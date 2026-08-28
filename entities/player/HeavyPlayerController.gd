@@ -65,6 +65,10 @@ signal possession_lost
 @export var team: int = 0
 ## When true this player reads InputHelper; when false PlayerBrain drives it.
 @export var is_user_controlled: bool = false
+## Index into this player's team squad in DataLoader — which PlayerData
+## PlayerFactory applies. PitchScene assigns this at bind time from each
+## player's position in the $Players list, so scenes need no per-instance setup.
+@export var squad_index: int = 0
 
 const NEUTRAL_MASS: float = 70.0
 ## Below this speed a turn costs nothing — you cannot "bleed momentum" you do

@@ -18,6 +18,7 @@ config/icon="res://art/player.png"
 
 GameEvents="*res://autoloads/GameEvents.gd"
 GameManager="*res://autoloads/GameManager.gd"
+DataLoader="*res://autoloads/DataLoader.gd"
 InputHelper="*res://autoloads/InputHelper.gd"
 
 [display]

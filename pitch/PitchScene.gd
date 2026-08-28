@@ -16,7 +16,8 @@
 ## velocity in the move_and_slide solver and flatten the momentum model.
 ##
 ## Depends on: GameManager, GameEvents, PitchBoundary, Pseudo3DBall,
-##             HeavyPlayerController, PlayerBrain, SetPieceCoordinator.
+##             HeavyPlayerController, PlayerBrain, SetPieceCoordinator,
+##             DataLoader, PlayerFactory.
 ## Exposes: reset_for_kickoff(), shake_camera(amount)
 ##
 
@@ -115,6 +116,8 @@ func _update_camera(delta: float) -> void:
 
 
 func _bind_players() -> void:
+	var squad_counts: Dictionary = {}
+
 	for node: Node in players.get_children():
 		var player := node as HeavyPlayerController
 		if player == null:
@@ -124,6 +127,11 @@ func _bind_players() -> void:
 			player.brain.bind_ball(ball)
 		if player.is_user_controlled:
 			hud.bind_active_player(player)
+
+		var anchor: Vector2 = player.brain.formation_anchor if player.brain != null else player.global_position
+		player.squad_index = squad_counts.get(player.team, 0)
+		squad_counts[player.team] = player.squad_index + 1
+		PlayerFactory.apply(player, DataLoader.get_player(player.team, player.squad_index), anchor)
 
 
 ## Hands control to whichever teammate is closest to the ball. Control transfers
