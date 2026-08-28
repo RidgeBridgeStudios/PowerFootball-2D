@@ -73,9 +73,11 @@ Three rules hold the design together:
 - **Out of bounds.** `PitchBoundary` builds a closed box, so the ball rebounds off
   touchlines instead of going out. `GameEvents.ball_out_of_bounds(side)` is
   declared but never emitted — throw-ins, corners and goal kicks are unbuilt.
-- **Fouls and the referee.** `GameEvents.foul_committed` is declared and
-  `TackleState` marks where the roll belongs, but no referee consumes it. No
-  cards, no free kicks.
+- **Fouls and the referee.** `MatchReferee` intercepts `GameEvents.foul_committed`
+  and decides whether to award it, using `RefereeData` personality and match
+  temperature; an awarded foul routes to `SetPieceCoordinator.handle_foul()`
+  for the free kick or penalty. No cards yet — `RefereeData.red_cards_issued`
+  is tracked but nothing increments it.
 - **Half time.** `MatchPhase.HALF_TIME` exists in the enum; nothing drives it.
   `GameManager._end_match()` marks the split point.
 - **Super Cancel** only purges a charging kick. It should also sever the CPU
