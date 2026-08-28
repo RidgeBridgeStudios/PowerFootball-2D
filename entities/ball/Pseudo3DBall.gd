@@ -22,10 +22,10 @@
 ##   - GameEvents (autoload) for broadcasting kicks
 ##
 ## Exposes:
-##   - apply_kick(impulse_xy, impulse_z)
+##   - apply_kick(impulse_xy, impulse_z, kicker)
 ##   - predict_trajectory(impulse_xy, impulse_z, steps, dt) -> Array[Vector2]
 ##   - reset_at(position), freeze() / unfreeze()
-##   - position_z, velocity_z, is_on_ground, possessor
+##   - position_z, velocity_z, is_on_ground, possessor, last_touched_by
 ##   - signals ball_bounced(impact_velocity), ball_kicked(impulse, height)
 ##
 
@@ -66,8 +66,10 @@ var is_frozen: bool = false
 ## The player loosely controlling the ball, if any. Typed as Node2D rather than
 ## HeavyPlayerController so the ball stays independent of the player module.
 var possessor: Node2D = null
-## Set by whoever last struck the ball, for assists/own-goal attribution later.
-var last_touched_by: Node2D = null
+## Set by whoever last struck the ball, via apply_kick()'s kicker argument. Used
+## for assists/own-goal attribution and, by PitchBoundary, to tell a goal kick
+## from a corner when the ball goes out over the end line.
+var last_touched_by: HeavyPlayerController = null
 
 @onready var ball_sprite: Sprite2D = $BallSprite
 @onready var shadow_sprite: Sprite2D = $ShadowSprite
@@ -99,12 +101,14 @@ func _physics_process(delta: float) -> void:
 
 
 ## Strikes the ball. `impulse_xy` is the ground vector in px/s, `impulse_z` the
-## vertical launch speed (0.0 keeps it on the deck).
-func apply_kick(impulse_xy: Vector2, impulse_z: float) -> void:
+## vertical launch speed (0.0 keeps it on the deck). `kicker` records the last
+## touch for out-of-bounds attribution; pass null for a wall/scenery rebound.
+func apply_kick(impulse_xy: Vector2, impulse_z: float, kicker: HeavyPlayerController = null) -> void:
 	velocity = impulse_xy
 	velocity_z = impulse_z
 	if impulse_z > 0.0:
 		is_on_ground = false
+	last_touched_by = kicker
 	release_possession()
 	ball_kicked.emit(impulse_xy, impulse_z)
 
@@ -210,8 +214,6 @@ func set_possessor(player: Node2D) -> void:
 	if possessor == player:
 		return
 	possessor = player
-	if player != null:
-		last_touched_by = player
 	possession_changed.emit(player)
 
 

@@ -75,7 +75,7 @@ func physics_process(player: HeavyPlayerController, delta: float) -> void:
 	if player.is_sprinting:
 		touch_speed *= SPRINT_TOUCH_BONUS
 
-	ball.apply_kick(touch_direction * touch_speed, 0.0)
+	ball.apply_kick(touch_direction * touch_speed, 0.0, player)
 	ball.set_possessor(player)
 	_touch_cooldown = TOUCH_INTERVAL
 

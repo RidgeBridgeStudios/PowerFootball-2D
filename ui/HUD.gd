@@ -5,9 +5,13 @@
 ## bar under the active player. It reads GameManager for state and listens on
 ## GameEvents for match flow — no gameplay system knows the HUD exists.
 ##
-## The power meter is only visible while a kick is charging; the stamina bar
-## lives on the player scene (world space, so it tracks the sprite) and is driven
-## from here for whichever player is currently controlled.
+## The power meter is only visible while a kick is charging (or a throw-in /
+## penalty is winding up — PlayerStateFactory.get_charge_ratio() covers all
+## three); the stamina bar lives on the player scene (world space, so it tracks
+## the sprite) and is driven from here for whichever player is currently
+## controlled. The set piece banner announces each new dead-ball restart and
+## fades itself out; the wall hint layers a short extra line on top of it when
+## the human is defending a free kick.
 ##
 ## Depends on: GameManager, GameEvents, HeavyPlayerController.
 ## Exposes: bind_active_player(player)
@@ -19,13 +23,21 @@ extends CanvasLayer
 ## Charge below this leaves the power meter hidden, so a tapped pass does not
 ## flash the bar.
 const METER_VISIBILITY_THRESHOLD: float = 0.02
+## Seconds the set piece banner stays fully visible before it fades.
+const BANNER_HOLD_TIME: float = 1.5
+const BANNER_FADE_TIME: float = 0.4
 
 var active_player: HeavyPlayerController = null
+
+var _banner_tween: Tween = null
+var _wall_hint_tween: Tween = null
 
 @onready var score_label: Label = $Root/TopBar/ScoreLabel
 @onready var clock_label: Label = $Root/TopBar/ClockLabel
 @onready var status_label: Label = $Root/StatusLabel
 @onready var power_meter: ProgressBar = $Root/PowerMeter
+@onready var set_piece_banner: Label = $Root/SetPieceBanner
+@onready var wall_hint_label: Label = $Root/WallHintLabel
 
 
 func _ready() -> void:
@@ -34,11 +46,22 @@ func _ready() -> void:
 	GameEvents.match_ended.connect(_on_match_ended)
 	GameEvents.player_switched.connect(_on_player_switched)
 
+	GameEvents.goal_kick_started.connect(_on_goal_kick_started)
+	GameEvents.corner_kick_started.connect(_on_corner_kick_started)
+	GameEvents.throw_in_started.connect(_on_throw_in_started)
+	GameEvents.free_kick_started.connect(_on_free_kick_started)
+	GameEvents.penalty_started.connect(_on_penalty_started)
+	GameEvents.defensive_wall_requested.connect(_on_defensive_wall_requested)
+
 	power_meter.min_value = 0.0
 	power_meter.max_value = 1.0
 	power_meter.value = 0.0
 	power_meter.visible = false
 	status_label.text = ""
+
+	set_piece_banner.modulate.a = 0.0
+	set_piece_banner.visible = false
+	wall_hint_label.visible = false
 
 
 func _process(_delta: float) -> void:
@@ -102,3 +125,62 @@ func _on_match_ended(winner: int) -> void:
 
 func _on_player_switched(new_player: Node) -> void:
 	bind_active_player(new_player as HeavyPlayerController)
+
+
+func _on_goal_kick_started(_team: int, _position: Vector2) -> void:
+	_show_set_piece_banner("GOAL KICK")
+
+
+func _on_corner_kick_started(_team: int, _position: Vector2) -> void:
+	_show_set_piece_banner("CORNER KICK")
+
+
+func _on_throw_in_started(_team: int, _position: Vector2) -> void:
+	_show_set_piece_banner("THROW-IN")
+
+
+func _on_free_kick_started(_team: int, _position: Vector2, is_direct: bool) -> void:
+	_show_set_piece_banner("FREE KICK — DIRECT" if is_direct else "FREE KICK — INDIRECT")
+
+
+func _on_penalty_started(_team: int, _position: Vector2) -> void:
+	_show_set_piece_banner("PENALTY")
+
+
+## Only the human defending that free kick sees the hint — an attacking or
+## uninvolved human has nothing to build.
+func _on_defensive_wall_requested(_free_kick_pos: Vector2) -> void:
+	if active_player == null or not is_instance_valid(active_player):
+		return
+	var defending_team: int = 1 - GameManager.set_piece_team
+	if active_player.team != defending_team:
+		return
+	_show_wall_hint()
+
+
+func _show_set_piece_banner(text: String) -> void:
+	set_piece_banner.text = text
+	set_piece_banner.visible = true
+	set_piece_banner.modulate.a = 1.0
+
+	if _banner_tween != null and _banner_tween.is_valid():
+		_banner_tween.kill()
+
+	_banner_tween = create_tween()
+	_banner_tween.tween_interval(BANNER_HOLD_TIME)
+	_banner_tween.tween_property(set_piece_banner, "modulate:a", 0.0, BANNER_FADE_TIME)
+	_banner_tween.tween_callback(func() -> void: set_piece_banner.visible = false)
+
+
+func _show_wall_hint() -> void:
+	wall_hint_label.text = "Build wall: [G / D-Pad Up]"
+	wall_hint_label.visible = true
+	wall_hint_label.modulate.a = 1.0
+
+	if _wall_hint_tween != null and _wall_hint_tween.is_valid():
+		_wall_hint_tween.kill()
+
+	_wall_hint_tween = create_tween()
+	_wall_hint_tween.tween_interval(BANNER_HOLD_TIME)
+	_wall_hint_tween.tween_property(wall_hint_label, "modulate:a", 0.0, BANNER_FADE_TIME)
+	_wall_hint_tween.tween_callback(func() -> void: wall_hint_label.visible = false)

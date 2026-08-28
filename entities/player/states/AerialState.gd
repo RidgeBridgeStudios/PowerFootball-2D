@@ -65,12 +65,11 @@ func _attempt_contact(player: HeavyPlayerController, ball: Pseudo3DBall) -> void
 		aim = player.facing_direction
 
 	if clean:
-		ball.apply_kick(aim * HEADER_SPEED, HEADER_DOWNWARD_Z)
+		ball.apply_kick(aim * HEADER_SPEED, HEADER_DOWNWARD_Z, player)
 		if player.is_user_controlled:
 			InputHelper.rumble(0.3, 0.8, 0.15)
 	else:
 		# Glanced it: the ball loops off at a fraction of the pace.
-		ball.apply_kick(aim * HEADER_SPEED * MISCUE_RATIO, absf(HEADER_DOWNWARD_Z) * 0.5)
+		ball.apply_kick(aim * HEADER_SPEED * MISCUE_RATIO, absf(HEADER_DOWNWARD_Z) * 0.5, player)
 
-	ball.last_touched_by = player
 	GameEvents.aerial_contested.emit(player, clean)
