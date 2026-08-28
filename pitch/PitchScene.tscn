@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3]
+[gd_scene load_steps=12 format=3]
 
 [ext_resource type="Script" path="res://pitch/PitchScene.gd" id="1_pitch"]
 [ext_resource type="Script" path="res://pitch/PitchBoundary.gd" id="2_boundary"]
@@ -8,6 +8,7 @@
 [ext_resource type="PackedScene" path="res://entities/player/HeavyPlayer.tscn" id="6_player"]
 [ext_resource type="PackedScene" path="res://ui/HUD.tscn" id="7_hud"]
 [ext_resource type="Script" path="res://pitch/SetPieceCoordinator.gd" id="8_set_piece"]
+[ext_resource type="Script" path="res://entities/referee/MatchReferee.gd" id="9_match_referee"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_goal"]
 size = Vector2(48, 200)
@@ -80,5 +81,8 @@ script = ExtResource("8_set_piece")
 
 [node name="ConfirmationTimer" type="Timer" parent="SetPieceCoordinator"]
 one_shot = true
+
+[node name="MatchReferee" type="Node" parent="."]
+script = ExtResource("9_match_referee")
 
 [node name="HUD" parent="." instance=ExtResource("7_hud")]

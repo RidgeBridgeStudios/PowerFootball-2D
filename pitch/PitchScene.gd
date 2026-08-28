@@ -17,7 +17,7 @@
 ##
 ## Depends on: GameManager, GameEvents, PitchBoundary, Pseudo3DBall,
 ##             HeavyPlayerController, PlayerBrain, SetPieceCoordinator,
-##             DataLoader, PlayerFactory.
+##             DataLoader, PlayerFactory, RefereeLoader, MatchReferee.
 ## Exposes: reset_for_kickoff(), shake_camera(amount)
 ##
 
@@ -40,6 +40,7 @@ var _shake_amount: float = 0.0
 @onready var restart_timer: Timer = $RestartTimer
 @onready var hud: HUD = $HUD
 @onready var _set_piece_coordinator: SetPieceCoordinator = $SetPieceCoordinator
+@onready var match_referee: MatchReferee = $MatchReferee
 
 
 func _ready() -> void:
@@ -48,12 +49,17 @@ func _ready() -> void:
 	GameEvents.goal_scored.connect(_on_goal_scored)
 	GameEvents.match_ended.connect(_on_match_ended)
 	GameEvents.ball_out_of_bounds.connect(_on_ball_out_of_bounds)
-	GameEvents.foul_committed.connect(_on_foul_committed)
 	ball.ball_bounced.connect(_on_ball_bounced)
 	restart_timer.timeout.connect(_on_restart_timer_timeout)
 
 	_bind_players()
 	_set_piece_coordinator.bind(ball, boundary, players)
+
+	var team_a_name: String = DataLoader.get_team(GameManager.TEAM_A).team_name if DataLoader.league != null else "Team A"
+	var team_b_name: String = DataLoader.get_team(GameManager.TEAM_B).team_name if DataLoader.league != null else "Team B"
+	var ref_data: RefereeData = RefereeLoader.get_random_referee()
+	match_referee.bind(ref_data, _set_piece_coordinator, team_a_name, team_b_name)
+
 	reset_for_kickoff()
 	GameManager.start_match()
 	GameManager.restart_play()
@@ -185,15 +191,6 @@ func _on_match_ended(_winner: int) -> void:
 func _on_ball_out_of_bounds(side: String) -> void:
 	ball.freeze()
 	_set_piece_coordinator.handle_out_of_bounds(side, ball.global_position, ball.last_touched_by)
-
-
-func _on_foul_committed(fouler: Node, victim: Node, pos: Vector2) -> void:
-	var fouler_player := fouler as HeavyPlayerController
-	var victim_player := victim as HeavyPlayerController
-	if fouler_player == null or victim_player == null:
-		return
-	ball.freeze()
-	_set_piece_coordinator.handle_foul(fouler_player, victim_player, pos)
 
 
 func _on_ball_bounced(impact_velocity: float) -> void:

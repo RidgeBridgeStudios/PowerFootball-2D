@@ -14,7 +14,8 @@
 ## the human is defending a free kick. The mood label shows only while the
 ## active player is in SLUMP or STREAK — silent during NORMAL.
 ##
-## Depends on: GameManager, GameEvents, HeavyPlayerController, MoodSystem.
+## Depends on: GameManager, GameEvents, HeavyPlayerController, MoodSystem,
+##             MatchReferee.
 ## Exposes: bind_active_player(player)
 ##
 
@@ -124,6 +125,19 @@ func _on_kickoff_started() -> void:
 	status_label.text = "KICKOFF"
 	# TODO: replace this with a short tween-out banner rather than clearing text
 	# on the next event.
+
+	# Show referee name briefly at match start.
+	var ref_node: MatchReferee = _find_referee()
+	if ref_node != null and ref_node.current_data != null:
+		_show_set_piece_banner("Referee: " + ref_node.current_data.referee_name)
+
+
+## PitchScene is the parent of the CanvasLayer parent — walk up two levels.
+func _find_referee() -> MatchReferee:
+	var scene: Node = get_parent()
+	if scene == null:
+		return null
+	return scene.get_node_or_null("MatchReferee") as MatchReferee
 
 
 func _on_match_ended(winner: int) -> void:

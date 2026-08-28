@@ -53,3 +53,10 @@ signal player_mood_changed(player: Node, tier: int)
 signal ball_struck(player: Node, speed: float, charge_ratio: float)
 signal tackle_won(winner: Node, loser: Node)
 signal aerial_contested(player: Node, clean: bool)
+
+## --- Referee events ---------------------------------------------------------
+
+## Fired when the referee decides to award a foul. HUD and audio react to this.
+signal referee_awarded_foul(referee: Node, fouler: Node, victim: Node, position: Vector2)
+## Fired when the referee decides to play on after a foul_committed event.
+signal referee_played_on(referee: Node, fouler: Node, victim: Node, position: Vector2)
