@@ -1,0 +1,27 @@
+[gd_scene load_steps=6 format=3]
+
+[ext_resource type="Script" path="res://entities/ball/Pseudo3DBall.gd" id="1_ball"]
+[ext_resource type="Texture2D" path="res://art/ball.png" id="2_ball_tex"]
+[ext_resource type="Texture2D" path="res://art/shadow.png" id="3_shadow"]
+[ext_resource type="Script" path="res://entities/ball/BallStateFactory.gd" id="4_fsm"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_ball"]
+radius = 4.0
+
+[node name="Ball" type="CharacterBody2D"]
+motion_mode = 1
+script = ExtResource("1_ball")
+
+[node name="ShadowSprite" type="Sprite2D" parent="."]
+modulate = Color(0, 0, 0, 0.8)
+scale = Vector2(0.5, 0.5)
+texture = ExtResource("3_shadow")
+
+[node name="BallSprite" type="Sprite2D" parent="."]
+texture = ExtResource("2_ball_tex")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_ball")
+
+[node name="BallStateFactory" type="Node" parent="."]
+script = ExtResource("4_fsm")

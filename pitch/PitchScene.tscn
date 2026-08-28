@@ -1,0 +1,77 @@
+[gd_scene load_steps=10 format=3]
+
+[ext_resource type="Script" path="res://pitch/PitchScene.gd" id="1_pitch"]
+[ext_resource type="Script" path="res://pitch/PitchBoundary.gd" id="2_boundary"]
+[ext_resource type="Script" path="res://pitch/GoalZone.gd" id="3_goal"]
+[ext_resource type="Texture2D" path="res://art/turf.png" id="4_turf"]
+[ext_resource type="PackedScene" path="res://entities/ball/Ball.tscn" id="5_ball"]
+[ext_resource type="PackedScene" path="res://entities/player/HeavyPlayer.tscn" id="6_player"]
+[ext_resource type="PackedScene" path="res://ui/HUD.tscn" id="7_hud"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_goal"]
+size = Vector2(48, 200)
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_goal_b"]
+size = Vector2(48, 200)
+
+[node name="PitchScene" type="Node2D"]
+script = ExtResource("1_pitch")
+
+[node name="Turf" type="Sprite2D" parent="."]
+texture_repeat = 2
+z_index = -10
+texture = ExtResource("4_turf")
+region_enabled = true
+region_rect = Rect2(0, 0, 1728, 1024)
+
+[node name="PitchBoundary" type="StaticBody2D" parent="."]
+script = ExtResource("2_boundary")
+
+[node name="GoalZoneA" type="Area2D" parent="."]
+position = Vector2(-824, 0)
+script = ExtResource("3_goal")
+defending_team = 0
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GoalZoneA"]
+shape = SubResource("RectangleShape2D_goal")
+
+[node name="GoalZoneB" type="Area2D" parent="."]
+position = Vector2(824, 0)
+script = ExtResource("3_goal")
+defending_team = 1
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="GoalZoneB"]
+shape = SubResource("RectangleShape2D_goal_b")
+
+[node name="Ball" parent="." instance=ExtResource("5_ball")]
+
+[node name="Players" type="Node2D" parent="."]
+
+[node name="PlayerA1" parent="Players" instance=ExtResource("6_player")]
+position = Vector2(-220, 0)
+team = 0
+is_user_controlled = true
+
+[node name="PlayerA2" parent="Players" instance=ExtResource("6_player")]
+position = Vector2(-520, -140)
+team = 0
+
+[node name="PlayerB1" parent="Players" instance=ExtResource("6_player")]
+modulate = Color(1, 0.65, 0.55, 1)
+position = Vector2(240, -110)
+team = 1
+
+[node name="PlayerB2" parent="Players" instance=ExtResource("6_player")]
+modulate = Color(1, 0.65, 0.55, 1)
+position = Vector2(240, 110)
+team = 1
+player_mass = 88.0
+
+[node name="MatchCamera" type="Camera2D" parent="."]
+zoom = Vector2(0.72, 0.72)
+position_smoothing_enabled = true
+
+[node name="RestartTimer" type="Timer" parent="."]
+one_shot = true
+
+[node name="HUD" parent="." instance=ExtResource("7_hud")]
