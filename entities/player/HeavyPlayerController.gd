@@ -15,12 +15,16 @@
 ## Depends on:
 ##   - InputHelper (autoload) for stick reads on the human-controlled player
 ##   - CollisionLayers for the matrix set up in _ready()
-##   - GameEvents (autoload) for stamina_depleted broadcasts
+##   - GameEvents (autoload) for stamina_depleted broadcasts and
+##     player_mood_changed, which triggers a movement curve recalculation
+##   - MoodSystem, attached as a child by PlayerFactory, whose multipliers feed
+##     into _recalculate_movement_curve()
 ##
 ## Exposes:
 ##   - apply_kinematic_weight(input_dir, delta)
 ##   - apply_external_impulse(impulse)   knockback from tackles and collisions
 ##   - get_ball_in_foot_range() / get_ball_in_aerial_range()
+##   - get_mood()
 ##   - stamina, facing_direction, is_sprinting, movement_intent
 ##   - signal stamina_state_changed(ratio)
 ##
@@ -113,6 +117,7 @@ func _ready() -> void:
 	_apply_collision_matrix()
 	stamina = stamina_max
 	stamina_state_changed.emit(1.0)
+	GameEvents.player_mood_changed.connect(_on_player_mood_changed)
 
 
 func _physics_process(delta: float) -> void:
@@ -131,10 +136,29 @@ func _physics_process(delta: float) -> void:
 
 ## Recomputes the acceleration/friction constants from the exported tuning
 ## values. Call this after changing mass or speed at runtime (e.g. a fatigue or
-## injury modifier) — nothing caches them elsewhere.
+## injury modifier) — nothing caches them elsewhere. Mood multipliers are folded
+## in here too, so this is the only place mood ever touches the movement model.
 func _recalculate_movement_curve() -> void:
-	base_acceleration = (top_speed / maxf(acceleration_time, 0.01)) * (NEUTRAL_MASS / maxf(player_mass, 1.0))
-	base_friction = (top_speed / maxf(friction_time, 0.01)) * (maxf(player_mass, 1.0) / NEUTRAL_MASS)
+	var mood_node: MoodSystem = get_mood()
+	var speed_mult: float = mood_node.get_speed_multiplier() if mood_node != null else 1.0
+	var accel_mult: float = mood_node.get_accel_multiplier() if mood_node != null else 1.0
+
+	var effective_top_speed: float = top_speed * speed_mult
+	var effective_accel_time: float = acceleration_time * accel_mult
+
+	base_acceleration = (effective_top_speed / maxf(effective_accel_time, 0.01)) * (NEUTRAL_MASS / maxf(player_mass, 1.0))
+	base_friction = (effective_top_speed / maxf(friction_time, 0.01)) * (maxf(player_mass, 1.0) / NEUTRAL_MASS)
+
+
+## MoodSystem is attached dynamically by PlayerFactory rather than living in the
+## scene, so it cannot be an @onready var — this looks it up lazily instead.
+func get_mood() -> MoodSystem:
+	return get_node_or_null("MoodSystem") as MoodSystem
+
+
+func _on_player_mood_changed(player: Node, _tier: int) -> void:
+	if player == self:
+		_recalculate_movement_curve()
 
 
 func _apply_collision_matrix() -> void:

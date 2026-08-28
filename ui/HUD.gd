@@ -11,9 +11,10 @@
 ## the sprite) and is driven from here for whichever player is currently
 ## controlled. The set piece banner announces each new dead-ball restart and
 ## fades itself out; the wall hint layers a short extra line on top of it when
-## the human is defending a free kick.
+## the human is defending a free kick. The mood label shows only while the
+## active player is in SLUMP or STREAK — silent during NORMAL.
 ##
-## Depends on: GameManager, GameEvents, HeavyPlayerController.
+## Depends on: GameManager, GameEvents, HeavyPlayerController, MoodSystem.
 ## Exposes: bind_active_player(player)
 ##
 
@@ -38,6 +39,7 @@ var _wall_hint_tween: Tween = null
 @onready var power_meter: ProgressBar = $Root/PowerMeter
 @onready var set_piece_banner: Label = $Root/SetPieceBanner
 @onready var wall_hint_label: Label = $Root/WallHintLabel
+@onready var mood_label: Label = $Root/MoodLabel
 
 
 func _ready() -> void:
@@ -45,6 +47,7 @@ func _ready() -> void:
 	GameEvents.kickoff_started.connect(_on_kickoff_started)
 	GameEvents.match_ended.connect(_on_match_ended)
 	GameEvents.player_switched.connect(_on_player_switched)
+	GameEvents.player_mood_changed.connect(_on_player_mood_changed)
 
 	GameEvents.goal_kick_started.connect(_on_goal_kick_started)
 	GameEvents.corner_kick_started.connect(_on_corner_kick_started)
@@ -62,6 +65,8 @@ func _ready() -> void:
 	set_piece_banner.modulate.a = 0.0
 	set_piece_banner.visible = false
 	wall_hint_label.visible = false
+	mood_label.text = ""
+	mood_label.visible = false
 
 
 func _process(_delta: float) -> void:
@@ -84,6 +89,11 @@ func bind_active_player(player: HeavyPlayerController) -> void:
 	active_player = player
 	if active_player != null:
 		active_player.stamina_bar.visible = true
+		var mood_node: MoodSystem = active_player.get_mood()
+		if mood_node != null:
+			_refresh_mood_label(mood_node.current_tier)
+		else:
+			_refresh_mood_label(MoodSystem.Tier.NORMAL)
 
 
 func _update_power_meter() -> void:
@@ -125,6 +135,29 @@ func _on_match_ended(winner: int) -> void:
 
 func _on_player_switched(new_player: Node) -> void:
 	bind_active_player(new_player as HeavyPlayerController)
+
+
+func _on_player_mood_changed(player: Node, tier: int) -> void:
+	if active_player == null or player != active_player:
+		return
+	_refresh_mood_label(tier)
+
+
+## NORMAL shows nothing — the indicator is only for a player standing out from
+## the pack, not a running readout of everyone's baseline state.
+func _refresh_mood_label(tier: int) -> void:
+	match tier:
+		MoodSystem.Tier.SLUMP:
+			mood_label.text = "▼ SLUMP"
+			mood_label.modulate = Color(0.85, 0.25, 0.25)
+			mood_label.visible = true
+		MoodSystem.Tier.STREAK:
+			mood_label.text = "▲ STREAK"
+			mood_label.modulate = Color(1.0, 0.80, 0.10)
+			mood_label.visible = true
+		_:
+			mood_label.text = ""
+			mood_label.visible = false
 
 
 func _on_goal_kick_started(_team: int, _position: Vector2) -> void:

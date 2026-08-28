@@ -6,7 +6,7 @@
 ## it is simply the one place that knows how PlayerData fields map onto the
 ## controller and brain exports.
 ##
-## Depends on: PlayerData, HeavyPlayerController, PlayerBrain.
+## Depends on: PlayerData, HeavyPlayerController, PlayerBrain, MoodSystem.
 ## Exposes: apply(player, data, anchor)
 ##
 
@@ -43,3 +43,13 @@ static func apply(player: HeavyPlayerController, data: PlayerData, anchor: Vecto
 		player.brain.formation_anchor = anchor
 
 	player.set_meta(&"player_data", data)
+
+	# Attach or reset the mood system. One MoodSystem child per controller — if
+	# one already exists from a previous match, reset it rather than duplicating.
+	var mood: MoodSystem = player.get_node_or_null("MoodSystem") as MoodSystem
+	if mood == null:
+		mood = MoodSystem.new()
+		mood.name = "MoodSystem"
+		player.add_child(mood)
+	else:
+		mood.reset()
