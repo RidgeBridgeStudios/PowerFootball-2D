@@ -6,7 +6,8 @@
 ## it is simply the one place that knows how PlayerData fields map onto the
 ## controller and brain exports.
 ##
-## Depends on: PlayerData, HeavyPlayerController, PlayerBrain, MoodSystem.
+## Depends on: PlayerData, HeavyPlayerController, PlayerBrain, MoodSystem,
+##             DataLoader, TeamData, ManagerLoader, ManagerData.
 ## Exposes: apply(player, data, anchor)
 ##
 
@@ -53,3 +54,24 @@ static func apply(player: HeavyPlayerController, data: PlayerData, anchor: Vecto
 		player.add_child(mood)
 	else:
 		mood.reset()
+
+	# Manager coaching bonus — prized_attribute gives a small lift to every
+	# player on the squad. +0.05, clamped to 1.0. This is intentionally small:
+	# a coaching edge, not a talent rewrite.
+	var team_name: String = ""
+	if DataLoader.league != null:
+		var team_data: TeamData = DataLoader.get_team(player.team)
+		if team_data != null:
+			team_name = team_data.team_name
+	var manager: ManagerData = ManagerLoader.get_manager_for_team(team_name)
+	if manager != null and player.brain != null:
+		match manager.prized_attribute:
+			"vision":
+				player.brain.vision_attribute = minf(
+					player.brain.vision_attribute + 0.05, 1.0)
+			"composure":
+				player.brain.composure_attribute = minf(
+					player.brain.composure_attribute + 0.05, 1.0)
+			"aggression":
+				player.brain.aggression_attribute = minf(
+					player.brain.aggression_attribute + 0.05, 1.0)

@@ -17,7 +17,8 @@
 ##
 ## Depends on: GameManager, GameEvents, PitchBoundary, Pseudo3DBall,
 ##             HeavyPlayerController, PlayerBrain, SetPieceCoordinator,
-##             DataLoader, PlayerFactory, RefereeLoader, MatchReferee.
+##             DataLoader, PlayerFactory, RefereeLoader, MatchReferee,
+##             ManagerLoader, ManagerData, ManagerDirector.
 ## Exposes: reset_for_kickoff(), shake_camera(amount)
 ##
 
@@ -41,6 +42,8 @@ var _shake_amount: float = 0.0
 @onready var hud: HUD = $HUD
 @onready var _set_piece_coordinator: SetPieceCoordinator = $SetPieceCoordinator
 @onready var match_referee: MatchReferee = $MatchReferee
+@onready var _manager_director_a: ManagerDirector = $ManagerDirectorA
+@onready var _manager_director_b: ManagerDirector = $ManagerDirectorB
 
 
 func _ready() -> void:
@@ -59,6 +62,11 @@ func _ready() -> void:
 	var team_b_name: String = DataLoader.get_team(GameManager.TEAM_B).team_name if DataLoader.league != null else "Team B"
 	var ref_data: RefereeData = RefereeLoader.get_random_referee()
 	match_referee.bind(ref_data, _set_piece_coordinator, team_a_name, team_b_name)
+
+	var manager_a: ManagerData = ManagerLoader.get_or_assign_manager(team_a_name)
+	var manager_b: ManagerData = ManagerLoader.get_or_assign_manager(team_b_name)
+	_manager_director_a.bind(manager_a, GameManager.TEAM_A, players, boundary)
+	_manager_director_b.bind(manager_b, GameManager.TEAM_B, players, boundary)
 
 	reset_for_kickoff()
 	GameManager.start_match()
@@ -183,9 +191,31 @@ func _on_restart_timer_timeout() -> void:
 	GameManager.restart_play()
 
 
-func _on_match_ended(_winner: int) -> void:
+func _on_match_ended(winner: int) -> void:
 	ball.freeze()
+	_log_manager_stats(winner)
 	# TODO: full-time screen and a rematch flow; for now the pitch simply stops.
+
+
+## Writes each team's manager career stats back to ManagerData and persists
+## the whole pool. winner is TEAM_A/TEAM_B, or -1 for a draw.
+func _log_manager_stats(winner: int) -> void:
+	var directors: Array = [_manager_director_a, _manager_director_b]
+	for i: int in range(directors.size()):
+		var m: ManagerData = directors[i].get_data()
+		if m == null:
+			continue
+		m.matches_managed += 1
+		m.goals_scored += GameManager.score[i]
+		m.goals_conceded += GameManager.score[1 - i]
+		if winner == i:
+			m.wins += 1
+		elif winner < 0:
+			m.draws += 1
+		else:
+			m.losses += 1
+		GameEvents.manager_stats_updated.emit(m)
+	ManagerLoader.save_managers()
 
 
 func _on_ball_out_of_bounds(side: String) -> void:
