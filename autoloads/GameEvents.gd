@@ -60,3 +60,12 @@ signal aerial_contested(player: Node, clean: bool)
 signal referee_awarded_foul(referee: Node, fouler: Node, victim: Node, position: Vector2)
 ## Fired when the referee decides to play on after a foul_committed event.
 signal referee_played_on(referee: Node, fouler: Node, victim: Node, position: Vector2)
+
+## --- Manager events -------------------------------------------------------
+
+## Fired by ManagerDirector when a mid-match formation shift occurs.
+signal manager_formation_changed(team: int, new_formation: String)
+
+## Fired by PitchScene._log_manager_stats() after every match ends.
+## Career mode UI connects to this to refresh the manager profile screen.
+signal manager_stats_updated(manager: ManagerData)

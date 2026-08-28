@@ -20,6 +20,7 @@ GameEvents="*res://autoloads/GameEvents.gd"
 GameManager="*res://autoloads/GameManager.gd"
 DataLoader="*res://autoloads/DataLoader.gd"
 RefereeLoader="*res://autoloads/RefereeLoader.gd"
+ManagerLoader="*res://autoloads/ManagerLoader.gd"
 InputHelper="*res://autoloads/InputHelper.gd"
 
 [display]
