@@ -11,7 +11,8 @@
 ## Aim comes from the right stick, falling back to the run direction, so the
 ## mechanic works one-handed and on the keyboard.
 ##
-## Depends on: PlayerState, HeavyPlayerController, Pseudo3DBall, InputHelper.
+## Depends on: PlayerState, HeavyPlayerController, Pseudo3DBall, InputHelper,
+## MoodSystem (kick accuracy scatter at high charge).
 ## Exposes: the PlayerState interface plus charge_ratio (read by the HUD meter).
 ##
 
@@ -92,12 +93,18 @@ func _release_kick(player: HeavyPlayerController) -> void:
 	# heavier strike than a standing one.
 	var inherited: Vector2 = player.velocity * 0.25
 
+	# Accuracy scatter: at full charge, mood determines how much aim jitter applies.
+	# A streaking player is locked in; a slumping one sprays the ball.
+	var mood_node: MoodSystem = player.get_mood()
+	var scatter_mult: float = mood_node.get_kick_accuracy_scatter_multiplier() if mood_node != null else 1.0
+	var max_scatter_angle: float = deg_to_rad(12.0) * charge_ratio * scatter_mult
+	if max_scatter_angle > 0.001:
+		aim = aim.rotated(randf_range(-max_scatter_angle, max_scatter_angle))
+
 	ball.apply_kick(aim * speed + inherited, height, player)
 	GameEvents.ball_struck.emit(player, speed, charge_ratio)
 
 	if player.is_user_controlled:
 		InputHelper.rumble(0.25 * charge_ratio, 0.6 * charge_ratio, 0.12)
 
-	# TODO: fold in a per-player `accuracy` attribute that scatters the aim angle
-	# as charge_ratio approaches 1.0 (the PK_Shootout high-power jitter model),
-	# and split action_through into a lead-the-runner pass target.
+	# TODO: split action_through into a lead-the-runner pass target.

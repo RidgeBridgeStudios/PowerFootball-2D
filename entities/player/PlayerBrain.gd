@@ -11,7 +11,9 @@
 ## touches velocity directly, so CPU players are bound by exactly the same weight
 ## model as the human one.
 ##
-## Depends on: Pseudo3DBall, HeavyPlayerController (as parent node).
+## Depends on: Pseudo3DBall, HeavyPlayerController (as parent node), MoodSystem
+## (read via player.get_mood() to bias vision/composure/aggression at the
+## decision site — mood never touches the exported attributes themselves).
 ## Exposes: evaluate_tactical_action(), calculate_pressure_index(), ball
 ##
 
@@ -77,11 +79,24 @@ func _physics_process(delta: float) -> void:
 func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 	var pressure: float = calculate_pressure_index(defenders_nearby)
 
-	# Composure decides how much of the pressure actually reaches the decision.
-	var vision_bias: float = vision_attribute * (1.0 - (pressure * (1.0 - composure_attribute)))
-	var ego_bias: float = aggression_attribute * pressure
+	# Read base attributes, then layer mood on top. Mood never mutates the
+	# exported attributes — it is applied only at the decision site so the
+	# Inspector always shows the base talent regardless of in-match state.
+	var mood_node: MoodSystem = player.get_mood() if player != null else null
+	var eff_vision: float = vision_attribute + (mood_node.get_vision_delta() if mood_node != null else 0.0)
+	var eff_composure: float = composure_attribute + (mood_node.get_composure_delta() if mood_node != null else 0.0)
+	var eff_aggression: float = aggression_attribute + (mood_node.get_aggression_delta() if mood_node != null else 0.0)
 
-	if pressure > 0.85 and composure_attribute < 0.45:
+	# Clamp so extreme mood cannot push attributes out of the 0-1 behavioural range.
+	eff_vision = clampf(eff_vision, 0.0, 1.0)
+	eff_composure = clampf(eff_composure, 0.0, 1.0)
+	eff_aggression = clampf(eff_aggression, 0.0, 1.0)
+
+	# Composure decides how much of the pressure actually reaches the decision.
+	var vision_bias: float = eff_vision * (1.0 - (pressure * (1.0 - eff_composure)))
+	var ego_bias: float = eff_aggression * pressure
+
+	if pressure > 0.85 and eff_composure < 0.45:
 		return &"PanicClear"
 
 	if ball != null and player != null:

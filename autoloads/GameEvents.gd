@@ -43,6 +43,8 @@ signal defensive_wall_requested(free_kick_pos: Vector2)
 
 signal player_switched(new_player: Node)
 signal stamina_depleted(player: Node)
+## Fired when a player's mood tier changes (not on every float nudge).
+signal player_mood_changed(player: Node, tier: int)
 
 ## --- Contact events (feel, audio and stats hooks) --------------------------
 ## Extensions beyond the core match set: the audio and camera layers need to
