@@ -1,0 +1,58 @@
+[gd_scene load_steps=9 format=3]
+
+[ext_resource type="Script" path="res://entities/player/HeavyPlayerController.gd" id="1_controller"]
+[ext_resource type="Texture2D" path="res://art/player.png" id="2_body"]
+[ext_resource type="Texture2D" path="res://art/shadow.png" id="3_shadow"]
+[ext_resource type="Script" path="res://entities/player/PlayerStateFactory.gd" id="4_fsm"]
+[ext_resource type="Script" path="res://entities/player/PlayerBrain.gd" id="5_brain"]
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_body"]
+radius = 7.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_foot"]
+radius = 15.0
+
+[sub_resource type="CircleShape2D" id="CircleShape2D_aerial"]
+radius = 24.0
+
+[node name="HeavyPlayer" type="CharacterBody2D"]
+motion_mode = 1
+script = ExtResource("1_controller")
+
+[node name="ShadowSprite2D" type="Sprite2D" parent="."]
+modulate = Color(0, 0, 0, 0.45)
+position = Vector2(0, 5)
+texture = ExtResource("3_shadow")
+
+[node name="Sprite2D" type="Sprite2D" parent="."]
+texture = ExtResource("2_body")
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+shape = SubResource("CircleShape2D_body")
+
+[node name="FootSensor" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="FootSensor"]
+shape = SubResource("CircleShape2D_foot")
+
+[node name="AerialHitbox" type="Area2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="AerialHitbox"]
+shape = SubResource("CircleShape2D_aerial")
+
+[node name="PlayerStateFactory" type="Node" parent="."]
+script = ExtResource("4_fsm")
+
+[node name="PlayerBrain" type="Node" parent="."]
+script = ExtResource("5_brain")
+
+[node name="StaminaBar" type="ProgressBar" parent="."]
+offset_left = -12.0
+offset_top = 13.0
+offset_right = 12.0
+offset_bottom = 17.0
+max_value = 1.0
+step = 0.01
+value = 1.0
+show_percentage = false
+visible = false
