@@ -1,0 +1,172 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://ui/OptionsMenu.gd" id="1_options"]
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
+bg_color = Color(0.0509804, 0.0588235, 0.0509804, 0.92)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.24, 0.86, 0.41, 0.2)
+corner_radius_top_left = 8
+corner_radius_top_right = 8
+corner_radius_bottom_right = 8
+corner_radius_bottom_left = 8
+content_margin_left = 32.0
+content_margin_top = 24.0
+content_margin_right = 32.0
+content_margin_bottom = 24.0
+
+[node name="OptionsMenu" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+visible = false
+script = ExtResource("1_options")
+
+[node name="Panel" type="PanelContainer" parent="."]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -260.0
+offset_top = -220.0
+offset_right = 260.0
+offset_bottom = 220.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
+
+[node name="Layout" type="VBoxContainer" parent="Panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="TitleLabel" type="Label" parent="Panel/Layout"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+horizontal_alignment = 1
+text = "OPTIONS"
+
+[node name="AudioSection" type="VBoxContainer" parent="Panel/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="AudioLabel" type="Label" parent="Panel/Layout/AudioSection"]
+layout_mode = 2
+text = "AUDIO"
+theme_override_colors/font_color = Color(0.419608, 0.486275, 0.423529, 1)
+
+[node name="MasterRow" type="HBoxContainer" parent="Panel/Layout/AudioSection"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MasterLabel" type="Label" parent="Panel/Layout/AudioSection/MasterRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(150, 0)
+text = "Master Volume"
+
+[node name="MasterSlider" type="HSlider" parent="Panel/Layout/AudioSection/MasterRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 80.0
+
+[node name="MasterValueLabel" type="Label" parent="Panel/Layout/AudioSection/MasterRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(32, 0)
+horizontal_alignment = 2
+text = "80"
+
+[node name="MusicRow" type="HBoxContainer" parent="Panel/Layout/AudioSection"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="MusicLabel" type="Label" parent="Panel/Layout/AudioSection/MusicRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(150, 0)
+text = "Music Volume"
+
+[node name="MusicSlider" type="HSlider" parent="Panel/Layout/AudioSection/MusicRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 70.0
+
+[node name="MusicValueLabel" type="Label" parent="Panel/Layout/AudioSection/MusicRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(32, 0)
+horizontal_alignment = 2
+text = "70"
+
+[node name="SfxRow" type="HBoxContainer" parent="Panel/Layout/AudioSection"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="SfxLabel" type="Label" parent="Panel/Layout/AudioSection/SfxRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(150, 0)
+text = "SFX Volume"
+
+[node name="SfxSlider" type="HSlider" parent="Panel/Layout/AudioSection/SfxRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+min_value = 0.0
+max_value = 100.0
+step = 1.0
+value = 90.0
+
+[node name="SfxValueLabel" type="Label" parent="Panel/Layout/AudioSection/SfxRow"]
+layout_mode = 2
+custom_minimum_size = Vector2(32, 0)
+horizontal_alignment = 2
+text = "90"
+
+[node name="Separator" type="HSeparator" parent="Panel/Layout"]
+layout_mode = 2
+
+[node name="GraphicsSection" type="VBoxContainer" parent="Panel/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="GraphicsLabel" type="Label" parent="Panel/Layout/GraphicsSection"]
+layout_mode = 2
+text = "GRAPHICS"
+theme_override_colors/font_color = Color(0.419608, 0.486275, 0.423529, 1)
+
+[node name="FullscreenRow" type="HBoxContainer" parent="Panel/Layout/GraphicsSection"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="FullscreenLabel" type="Label" parent="Panel/Layout/GraphicsSection/FullscreenRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Fullscreen"
+
+[node name="FullscreenCheck" type="CheckButton" parent="Panel/Layout/GraphicsSection/FullscreenRow"]
+layout_mode = 2
+
+[node name="FpsRow" type="HBoxContainer" parent="Panel/Layout/GraphicsSection"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="FpsLabel" type="Label" parent="Panel/Layout/GraphicsSection/FpsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Show FPS"
+
+[node name="FpsCheck" type="CheckButton" parent="Panel/Layout/GraphicsSection/FpsRow"]
+layout_mode = 2
+
+[node name="BackButton" type="Button" parent="Panel/Layout"]
+layout_mode = 2
+text = "← Back"
