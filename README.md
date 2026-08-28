@@ -10,9 +10,10 @@ autoload layer and a playable test pitch.
 
 ## Running it
 
-Open the project folder in Godot 4.7 and press F5. `res://pitch/PitchScene.tscn`
-is the main scene: four players (one human-controlled, three CPU), one ball, two
-goals, a 5-minute clock.
+Open the project folder in Godot 4.7 and press F5. `res://ui/MainMenu.tscn` is
+the main scene — pick Kick Off (team select) or Practice Arena to load
+`res://pitch/PitchScene.tscn`: four players (one human-controlled, three CPU),
+one ball, two goals, a 5-minute clock.
 
 ## Controls
 

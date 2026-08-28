@@ -34,6 +34,13 @@ extends Node2D
 
 var _shake_amount: float = 0.0
 
+## Set by _apply_match_config() from GameManager meta written by KickOffMenu.
+## Null means "run standalone from the editor" — team names fall back to
+## DataLoader teams 0/1 wherever these are read.
+var _selected_home_team: TeamData = null
+var _selected_away_team: TeamData = null
+var _is_practice_mode: bool = false
+
 @onready var boundary: PitchBoundary = $PitchBoundary
 @onready var ball: Pseudo3DBall = $Ball
 @onready var players: Node2D = $Players
@@ -48,6 +55,7 @@ var _shake_amount: float = 0.0
 
 func _ready() -> void:
 	randomize()
+	_apply_match_config()
 
 	GameEvents.goal_scored.connect(_on_goal_scored)
 	GameEvents.match_ended.connect(_on_match_ended)
@@ -58,8 +66,8 @@ func _ready() -> void:
 	_bind_players()
 	_set_piece_coordinator.bind(ball, boundary, players)
 
-	var team_a_name: String = DataLoader.get_team(GameManager.TEAM_A).team_name if DataLoader.league != null else "Team A"
-	var team_b_name: String = DataLoader.get_team(GameManager.TEAM_B).team_name if DataLoader.league != null else "Team B"
+	var team_a_name: String = _selected_home_team.team_name if _selected_home_team != null else (DataLoader.get_team(GameManager.TEAM_A).team_name if DataLoader.league != null else "Team A")
+	var team_b_name: String = _selected_away_team.team_name if _selected_away_team != null else (DataLoader.get_team(GameManager.TEAM_B).team_name if DataLoader.league != null else "Team B")
 	var ref_data: RefereeData = RefereeLoader.get_random_referee()
 	match_referee.bind(ref_data, _set_piece_coordinator, team_a_name, team_b_name)
 
@@ -77,6 +85,26 @@ func _process(delta: float) -> void:
 	_update_camera(delta)
 	if Input.is_action_just_pressed(&"action_switch"):
 		switch_to_nearest_teammate()
+
+
+## Reads match configuration written by MainMenu/KickOffMenu before this scene
+## loaded. Falls back to teams 0/1 and non-practice mode, so the scene still
+## runs standalone from the editor during development.
+func _apply_match_config() -> void:
+	if GameManager.has_meta(&"home_team_index") and GameManager.has_meta(&"away_team_index"):
+		# TODO: wire these into _bind_players()/PlayerFactory once team
+		# selection needs to change which squads actually spawn — for now the
+		# selected teams only rename the referee/manager binding below, the
+		# scene's own two Player nodes still use team 0/1's squads.
+		var home_idx: int = GameManager.get_meta(&"home_team_index")
+		var away_idx: int = GameManager.get_meta(&"away_team_index")
+		_selected_home_team = DataLoader.get_team(home_idx)
+		_selected_away_team = DataLoader.get_team(away_idx)
+
+	_is_practice_mode = GameManager.get_meta(&"practice_mode", false)
+	# TODO: practice mode should disable the away team's AI and place the
+	# active player at the centre circle facing an empty goal — stubbed until
+	# practice has its own pitch setup path.
 
 
 ## Places the ball on the centre spot and returns every player to their
