@@ -16,7 +16,7 @@
 ## velocity in the move_and_slide solver and flatten the momentum model.
 ##
 ## Depends on: GameManager, GameEvents, PitchBoundary, Pseudo3DBall,
-##             HeavyPlayerController, PlayerBrain.
+##             HeavyPlayerController, PlayerBrain, SetPieceCoordinator.
 ## Exposes: reset_for_kickoff(), shake_camera(amount)
 ##
 
@@ -38,6 +38,7 @@ var _shake_amount: float = 0.0
 @onready var camera: Camera2D = $MatchCamera
 @onready var restart_timer: Timer = $RestartTimer
 @onready var hud: HUD = $HUD
+@onready var _set_piece_coordinator: SetPieceCoordinator = $SetPieceCoordinator
 
 
 func _ready() -> void:
@@ -45,10 +46,13 @@ func _ready() -> void:
 
 	GameEvents.goal_scored.connect(_on_goal_scored)
 	GameEvents.match_ended.connect(_on_match_ended)
+	GameEvents.ball_out_of_bounds.connect(_on_ball_out_of_bounds)
+	GameEvents.foul_committed.connect(_on_foul_committed)
 	ball.ball_bounced.connect(_on_ball_bounced)
 	restart_timer.timeout.connect(_on_restart_timer_timeout)
 
 	_bind_players()
+	_set_piece_coordinator.bind(ball, boundary, players)
 	reset_for_kickoff()
 	GameManager.start_match()
 	GameManager.restart_play()
@@ -62,6 +66,15 @@ func _process(delta: float) -> void:
 
 ## Places the ball on the centre spot and returns every player to their
 ## formation anchor.
+##
+## TODO: unify with SetPieceCoordinator. Kickoff deliberately stays on this
+## older, simpler path rather than being routed through the coordinator: it
+## has no "out of bounds" or "foul" trigger to react to, always uses the same
+## fixed centre-spot placement, and — unlike the other restarts — happens
+## before any players exist to freeze/assign a taker from on the very first
+## call. Folding it in would mean special-casing the coordinator for a case it
+## does not otherwise need to handle; left as-is until there is a real reason
+## (e.g. a kickoff-specific taker/ready-up UI) to share the machinery.
 func reset_for_kickoff() -> void:
 	ball.reset_at(boundary.get_centre_spot())
 
@@ -72,6 +85,11 @@ func reset_for_kickoff() -> void:
 		if player.brain != null and player.brain.formation_anchor != Vector2.ZERO:
 			player.global_position = player.brain.formation_anchor
 		player.velocity = Vector2.ZERO
+
+	var kickoff_team: int = GameManager.TEAM_A
+	if GameManager.last_scoring_team >= 0:
+		kickoff_team = 1 - GameManager.last_scoring_team
+	GameEvents.kickoff_confirmed.emit(kickoff_team)
 
 
 ## Camera feel. Kept here deliberately small.
@@ -154,6 +172,20 @@ func _on_restart_timer_timeout() -> void:
 func _on_match_ended(_winner: int) -> void:
 	ball.freeze()
 	# TODO: full-time screen and a rematch flow; for now the pitch simply stops.
+
+
+func _on_ball_out_of_bounds(side: String) -> void:
+	ball.freeze()
+	_set_piece_coordinator.handle_out_of_bounds(side, ball.global_position, ball.last_touched_by)
+
+
+func _on_foul_committed(fouler: Node, victim: Node, pos: Vector2) -> void:
+	var fouler_player := fouler as HeavyPlayerController
+	var victim_player := victim as HeavyPlayerController
+	if fouler_player == null or victim_player == null:
+		return
+	ball.freeze()
+	_set_piece_coordinator.handle_foul(fouler_player, victim_player, pos)
 
 
 func _on_ball_bounced(impact_velocity: float) -> void:

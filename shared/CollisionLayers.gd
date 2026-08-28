@@ -12,6 +12,7 @@
 ## | 3     | BallPhysicsBody  | Ball CharacterBody2D          | PitchWorld (1) only      |
 ## | 4     | FootSensorArea   | Area2D at player feet         | BallPhysicsBody (3)      |
 ## | 5     | AerialHitboxZone | Area2D above player shoulders | BallPhysicsBody (3)      |
+## | 6     | BoundarySensor   | Area2D beyond the pitch edge  | BallPhysicsBody (3)      |
 ##
 ## CRITICAL: the ball (layer 3) must never mask layer 2, and player bodies must
 ## never mask layer 3. If the ball is a solid obstacle to a CharacterBody2D, the
@@ -32,6 +33,7 @@ const LAYER_PLAYER_BODIES: int = 1 << 1      # layer 2
 const LAYER_BALL_PHYSICS: int = 1 << 2       # layer 3
 const LAYER_FOOT_SENSOR: int = 1 << 3        # layer 4
 const LAYER_AERIAL_HITBOX: int = 1 << 4      # layer 5
+const LAYER_BOUNDARY_SENSOR: int = 1 << 5    # layer 6
 
 ## Pitch walls / goal frames: collide with players and the ball.
 const MASK_PITCH_WORLD: int = LAYER_PLAYER_BODIES | LAYER_BALL_PHYSICS
@@ -45,3 +47,6 @@ const MASK_BALL_PHYSICS: int = LAYER_PITCH_WORLD
 ## Foot sensor and aerial hitbox: detect the ball, nothing else.
 const MASK_FOOT_SENSOR: int = LAYER_BALL_PHYSICS
 const MASK_AERIAL_HITBOX: int = LAYER_BALL_PHYSICS
+
+## Boundary sensor (touchlines/end lines): detect the ball, nothing else.
+const MASK_BOUNDARY_SENSOR: int = LAYER_BALL_PHYSICS

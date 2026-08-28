@@ -8,13 +8,26 @@
 ## Depends on: GameEvents (autoload, declared before this one in project.godot).
 ## Exposes:
 ##   - start_match(), register_goal(team), set_phase(phase), restart_play()
+##   - start_set_piece(phase, team, position), start_free_kick(), start_penalty()
 ##   - current_phase, score, match_time, match_duration
+##   - set_piece_team, set_piece_position, free_kick_is_direct, is_set_piece_active()
 ##   - get_clock_string(), get_score_string()
 ##
 
 extends Node
 
-enum MatchPhase { PREGAME, KICKOFF, IN_PLAY, GOAL_SCORED, HALF_TIME, FULL_TIME }
+enum MatchPhase {
+	PREGAME, KICKOFF, IN_PLAY, GOAL_SCORED, HALF_TIME, FULL_TIME,
+	GOAL_KICK, CORNER_KICK, THROW_IN, FREE_KICK, PENALTY_KICK,
+}
+
+## The five dead-ball phases SetPieceCoordinator drives. KICKOFF is deliberately
+## excluded — it still runs through the older, simpler reset_for_kickoff() path
+## (see PitchScene.reset_for_kickoff for the TODO on unifying the two).
+const SET_PIECE_PHASES: Array[MatchPhase] = [
+	MatchPhase.GOAL_KICK, MatchPhase.CORNER_KICK, MatchPhase.THROW_IN,
+	MatchPhase.FREE_KICK, MatchPhase.PENALTY_KICK,
+]
 
 const TEAM_A: int = 0
 const TEAM_B: int = 1
@@ -31,6 +44,15 @@ var match_time: float = 0.0
 var match_duration: float = 300.0
 ## The team that scored most recently — the pitch uses it to set up the restart.
 var last_scoring_team: int = -1
+
+## --- Set pieces --------------------------------------------------------------
+
+## Which team is taking the current set piece. -1 = none.
+var set_piece_team: int = -1
+## World position the ball should be placed for the current set piece.
+var set_piece_position: Vector2 = Vector2.ZERO
+## Whether the current free kick is direct (can score directly) or indirect.
+var free_kick_is_direct: bool = true
 
 
 func _ready() -> void:
@@ -85,6 +107,47 @@ func set_phase(phase: MatchPhase) -> void:
 
 func is_in_play() -> bool:
 	return current_phase == MatchPhase.IN_PLAY
+
+
+## Stores where and for whom the dead ball is being taken, switches phase, and
+## announces it on GameEvents. SetPieceCoordinator calls this (directly, or via
+## the start_free_kick/start_penalty wrappers below) once it has worked out the
+## restart type and placement; it does not place the ball or move players
+## itself — that stays the coordinator's job.
+func start_set_piece(phase: MatchPhase, team: int, position: Vector2) -> void:
+	set_piece_team = team
+	set_piece_position = position
+	set_phase(phase)
+
+	match phase:
+		MatchPhase.GOAL_KICK:
+			GameEvents.goal_kick_started.emit(team, position)
+		MatchPhase.CORNER_KICK:
+			GameEvents.corner_kick_started.emit(team, position)
+		MatchPhase.THROW_IN:
+			GameEvents.throw_in_started.emit(team, position)
+		MatchPhase.FREE_KICK:
+			GameEvents.free_kick_started.emit(team, position, free_kick_is_direct)
+		MatchPhase.PENALTY_KICK:
+			GameEvents.penalty_started.emit(team, position)
+
+
+func start_free_kick(team: int, position: Vector2, direct: bool) -> void:
+	free_kick_is_direct = direct
+	start_set_piece(MatchPhase.FREE_KICK, team, position)
+
+
+## NOTE: deviates from the brief's `start_penalty(team)` — GameManager has no
+## knowledge of pitch geometry (deliberately: it owns match state, not the
+## scene), so it cannot derive the spot itself. SetPieceCoordinator computes
+## the spot from PitchBoundary.get_goal_centre() and passes it through here,
+## the same way it already does for goal kicks and corners.
+func start_penalty(team: int, position: Vector2) -> void:
+	start_set_piece(MatchPhase.PENALTY_KICK, team, position)
+
+
+func is_set_piece_active() -> bool:
+	return SET_PIECE_PHASES.has(current_phase)
 
 
 ## "MM:SS", counting up from 0:00.

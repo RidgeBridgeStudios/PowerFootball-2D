@@ -92,8 +92,7 @@ func _release_kick(player: HeavyPlayerController) -> void:
 	# heavier strike than a standing one.
 	var inherited: Vector2 = player.velocity * 0.25
 
-	ball.apply_kick(aim * speed + inherited, height)
-	ball.last_touched_by = player
+	ball.apply_kick(aim * speed + inherited, height, player)
 	GameEvents.ball_struck.emit(player, speed, charge_ratio)
 
 	if player.is_user_controlled:
