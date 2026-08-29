@@ -33,7 +33,17 @@ extends Node2D
 ## Maximum camera offset in pixels at full shake.
 @export var shake_strength: float = 8.0
 
+## Minimum distance advantage a teammate must have over the controlled player
+## before auto-switch fires. Prevents triggering for trivial proximity differences.
+const AUTOSWITCH_ADVANTAGE_PX: float = 160.0
+## The controlled player must also be at least this far from the ball for
+## auto-switch to be considered. If they're close, they're in the right place.
+const AUTOSWITCH_MIN_BALL_DIST: float = 200.0
+## Seconds before auto-switch can fire again. Stops the switch flickering.
+const AUTOSWITCH_COOLDOWN: float = 3.0
+
 var _shake_amount: float = 0.0
+var _autoswitch_cooldown_remaining: float = 0.0
 
 ## Set by _apply_match_config() from GameManager meta written by KickOffMenu.
 ## Null means "run standalone from the editor" — team names fall back to
@@ -93,6 +103,7 @@ func _process(delta: float) -> void:
 	_update_camera(delta)
 	if Input.is_action_just_pressed(&"action_switch"):
 		switch_to_nearest_teammate()
+	_tick_autoswitch(delta)
 
 
 ## Reads match configuration written by MainMenu/KickOffMenu before this scene
@@ -207,6 +218,60 @@ func switch_to_nearest_teammate() -> void:
 	if best == null:
 		return
 
+	current.is_user_controlled = false
+	current.movement_intent = Vector2.ZERO
+	best.is_user_controlled = true
+	hud.bind_active_player(best)
+	GameEvents.player_switched.emit(best)
+
+
+## Switches control away from the current player automatically when a
+## teammate is clearly the better candidate to intercept the ball — the
+## current player is crowding out of position, not merely not-closest.
+func _tick_autoswitch(delta: float) -> void:
+	_autoswitch_cooldown_remaining = maxf(_autoswitch_cooldown_remaining - delta, 0.0)
+	if _autoswitch_cooldown_remaining > 0.0:
+		return
+	if not GameManager.is_in_play():
+		return
+
+	var current: HeavyPlayerController = hud.active_player
+	if current == null:
+		return
+
+	# Never auto-switch away from the goalkeeper.
+	var current_brain: PlayerBrain = current.brain
+	if current_brain != null and current_brain.is_goalkeeper:
+		return
+
+	var my_dist: float = current.global_position.distance_to(ball.global_position)
+
+	# Only consider switching if the controlled player is far from the ball.
+	if my_dist < AUTOSWITCH_MIN_BALL_DIST:
+		return
+
+	# Find the best teammate: closest to ball, same team, not goalkeeper,
+	# and must beat the controlled player by at least AUTOSWITCH_ADVANTAGE_PX.
+	var best: HeavyPlayerController = null
+	var best_dist: float = my_dist - AUTOSWITCH_ADVANTAGE_PX  # Must beat this threshold
+
+	for node: Node in players.get_children():
+		var player := node as HeavyPlayerController
+		if player == null or player == current or player.team != current.team:
+			continue
+		var pbrain: PlayerBrain = player.brain
+		if pbrain != null and pbrain.is_goalkeeper:
+			continue
+		var d: float = player.global_position.distance_to(ball.global_position)
+		if d < best_dist:
+			best_dist = d
+			best = player
+
+	if best == null:
+		return
+
+	# A qualifying teammate exists — auto-switch.
+	_autoswitch_cooldown_remaining = AUTOSWITCH_COOLDOWN
 	current.is_user_controlled = false
 	current.movement_intent = Vector2.ZERO
 	best.is_user_controlled = true
