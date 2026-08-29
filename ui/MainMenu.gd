@@ -61,6 +61,9 @@ func _on_kickoff_pressed() -> void:
 
 func _on_practice_pressed() -> void:
 	GameManager.match_duration = 300.0
+	GameManager.set_meta(&"home_team_index", 0)
+	GameManager.set_meta(&"away_team_index", 0)
+	GameManager.set_meta(&"vs_mode", "cpu")
 	GameManager.set_meta(&"practice_mode", true)
 	get_tree().change_scene_to_file("res://pitch/PitchScene.tscn")
 

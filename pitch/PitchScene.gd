@@ -45,6 +45,18 @@ const AUTOSWITCH_COOLDOWN: float = 3.0
 var _shake_amount: float = 0.0
 var _autoswitch_cooldown_remaining: float = 0.0
 
+## Practice Arena runtime state. All null / false outside practice mode.
+var _practice_human: HeavyPlayerController = null
+var _practice_keeper: HeavyPlayerController = null
+var _practice_gk_frozen: bool = false
+var _practice_goal_pending: bool = false
+var _practice_goal_timer: float = 0.0
+## Seconds before the ball auto-resets after a goal in practice.
+const PRACTICE_GOAL_RESET_DELAY: float = 1.5
+## Pixels the frozen GK's spawn/reset spot sits inside the goal mouth, so they
+## start on the line rather than behind the end wall.
+const PRACTICE_KEEPER_LINE_OFFSET: float = 48.0
+
 ## Set by _apply_match_config() from GameManager meta written by KickOffMenu.
 ## Null means "run standalone from the editor" — team names fall back to
 ## DataLoader teams 0/1 wherever these are read.
@@ -73,6 +85,14 @@ func _ready() -> void:
 	randomize()
 	_apply_match_config()
 
+	if _is_practice_mode:
+		_setup_practice_arena()
+	else:
+		_setup_normal_match()
+
+
+## The full-match setup path — unchanged from the original _ready() body.
+func _setup_normal_match() -> void:
 	GameEvents.goal_scored.connect(_on_goal_scored)
 	GameEvents.match_ended.connect(_on_match_ended)
 	GameEvents.ball_out_of_bounds.connect(_on_ball_out_of_bounds)
@@ -99,11 +119,223 @@ func _ready() -> void:
 	GameManager.restart_play()
 
 
+## Practice Arena setup: strips the pitch down to one human attacker and one
+## goalkeeper, places them, and wires only the practice-specific handlers —
+## none of the full-match ceremony (referee, managers, kickoff, half/full time).
+func _setup_practice_arena() -> void:
+	_bind_players()
+	await get_tree().process_frame
+
+	var team_a_players: Array[HeavyPlayerController] = []
+	var team_b_players: Array[HeavyPlayerController] = []
+	for node: Node in players.get_children():
+		var p := node as HeavyPlayerController
+		if p == null:
+			continue
+		if p.team == GameManager.TEAM_A:
+			team_a_players.append(p)
+		elif p.team == GameManager.TEAM_B:
+			team_b_players.append(p)
+
+	var human_player: HeavyPlayerController = null
+	for p: HeavyPlayerController in team_a_players:
+		if p.is_user_controlled:
+			human_player = p
+			break
+	if human_player == null and team_a_players.size() > 0:
+		human_player = team_a_players[0]
+
+	var keeper_player: HeavyPlayerController = null
+	for p: HeavyPlayerController in team_b_players:
+		if p.brain != null and p.brain.is_goalkeeper:
+			keeper_player = p
+			break
+	if keeper_player == null and team_b_players.size() > 0:
+		keeper_player = team_b_players[0]
+
+	if human_player == null or keeper_player == null:
+		push_error("PracticeArena: could not identify human or goalkeeper. Aborting.")
+		return
+
+	# Free every other spawned player. A Dictionary keyed by node stands in for
+	# a Set so a duplicate never gets queue_free()'d twice.
+	var to_free: Dictionary = {}
+	for node: Node in players.get_children():
+		var p := node as HeavyPlayerController
+		if p == null or p == human_player or p == keeper_player:
+			continue
+		to_free[p] = true
+	for p: HeavyPlayerController in to_free.keys():
+		if is_instance_valid(p):
+			p.queue_free()
+
+	await get_tree().process_frame
+
+	if not is_instance_valid(human_player) or not is_instance_valid(keeper_player):
+		push_error("PracticeArena: human or goalkeeper freed unexpectedly. Aborting.")
+		return
+
+	human_player.is_user_controlled = true
+	var keeper_brain: PlayerBrain = keeper_player.brain
+	if keeper_brain != null:
+		keeper_brain.is_goalkeeper = true
+		keeper_brain.formation_anchor = boundary.get_goal_centre(GameManager.TEAM_B)
+
+	_practice_human = human_player
+	_practice_keeper = keeper_player
+
+	_practice_human.global_position = boundary.get_centre_spot()
+	_practice_human.velocity = Vector2.ZERO
+
+	_practice_keeper.global_position = _practice_keeper_spot()
+	_practice_keeper.velocity = Vector2.ZERO
+
+	ball.reset_at(boundary.get_centre_spot())
+	ball.unfreeze()
+
+	# No start_match(): that would reset the score, fire kickoff_started (the
+	# referee banner), and start the clock before the GameManager practice
+	# guard even runs. restart_play() alone is enough to get FSMs ticking.
+	GameManager.restart_play()
+
+	_set_piece_coordinator.bind(ball, boundary, players)
+
+	hud.bind_active_player(_practice_human)
+	hud.enter_practice_mode()
+	GameEvents.player_switched.emit(_practice_human)
+
+	# Practice-only handlers. The normal _on_goal_scored/_on_ball_out_of_bounds
+	# are deliberately never connected here — they'd run a full kickoff ceremony.
+	GameEvents.goal_scored.connect(_on_practice_goal_scored)
+	GameEvents.ball_out_of_bounds.connect(_on_practice_out_of_bounds)
+	restart_timer.timeout.connect(_on_practice_restart_timeout)
+
+
+## World spot for the practice keeper: on TEAM_B's goal line, offset inward
+## (toward the centre spot) so they stand in the mouth rather than behind it.
+func _practice_keeper_spot() -> Vector2:
+	var goal_centre: Vector2 = boundary.get_goal_centre(GameManager.TEAM_B)
+	var direction: float = -1.0 if GameManager.TEAM_B == 0 else 1.0
+	return goal_centre - Vector2(direction * PRACTICE_KEEPER_LINE_OFFSET, 0.0)
+
+
 func _process(delta: float) -> void:
 	_update_camera(delta)
-	if Input.is_action_just_pressed(&"action_switch"):
-		switch_to_nearest_teammate()
-	_tick_autoswitch(delta)
+	if _is_practice_mode:
+		_tick_practice(delta)
+	else:
+		if Input.is_action_just_pressed(&"action_switch"):
+			switch_to_nearest_teammate()
+		_tick_autoswitch(delta)
+
+
+func _tick_practice(delta: float) -> void:
+	if _practice_goal_pending:
+		_practice_goal_timer -= delta
+		if _practice_goal_timer <= 0.0:
+			_practice_goal_pending = false
+			_do_practice_reset()
+		return  # Block all other input during the post-goal reset countdown.
+
+	if not GameManager.is_in_play():
+		return
+
+	# SetPieceFreezeState.process() hands itself back to Idle the instant
+	# GameManager.is_in_play() is true — which it always is during a practice
+	# rally — so a one-shot transition_to() would unfreeze the GK within a
+	# single frame. Re-asserting it every tick is what actually holds it.
+	_hold_gk_freeze()
+
+	if Input.is_action_just_pressed(&"action_practice_reset"):
+		_do_practice_reset()
+
+	if Input.is_action_just_pressed(&"action_practice_freekick"):
+		_do_practice_freekick()
+
+	if Input.is_action_just_pressed(&"action_practice_penalty"):
+		_do_practice_penalty()
+
+	# action_through is repurposed as the GK toggle in practice: there are no
+	# teammates to pass to, so its normal binding is unused here.
+	if Input.is_action_just_pressed(&"action_through"):
+		_do_practice_toggle_gk()
+
+
+func _hold_gk_freeze() -> void:
+	if not _practice_gk_frozen or not is_instance_valid(_practice_keeper):
+		return
+	_practice_keeper.velocity = Vector2.ZERO
+	_practice_keeper.movement_intent = Vector2.ZERO
+	if _practice_keeper.state_factory.current_state_name != PlayerState.SET_PIECE_FREEZE:
+		_practice_keeper.state_factory.transition_to(PlayerState.SET_PIECE_FREEZE)
+
+
+func _do_practice_reset() -> void:
+	ball.unfreeze()
+	ball.reset_at(boundary.get_centre_spot())
+
+	if is_instance_valid(_practice_human):
+		_practice_human.global_position = boundary.get_centre_spot()
+		_practice_human.velocity = Vector2.ZERO
+		_practice_human.movement_intent = Vector2.ZERO
+
+	if is_instance_valid(_practice_keeper):
+		_practice_keeper.global_position = _practice_keeper_spot()
+		_practice_keeper.velocity = Vector2.ZERO
+		_practice_keeper.movement_intent = Vector2.ZERO
+		if _practice_gk_frozen:
+			_practice_keeper.state_factory.transition_to(PlayerState.SET_PIECE_FREEZE)
+		else:
+			_practice_keeper.state_factory.transition_to(PlayerState.IDLE)
+
+	GameManager.restart_play()
+
+
+func _do_practice_freekick() -> void:
+	# Fabricates a foul: the keeper "fouled" the human at the ball's current
+	# position. handle_foul() itself decides free kick vs. penalty depending
+	# on whether that position is inside TEAM_B's penalty area.
+	if not is_instance_valid(_practice_keeper) or not is_instance_valid(_practice_human):
+		return
+	_set_piece_coordinator.handle_foul(_practice_keeper, _practice_human, ball.global_position)
+
+
+func _do_practice_penalty() -> void:
+	_set_piece_coordinator.start_penalty_for_practice(GameManager.TEAM_A, GameManager.TEAM_B)
+
+
+func _do_practice_toggle_gk() -> void:
+	if not is_instance_valid(_practice_keeper):
+		return
+	_practice_gk_frozen = not _practice_gk_frozen
+	if _practice_gk_frozen:
+		_practice_keeper.movement_intent = Vector2.ZERO
+		_practice_keeper.state_factory.transition_to(PlayerState.SET_PIECE_FREEZE)
+	else:
+		_practice_keeper.state_factory.transition_to(PlayerState.IDLE)
+	hud.set_practice_gk_label(_practice_gk_frozen)
+
+
+func _on_practice_goal_scored(_team: int) -> void:
+	ball.freeze()
+	shake_camera(1.0)
+	InputHelper.rumble(0.35, 0.7, 0.25)
+	_practice_goal_pending = true
+	_practice_goal_timer = PRACTICE_GOAL_RESET_DELAY
+	# No restart_timer.start() here — _tick_practice() drives the delay itself.
+
+
+func _on_practice_out_of_bounds(_side: String) -> void:
+	# Any out-of-bounds in practice is a soft reset to centre — never routed
+	# through SetPieceCoordinator.handle_out_of_bounds().
+	ball.unfreeze()
+	ball.reset_at(boundary.get_centre_spot())
+	GameManager.restart_play()
+
+
+func _on_practice_restart_timeout() -> void:
+	ball.unfreeze()
+	GameManager.restart_play()
 
 
 ## Reads match configuration written by MainMenu/KickOffMenu before this scene
@@ -121,9 +353,6 @@ func _apply_match_config() -> void:
 		_selected_away_team = DataLoader.get_team(away_idx)
 
 	_is_practice_mode = GameManager.get_meta(&"practice_mode", false)
-	# TODO: practice mode should disable the away team's AI and place the
-	# active player at the centre circle facing an empty goal — stubbed until
-	# practice has its own pitch setup path.
 
 
 ## Places the ball on the centre spot and returns every player to their
