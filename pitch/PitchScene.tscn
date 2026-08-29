@@ -12,6 +12,7 @@
 [ext_resource type="Script" path="res://entities/manager/ManagerDirector.gd" id="10_manager_director"]
 [ext_resource type="Script" path="res://pitch/PitchMarkings.gd" id="11_markings"]
 [ext_resource type="PackedScene" path="res://ui/TouchlineBubble.tscn" id="12_touchline"]
+[ext_resource type="PackedScene" path="res://pitch/Minimap.tscn" id="13_minimap"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_goal"]
 size = Vector2(48, 200)
@@ -249,3 +250,5 @@ script = ExtResource("10_manager_director")
 [node name="HUD" parent="." instance=ExtResource("7_hud")]
 
 [node name="TouchlineBubble" parent="." instance=ExtResource("12_touchline")]
+
+[node name="Minimap" parent="." instance=ExtResource("13_minimap")]

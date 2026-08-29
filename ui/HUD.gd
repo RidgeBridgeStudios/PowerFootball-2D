@@ -41,6 +41,9 @@ var _wall_hint_tween: Tween = null
 @onready var set_piece_banner: Label = $Root/SetPieceBanner
 @onready var wall_hint_label: Label = $Root/WallHintLabel
 @onready var mood_label: Label = $Root/MoodLabel
+@onready var nameplate_panel: PanelContainer = $Root/NameplatePanel
+@onready var nameplate_number_label: Label = $Root/NameplatePanel/NameplateBox/NumberLabel
+@onready var nameplate_name_label: Label = $Root/NameplatePanel/NameplateBox/NameLabel
 @onready var practice_hints_panel: PanelContainer = $Root/PracticeHintsPanel
 @onready var _practice_gk_label: Label = $Root/PracticeHintsPanel/VBox/GKLabel
 
@@ -70,6 +73,7 @@ func _ready() -> void:
 	wall_hint_label.visible = false
 	mood_label.text = ""
 	mood_label.visible = false
+	nameplate_panel.visible = false
 
 
 func _process(_delta: float) -> void:
@@ -124,6 +128,24 @@ func bind_active_player(player: HeavyPlayerController) -> void:
 			_refresh_mood_label(mood_node.current_tier)
 		else:
 			_refresh_mood_label(MoodSystem.Tier.NORMAL)
+	_refresh_nameplate()
+
+
+## Shirt number and name live on the PlayerData resource PlayerFactory stashes
+## in meta (see PlayerFactory.apply) rather than on the controller itself.
+func _refresh_nameplate() -> void:
+	if active_player == null or not is_instance_valid(active_player):
+		nameplate_panel.visible = false
+		return
+
+	var data: PlayerData = active_player.get_meta(&"player_data", null) as PlayerData
+	if data == null:
+		nameplate_panel.visible = false
+		return
+
+	nameplate_number_label.text = str(data.shirt_number)
+	nameplate_name_label.text = data.player_name
+	nameplate_panel.visible = true
 
 
 func _update_power_meter() -> void:
