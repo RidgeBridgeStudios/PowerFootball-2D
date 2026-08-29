@@ -189,6 +189,16 @@ func _score_chase(ctx: UtilityContext) -> float:
 	# they are more likely to lose a footrace.
 	if ctx.sprint_locked:
 		base *= 0.65
+
+	# A defender who is not yet turned toward the ball should not immediately
+	# lunge — the tackle will miss and may be a foul.
+	if ball != null and player != null:
+		var facing_dot: float = player.get_facing_dot(ball.global_position)
+		# Penalty ramps from 0 at dot >= 0.64 (within 50° cone) to 0.85 at
+		# dot = -1.0 (fully back-facing).
+		var back_penalty: float = clampf((0.64 - facing_dot) / 1.64, 0.0, 1.0) * 0.85
+		base = clampf(base - back_penalty, 0.0, 1.0)
+
 	return clampf(base, 0.0, 1.0)
 
 
@@ -221,6 +231,23 @@ func _score_dribble(ctx: UtilityContext) -> float:
 	base -= ctx.pressure * (1.0 - ctx.eff_composure) * 0.50
 	# Stamina matters — a tired player should not try to beat their marker.
 	base *= ctx.stamina_ratio
+
+	# If a facing opponent is within the pressure radius, dribbling into them
+	# risks a clean tackle. Test is "is the OPPONENT facing US" — the same
+	# check TackleState.MIN_FACING_DOT (0.42) applies to the tackler, mirrored
+	# here so a set defender scores as a threat before the tackle even starts.
+	if player != null:
+		for node: Node in get_tree().get_nodes_in_group(&"players"):
+			var opp := node as HeavyPlayerController
+			if opp == null or opp.team == player.team:
+				continue
+			var dist: float = player.global_position.distance_to(opp.global_position)
+			if dist < PRESSURE_RADIUS:
+				# 0.42 mirrors TackleState.MIN_FACING_DOT — keep in sync.
+				if opp.get_facing_dot(player.global_position) >= 0.42:
+					base *= 0.40  # Opponent is set up to tackle — don't dribble in
+					break
+
 	return clampf(base, 0.0, 1.0)
 
 

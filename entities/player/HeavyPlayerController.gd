@@ -241,6 +241,18 @@ func get_kick_origin() -> Vector2:
 	return global_position + facing_direction * 10.0
 
 
+## Returns how directly this player is facing toward a world-space point.
+## Return value:
+##   +1.0  perfectly facing the target
+##    0.0  target is exactly 90° to the side
+##   -1.0  target is directly behind
+func get_facing_dot(target_world_pos: Vector2) -> float:
+	var to_target: Vector2 = target_world_pos - global_position
+	if to_target.is_zero_approx():
+		return 1.0  # standing on the target — treat as facing
+	return facing_direction.dot(to_target.normalized())
+
+
 ## Spawns floating action text in world space above this player.
 ## Added to the parent (not self) so the text does not rotate with the player.
 func show_action_text(message: String) -> void:
