@@ -78,5 +78,6 @@ func _release_throw(player: HeavyPlayerController) -> void:
 	var speed: float = lerpf(MIN_SPEED, MAX_SPEED, charge_ratio)
 	# Flat trajectory is the point of a throw-in — impulse_z stays 0.
 	ball.apply_kick(aim.normalized() * speed, 0.0, player)
+	player.show_action_text("THROW")
 	GameEvents.ball_struck.emit(player, speed, charge_ratio)
 	GameManager.restart_play()
