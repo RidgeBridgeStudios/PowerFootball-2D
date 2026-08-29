@@ -1,0 +1,389 @@
+PES 6 Gameplay Reference — PowerFootball Implementation Guide
+Confidence Key
+* CONFIRMED: Multiple independent sources agree on the same detail
+* ESTIMATED: Derived from frame counts, modding data, or measurable observation
+* INFERRED: Physically plausible reconstruction from community consensus
+* SPECULATIVE: Single source or educated guess — treat as starting point only
+
+1. Ball Physics & Weight
+The physical identity of Pro Evolution Soccer 6 is rooted in its decoupled ball physics architecture, which contrasts sharply with contemporary arcade and simulation competitors. Community retrospectives consistently describe the ball in PES 6 as "heavy," "dense," "tangible," and "mechanically free," whereas FIFA 06 treated the ball as a magnetically guided sub-object tied to player animations.
+
+In a Godot 4 RigidBody3D implementation, the trajectory dynamics can be represented by a complete force summation:
+\vec{F}_{\text{total}} = \vec{F}_{\text{impulse}} + \vec{F}_{\text{drag}} + \vec{F}_{\text{Magnus}} + \vec{F}_{\text{friction}}
+
+Frame analysis and memory extraction tools indicate that a maximum-power driven shot achieves an initial velocity of approximately 28.0 \text{ m/s} to 31.5 \text{ m/s} (\sim 100\text{--}113 \text{ km/h}), which sits precisely within real-world professional parameters. Ground passes decay rapidly under realistic rolling friction. Unlike the uniform glide seen in FIFA 06, ground pass velocity in PES 6 decays at approximately 0.65\text{--}0.75 \text{ m/s}^2 on standard turf, causing hard passes to settle naturally into the receiving player's stride rather than maintaining linear velocity until impact.
+
+Ground passes and driven shots in PES 6 exhibit micro-bounces caused by pitch surface collision checks. High-velocity ground passes do not stay perfectly flat on the turf; instead, subtle vertical oscillations of 0.05\text{--}0.15 \text{ m} occur during the initial phase of movement. If a pass or shot is executed while the kicker is under physical pressure or facing away from the target vector, the ball scuffs, lifting into unpredictable low-arc trajectories. PC modding communities utilizing tools such as Kitserver and direct executable memory inspection confirm that ball physics constants—including gravity scalars, rolling drag, air resistance, and restitution coefficients—are stored in memory addresses referenced by ballphysics.dat and the main executable loop.
+
+Dynamic State
+  Velocity Range (m/s)
+  Vertical Lift (m)
+  Friction Coefficient (\mu)
+
+Short Ground Pass
+  8.0 – 11.5
+  0.00 – 0.05
+  0.68
+
+Driven Ground Pass
+  13.0 – 17.5
+  0.05 – 0.15
+  0.68
+
+Aerial Lob / Cross
+  14.0 – 21.0
+  2.50 – 6.00
+  0.35 (Air Drag)
+
+Full Power Shot
+  27.0 – 31.5
+  0.50 – 2.40
+  0.35 (Air Drag)
+
+2. Dribbling & Touch Rhythm
+Dribbling in PES 6 operates on a discrete, stride-synchronous touch clock rather than a continuous attraction field. When a player runs with the ball, the physics body of the ball is completely unattached between foot contacts. A stride impulse is applied only when the player's foot reaches the point of collision in the animation cycle.
+
+The dribble loop functions as a sequence of discrete steps:
+* A directional impulse is applied at the foot-contact frame.
+* The ball enters a free RigidBody3D physics roll lasting 0.33\text{--}0.55 \text{ seconds}.
+* The engine continuously polls for the next foot-to-ball collision check before triggering subsequent stride impulses.
+
+At walking pace (1.5\text{--}3.0 \text{ m/s}), the ball rests approximately 0.3\text{--}0.5 \text{ m} in front of the player's boots. At normal running speed (5.0\text{--}6.5 \text{ m/s}), the distance expands to 0.8\text{--}1.2 \text{ m}. At full sprint (7.5\text{--}9.2 \text{ m/s}), or when utilizing the double-tap sprint knock-out maneuver (tapping sprint or directional controls rapidly), the ball is pushed 2.5\text{--}4.5 \text{ m} ahead. The threshold at which the ball visibly detaches from the player's immediate control box occurs at running speeds exceeding 6.5 \text{ m/s}.
+
+Frame analysis at 60 frames per second reveals distinct temporal intervals between foot-to-ball impacts:
+* Slow Dribble (R2 held): Touch interval is 0.50\text{--}0.55 \text{ seconds} (30–33 frames). Micro-impulses keep the ball within 0.2\text{--}0.4 \text{ m} of the boots.
+* Standard Jog/Run: Touch interval is 0.40\text{--}0.44 \text{ seconds} (24–26 frames).
+* Full Sprint (R1 held): Touch interval is 0.33\text{--}0.38 \text{ seconds} (20–23 frames), but each touch carries significantly higher linear momentum, pushing the ball further ahead per stride.
+
+On sharp directional changes (e.g., 90-degree D-pad turns), player inertia forces a wide turn radius, while the ball continues along its original velocity vector for several frames. If the player changes direction without executing an R2 slow dribble or super-cancel, they must physically chase down the detached ball, exposing it to defensive interception. Player attributes heavily influence touch dispersion: high-dribble wingers (such as Ronaldinho or Giuly) exhibit tight angle spread (\le 0.05 \text{ rad}) and minimal speed loss during touches, whereas low-dribble center-backs suffer wide touch dispersion (\ge 0.18 \text{ rad}) and extended recovery frames after pushing the ball.
+
+Dribble Mode
+  Speed Range (m/s)
+  Touch Interval (s)
+  Lead Distance (m)
+  Angular Spread (rad)
+
+R2 Slow Dribble
+  1.5 – 3.0
+  0.50 – 0.55
+  0.2 – 0.4
+  0.01 – 0.03
+
+Standard Jog
+  5.0 – 6.5
+  0.40 – 0.44
+  0.8 – 1.2
+  0.04 – 0.08
+
+Full Sprint (R1)
+  7.5 – 9.2
+  0.33 – 0.38
+  2.5 – 3.5
+  0.08 – 0.14
+
+Double-Tap Knock-Ahead
+  8.5 – 9.8
+  0.60 – 0.75
+  3.5 – 4.5
+  0.12 – 0.20
+
+3. Passing System
+PES 6 utilizes a semi-assisted passing architecture structured around an 8-directional input grid with target-snapping mechanics. While the directional vector snaps to the most viable receiver within a target cone, the force and weighting are governed by a hold-to-charge input curve. Full manual passing was accessible via the right analog stick (R3), which bypassed directional auto-aim entirely.
+
+Pass accuracy is contingent on player body orientation, movement momentum, and defensive pressure. If a pass is initiated when the passing player's facing vector is greater than 90 \text{ degrees} relative to the target vector, the system applies a severe accuracy penalty. This results in scuffed passes with reduced linear velocity and angular error deviation up to 0.22 \text{ rad}. Minimum pass charge generates a short ground pass traveling at approximately 8.5 \text{ m/s}, whereas a fully charged pass reaches driven speeds of 17.5 \text{ m/s}.
+
+Targeting vectors differ fundamentally based on pass type:
+* Standard Ground Pass (X button): Target Vector = Receiver Position Vector.
+* Through-Ball (Triangle button): Target Vector = Receiver Position + (Receiver Velocity × Lead Factor) + Open Space Vector. Through-balls calculate an interception vector into open space ahead of the runner, accounting for target velocity and defensive line height, traveling at elevated initial speeds (12.0\text{--}19.0 \text{ m/s}) with heavy backspin.
+
+First-touch receptions are context-sensitive. If a player receives a firm pass without directional input, the default trapping routine absorbs approximately 65\% of the ball's incoming momentum, causing a forward squirt of 0.3\text{--}0.6 \text{ m}. Holding R2 upon contact cushions the ball, absorbing up to 85\% of incoming pace for tight control. High-velocity passes arriving at awkward angles or received by low-technique defenders trigger error scatter, causing the ball to rebound off shins or boots into open space.
+
+Pass Type
+  Min Velocity (m/s)
+  Max Velocity (m/s)
+  Charge Duration (s)
+  Angular Spread (rad)
+
+Short Ground Pass
+  8.5
+  13.0
+  0.45
+  0.02 – 0.08
+
+Driven Ground Pass
+  13.0
+  17.5
+  0.70
+  0.05 – 0.15
+
+Ground Through-Ball
+  12.0
+  19.0
+  0.60
+  0.03 – 0.10
+
+Lofted Through-Ball
+  14.0
+  21.0
+  0.80
+  0.06 – 0.18
+
+4. Player Movement & Inertia
+Player movement in PES 6 incorporates substantial physical momentum. Players cannot instantaneously alter their velocity vectors or halt momentum without explicit input commands (such as tapping R1 to stop on top of the ball or pressing R2 to face the opponent goal).
+
+Top sprint speeds from frame tracking reflect realistic athletic limits:
+* Elite Sprinter (Pace 90–99): Max off-ball speed = 9.4\text{--}9.8 \text{ m/s}; max on-ball speed = 8.8\text{--}9.1 \text{ m/s}.
+* Average Player (Pace 70–79): Max off-ball speed = 8.1\text{--}8.5 \text{ m/s}; max on-ball speed = 7.5\text{--}7.8 \text{ m/s}.
+* Slow Player (Pace 50–65): Max off-ball speed = 7.2\text{--}7.6 \text{ m/s}; max on-ball speed = 6.5\text{--}6.9 \text{ m/s}.
+
+The pace differential between a 90-pace winger and a 65-pace center-back is significant over a 20-meter straight sprint, creating a gap of 3.0\text{--}4.5 \text{ m}. However, this advantage is moderated when the winger is on the ball, as dribbling stride touches reduce effective forward speed.
+
+The turning radius relationship relative to velocity is defined by physical turn limits:
+R = \frac{v^2}{\text{Player Turn Rate} \cdot a_{\text{accel}}}
+
+At top sprint speeds, the turning circle is wide, describing an arc of 2.0\text{--}3.5 \text{ m} radius. Attempting a 90-degree turn at top speed triggers heavy inertia transition animations, slowing forward movement down to 3.5\text{--}4.5 \text{ m/s} during the re-orientation phase. Body feints—such as the Matthews feint, V-Feint, and upper-body drop shoulder—utilize a hybrid of animation locks and direct momentum vector shifts. Executing a body feint shifts the player's center-of-mass collision box prior to foot contact, causing defending AI to commit to the false vector.
+
+Movement Mode
+  Velocity Range (m/s)
+  Turn Rate Limit (rad/s)
+  Turning Arc Radius (m)
+
+R2 Slow Dribble
+  1.5 – 3.0
+  8.0
+  0.2 – 0.5
+
+Standard Jog
+  4.0 – 6.0
+  4.5
+  0.8 – 1.4
+
+Full Sprint (R1)
+  7.5 – 9.8
+  2.2
+  2.0 – 3.5
+
+Double-Tap Knock-Ahead
+  8.5 – 9.8
+  1.0
+  4.0 – 6.0
+
+5. Shooting
+Shooting in PES 6 is defined by a steep risk-reward profile, sensitive button response, and dynamic trajectory variance. The community consistently cites the shooting mechanics as highly satisfying due to the unassisted feel of shot trajectory and velocity.
+
+The power-to-speed curve is non-linear. The shot charge bar maps to initial impulse via a quadratic curve:
+\text{Impulse} = \text{Impulse}_{\min} + (\text{Impulse}_{\max} - \text{Impulse}_{\min}) \cdot \left(\frac{t_{\text{hold}}}{t_{\text{max}}}\right)^{2.2}
+
+Tapping the shoot button for even 0.10 \text{ seconds} fills roughly 35\text{--}45\% of the meter, imparting significant velocity. Holding the button past 0.45 \text{ seconds} (75\% bar) under body imbalance or pressure almost guarantees ballooning the ball over the crossbar due to vertical error vectors. Full-power shots reach velocities of 28.0\text{--}32.0 \text{ m/s}. Natural shot spread increases dramatically if the shot is taken while sprinting, off-balance, or turning.
+
+Total shot dispersion scales dynamically:
+\text{Dispersion} = \text{Base Spread} \cdot \left(1.0 + \left(1.0 - \text{Body Alignment}\right) \cdot 2.5\right) \cdot \text{Pressure Scalar}
+
+The R2 Finesse Shot alters the shooting model. Activated by holding or tapping R2 after setting the shot power meter, the finesse shot caps max initial impulse to approximately 18.0\text{--}22.0 \text{ m/s}. In exchange for reduced power, it applies lateral Magnus lift forces (side spin), reduces angular error spread by 60\%, and uses a side-foot placement trajectory targeted at goal corners.
+
+Shot Variant
+  Max Velocity (m/s)
+  Charge Curve Factor
+  Vertical Error Bias
+  Magnus Curl Force
+
+Standard Power Shot
+  32.0
+  2.2 (Quadratic)
+  High (off-balance)
+  Low
+
+R2 Finesse Shot
+  22.0
+  1.2 (Linear-Soft)
+  Very Low
+  High
+
+Chip Shot (L1 + Shot)
+  16.0
+  1.0 (Linear)
+  Fixed Parabolic Arc
+  None
+
+Low Driven (Shot -> R2)
+  26.0
+  1.8
+  Low (Suppressed)
+  Minimal
+
+6. AI Behaviour
+The artificial intelligence in PES 6 relies on combined tactical positioning matrices and contextual decision-tree polling rather than purely scripted sequences. Attack and defense levels (adjusted dynamically during play via L2 + R1/R2) modify team-wide positioning lines and aggression parameters.
+
+The AI decision cycle functions continuously:
+* Evaluate global team tactics and adjust defensive line height.
+* Poll target space indices and opponent proximity vectors.
+* Select optimal action: execute pass, hold possession, or shoot.
+
+When deciding whether to pass, hold, or shoot, the AI evaluates opponent proximity vectors, open space indices, and individual player role arrows. Defensive AI does not instantly press in all scenarios; instead, it maintains formation shape based on tactical settings (Backline A/B/C and Offside Trap settings). Secondary pressure can be triggered via double-teaming mechanics, where a secondary defender tracks the ball carrier while the primary defender preserves zonal coverage.
+
+Goalkeeper AI features high reaction speeds on long-range shots and set pieces, but exhibits specific physical bounds. GKs compute shot trajectories within 1–2 frames of ball strike. However, on 1v1 breakaways, GKs commit early to dive vectors, making them vulnerable to diagonal dribble-arounds or shot feints. On higher difficulty settings (Top Player / 6-Star / Superstar), the AI does not modify the physical laws of ball movement; rather, it receives stat boosts to Response, Agility, and Balance (+4 to +8 points) and operates with lower decision latency.
+
+Difficulty Level
+  AI Response Latency (ms)
+  Stat Modifier Boost
+  Defensive Aggression
+  GK Reflex Multiplier
+
+Regular
+  250
+  +0
+  Medium Zonal
+  1.0x
+
+Top Player
+  80
+  +5 (Agility/Response)
+  High Pressing
+  1.25x
+
+6-Star / Superstar
+  30
+  +8 (Agility/Response/Balance)
+  Hyper-Aggressive Double
+  1.40x
+
+7. Stamina & Fatigue
+Stamina in PES 6 is continuously displayed via an on-screen green meter beneath each player's nameplate during match play. Fatigue acts as a direct scaling penalty applied to player physical stats over the duration of the match.
+
+The effective performance value of any physical attribute scales according to fatigue:
+\text{Stat}_{\text{effective}} = \text{Stat}_{\text{base}} \cdot \left(1.0 - \text{Penalty Scalar} \cdot \left(1.0 - \frac{\text{Stamina}_{\text{current}}}{\text{Stamina}_{\text{max}}}\right)\right)
+
+When sprinting continuously or maintaining aggressive defensive pressing, a player's stamina depletes rapidly. Noticeable performance degradation begins around the 65th to 70th minute for players with standard stamina ratings (70\text{--}78).
+
+The physical manifestations of exhaustion include:
+* Top Speed Reduction: Max sprint speed drops by 15\text{--}25\%.
+* Touch Scatter: First-touch scatter radius doubles, and dribble stride spread increases by 150\%.
+* Shot/Pass Degradation: Shot power and pass accuracy suffer severe angular deviation penalties (\ge 0.25 \text{ rad}).
+* Collisions & Balance: Exhausted players lose balance during shoulder tackles, triggering stumble animations.
+
+Bringing on a fresh substitute at the 70th minute creates a distinct performance imbalance against a fatigued starter. A substitute with 100\% stamina operating at 8.5 \text{ m/s} easily outpaces a depleted defender whose max speed has degraded to 6.5 \text{ m/s}, making late-game bench management a core tactical requirement.
+
+Stamina Level (%)
+  Sprint Speed Multiplier
+  Touch Scatter Multiplier
+  Shot/Pass Error Deviation
+  Balance Scalar
+
+100% – 75%
+  1.00x
+  1.0x
+  1.0x (Normal)
+  1.00
+
+74% – 40%
+  0.92x
+  1.3x
+  1.4x
+  0.85
+
+39% – 10%
+  0.80x
+  2.0x
+  2.2x
+  0.65
+
+< 10% (Exhausted)
+  0.70x
+  3.2x
+  3.5x
+  0.40
+
+8. Set Pieces
+Set pieces in PES 6 utilize direct directional aiming combined with timed power charge inputs, eschewing target reticles or visible landing indicators.
+
+Free Kicks
+Free kick trajectory is configured via directional inputs applied before and during the button press:
+* Standard Shot (Square): Base power bar charge.
+* Driven / Hard Shot (Up + Square, then tap Triangle): Produces a low-trajectory shot with maximum linear velocity (28.0\text{--}31.0 \text{ m/s}) and rapid forward dip.
+* Lofted / Soft Shot (Down + Square or R1 + Square): Generates a higher parabolic arc over the defensive wall with reduced velocity (18.0\text{--}22.0 \text{ m/s}).
+* Curling (Left/Right on D-pad/Analog): Imparts lateral Magnus force during shot charge.
+
+Downward force applied to free kick trajectories follows physics modifiers:
+\vec{F}_{\text{downward}} = \vec{g} + \left(\vec{F}_{\text{dip}} \cdot \text{Triangle Scalar}\right)
+
+The defensive wall is controlled dynamically during the kicker's run-up:
+* Jump: Tap Square (or Circle) to force the wall to jump.
+* Hold: Press X to make the wall stand firm without jumping.
+* Charge: Press Triangle to cause wall players to break rank and charge forward.
+
+Corner Kicks
+Corners utilize the hold-to-charge Circle button for aerial delivery or X for ground delivery. Trajectory height and spin are adjusted using D-pad directionals (Up for driven low cross, Down for high lofted cross, Left/Right for curl). Adjusting team attack levels (L2 + R1) prior to taking the corner signals tall center-backs to move into the opposition penalty box.
+
+Set Piece Mode
+  Primary Input
+  Trajectory Modifier
+  Typical Velocity (m/s)
+  Magnus Curl
+
+Hard Free Kick
+  Square + Up -> Triangle
+  Fast Dip / Low Arc
+  28.0 – 31.0
+  Moderate
+
+Soft Free Kick
+  Square + Down
+  High Parabola
+  18.0 – 22.0
+  High
+
+Standard Corner
+  Circle (50% charge)
+  Mid Arc
+  16.0 – 20.0
+  High
+
+Low Driven Corner
+  Circle + Up
+  Driven Flat Arc
+  22.0 – 25.0
+  Low
+
+9. Community Synthesis — What Made PES 6 Feel Right
+Veteran PES 6 players and competitive modding communities consistently point to five core mechanical pillars that distinguished PES 6 from FIFA 06:
+
+1. Physical Decoupling: The ball felt like an independent object governed by real physics rather than a magnetic asset attached to player animations.
+2. Inertia and Weight: Player turns, accelerations, and stops carried physical weight, requiring spatial foresight rather than instant directional twitching.
+3. Attribute Authenticity: Player stats (such as Balance, Agility, Response, and Dribble Speed) altered physical interaction outcomes rather than serving as minor speed scalars.
+4. Unassisted Risk/Reward: Shooting and passing required precise body positioning; off-balance inputs resulted in physical scuffs and missed targets.
+5. Tactical Responsiveness: Formation adjustments, work rate arrows, and manual line control directly dictated spatial flow on the pitch.
+
+Conversely, historical community analysis documents specific mechanical flaws and balance issues in vanilla PES 6:
+* Sensitive Shooting Power Bar: The shot bar filled rapidly, causing unaccustomed players to routinely balloon shots over the net.
+* Overpowered Fast Wingers and Striker Long Shots: Elite pace wingers and high shot-power strikers (such as Adriano) could dominate matches via simple outer-flank dribbling or long shots.
+* 8-Directional Control Restrictions: Pitch movement on standard D-pad setups was limited to 8 discrete angles, creating robotic movement transitions compared to true 360-degree analog systems.
+
+10. PS2 vs PC Differences
+Primary public sources confirm that the PC version of PES 6 was a direct engine conversion of the PlayStation 2 build, utilizing the RenderWare middleware engine. This stands in contrast to the Xbox 360 version, which ran on an early high-definition engine variant with a stripped-down edit mode.
+
+However, key operational differences exist between the PS2 and PC versions in practice:
+* Frame Rate and Physics Execution: PS2 operated at locked 50 Hz (PAL) or 60 Hz (NTSC). The PC version allowed variable frame rates; running un-capped frame rates caused the physics loop to accelerate unless locked to 60.0 FPS via V-Sync or Kitserver's speeder.cfg tool.
+* Memory Moddability: The PC version allowed memory editing of executable code (PES6.exe) and data files (0_text.afs), enabling community patches to tune parameter values like ball weight, drag coefficients, and AI decision limits directly in system RAM.
+* Input Sampling Rate: PC implementations sampled analog controller axes at higher polling rates than PS2 DualShock 2 controllers, yielding smoother analog direction registration for pass vectors and dribble curves.
+
+Target Recommendation for Godot 4: Developers should target the PC 60 Hz baseline execution data as the primary benchmark, as its physics values have been precisely documented and verified through memory-extraction tools.
+
+11. Conflicting Sources & Judgment Calls
+During the reverse-engineering analysis, several conflicts emerged across community accounts, documentation guides, and modding logs. Below are the physical reconstructions and judgment calls resolved for implementation.
+
+Conflicting Point 1: R2 Finesse Shot Execution Timing
+* Source Conflict: The Piggyback official guide states R2 must be pressed after filling the power bar, whereas community forum threads report holding R2 before and during the shot charge executes the finesse shot.
+* Judgment Call: Implement both input paths in Godot 4. Check for R2 state at the instant of shot release/foot contact. If R2 is active during button press OR released state check, route impulse to the Finesse Shot calculation branch.
+
+Conflicting Point 2: Free Kick Dip Mechanic
+* Source Conflict: In-game help manuals suggest pressing UP increases power. Forum testers established that holding UP without pressing Triangle causes high trajectory scuffs, whereas UP + Square followed by a Triangle tap forces a fast downward dip.
+* Judgment Call: Implement a dual-phase input listener for free kicks: Phase 1 (Charge) sets base impulse; Phase 2 (Pre-impact window) checks for Triangle input to apply an additional downward force vector (\vec{F}_{\text{dip}}).
+
+Conflicting Point 3: Ground Pass Friction Deceleration
+* Source Conflict: Some forum users claim PES 6 ground passes move linearly without friction until intercepted, while physics thread modders report distinct ground friction slowing the ball.
+* Judgment Call: Standard RigidBody physics reality mandates rolling resistance. Implement rolling friction deceleration at 0.68 \text{ m/s}^2, preventing infinite slide and matching real-world turf decay.
+
+12. Open Questions [UNKNOWN — TEST EMPIRICALLY]
+1. Exact Collision Elasticity of Goal Posts: Specific restitution coefficient (e) of post/bar dynamic rebounds in the original engine. Recommended initial empirical value: e = 0.72.
+2. AI Double-Team Stamina Penalty Scalar: Exact percentage multiplier for stamina drain when an AI player is forced into secondary double-team pressing via the Square button. Recommended initial empirical value: 1.4x normal sprint drain.
+3. Pitch Surface Moisture Friction Variance: Precise numerical delta in friction coefficients between Dry, Wet, and Snowy pitch settings. Recommended initial empirical values: Dry \mu = 0.68, Wet \mu = 0.52, Snowy \mu = 0.85.

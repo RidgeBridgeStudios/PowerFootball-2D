@@ -47,6 +47,7 @@ Always reduce shell output to structured summary before injecting:
 ### Pre-Load Rule
 
 Read only files the current task directly requires.
+When implementation intent is unclear, read research-index.md and consult the relevant file before writing any code.
 
 Use `grep -r "ClassName" . --include="*.gd"` to locate dependencies instead of reading directories. This is faster and cheaper than scanning subdirectories.
 
