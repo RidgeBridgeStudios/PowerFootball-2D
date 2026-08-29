@@ -66,6 +66,17 @@ func process(player: HeavyPlayerController, delta: float) -> StringName:
 		return &""
 
 	_release_kick(player)
+
+	# Corner, free and goal kicks are all taken through this state (see
+	# SetPieceCoordinator._activate_set_piece). apply_kick() only sets the
+	# ball's velocity — it moves on its own next _physics_process tick — so
+	# the foot sensor still reports it as overlapping on this exact frame.
+	# In a set-piece context that stale overlap must never be read as "still
+	# have the ball": the taker just struck a dead ball away and cannot
+	# immediately resume dribbling it.
+	if GameManager.is_set_piece_active():
+		return MOVE if player.movement_intent.length() > 0.05 else IDLE
+
 	if player.get_ball_in_foot_range() != null:
 		return DRIBBLE
 	return MOVE if player.movement_intent.length() > 0.05 else IDLE
