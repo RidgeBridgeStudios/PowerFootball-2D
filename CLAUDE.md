@@ -4,6 +4,21 @@
 **Verify:** `python3 tools/gdcheck.py`
 (Static GDScript checker; no engine binary in CI.)
 
+## Multi-Agent Sync
+
+AGENTS.md at the repo root is the flattened, self-contained mirror of this file
+for non-Claude agents (DeepSeek, opencode-go models, etc.) that do not auto-load
+.claude/rules/.
+
+Sync contract:
+- Any new architectural law added here MUST also be added to AGENTS.md Section 3
+  in the same session.
+- Any new .claude/rules/*.md file MUST have its key prohibitions mirrored in
+  AGENTS.md Section 3 or Section 9.
+- ROADMAP.md checkbox changes MUST be mirrored in AGENTS.md Section 5 tables.
+- Non-Claude agents write rule proposals to AGENTS_ERRATA.md. Reconcile
+  AGENTS_ERRATA.md into .claude/rules/ at the start of the next Claude Code session.
+
 ## READ FIRST
 
 **Before implementing any feature:**
