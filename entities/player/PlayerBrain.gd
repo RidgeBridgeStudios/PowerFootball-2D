@@ -39,6 +39,23 @@ extends Node
 
 enum Role { OUTFIELD_ATTACKER, OUTFIELD_MIDFIELDER, OUTFIELD_DEFENDER, GOALKEEPER }
 
+## Snapshot of situational inputs computed once per decision tick and shared
+## across all scorer functions. Avoids recomputing the same distances and
+## teammate counts multiple times inside a single evaluation.
+class UtilityContext:
+	var pressure: float              ## 0-1, from calculate_pressure_index()
+	var eff_vision: float            ## composure/mood-adjusted vision
+	var eff_composure: float
+	var eff_aggression: float
+	var dist_to_ball: float          ## pixels, player → ball
+	var dist_to_goal: float          ## pixels, player → opponent goal centre
+	var stamina_ratio: float         ## 0-1
+	var team_has_ball: bool
+	var is_possessor: bool           ## player is ball.possessor
+	var open_teammate_exists: bool   ## _find_best_pass_target() != null
+	var chase_is_legal: bool         ## _should_chase_ball() returned true
+	var sprint_locked: bool
+
 @export var role: Role = Role.OUTFIELD_MIDFIELDER
 
 ## Radius inside which an opponent contributes to the pressure index.
@@ -106,6 +123,123 @@ func _physics_process(delta: float) -> void:
 	player.movement_intent = _steer_for_action()
 
 
+## Builds the UtilityContext snapshot for one decision tick.
+func _build_context(defenders_nearby: Array[Node2D]) -> UtilityContext:
+	var ctx := UtilityContext.new()
+
+	ctx.pressure = calculate_pressure_index(defenders_nearby)
+
+	# Read base attributes, then layer mood on top. Mood never mutates the
+	# exported attributes — it is applied only at the decision site so the
+	# Inspector always shows the base talent regardless of in-match state.
+	var mood_node: MoodSystem = player.get_mood() if player != null else null
+	ctx.eff_vision      = clampf(vision_attribute      + (mood_node.get_vision_delta()      if mood_node != null else 0.0), 0.0, 1.0)
+	ctx.eff_composure   = clampf(composure_attribute   + (mood_node.get_composure_delta()   if mood_node != null else 0.0), 0.0, 1.0)
+	ctx.eff_aggression  = clampf(aggression_attribute  + (mood_node.get_aggression_delta()  if mood_node != null else 0.0), 0.0, 1.0)
+
+	ctx.dist_to_ball = player.global_position.distance_to(ball.global_position) if ball != null else INF
+	ctx.stamina_ratio = player.get_stamina_ratio()
+	ctx.team_has_ball = _team_has_ball()
+	ctx.is_possessor  = ball != null and ball.possessor == player
+	ctx.sprint_locked = player.sprint_locked
+
+	# Forward direction toward the opponent goal. Team A attacks toward +X.
+	if pitch_boundary != null:
+		var opp_team: int = 1 - player.team
+		ctx.dist_to_goal = player.global_position.distance_to(
+			pitch_boundary.get_goal_centre(opp_team))
+	else:
+		ctx.dist_to_goal = 800.0
+
+	# These are cached results of existing methods — call them here so every
+	# scorer sees the same answer rather than running independent tree scans.
+	ctx.chase_is_legal         = _should_chase_ball()
+	ctx.open_teammate_exists   = _find_best_pass_target() != null
+
+	return ctx
+
+
+## Score for choosing Pass.
+## Peaks when: possessor, high vision, open teammate, composure keeps
+## panic from overriding it.  Falls when stamina is low (hurried passes).
+func _score_pass(ctx: UtilityContext) -> float:
+	if not ctx.is_possessor or not ctx.open_teammate_exists:
+		return 0.0
+	var base: float = 0.60
+	# High vision = more likely to spot and execute the pass.
+	base += ctx.eff_vision * 0.25
+	# Under pressure, composure decides whether to pass or panic.
+	base += ctx.eff_composure * 0.10 * (1.0 - ctx.pressure)
+	# Low stamina hurries decisions — a tired player passes sooner.
+	base += (1.0 - ctx.stamina_ratio) * 0.10
+	return clampf(base, 0.0, 1.0)
+
+
+## Score for chasing the ball.
+## Legal only when _should_chase_ball() approved it.  Closer + aggressive
+## players score higher; a tired sprint-locked player scores much lower.
+func _score_chase(ctx: UtilityContext) -> float:
+	if not ctx.chase_is_legal:
+		return 0.0
+	# Normalise distance — 0 px = 1.0, CHASE_RADIUS = 0.0.
+	var prox: float = clampf(1.0 - ctx.dist_to_ball / CHASE_RADIUS, 0.0, 1.0)
+	var base: float = prox * 0.55
+	base += ctx.eff_aggression * 0.30
+	# Sprint-locked players can still chase but don't score as highly —
+	# they are more likely to lose a footrace.
+	if ctx.sprint_locked:
+		base *= 0.65
+	return clampf(base, 0.0, 1.0)
+
+
+## Score for finding space (off-ball intelligent run).
+## High vision unlocks this; only fires when team has the ball.
+func _score_find_space(ctx: UtilityContext) -> float:
+	if ctx.is_possessor:
+		return 0.0
+	# Only make attacking runs when team has possession.
+	if not ctx.team_has_ball:
+		return 0.0
+	var base: float = ctx.eff_vision * 0.60
+	# Fresh legs make runs more dangerous.
+	base += ctx.stamina_ratio * 0.20
+	# Attackers who are already in a threatening position score lower —
+	# they don't need to make another run.
+	var goal_prox: float = clampf(1.0 - ctx.dist_to_goal / 600.0, 0.0, 1.0)
+	base -= goal_prox * 0.15
+	return clampf(base, 0.0, 1.0)
+
+
+## Score for attempting a dribble (carrying the ball forward).
+## Aggressive players attempt it; the score collapses under heavy pressure
+## unless composure is very high.
+func _score_dribble(ctx: UtilityContext) -> float:
+	if not ctx.is_possessor:
+		return 0.0
+	var base: float = ctx.eff_aggression * 0.55
+	# Pressure kills dribble desirability unless composure keeps it alive.
+	base -= ctx.pressure * (1.0 - ctx.eff_composure) * 0.50
+	# Stamina matters — a tired player should not try to beat their marker.
+	base *= ctx.stamina_ratio
+	return clampf(base, 0.0, 1.0)
+
+
+## Score for maintaining formation (conservative option).
+## Acts as the floor: always available, but outscored whenever anything
+## more purposeful is viable.  Rises when team lacks the ball and player
+## is far from anchor — getting back into shape.
+func _score_maintain_formation(ctx: UtilityContext) -> float:
+	# Base desirability: modest but non-zero — always an option.
+	var base: float = 0.20
+	if not ctx.team_has_ball:
+		# Defensive discipline: get back into shape when out of possession.
+		if player != null:
+			var anchor_dist: float = player.global_position.distance_to(formation_anchor)
+			var anchor_urgency: float = clampf(anchor_dist / CHASE_RADIUS, 0.0, 1.0)
+			base += anchor_urgency * 0.35
+	return clampf(base, 0.0, 1.0)
+
+
 ## Turns the contextual vector into an action name. Returned names are
 ## deliberately tactical rather than mechanical — the steering layer decides how
 ## to execute them.
@@ -129,44 +263,48 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 			_cached_space_target = goal_centre + to_ball * 60.0
 		return &"MaintainFormation"
 
-	var pressure: float = calculate_pressure_index(defenders_nearby)
+	var ctx: UtilityContext = _build_context(defenders_nearby)
 
-	# Read base attributes, then layer mood on top. Mood never mutates the
-	# exported attributes — it is applied only at the decision site so the
-	# Inspector always shows the base talent regardless of in-match state.
-	var mood_node: MoodSystem = player.get_mood() if player != null else null
-	var eff_vision: float = vision_attribute + (mood_node.get_vision_delta() if mood_node != null else 0.0)
-	var eff_composure: float = composure_attribute + (mood_node.get_composure_delta() if mood_node != null else 0.0)
-	var eff_aggression: float = aggression_attribute + (mood_node.get_aggression_delta() if mood_node != null else 0.0)
-
-	# Clamp so extreme mood cannot push attributes out of the 0-1 behavioural range.
-	eff_vision = clampf(eff_vision, 0.0, 1.0)
-	eff_composure = clampf(eff_composure, 0.0, 1.0)
-	eff_aggression = clampf(eff_aggression, 0.0, 1.0)
-
-	# Composure decides how much of the pressure actually reaches the decision.
-	var vision_bias: float = eff_vision * (1.0 - (pressure * (1.0 - eff_composure)))
-	var ego_bias: float = eff_aggression * pressure
-
-	if pressure > 0.85 and eff_composure < 0.45:
+	if ctx.pressure > 0.85 and ctx.eff_composure < 0.45:
 		return &"PanicClear"
 
-	if ball != null and player != null and ball.possessor == player:
-		var pass_target: HeavyPlayerController = _find_best_pass_target()
-		if pass_target != null:
-			_cached_pass_target = pass_target
-			return &"Pass"
+	# --- Utility scoring ---
+	# Hard guards above have already filtered out PanicClear.
+	# Now build a scored candidate list — the highest score wins.
+	# Ties are broken by the order of the array (pass > chase > space > dribble > formation).
 
-	if ball != null and player != null:
-		if _should_chase_ball():
-			return &"ChaseBall"
+	# Cache the pass target now so _score_pass() and _steer_for_action()
+	# both see the same answer without a second tree scan.
+	var pass_target: HeavyPlayerController = _find_best_pass_target()
+	if pass_target != null:
+		_cached_pass_target = pass_target
 
-	if vision_bias > 0.55:
-		return &"FindSpace"
-	if ego_bias > 0.65:
-		return &"AttemptDribble"
+	var candidates: Array[Dictionary] = [
+		{ &"action": &"Pass",              "score": _score_pass(ctx)              },
+		{ &"action": &"ChaseBall",         "score": _score_chase(ctx)             },
+		{ &"action": &"FindSpace",         "score": _score_find_space(ctx)        },
+		{ &"action": &"AttemptDribble",    "score": _score_dribble(ctx)           },
+		{ &"action": &"MaintainFormation", "score": _score_maintain_formation(ctx)},
+	]
 
-	return &"MaintainFormation"
+	# Add a small noise term so two players in identical situations make
+	# slightly different choices — they won't always run to the same spot.
+	# Noise is seeded from the player's unique node path so it is
+	# deterministic per player but different between players.
+	var noise_seed: int = player.get_instance_id() + GameManager.get_match_tick()
+	var rng := RandomNumberGenerator.new()
+	rng.seed = noise_seed
+	for c: Dictionary in candidates:
+		c["score"] = clampf(c["score"] + rng.randf_range(-0.04, 0.04), 0.0, 1.0)
+
+	var best_action: StringName = &"MaintainFormation"
+	var best_score: float = -1.0
+	for c: Dictionary in candidates:
+		if c["score"] > best_score:
+			best_score = c["score"]
+			best_action = c[&"action"]
+
+	return best_action
 
 
 ## Scores every same-team, non-GK, non-self teammate by openness (distance
