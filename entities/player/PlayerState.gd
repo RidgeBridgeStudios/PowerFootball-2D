@@ -23,6 +23,7 @@ const IDLE: StringName = &"Idle"
 const MOVE: StringName = &"Move"
 const DRIBBLE: StringName = &"Dribble"
 const CHARGE_KICK: StringName = &"ChargeKick"
+const SHOT_LOCK: StringName = &"ShotLock"
 const TACKLE: StringName = &"Tackle"
 const AERIAL: StringName = &"Aerial"
 const SET_PIECE_FREEZE: StringName = &"SetPieceFreeze"
@@ -60,8 +61,13 @@ func check_common_transitions(player: HeavyPlayerController) -> StringName:
 	if wants(player, &"action_tackle"):
 		return TACKLE
 
-	if wants(player, &"action_kick") and player.get_ball_in_foot_range() != null:
-		return CHARGE_KICK
+	if wants(player, &"action_kick"):
+		if player.get_ball_in_foot_range() != null:
+			return CHARGE_KICK
+		# Ball not at the player's feet — engage shot lock-on. ShotLockState
+		# bails straight back out on its own next tick if no shootable ball is
+		# within range, so no need to duplicate that search here.
+		return SHOT_LOCK
 
 	return &""
 

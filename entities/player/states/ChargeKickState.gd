@@ -31,6 +31,10 @@ const SHOT_SPEED: float = 620.0
 const LOB_HEIGHT_SPEED: float = 420.0
 ## Movement is throttled while winding up — you plant to strike.
 const CHARGE_MOVE_PENALTY: float = 0.55
+## Maximum distance at which a mis-timed shot still finds the ball, so a
+## charge that ends a pixel or two outside the foot sensor doesn't silently
+## whiff.
+const CONTACT_REACH: float = 48.0
 
 ## 0.0-1.0, read by HUD.gd for the power meter.
 var charge_ratio: float = 0.0
@@ -72,7 +76,17 @@ func physics_process(player: HeavyPlayerController, delta: float) -> void:
 
 
 func _release_kick(player: HeavyPlayerController) -> void:
+	# Prefer a ball already inside the foot sensor.
 	var ball: Pseudo3DBall = player.get_ball_in_foot_range()
+
+	# Fallback: no ball in the sensor, but one is within CONTACT_REACH px —
+	# snap it to foot position and strike anyway. Prevents a genuine "swung
+	# and missed" from degrading into a 1px sensor-edge whiff.
+	if ball == null:
+		ball = _nearest_ground_ball(player)
+		if ball != null:
+			ball.global_position = player.global_position + player.facing_direction * 16.0
+
 	if ball == null:
 		# Swung and missed — the charge is spent regardless.
 		return
@@ -118,3 +132,20 @@ func _release_kick(player: HeavyPlayerController) -> void:
 		InputHelper.rumble(0.25 * charge_ratio, 0.6 * charge_ratio, 0.12)
 
 	# TODO: split action_through into a lead-the-runner pass target.
+
+
+func _nearest_ground_ball(player: HeavyPlayerController) -> Pseudo3DBall:
+	var balls: Array[Node] = player.get_tree().get_nodes_in_group(&"ball")
+	var closest: Pseudo3DBall = null
+	var closest_dist: float = CONTACT_REACH
+	for node: Node in balls:
+		var b := node as Pseudo3DBall
+		if b == null or b.is_frozen or b.is_airborne():
+			continue
+		if b.possessor != null and b.possessor != player:
+			continue
+		var d: float = player.global_position.distance_to(b.global_position)
+		if d < closest_dist:
+			closest_dist = d
+			closest = b
+	return closest
