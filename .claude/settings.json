@@ -1,13 +1,14 @@
 {
   "permissions": {
     "autoApprove": [
-      "Read",
-      "Grep",
-      "Glob",
-      "Bash(godot --headless *)",
-      "Bash(git status)",
-      "Bash(git diff *)",
-      "Bash(python3 tools/gdcheck.py*)"
+      "Bash(grep -r * autoloads/)",
+      "Bash(grep -r * entities/)",
+      "Bash(grep -r * shared/)",
+      "Bash(find . -name .gd -not -path ./.git/)",
+      "Bash(cat ROADMAP.md)",
+      "Bash(cat AGENTS.md)",
+      "Bash(cat AGENTS_ERRATA.md)",
+      "Bash(python3 tools/gdcheck.py)"
     ]
   },
   "hooks": {

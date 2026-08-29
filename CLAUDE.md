@@ -48,3 +48,28 @@ MatchWorldModel (-100) → PlayerBrain (0) → HeavyPlayerController (100)
 
 22 players total (11 per team), spawned declaratively as children
 of `$Players` in `pitch/PitchScene.tscn`.
+
+## Multi-Agent Sync
+
+AGENTS.md is the onboarding file for non-Claude agents. Keep in sync with this file.
+
+**Sync contract:**
+- Any new architectural law added here MUST also be added to AGENTS.md Section 3 in the same session.
+- Any new `.claude/rules/*.md` file MUST have its key prohibitions mirrored in AGENTS.md Engine Lock or as a new subsection.
+- ROADMAP.md checkbox changes MUST be mirrored in AGENTS.md if coverage is required.
+- Non-Claude agents write rule proposals to AGENTS_ERRATA.md. Reconcile AGENTS_ERRATA.md into `.claude/rules/` at the start of the next Claude Code session.
+
+AGENTS_ERRATA.md takes priority over this file on any specific recent decision.
+
+## Context Budget — Claude Code Sessions
+
+All Claude Code sessions track context usage against the same thresholds:
+
+| Range | State | Action |
+|-------|-------|--------|
+| 0–50% | OPTIMAL | Full architecture work. Multi-layer features. Reference files inline. |
+| 50–70% | MONITOR | Verify outputs against `.claude/rules/` files. Use grep for spot checks. |
+| 70–85% | DANGER | Run `/compact` to compress prior messages. Do not start new features. |
+| 85%+ | CRITICAL | Run `/compact` or `/clear` before next task. Major subsystem switches only. |
+
+Switch major subsystems (physics ↔ AI, match ↔ career) with `/clear`. CLAUDE.md and `.claude/rules/` survive both compaction and clear.
