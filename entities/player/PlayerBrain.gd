@@ -13,7 +13,8 @@
 ##
 ## Depends on: Pseudo3DBall, HeavyPlayerController (as parent node), MoodSystem
 ## (read via player.get_mood() to bias vision/composure/aggression at the
-## decision site — mood never touches the exported attributes themselves).
+## decision site — mood never touches the exported attributes themselves),
+## PitchBoundary (bound via bind_boundary(), used for goalkeeper positioning).
 ## Exposes: evaluate_tactical_action(), calculate_pressure_index(), ball
 ##
 
@@ -32,6 +33,9 @@ extends Node
 @export_range(0.0, 1.0) var formation_ball_weight: float = 0.35
 ## Seconds between decision re-evaluations. Human-scale latency, and cheap.
 @export var decision_interval: float = 0.25
+## True for the goalkeeper — swaps evaluate_tactical_action() for a simple
+## stay-near-goal/chase-goal-area rule instead of the outfield decision tree.
+@export var is_goalkeeper: bool = false
 
 ## Radius inside which an opponent contributes to the pressure index.
 const PRESSURE_RADIUS: float = 180.0
@@ -39,9 +43,12 @@ const PRESSURE_RADIUS: float = 180.0
 const CHASE_RADIUS: float = 220.0
 ## Arrival radius — inside this the player eases off instead of oscillating.
 const ARRIVE_RADIUS: float = 24.0
+## How close the ball must be to the keeper's own goal centre before they chase it.
+const GOALKEEPER_CHASE_RADIUS: float = 200.0
 
 var player: HeavyPlayerController = null
 var ball: Pseudo3DBall = null
+var pitch_boundary: PitchBoundary = null
 var current_action: StringName = &"MaintainFormation"
 
 var _decision_cooldown: float = 0.0
@@ -56,6 +63,12 @@ func _ready() -> void:
 ## The pitch calls this after spawning so the brain knows which ball to track.
 func bind_ball(match_ball: Pseudo3DBall) -> void:
 	ball = match_ball
+
+
+## The pitch calls this after spawning so a goalkeeper's brain can measure
+## distance to its own goal centre.
+func bind_boundary(b: PitchBoundary) -> void:
+	pitch_boundary = b
 
 
 func _physics_process(delta: float) -> void:
@@ -77,6 +90,13 @@ func _physics_process(delta: float) -> void:
 ## deliberately tactical rather than mechanical — the steering layer decides how
 ## to execute them.
 func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
+	if is_goalkeeper:
+		if pitch_boundary != null and ball != null and player != null:
+			var goal_centre: Vector2 = pitch_boundary.get_goal_centre(player.team)
+			if ball.global_position.distance_to(goal_centre) < GOALKEEPER_CHASE_RADIUS:
+				return &"ChaseBall"
+		return &"MaintainFormation"
+
 	var pressure: float = calculate_pressure_index(defenders_nearby)
 
 	# Read base attributes, then layer mood on top. Mood never mutates the

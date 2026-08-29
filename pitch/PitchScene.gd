@@ -167,6 +167,7 @@ func _bind_players() -> void:
 		player.add_to_group(&"players")
 		if player.brain != null:
 			player.brain.bind_ball(ball)
+			player.brain.bind_boundary(boundary)
 		if player.is_user_controlled:
 			hud.bind_active_player(player)
 

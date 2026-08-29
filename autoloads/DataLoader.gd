@@ -10,6 +10,12 @@
 ## Depends on: PlayerData, TeamData, LeagueData.
 ## Exposes: league, get_team(index), get_player(team_index, squad_index)
 ##
+## get_team()/get_player() never return null, even for an index a loaded
+## league doesn't cover (e.g. a custom JSON league with fewer than 11 players
+## on a squad, or a scene that spawns more players than any team defines) —
+## they fall back to a procedurally generated placeholder instead, so callers
+## like PitchScene._bind_players() can iterate 22 players against any league
+## without a null check or a crash.
 
 extends Node
 
@@ -24,17 +30,53 @@ func _ready() -> void:
 
 func get_team(index: int) -> TeamData:
 	if league == null or index < 0 or index >= league.teams.size():
-		push_warning("DataLoader.get_team: index %d out of bounds." % index)
-		return null
+		push_warning("DataLoader.get_team: index %d out of bounds; using a fallback team." % index)
+		return _make_fallback_team(index)
 	return league.teams[index]
 
 
 func get_player(team_index: int, squad_index: int) -> PlayerData:
 	var team: TeamData = get_team(team_index)
-	if team == null or squad_index < 0 or squad_index >= team.squad.size():
-		push_warning("DataLoader.get_player: squad index %d out of bounds for team %d." % [squad_index, team_index])
-		return null
+	if squad_index < 0 or squad_index >= team.squad.size():
+		push_warning("DataLoader.get_player: squad index %d out of bounds for team %d; using a fallback player." % [squad_index, team_index])
+		return _make_fallback_player(squad_index)
 	return team.squad[squad_index]
+
+
+## Placeholder squad used when a team index has no real data — a fresh
+## 11-player squad of _make_fallback_player() entries, so a scene expecting a
+## full team never runs into an out-of-range squad lookup either.
+func _make_fallback_team(index: int) -> TeamData:
+	var team := TeamData.new()
+	team.team_name = "Team %d" % (index + 1)
+	team.team_color = Color(0.5, 0.5, 0.5)
+
+	var squad: Array[PlayerData] = []
+	for i in range(11):
+		squad.append(_make_fallback_player(i))
+	team.squad = squad
+	return team
+
+
+## Sensible neutral defaults — matches the reference stats HeavyPlayerController
+## and PlayerBrain already treat as neutral, so a fallback player behaves like
+## an average pro rather than an edge case.
+func _make_fallback_player(index: int) -> PlayerData:
+	var data := PlayerData.make_default("Player %d" % (index + 1), index + 1, "CM")
+	data.mass = 75.0
+	data.top_speed = 210.0
+	data.acceleration_time = 0.65
+	data.friction_time = 0.35
+	data.turning_penalty = 0.75
+	data.sprint_multiplier = 1.45
+	data.stamina_max = 100.0
+	data.stamina_drain = 18.0
+	data.stamina_recover = 9.0
+	data.vision = 0.6
+	data.composure = 0.6
+	data.aggression = 0.6
+	data.formation_ball_weight = 0.35
+	return data
 
 
 func _load_league() -> void:
