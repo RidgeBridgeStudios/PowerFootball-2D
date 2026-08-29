@@ -25,6 +25,7 @@ signal ball_out_of_bounds(side: String)
 signal foul_committed(fouler: Node, victim: Node, position: Vector2)
 signal match_ended(winner: int)
 signal match_phase_changed(phase: int)
+signal half_time_reached
 
 ## --- Set pieces --------------------------------------------------------------
 

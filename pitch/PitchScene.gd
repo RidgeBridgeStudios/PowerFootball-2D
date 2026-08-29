@@ -18,7 +18,8 @@
 ## Depends on: GameManager, GameEvents, PitchBoundary, Pseudo3DBall,
 ##             HeavyPlayerController, PlayerBrain, SetPieceCoordinator,
 ##             DataLoader, PlayerFactory, RefereeLoader, MatchReferee,
-##             ManagerLoader, ManagerData, ManagerDirector.
+##             ManagerLoader, ManagerData, ManagerDirector, PressOffice,
+##             TouchlineBubble.
 ## Exposes: reset_for_kickoff(), shake_camera(amount)
 ##
 
@@ -51,6 +52,11 @@ var _is_practice_mode: bool = false
 @onready var match_referee: MatchReferee = $MatchReferee
 @onready var _manager_director_a: ManagerDirector = $ManagerDirectorA
 @onready var _manager_director_b: ManagerDirector = $ManagerDirectorB
+@onready var _touchline_bubble: TouchlineBubble = $TouchlineBubble
+
+## PressOffice is a RefCounted press-quote generator — never add_child'd, no
+## scene tree access.
+var _press_office: PressOffice = PressOffice.new()
 
 
 func _ready() -> void:
@@ -60,6 +66,8 @@ func _ready() -> void:
 	GameEvents.goal_scored.connect(_on_goal_scored)
 	GameEvents.match_ended.connect(_on_match_ended)
 	GameEvents.ball_out_of_bounds.connect(_on_ball_out_of_bounds)
+	GameEvents.half_time_reached.connect(_on_half_time_reached)
+	GameEvents.manager_formation_changed.connect(_on_touchline_shift)
 	ball.ball_bounced.connect(_on_ball_bounced)
 	restart_timer.timeout.connect(_on_restart_timer_timeout)
 
@@ -206,11 +214,64 @@ func switch_to_nearest_teammate() -> void:
 	GameEvents.player_switched.emit(best)
 
 
-func _on_goal_scored(_team: int) -> void:
+func _on_goal_scored(scoring_team: int) -> void:
 	ball.freeze()
 	shake_camera(1.0)
 	InputHelper.rumble(0.5, 0.9, 0.35)
 	restart_timer.start(goal_restart_delay)
+	_fire_touchline_goal_shout(scoring_team)
+
+
+## The HOME manager's touchline reaction is always shown — whether their team
+## scored or conceded. The away manager never gets a goal-reaction bubble; the
+## touchline shout is a home-perspective feature.
+func _fire_touchline_goal_shout(scoring_team: int) -> void:
+	var home_data: ManagerData = _manager_director_a.get_data()
+	if home_data == null:
+		return
+
+	var ctx := PressOffice.PressContext.new()
+	var is_home_team: bool = (scoring_team == GameManager.TEAM_A)
+	ctx.event = "touchline_goal" if is_home_team else "touchline_goal_conceded"
+
+	var quote: String = _press_office.generate_quote(home_data, ctx)
+	var display_name: String = home_data.manager_name if home_data.manager_name != "" else "Manager"
+	_touchline_bubble.show_shout(display_name, quote, true)
+
+
+func _on_touchline_shift(team: int, _new_formation: String) -> void:
+	var director: ManagerDirector = _manager_director_a if team == GameManager.TEAM_A else _manager_director_b
+	var data: ManagerData = director.get_data()
+	if data == null:
+		return
+
+	var is_home: bool = (team == GameManager.TEAM_A)
+	var ctx := PressOffice.PressContext.new()
+	ctx.event = "touchline_shift"
+
+	var quote: String = _press_office.generate_quote(data, ctx)
+	var display_name: String = data.manager_name if data.manager_name != "" else "Manager"
+	_touchline_bubble.show_shout(display_name, quote, is_home)
+
+
+## HOME manager's half-time quote only.
+## INTENTIONAL: away team half-time instructions are secret. The player only
+## ever controls the home team, so surfacing the away manager's tactical talk
+## would hand over information the player is not meant to see.
+func _on_half_time_reached() -> void:
+	var home_data: ManagerData = _manager_director_a.get_data()
+	if home_data == null:
+		return
+
+	var ctx := PressOffice.PressContext.new()
+	# Reuse "pre_match" context — it generates motivational mid-match
+	# instructions cleanly without needing a new context type.
+	ctx.event = "pre_match"
+	ctx.opponent_name = _selected_away_team.team_name if _selected_away_team != null else ""
+
+	var quote: String = _press_office.generate_quote(home_data, ctx)
+	var display_name: String = home_data.manager_name if home_data.manager_name != "" else "Manager"
+	_touchline_bubble.show_shout(display_name, quote, true)
 
 
 func _on_restart_timer_timeout() -> void:
