@@ -1,0 +1,71 @@
+# PowerFootball-2D — Static Repository Map
+
+**Godot 4.7 · GDScript 2.0 · Top-Down Football Simulation**
+"Dwarf Fortress with a football." Simple visuals; deep social simulation.
+
+## Vision & Architecture
+
+- **POWERFOOTBALL_MASTER_VISION.md** — Canonical vision, five-layer stack, roadmap, deep systems design, AI-agent protocol
+- **ROADMAP.md** — Tactical `[ ]`/`[x]` feature checklist (5 phases)
+- **CLAUDE.md** — Agent entry point; invariants, boot order, contracts
+
+## Core Rules (Immutable)
+
+- **.claude/rules/godot-47-core.md** — Godot 4.7 syntax; forbidden APIs; scene init contracts
+- **.claude/rules/soccer-physics.md** — Ball physics formulas; collision matrix; kinematic weight rules
+- **.claude/rules/ai-architect.md** — AI time-slicing; zero scene-tree polling; allocation constraints; declarative player spawn
+
+## Spatial & Event System (Choke Points)
+
+- **autoloads/MatchWorldModel.gd** — Spatial position cache; all NPC position reads route here
+- **autoloads/GameEvents.gd** — Signal bus; all inter-system events route here
+- **autoloads/GameManager.gd** — Match phase, score, clock; set piece flow control
+
+## Player & Ball Physics
+
+- **entities/player/HeavyPlayerController.gd** — Kinematic weight model; stamina; input handling
+- **entities/player/PlayerBrain.gd** — Utility-scored AI decisions; decision interval stagger
+- **entities/ball/Pseudo3DBall.gd** — Ball physics; z-axis; shadow rendering; friction model
+
+## Data & Decision Systems
+
+- **shared/PlayerData.gd** — Player attributes, traits (planned), relationships (planned)
+- **shared/ManagerData.gd** — Manager personality traits; formation library; tactics
+- **shared/UtilityMath.gd** — Intercept solver; lane occlusion; sigmoid and lerp helpers
+- **shared/CollisionLayers.gd** — Layer constants; read before any physics work
+
+## Data Import
+
+- **docs/json-schema.md** — Complete schema for player, manager, team, league JSON import; trait bitmasks; relationships
+- **autoloads/DataLoader.gd** — JSON parsing; player/manager/team instantiation
+
+## Static Analysis
+
+- **tools/gdcheck.py** — Static GDScript checker; catches undeclared members, unknown types, Godot 3 APIs
+- **Verify:** `python3 tools/gdcheck.py` (run after every file write)
+
+## Directory Map
+
+| Path | Purpose |
+|---|---|
+| `autoloads/` | Singletons; spatial cache, event bus, game state |
+| `entities/player/` | HeavyPlayerController, brain, state machine, decision trees |
+| `entities/ball/` | Pseudo3DBall, physics solver, possession state |
+| `entities/manager/` | Formation library, director, tactical AI |
+| `entities/referee/` | Match rules, personality-weighted decisions |
+| `shared/` | Data models, math utilities, collision setup |
+| `pitch/` | Field, boundaries, goal zones, markings |
+| `ui/` | HUD, menus, pause, pre-game, screens |
+| `tools/` | Static checkers, dev utilities |
+| `.claude/` | Claude Code configuration, rules, skills |
+| `docs/` | JSON schema, system documentation |
+
+## First Steps for an Agent
+
+1. Read **POWERFOOTBALL_MASTER_VISION.md** (vision, build order, context)
+2. Read **ROADMAP.md** (current priorities)
+3. Check **.claude/rules/** (three constraint files)
+4. Identify target file in **autoloads/**, **entities/**, or **shared/**
+5. Read that file's neighbors and upstream dependencies
+6. Run `python3 tools/gdcheck.py` after every edit
+7. Never cache stale architecture; re-read vision if context drift suspected
