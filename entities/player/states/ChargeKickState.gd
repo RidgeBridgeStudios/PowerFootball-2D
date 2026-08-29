@@ -102,6 +102,16 @@ func _release_kick(player: HeavyPlayerController) -> void:
 		aim = aim.rotated(randf_range(-max_scatter_angle, max_scatter_angle))
 
 	ball.apply_kick(aim * speed + inherited, height, player)
+
+	var action_label: String
+	if is_tap:
+		action_label = "PASS"
+	elif _is_lob:
+		action_label = "LOB SHOT"
+	else:
+		action_label = "SHOT"
+	player.show_action_text(action_label)
+
 	GameEvents.ball_struck.emit(player, speed, charge_ratio)
 
 	if player.is_user_controlled:

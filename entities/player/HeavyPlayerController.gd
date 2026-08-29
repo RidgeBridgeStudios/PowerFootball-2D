@@ -74,6 +74,10 @@ signal possession_lost
 ## player's position in the $Players list, so scenes need no per-instance setup.
 @export var squad_index: int = 0
 
+const ACTION_TEXT_SCENE: PackedScene = preload("res://ui/ActionText.tscn")
+## Minimum seconds between action text spawns (prevents per-frame spam).
+const ACTION_TEXT_COOLDOWN: float = 0.25
+
 const NEUTRAL_MASS: float = 70.0
 ## Below this speed a turn costs nothing — you cannot "bleed momentum" you do
 ## not have, and applying the penalty at rest makes starting off feel mushy.
@@ -101,6 +105,8 @@ var movement_intent: Vector2 = Vector2.ZERO
 ## development; already wired into the sprite offset so aerial states can drive
 ## it without touching rendering code.
 var current_z: float = 0.0
+
+var _action_text_cooldown: float = 0.0
 
 @onready var sprite: Sprite2D = $Sprite2D
 @onready var shadow: Sprite2D = $ShadowSprite2D
@@ -133,6 +139,8 @@ func _physics_process(delta: float) -> void:
 	move_and_slide()
 	_update_facing()
 	_update_visual_anchors()
+	if _action_text_cooldown > 0.0:
+		_action_text_cooldown = maxf(0.0, _action_text_cooldown - delta)
 
 
 ## Recomputes the acceleration/friction constants from the exported tuning
@@ -231,6 +239,20 @@ func get_stamina_ratio() -> float:
 ## World position of the kicking/controlling zone, a little ahead of the body.
 func get_kick_origin() -> Vector2:
 	return global_position + facing_direction * 10.0
+
+
+## Spawns floating action text in world space above this player.
+## Added to the parent (not self) so the text does not rotate with the player.
+func show_action_text(message: String) -> void:
+	if message.is_empty() or _action_text_cooldown > 0.0:
+		return
+	var fx: ActionText = ACTION_TEXT_SCENE.instantiate() as ActionText
+	if fx == null:
+		return
+	get_parent().add_child(fx)
+	fx.global_position = global_position + Vector2(0.0, -28.0)
+	fx.show_text(message)
+	_action_text_cooldown = ACTION_TEXT_COOLDOWN
 
 
 ## The ball currently inside the foot sensor, or null. Duck-typed lookups are

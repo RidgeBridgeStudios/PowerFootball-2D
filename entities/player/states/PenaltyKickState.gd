@@ -80,6 +80,7 @@ func _strike(player: HeavyPlayerController) -> void:
 	var aim: Vector2 = _aim if _aim != Vector2.ZERO else player.facing_direction
 	var speed: float = SHOT_SPEED * FIXED_POWER
 	ball.apply_kick(aim.normalized() * speed, 0.0, player)
+	player.show_action_text("SHOT")
 	GameEvents.ball_struck.emit(player, speed, FIXED_POWER)
 
 	if player.is_user_controlled:
