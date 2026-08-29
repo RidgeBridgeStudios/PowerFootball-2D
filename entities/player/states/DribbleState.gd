@@ -5,13 +5,11 @@
 ## snapped to the player: it is nudged forward with micro-impulses whenever it
 ## drifts inside the foot sensor. Turn sharply or sprint too hard and the ball
 ## runs away from you — that separation is the mechanic, not a bug.
-## Magnetism layer: every physics tick a velocity-correction pull is applied to
-## keep the ball anchored near the carry target (CARRY_OFFSET px ahead of the
-## player), on top of the timed touch impulse below. MAGNET_STRENGTH and
-## MAGNET_BLEND are intentionally strong — better to feel magnetic than to let
-## the ball slip through the body between touches. POSSESSION_DAMPING kills
-## residual ball momentum each tick while possessed. A short POSSESSION_GRACE
-## window prevents jitter-drops when the ball briefly leaves the foot sensor.
+## Magnetism layer: every physics tick a velocity-correction pull keeps the ball
+## at CARRY_OFFSET px ahead of the player along the travel direction. The magnet
+## is intentionally strong — a 10px gap produces a 550 px/s correction so a
+## sprinting player never outruns it. Only lateral/reverse momentum is damped;
+## forward momentum is not braked.
 ##
 ## Depends on: PlayerState, HeavyPlayerController, Pseudo3DBall.
 ## Exposes: the PlayerState interface.
@@ -22,26 +20,29 @@ extends PlayerState
 
 ## --- Magnetism constants ----------------------------------------------------
 
-## Pixels ahead of the player centre the ball is pulled toward.
-const CARRY_OFFSET: float = 18.0
+## Pixels ahead of the player (along travel direction) the ball is pulled toward.
+const CARRY_OFFSET: float = 22.0
 
-## Scales offset-in-pixels to a correction velocity in px/s.
-## At 14.0, a 10 px gap → 140 px/s pull. Deliberately strong.
-const MAGNET_STRENGTH: float = 14.0
+## Scales gap-in-pixels to correction px/s. 55.0 → 550 px/s per 10px gap.
+## Strong enough that even a sprinting player (up to 304 px/s) cannot outrun
+## the correction within a physics tick.
+const MAGNET_STRENGTH: float = 55.0
 
 ## Lerp weight applied per physics tick to blend toward the magnet velocity.
-## 0.55 means ~3 ticks to fully lock the ball to the carry position.
-const MAGNET_BLEND: float = 0.55
+## 0.85 locks the ball onto the carry target within ~1 frame at 60 Hz.
+const MAGNET_BLEND: float = 0.85
 
-## Fraction of the ball's own velocity kept each tick while possessed.
-## 0.72 removes 28%/tick — kills free spin within ~10 frames at 60 Hz.
-const POSSESSION_DAMPING: float = 0.72
+## Fraction of the ball's lateral (perpendicular-to-travel) velocity kept each
+## tick while possessed. Only sideways/reverse drift is damped — forward
+## momentum along the carry direction is left untouched so the magnet never
+## fights the ball's own momentum.
+const LATERAL_DAMPING: float = 0.6
 
 ## Seconds the ball may stay outside the foot sensor before possession drops.
 ## Prevents jitter-drops from momentary physics separations at high speed.
-const POSSESSION_GRACE: float = 0.08
+const POSSESSION_GRACE: float = 0.10
 
-## --- Touch constants (unchanged from previous version) ---------------------
+## --- Touch constants ---------------------------------------------------------
 
 ## Fraction of top speed the touch imparts to the ball.
 ## At 0.60 the ball stays close to the player's feet at a walk and drifts
@@ -122,15 +123,26 @@ func physics_process(player: HeavyPlayerController, delta: float) -> void:
 	if ball == null or ball.is_airborne():
 		return
 
-	# --- Magnetism: runs every tick regardless of touch cooldown -------------
-	# Pseudo3DBall extends CharacterBody2D, so its velocity property is
-	# `velocity` (not RigidBody2D's `linear_velocity`).
+	# --- Carry direction: where the player is physically travelling ----------
+	# Use velocity.normalized() (actual travel) rather than facing_direction
+	# (intent, can lag a frame during a turn). Fall back to facing_direction
+	# at rest, where velocity carries no useful heading.
+	var carry_dir: Vector2 = player.velocity.normalized() \
+		if player.velocity.length() > 10.0 \
+		else player.facing_direction
 
-	var carry_target: Vector2 = player.global_position + player.facing_direction * CARRY_OFFSET
+	var carry_target: Vector2 = player.global_position + carry_dir * CARRY_OFFSET
 	var offset: Vector2 = carry_target - ball.global_position
 
-	# Damp free ball momentum first, then blend toward the magnet pull.
-	ball.velocity *= POSSESSION_DAMPING
+	# --- Selective damping: kill lateral/reverse drift, preserve forward -----
+	# Project the ball's current velocity onto the carry direction; damp only
+	# the perpendicular remainder so the magnet never brakes a ball that is
+	# already rolling the right way.
+	var forward_component: Vector2 = carry_dir * ball.velocity.dot(carry_dir)
+	var lateral_component: Vector2 = ball.velocity - forward_component
+	ball.velocity = forward_component + lateral_component * LATERAL_DAMPING
+
+	# --- Magnet pull: blend toward offset-derived velocity -------------------
 	var pull_velocity: Vector2 = offset * MAGNET_STRENGTH
 	ball.velocity = ball.velocity.lerp(pull_velocity, MAGNET_BLEND)
 
@@ -144,15 +156,15 @@ func physics_process(player: HeavyPlayerController, delta: float) -> void:
 
 	# Push the ball along the running line rather than the stick line: a heavy
 	# player cannot redirect the ball faster than they can redirect themselves.
-	# Blend facing_direction toward the desired intent. At low speed the blend
-	# is 0 — the ball follows the body's current heading. At full pace, up to
-	# 30° of re-direction per touch is allowed, matching how a heavy player
+	# Blend carry_dir toward the desired intent. At low speed the blend is 0 —
+	# the ball follows the body's current heading. At full pace, up to 30° of
+	# re-direction per touch is allowed, matching how a heavy player
 	# realistically redirects the ball.
-	var touch_direction: Vector2 = player.facing_direction
+	var touch_direction: Vector2 = carry_dir
 	if player.movement_intent.length() > 0.05:
 		var desired: Vector2 = player.movement_intent.normalized()
 		var blend: float = clampf(player.get_speed_ratio() * 0.5, 0.0, 0.5)
-		touch_direction = player.facing_direction.lerp(desired, 1.0 - blend).normalized()
+		touch_direction = carry_dir.lerp(desired, 1.0 - blend).normalized()
 
 	var touch_speed: float = player.get_current_top_speed() * TOUCH_SPEED_RATIO
 	if player.is_sprinting:

@@ -79,12 +79,17 @@ func is_in_state(state_name: StringName) -> bool:
 
 
 ## 0.0-1.0 charge for the HUD power meter; 0.0 whenever no kick is winding up.
-## ThrowInState and PenaltyKickState also expose a charge_ratio field (throw
-## distance and runup progress, respectively) so the same meter reads for them.
+## ShotLockState, ThrowInState and PenaltyKickState also expose a charge_ratio
+## field (shot lock-on power, throw distance, and runup progress respectively)
+## so the same meter reads for them.
 func get_charge_ratio() -> float:
 	var charging := current_state as ChargeKickState
 	if charging != null:
 		return charging.charge_ratio
+
+	var locking := current_state as ShotLockState
+	if locking != null:
+		return locking.charge_ratio
 
 	var throwing := current_state as ThrowInState
 	if throwing != null:
@@ -102,6 +107,7 @@ func _register_states() -> void:
 	_states[PlayerState.MOVE] = MoveState.new()
 	_states[PlayerState.DRIBBLE] = DribbleState.new()
 	_states[PlayerState.CHARGE_KICK] = ChargeKickState.new()
+	_states[PlayerState.SHOT_LOCK] = ShotLockState.new()
 	_states[PlayerState.TACKLE] = TackleState.new()
 	_states[PlayerState.AERIAL] = AerialState.new()
 	_states[PlayerState.SET_PIECE_FREEZE] = SetPieceFreezeState.new()
