@@ -13,13 +13,17 @@
 class_name DribbleState
 extends PlayerState
 
-## Fraction of top speed the touch aims to put on the ball. Above 1.0 the ball
-## outruns the player.
-const TOUCH_SPEED_RATIO: float = 1.05
-## Minimum seconds between touches, so the ball is not carried on a rail.
-const TOUCH_INTERVAL: float = 0.22
-## Sprinting pushes the ball further out in front — harder to keep, faster to run onto.
-const SPRINT_TOUCH_BONUS: float = 1.25
+## Fraction of top speed the touch imparts to the ball.
+## At 0.60 the ball stays close to the player's feet at a walk and drifts
+## a comfortable 1–2 player-widths ahead at a sprint.
+const TOUCH_SPEED_RATIO: float = 0.60
+## Seconds between dribble touches. Shorter interval + lower speed ratio =
+## finer ball control. 0.14 s gives ~7 Hz re-touch cadence — tight without
+## feeling "on a rail".
+const TOUCH_INTERVAL: float = 0.14
+## Sprint multiplier on touch speed. The ball still drifts looser at pace,
+## but by one body length — not three.
+const SPRINT_TOUCH_BONUS: float = 1.15
 ## Close control: dribbling costs a slice of top speed.
 const DRIBBLE_SPEED_PENALTY: float = 0.9
 
@@ -67,9 +71,15 @@ func physics_process(player: HeavyPlayerController, delta: float) -> void:
 
 	# Push the ball along the running line rather than the stick line: a heavy
 	# player cannot redirect the ball faster than they can redirect themselves.
+	# Blend facing_direction toward the desired intent. At low speed the blend
+	# is 0 — the ball follows the body's current heading. At full pace, up to
+	# 30° of re-direction per touch is allowed, matching how a heavy player
+	# realistically redirects the ball.
 	var touch_direction: Vector2 = player.facing_direction
 	if player.movement_intent.length() > 0.05:
-		touch_direction = player.movement_intent.normalized()
+		var desired: Vector2 = player.movement_intent.normalized()
+		var blend: float = clampf(player.get_speed_ratio() * 0.5, 0.0, 0.5)
+		touch_direction = player.facing_direction.lerp(desired, 1.0 - blend).normalized()
 
 	var touch_speed: float = player.get_current_top_speed() * TOUCH_SPEED_RATIO
 	if player.is_sprinting:

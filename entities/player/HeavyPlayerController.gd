@@ -110,6 +110,7 @@ var current_z: float = 0.0
 @onready var state_factory: PlayerStateFactory = $PlayerStateFactory
 @onready var brain: PlayerBrain = $PlayerBrain
 @onready var stamina_bar: ProgressBar = $StaminaBar
+@onready var facing_arrow: FacingArrow = $FacingArrow
 
 
 func _ready() -> void:

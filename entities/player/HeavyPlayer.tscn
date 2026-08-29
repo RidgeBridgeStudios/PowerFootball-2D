@@ -1,10 +1,11 @@
-[gd_scene load_steps=9 format=3]
+[gd_scene load_steps=10 format=3]
 
 [ext_resource type="Script" path="res://entities/player/HeavyPlayerController.gd" id="1_controller"]
 [ext_resource type="Texture2D" path="res://art/player.png" id="2_body"]
 [ext_resource type="Texture2D" path="res://art/shadow.png" id="3_shadow"]
 [ext_resource type="Script" path="res://entities/player/PlayerStateFactory.gd" id="4_fsm"]
 [ext_resource type="Script" path="res://entities/player/PlayerBrain.gd" id="5_brain"]
+[ext_resource type="Script" path="res://entities/player/FacingArrow.gd" id="6_facing_arrow"]
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
 radius = 7.0
@@ -26,6 +27,10 @@ texture = ExtResource("3_shadow")
 
 [node name="Sprite2D" type="Sprite2D" parent="."]
 texture = ExtResource("2_body")
+
+[node name="FacingArrow" type="Node2D" parent="."]
+z_index = 1
+script = ExtResource("6_facing_arrow")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]
 shape = SubResource("CircleShape2D_body")
