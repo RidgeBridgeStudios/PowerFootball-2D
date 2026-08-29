@@ -42,6 +42,23 @@ extends Resource
 @export_range(0.0, 1.0) var aggression: float = 0.80
 @export_range(0.0, 1.0) var formation_ball_weight: float = 0.35
 
+## --- Live form and career stats — read by the pre-game screen and pause menu ---
+
+## Per-match rolling form (0.0 - 10.0). Persists across matches; decays
+## slightly each match a player does not feature. Default 6.5 = neutral form.
+@export var form: float = 6.5
+
+## Career goals and assists — incremented by PitchScene after each match.
+@export var career_goals: int = 0
+@export var career_assists: int = 0
+
+## Match rating assigned at end of the last match (0.0 - 10.0). 0.0 = did not play.
+@export var last_match_rating: float = 0.0
+
+## Whether this player is marked as unavailable (injured/suspended) for
+## the next match. The pre-game screen reads this and greys out the card.
+@export var is_unavailable: bool = false
+
 
 static func make_default(player_name: String, shirt_number: int, position_role: String) -> PlayerData:
 	var d := PlayerData.new()
