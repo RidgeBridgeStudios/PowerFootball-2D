@@ -27,6 +27,7 @@
 ##   - get_mood()
 ##   - stamina, facing_direction, is_sprinting, movement_intent
 ##   - signal stamina_state_changed(ratio)
+##   - world_index — this player's slot in MatchWorldModel, or -1 if unregistered
 ##
 
 class_name HeavyPlayerController
@@ -88,6 +89,16 @@ const FACING_UPDATE_SPEED: float = 15.0
 ## Floor on effective acceleration so a full 180 still eventually resolves.
 const MIN_ACCELERATION_RATIO: float = 0.1
 
+## Next MatchWorldModel slot handed out to a spawning player. Players are laid
+## out declaratively as children of $Players in PitchScene.tscn, so there is no
+## spawn loop to number them — each one claims the next slot in its own _ready()
+## instead. MatchWorldModel.unregister_all() resets this between matches.
+static var _auto_index: int = 0
+
+## This player's slot in MatchWorldModel, or -1 if registration was refused
+## (roster already full).
+var world_index: int = -1
+
 var base_acceleration: float = 0.0
 var base_friction: float = 0.0
 
@@ -120,11 +131,34 @@ var _action_text_cooldown: float = 0.0
 
 
 func _ready() -> void:
+	# Last in the physics order: MatchWorldModel (-100) refreshes the spatial
+	# cache, PlayerBrain (0) decides from it, and only then does the body move.
+	process_priority = 100
+
+	_register_with_world_model()
 	_recalculate_movement_curve()
 	_apply_collision_matrix()
 	stamina = stamina_max
 	stamina_state_changed.emit(1.0)
 	GameEvents.player_mood_changed.connect(_on_player_mood_changed)
+
+
+## Claims the next MatchWorldModel slot and tells this player's brain which
+## index it was given, so the brain's frame-stagger and its world-model reads
+## agree on who it is.
+func _register_with_world_model() -> void:
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		push_warning("HeavyPlayerController: MatchWorldModel autoload missing; %s is uncached." % name)
+		return
+
+	world_index = world.register_player(_auto_index, self, team)
+	_auto_index += 1
+
+	if world_index >= 0 and has_node("PlayerBrain"):
+		var player_brain := get_node("PlayerBrain") as PlayerBrain
+		if player_brain != null:
+			player_brain.player_index = world_index
 
 
 func _physics_process(delta: float) -> void:

@@ -98,6 +98,11 @@ func _apply_formation(formation_name: String) -> void:
 		return a.squad_index < b.squad_index
 	team_players.sort_custom(by_squad_index)
 
+	# Collected alongside the direct writes below and published on
+	# GameEvents.formation_anchors_changed, so a brain can react to the new
+	# shape immediately instead of waiting out its decision stagger.
+	var new_anchors: Dictionary = {}
+
 	for i: int in range(team_players.size()):
 		var player: HeavyPlayerController = team_players[i]
 		if player.brain == null:
@@ -109,11 +114,14 @@ func _apply_formation(formation_name: String) -> void:
 
 		var anchor: Vector2 = pitch_centre + offset if _team == GameManager.TEAM_A else pitch_centre - offset
 		player.brain.formation_anchor = anchor
+		new_anchors[player.brain.player_index] = anchor
 
 		# Convenience tag for career mode UI only — does not affect physics.
 		var pdata: PlayerData = player.get_meta(&"player_data", null) as PlayerData
 		if pdata != null:
 			pdata.position_role = slot["role"]
+
+	GameEvents.formation_anchors_changed.emit(_team, new_anchors)
 
 
 func _apply_brain_overrides() -> void:

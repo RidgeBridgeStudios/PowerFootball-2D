@@ -45,15 +45,31 @@ const DRIFT_RATE_STREAK: float = 0.01 / 60.0
 
 ## --- State --------------------------------------------------------------------
 
+## Physics frames between passive-drift updates, matching
+## PlayerBrain.UPDATE_INTERVAL. Drift is a slow per-second ramp, so applying it
+## once every 15 frames with 15 frames' worth of delta is numerically identical
+## to applying it every frame — it just stops 22 mood systems from doing tier
+## comparisons on the same tick.
+const UPDATE_INTERVAL: int = 15
+
 var mood_value: float = 0.5
 var current_tier: Tier = Tier.NORMAL
 var _player: HeavyPlayerController = null
+
+## Phase offset for the drift stagger, taken from the owning player's world
+## model slot so the 22 systems spread across the interval.
+var _stagger_offset: int = 0
+var _frame_counter: int = 0
+## Physics time accumulated since the last drift application.
+var _drift_accumulator: float = 0.0
 
 
 func _ready() -> void:
 	_player = get_parent() as HeavyPlayerController
 	if _player == null:
 		push_error("MoodSystem must be a child of HeavyPlayerController.")
+	else:
+		_stagger_offset = maxi(_player.world_index, 0)
 
 	GameEvents.goal_scored.connect(_on_goal_scored)
 	GameEvents.tackle_won.connect(_on_tackle_won)
@@ -66,11 +82,21 @@ func _physics_process(delta: float) -> void:
 	if not GameManager.is_in_play():
 		return
 
+	# Accumulate every frame, apply on this system's stagger slot, so no drift
+	# time is lost even though the tier comparison runs 15× less often.
+	_drift_accumulator += delta
+	_frame_counter += 1
+	if (_frame_counter + _stagger_offset) % UPDATE_INTERVAL != 0:
+		return
+
+	var elapsed: float = _drift_accumulator
+	_drift_accumulator = 0.0
+
 	match current_tier:
 		Tier.SLUMP:
-			mood_value += DRIFT_RATE_SLUMP * delta
+			mood_value += DRIFT_RATE_SLUMP * elapsed
 		Tier.STREAK:
-			mood_value -= DRIFT_RATE_STREAK * delta
+			mood_value -= DRIFT_RATE_STREAK * elapsed
 		_:
 			return
 

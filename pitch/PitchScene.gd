@@ -498,6 +498,13 @@ func _on_player_switched_for_camera(new_player: Node) -> void:
 
 
 func _bind_players() -> void:
+	# Players register themselves into MatchWorldModel from their own _ready()
+	# (they are declared as children of $Players in the scene, so there is no
+	# spawn loop to number them). The ball has no such hook, so the pitch hands
+	# it over here — before any brain runs a decision tick.
+	if MatchWorldModel.instance != null:
+		MatchWorldModel.instance.register_ball(ball)
+
 	var squad_counts: Dictionary = {}
 
 	for node: Node in players.get_children():
@@ -698,7 +705,20 @@ func _on_restart_timer_timeout() -> void:
 func _on_match_ended(winner: int) -> void:
 	ball.freeze()
 	_log_manager_stats(winner)
+	# The world model is deliberately NOT cleared here: full time is a phase,
+	# not a teardown, and the rematch flow below would restart play against an
+	# empty roster with no spawn pass left to re-register anyone. _exit_tree()
+	# owns the reset instead — it covers this path and practice mode both.
 	# TODO: full-time screen and a rematch flow; for now the pitch simply stops.
+
+
+## Clears the world model roster whenever the match scene goes away, by any
+## route — full time, quitting to the menu, or practice mode, which never
+## reaches _on_match_ended() at all. Without this the next match's players
+## would claim slots from 22 upward and fall off the end of the model.
+func _exit_tree() -> void:
+	if MatchWorldModel.instance != null:
+		MatchWorldModel.instance.unregister_all()
 
 
 ## Writes each team's manager career stats back to ManagerData and persists

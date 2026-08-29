@@ -67,6 +67,16 @@ signal referee_played_on(referee: Node, fouler: Node, victim: Node, position: Ve
 ## Fired by ManagerDirector when a mid-match formation shift occurs.
 signal manager_formation_changed(team: int, new_formation: String)
 
+## Fired by ManagerDirector._apply_formation() every time a team's shape is laid
+## out — at bind time, at each kickoff, and after a tactical shift. `new_anchors`
+## maps PlayerBrain.player_index (int) to that slot's world-space anchor
+## (Vector2). PlayerBrain listens for this so a shape change is steered to on
+## the next frame rather than at the brain's next staggered decision tick.
+##
+## Distinct from manager_formation_changed, which announces *that* the shape
+## changed (for the touchline bubble and HUD) but carries only its name.
+signal formation_anchors_changed(team: int, new_anchors: Dictionary)
+
 ## Fired by PitchScene._log_manager_stats() after every match ends.
 ## Career mode UI connects to this to refresh the manager profile screen.
 signal manager_stats_updated(manager: ManagerData)
