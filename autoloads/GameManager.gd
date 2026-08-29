@@ -44,6 +44,8 @@ var match_time: float = 0.0
 var match_duration: float = 300.0
 ## The team that scored most recently — the pitch uses it to set up the restart.
 var last_scoring_team: int = -1
+## Guards GameEvents.half_time_reached so it only fires once per match.
+var _half_time_fired: bool = false
 
 ## --- Set pieces --------------------------------------------------------------
 
@@ -64,6 +66,9 @@ func _process(delta: float) -> void:
 		return
 
 	match_time += delta
+	if not _half_time_fired and match_time >= match_duration * 0.5:
+		_half_time_fired = true
+		GameEvents.half_time_reached.emit()
 	if match_time >= match_duration:
 		match_time = match_duration
 		_end_match()
@@ -73,6 +78,7 @@ func start_match() -> void:
 	match_time = 0.0
 	score = [0, 0]
 	last_scoring_team = -1
+	_half_time_fired = false
 	set_phase(MatchPhase.KICKOFF)
 	GameEvents.kickoff_started.emit()
 
@@ -172,5 +178,6 @@ func _end_match() -> void:
 	set_phase(MatchPhase.FULL_TIME)
 	GameEvents.match_ended.emit(get_leading_team())
 
-	# TODO: half time. The phase exists in the enum but nothing drives it yet —
-	# split match_duration in two, swap ends, and emit HALF_TIME at the midpoint.
+	# TODO: half time. GameEvents.half_time_reached now fires at the midpoint
+	# (see _process), but MatchPhase.HALF_TIME itself is still unused — nothing
+	# pauses play or swaps ends yet.

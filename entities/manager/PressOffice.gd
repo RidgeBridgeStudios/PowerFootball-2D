@@ -18,6 +18,7 @@ extends RefCounted
 
 class PressContext:
 	## "post_match"  "pre_match"  "transfer_speculation"  "injury_update"
+	## "touchline_goal"  "touchline_goal_conceded"  "touchline_shift"
 	var event: String = "post_match"
 	## "win"  "loss"  "draw"
 	var match_result: String = "draw"
@@ -138,6 +139,76 @@ const INJURY_BASE: Array[String] = [
 const LOYALIST_INJURY_APPEND: String = "The most important thing is that he recovers fully. Results can wait."
 const DISCIPLINARIAN_INJURY_APPEND: String = "The others know what's expected. The standard doesn't drop."
 
+## --- Touchline: goal scored --------------------------------------------------
+
+const TOUCHLINE_GOAL_BASE: Array[String] = [
+	"YES! Come on!",
+	"That's it! Keep pushing!",
+	"Beautiful! Don't stop now!",
+	"Get back in position! Reset!",
+]
+const HOTHEAD_GOAL_PREPEND: Array[String] = [
+	"THAT'S what I'm talking about!",
+	"Finally! NOW we play!",
+]
+const VISIONARY_GOAL_APPEND: Array[String] = [
+	"Exactly as we drilled it. Exactly.",
+	"The movement created that. Remember it.",
+]
+const PRAGMATIST_GOAL_REPLACE: Array[String] = [
+	"Good. Stay organised.",
+	"One more. Same focus.",
+]
+const SENTIMENTAL_GOAL_APPEND: Array[String] = [
+	"This crowd is unbelievable. Feed off them!",
+	"For each other! Always for each other!",
+]
+const VOLATILE_GOAL_EFFUSIVE: String = "INCREDIBLE! I love this group! I LOVE this group!"
+const VOLATILE_GOAL_MUTED: String = "Good. Don't celebrate too long."
+const DISCIPLINARIAN_GOAL_APPEND: String = "Back in shape. NOW. We don't switch off."
+
+## --- Touchline: goal conceded ------------------------------------------------
+
+const TOUCHLINE_CONCEDED_BASE: Array[String] = [
+	"Wake UP! That was unacceptable!",
+	"Hold the line! Stay compact!",
+	"Concentrate! Defensive shape, now!",
+	"Don't panic. Stick to the plan.",
+]
+const HOTHEAD_CONCEDED_REPLACE: Array[String] = [
+	"That is EMBARRASSING! Sort yourselves out!",
+	"How?! HOW does that happen?!",
+]
+const LOYALIST_CONCEDED_APPEND: String = "I believe in you. Fix it together."
+const DISCIPLINARIAN_CONCEDED_REPLACE: Array[String] = [
+	"Concentration. Shape. Do your jobs.",
+	"That will not happen again. I promise you that.",
+]
+const IDEALIST_CONCEDED_APPEND: String = "Our way. Keep playing our way."
+const VOLATILE_CONCEDED_FURIOUS: String = "That was SOFT. Completely soft. Unacceptable."
+const VOLATILE_CONCEDED_CALM: String = "It's fine. Breathe. We've been here before."
+
+## --- Touchline: tactical shift -----------------------------------------------
+
+const TOUCHLINE_SHIFT_BASE: Array[String] = [
+	"New shape! Everyone adjust!",
+	"Switch now! You know the positions!",
+	"Formation change! Trust the system!",
+]
+const VISIONARY_SHIFT_APPEND: Array[String] = [
+	"This was always the plan for this moment.",
+	"We rehearsed this. Execute it.",
+]
+const PRAGMATIST_SHIFT_REPLACE: Array[String] = [
+	"Adapt or lose. Simple.",
+	"New plan. Same commitment.",
+]
+const HOTHEAD_SHIFT_PREPEND: Array[String] = [
+	"Right, enough of this —",
+	"I've seen enough —",
+]
+const IDEALIST_SHIFT_APPEND: String = "The shape changes. The principles never do."
+
 
 func generate_quote(data: ManagerData, ctx: PressContext) -> String:
 	if data == null or ctx == null:
@@ -158,6 +229,12 @@ func generate_quote(data: ManagerData, ctx: PressContext) -> String:
 			return _transfer_speculation(data, ctx)
 		"injury_update":
 			return _injury_update(data, ctx)
+		"touchline_goal":
+			return _touchline_goal(data, ctx)
+		"touchline_goal_conceded":
+			return _touchline_conceded(data, ctx)
+		"touchline_shift":
+			return _touchline_shift(data, ctx)
 		_:
 			return ""
 
@@ -271,6 +348,63 @@ func _injury_update(data: ManagerData, ctx: PressContext) -> String:
 		append.append(LOYALIST_INJURY_APPEND)
 	if data.has_trait(16): # Disciplinarian
 		append.append(DISCIPLINARIAN_INJURY_APPEND)
+
+	return _assemble(prepend, base, append)
+
+
+func _touchline_goal(data: ManagerData, _ctx: PressContext) -> String:
+	var prepend: String = ""
+	var base: String = _pick(TOUCHLINE_GOAL_BASE)
+	var append: Array[String] = []
+
+	if data.has_trait(1): # HotHead
+		prepend = _pick(HOTHEAD_GOAL_PREPEND)
+	if data.has_trait(4): # Pragmatist
+		base = _pick(PRAGMATIST_GOAL_REPLACE)
+	if data.has_trait(8): # Visionary
+		append.append(_pick(VISIONARY_GOAL_APPEND))
+	if data.has_trait(16): # Disciplinarian
+		append.append(DISCIPLINARIAN_GOAL_APPEND)
+	if data.has_trait(64): # Sentimental
+		append.append(_pick(SENTIMENTAL_GOAL_APPEND))
+	if data.has_trait(256): # Volatile
+		base = VOLATILE_GOAL_EFFUSIVE if randf() < 0.6 else VOLATILE_GOAL_MUTED
+
+	return _assemble(prepend, base, append)
+
+
+func _touchline_conceded(data: ManagerData, _ctx: PressContext) -> String:
+	var prepend: String = ""
+	var base: String = _pick(TOUCHLINE_CONCEDED_BASE)
+	var append: Array[String] = []
+
+	if data.has_trait(1): # HotHead
+		base = _pick(HOTHEAD_CONCEDED_REPLACE)
+	if data.has_trait(2): # Loyalist
+		append.append(LOYALIST_CONCEDED_APPEND)
+	if data.has_trait(16): # Disciplinarian
+		base = _pick(DISCIPLINARIAN_CONCEDED_REPLACE)
+	if data.has_trait(256): # Volatile
+		base = VOLATILE_CONCEDED_FURIOUS if randf() < 0.5 else VOLATILE_CONCEDED_CALM
+	if data.has_trait(512): # Idealist
+		append.append(IDEALIST_CONCEDED_APPEND)
+
+	return _assemble(prepend, base, append)
+
+
+func _touchline_shift(data: ManagerData, _ctx: PressContext) -> String:
+	var prepend: String = ""
+	var base: String = _pick(TOUCHLINE_SHIFT_BASE)
+	var append: Array[String] = []
+
+	if data.has_trait(1): # HotHead
+		prepend = _pick(HOTHEAD_SHIFT_PREPEND)
+	if data.has_trait(4): # Pragmatist
+		base = _pick(PRAGMATIST_SHIFT_REPLACE)
+	if data.has_trait(8): # Visionary
+		append.append(_pick(VISIONARY_SHIFT_APPEND))
+	if data.has_trait(512): # Idealist
+		append.append(IDEALIST_SHIFT_APPEND)
 
 	return _assemble(prepend, base, append)
 
