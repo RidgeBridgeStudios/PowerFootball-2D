@@ -61,47 +61,78 @@ team = 0
 
 [node name="PlayerBrain" parent="Players/PlayerA_GK"]
 is_goalkeeper = true
+role = 3
 
 [node name="PlayerA_LB" parent="Players" instance=ExtResource("6_player")]
 position = Vector2(-520, 280)
 team = 0
 
+[node name="PlayerBrain" parent="Players/PlayerA_LB"]
+role = 2
+
 [node name="PlayerA_CB1" parent="Players" instance=ExtResource("6_player")]
 position = Vector2(-520, 90)
 team = 0
+
+[node name="PlayerBrain" parent="Players/PlayerA_CB1"]
+role = 2
 
 [node name="PlayerA_CB2" parent="Players" instance=ExtResource("6_player")]
 position = Vector2(-520, -90)
 team = 0
 
+[node name="PlayerBrain" parent="Players/PlayerA_CB2"]
+role = 2
+
 [node name="PlayerA_RB" parent="Players" instance=ExtResource("6_player")]
 position = Vector2(-520, -280)
 team = 0
+
+[node name="PlayerBrain" parent="Players/PlayerA_RB"]
+role = 2
 
 [node name="PlayerA_LM" parent="Players" instance=ExtResource("6_player")]
 position = Vector2(-260, 220)
 team = 0
 
+[node name="PlayerBrain" parent="Players/PlayerA_LM"]
+role = 1
+
 [node name="PlayerA_CM" parent="Players" instance=ExtResource("6_player")]
 position = Vector2(-260, 0)
 team = 0
+
+[node name="PlayerBrain" parent="Players/PlayerA_CM"]
+role = 1
 
 [node name="PlayerA_RM" parent="Players" instance=ExtResource("6_player")]
 position = Vector2(-260, -220)
 team = 0
 
+[node name="PlayerBrain" parent="Players/PlayerA_RM"]
+role = 1
+
 [node name="PlayerA_LW" parent="Players" instance=ExtResource("6_player")]
 position = Vector2(60, 260)
 team = 0
+
+[node name="PlayerBrain" parent="Players/PlayerA_LW"]
+role = 0
 
 [node name="PlayerA_ST" parent="Players" instance=ExtResource("6_player")]
 position = Vector2(60, 0)
 team = 0
 is_user_controlled = true
 
+[node name="PlayerBrain" parent="Players/PlayerA_ST"]
+role = 0
+
 [node name="PlayerA_RW" parent="Players" instance=ExtResource("6_player")]
 position = Vector2(60, -260)
 team = 0
+
+[node name="PlayerBrain" parent="Players/PlayerA_RW"]
+role = 0
 
 [node name="PlayerB_GK" parent="Players" instance=ExtResource("6_player")]
 modulate = Color(1, 0.65, 0.55, 1)
@@ -110,56 +141,87 @@ team = 1
 
 [node name="PlayerBrain" parent="Players/PlayerB_GK"]
 is_goalkeeper = true
+role = 3
 
 [node name="PlayerB_LB" parent="Players" instance=ExtResource("6_player")]
 modulate = Color(1, 0.65, 0.55, 1)
 position = Vector2(520, 280)
 team = 1
 
+[node name="PlayerBrain" parent="Players/PlayerB_LB"]
+role = 2
+
 [node name="PlayerB_CB1" parent="Players" instance=ExtResource("6_player")]
 modulate = Color(1, 0.65, 0.55, 1)
 position = Vector2(520, 90)
 team = 1
+
+[node name="PlayerBrain" parent="Players/PlayerB_CB1"]
+role = 2
 
 [node name="PlayerB_CB2" parent="Players" instance=ExtResource("6_player")]
 modulate = Color(1, 0.65, 0.55, 1)
 position = Vector2(520, -90)
 team = 1
 
+[node name="PlayerBrain" parent="Players/PlayerB_CB2"]
+role = 2
+
 [node name="PlayerB_RB" parent="Players" instance=ExtResource("6_player")]
 modulate = Color(1, 0.65, 0.55, 1)
 position = Vector2(520, -280)
 team = 1
+
+[node name="PlayerBrain" parent="Players/PlayerB_RB"]
+role = 2
 
 [node name="PlayerB_LM" parent="Players" instance=ExtResource("6_player")]
 modulate = Color(1, 0.65, 0.55, 1)
 position = Vector2(260, 220)
 team = 1
 
+[node name="PlayerBrain" parent="Players/PlayerB_LM"]
+role = 1
+
 [node name="PlayerB_CM" parent="Players" instance=ExtResource("6_player")]
 modulate = Color(1, 0.65, 0.55, 1)
 position = Vector2(260, 0)
 team = 1
+
+[node name="PlayerBrain" parent="Players/PlayerB_CM"]
+role = 1
 
 [node name="PlayerB_RM" parent="Players" instance=ExtResource("6_player")]
 modulate = Color(1, 0.65, 0.55, 1)
 position = Vector2(260, -220)
 team = 1
 
+[node name="PlayerBrain" parent="Players/PlayerB_RM"]
+role = 1
+
 [node name="PlayerB_LW" parent="Players" instance=ExtResource("6_player")]
 modulate = Color(1, 0.65, 0.55, 1)
 position = Vector2(-60, 260)
 team = 1
+
+[node name="PlayerBrain" parent="Players/PlayerB_LW"]
+role = 0
 
 [node name="PlayerB_ST" parent="Players" instance=ExtResource("6_player")]
 modulate = Color(1, 0.65, 0.55, 1)
 position = Vector2(-60, 0)
 team = 1
 
+[node name="PlayerBrain" parent="Players/PlayerB_ST"]
+role = 0
+
 [node name="PlayerB_RW" parent="Players" instance=ExtResource("6_player")]
 modulate = Color(1, 0.65, 0.55, 1)
 position = Vector2(-60, -260)
 team = 1
+
+[node name="PlayerBrain" parent="Players/PlayerB_RW"]
+role = 0
 
 [node name="MatchCamera" type="Camera2D" parent="."]
 zoom = Vector2(0.52, 0.52)
