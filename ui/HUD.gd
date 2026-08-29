@@ -36,6 +36,7 @@ var _wall_hint_tween: Tween = null
 
 @onready var score_label: Label = $Root/TopBar/ScoreLabel
 @onready var clock_label: Label = $Root/TopBar/ClockLabel
+@onready var camera_mode_label: Label = $Root/CameraModeLabel
 @onready var status_label: Label = $Root/StatusLabel
 @onready var power_meter: ProgressBar = $Root/PowerMeter
 @onready var set_piece_banner: Label = $Root/SetPieceBanner
@@ -101,6 +102,12 @@ func enter_practice_mode() -> void:
 
 	score_label.visible = false
 	clock_label.visible = false
+
+
+## Called by PitchScene (via MatchCamera.camera_mode_changed) whenever the
+## camera mode changes, so the player always sees which mode is active.
+func set_camera_mode_label(mode_name: String) -> void:
+	camera_mode_label.text = "CAM: " + mode_name
 
 
 ## Called by PitchScene whenever the GK active/frozen toggle changes.

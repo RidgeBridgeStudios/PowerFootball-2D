@@ -105,6 +105,7 @@ func _setup_normal_match() -> void:
 	restart_timer.timeout.connect(_on_restart_timer_timeout)
 
 	_bind_players()
+	_bind_camera(hud.active_player)
 	_set_piece_coordinator.bind(ball, boundary, players)
 
 	var team_a_name: String = _selected_home_team.team_name if _selected_home_team != null else (DataLoader.get_team(GameManager.TEAM_A).team_name if DataLoader.league != null else "Team A")
@@ -206,6 +207,7 @@ func _setup_practice_arena() -> void:
 	hud.bind_active_player(_practice_human)
 	hud.enter_practice_mode()
 	GameEvents.player_switched.emit(_practice_human)
+	_bind_camera(_practice_human)
 
 	# Practice-only handlers. The normal _on_goal_scored/_on_ball_out_of_bounds
 	# are deliberately never connected here — they'd run a full kickoff ceremony.
@@ -387,18 +389,14 @@ func reset_for_kickoff() -> void:
 
 
 ## Camera feel. Kept here deliberately small.
-## TODO: extract into a CameraRig node alongside dynamic zoom (pull out when play
-## is stretched, push in near the box) once there are more than two players.
 func shake_camera(amount: float) -> void:
 	_shake_amount = minf(_shake_amount + amount, 1.0)
 
 
+## Position and zoom are owned by MatchCamera.gd (the three-mode controller
+## bound in _bind_camera()); this only layers screen-shake on top via offset,
+## which MatchCamera never touches.
 func _update_camera(delta: float) -> void:
-	# Follow the ball, damped, so the pitch stays readable and the camera never
-	# snaps. The high-angle view is otherwise static by design.
-	var target: Vector2 = ball.global_position.lerp(boundary.get_centre_spot(), 0.35)
-	camera.global_position = camera.global_position.lerp(target, 1.0 - exp(-3.0 * delta))
-
 	if _shake_amount <= 0.0:
 		camera.offset = Vector2.ZERO
 		return
@@ -406,6 +404,36 @@ func _update_camera(delta: float) -> void:
 	_shake_amount = maxf(_shake_amount - shake_decay * delta * _shake_amount, 0.0)
 	var magnitude: float = shake_strength * _shake_amount
 	camera.offset = Vector2(randf_range(-magnitude, magnitude), randf_range(-magnitude, magnitude))
+
+
+## Wires MatchCamera to the ball, pitch bounds, and the currently human-
+## controlled player, and keeps the human reference current across
+## GameEvents.player_switched so DYNAMIC/BALL_FOLLOW keep tracking the right
+## player after a switch.
+func _bind_camera(human: HeavyPlayerController) -> void:
+	var cam := camera as MatchCamera
+	if cam == null:
+		return
+
+	cam.bind_ball(ball)
+	cam.bind_human_player(human)
+	cam.bind_pitch(boundary)
+
+	if not cam.camera_mode_changed.is_connected(hud.set_camera_mode_label):
+		cam.camera_mode_changed.connect(hud.set_camera_mode_label)
+	hud.set_camera_mode_label(cam.get_mode_name())
+
+	if not GameEvents.player_switched.is_connected(_on_player_switched_for_camera):
+		GameEvents.player_switched.connect(_on_player_switched_for_camera)
+
+
+## GameEvents.player_switched carries a plain Node; MatchCamera.bind_human_player
+## wants a Node2D, so this narrows it rather than connecting the signal straight
+## to the bind method.
+func _on_player_switched_for_camera(new_player: Node) -> void:
+	var cam := camera as MatchCamera
+	if cam != null:
+		cam.bind_human_player(new_player as Node2D)
 
 
 func _bind_players() -> void:
