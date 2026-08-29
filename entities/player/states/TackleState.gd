@@ -30,6 +30,15 @@ const DISPOSSESS_IMPULSE: float = 150.0
 ## foul rather than a clean whiff — a proxy for "the challenge took the man".
 const FOUL_CONTACT_RADIUS: float = 40.0
 
+## Minimum dot product (tackler facing_direction · direction_to_ball) for the
+## challenge to be considered aimed at the ball.
+## 0.42 ≈ cos(65°) — within a 65° half-cone. Wider than this is a side-lunge.
+const MIN_FACING_DOT: float = 0.42
+
+## Dot product below which a non-facing challenge is always a foul.
+## -0.10 ≈ cos(96°) — clearly back-facing; no "aggression saves you" clause.
+const BACK_TACKLE_FOUL_DOT: float = -0.10
+
 var _elapsed: float = 0.0
 var _resolved: bool = false
 var _foul_checked: bool = false
@@ -77,6 +86,21 @@ func _try_win_ball(player: HeavyPlayerController) -> bool:
 	if ball == null or ball.is_airborne():
 		return false
 
+	# ── Facing check ──────────────────────────────────────────────────────
+	# The tackler must be roughly aimed at the ball. A lunge from the side or
+	# behind reaches the man, not the ball — that is a foul, not a tackle.
+	var facing_dot: float = player.get_facing_dot(ball.global_position)
+
+	if facing_dot < MIN_FACING_DOT:
+		# Not aimed at the ball. Call the foul check now (inside the live
+		# window) so it is not called a second time by the post-window path
+		# in process(). Do NOT set _resolved — fall through to RECOVERY.
+		if not _foul_checked:
+			_foul_checked = true
+			_check_mistimed_foul(player, facing_dot)
+		return false
+
+	# ── Existing win-ball path ─────────────────────────────────────────────
 	var loser: Node2D = ball.possessor
 	ball.apply_kick(player.facing_direction * DISPOSSESS_IMPULSE, 0.0, player)
 	ball.set_possessor(player)
@@ -90,14 +114,35 @@ func _try_win_ball(player: HeavyPlayerController) -> bool:
 	return true
 
 
-func _check_mistimed_foul(player: HeavyPlayerController) -> void:
+## Called when a challenge missed or was not aimed at the ball.
+## facing_dot: the dot product stored by _try_win_ball (or 0.0 from the
+## post-window timeout path in process(), where no facing data was captured).
+func _check_mistimed_foul(
+		player: HeavyPlayerController,
+		facing_dot: float = 0.0) -> void:
 	var victim: HeavyPlayerController = _find_nearby_opponent(player)
 	if victim == null:
 		return
-	GameEvents.foul_committed.emit(player, victim, player.global_position)
-	# TODO: weight this by the tackler's aggression/composure and the approach
-	# angle once PlayerBrain exposes them, so fouls scale with attributes
-	# rather than being a flat proximity check.
+
+	# A fully back-facing challenge is always a foul — no attribute saves it.
+	if facing_dot < BACK_TACKLE_FOUL_DOT:
+		GameEvents.foul_committed.emit(player, victim, player.global_position)
+		return
+
+	# Side-on misses: foul probability scales with how off-angle the challenge
+	# was, reduced by the aggression attribute (aggressive players are better
+	# at last-ditch side challenges).
+	var brain: PlayerBrain = player.get_node_or_null("PlayerBrain") as PlayerBrain
+	var aggression: float = brain.aggression_attribute if brain != null else 0.5
+
+	# side_factor: 0.0 = perfectly aimed (MIN_FACING_DOT), 1.0 = side-on (dot ≤ 0)
+	var side_factor: float = clampf(1.0 - facing_dot / MIN_FACING_DOT, 0.0, 1.0)
+	var foul_probability: float = side_factor * (1.0 - aggression * 0.4)
+
+	var rng := RandomNumberGenerator.new()
+	rng.randomize()
+	if rng.randf() < foul_probability:
+		GameEvents.foul_committed.emit(player, victim, player.global_position)
 
 
 func _find_nearby_opponent(player: HeavyPlayerController) -> HeavyPlayerController:
