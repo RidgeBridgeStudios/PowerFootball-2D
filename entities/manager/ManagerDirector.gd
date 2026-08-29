@@ -37,6 +37,18 @@ var _live_pressing: float = 0.5
 ## Tracks how many goals have been conceded this match (for HotHead).
 var _goals_conceded: int = 0
 
+## Per-role formation_ball_weight band that tempo is lerped across. Keeps
+## defenders holding their line and attackers pushing up at any tempo
+## setting, instead of tempo flattening every role to the same drift —
+## the goalkeeper's band is fixed narrow since team tempo shouldn't drag
+## the keeper out of position.
+const _BALL_WEIGHT_RANGE_BY_ROLE: Dictionary = {
+	PlayerBrain.Role.OUTFIELD_DEFENDER: Vector2(0.05, 0.25),
+	PlayerBrain.Role.OUTFIELD_MIDFIELDER: Vector2(0.15, 0.45),
+	PlayerBrain.Role.OUTFIELD_ATTACKER: Vector2(0.25, 0.65),
+	PlayerBrain.Role.GOALKEEPER: Vector2(0.05, 0.05),
+}
+
 
 func bind(data: ManagerData, team: int, players_node: Node2D, boundary: PitchBoundary) -> void:
 	_data = data
@@ -118,8 +130,12 @@ func _apply_brain_overrides() -> void:
 		if brain == null:
 			continue
 
-		# a) Tempo -> formation_ball_weight.
-		brain.formation_ball_weight = lerpf(0.15, 0.65, _data.tempo)
+		# a) Tempo -> formation_ball_weight, scaled within this player's role
+		# band so tempo never flattens defenders and attackers to the same
+		# drift.
+		var weight_range: Vector2 = _BALL_WEIGHT_RANGE_BY_ROLE.get(
+			brain.role, Vector2(0.15, 0.65))
+		brain.formation_ball_weight = lerpf(weight_range.x, weight_range.y, _data.tempo)
 
 		# b) Live pressing -> aggression + decision_interval.
 		brain.aggression_attribute = clampf(
