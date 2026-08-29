@@ -78,6 +78,17 @@ var _is_practice_mode: bool = false
 @onready var _manager_director_b: ManagerDirector = $ManagerDirectorB
 @onready var _touchline_bubble: TouchlineBubble = $TouchlineBubble
 @onready var minimap: Minimap = $Minimap/MapArea
+@onready var pregame: PreGameScreen = $PreGameScreen
+@onready var pause_menu: PauseMenu = $PauseMenu
+
+## Working lineup/formation data for the pause menu. Built once the pre-game
+## screen confirms; null in practice mode, where neither UI is shown.
+var _mgmt_a: TeamManagementData = null
+var _mgmt_b: TeamManagementData = null
+## The human-controlled player whose input is suspended while the pause menu
+## is open — see _open_pause_menu() for why this, rather than the
+## MatchPhase guard alone, is what actually stops them moving.
+var _paused_human: HeavyPlayerController = null
 
 ## PressOffice is a RefCounted press-quote generator — never add_child'd, no
 ## scene tree access.
@@ -94,8 +105,20 @@ func _ready() -> void:
 		_setup_normal_match()
 
 
-## The full-match setup path — unchanged from the original _ready() body.
+## The full-match setup path. Everything that used to run straight through in
+## _ready() now waits behind the pre-game screen: it shows the lineup/formation
+## UI first and defers the rest — including GameManager.start_match() — to
+## _on_pregame_confirmed(), fired once via GameEvents.pregame_confirmed.
 func _setup_normal_match() -> void:
+	pregame.setup()
+	pregame.show()
+	GameEvents.pregame_confirmed.connect(_on_pregame_confirmed, CONNECT_ONE_SHOT)
+	GameEvents.pause_closed.connect(_on_pause_closed)
+
+
+## Everything the original _setup_normal_match() body did, now deferred until
+## the player has set lineups/formations on the pre-game screen and confirmed.
+func _on_pregame_confirmed() -> void:
 	GameEvents.goal_scored.connect(_on_goal_scored)
 	GameEvents.match_ended.connect(_on_match_ended)
 	GameEvents.ball_out_of_bounds.connect(_on_ball_out_of_bounds)
@@ -117,6 +140,9 @@ func _setup_normal_match() -> void:
 	var manager_b: ManagerData = ManagerLoader.get_or_assign_manager(team_b_name)
 	_manager_director_a.bind(manager_a, GameManager.TEAM_A, players, boundary)
 	_manager_director_b.bind(manager_b, GameManager.TEAM_B, players, boundary)
+
+	_mgmt_a = TeamManagementData.from_team(DataLoader.get_team(GameManager.TEAM_A), manager_a)
+	_mgmt_b = TeamManagementData.from_team(DataLoader.get_team(GameManager.TEAM_B), manager_b)
 
 	reset_for_kickoff()
 	GameManager.start_match()
@@ -222,6 +248,41 @@ func _practice_keeper_spot() -> Vector2:
 	var goal_centre: Vector2 = boundary.get_goal_centre(GameManager.TEAM_B)
 	var direction: float = -1.0 if GameManager.TEAM_B == 0 else 1.0
 	return goal_centre - Vector2(direction * PRACTICE_KEEPER_LINE_OFFSET, 0.0)
+
+
+## Only wired up for a full match — practice mode never shows either UI, so
+## the pregame/pause_menu nodes stay hidden and _mgmt_a/_mgmt_b stay null there.
+func _input(event: InputEvent) -> void:
+	if _is_practice_mode or _mgmt_a == null:
+		return
+	if event.is_action_pressed(&"ui_pause") and GameManager.is_in_play():
+		_open_pause_menu()
+		get_viewport().set_input_as_handled()
+
+
+## Opens the pause menu and freezes physics. GameManager.set_phase() away from
+## IN_PLAY is what stops PlayerBrain and MoodSystem acting on every CPU player
+## (both already guard on GameManager.is_in_play()); it does nothing for the
+## human-controlled player, whose _physics_process reads raw input regardless
+## of match phase, so that player is additionally handed to the CPU guard by
+## flipping is_user_controlled off for the duration of the pause. The ball has
+## no such guard either — same as a goal celebration or half time, it is
+## stopped with an explicit freeze() rather than a phase check.
+func _open_pause_menu() -> void:
+	_paused_human = hud.active_player
+	if is_instance_valid(_paused_human):
+		_paused_human.is_user_controlled = false
+	ball.freeze()
+	GameManager.set_phase(GameManager.MatchPhase.PREGAME)
+	pause_menu.open(_mgmt_a, _mgmt_b)
+
+
+func _on_pause_closed() -> void:
+	if is_instance_valid(_paused_human):
+		_paused_human.is_user_controlled = true
+	_paused_human = null
+	ball.unfreeze()
+	GameManager.set_phase(GameManager.MatchPhase.IN_PLAY)
 
 
 func _process(delta: float) -> void:
@@ -451,8 +512,14 @@ func _bind_players() -> void:
 			hud.bind_active_player(player)
 
 		var anchor: Vector2 = player.brain.formation_anchor if player.brain != null else player.global_position
-		player.squad_index = squad_counts.get(player.team, 0)
-		squad_counts[player.team] = player.squad_index + 1
+		var slot: int = squad_counts.get(player.team, 0)
+		squad_counts[player.team] = slot + 1
+
+		# The pre-game screen / pause menu reorder the starting XI into
+		# TeamData.lineup_indices; a squad with no lineup set yet (practice
+		# mode, or a standalone editor run) falls back to raw slot order.
+		var team: TeamData = DataLoader.get_team(player.team)
+		player.squad_index = team.lineup_indices[slot] if team.lineup_indices.size() == 11 else slot
 		PlayerFactory.apply(player, DataLoader.get_player(player.team, player.squad_index), anchor)
 
 	minimap.bind(players, boundary)

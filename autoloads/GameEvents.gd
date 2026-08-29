@@ -70,3 +70,15 @@ signal manager_formation_changed(team: int, new_formation: String)
 ## Fired by PitchScene._log_manager_stats() after every match ends.
 ## Career mode UI connects to this to refresh the manager profile screen.
 signal manager_stats_updated(manager: ManagerData)
+
+## --- Team management (pre-game screen and pause menu) -----------------------
+
+## Emitted by PreGameScreen once the user clicks Kick Off; match start is
+## deferred until this fires.
+signal pregame_confirmed
+## Emitted by PauseMenu when the player opens or closes the pause.
+signal pause_opened
+signal pause_closed
+signal substitution_made(team: int, player_out_idx: int, player_in_idx: int)
+signal formation_changed(team: int, new_formation: String)
+signal lineup_changed(team: int)
