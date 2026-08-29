@@ -62,6 +62,13 @@ var _decision_cooldown: float = 0.0
 ## get_target_position() is called from _steer_for_action() every physics
 ## frame, so it reads this cache instead of recomputing it each frame.
 var _cached_space_target: Vector2 = Vector2.ZERO
+## Teammate targeted by the last "Pass" decision. Cleared once the pass is
+## struck or the decision changes away from passing.
+var _cached_pass_target: HeavyPlayerController = null
+## Predicted ball-intercept point cached from the last decision tick, used
+## while chasing/clearing so steering doesn't recompute the trajectory every
+## physics frame.
+var _cached_intercept: Vector2 = Vector2.ZERO
 
 
 func _ready() -> void:
@@ -93,6 +100,8 @@ func _physics_process(delta: float) -> void:
 		_decision_cooldown = decision_interval
 		current_action = evaluate_tactical_action(_find_nearby_opponents())
 		_cached_space_target = _find_open_space_target()
+		if current_action == &"ChaseBall" or current_action == &"PanicClear":
+			_cached_intercept = _predict_intercept_position()
 
 	player.movement_intent = _steer_for_action()
 
@@ -103,9 +112,21 @@ func _physics_process(delta: float) -> void:
 func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 	if is_goalkeeper:
 		if pitch_boundary != null and ball != null and player != null:
+			# Priority 1: intercept a shot heading for goal.
+			var intercept: Vector2 = _find_goalkeeper_intercept()
+			if intercept != Vector2.ZERO:
+				_cached_intercept = intercept
+				return &"ChaseBall"
+
+			# Priority 2: basic chase if ball is close to goal.
 			var goal_centre: Vector2 = pitch_boundary.get_goal_centre(player.team)
 			if ball.global_position.distance_to(goal_centre) < GOALKEEPER_CHASE_RADIUS:
+				_cached_intercept = ball.global_position
 				return &"ChaseBall"
+
+			# Priority 3: positional — stand between ball and goal centre.
+			var to_ball: Vector2 = (ball.global_position - goal_centre).normalized()
+			_cached_space_target = goal_centre + to_ball * 60.0
 		return &"MaintainFormation"
 
 	var pressure: float = calculate_pressure_index(defenders_nearby)
@@ -130,6 +151,12 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 	if pressure > 0.85 and eff_composure < 0.45:
 		return &"PanicClear"
 
+	if ball != null and player != null and ball.possessor == player:
+		var pass_target: HeavyPlayerController = _find_best_pass_target()
+		if pass_target != null:
+			_cached_pass_target = pass_target
+			return &"Pass"
+
 	if ball != null and player != null:
 		if _should_chase_ball():
 			return &"ChaseBall"
@@ -140,6 +167,88 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 		return &"AttemptDribble"
 
 	return &"MaintainFormation"
+
+
+## Scores every same-team, non-GK, non-self teammate by openness (distance
+## from the nearest opponent) and forward positioning. Returns null if nothing
+## scores above the minimum openness threshold.
+func _find_best_pass_target() -> HeavyPlayerController:
+	if ball == null or player == null:
+		return null
+
+	var attack_dir: Vector2 = Vector2(1.0, 0.0) if player.team == GameManager.TEAM_A else Vector2(-1.0, 0.0)
+	var ball_pos: Vector2 = ball.global_position
+	var all_opponents: Array[Node2D] = _find_nearby_opponents()
+
+	# Recompute effective composure locally (same pattern as evaluate_tactical_action).
+	var mood_node: MoodSystem = player.get_mood() if player != null else null
+	var eff_composure: float = composure_attribute + (mood_node.get_composure_delta() if mood_node != null else 0.0)
+	eff_composure = clampf(eff_composure, 0.0, 1.0)
+
+	var best_target: HeavyPlayerController = null
+	var best_score: float = 60.0  # Minimum openness threshold in pixels
+
+	for node: Node in get_tree().get_nodes_in_group(&"players"):
+		var candidate := node as HeavyPlayerController
+		if candidate == null or candidate == player or candidate.team != player.team:
+			continue
+		var candidate_brain := candidate.get_node_or_null("PlayerBrain") as PlayerBrain
+		if candidate_brain != null and candidate_brain.is_goalkeeper:
+			continue
+
+		var to_candidate: Vector2 = candidate.global_position - ball_pos
+		var forward_dot: float = to_candidate.normalized().dot(attack_dir)
+		# No backward passes unless composure is high (safety valve under pressure).
+		if forward_dot < -0.2 and eff_composure < 0.55:
+			continue
+
+		var min_opp_dist: float = INF
+		for opp: Node2D in all_opponents:
+			var d: float = candidate.global_position.distance_to(opp.global_position)
+			if d < min_opp_dist:
+				min_opp_dist = d
+
+		var forward_bonus: float = clampf(forward_dot, 0.0, 1.0) * 40.0
+		var score: float = min_opp_dist + forward_bonus
+		if score > best_score:
+			best_score = score
+			best_target = candidate
+
+	return best_target
+
+
+## Predicts where a fast or airborne ball will cross the goalkeeper's own
+## goal mouth, and returns that point if the keeper can reach it in time.
+## Returns Vector2.ZERO if the ball isn't a shot threat or no reachable
+## crossing point exists.
+func _find_goalkeeper_intercept() -> Vector2:
+	if ball == null or player == null or pitch_boundary == null:
+		return Vector2.ZERO
+
+	var goal_centre: Vector2 = pitch_boundary.get_goal_centre(player.team)
+
+	# Only react to fast or airborne balls.
+	if not ball.is_airborne() and ball.velocity.length() < 200.0:
+		return Vector2.ZERO
+
+	var trajectory: Array[Vector2] = ball.predict_trajectory(
+		ball.velocity, ball.velocity_z, 60, 0.05)
+
+	const GOAL_HALF_WIDTH: float = 200.0
+	var my_speed: float = player.get_current_top_speed()
+
+	for i: int in range(trajectory.size()):
+		var point: Vector2 = trajectory[i]
+		if absf(point.x - goal_centre.x) > 80.0:
+			continue
+		if absf(point.y - goal_centre.y) > GOAL_HALF_WIDTH:
+			continue
+		var time_to_point: float = float(i + 1) * 0.05
+		var dist_to_point: float = player.global_position.distance_to(point)
+		if dist_to_point <= my_speed * time_to_point + 40.0:
+			return point
+
+	return Vector2.ZERO
 
 
 ## Returns true only if this player is the most appropriate chaser on the team.
@@ -221,8 +330,36 @@ func get_target_position() -> Vector2:
 			if carrier != null:
 				return carrier.global_position
 			return ball.global_position
+		&"Pass":
+			if _cached_pass_target != null and is_instance_valid(_cached_pass_target):
+				return _cached_pass_target.global_position + _cached_pass_target.velocity * 0.3
+			return ball.global_position
 		_:
 			return _cached_space_target
+
+
+## Walks the ball's predicted trajectory and returns the first point this
+## player can reach in time, given their current top speed. Falls back to the
+## trajectory's final point, or the ball's current position if no trajectory
+## is available.
+func _predict_intercept_position() -> Vector2:
+	if ball == null or player == null:
+		return ball.global_position if ball != null else player.global_position
+
+	var my_speed: float = player.get_current_top_speed()
+	var trajectory: Array[Vector2] = ball.predict_trajectory(
+		ball.velocity, ball.velocity_z, 30, 0.05)
+
+	for i: int in range(trajectory.size()):
+		var point: Vector2 = trajectory[i]
+		var time_to_point: float = float(i + 1) * 0.05
+		var dist_to_point: float = player.global_position.distance_to(point)
+		if dist_to_point <= my_speed * time_to_point + 20.0:
+			return point
+
+	if trajectory.size() > 0:
+		return trajectory[-1]
+	return ball.global_position
 
 
 ## Returns true if a teammate (or this player) last touched the ball.
@@ -414,6 +551,23 @@ func _find_nearest_threatening_opponent() -> HeavyPlayerController:
 	return best
 
 
+## Repels this player from teammates within sep_radius so off-ball players
+## don't stack on top of each other.
+func _separation_force(sep_radius: float = 90.0) -> Vector2:
+	if player == null:
+		return Vector2.ZERO
+	var force: Vector2 = Vector2.ZERO
+	for node: Node in get_tree().get_nodes_in_group(&"players"):
+		var other := node as HeavyPlayerController
+		if other == null or other == player or other.team != player.team:
+			continue
+		var offset: Vector2 = player.global_position - other.global_position
+		var dist: float = offset.length()
+		if dist > 0.0 and dist < sep_radius:
+			force += offset.normalized() * (1.0 - dist / sep_radius)
+	return force
+
+
 func _get_ball_carrier() -> HeavyPlayerController:
 	if ball == null:
 		return null
@@ -423,25 +577,58 @@ func _get_ball_carrier() -> HeavyPlayerController:
 	return null
 
 
+## Blends three forces into the final movement_intent: a seek toward the
+## current action's target, separation from teammates (off-ball only, so
+## chasers aren't pushed off the intercept line), and a gentle formation
+## spring when far from the anchor.
 func _steer_for_action() -> Vector2:
-	var target: Vector2 = get_target_position()
-	var offset: Vector2 = target - player.global_position
+	# --- Pass execution (Task 1 preserved) ---
+	if current_action == &"Pass" and _cached_pass_target != null and is_instance_valid(_cached_pass_target):
+		if player.global_position.distance_to(ball.global_position) < 80.0 and player.get_ball_in_foot_range() != null:
+			var lead_pos: Vector2 = _cached_pass_target.global_position + _cached_pass_target.velocity * 0.3
+			var aim: Vector2 = (lead_pos - ball.global_position).normalized()
+			ball.apply_kick(aim * 260.0, 0.0, player)
+			_cached_pass_target = null
+			current_action = &"MaintainFormation"
+
+	# --- Seek target selection ---
+	var seek_target: Vector2
+	match current_action:
+		&"ChaseBall", &"PanicClear":
+			seek_target = _cached_intercept if _cached_intercept != Vector2.ZERO else ball.global_position
+		&"Pass":
+			if _cached_pass_target != null and is_instance_valid(_cached_pass_target):
+				seek_target = _cached_pass_target.global_position + _cached_pass_target.velocity * 0.3
+			else:
+				seek_target = ball.global_position
+		_:
+			seek_target = _cached_space_target
+
+	# --- Three-force blend ---
+	var offset: Vector2 = seek_target - player.global_position
 	var distance: float = offset.length()
 
 	if distance <= ARRIVE_RADIUS:
 		return Vector2.ZERO
 
-	# Ease the stick deflection down on approach: full pace far out, a controlled
-	# walk close in. Feeding a partial vector means the CPU inherits the same
-	# analog speed scaling the human player gets.
+	# 1. Seek force
 	var deflection: float = clampf(distance / (ARRIVE_RADIUS * 4.0), 0.35, 1.0)
-	player.is_sprinting = current_action == &"ChaseBall" and distance > CHASE_RADIUS * 0.5
-	return offset.normalized() * deflection
+	var seek_force: Vector2 = offset.normalized() * deflection
 
-	# TODO: replace this direct-seek steering with the full behaviour blend
-	# (pursue the ball's predicted position, separate from teammates, mark the
-	# nearest runner) once formations exist — Pseudo3DBall.predict_trajectory()
-	# already gives the interception point.
+	# 2. Separation — only off-ball so chasers aren't pushed off the intercept line
+	var sep_force: Vector2 = Vector2.ZERO
+	if current_action != &"ChaseBall" and current_action != &"PanicClear":
+		sep_force = _separation_force() * 0.40
+
+	# 3. Formation spring — gentle pull back when very far from anchor
+	var spring_force: Vector2 = Vector2.ZERO
+	if player.brain != null:
+		var anchor_offset: Vector2 = player.brain.formation_anchor - player.global_position
+		if anchor_offset.length() > CHASE_RADIUS * 1.5:
+			spring_force = anchor_offset.normalized() * 0.15
+
+	player.is_sprinting = current_action == &"ChaseBall" and distance > CHASE_RADIUS * 0.5
+	return (seek_force + sep_force + spring_force).limit_length(1.0)
 
 
 func _find_nearby_opponents() -> Array[Node2D]:

@@ -41,6 +41,8 @@ const AUTOSWITCH_ADVANTAGE_PX: float = 160.0
 const AUTOSWITCH_MIN_BALL_DIST: float = 200.0
 ## Seconds before auto-switch can fire again. Stops the switch flickering.
 const AUTOSWITCH_COOLDOWN: float = 3.0
+## Seconds the pitch pauses between halves.
+const HALF_TIME_DURATION: float = 5.0
 
 var _shake_amount: float = 0.0
 var _autoswitch_cooldown_remaining: float = 0.0
@@ -553,19 +555,39 @@ func _on_touchline_shift(team: int, _new_formation: String) -> void:
 ## ever controls the home team, so surfacing the away manager's tactical talk
 ## would hand over information the player is not meant to see.
 func _on_half_time_reached() -> void:
+	ball.freeze()
+
+	# Touchline shout (existing behaviour preserved).
 	var home_data: ManagerData = _manager_director_a.get_data()
-	if home_data == null:
-		return
+	if home_data != null:
+		var ctx := PressOffice.PressContext.new()
+		ctx.event = "pre_match"
+		ctx.opponent_name = _selected_away_team.team_name if _selected_away_team != null else ""
+		var quote: String = _press_office.generate_quote(home_data, ctx)
+		var display_name: String = home_data.manager_name if home_data.manager_name != "" else "Manager"
+		_touchline_bubble.show_shout(display_name, quote, true)
 
-	var ctx := PressOffice.PressContext.new()
-	# Reuse "pre_match" context — it generates motivational mid-match
-	# instructions cleanly without needing a new context type.
-	ctx.event = "pre_match"
-	ctx.opponent_name = _selected_away_team.team_name if _selected_away_team != null else ""
+	# Wait, then swap ends and start the second half.
+	await get_tree().create_timer(HALF_TIME_DURATION).timeout
+	_swap_ends_and_restart()
 
-	var quote: String = _press_office.generate_quote(home_data, ctx)
-	var display_name: String = home_data.manager_name if home_data.manager_name != "" else "Manager"
-	_touchline_bubble.show_shout(display_name, quote, true)
+
+## Mirrors every player's formation_anchor around the pitch centre X and fires
+## a second-half kickoff.
+func _swap_ends_and_restart() -> void:
+	var centre_x: float = boundary.get_centre_spot().x
+
+	for node: Node in players.get_children():
+		var player := node as HeavyPlayerController
+		if player == null or player.brain == null:
+			continue
+		var anchor: Vector2 = player.brain.formation_anchor
+		player.brain.formation_anchor = Vector2(2.0 * centre_x - anchor.x, anchor.y)
+
+	reset_for_kickoff()
+	ball.unfreeze()
+	GameManager.kickoff()
+	GameManager.restart_play()
 
 
 func _on_restart_timer_timeout() -> void:

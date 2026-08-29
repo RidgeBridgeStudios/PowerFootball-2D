@@ -323,15 +323,46 @@ func _is_in_penalty_area(pos: Vector2, defending_team: int) -> bool:
 	return depth >= 0.0 and depth <= PENALTY_AREA_DEPTH and absf(local.y) <= PENALTY_AREA_HALF_WIDTH
 
 
-## --- Defensive wall (scaffold only) --------------------------------------------
+## --- Defensive wall ------------------------------------------------------------
 
 func _build_defensive_wall(free_kick_pos: Vector2, _defending_team: int) -> void:
-	## TODO: select the 2-4 nearest defenders of defending_team, position them
-	## wall_distance pixels from free_kick_pos along the kick direction vector,
-	## spaced 60px apart perpendicular to that vector. _position_defending_players()
-	## already pushes them back to a legal distance in a straight line from the
-	## ball; this needs to additionally line them up between the ball and goal.
-	## For now: emit the signal so the HUD can still show the wall-building hint.
+	if _boundary == null or _players == null:
+		GameEvents.defensive_wall_requested.emit(free_kick_pos)
+		return
+
+	var defending_team: int = _defending_team
+	var goal_centre: Vector2 = _boundary.get_goal_centre(defending_team)
+	var to_goal: Vector2 = (goal_centre - free_kick_pos).normalized()
+	var wall_origin: Vector2 = free_kick_pos + to_goal * wall_distance
+	var perp: Vector2 = Vector2(-to_goal.y, to_goal.x)
+
+	# Collect outfield defenders for the wall (exclude goalkeeper).
+	var defenders: Array[HeavyPlayerController] = []
+	for node: Node in _players.get_children():
+		var p := node as HeavyPlayerController
+		if p == null or p.team != defending_team:
+			continue
+		var brain := p.get_node_or_null("PlayerBrain") as PlayerBrain
+		if brain != null and brain.is_goalkeeper:
+			continue
+		defenders.append(p)
+
+	# Sort by proximity to the free kick spot; take the 4 closest.
+	defenders.sort_custom(func(a: HeavyPlayerController, b: HeavyPlayerController) -> bool:
+		return a.global_position.distance_to(free_kick_pos) < b.global_position.distance_to(free_kick_pos)
+	)
+	var wall_size: int = mini(defenders.size(), 4)
+
+	# Space them 60 px apart, centred on wall_origin.
+	var spacing: float = 60.0
+	var half_span: float = float(wall_size - 1) * spacing * 0.5
+
+	for i: int in range(wall_size):
+		var p: HeavyPlayerController = defenders[i]
+		var lateral_offset: float = -half_span + float(i) * spacing
+		p.global_position = wall_origin + perp * lateral_offset
+		p.velocity = Vector2.ZERO
+
 	GameEvents.defensive_wall_requested.emit(free_kick_pos)
 
 

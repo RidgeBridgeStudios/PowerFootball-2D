@@ -70,6 +70,7 @@ func _process(delta: float) -> void:
 	match_time += delta
 	if not _half_time_fired and match_time >= match_duration * 0.5:
 		_half_time_fired = true
+		set_phase(MatchPhase.HALF_TIME)   # Pauses the clock — IN_PLAY guard now exits
 		GameEvents.half_time_reached.emit()
 	if match_time >= match_duration:
 		match_time = match_duration
@@ -179,7 +180,3 @@ func get_leading_team() -> int:
 func _end_match() -> void:
 	set_phase(MatchPhase.FULL_TIME)
 	GameEvents.match_ended.emit(get_leading_team())
-
-	# TODO: half time. GameEvents.half_time_reached now fires at the midpoint
-	# (see _process), but MatchPhase.HALF_TIME itself is still unused — nothing
-	# pauses play or swaps ends yet.
