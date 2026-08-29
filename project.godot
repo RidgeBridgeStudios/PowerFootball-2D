@@ -16,6 +16,7 @@ config/icon="res://art/player.png"
 
 [autoload]
 
+MatchWorldModel="*res://autoloads/MatchWorldModel.gd"
 GameEvents="*res://autoloads/GameEvents.gd"
 GameManager="*res://autoloads/GameManager.gd"
 DataLoader="*res://autoloads/DataLoader.gd"

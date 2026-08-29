@@ -11,11 +11,32 @@
 ## touches velocity directly, so CPU players are bound by exactly the same weight
 ## model as the human one.
 ##
+## Scheduling: the decision block is time-sliced on a 15-frame stagger keyed to
+## player_index, so the 22 brains spread their evaluations across the interval
+## rather than all thinking on the same tick. Steering still runs every physics
+## frame, so staggering costs nothing in responsiveness.
+##
+## Spatial reads: nothing here scans the scene tree. Every teammate/opponent
+## query indexes MatchWorldModel, which refreshes once per frame at
+## process_priority -100, ahead of this node's 0.
+##
 ## Depends on: Pseudo3DBall, HeavyPlayerController (as parent node), MoodSystem
 ## (read via player.get_mood() to bias vision/composure/aggression at the
 ## decision site — mood never touches the exported attributes themselves),
-## PitchBoundary (bound via bind_boundary(), used for goalkeeper positioning).
-## Exposes: evaluate_tactical_action(), calculate_pressure_index(), ball
+## PitchBoundary (bound via bind_boundary(), used for goalkeeper positioning),
+## MatchWorldModel (autoload spatial cache), UtilityMath (static helpers).
+##
+## Signals consumed:
+##   GameEvents.formation_anchors_changed(team, new_anchors)
+##     Raised by ManagerDirector._apply_formation() whenever a team's shape is
+##     (re)applied — at bind time, at every kickoff, and on a mid-match
+##     tactical shift. new_anchors maps player_index (int) to a world-space
+##     Vector2. _on_formation_changed() adopts this player's entry and refreshes
+##     the cached off-ball target so the new shape is steered to on the very
+##     next frame rather than at the next decision tick.
+##
+## Exposes: bind_ball(), bind_boundary(), evaluate_tactical_action(),
+##          calculate_pressure_index(), get_target_position(), ball
 ##
 
 class_name PlayerBrain
@@ -31,11 +52,19 @@ extends Node
 @export var formation_anchor: Vector2 = Vector2.ZERO
 ## How far the anchor drifts toward the ball, 0.0-1.0 (team compactness).
 @export_range(0.0, 1.0) var formation_ball_weight: float = 0.35
-## Seconds between decision re-evaluations. Human-scale latency, and cheap.
+## Seconds between decision re-evaluations.
+## Deprecated: superseded by the UPDATE_INTERVAL frame stagger.
+## Retained for .tscn backwards-compatibility only — ManagerDirector still
+## writes it from manager pressing intensity, and removing the export would
+## drop that value out of every serialised scene.
 @export var decision_interval: float = 0.25
 ## True for the goalkeeper — swaps evaluate_tactical_action() for a simple
 ## stay-near-goal/chase-goal-area rule instead of the outfield decision tree.
 @export var is_goalkeeper: bool = false
+## This player's slot in MatchWorldModel. Assigned by
+## HeavyPlayerController._register_with_world_model() at spawn; it is both the
+## index used for every spatial read and the phase offset of the frame stagger.
+@export var player_index: int = 0
 
 enum Role { OUTFIELD_ATTACKER, OUTFIELD_MIDFIELDER, OUTFIELD_DEFENDER, GOALKEEPER }
 
@@ -67,31 +96,79 @@ const ARRIVE_RADIUS: float = 24.0
 ## How close the ball must be to the keeper's own goal centre before they chase it.
 const GOALKEEPER_CHASE_RADIUS: float = 200.0
 
+## Physics frames between decision re-evaluations. Combined with player_index as
+## a phase offset, this spreads 22 brains over 15 frames — at most two think on
+## any given tick instead of all of them.
+const UPDATE_INTERVAL: int = 15
+
+## Seconds a designated pass receiver commits to running onto the ball, ignoring
+## its own decision tree. Without it the receiver re-evaluates mid-flight and
+## can turn away from a pass that was played to where it was going.
+const PASS_LOCK_DURATION: float = 0.35
+
+## Minimum clearance, in pixels, an opponent must leave either side of a passing
+## lane before that lane counts as open.
+const PASS_LANE_CLEARANCE: float = 45.0
+
+## Reaction time fed to UtilityMath.calculate_intercept_point() — the beat
+## between reading the ball's line and actually setting off after it.
+const INTERCEPT_REACTION_TIME: float = 0.08
+
 var player: HeavyPlayerController = null
 var ball: Pseudo3DBall = null
 var pitch_boundary: PitchBoundary = null
 var current_action: StringName = &"MaintainFormation"
 
+## Deprecated alongside decision_interval: the runtime no longer decrements or
+## reads this. Kept only so any external reference still resolves.
 var _decision_cooldown: float = 0.0
+
+## Physics frames elapsed. Increments every frame regardless of whether this
+## frame is a decision frame.
+var _frame_counter: int = 0
+
+## Counts down while this player is committed to a pass played to them.
+var _pass_lock_timer: float = 0.0
+
 ## Off-ball target cached from the last decision tick. _find_open_space_target()
-## does get_tree().get_nodes_in_group() scans that must stay on the decision
-## interval (every decision_interval seconds), not the physics frame rate —
-## get_target_position() is called from _steer_for_action() every physics
-## frame, so it reads this cache instead of recomputing it each frame.
+## walks the whole world model, which must stay on the decision stagger rather
+## than the physics frame rate — get_target_position() is called from
+## _steer_for_action() every physics frame, so it reads this cache instead of
+## recomputing it each frame.
 var _cached_space_target: Vector2 = Vector2.ZERO
 ## Teammate targeted by the last "Pass" decision. Cleared once the pass is
 ## struck or the decision changes away from passing.
 var _cached_pass_target: HeavyPlayerController = null
 ## Predicted ball-intercept point cached from the last decision tick, used
-## while chasing/clearing so steering doesn't recompute the trajectory every
+## while chasing/clearing so steering doesn't recompute the intercept every
 ## physics frame.
 var _cached_intercept: Vector2 = Vector2.ZERO
+## Teammate-repulsion vector cached from the last decision tick. Up to 14
+## frames stale, which is imperceptible for an off-ball player drifting into
+## space and saves a full roster walk every frame.
+var _cached_separation: Vector2 = Vector2.ZERO
+
+## Reused across decision ticks so evaluate_tactical_action() never allocates a
+## generator. Reseeded per tick to keep the noise deterministic per player.
+var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
+
+## Scratch list handed to evaluate_tactical_action(). Refilled in place each
+## decision tick rather than reallocated. Only _find_nearby_opponents() writes
+## it, and only one call is live at a time.
+var _opponents_buffer: Array[Node2D] = []
 
 
 func _ready() -> void:
+	# Between MatchWorldModel (-100), which refreshes the spatial cache, and
+	# HeavyPlayerController (100), which consumes the steering this produces.
+	process_priority = 0
+
 	player = get_parent() as HeavyPlayerController
 	if formation_anchor == Vector2.ZERO and player != null:
 		formation_anchor = player.global_position
+	_cached_space_target = formation_anchor
+
+	GameEvents.formation_anchors_changed.connect(_on_formation_changed)
 
 
 ## The pitch calls this after spawning so the brain knows which ball to track.
@@ -105,6 +182,20 @@ func bind_boundary(b: PitchBoundary) -> void:
 	pitch_boundary = b
 
 
+## Adopts a new formation anchor pushed by this team's ManagerDirector.
+## new_anchors maps player_index (int) → world-space Vector2.
+func _on_formation_changed(team_id: int, new_anchors: Dictionary) -> void:
+	if player == null or player.team != team_id:
+		return
+	if not new_anchors.has(player_index):
+		return
+
+	formation_anchor = new_anchors[player_index]
+	# Steer to the new shape on the next frame rather than waiting out the
+	# remainder of the stagger interval.
+	_cached_space_target = formation_anchor
+
+
 func _physics_process(delta: float) -> void:
 	if player == null or ball == null or player.is_user_controlled:
 		return
@@ -112,15 +203,36 @@ func _physics_process(delta: float) -> void:
 		player.movement_intent = Vector2.ZERO
 		return
 
-	_decision_cooldown -= delta
-	if _decision_cooldown <= 0.0:
-		_decision_cooldown = decision_interval
+	# Receiver lock: a player a pass was just played to runs onto it and does
+	# not re-decide mid-flight. Checked before the frame counter so the lock is
+	# never skipped by landing on a decision frame.
+	if _pass_lock_timer > 0.0:
+		_pass_lock_timer -= delta
+		player.movement_intent = _steer_toward_ball_direct()
+		return
+
+	_frame_counter += 1
+
+	if (_frame_counter + player_index) % UPDATE_INTERVAL == 0:
 		current_action = evaluate_tactical_action(_find_nearby_opponents())
 		_cached_space_target = _find_open_space_target()
+		_cached_separation = _separation_force()
 		if current_action == &"ChaseBall" or current_action == &"PanicClear":
 			_cached_intercept = _predict_intercept_position()
 
 	player.movement_intent = _steer_for_action()
+
+
+## Straight run at the ball, used while the receiver lock is held. Deliberately
+## simpler than _steer_for_action(): no separation, no formation spring — the
+## whole point of the lock is that nothing pulls the receiver off the ball.
+func _steer_toward_ball_direct() -> Vector2:
+	if ball == null or player == null:
+		return Vector2.ZERO
+	var offset: Vector2 = ball.global_position - player.global_position
+	if offset.length() < ARRIVE_RADIUS:
+		return Vector2.ZERO
+	return offset.normalized()
 
 
 ## Builds the UtilityContext snapshot for one decision tick.
@@ -152,7 +264,7 @@ func _build_context(defenders_nearby: Array[Node2D]) -> UtilityContext:
 		ctx.dist_to_goal = 800.0
 
 	# These are cached results of existing methods — call them here so every
-	# scorer sees the same answer rather than running independent tree scans.
+	# scorer sees the same answer rather than running independent scans.
 	ctx.chase_is_legal         = _should_chase_ball()
 	ctx.open_teammate_exists   = _find_best_pass_target() != null
 
@@ -237,16 +349,24 @@ func _score_dribble(ctx: UtilityContext) -> float:
 	# check TackleState.MIN_FACING_DOT (0.42) applies to the tackler, mirrored
 	# here so a set defender scores as a threat before the tackle even starts.
 	if player != null:
-		for node: Node in get_tree().get_nodes_in_group(&"players"):
-			var opp := node as HeavyPlayerController
-			if opp == null or opp.team == player.team:
-				continue
-			var dist: float = player.global_position.distance_to(opp.global_position)
-			if dist < PRESSURE_RADIUS:
-				# 0.42 mirrors TackleState.MIN_FACING_DOT — keep in sync.
-				if opp.get_facing_dot(player.global_position) >= 0.42:
-					base *= 0.40  # Opponent is set up to tackle — don't dribble in
-					break
+		var world: MatchWorldModel = MatchWorldModel.instance
+		if world != null:
+			for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+				var other: HeavyPlayerController = world.player_nodes[i]
+				if not is_instance_valid(other) or other == player:
+					continue
+				if world.player_teams[i] == player.team:
+					continue
+				var dist: float = player.global_position.distance_to(world.player_positions[i])
+				if dist < PRESSURE_RADIUS:
+					# get_facing_dot() is read live off the node rather than
+					# from the cache: the world model stores position and
+					# velocity, not heading, and facing lags velocity through a
+					# turn — which is exactly the case this check is about.
+					# 0.42 mirrors TackleState.MIN_FACING_DOT — keep in sync.
+					if other.get_facing_dot(player.global_position) >= 0.42:
+						base *= 0.40  # Opponent is set up to tackle — don't dribble in
+						break
 
 	return clampf(base, 0.0, 1.0)
 
@@ -301,7 +421,7 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 	# Ties are broken by the order of the array (pass > chase > space > dribble > formation).
 
 	# Cache the pass target now so _score_pass() and _steer_for_action()
-	# both see the same answer without a second tree scan.
+	# both see the same answer without a second roster walk.
 	var pass_target: HeavyPlayerController = _find_best_pass_target()
 	if pass_target != null:
 		_cached_pass_target = pass_target
@@ -316,13 +436,13 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 
 	# Add a small noise term so two players in identical situations make
 	# slightly different choices — they won't always run to the same spot.
-	# Noise is seeded from the player's unique node path so it is
-	# deterministic per player but different between players.
+	# Noise is seeded from the player's instance id so it is deterministic per
+	# player but different between players; the match tick varies it per tick.
+	# The generator itself is a class member, reseeded rather than reallocated.
 	var noise_seed: int = player.get_instance_id() + GameManager.get_match_tick()
-	var rng := RandomNumberGenerator.new()
-	rng.seed = noise_seed
+	_rng.seed = noise_seed
 	for c: Dictionary in candidates:
-		c["score"] = clampf(c["score"] + rng.randf_range(-0.04, 0.04), 0.0, 1.0)
+		c["score"] = clampf(c["score"] + _rng.randf_range(-0.04, 0.04), 0.0, 1.0)
 
 	var best_action: StringName = &"MaintainFormation"
 	var best_score: float = -1.0
@@ -335,15 +455,18 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 
 
 ## Scores every same-team, non-GK, non-self teammate by openness (distance
-## from the nearest opponent) and forward positioning. Returns null if nothing
+## from the nearest opponent) and forward positioning, rejecting any candidate
+## whose passing lane an opponent is standing in. Returns null if nothing
 ## scores above the minimum openness threshold.
 func _find_best_pass_target() -> HeavyPlayerController:
 	if ball == null or player == null:
 		return null
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return null
 
 	var attack_dir: Vector2 = Vector2(1.0, 0.0) if player.team == GameManager.TEAM_A else Vector2(-1.0, 0.0)
 	var ball_pos: Vector2 = ball.global_position
-	var all_opponents: Array[Node2D] = _find_nearby_opponents()
 
 	# Recompute effective composure locally (same pattern as evaluate_tactical_action).
 	var mood_node: MoodSystem = player.get_mood() if player != null else null
@@ -353,25 +476,43 @@ func _find_best_pass_target() -> HeavyPlayerController:
 	var best_target: HeavyPlayerController = null
 	var best_score: float = 60.0  # Minimum openness threshold in pixels
 
-	for node: Node in get_tree().get_nodes_in_group(&"players"):
-		var candidate := node as HeavyPlayerController
-		if candidate == null or candidate == player or candidate.team != player.team:
+	for c: int in range(MatchWorldModel.TOTAL_PLAYERS):
+		var candidate: HeavyPlayerController = world.player_nodes[c]
+		if not is_instance_valid(candidate) or candidate == player:
+			continue
+		if world.player_teams[c] != player.team:
 			continue
 		var candidate_brain := candidate.get_node_or_null("PlayerBrain") as PlayerBrain
 		if candidate_brain != null and candidate_brain.is_goalkeeper:
 			continue
 
-		var to_candidate: Vector2 = candidate.global_position - ball_pos
+		var candidate_pos: Vector2 = world.player_positions[c]
+		var to_candidate: Vector2 = candidate_pos - ball_pos
 		var forward_dot: float = to_candidate.normalized().dot(attack_dir)
 		# No backward passes unless composure is high (safety valve under pressure).
 		if forward_dot < -0.2 and eff_composure < 0.55:
 			continue
 
-		var min_opp_dist: float = INF
-		for opp: Node2D in all_opponents:
-			var d: float = candidate.global_position.distance_to(opp.global_position)
-			if d < min_opp_dist:
-				min_opp_dist = d
+		# Lane check: an opponent standing in the passing lane makes the pass an
+		# interception, however open the receiver looks.
+		var lane_clear: bool = true
+		for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+			if not is_instance_valid(world.player_nodes[i]):
+				continue
+			if world.player_teams[i] == player.team:
+				continue
+			if UtilityMath.is_lane_blocked(
+					ball_pos,
+					candidate_pos,
+					world.player_positions[i],
+					PASS_LANE_CLEARANCE):
+				lane_clear = false
+				break
+		if not lane_clear:
+			continue
+
+		# Openness, straight off the world model — no second roster walk.
+		var min_opp_dist: float = world.nearest_opponent_dist_to(candidate_pos, player.team)
 
 		var forward_bonus: float = clampf(forward_dot, 0.0, 1.0) * 40.0
 		var score: float = min_opp_dist + forward_bonus
@@ -386,6 +527,11 @@ func _find_best_pass_target() -> HeavyPlayerController:
 ## goal mouth, and returns that point if the keeper can reach it in time.
 ## Returns Vector2.ZERO if the ball isn't a shot threat or no reachable
 ## crossing point exists.
+##
+## NOTE: predict_trajectory retained intentionally. The closed-form intercept
+## (UtilityMath.calculate_intercept_point) returns a single point and cannot
+## replicate the goal-mouth spatial filter (X proximity + GOAL_HALF_WIDTH Y check)
+## this loop performs. To replace it, UtilityMath would need goal-bounds parameters.
 func _find_goalkeeper_intercept() -> Vector2:
 	if ball == null or player == null or pitch_boundary == null:
 		return Vector2.ZERO
@@ -424,6 +570,9 @@ func _find_goalkeeper_intercept() -> Vector2:
 func _should_chase_ball() -> bool:
 	if ball == null or player == null:
 		return false
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return false
 
 	# Role-based chase budget: how many players of this role are allowed to
 	# chase the ball at once. Defenders only send 1 if they are the closest;
@@ -444,21 +593,26 @@ func _should_chase_ball() -> bool:
 		Role.OUTFIELD_DEFENDER: max_dist = 260.0
 		_: return false
 
-	var my_dist: float = player.global_position.distance_to(ball.global_position)
+	var ball_pos: Vector2 = ball.global_position
+	var my_dist: float = player.global_position.distance_to(ball_pos)
 	if my_dist > max_dist:
 		return false
 
 	# Count how many same-role same-team players are closer to the ball than me.
 	# If fewer than `budget` are closer, I am within the allowed chasers.
 	var closer_count: int = 0
-	for node: Node in get_tree().get_nodes_in_group(&"players"):
-		var other := node as HeavyPlayerController
-		if other == null or other == player or other.team != player.team:
+	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+		var other: HeavyPlayerController = world.player_nodes[i]
+		if not is_instance_valid(other) or other == player:
 			continue
+		if world.player_teams[i] != player.team:
+			continue
+		# Role lives on the brain, which the world model deliberately does not
+		# cache — it caches spatial state, not behaviour.
 		var other_brain := other.get_node_or_null("PlayerBrain") as PlayerBrain
 		if other_brain == null or other_brain.role != role:
 			continue
-		if other.global_position.distance_to(ball.global_position) < my_dist:
+		if world.player_positions[i].distance_to(ball_pos) < my_dist:
 			closer_count += 1
 		if closer_count >= budget:
 			return false
@@ -503,28 +657,25 @@ func get_target_position() -> Vector2:
 			return _cached_space_target
 
 
-## Walks the ball's predicted trajectory and returns the first point this
-## player can reach in time, given their current top speed. Falls back to the
-## trajectory's final point, or the ball's current position if no trajectory
-## is available.
+## Closed-form intercept: where this player and the decelerating ball can first
+## meet, given the player's current top speed.
+##
+## Replaces the old 30-step trajectory walk. Pseudo3DBall sheds
+## `pitch_friction * FRICTION_SCALE` px/s of ground speed per second — the
+## exported coefficient alone is not the deceleration, so the combined scalar is
+## what the solver needs.
 func _predict_intercept_position() -> Vector2:
 	if ball == null or player == null:
 		return ball.global_position if ball != null else player.global_position
 
-	var my_speed: float = player.get_current_top_speed()
-	var trajectory: Array[Vector2] = ball.predict_trajectory(
-		ball.velocity, ball.velocity_z, 30, 0.05)
-
-	for i: int in range(trajectory.size()):
-		var point: Vector2 = trajectory[i]
-		var time_to_point: float = float(i + 1) * 0.05
-		var dist_to_point: float = player.global_position.distance_to(point)
-		if dist_to_point <= my_speed * time_to_point + 20.0:
-			return point
-
-	if trajectory.size() > 0:
-		return trajectory[-1]
-	return ball.global_position
+	return UtilityMath.calculate_intercept_point(
+		player.global_position,
+		player.get_current_top_speed(),
+		ball.global_position,
+		ball.velocity,
+		ball.pitch_friction * Pseudo3DBall.FRICTION_SCALE,
+		INTERCEPT_REACTION_TIME
+	)
 
 
 ## Returns true if a teammate (or this player) last touched the ball.
@@ -549,6 +700,19 @@ func _find_open_space_target() -> Vector2:
 	var ball_pos: Vector2 = ball.global_position
 	var has_ball: bool = _team_has_ball()
 
+	# The shape breathes toward the ball by the team's compactness setting.
+	# Every anchor read inside this function uses the drifted anchor; the
+	# exported formation_anchor itself is never modified here.
+	#
+	# TUNING NOTE: three branches below then lerp toward the ball a second time
+	# (the midfield's lateral press, the attacker's drop-off, the defender's
+	# compression). Those pulls now compound with this one, so effective
+	# ball-tracking is stronger than before the dynamic anchor existed — for a
+	# midfielder at formation_ball_weight 0.3, roughly 0.51 rather than 0.30 on
+	# the X axis. That is the intended direction, but the per-branch constants
+	# were tuned against a static anchor and are worth a pass on the pitch.
+	var dynamic_anchor: Vector2 = formation_anchor.lerp(ball_pos, formation_ball_weight)
+
 	match role:
 
 		Role.OUTFIELD_ATTACKER:
@@ -560,7 +724,7 @@ func _find_open_space_target() -> Vector2:
 			else:
 				# Defending: drop toward own half but not all the way back.
 				# Maintain a threatening position so the team can counter.
-				var drop_target: Vector2 = formation_anchor
+				var drop_target: Vector2 = dynamic_anchor
 				drop_target = drop_target.lerp(ball_pos, 0.20)
 				return drop_target
 
@@ -575,7 +739,7 @@ func _find_open_space_target() -> Vector2:
 				# ball's lateral position (press the space it is going to).
 				# Reuses formation_ball_weight so the manager's tempo/trait
 				# tuning still shapes how far the midfield presses across.
-				var defend_pos: Vector2 = formation_anchor
+				var defend_pos: Vector2 = dynamic_anchor
 				defend_pos.x = lerpf(defend_pos.x, ball_pos.x, formation_ball_weight)
 				return defend_pos
 
@@ -583,7 +747,7 @@ func _find_open_space_target() -> Vector2:
 			if has_ball:
 				# When team has the ball, hold the defensive line — do NOT
 				# drift forward. Compress slightly to offer a safe back-pass.
-				var safe_pos: Vector2 = formation_anchor
+				var safe_pos: Vector2 = dynamic_anchor
 				safe_pos = safe_pos.lerp(ball_pos, 0.08)
 				return safe_pos
 			else:
@@ -593,18 +757,21 @@ func _find_open_space_target() -> Vector2:
 				if threat != null:
 					# Position between the threat and our own goal — not on top
 					# of them, but cutting the passing lane.
-					var goal_centre: Vector2 = formation_anchor  # anchor IS the defensive line
+					var goal_centre: Vector2 = dynamic_anchor  # anchor IS the defensive line
 					return threat.global_position.lerp(goal_centre, 0.45)
-				return formation_anchor
+				return dynamic_anchor
 
 		_:
-			return formation_anchor
+			return dynamic_anchor
 
 
 ## Samples 5 lateral positions at the opponent's defensive third and returns
 ## the one with the most open space (furthest average distance from defenders).
 func _find_channel_run_target(ball_pos: Vector2) -> Vector2:
 	if pitch_boundary == null or player == null:
+		return formation_anchor
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
 		return formation_anchor
 
 	var bounds: Rect2 = pitch_boundary.get_pitch_rect()
@@ -619,34 +786,34 @@ func _find_channel_run_target(ball_pos: Vector2) -> Vector2:
 		attack_x = lerpf(ball_pos.x, bounds.position.x + 80.0, 0.55)
 
 	# Sample 5 Y positions across the pitch width (touchline to touchline),
-	# biased toward the flanks.
+	# biased toward the flanks. Five is kept rather than trimmed to three: the
+	# samples are what distinguish a near-post run from a far-post one, and
+	# collapsing them loses the wide channels this function exists to find.
 	var pitch_top: float = bounds.position.y + 40.0
 	var pitch_bottom: float = bounds.end.y - 40.0
-	var candidates: Array[Vector2] = []
-	for i: int in range(5):
-		var t: float = float(i) / 4.0
-		candidates.append(Vector2(attack_x, lerpf(pitch_top, pitch_bottom, t)))
 
-	# Score each candidate by distance from all opponents.
 	var best_pos: Vector2 = formation_anchor
 	var best_score: float = -INF
-	var opponents: Array[Node2D] = _find_nearby_opponents()
 
-	for candidate: Vector2 in candidates:
-		var min_opp_dist: float = INF
-		for opp: Node2D in opponents:
-			var d: float = candidate.distance_to(opp.global_position)
-			if d < min_opp_dist:
-				min_opp_dist = d
+	for s: int in range(5):
+		var t: float = float(s) / 4.0
+		var candidate: Vector2 = Vector2(attack_x, lerpf(pitch_top, pitch_bottom, t))
+
+		# Openness, straight off the world model.
+		var min_opp_dist: float = world.nearest_opponent_dist_to(candidate, player.team)
+
 		# Also penalise positions where a teammate is already standing nearby.
 		var teammate_penalty: float = 0.0
-		for node: Node in get_tree().get_nodes_in_group(&"players"):
-			var mate := node as HeavyPlayerController
-			if mate == null or mate == player or mate.team != player.team:
+		for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+			var mate: HeavyPlayerController = world.player_nodes[i]
+			if not is_instance_valid(mate) or mate == player:
 				continue
-			var td: float = candidate.distance_to(mate.global_position)
+			if world.player_teams[i] != player.team:
+				continue
+			var td: float = candidate.distance_to(world.player_positions[i])
 			if td < 80.0:
 				teammate_penalty += (80.0 - td)  # Penalise overlap
+
 		var score: float = min_opp_dist - teammate_penalty * 0.5
 		if score > best_score:
 			best_score = score
@@ -688,27 +855,33 @@ func _find_passing_triangle_position(ball_pos: Vector2) -> Vector2:
 func _find_nearest_threatening_opponent() -> HeavyPlayerController:
 	if player == null or pitch_boundary == null:
 		return null
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return null
 
 	var centre_x: float = pitch_boundary.get_centre_spot().x
 	var best: HeavyPlayerController = null
 	var best_dist: float = 300.0  # Only mark opponents within this radius
 
-	for node: Node in get_tree().get_nodes_in_group(&"players"):
-		var other := node as HeavyPlayerController
-		if other == null or other.team == player.team:
+	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+		var other: HeavyPlayerController = world.player_nodes[i]
+		if not is_instance_valid(other) or other == player:
+			continue
+		if world.player_teams[i] == player.team:
 			continue
 
 		# Only threatening if they are between us and our goal.
 		var other_brain := other.get_node_or_null("PlayerBrain") as PlayerBrain
 		if other_brain != null and other_brain.role == PlayerBrain.Role.OUTFIELD_ATTACKER:
-			var d: float = player.global_position.distance_to(other.global_position)
+			var other_pos: Vector2 = world.player_positions[i]
+			var d: float = player.global_position.distance_to(other_pos)
 			# Threatening if they have pushed into our defensive half (goals
 			# sit on the X ends — see PitchBoundary.get_goal_centre()).
 			var toward_goal: bool
 			if player.team == GameManager.TEAM_A:
-				toward_goal = other.global_position.x < centre_x
+				toward_goal = other_pos.x < centre_x
 			else:
-				toward_goal = other.global_position.x > centre_x
+				toward_goal = other_pos.x > centre_x
 			if toward_goal and d < best_dist:
 				best_dist = d
 				best = other
@@ -721,12 +894,18 @@ func _find_nearest_threatening_opponent() -> HeavyPlayerController:
 func _separation_force(sep_radius: float = 90.0) -> Vector2:
 	if player == null:
 		return Vector2.ZERO
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return Vector2.ZERO
+
 	var force: Vector2 = Vector2.ZERO
-	for node: Node in get_tree().get_nodes_in_group(&"players"):
-		var other := node as HeavyPlayerController
-		if other == null or other == player or other.team != player.team:
+	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+		var other: HeavyPlayerController = world.player_nodes[i]
+		if not is_instance_valid(other) or other == player:
 			continue
-		var offset: Vector2 = player.global_position - other.global_position
+		if world.player_teams[i] != player.team:
+			continue
+		var offset: Vector2 = player.global_position - world.player_positions[i]
 		var dist: float = offset.length()
 		if dist > 0.0 and dist < sep_radius:
 			force += offset.normalized() * (1.0 - dist / sep_radius)
@@ -747,12 +926,21 @@ func _get_ball_carrier() -> HeavyPlayerController:
 ## chasers aren't pushed off the intercept line), and a gentle formation
 ## spring when far from the anchor.
 func _steer_for_action() -> Vector2:
-	# --- Pass execution (Task 1 preserved) ---
+	# --- Pass execution ---
 	if current_action == &"Pass" and _cached_pass_target != null and is_instance_valid(_cached_pass_target):
 		if player.global_position.distance_to(ball.global_position) < 80.0 and player.get_ball_in_foot_range() != null:
 			var lead_pos: Vector2 = _cached_pass_target.global_position + _cached_pass_target.velocity * 0.3
 			var aim: Vector2 = (lead_pos - ball.global_position).normalized()
 			ball.apply_kick(aim * 260.0, 0.0, player)
+
+			# Commit the receiver to the ball for a beat. Without this the
+			# receiver's own decision tick can turn it away from a pass played
+			# into the space ahead of it.
+			var target_brain: PlayerBrain = \
+				_cached_pass_target.get_node_or_null("PlayerBrain") as PlayerBrain
+			if target_brain != null:
+				target_brain._pass_lock_timer = PASS_LOCK_DURATION
+
 			_cached_pass_target = null
 			current_action = &"MaintainFormation"
 
@@ -780,26 +968,37 @@ func _steer_for_action() -> Vector2:
 	var deflection: float = clampf(distance / (ARRIVE_RADIUS * 4.0), 0.35, 1.0)
 	var seek_force: Vector2 = offset.normalized() * deflection
 
-	# 2. Separation — only off-ball so chasers aren't pushed off the intercept line
+	# 2. Separation — only off-ball so chasers aren't pushed off the intercept
+	# line. Read from the decision-tick cache rather than recomputed here.
 	var sep_force: Vector2 = Vector2.ZERO
 	if current_action != &"ChaseBall" and current_action != &"PanicClear":
-		sep_force = _separation_force() * 0.40
+		sep_force = _cached_separation * 0.40
 
 	# 3. Formation spring — gentle pull back when very far from anchor
 	var spring_force: Vector2 = Vector2.ZERO
-	if player.brain != null:
-		var anchor_offset: Vector2 = player.brain.formation_anchor - player.global_position
-		if anchor_offset.length() > CHASE_RADIUS * 1.5:
-			spring_force = anchor_offset.normalized() * 0.15
+	var anchor_offset: Vector2 = formation_anchor - player.global_position
+	if anchor_offset.length() > CHASE_RADIUS * 1.5:
+		spring_force = anchor_offset.normalized() * 0.15
 
 	player.is_sprinting = current_action == &"ChaseBall" and distance > CHASE_RADIUS * 0.5
 	return (seek_force + sep_force + spring_force).limit_length(1.0)
 
 
+## Every opponent currently on the pitch, as Node2D so callers that take a
+## generic list keep working. Refills a member buffer rather than allocating —
+## the returned Array is overwritten by the next call.
 func _find_nearby_opponents() -> Array[Node2D]:
-	var opponents: Array[Node2D] = []
-	for node: Node in get_tree().get_nodes_in_group(&"players"):
-		var other := node as HeavyPlayerController
-		if other != null and other != player and other.team != player.team:
-			opponents.append(other)
-	return opponents
+	_opponents_buffer.clear()
+	if player == null:
+		return _opponents_buffer
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return _opponents_buffer
+
+	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+		var other: HeavyPlayerController = world.player_nodes[i]
+		if not is_instance_valid(other) or other == player:
+			continue
+		if world.player_teams[i] != player.team:
+			_opponents_buffer.append(other)
+	return _opponents_buffer
