@@ -41,6 +41,8 @@ var _wall_hint_tween: Tween = null
 @onready var set_piece_banner: Label = $Root/SetPieceBanner
 @onready var wall_hint_label: Label = $Root/WallHintLabel
 @onready var mood_label: Label = $Root/MoodLabel
+@onready var practice_hints_panel: PanelContainer = $Root/PracticeHintsPanel
+@onready var _practice_gk_label: Label = $Root/PracticeHintsPanel/VBox/GKLabel
 
 
 func _ready() -> void:
@@ -71,10 +73,37 @@ func _ready() -> void:
 
 
 func _process(_delta: float) -> void:
-	score_label.text = GameManager.get_score_string()
-	clock_label.text = GameManager.get_clock_string()
+	if not practice_hints_panel.visible:
+		score_label.text = GameManager.get_score_string()
+		clock_label.text = GameManager.get_clock_string()
 	_update_power_meter()
 	_update_stamina_bar()
+
+
+## Called once from PitchScene._setup_practice_arena() to switch the HUD into
+## practice mode: show hints, hide the match-only score/clock readout.
+func enter_practice_mode() -> void:
+	practice_hints_panel.visible = true
+
+	# Applied at runtime rather than baked into the .tscn so it always wins
+	# over any global theme applied to PanelContainer.
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.05, 0.05, 0.05, 0.72)
+	panel_style.corner_radius_top_left = 6
+	panel_style.corner_radius_top_right = 6
+	panel_style.corner_radius_bottom_left = 6
+	panel_style.corner_radius_bottom_right = 6
+	practice_hints_panel.add_theme_stylebox_override("panel", panel_style)
+
+	score_label.visible = false
+	clock_label.visible = false
+
+
+## Called by PitchScene whenever the GK active/frozen toggle changes.
+func set_practice_gk_label(frozen: bool) -> void:
+	if _practice_gk_label == null:
+		return
+	_practice_gk_label.text = "[X / Q]  GK: %s" % ("FROZEN" if frozen else "ACTIVE")
 
 
 ## Points the HUD at the player the human is currently controlling. Called on

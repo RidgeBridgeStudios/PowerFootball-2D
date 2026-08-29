@@ -64,6 +64,8 @@ func _ready() -> void:
 func _process(delta: float) -> void:
 	if current_phase != MatchPhase.IN_PLAY:
 		return
+	if get_meta(&"practice_mode", false):
+		return  # Practice Arena: FSMs run, but the clock never ticks and half/full time never fire.
 
 	match_time += delta
 	if not _half_time_fired and match_time >= match_duration * 0.5:

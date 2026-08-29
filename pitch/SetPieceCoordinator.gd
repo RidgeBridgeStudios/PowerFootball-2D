@@ -155,6 +155,12 @@ func _start_free_kick(team: int, foul_pos: Vector2) -> void:
 	_build_defensive_wall(foul_pos, 1 - team)
 
 
+## Public entry point for the Practice Arena. Computes the penalty spot for
+## `defending_team`'s goal and runs the full penalty setup.
+func start_penalty_for_practice(attacking_team: int, defending_team: int) -> void:
+	_start_penalty(attacking_team, defending_team)
+
+
 func _start_penalty(attacking_team: int, defending_team: int) -> void:
 	var goal_centre: Vector2 = _boundary.get_goal_centre(defending_team)
 	var attack_direction: float = 1.0 if defending_team == 0 else -1.0
