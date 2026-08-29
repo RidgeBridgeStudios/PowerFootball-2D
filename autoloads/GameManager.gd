@@ -11,7 +11,7 @@
 ##   - start_set_piece(phase, team, position), start_free_kick(), start_penalty()
 ##   - current_phase, score, match_time, match_duration
 ##   - set_piece_team, set_piece_position, free_kick_is_direct, is_set_piece_active()
-##   - get_clock_string(), get_score_string()
+##   - get_clock_string(), get_score_string(), get_match_tick()
 ##
 
 extends Node
@@ -46,6 +46,9 @@ var match_duration: float = 300.0
 var last_scoring_team: int = -1
 ## Guards GameEvents.half_time_reached so it only fires once per match.
 var _half_time_fired: bool = false
+## Monotonically incrementing counter stepped every frame. Used by PlayerBrain
+## to vary per-player noise seeds between decision ticks.
+var _match_tick: int = 0
 
 ## --- Set pieces --------------------------------------------------------------
 
@@ -62,6 +65,8 @@ func _ready() -> void:
 
 
 func _process(delta: float) -> void:
+	_match_tick += 1
+
 	if current_phase != MatchPhase.IN_PLAY:
 		return
 	if get_meta(&"practice_mode", false):
@@ -116,6 +121,10 @@ func set_phase(phase: MatchPhase) -> void:
 
 func is_in_play() -> bool:
 	return current_phase == MatchPhase.IN_PLAY
+
+
+func get_match_tick() -> int:
+	return _match_tick
 
 
 ## Stores where and for whom the dead ball is being taken, switches phase, and
