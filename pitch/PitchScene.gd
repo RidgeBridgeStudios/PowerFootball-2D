@@ -19,7 +19,7 @@
 ##             HeavyPlayerController, PlayerBrain, SetPieceCoordinator,
 ##             DataLoader, PlayerFactory, RefereeLoader, MatchReferee,
 ##             ManagerLoader, ManagerData, ManagerDirector, PressOffice,
-##             TouchlineBubble.
+##             TouchlineBubble, Minimap.
 ## Exposes: reset_for_kickoff(), shake_camera(amount)
 ##
 
@@ -77,6 +77,7 @@ var _is_practice_mode: bool = false
 @onready var _manager_director_a: ManagerDirector = $ManagerDirectorA
 @onready var _manager_director_b: ManagerDirector = $ManagerDirectorB
 @onready var _touchline_bubble: TouchlineBubble = $TouchlineBubble
+@onready var minimap: Minimap = $Minimap/MapArea
 
 ## PressOffice is a RefCounted press-quote generator — never add_child'd, no
 ## scene tree access.
@@ -425,6 +426,8 @@ func _bind_players() -> void:
 		player.squad_index = squad_counts.get(player.team, 0)
 		squad_counts[player.team] = player.squad_index + 1
 		PlayerFactory.apply(player, DataLoader.get_player(player.team, player.squad_index), anchor)
+
+	minimap.bind(players, boundary)
 
 
 ## Hands control to whichever teammate is closest to the ball. Control transfers
