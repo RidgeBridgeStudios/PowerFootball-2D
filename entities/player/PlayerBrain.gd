@@ -37,6 +37,10 @@ extends Node
 ## stay-near-goal/chase-goal-area rule instead of the outfield decision tree.
 @export var is_goalkeeper: bool = false
 
+enum Role { OUTFIELD_ATTACKER, OUTFIELD_MIDFIELDER, OUTFIELD_DEFENDER, GOALKEEPER }
+
+@export var role: Role = Role.OUTFIELD_MIDFIELDER
+
 ## Radius inside which an opponent contributes to the pressure index.
 const PRESSURE_RADIUS: float = 180.0
 ## Distance at which the brain commits to chasing the ball rather than holding shape.
@@ -120,8 +124,7 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 		return &"PanicClear"
 
 	if ball != null and player != null:
-		var distance_to_ball: float = player.global_position.distance_to(ball.global_position)
-		if distance_to_ball < CHASE_RADIUS:
+		if _should_chase_ball():
 			return &"ChaseBall"
 
 	if vision_bias > 0.55:
@@ -130,6 +133,56 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 		return &"AttemptDribble"
 
 	return &"MaintainFormation"
+
+
+## Returns true only if this player is the most appropriate chaser on the team.
+## "Most appropriate" means: among all teammates, this player is one of the
+## role's budgeted closest to the ball, AND within that role's max chase
+## distance. This prevents all outfield players from simultaneously deciding
+## to chase.
+func _should_chase_ball() -> bool:
+	if ball == null or player == null:
+		return false
+
+	# Role-based chase budget: how many players of this role are allowed to
+	# chase the ball at once. Defenders only send 1 if they are the closest;
+	# attackers can send up to 2 (striker + a supporting wide player).
+	var budget: int
+	match role:
+		Role.OUTFIELD_ATTACKER: budget = 2
+		Role.OUTFIELD_MIDFIELDER: budget = 1
+		Role.OUTFIELD_DEFENDER: budget = 1
+		_: return false  # Goalkeeper handled separately
+
+	# Maximum distance from the ball at which this player will ever chase,
+	# regardless of being closest. Keeps shape when play is far away.
+	var max_dist: float
+	match role:
+		Role.OUTFIELD_ATTACKER: max_dist = 380.0
+		Role.OUTFIELD_MIDFIELDER: max_dist = 320.0
+		Role.OUTFIELD_DEFENDER: max_dist = 260.0
+		_: return false
+
+	var my_dist: float = player.global_position.distance_to(ball.global_position)
+	if my_dist > max_dist:
+		return false
+
+	# Count how many same-role same-team players are closer to the ball than me.
+	# If fewer than `budget` are closer, I am within the allowed chasers.
+	var closer_count: int = 0
+	for node: Node in get_tree().get_nodes_in_group(&"players"):
+		var other := node as HeavyPlayerController
+		if other == null or other == player or other.team != player.team:
+			continue
+		var other_brain := other.get_node_or_null("PlayerBrain") as PlayerBrain
+		if other_brain == null or other_brain.role != role:
+			continue
+		if other.global_position.distance_to(ball.global_position) < my_dist:
+			closer_count += 1
+		if closer_count >= budget:
+			return false
+
+	return true
 
 
 ## 0.0-1.0 crowding score from opponents within PRESSURE_RADIUS.
@@ -154,12 +207,24 @@ func get_target_position() -> Vector2:
 		return formation_anchor
 
 	match current_action:
-		&"ChaseBall", &"PanicClear":
-			return ball.global_position
-		&"AttemptDribble":
+		&"ChaseBall", &"PanicClear", &"AttemptDribble":
+			# Prefer chasing the ball carrier rather than the raw ball position.
+			# Carrier is whoever last touched the ball and is an opponent.
+			var carrier: HeavyPlayerController = _get_ball_carrier()
+			if carrier != null:
+				return carrier.global_position
 			return ball.global_position
 		_:
 			return formation_anchor + (ball.global_position - formation_anchor) * formation_ball_weight
+
+
+func _get_ball_carrier() -> HeavyPlayerController:
+	if ball == null:
+		return null
+	var toucher: HeavyPlayerController = ball.last_touched_by
+	if toucher != null and toucher.team != player.team:
+		return toucher
+	return null
 
 
 func _steer_for_action() -> Vector2:
