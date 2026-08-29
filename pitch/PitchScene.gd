@@ -176,17 +176,6 @@ func _bind_players() -> void:
 		squad_counts[player.team] = player.squad_index + 1
 		PlayerFactory.apply(player, DataLoader.get_player(player.team, player.squad_index), anchor)
 
-		if player.brain != null:
-			match player.brain.role:
-				PlayerBrain.Role.OUTFIELD_DEFENDER:
-					player.brain.formation_ball_weight = 0.15
-				PlayerBrain.Role.OUTFIELD_MIDFIELDER:
-					player.brain.formation_ball_weight = 0.28
-				PlayerBrain.Role.OUTFIELD_ATTACKER:
-					player.brain.formation_ball_weight = 0.42
-				PlayerBrain.Role.GOALKEEPER:
-					player.brain.formation_ball_weight = 0.05
-
 
 ## Hands control to whichever teammate is closest to the ball. Control transfers
 ## wholesale: the player being left behind hands off to its brain, which picks up
