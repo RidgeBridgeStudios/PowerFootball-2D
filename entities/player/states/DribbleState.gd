@@ -21,6 +21,9 @@ extends PlayerState
 ## --- Magnetism constants ----------------------------------------------------
 
 ## Pixels ahead of the player (along travel direction) the ball is pulled toward.
+## NOTE: unused by live logic — kept as a fallback reference value only. The
+## carry target now derives its offset from `close_control` dynamically (see
+## physics_process) so high-control players keep the ball tighter.
 const CARRY_OFFSET: float = 22.0
 
 ## Scales gap-in-pixels to correction px/s. 55.0 → 550 px/s per 10px gap.
@@ -141,7 +144,8 @@ func physics_process(player: HeavyPlayerController, delta: float) -> void:
 		if player.movement_intent.normalized().dot(to_opp) < -0.3:
 			shield_dir = -to_opp
 
-	var carry_target: Vector2 = player.global_position + shield_dir * CARRY_OFFSET
+	var dynamic_offset: float = lerpf(28.0, 16.0, player.get_close_control())
+	var carry_target: Vector2 = player.global_position + shield_dir * dynamic_offset
 	var offset: Vector2 = carry_target - ball.global_position
 
 	# --- Selective damping: kill lateral/reverse drift, preserve forward -----
@@ -180,6 +184,12 @@ func physics_process(player: HeavyPlayerController, delta: float) -> void:
 		var blend: float = clampf(player.get_speed_ratio() * 0.5, 0.0, 0.5)
 		touch_direction = carry_dir.lerp(desired, 1.0 - blend).normalized()
 
+	# When actively shielding (shield_dir was diverted away from carry_dir),
+	# push the ball slightly behind ourselves toward the shielded position
+	# rather than continuing straight along the carry direction.
+	if shield_dir != carry_dir:
+		touch_direction = touch_direction.lerp(shield_dir, 0.4).normalized()
+
 	var touch_speed: float = player.get_current_top_speed() * effective_touch_ratio
 	if player.is_sprinting:
 		touch_speed *= SPRINT_TOUCH_BONUS
@@ -187,6 +197,3 @@ func physics_process(player: HeavyPlayerController, delta: float) -> void:
 	ball.apply_kick(touch_direction * touch_speed, 0.0, player)
 	ball.set_possessor(player)
 	_touch_cooldown = effective_interval
-
-	# TODO: scale touch distance by a per-player `close_control` attribute and add
-	# a shielding variant when the stick points away from the nearest defender.
