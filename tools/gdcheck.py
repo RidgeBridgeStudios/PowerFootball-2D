@@ -231,7 +231,34 @@ def parse(path: str, text: str, problems: list[Problem]) -> ScriptInfo:
     return info
 
 
-def check_static_access(scripts: dict[str, ScriptInfo], problems: list[Problem]) -> None:
+def parse_autoload_entries(problems: list[Problem]) -> list[tuple[str, int, str]]:
+    """Reads the [autoload] section of project.godot: (name, line, relative path)."""
+    project = os.path.join(ROOT, "project.godot")
+    if not os.path.exists(project):
+        return []
+    with open(project, encoding="utf-8") as handle:
+        lines = handle.read().split("\n")
+
+    entries: list[tuple[str, int, str]] = []
+    in_section = False
+    for idx, raw in enumerate(lines, start=1):
+        line = raw.strip()
+        if line.startswith("["):
+            in_section = line == "[autoload]"
+            continue
+        if not in_section or not line or line.startswith(";"):
+            continue
+        m = re.match(r'(%s)\s*=\s*"\*?res://(.+)"' % IDENT, line)
+        if not m:
+            problems.append(Problem("ERROR", project, idx, "malformed autoload entry: " + line))
+            continue
+        entries.append((m.group(1), idx, m.group(2)))
+    return entries
+
+
+def check_static_access(
+    scripts: dict[str, ScriptInfo], problems: list[Problem], autoload_names: set[str]
+) -> None:
     by_name = {s.class_name: s for s in scripts.values() if s.class_name}
 
     def members_of(name: str, seen: set[str]) -> set[str]:
@@ -271,6 +298,8 @@ def check_static_access(scripts: dict[str, ScriptInfo], problems: list[Problem])
             for typename in type_re.findall(code):
                 if typename in ENGINE_TYPES or typename in by_name:
                     continue
+                if typename in autoload_names:
+                    continue
                 if typename in info.inner_classes or typename in info.members:
                     continue
                 if not typename[0].isupper():
@@ -280,27 +309,13 @@ def check_static_access(scripts: dict[str, ScriptInfo], problems: list[Problem])
                             "unknown type `%s` — no class_name and not an engine type" % typename))
 
 
-def check_autoloads(scripts: dict[str, ScriptInfo], problems: list[Problem]) -> None:
+def check_autoloads(
+    scripts: dict[str, ScriptInfo], problems: list[Problem], entries: list[tuple[str, int, str]]
+) -> None:
     project = os.path.join(ROOT, "project.godot")
-    if not os.path.exists(project):
-        return
-    with open(project, encoding="utf-8") as handle:
-        lines = handle.read().split("\n")
 
-    in_section = False
     order: list[str] = []
-    for idx, raw in enumerate(lines, start=1):
-        line = raw.strip()
-        if line.startswith("["):
-            in_section = line == "[autoload]"
-            continue
-        if not in_section or not line or line.startswith(";"):
-            continue
-        m = re.match(r'(%s)\s*=\s*"\*?res://(.+)"' % IDENT, line)
-        if not m:
-            problems.append(Problem("ERROR", project, idx, "malformed autoload entry: " + line))
-            continue
-        name, rel = m.group(1), m.group(2)
+    for name, idx, rel in entries:
         order.append(name)
         target = os.path.join(ROOT, rel)
         if not os.path.exists(target):
@@ -338,8 +353,11 @@ def main() -> int:
                         % (info.class_name, os.path.relpath(seen[info.class_name], ROOT))))
         seen[info.class_name] = path
 
-    check_static_access(scripts, problems)
-    check_autoloads(scripts, problems)
+    autoload_entries = parse_autoload_entries(problems)
+    autoload_names = {name for name, _idx, _rel in autoload_entries}
+
+    check_static_access(scripts, problems, autoload_names)
+    check_autoloads(scripts, problems, autoload_entries)
 
     errors = [p for p in problems if p.level == "ERROR"]
     warns = [p for p in problems if p.level == "WARN"]
