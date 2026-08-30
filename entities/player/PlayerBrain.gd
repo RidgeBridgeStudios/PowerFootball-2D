@@ -14,7 +14,13 @@
 ## Scheduling: the decision block is time-sliced on a 15-frame stagger keyed to
 ## player_index, so the 22 brains spread their evaluations across the interval
 ## rather than all thinking on the same tick. Steering still runs every physics
-## frame, so staggering costs nothing in responsiveness.
+## frame, so staggering costs nothing in responsiveness. At the engine's fixed
+## 60Hz physics tick this realizes a 250ms tactical slice per player (see
+## TACTICAL_SLICE_SECONDS) — heavy utility scoring runs once a slice, and the
+## chosen action is held (current_action, plus whichever _cached_* target it
+## resolved to) until the next slice. _validate_action_plan() runs every frame
+## regardless of slice boundary and can abort a queued Pass mid-slice if its
+## lane closes before the kick fires.
 ##
 ## Spatial reads: nothing here scans the scene tree. Every teammate/opponent
 ## query indexes MatchWorldModel, which refreshes once per frame at
@@ -119,6 +125,14 @@ const GOALIE_KNOCKDOWN_IMPULSE: float = 220.0
 ## a phase offset, this spreads 22 brains over 15 frames — at most two think on
 ## any given tick instead of all of them.
 const UPDATE_INTERVAL: int = 15
+
+## Documents the wall-clock cadence UPDATE_INTERVAL realizes at the engine's
+## fixed 60Hz physics tick — the "250ms tactical slice" the AI research report
+## calls for. Frames remain the source of truth for scheduling per
+## ai-architect.md's mandated ShouldUpdate(i,f) = ((i+f) % N == 0) stagger;
+## this constant is not read anywhere and exists purely so the 0.25s figure is
+## named in code rather than only in comments.
+const TACTICAL_SLICE_SECONDS: float = UPDATE_INTERVAL / 60.0
 
 ## Running decision interval, adjusted by set_pressing_intensity(). Starts at
 ## the UPDATE_INTERVAL default and is the value the stagger gate actually reads.
@@ -315,6 +329,12 @@ func _physics_process(delta: float) -> void:
 			player.movement_intent = _steer_toward_ball_direct()
 		return
 
+	# Mid-slice validation: cheap, runs every frame regardless of whether this
+	# is a decision tick, and only does real work while a Pass is queued — an
+	# opponent can step into the lane in the ~250ms between slices, and the
+	# receiver can be sent off before the kick fires.
+	_validate_action_plan()
+
 	_frame_counter += 1
 
 	if (_frame_counter + player_index) % _effective_update_interval == 0:
@@ -343,6 +363,63 @@ func _steer_toward_ball_direct() -> Vector2:
 	if offset.length() < ARRIVE_RADIUS:
 		return Vector2.ZERO
 	return offset.normalized()
+
+
+## Checks the plan chosen at the last tactical slice against the current world
+## state and aborts it if it has gone stale. Only Pass needs this: ChaseBall,
+## PanicClear, AttemptDribble and AttemptShoot all re-read the ball's live
+## position every frame via get_target_position()/_steer_for_action(), so they
+## never hold a stale target. A queued Pass is the one action that commits to
+## a specific teammate and lane at the slice tick and then waits — sometimes
+## several frames — for the ball to be in foot range before it actually fires.
+func _validate_action_plan() -> void:
+	if current_action != &"Pass" or _cached_pass_target == null:
+		return
+	if not _is_pass_plan_still_valid():
+		_abort_action_plan()
+
+
+## True if the queued pass is still safe to hit: the receiver is alive, still
+## registered in the world model (a red card nulls its slot without freeing
+## the node), still a teammate, and the lane between the ball and them is
+## still clear of opponents. Re-checks only the one already-cached candidate —
+## cheap enough to run every frame, unlike _find_best_pass_target()'s full
+## roster scan for the best candidate.
+func _is_pass_plan_still_valid() -> bool:
+	if not is_instance_valid(_cached_pass_target):
+		return false
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null or ball == null or player == null:
+		return false
+	if not world.is_slot_live(_cached_pass_target.world_index):
+		return false
+	if _cached_pass_target.team != player.team:
+		return false
+
+	var ball_pos: Vector2 = ball.global_position
+	var target_pos: Vector2 = _cached_pass_target.global_position
+	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+		if not is_instance_valid(world.player_nodes[i]):
+			continue
+		if world.player_teams[i] == player.team:
+			continue
+		if UtilityMath.is_lane_blocked(ball_pos, target_pos, world.player_positions[i], PASS_LANE_CLEARANCE):
+			return false
+	return true
+
+
+## Clean abort path for a stale plan: drop back to the conservative default
+## and pull this player's next slice forward to the very next frame instead of
+## waiting out the remainder of _effective_update_interval, so the abort reads
+## as an instant change of mind rather than a freeze. There is no controller
+## intent to unwind — the kick that would have committed the receiver's
+## pass-lock (see _steer_for_action()'s Pass-execution block) never fired, so
+## the receiver was never touched and nothing downstream needs cleanup beyond
+## this brain's own cached target.
+func _abort_action_plan() -> void:
+	_cached_pass_target = null
+	current_action = &"MaintainFormation"
+	_frame_counter = _effective_update_interval - player_index - 1
 
 
 ## Runs every physics frame for a goalkeeper — not gated by UPDATE_INTERVAL —
