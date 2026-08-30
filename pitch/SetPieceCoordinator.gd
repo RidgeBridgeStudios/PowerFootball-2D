@@ -240,9 +240,13 @@ func _begin_set_piece(phase: int, team: int, position: Vector2) -> void:
 ## Common tail of every restart: freeze the pitch, park the ball, pick a taker,
 ## push the opposition back, and wait for the go-ahead.
 func _setup_taking_side(phase: int, team: int, position: Vector2) -> void:
+	# Snapshot before freezing — _freeze_all_players() clears is_user_controlled
+	# on every player, so _assign_taker()'s kickoff branch would otherwise always
+	# read false here regardless of which side the human actually plays.
+	var team_has_human: bool = _team_has_human(team)
 	_freeze_all_players()
 	_ball.reset_at(position)
-	_assign_taker(team)
+	_assign_taker(team, team_has_human)
 	_position_defending_players(phase)
 	_await_taker_confirmation()
 
@@ -262,7 +266,11 @@ func _freeze_all_players() -> void:
 		player.state_factory.transition_to(PlayerState.SET_PIECE_FREEZE)
 
 
-func _assign_taker(team: int) -> void:
+## `kickoff_team_has_human` is only meaningful for a KICKOFF restart — it must
+## be resolved by the caller before _freeze_all_players() runs (see
+## _setup_taking_side), since that clears is_user_controlled on every player
+## before this function ever sees it.
+func _assign_taker(team: int, kickoff_team_has_human: bool = false) -> void:
 	var spot: Vector2 = GameManager.set_piece_position
 
 	_taker_candidates.clear()
@@ -298,7 +306,7 @@ func _assign_taker(team: int) -> void:
 	# regardless of which team was controlled before the goal, so the human who
 	# just conceded is the one holding the pad for the restart.
 	if GameManager.current_phase == GameManager.MatchPhase.KICKOFF:
-		_taker_is_human = _team_has_human(team)
+		_taker_is_human = kickoff_team_has_human
 	if _taker_is_human:
 		_current_taker.is_user_controlled = true
 		# Reuse the existing player-switch channel so the HUD (power meter,

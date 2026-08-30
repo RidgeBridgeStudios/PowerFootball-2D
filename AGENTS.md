@@ -55,6 +55,14 @@ python3 tools/gdcheck.py
 ```
 Do not stop until output shows `0 errors`.
 
+`gdcheck.py` reads `[autoload]` from `project.godot` and treats every
+autoload name (e.g. `MatchWorldModel`) as a known type even when its script
+has no `class_name` — that's deliberate, since Godot 4.7+ rejects a
+`class_name` that collides with an autoload's injected global name. If
+gdcheck ever reports `unknown type` for an autoload, fix `gdcheck.py`'s
+autoload parsing — never "fix" it by adding `class_name` to the autoload
+script itself.
+
 ## 5. Context Budget — Non-Claude Sessions
 
 Hard limits (no `/compact` available):

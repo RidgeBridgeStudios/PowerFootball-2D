@@ -73,6 +73,18 @@ RefCounted / Resource surface (`new`, `instantiate`, `duplicate`, `connect`,
 `call`, `free`, ...). `TeamData.new()` is valid despite `new` appearing
 nowhere in `TeamData.gd`.
 
+### gdcheck resolves autoload singleton names as types — never "fix" this by adding class_name
+`tools/gdcheck.py` used to flag every `var x: MatchWorldModel` (or any other
+autoload used as a type annotation) as `unknown type — no class_name and not
+an engine type`, because it only recognised types with a declared
+`class_name`. `MatchWorldModel.gd` deliberately has no `class_name` — Godot
+4.7+ rejects a `class_name` that collides with an autoload's injected global
+name — so the fix was in the checker, not the script: `gdcheck.py` now reads
+`[autoload]` from `project.godot` once (`parse_autoload_entries()`) and
+treats every autoload name as a known type in `check_static_access()`. If a
+type-annotation error ever names an autoload again, the bug is in the
+checker's autoload parsing, not a missing `class_name` — do not add one.
+
 ### This container has no engine and no GUT
 Neither a `godot` binary nor `addons/gut/` exists here, so
 `godot --headless -s addons/gut/gut_cmdln.gd -gexit` cannot run and its absence
