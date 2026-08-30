@@ -99,6 +99,19 @@ extends Node
 
 enum Role { OUTFIELD_ATTACKER, OUTFIELD_MIDFIELDER, OUTFIELD_DEFENDER, GOALKEEPER }
 
+## Pressing-duty assignment for OUTFIELD_DEFENDER while MatchWorldModel's
+## pressing trigger is active — see _resolve_defensive_duty(). Deliberately
+## small: one defender presses, nearby cover blocks a lane, everyone else
+## falls back to the pre-existing hold-the-line/mark-the-threat behaviour
+## _find_open_space_target() already had. NONE outside a live trigger.
+enum DefensiveDuty {
+	NONE,          ## No active trigger, or this role does not take a duty.
+	TRIGGER_PRESS, ## The one defender closest to the trigger carrier — closes down.
+	COVER_SHADOW,  ## A nearby defender not pressing — cuts a likely passing lane instead.
+	MARKING,       ## Reserved fallback label — currently folded into RETREAT's target.
+	RETREAT,       ## Too far from the trigger to be relevant — hold the defensive line.
+}
+
 ## Snapshot of situational inputs computed once per decision tick and shared
 ## across all scorer functions. Avoids recomputing the same distances and
 ## teammate counts multiple times inside a single evaluation.
@@ -132,6 +145,26 @@ const CHASE_RADIUS: float = 220.0
 ## still outscore it — this nudges the chase/hold-shape balance, it does not
 ## override it.
 const PRESS_TRIGGER_CHASE_BONUS: float = 0.18
+
+## Extra additive bonus to _score_chase() for the single OUTFIELD_DEFENDER
+## _resolve_defensive_duty() has actually assigned TRIGGER_PRESS this tick, on
+## top of PRESS_TRIGGER_CHASE_BONUS above. Large enough that the coordinated
+## presser decisively wins the chase/hold-shape comparison rather than merely
+## nudging it -- the whole point of naming one presser is that they commit.
+const DUTY_TRIGGER_PRESS_CHASE_BONUS: float = 0.30
+
+## Distance from the pressing trigger's carrier inside which a non-pressing
+## OUTFIELD_DEFENDER is close enough to matter as support -- see
+## _resolve_defensive_duty(). Beyond this the defender is too far from the
+## pressing situation to usefully shadow a lane and just holds the back line
+## (DefensiveDuty.MARKING / RETREAT -- the pre-existing default behaviour).
+const COVER_SHADOW_RADIUS: float = 320.0
+## How far along the lane between the trigger carrier and this defender's own
+## nearest marked threat (see _find_nearest_threatening_opponent()) the
+## cover-shadow position sits. 0.0 sits on the carrier, 1.0 sits on the
+## threat; 0.5 is the lane midpoint, which reads on screen as "cutting the
+## pass" rather than either "guarding the ball" or "marking the man".
+const COVER_SHADOW_LANE_RATIO: float = 0.5
 
 ## How strongly a defender's default "hold shape" X target is pulled toward
 ## MatchWorldModel.defensive_line_x[team] — the shared band depth — versus
@@ -220,6 +253,10 @@ var player: HeavyPlayerController = null
 var ball: Pseudo3DBall = null
 var pitch_boundary: PitchBoundary = null
 var current_action: StringName = &"MaintainFormation"
+## This tick's pressing-duty assignment (OUTFIELD_DEFENDER only) — see
+## DefensiveDuty and _resolve_defensive_duty(). Recomputed alongside
+## current_action at every decision tick; NONE the rest of the time.
+var current_duty: DefensiveDuty = DefensiveDuty.NONE
 
 ## Counts down while a committed GoalieDive is in progress.
 var _goalie_dive_timer: float = 0.0
@@ -434,6 +471,7 @@ func _physics_process(delta: float) -> void:
 				current_action = evaluate_tactical_action(_find_nearby_opponents())
 		else:
 			current_action = evaluate_tactical_action(_find_nearby_opponents())
+			current_duty = _resolve_defensive_duty()
 			_cached_space_target = _find_open_space_target()
 			_cached_separation = _separation_force()
 			if role == Role.OUTFIELD_DEFENDER:
@@ -635,6 +673,14 @@ func _score_chase(ctx: UtilityContext) -> float:
 		base = clampf(base - back_penalty, 0.0, 1.0)
 
 	base += _press_trigger_chase_bonus(ctx)
+
+	# The one defender _resolve_defensive_duty() named as presser this tick
+	# commits decisively rather than merely being nudged toward chasing —
+	# without this, a covering teammate's own small press-trigger bonus above
+	# could occasionally outscore the assigned presser and both end up diving
+	# in, defeating the point of naming a single presser.
+	if role == Role.OUTFIELD_DEFENDER and current_duty == DefensiveDuty.TRIGGER_PRESS:
+		base += DUTY_TRIGGER_PRESS_CHASE_BONUS
 
 	return clampf(base, 0.0, 1.0)
 
@@ -1274,6 +1320,16 @@ func _find_open_space_target() -> Vector2:
 				safe_pos = safe_pos.lerp(ball_pos, 0.08)
 				return _evaluate_off_ball_target(safe_pos)
 			else:
+				# Cover-shadow duty overrides the default hold-line/mark-
+				# threat target below: _resolve_defensive_duty() has
+				# already named a different teammate as the presser, so
+				# this defender's job right now is cutting a passing lane
+				# near the pressing situation, not standing on the line.
+				if current_duty == DefensiveDuty.COVER_SHADOW:
+					var world_press: MatchWorldModel = MatchWorldModel.instance
+					if world_press != null and is_instance_valid(world_press.press_trigger_carrier):
+						return _cover_shadow_target(world_press.press_trigger_carrier)
+
 				# Shared band depth: pull this defender's default hold-shape
 				# X target toward MatchWorldModel.defensive_line_x[team] — the
 				# world-level line every defender on this team reads, stepped
@@ -1425,6 +1481,79 @@ func _find_nearest_threatening_opponent() -> HeavyPlayerController:
 				best = other
 
 	return best
+
+
+## Assigns this tick's pressing duty for an OUTFIELD_DEFENDER while
+## MatchWorldModel's pressing trigger is active — see DefensiveDuty. Every
+## live defender on the team reads the same synchronized world-model snapshot
+## this tick, so each one independently resolves "am I the closest defender
+## to the carrier" to the same single answer without any central coordinator
+## — the same pattern _should_chase_ball()'s role budget already relies on.
+## Non-defenders, and defenders when no trigger concerns an opponent carrier,
+## always resolve to NONE and are unaffected.
+func _resolve_defensive_duty() -> DefensiveDuty:
+	if role != Role.OUTFIELD_DEFENDER or player == null:
+		return DefensiveDuty.NONE
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null or not world.press_trigger_active:
+		return DefensiveDuty.NONE
+	if _team_has_ball():
+		return DefensiveDuty.NONE
+	var carrier: HeavyPlayerController = world.press_trigger_carrier
+	if not is_instance_valid(carrier) or carrier.team == player.team:
+		return DefensiveDuty.NONE
+
+	var my_dist: float = player.global_position.distance_to(carrier.global_position)
+	var someone_closer: bool = false
+	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+		var other: HeavyPlayerController = world.player_nodes[i]
+		if not is_instance_valid(other) or other == player:
+			continue
+		if world.player_teams[i] != player.team:
+			continue
+		var other_brain := other.get_node_or_null("PlayerBrain") as PlayerBrain
+		if other_brain == null or other_brain.role != Role.OUTFIELD_DEFENDER:
+			continue
+		var other_dist: float = world.player_positions[i].distance_to(carrier.global_position)
+		# Tie-break on player_index so an exact distance tie still resolves to
+		# a single presser instead of both defenders claiming the duty.
+		if other_dist < my_dist or (is_equal_approx(other_dist, my_dist) and i < player_index):
+			someone_closer = true
+			break
+
+	if not someone_closer:
+		return DefensiveDuty.TRIGGER_PRESS
+	if my_dist <= COVER_SHADOW_RADIUS:
+		return DefensiveDuty.COVER_SHADOW
+	# Too far from the pressing situation to usefully shadow a lane — label
+	# only, the pre-existing hold-shape branch in _find_open_space_target()
+	# already picks between marking a real threat and holding the line.
+	return DefensiveDuty.MARKING if _find_nearest_threatening_opponent() != null else DefensiveDuty.RETREAT
+
+
+## Cover-shadow target for a supporting defender: a point that cuts the
+## passing lane between the pressing trigger's carrier and this defender's
+## own nearest marked threat, rather than either standing off passively or
+## piling onto the ball like the presser. Different defenders track different
+## threats (_find_nearest_threatening_opponent() is per-player), so several
+## COVER_SHADOW defenders naturally spread across different lanes instead of
+## clumping on one point.
+func _cover_shadow_target(carrier: HeavyPlayerController) -> Vector2:
+	if player == null or not is_instance_valid(carrier):
+		return formation_anchor
+
+	var threat: HeavyPlayerController = _find_nearest_threatening_opponent()
+	var lane_far_point: Vector2 = threat.global_position if threat != null else formation_anchor
+	var shadow_pos: Vector2 = carrier.global_position.lerp(lane_far_point, COVER_SHADOW_LANE_RATIO)
+
+	# Still respect the shared defensive line depth so cover-shadowing never
+	# drags the back line badly out of shape — same blend
+	# Role.OUTFIELD_DEFENDER's default hold-line target already applies.
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world != null:
+		shadow_pos.x = lerpf(shadow_pos.x, world.defensive_line_x[player.team], DEFENSIVE_LINE_DEPTH_WEIGHT)
+
+	return shadow_pos
 
 
 ## Repels this player from teammates within sep_radius so off-ball players
