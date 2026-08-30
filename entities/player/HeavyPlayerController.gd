@@ -309,24 +309,29 @@ func apply_kinematic_weight(input_dir: Vector2, delta: float) -> void:
 
 	var direction: Vector2 = input_dir / deflection
 	var target_velocity: Vector2 = direction * get_current_top_speed() * deflection
+	var current_speed: float = velocity.length()
 
 	# How far off the current heading is the requested one? 0.0 = straight
 	# ahead, 1.0 = a full reversal. Below TURN_EVAL_SPEED there is no meaningful
 	# heading to fight against.
 	var turn_severity: float = 0.0
-	if velocity.length() > TURN_EVAL_SPEED:
-		turn_severity = 1.0 - clampf(velocity.normalized().dot(direction), 0.0, 1.0)
+	var dot_heading: float = 1.0
+	if current_speed > TURN_EVAL_SPEED:
+		dot_heading = velocity.normalized().dot(direction)
+		# Map cosine from [-1.0, 1.0] smoothly to [1.0, 0.0] severity:
+		# 0° (dot=1.0) -> 0.0, 90° (dot=0.0) -> 0.5, 180° (dot=-1.0) -> 1.0
+		turn_severity = clampf((1.0 - dot_heading) * 0.5, 0.0, 1.0)
 
 	var penalty: float = turning_penalty_factor * turn_severity
 	var effective_acceleration: float = base_acceleration * maxf(1.0 - penalty, MIN_ACCELERATION_RATIO)
 
-	# A sharp turn should bleed pace, not merely accelerate slowly. When the new
-	# target is slower than the current speed, friction scaled by the turn
-	# penalty takes over, so hard changes of direction cost real momentum while
-	# a gentle curve costs almost nothing.
+	# A sharp turn or reversal should bleed pace, not merely accelerate slowly. When the new
+	# target is slower than the current speed OR the player is cutting back against heading,
+	# friction scaled by the turn penalty takes over.
 	var rate: float = effective_acceleration
-	if target_velocity.length() < velocity.length():
-		rate = maxf(effective_acceleration, base_friction * penalty)
+	if target_velocity.length() < current_speed or (current_speed > TURN_EVAL_SPEED and dot_heading < 0.0):
+		var brake_friction: float = base_friction * maxf(penalty, 0.5)
+		rate = maxf(effective_acceleration, brake_friction)
 
 	velocity = velocity.move_toward(target_velocity, rate * delta)
 

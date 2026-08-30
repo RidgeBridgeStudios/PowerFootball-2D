@@ -80,5 +80,6 @@ static func get_dynamic_anchor_position(
 	var push: float = float(_PHASE_LINE_PUSH.get(phase, 0.0)) \
 		* float(_ROLE_PHASE_SENSITIVITY.get(role, 1.0)) * attack_sign
 	pulled_norm.x = clampf(pulled_norm.x + push, -1.0, 1.0)
+	pulled_norm.y = clampf(pulled_norm.y, -1.0, 1.0)
 
 	return pitch_centre + pulled_norm * half

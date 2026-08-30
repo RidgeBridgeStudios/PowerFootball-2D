@@ -200,13 +200,18 @@ func predict_trajectory(impulse_xy: Vector2, impulse_z: float, steps: int = 25, 
 	var sim_pos_z: float = position_z
 	var sim_vel_z: float = impulse_z
 	var sim_grounded: bool = is_on_ground and is_zero_approx(impulse_z)
+	var effective_friction: float = pitch_friction * (1.0 - surface_wetness * 0.45)
 
 	for i: int in range(steps):
 		if sim_grounded:
-			sim_vel_xy = sim_vel_xy.move_toward(Vector2.ZERO, pitch_friction * FRICTION_SCALE * dt)
+			var drag_force: float = effective_friction * sim_vel_xy.length()
+			sim_vel_xy = sim_vel_xy.move_toward(Vector2.ZERO, (drag_force + REST_DRAG_FLAT) * dt)
+			if sim_vel_xy.length() < rest_speed:
+				sim_vel_xy = Vector2.ZERO
 		else:
 			sim_vel_xy -= sim_vel_xy * air_resistance * dt
 			sim_vel_z -= gravity * dt
+			sim_vel_z -= sim_vel_z * air_resistance * dt
 			sim_pos_z += sim_vel_z * dt
 
 			if sim_pos_z <= 0.0:

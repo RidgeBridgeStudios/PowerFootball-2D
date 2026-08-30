@@ -34,7 +34,7 @@ func bind(boundary: PitchBoundary, coordinator: SetPieceCoordinator) -> void:
 		GameEvents.ball_struck.connect(_on_ball_struck)
 
 
-func _on_ball_struck(striker: Node, _speed: float, _charge_ratio: float) -> void:
+func _on_ball_struck(striker: Node, _speed: float, _charge_ratio: float, _is_shot: bool = false) -> void:
 	if GameManager.current_phase != GameManager.MatchPhase.IN_PLAY:
 		return
 	if _boundary == null or _coordinator == null:
@@ -98,23 +98,33 @@ func _compute_offside_line(defending_team: int) -> float:
 	# the negative-X goal, team 1 the positive-X goal.
 	var goal_direction: float = -1.0 if defending_team == 0 else 1.0
 
-	var defender_xs: Array[float] = []
+	var deepest_score: float = -INF
+	var second_deepest_score: float = -INF
+	var second_deepest_x: float = _boundary.get_goal_centre(defending_team).x
+
 	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
 		var node: HeavyPlayerController = world.player_nodes[i]
 		if node == null or not is_instance_valid(node):
 			continue
 		if world.player_teams[i] != defending_team:
 			continue
-		defender_xs.append(world.player_positions[i].x)
 
-	if defender_xs.size() < 2:
+		var px: float = world.player_positions[i].x
+		var score: float = px * goal_direction
+
+		if score > deepest_score:
+			second_deepest_score = deepest_score
+			if second_deepest_score > -INF:
+				second_deepest_x = world.player_positions[i].x
+			deepest_score = score
+		elif score > second_deepest_score:
+			second_deepest_score = score
+			second_deepest_x = px
+
+	if second_deepest_score == -INF:
 		return _boundary.get_goal_centre(defending_team).x
 
-	# Deepest defender (closest to their own goal line) first.
-	defender_xs.sort_custom(func(a: float, b: float) -> bool:
-		return a * goal_direction > b * goal_direction
-	)
-	return defender_xs[1]
+	return second_deepest_x
 
 
 ## True only when the recipient is past the halfway line, ahead of the ball,

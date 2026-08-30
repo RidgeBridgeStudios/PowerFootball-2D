@@ -117,8 +117,13 @@ static func score_pass(
 	if distance > MAX_USEFUL_DISTANCE:
 		return 0.0
 
-	var distance_utility: float = UtilityMath.quadratic_decay(
-		absf(distance - PREFERRED_DISTANCE), PREFERRED_DISTANCE)
+	var distance_utility: float
+	if distance <= PREFERRED_DISTANCE:
+		distance_utility = UtilityMath.quadratic_decay(PREFERRED_DISTANCE - distance, PREFERRED_DISTANCE)
+	else:
+		var max_tail: float = MAX_USEFUL_DISTANCE - PREFERRED_DISTANCE
+		distance_utility = UtilityMath.quadratic_decay(distance - PREFERRED_DISTANCE, max_tail)
+
 	var angle_utility: float = clampf((passer_facing_dot + 1.0) * 0.5, 0.0, 1.0)
 	var pressure_utility: float = clampf(receiver_open_dist / RECEIVER_OPEN_RADIUS, 0.0, 1.0)
 	var advancement_utility: float = clampf((forward_dot + 1.0) * 0.5, 0.0, 1.0)
@@ -149,8 +154,12 @@ static func score_pass_breakdown(
 	if distance > MAX_USEFUL_DISTANCE:
 		return result
 
-	result.distance_utility = UtilityMath.quadratic_decay(
-		absf(distance - PREFERRED_DISTANCE), PREFERRED_DISTANCE)
+	if distance <= PREFERRED_DISTANCE:
+		result.distance_utility = UtilityMath.quadratic_decay(PREFERRED_DISTANCE - distance, PREFERRED_DISTANCE)
+	else:
+		var max_tail: float = MAX_USEFUL_DISTANCE - PREFERRED_DISTANCE
+		result.distance_utility = UtilityMath.quadratic_decay(distance - PREFERRED_DISTANCE, max_tail)
+
 	result.angle_utility = clampf((passer_facing_dot + 1.0) * 0.5, 0.0, 1.0)
 	result.pressure_utility = clampf(receiver_open_dist / RECEIVER_OPEN_RADIUS, 0.0, 1.0)
 	result.advancement_utility = clampf((forward_dot + 1.0) * 0.5, 0.0, 1.0)

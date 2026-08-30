@@ -66,8 +66,8 @@ static func calculate_intercept_point(
 
 	# A zero or negative friction would never stop the ball; clamp the horizon
 	# to something finite so the bisection still terminates on a sane interval.
-	var safe_friction: float = maxf(friction, 0.001)
-	var t_stop: float = b_speed / safe_friction
+	var safe_friction: float = maxf(friction, 10.0)
+	var t_stop: float = clampf(b_speed / safe_friction, 0.05, 5.0)
 
 	var safe_speed: float = maxf(p_max_speed, 1.0)
 
@@ -87,7 +87,7 @@ static func calculate_intercept_point(
 
 	var t_final: float = hi
 	var final_travel: float = b_speed * t_final - 0.5 * safe_friction * t_final * t_final
-	return b_pos + b_dir * final_travel
+	return b_pos + b_dir * maxf(final_travel, 0.0)
 
 
 ## Returns the closest point on segment [seg_start, seg_end] to `point`.

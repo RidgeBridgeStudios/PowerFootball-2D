@@ -202,7 +202,7 @@ const GOALIE_DIVE_DOT_THRESHOLD: float = 0.55
 ## airborne ball qualifies regardless of speed.
 const GOALIE_DIVE_SPEED_THRESHOLD: float = 200.0
 ## Seconds a committed dive holds before the keeper returns to patrol.
-const GOALIE_DIVE_DURATION: float = 0.5
+const GOALIE_DIVE_DURATION: float = 0.55
 ## Knockback impulse applied to an opponent caught in the crowd-knockdown
 ## hitbox during a dive.
 const GOALIE_KNOCKDOWN_IMPULSE: float = 220.0
@@ -337,6 +337,9 @@ var _blend_timer: float = 0.0
 ## generator. Reseeded per tick to keep the noise deterministic per player.
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
+## Reusable context instance to eliminate heap allocations on hot decision paths.
+var _ctx: UtilityContext = UtilityContext.new()
+
 ## Scratch list handed to evaluate_tactical_action(). Refilled in place each
 ## decision tick rather than reallocated. Only _find_nearby_opponents() writes
 ## it, and only one call is live at a time.
@@ -465,7 +468,7 @@ func _physics_process(delta: float) -> void:
 			# Reset the frame counter so this player evaluates on its next tick.
 			# Subtracting player_index ensures the evaluation lands on a frame
 			# where ((_frame_counter + player_index) % _effective_update_interval == 0).
-			_frame_counter = _effective_update_interval - player_index - 1
+			_frame_counter = (_effective_update_interval * 16) - player_index - 1
 
 	if _transition_timer > 0.0:
 		_transition_timer = maxf(_transition_timer - delta, 0.0)
@@ -582,7 +585,7 @@ func _is_pass_plan_still_valid() -> bool:
 func _abort_action_plan() -> void:
 	_cached_pass_target = null
 	current_action = &"MaintainFormation"
-	_frame_counter = _effective_update_interval - player_index - 1
+	_frame_counter = (_effective_update_interval * 16) - player_index - 1
 
 
 ## Runs every physics frame for a goalkeeper — not gated by UPDATE_INTERVAL —
@@ -653,42 +656,40 @@ func _get_attack_direction() -> Vector2:
 	return Vector2(_get_attack_sign(), 0.0)
 
 
-## Builds the UtilityContext snapshot for one decision tick.
-func _build_context(defenders_nearby: Array[Node2D]) -> UtilityContext:
-	var ctx := UtilityContext.new()
-
-	ctx.pressure = calculate_pressure_index(defenders_nearby)
+## Builds the UtilityContext snapshot for one decision tick (reusing _ctx in-place).
+func _build_context(defenders_nearby: Array[Node2D] = []) -> UtilityContext:
+	_ctx.pressure = calculate_pressure_index(defenders_nearby)
 
 	# Read base attributes, then layer mood on top. Mood never mutates the
 	# exported attributes — it is applied only at the decision site so the
 	# Inspector always shows the base talent regardless of in-match state.
 	var mood_node: MoodSystem = player.get_mood() if player != null else null
-	ctx.eff_vision      = clampf(vision_attribute      + (mood_node.get_vision_delta()      if mood_node != null else 0.0), 0.0, 1.0)
-	ctx.eff_composure   = clampf(composure_attribute   + (mood_node.get_composure_delta()   if mood_node != null else 0.0), 0.0, 1.0)
-	ctx.eff_aggression  = clampf(aggression_attribute  + (mood_node.get_aggression_delta()  if mood_node != null else 0.0), 0.0, 1.0)
+	_ctx.eff_vision      = clampf(vision_attribute      + (mood_node.get_vision_delta()      if mood_node != null else 0.0), 0.0, 1.0)
+	_ctx.eff_composure   = clampf(composure_attribute   + (mood_node.get_composure_delta()   if mood_node != null else 0.0), 0.0, 1.0)
+	_ctx.eff_aggression  = clampf(aggression_attribute  + (mood_node.get_aggression_delta()  if mood_node != null else 0.0), 0.0, 1.0)
 
-	ctx.dist_to_ball = player.global_position.distance_to(ball.global_position) if ball != null else INF
-	ctx.stamina_ratio = player.get_stamina_ratio()
+	_ctx.dist_to_ball = player.global_position.distance_to(ball.global_position) if ball != null else INF
+	_ctx.stamina_ratio = player.get_stamina_ratio()
 	var is_throw_in_taker: bool = player != null and player.state_factory != null and player.state_factory.current_state == &"ThrowIn"
-	ctx.team_has_ball = _team_has_ball() or is_throw_in_taker
-	ctx.is_possessor  = (ball != null and ball.possessor == player) or is_throw_in_taker
-	ctx.sprint_locked = player.sprint_locked
+	_ctx.team_has_ball = _team_has_ball() or is_throw_in_taker
+	_ctx.is_possessor  = (ball != null and ball.possessor == player) or is_throw_in_taker
+	_ctx.sprint_locked = player.sprint_locked
 
 	# Forward direction toward the opponent goal. Team A attacks toward +X.
 	if pitch_boundary != null:
 		var opp_team: int = 1 - player.team
-		ctx.dist_to_goal = player.global_position.distance_to(
+		_ctx.dist_to_goal = player.global_position.distance_to(
 			pitch_boundary.get_goal_centre(opp_team))
 	else:
-		ctx.dist_to_goal = 800.0
+		_ctx.dist_to_goal = 800.0
 
 	# Cache best pass target once per tactical slice here to avoid repeating
 	# the entire 22-player evaluation loop in evaluate_tactical_action().
-	_cached_pass_target = _find_best_pass_target(ctx.pressure)
-	ctx.open_teammate_exists = _cached_pass_target != null
-	ctx.chase_is_legal       = _should_chase_ball()
+	_cached_pass_target = _find_best_pass_target(_ctx.pressure)
+	_ctx.open_teammate_exists = _cached_pass_target != null
+	_ctx.chase_is_legal       = _should_chase_ball()
 
-	return ctx
+	return _ctx
 
 
 ## Score for choosing Pass.
@@ -911,8 +912,8 @@ func _should_goalkeeper_rush() -> bool:
 
 ## Turns the contextual vector into an action name. Returned names are
 ## deliberately tactical rather than mechanical — the steering layer decides how
-## to execute them.
-func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
+## to execute them. Allocation-free hot path.
+func evaluate_tactical_action(defenders_nearby: Array[Node2D] = []) -> StringName:
 	if is_goalkeeper:
 		if _should_goalkeeper_rush():
 			return &"GoalieRush"
@@ -930,36 +931,39 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 		else:
 			return &"FindSpace"
 
-	# --- Utility scoring ---
-	# Hard guards above have already filtered out PanicClear.
-	# Now build a scored candidate list — the highest score wins.
-	# Ties are broken by the order of the array (pass > chase > space > dribble > formation).
-
-	var candidates: Array[Dictionary] = [
-		{ &"action": &"Pass",              "score": _score_pass(ctx)              },
-		{ &"action": &"ChaseBall",         "score": _score_chase(ctx)             },
-		{ &"action": &"FindSpace",         "score": _score_find_space(ctx)        },
-		{ &"action": &"AttemptDribble",    "score": _score_dribble(ctx)           },
-		{ &"action": &"AttemptShoot",      "score": _score_shoot(ctx)             },
-		{ &"action": &"MaintainFormation", "score": _score_maintain_formation(ctx)},
-	]
-
-	# Add a small noise term so two players in identical situations make
-	# slightly different choices — they won't always run to the same spot.
+	# --- Utility scoring (Zero dynamic allocations) ---
 	# Noise is seeded from the player's instance id so it is deterministic per
 	# player but different between players; the match tick varies it per tick.
-	# The generator itself is a class member, reseeded rather than reallocated.
 	var noise_seed: int = player.get_instance_id() + GameManager.get_match_tick()
 	_rng.seed = noise_seed
-	for c: Dictionary in candidates:
-		c["score"] = clampf(c["score"] + _rng.randf_range(-0.04, 0.04), 0.0, 1.0)
 
 	var best_action: StringName = &"MaintainFormation"
-	var best_score: float = -1.0
-	for c: Dictionary in candidates:
-		if c["score"] > best_score:
-			best_score = c["score"]
-			best_action = c[&"action"]
+	var best_score: float = clampf(_score_maintain_formation(ctx) + _rng.randf_range(-0.04, 0.04), 0.0, 1.0)
+
+	var s_pass: float = clampf(_score_pass(ctx) + _rng.randf_range(-0.04, 0.04), 0.0, 1.0)
+	if s_pass > best_score:
+		best_score = s_pass
+		best_action = &"Pass"
+
+	var s_chase: float = clampf(_score_chase(ctx) + _rng.randf_range(-0.04, 0.04), 0.0, 1.0)
+	if s_chase > best_score:
+		best_score = s_chase
+		best_action = &"ChaseBall"
+
+	var s_space: float = clampf(_score_find_space(ctx) + _rng.randf_range(-0.04, 0.04), 0.0, 1.0)
+	if s_space > best_score:
+		best_score = s_space
+		best_action = &"FindSpace"
+
+	var s_dribble: float = clampf(_score_dribble(ctx) + _rng.randf_range(-0.04, 0.04), 0.0, 1.0)
+	if s_dribble > best_score:
+		best_score = s_dribble
+		best_action = &"AttemptDribble"
+
+	var s_shoot: float = clampf(_score_shoot(ctx) + _rng.randf_range(-0.04, 0.04), 0.0, 1.0)
+	if s_shoot > best_score:
+		best_score = s_shoot
+		best_action = &"AttemptShoot"
 
 	return best_action
 
