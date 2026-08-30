@@ -1,0 +1,28 @@
+# Google AI Studio / Gemini Indexing Ignore Rules
+# Mirrors .gitignore and prevents token waste on binary assets, engine caches, and generated artifacts.
+
+# Godot engine caches and export presets
+.godot/
+export_presets.cfg
+build/
+bin/
+dist/
+
+# Godot 4.4+ import files and auto-generated UID caches (regenerated dynamically on demand)
+*.import
+*.uid
+*.ctex
+*.md5
+*.cache
+*.bin
+
+# Temporary build, art, and editor artifacts
+art/**/*.import
+art/**/*.tmp
+*.tmp
+*.bak
+*.log
+*.swp
+*~
+.DS_Store
+Thumbs.db
