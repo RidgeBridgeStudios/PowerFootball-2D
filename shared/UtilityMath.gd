@@ -12,8 +12,9 @@
 ## small enough to state in its own doc comment.
 ##
 ## Depends on: nothing.
-## Exposes: calculate_intercept_point(), is_lane_blocked(), quadratic_decay(),
-##          sigmoid()
+## Exposes: calculate_intercept_point(), closest_point_on_segment(),
+##          distance_to_segment(), distance_squared_to_segment(),
+##          is_lane_blocked(), quadratic_decay(), sigmoid()
 ##
 
 class_name UtilityMath
@@ -89,6 +90,31 @@ static func calculate_intercept_point(
 	return b_pos + b_dir * final_travel
 
 
+## Returns the closest point on segment [seg_start, seg_end] to `point`.
+## Uses vector projection with parameter t clamped to [0.0, 1.0] so points
+## beyond segment endpoints project to the nearest endpoint.
+static func closest_point_on_segment(point: Vector2, seg_start: Vector2, seg_end: Vector2) -> Vector2:
+	var seg: Vector2 = seg_end - seg_start
+	var seg_len_sq: float = seg.length_squared()
+	if seg_len_sq <= 0.0001:
+		return seg_start
+
+	var t: float = clampf((point - seg_start).dot(seg) / seg_len_sq, 0.0, 1.0)
+	return seg_start + seg * t
+
+
+## Returns the squared Euclidean distance from `point` to the segment [seg_start, seg_end].
+## Allocation-free and avoids square root for hot-path threshold comparisons.
+static func distance_squared_to_segment(point: Vector2, seg_start: Vector2, seg_end: Vector2) -> float:
+	var closest: Vector2 = closest_point_on_segment(point, seg_start, seg_end)
+	return closest.distance_squared_to(point)
+
+
+## Returns the Euclidean distance from `point` to the segment [seg_start, seg_end].
+static func distance_to_segment(point: Vector2, seg_start: Vector2, seg_end: Vector2) -> float:
+	return sqrt(distance_squared_to_segment(point, seg_start, seg_end))
+
+
 ## True when `defender` sits within `min_clearance` px of the passer→receiver
 ## segment, i.e. the pass would have to go through them.
 ##
@@ -101,16 +127,15 @@ static func is_lane_blocked(
 		defender: Vector2,
 		min_clearance: float
 ) -> bool:
-	var lane: Vector2 = receiver - passer
-	var lane_len_sq: float = lane.length_squared()
-	if lane_len_sq <= 0.0001:
+	if min_clearance <= 0.0:
+		return false
+	var seg: Vector2 = receiver - passer
+	var seg_len_sq: float = seg.length_squared()
+	if seg_len_sq <= 0.0001:
 		return false
 
-	# Projection parameter of the defender onto the lane, clamped to the
-	# segment so a defender behind the passer or beyond the receiver is judged
-	# against the endpoint rather than the infinite line.
-	var t: float = clampf((defender - passer).dot(lane) / lane_len_sq, 0.0, 1.0)
-	var closest: Vector2 = passer + lane * t
+	var t: float = clampf((defender - passer).dot(seg) / seg_len_sq, 0.0, 1.0)
+	var closest: Vector2 = passer + seg * t
 	return closest.distance_squared_to(defender) < min_clearance * min_clearance
 
 

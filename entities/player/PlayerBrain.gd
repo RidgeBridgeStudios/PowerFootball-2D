@@ -527,7 +527,7 @@ func _is_pass_plan_still_valid() -> bool:
 
 	var ball_pos: Vector2 = ball.global_position
 	var target_pos: Vector2 = _cached_pass_target.global_position
-	return not world.is_lane_blocked_by_opponent(ball_pos, target_pos, PASS_LANE_CLEARANCE, player.team)
+	return world.is_passing_lane_open(ball_pos, target_pos, player.team, PASS_LANE_CLEARANCE)
 
 
 ## Clean abort path for a stale plan: drop back to the conservative default
@@ -926,7 +926,7 @@ func _find_best_pass_target(passer_pressure: float = 0.0) -> HeavyPlayerControll
 
 		# Lane check: an opponent standing in the passing lane makes the pass an
 		# interception, however open the receiver looks.
-		if world.is_lane_blocked_by_opponent(ball_pos, candidate_pos, PASS_LANE_CLEARANCE, player.team):
+		if not world.is_passing_lane_open(ball_pos, candidate_pos, player.team, PASS_LANE_CLEARANCE):
 			continue
 
 		# Openness, straight off the world model — no second roster walk.

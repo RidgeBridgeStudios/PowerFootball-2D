@@ -119,11 +119,20 @@ func sigmoid(x: float, mid: float, slope: float) -> float
 ```
 S-curve for utility normalization. Mid = inflection point; slope = steepness.
 
-**Lane Occlusion:**
+**Lane Occlusion & Vector Projection:**
 ```gdscript
-func is_lane_occluded(from_pos: Vector2, to_pos: Vector2, exclude_team: int) -> bool
+func closest_point_on_segment(point: Vector2, seg_start: Vector2, seg_end: Vector2) -> Vector2
+func distance_to_segment(point: Vector2, seg_start: Vector2, seg_end: Vector2) -> float
+func distance_squared_to_segment(point: Vector2, seg_start: Vector2, seg_end: Vector2) -> float
+func is_lane_blocked(passer: Vector2, receiver: Vector2, defender: Vector2, min_clearance: float) -> bool
 ```
-Checks if opponent blocks line from one player to another. Used in pass utility scoring.
+Calculates analytical point-to-segment vector projections and tests whether a defender breaches the pass corridor threshold without physics raycasts.
+
+**MatchWorldModel Queries:**
+```gdscript
+func is_passing_lane_open(start_pos: Vector2, end_pos: Vector2, passer_team_id: int, corridor_width: float = DEFAULT_PASS_LANE_CLEARANCE) -> bool
+func get_passing_lane_min_distance(start_pos: Vector2, end_pos: Vector2, passer_team_id: int) -> float
+```
 
 **Distance Queries:**
 ```gdscript

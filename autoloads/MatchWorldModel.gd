@@ -25,6 +25,8 @@
 ##          get_nearby_teammates(), get_nearby_opponent_nodes(),
 ##          count_nearby_players(), count_nearby_opponents(), count_nearby_teammates(),
 ##          get_opponent_density(), get_teammate_density(),
+##          is_passing_lane_open(), is_lane_blocked_by_opponent(),
+##          get_passing_lane_min_distance(),
 ##          defensive_line_x — shared per-team defensive-line depth (world X),
 ##          recomputed every frame from ball position and carrier pressure
 ##          bind_boundary(), PressTrigger enum, press_trigger_active/type/
@@ -57,6 +59,9 @@ const TOTAL_PLAYERS: int = 22
 
 ## Sentinel for "no player occupies this slot / no possessor".
 const NO_INDEX: int = -1
+
+## Default corridor width / clearance threshold (in pixels) for passing lane safety checks.
+const DEFAULT_PASS_LANE_CLEARANCE: float = 45.0
 
 ## --- Player cache -----------------------------------------------------------
 ## Four parallel arrays rather than an array of structs: the hot loops in
@@ -696,14 +701,24 @@ func get_teammate_density(pos: Vector2, radius: float, team: int, exclude_index:
 	return total
 
 
-## Returns true if any opponent (not on `team`) sits within `clearance` px of the
-## segment from `from_pos` to `to_pos`. Uses the grid bounding box to only test
-## relevant cells. Allocation-free.
-func is_lane_blocked_by_opponent(from_pos: Vector2, to_pos: Vector2, clearance: float, team: int) -> bool:
-	var min_x: float = minf(from_pos.x, to_pos.x) - clearance
-	var max_x: float = maxf(from_pos.x, to_pos.x) + clearance
-	var min_y: float = minf(from_pos.y, to_pos.y) - clearance
-	var max_y: float = maxf(from_pos.y, to_pos.y) + clearance
+## Returns true if the passing lane from `start_pos` to `end_pos` is clear of any opponent
+## (players not on `passer_team_id`) within `corridor_width` px of the pass segment.
+##
+## Performs an analytical point-to-segment distance / vector projection check.
+## Uses the spatial grid bounding box to test only relevant cells. Allocation-free.
+func is_passing_lane_open(
+		start_pos: Vector2,
+		end_pos: Vector2,
+		passer_team_id: int,
+		corridor_width: float = DEFAULT_PASS_LANE_CLEARANCE
+) -> bool:
+	if corridor_width <= 0.0:
+		return true
+
+	var min_x: float = minf(start_pos.x, end_pos.x) - corridor_width
+	var max_x: float = maxf(start_pos.x, end_pos.x) + corridor_width
+	var min_y: float = minf(start_pos.y, end_pos.y) - corridor_width
+	var max_y: float = maxf(start_pos.y, end_pos.y) + corridor_width
 
 	var min_cx: int = int(floorf(min_x * INV_CELL_SIZE))
 	var max_cx: int = int(floorf(max_x * INV_CELL_SIZE))
@@ -718,10 +733,34 @@ func is_lane_blocked_by_opponent(from_pos: Vector2, to_pos: Vector2, clearance: 
 			var bucket: Array = _grid[cell]
 			for idx_variant: Variant in bucket:
 				var i: int = int(idx_variant)
-				if player_teams[i] != team:
-					if UtilityMath.is_lane_blocked(from_pos, to_pos, player_positions[i], clearance):
-						return true
-	return false
+				if player_teams[i] != passer_team_id:
+					if UtilityMath.is_lane_blocked(start_pos, end_pos, player_positions[i], corridor_width):
+						return false
+	return true
+
+
+## Returns true if any opponent (not on `team`) sits within `clearance` px of the
+## segment from `from_pos` to `to_pos`. Kept for backward compatibility; delegates
+## directly to is_passing_lane_open. Allocation-free.
+func is_lane_blocked_by_opponent(from_pos: Vector2, to_pos: Vector2, clearance: float, team: int) -> bool:
+	return not is_passing_lane_open(from_pos, to_pos, team, clearance)
+
+
+## Returns the minimum distance from any opponent (player not on `passer_team_id`)
+## to the segment from `start_pos` to `end_pos`. Returns INF if no opponents exist.
+## Allocation-free.
+func get_passing_lane_min_distance(start_pos: Vector2, end_pos: Vector2, passer_team_id: int) -> float:
+	var min_dist_sq: float = INF
+	for i: int in range(TOTAL_PLAYERS):
+		var node: HeavyPlayerController = player_nodes[i]
+		if node == null or not is_instance_valid(node):
+			continue
+		if player_teams[i] == passer_team_id:
+			continue
+		var d_sq: float = UtilityMath.distance_squared_to_segment(player_positions[i], start_pos, end_pos)
+		if d_sq < min_dist_sq:
+			min_dist_sq = d_sq
+	return sqrt(min_dist_sq) if min_dist_sq < INF else INF
 
 
 ## Distance from `pos` to the closest registered player NOT on `team`.
