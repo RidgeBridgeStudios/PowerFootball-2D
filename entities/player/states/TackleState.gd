@@ -103,7 +103,8 @@ func _try_win_ball(player: HeavyPlayerController) -> bool:
 	# ── Existing win-ball path ─────────────────────────────────────────────
 	var loser: Node2D = ball.possessor
 	ball.apply_kick(player.facing_direction * DISPOSSESS_IMPULSE, 0.0, player)
-	ball.set_possessor(player)
+	if player.can_carry_ball():
+		ball.set_possessor(player)
 
 	if loser != null and loser != player:
 		GameEvents.tackle_won.emit(player, loser)

@@ -72,7 +72,7 @@ func enter(player: HeavyPlayerController) -> void:
 	_touch_cooldown = 0.0
 	_grace_timer = 0.0
 	var ball: Pseudo3DBall = player.get_ball_in_foot_range()
-	if ball != null:
+	if ball != null and player.can_carry_ball():
 		ball.set_possessor(player)
 		_possessed_ball = ball
 		player.possession_gained.emit()
@@ -96,7 +96,7 @@ func process(player: HeavyPlayerController, delta: float) -> StringName:
 
 	var ball_in_range: Pseudo3DBall = player.get_ball_in_foot_range()
 
-	if ball_in_range != null:
+	if ball_in_range != null and player.can_carry_ball():
 		# Ball is inside the sensor — reset grace, keep tracking.
 		_grace_timer = 0.0
 		if _possessed_ball == null:

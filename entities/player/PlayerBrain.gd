@@ -93,8 +93,18 @@ const PRESSURE_RADIUS: float = 180.0
 const CHASE_RADIUS: float = 220.0
 ## Arrival radius — inside this the player eases off instead of oscillating.
 const ARRIVE_RADIUS: float = 24.0
-## How close the ball must be to the keeper's own goal centre before they chase it.
-const GOALKEEPER_CHASE_RADIUS: float = 200.0
+
+## Minimum ball-velocity-to-goal alignment (dot product) for the goalkeeper's
+## per-frame dive trigger to treat the ball as a shot on target.
+const GOALIE_DIVE_DOT_THRESHOLD: float = 0.7
+## Ball speed above which an aligned ground shot counts as a dive threat; an
+## airborne ball qualifies regardless of speed.
+const GOALIE_DIVE_SPEED_THRESHOLD: float = 200.0
+## Seconds a committed dive holds before the keeper returns to patrol.
+const GOALIE_DIVE_DURATION: float = 0.5
+## Knockback impulse applied to an opponent caught in the crowd-knockdown
+## hitbox during a dive.
+const GOALIE_KNOCKDOWN_IMPULSE: float = 220.0
 
 ## Physics frames between decision re-evaluations. Combined with player_index as
 ## a phase offset, this spreads 22 brains over 15 frames — at most two think on
@@ -118,6 +128,12 @@ var player: HeavyPlayerController = null
 var ball: Pseudo3DBall = null
 var pitch_boundary: PitchBoundary = null
 var current_action: StringName = &"MaintainFormation"
+
+## Goalkeeper's own spawn X, captured once in _ready(). GoaliePatrol locks to
+## this forever — the keeper never advances off it except mid-dive.
+var _spawn_x: float = 0.0
+## Counts down while a committed GoalieDive is in progress.
+var _goalie_dive_timer: float = 0.0
 
 ## Deprecated alongside decision_interval: the runtime no longer decrements or
 ## reads this. Kept only so any external reference still resolves.
@@ -167,6 +183,8 @@ func _ready() -> void:
 	if formation_anchor == Vector2.ZERO and player != null:
 		formation_anchor = player.global_position
 	_cached_space_target = formation_anchor
+	if player != null:
+		_spawn_x = player.global_position.x
 
 	GameEvents.formation_anchors_changed.connect(_on_formation_changed)
 
@@ -180,6 +198,18 @@ func bind_ball(match_ball: Pseudo3DBall) -> void:
 ## distance to its own goal centre.
 func bind_boundary(b: PitchBoundary) -> void:
 	pitch_boundary = b
+
+
+## False for a goalkeeper once the ball is within 50px of their own goal's
+## scoring X line — prevents "catching" a shot that has already beaten them.
+## Always true for outfield players. Call this at the possession-assignment
+## site (wherever ball.set_possessor() is invoked), never from the decision
+## tick — carrying eligibility must be checked at the moment it matters.
+func can_carry_ball() -> bool:
+	if not is_goalkeeper or player == null or pitch_boundary == null or ball == null:
+		return true
+	var goal_x: float = pitch_boundary.get_goal_centre(player.team).x
+	return absf(ball.global_position.x - goal_x) > 50.0
 
 
 ## Re-applies a substitute's personality attributes onto this already-bound
@@ -213,6 +243,12 @@ func _physics_process(delta: float) -> void:
 		player.movement_intent = Vector2.ZERO
 		return
 
+	# Goalkeeper dive reaction cannot wait for the 15-frame decision stagger —
+	# a shot crosses the six-yard box in a handful of physics frames — so it is
+	# evaluated fresh every frame here, ahead of the stagger gate below.
+	if is_goalkeeper:
+		_check_goalkeeper_dive_trigger(delta)
+
 	# Receiver lock: a player a pass was just played to runs onto it and does
 	# not re-decide mid-flight. Checked before the frame counter so the lock is
 	# never skipped by landing on a decision frame.
@@ -224,11 +260,17 @@ func _physics_process(delta: float) -> void:
 	_frame_counter += 1
 
 	if (_frame_counter + player_index) % UPDATE_INTERVAL == 0:
-		current_action = evaluate_tactical_action(_find_nearby_opponents())
-		_cached_space_target = _find_open_space_target()
-		_cached_separation = _separation_force()
-		if current_action == &"ChaseBall" or current_action == &"PanicClear":
-			_cached_intercept = _predict_intercept_position()
+		if is_goalkeeper:
+			# GoaliePatrol is the only decision-tree action a keeper ever
+			# picks; a committed dive must not be clobbered by this re-affirm.
+			if current_action != &"GoalieDive":
+				current_action = evaluate_tactical_action(_find_nearby_opponents())
+		else:
+			current_action = evaluate_tactical_action(_find_nearby_opponents())
+			_cached_space_target = _find_open_space_target()
+			_cached_separation = _separation_force()
+			if current_action == &"ChaseBall" or current_action == &"PanicClear":
+				_cached_intercept = _predict_intercept_position()
 
 	player.movement_intent = _steer_for_action()
 
@@ -243,6 +285,47 @@ func _steer_toward_ball_direct() -> Vector2:
 	if offset.length() < ARRIVE_RADIUS:
 		return Vector2.ZERO
 	return offset.normalized()
+
+
+## Runs every physics frame for a goalkeeper — not gated by UPDATE_INTERVAL —
+## so a shot is reacted to within a frame or two rather than up to 15 frames
+## late. While a dive is already committed this instead counts down its
+## recovery and hands control back to GoaliePatrol once it expires.
+func _check_goalkeeper_dive_trigger(delta: float) -> void:
+	if pitch_boundary == null or ball == null or player == null:
+		return
+
+	if current_action == &"GoalieDive":
+		_goalie_dive_timer -= delta
+		if _goalie_dive_timer <= 0.0:
+			current_action = &"GoaliePatrol"
+		return
+
+	var goal_centre: Vector2 = pitch_boundary.get_goal_centre(player.team)
+	var to_goal: Vector2 = goal_centre - ball.global_position
+	var ball_vel: Vector2 = ball.velocity
+	if to_goal.is_zero_approx() or ball_vel.is_zero_approx():
+		return
+
+	var facing_goal: float = ball_vel.normalized().dot(to_goal.normalized())
+	if facing_goal <= GOALIE_DIVE_DOT_THRESHOLD:
+		return
+
+	var is_shot_threat: bool = ball_vel.length() > GOALIE_DIVE_SPEED_THRESHOLD or ball.is_airborne()
+	if not is_shot_threat:
+		return
+
+	# Y-intercept of the ball's current velocity line with the keeper's own
+	# spawn_x — a straight-line projection, not a multi-step trajectory walk.
+	if is_zero_approx(ball_vel.x):
+		return
+	var time_to_line: float = (_spawn_x - ball.global_position.x) / ball_vel.x
+	if time_to_line < 0.0:
+		return
+
+	_cached_intercept = Vector2(_spawn_x, ball.global_position.y + ball_vel.y * time_to_line)
+	current_action = &"GoalieDive"
+	_goalie_dive_timer = GOALIE_DIVE_DURATION
 
 
 ## Builds the UtilityContext snapshot for one decision tick.
@@ -316,9 +399,10 @@ func _score_chase(ctx: UtilityContext) -> float:
 	# lunge — the tackle will miss and may be a foul.
 	if ball != null and player != null:
 		var facing_dot: float = player.get_facing_dot(ball.global_position)
-		# Penalty ramps from 0 at dot >= 0.64 (within 50° cone) to 0.85 at
-		# dot = -1.0 (fully back-facing).
-		var back_penalty: float = clampf((0.64 - facing_dot) / 1.64, 0.0, 1.0) * 0.85
+		# Penalty ramps from 0 at dot >= 0.64 (within 50° cone) to 0.45 at
+		# dot = -1.0 (fully back-facing) — capped low enough that a defender
+		# still closes down a nearby ball rather than standing off it.
+		var back_penalty: float = clampf((0.64 - facing_dot) / 1.64, 0.0, 1.0) * 0.45
 		base = clampf(base - back_penalty, 0.0, 1.0)
 
 	return clampf(base, 0.0, 1.0)
@@ -402,23 +486,10 @@ func _score_maintain_formation(ctx: UtilityContext) -> float:
 ## to execute them.
 func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 	if is_goalkeeper:
-		if pitch_boundary != null and ball != null and player != null:
-			# Priority 1: intercept a shot heading for goal.
-			var intercept: Vector2 = _find_goalkeeper_intercept()
-			if intercept != Vector2.ZERO:
-				_cached_intercept = intercept
-				return &"ChaseBall"
-
-			# Priority 2: basic chase if ball is close to goal.
-			var goal_centre: Vector2 = pitch_boundary.get_goal_centre(player.team)
-			if ball.global_position.distance_to(goal_centre) < GOALKEEPER_CHASE_RADIUS:
-				_cached_intercept = ball.global_position
-				return &"ChaseBall"
-
-			# Priority 3: positional — stand between ball and goal centre.
-			var to_ball: Vector2 = (ball.global_position - goal_centre).normalized()
-			_cached_space_target = goal_centre + to_ball * 60.0
-		return &"MaintainFormation"
+		# GoaliePatrol is the sole decision-tree action for a keeper — the
+		# per-frame dive trigger in _check_goalkeeper_dive_trigger() is what
+		# ever moves them off it, into GoalieDive.
+		return &"GoaliePatrol"
 
 	var ctx: UtilityContext = _build_context(defenders_nearby)
 
@@ -533,45 +604,6 @@ func _find_best_pass_target() -> HeavyPlayerController:
 	return best_target
 
 
-## Predicts where a fast or airborne ball will cross the goalkeeper's own
-## goal mouth, and returns that point if the keeper can reach it in time.
-## Returns Vector2.ZERO if the ball isn't a shot threat or no reachable
-## crossing point exists.
-##
-## NOTE: predict_trajectory retained intentionally. The closed-form intercept
-## (UtilityMath.calculate_intercept_point) returns a single point and cannot
-## replicate the goal-mouth spatial filter (X proximity + GOAL_HALF_WIDTH Y check)
-## this loop performs. To replace it, UtilityMath would need goal-bounds parameters.
-func _find_goalkeeper_intercept() -> Vector2:
-	if ball == null or player == null or pitch_boundary == null:
-		return Vector2.ZERO
-
-	var goal_centre: Vector2 = pitch_boundary.get_goal_centre(player.team)
-
-	# Only react to fast or airborne balls.
-	if not ball.is_airborne() and ball.velocity.length() < 200.0:
-		return Vector2.ZERO
-
-	var trajectory: Array[Vector2] = ball.predict_trajectory(
-		ball.velocity, ball.velocity_z, 60, 0.05)
-
-	const GOAL_HALF_WIDTH: float = 200.0
-	var my_speed: float = player.get_current_top_speed()
-
-	for i: int in range(trajectory.size()):
-		var point: Vector2 = trajectory[i]
-		if absf(point.x - goal_centre.x) > 80.0:
-			continue
-		if absf(point.y - goal_centre.y) > GOAL_HALF_WIDTH:
-			continue
-		var time_to_point: float = float(i + 1) * 0.05
-		var dist_to_point: float = player.global_position.distance_to(point)
-		if dist_to_point <= my_speed * time_to_point + 40.0:
-			return point
-
-	return Vector2.ZERO
-
-
 ## Returns true only if this player is the most appropriate chaser on the team.
 ## "Most appropriate" means: among all teammates, this player is one of the
 ## role's budgeted closest to the ball, AND within that role's max chase
@@ -650,6 +682,13 @@ func calculate_pressure_index(defenders: Array[Node2D]) -> float:
 func get_target_position() -> Vector2:
 	if ball == null:
 		return formation_anchor
+
+	if is_goalkeeper:
+		match current_action:
+			&"GoalieDive":
+				return _cached_intercept if _cached_intercept != Vector2.ZERO else _goalie_patrol_target()
+			_:
+				return _goalie_patrol_target()
 
 	match current_action:
 		&"ChaseBall", &"PanicClear", &"AttemptDribble":
@@ -901,7 +940,7 @@ func _find_nearest_threatening_opponent() -> HeavyPlayerController:
 
 ## Repels this player from teammates within sep_radius so off-ball players
 ## don't stack on top of each other.
-func _separation_force(sep_radius: float = 90.0) -> Vector2:
+func _separation_force(sep_radius: float = 55.0) -> Vector2:
 	if player == null:
 		return Vector2.ZERO
 	var world: MatchWorldModel = MatchWorldModel.instance
@@ -936,6 +975,9 @@ func _get_ball_carrier() -> HeavyPlayerController:
 ## chasers aren't pushed off the intercept line), and a gentle formation
 ## spring when far from the anchor.
 func _steer_for_action() -> Vector2:
+	if is_goalkeeper:
+		return _steer_goalkeeper()
+
 	# --- Pass execution ---
 	if current_action == &"Pass" and _cached_pass_target != null and is_instance_valid(_cached_pass_target):
 		if player.global_position.distance_to(ball.global_position) < 80.0 and player.get_ball_in_foot_range() != null:
@@ -953,6 +995,19 @@ func _steer_for_action() -> Vector2:
 
 			_cached_pass_target = null
 			current_action = &"MaintainFormation"
+
+	# --- Panic clear execution ---
+	# Boot it toward the nearest touchline rather than upfield — a panicked
+	# clearance under heavy pressure is about getting rid of the ball safely,
+	# not building an attack.
+	if current_action == &"PanicClear" and pitch_boundary != null \
+			and player.global_position.distance_to(ball.global_position) < 80.0 \
+			and player.get_ball_in_foot_range() != null:
+		var clear_dir: Vector2 = Vector2(0.0, signf(player.global_position.y - pitch_boundary.get_centre_spot().y))
+		if is_zero_approx(clear_dir.y):
+			clear_dir.y = 1.0
+		ball.apply_kick(clear_dir * 300.0, 0.0, player)
+		current_action = &"MaintainFormation"
 
 	# --- Seek target selection ---
 	var seek_target: Vector2
@@ -990,8 +1045,108 @@ func _steer_for_action() -> Vector2:
 	if anchor_offset.length() > CHASE_RADIUS * 1.5:
 		spring_force = anchor_offset.normalized() * 0.15
 
+	# 4. Assist force — pulls attackers/midfielders finding space into a
+	# forward passing lane ahead of the ball carrier, mirrored to whichever
+	# side of the ball this player already favours.
+	var assist_force: Vector2 = _assist_force()
+
 	player.is_sprinting = current_action == &"ChaseBall" and distance > CHASE_RADIUS * 0.5
-	return (seek_force + sep_force + spring_force).limit_length(1.0)
+	return (seek_force + sep_force + spring_force + assist_force).limit_length(1.0)
+
+
+## Pulls a non-chasing attacker/midfielder into a forward outlet lane 120px
+## ahead of the ball carrier while FindSpace is active — the spec's fourth
+## steering force, distinct from the passing-triangle/channel-run targets
+## _find_open_space_target() already computes for the decision-tick cache.
+func _assist_force() -> Vector2:
+	if current_action != &"FindSpace":
+		return Vector2.ZERO
+	if role != Role.OUTFIELD_ATTACKER and role != Role.OUTFIELD_MIDFIELDER:
+		return Vector2.ZERO
+	if ball == null or player == null:
+		return Vector2.ZERO
+
+	var attack_dir: Vector2 = Vector2(1.0, 0.0) if player.team == GameManager.TEAM_A else Vector2(-1.0, 0.0)
+	var lateral_offset: float = player.global_position.y - ball.global_position.y
+	var assist_target: Vector2 = ball.global_position + attack_dir * 120.0 + Vector2(0.0, lateral_offset)
+
+	var to_assist: Vector2 = assist_target - player.global_position
+	if to_assist.is_zero_approx():
+		return Vector2.ZERO
+	return to_assist.normalized() * 0.25
+
+
+## Goal-line lock steering: patrol slides along Y between the posts, tracking
+## the ball, while X never leaves spawn_x except during a committed dive.
+## Replaces the outfield seek/separation/spring blend entirely — a keeper's
+## movement model is fundamentally different from an outfield player's.
+func _steer_goalkeeper() -> Vector2:
+	if player == null or ball == null:
+		return Vector2.ZERO
+
+	if current_action == &"GoalieDive":
+		_set_crowd_knockdown_enabled(true)
+		var dive_offset: Vector2 = _cached_intercept - player.global_position
+		if dive_offset.length() <= ARRIVE_RADIUS:
+			player.is_sprinting = false
+			return Vector2.ZERO
+		player.is_sprinting = true
+		return dive_offset.normalized()
+
+	_set_crowd_knockdown_enabled(false)
+	player.is_sprinting = false
+
+	var target: Vector2 = _goalie_patrol_target()
+	var offset: Vector2 = target - player.global_position
+	var distance: float = offset.length()
+	if distance < 0.01:
+		return Vector2.ZERO
+
+	# Proximity deceleration cushion — full pace beyond 10px of the target,
+	# linearly decaying to a stop inside it, so the keeper settles onto the
+	# line without jitter or overshoot.
+	var proximity_factor: float = clampf(distance / 10.0, 0.0, 1.0)
+	return offset.normalized() * proximity_factor
+
+
+## World-space patrol point: locked to spawn_x, sliding along Y between the
+## goal posts to track the ball. Shared by _steer_goalkeeper() and
+## get_target_position() so the two never drift out of sync.
+func _goalie_patrol_target() -> Vector2:
+	if pitch_boundary == null or player == null or ball == null:
+		return formation_anchor
+	var goal_centre: Vector2 = pitch_boundary.get_goal_centre(player.team)
+	var half_mouth: float = pitch_boundary.goal_mouth_height * 0.5
+	return Vector2(_spawn_x, clampf(ball.global_position.y, goal_centre.y - half_mouth, goal_centre.y + half_mouth))
+
+
+## Enables/disables the goalkeeper's crowd-knockdown hitbox for the duration
+## of a dive. PermanentDamageEmitterArea does not exist in any player scene in
+## this repo yet, so this is a no-op guard until that node is added.
+func _set_crowd_knockdown_enabled(enabled: bool) -> void:
+	if player == null:
+		return
+	var area := player.get_node_or_null("PermanentDamageEmitterArea") as Area2D
+	if area == null:
+		return
+	if enabled and not area.body_entered.is_connected(_on_crowd_knockdown_body_entered):
+		area.body_entered.connect(_on_crowd_knockdown_body_entered)
+	area.monitoring = enabled
+	area.monitorable = enabled
+
+
+## No Hurt state exists in this codebase yet (see entities/player/PlayerState.gd
+## for the full transition_to() set), so this reuses the existing external-
+## impulse knockback — the same mechanism tackles and collisions already use —
+## as the closest available stand-in for "knocked down".
+func _on_crowd_knockdown_body_entered(body: Node2D) -> void:
+	var opponent := body as HeavyPlayerController
+	if opponent == null or player == null or opponent.team == player.team:
+		return
+	var away: Vector2 = opponent.global_position - player.global_position
+	if away.is_zero_approx():
+		away = Vector2.RIGHT
+	opponent.apply_external_impulse(away.normalized() * GOALIE_KNOCKDOWN_IMPULSE)
 
 
 ## Every opponent currently on the pitch, as Node2D so callers that take a
