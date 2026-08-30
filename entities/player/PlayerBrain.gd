@@ -181,6 +181,18 @@ var _effective_update_interval: int = UPDATE_INTERVAL
 ## can turn away from a pass that was played to where it was going.
 const PASS_LOCK_DURATION: float = 0.35
 
+## Seconds over which _steer_for_action() eases from the direction a player
+## was actually moving in into a freshly chosen one, whenever current_action
+## changes value (a turnover flipping ChaseBall -> MaintainFormation, a pass
+## landing and flipping Pass -> MaintainFormation, etc). Sized against
+## PASS_LOCK_DURATION/UPDATE_INTERVAL's own cadence: long enough to mask the
+## instant re-decision a possession change forces (see _last_possession_team
+## below) as a believable deceleration-and-redirect rather than a snap, short
+## enough that a player never reads as sluggish to respond. Outfield-only —
+## the goalkeeper's patrol/dive steering is a different model with its own
+## proximity damping and is deliberately left unblended.
+const INTENT_BLEND_DURATION: float = 0.35
+
 ## Minimum clearance, in pixels, an opponent must leave either side of a passing
 ## lane before that lane counts as open.
 const PASS_LANE_CLEARANCE: float = 45.0
@@ -249,6 +261,17 @@ var _cached_separation: Vector2 = Vector2.ZERO
 ## cached from the last decision tick alongside _cached_separation. See
 ## _defensive_line_lateral_separation().
 var _cached_defensive_lateral: Vector2 = Vector2.ZERO
+
+## current_action as observed at the top of the previous _steer_for_action()
+## call. Comparing against the live current_action each frame is how a
+## tactical-intent change is detected — see INTENT_BLEND_DURATION.
+var _blend_prev_action: StringName = &""
+## The direction this player was actually steering in at the moment the most
+## recent transition was detected — what _apply_intent_blend() eases FROM.
+var _blend_from_intent: Vector2 = Vector2.ZERO
+## Counts down from INTENT_BLEND_DURATION after a detected transition; zero
+## means "no blend in progress, return the freshly computed direction as-is".
+var _blend_timer: float = 0.0
 
 ## Reused across decision ticks so evaluate_tactical_action() never allocates a
 ## generator. Reseeded per tick to keep the noise deterministic per player.
@@ -403,7 +426,7 @@ func _physics_process(delta: float) -> void:
 			if current_action == &"ChaseBall" or current_action == &"PanicClear":
 				_cached_intercept = _predict_intercept_position()
 
-	player.movement_intent = _steer_for_action()
+	player.movement_intent = _steer_for_action(delta)
 
 
 ## Straight run at the ball, used while the receiver lock is held. Deliberately
@@ -1437,9 +1460,22 @@ func _get_ball_carrier() -> HeavyPlayerController:
 ## current action's target, separation from teammates (off-ball only, so
 ## chasers aren't pushed off the intercept line), and a gentle formation
 ## spring when far from the anchor.
-func _steer_for_action() -> Vector2:
+func _steer_for_action(delta: float) -> Vector2:
 	if is_goalkeeper:
 		return _steer_goalkeeper()
+
+	# Transition detection: current_action only ever changes at a decision
+	# tick, a mid-slice abort, or the exec blocks just below flipping back to
+	# MaintainFormation — never inside this same check. Catching the change
+	# here, before anything this frame reacts to the new action, means
+	# _blend_from_intent is always last frame's real steering output, not a
+	# value already contaminated by the new target.
+	if current_action != _blend_prev_action:
+		_blend_from_intent = player.movement_intent
+		_blend_timer = INTENT_BLEND_DURATION
+		_blend_prev_action = current_action
+	elif _blend_timer > 0.0:
+		_blend_timer = maxf(_blend_timer - delta, 0.0)
 
 	# --- Pass execution ---
 	if current_action == &"Pass" and _cached_pass_target != null and is_instance_valid(_cached_pass_target):
@@ -1556,7 +1592,24 @@ func _steer_for_action() -> Vector2:
 	# Sprint is expressed as intent, not the resolved is_sprinting — the
 	# controller alone decides whether stamina actually allows it.
 	player.wants_sprint = current_action == &"ChaseBall" and distance > CHASE_RADIUS * 0.5
-	return (seek_force + sep_force + spring_force + assist_force + line_lateral_force).limit_length(1.0)
+	var raw_intent: Vector2 = (seek_force + sep_force + spring_force + assist_force + line_lateral_force).limit_length(1.0)
+	return _apply_intent_blend(raw_intent)
+
+
+## Eases from _blend_from_intent toward [raw_intent] over INTENT_BLEND_DURATION
+## whenever a transition is in progress (see the current_action check at the
+## top of _steer_for_action()); a no-op once _blend_timer has run out. Blending
+## the direction vector itself — rather than, say, capping angular speed — is
+## what makes a near-reversal read as a deceleration through a slower diagonal
+## rather than an instant flip: lerp() between two roughly opposite unit
+## vectors passes through a near-zero magnitude at the midpoint before
+## re-extending toward the new heading, and HeavyPlayerController's own
+## turning-penalty curve (soccer-physics.md) does the rest.
+func _apply_intent_blend(raw_intent: Vector2) -> Vector2:
+	if _blend_timer <= 0.0:
+		return raw_intent
+	var t: float = 1.0 - (_blend_timer / INTENT_BLEND_DURATION)
+	return _blend_from_intent.lerp(raw_intent, t)
 
 
 ## Pulls a non-chasing attacker/midfielder into a forward outlet lane 120px
