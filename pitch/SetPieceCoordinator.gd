@@ -233,7 +233,7 @@ func _assign_taker(team: int) -> void:
 
 	_current_taker.global_position = spot
 	_current_taker.velocity = Vector2.ZERO
-	_current_taker.state_factory.transition_to(PlayerState.IDLE)
+	_current_taker.state_factory.transition_to(PlayerState.SET_PIECE_FREEZE)
 
 	# The taker is human-controlled only when the set piece belongs to the
 	# team the human was already controlling; otherwise it stays a CPU restart
@@ -292,6 +292,9 @@ func _activate_set_piece() -> void:
 
 	_ball.reset_at(GameManager.set_piece_position)
 	_ball.unfreeze()
+
+	_current_taker.global_position = GameManager.set_piece_position
+	_current_taker.velocity = Vector2.ZERO
 
 	_current_taker.state_factory.state_changed.connect(_on_taker_state_changed)
 
