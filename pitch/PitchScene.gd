@@ -136,7 +136,17 @@ func _on_pregame_confirmed() -> void:
 	GameEvents.half_time_reached.connect(_on_half_time_reached)
 	GameEvents.manager_formation_changed.connect(_on_touchline_shift)
 	ball.ball_bounced.connect(_on_ball_bounced)
-	restart_timer.timeout.connect(_on_restart_timer_timeout)
+	## FIX: Guards against a broken $RestartTimer node path — a null timer here
+	## would otherwise defer every post-goal kickoff to Change 1's fallback path
+	## silently; this surfaces the misconfiguration immediately.
+	if restart_timer == null:
+		push_error("PitchScene: $RestartTimer is null — kickoff after goals will use fallback path.")
+	else:
+		## FIX: Guards against a double-connection if _on_pregame_confirmed ever
+		## fires more than once (it is a one-shot today, but defensive wiring is
+		## cheaper than a duplicated restart firing two kickoffs).
+		if not restart_timer.timeout.is_connected(_on_restart_timer_timeout):
+			restart_timer.timeout.connect(_on_restart_timer_timeout)
 
 	_bind_players()
 	MatchStatsTracker.init_players()
@@ -772,7 +782,13 @@ func _on_goal_scored(scoring_team: int) -> void:
 	ball.freeze()
 	shake_camera(1.0)
 	InputHelper.rumble(0.5, 0.9, 0.35)
-	restart_timer.start(goal_restart_delay)
+	## FIX: Guards against a null/broken $RestartTimer (silent no-op in release
+	## builds) permanently stalling the match in GOAL_SCORED — the kickoff is
+	## deferred onto a one-shot SceneTreeTimer instead.
+	if restart_timer == null or not restart_timer.is_inside_tree():
+		get_tree().create_timer(goal_restart_delay).timeout.connect(_on_restart_timer_timeout)
+	else:
+		restart_timer.start(goal_restart_delay)
 	_fire_touchline_goal_shout(scoring_team)
 
 
@@ -867,6 +883,12 @@ func _start_kickoff_flow() -> void:
 
 
 func _on_restart_timer_timeout() -> void:
+	## FIX: Guards against a stale timer already running from a prior state
+	## (shootout, half-time) firing a spurious kickoff that would clobber those
+	## flows' own restarts.
+	if GameManager.current_phase != GameManager.MatchPhase.GOAL_SCORED:
+		push_warning("PitchScene: restart timer fired outside GOAL_SCORED phase — ignoring.")
+		return
 	_start_kickoff_flow()
 
 
