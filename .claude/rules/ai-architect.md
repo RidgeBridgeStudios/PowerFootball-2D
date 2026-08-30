@@ -99,6 +99,23 @@ not need updating when a trailing arg is added: Godot drops emitted args a
 connected callback doesn't declare (same convention already used for
 `ball_struck`'s `is_shot` addition).
 
+### Defensive line depth is computed ONCE in MatchWorldModel, never per-defender
+`MatchWorldModel.defensive_line_x` (a `PackedFloat32Array[2]`, indexed by
+team) is the back line's shared depth target, recomputed once per physics
+frame in `_update_defensive_lines()` from ball position and which team is
+pressuring the carrier. `PlayerBrain._find_open_space_target()`'s
+`OUTFIELD_DEFENDER` branch blends its own dynamic anchor toward
+`world.defensive_line_x[player.team]` rather than deriving a line from local
+state — if every defender computed "the line" from its own read of the ball,
+each would settle on a slightly different depth and the band would never
+actually align. A defender marking a real nearby threat
+(`_find_nearest_threatening_opponent()`) is still allowed to step off this
+line entirely; only the "nothing to mark, hold shape" default is bound to it.
+Lateral (Y-axis) spacing between defenders is a separate force
+(`PlayerBrain._defensive_line_lateral_separation()`, cached per decision tick
+as `_cached_defensive_lateral`) deliberately projected onto Y only, so it
+never fights the shared line's pull on X.
+
 ### Group scans that must NOT be routed through MatchWorldModel
 The model caches players and the ball only. These remain correct as scene-tree
 lookups and were deliberately left alone:

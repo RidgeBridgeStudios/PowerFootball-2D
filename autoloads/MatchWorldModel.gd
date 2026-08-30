@@ -20,7 +20,9 @@
 ## Exposes: instance, register_player(), register_ball(), unregister_all(),
 ##          player_nodes/player_positions/player_velocities/player_teams,
 ##          ball_position, ball_velocity, possessor_index,
-##          get_opponents_of(), get_teammates_of(), nearest_opponent_dist_to()
+##          get_opponents_of(), get_teammates_of(), nearest_opponent_dist_to(),
+##          defensive_line_x — shared per-team defensive-line depth (world X),
+##          recomputed every frame from ball position and carrier pressure
 ##
 ## NOTE: class_name is intentionally absent. This script is registered as an
 ## autoload singleton — Godot 4.7+ rejects class_name declarations that shadow
@@ -61,6 +63,49 @@ var possessor_index: int = NO_INDEX
 
 ## Next slot handed out by register_player() when a caller passes NO_INDEX.
 var _auto_index: int = 0
+
+## --- Defensive line cache ----------------------------------------------------
+## A world-level, per-team depth target the back line steers against as one
+## band instead of four independently-computed dots (PlayerBrain adds this on
+## top of its existing per-player dynamic formation anchor — see
+## PlayerBrain._find_open_space_target()'s OUTFIELD_DEFENDER branch). This
+## project's attacking axis is X (goals sit at the X ends — see
+## PitchBoundary.get_goal_centre()), so "line depth" here is an X coordinate
+## despite the more familiar "defensive_line_y" naming from side-view football
+## games. Recomputed once per physics frame at this node's -100 priority,
+## ahead of any PlayerBrain decision, so every defender reads this frame's
+## line rather than a stale one.
+##
+## Index 0 == GameManager.TEAM_A (attacks +X), index 1 == GameManager.TEAM_B
+## (attacks -X). Read as ints here rather than via GameManager's constants to
+## avoid adding a new autoload dependency to this file's boot-order-sensitive
+## header (see class doc "Depends on:").
+
+## Crowding radius used to judge whether the current ball carrier is under
+## pressure. Mirrors PlayerBrain.PRESSURE_RADIUS so "pressured" reads the same
+## meaning in both places; duplicated rather than referenced so this file
+## still depends on nothing but HeavyPlayerController and Pseudo3DBall.
+const CARRIER_PRESSURE_RADIUS: float = 180.0
+
+## World-px the line sits goal-side of the ball when its team applies no
+## pressure to the carrier (opponent has time — line drops deep to cover the
+## space in behind).
+const LINE_OFFSET_DROPPED: float = 150.0
+## World-px when the team is fully pressuring the carrier (numbers already
+## around the ball — the line can step up and compress the pitch).
+const LINE_OFFSET_PRESSED: float = 60.0
+## How fast the line glides toward its target, world-px/sec. Keeps the back
+## four moving as a smooth wave rather than snapping every time the ball
+## twitches.
+const LINE_DEPTH_LERP_SPEED: float = 220.0
+
+## Per-team [TEAM_A, TEAM_B] defensive line depth, world-space X. Read by
+## PlayerBrain via MatchWorldModel.instance.defensive_line_x[team].
+var defensive_line_x: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+
+## False until the first _update_defensive_lines() call, so that call can snap
+## straight to its target instead of gliding in from a stale 0.0 at kickoff.
+var _defensive_lines_ready: bool = false
 
 ## Scratch buffers for the two Array-returning accessors. Reused between calls
 ## so a caller on a warm path does not allocate; see the accessor docs for the
@@ -132,12 +177,15 @@ func unregister_all() -> void:
 	ball_position = Vector2.ZERO
 	ball_velocity = Vector2.ZERO
 	possessor_index = NO_INDEX
+	defensive_line_x[0] = 0.0
+	defensive_line_x[1] = 0.0
+	_defensive_lines_ready = false
 	_resize_arrays()
 
 
 ## --- Per-frame refresh ------------------------------------------------------
 
-func _physics_process(_delta: float) -> void:
+func _physics_process(delta: float) -> void:
 	if ball_node != null and is_instance_valid(ball_node):
 		ball_position = ball_node.global_position
 		ball_velocity = ball_node.velocity
@@ -150,6 +198,58 @@ func _physics_process(_delta: float) -> void:
 			continue
 		player_positions[i] = node.global_position
 		player_velocities[i] = node.velocity
+
+	_update_defensive_lines(delta)
+
+
+## Recomputes both teams' shared line depth from the ball's position and
+## whichever team is currently pressuring the carrier. Called after the
+## per-player position refresh above so it reads this frame's positions.
+func _update_defensive_lines(delta: float) -> void:
+	if ball_node == null or not is_instance_valid(ball_node):
+		return
+
+	var target_x: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+	for t: int in range(2):
+		# Team 0 attacks +X, team 1 attacks -X (see soccer-physics.md /
+		# FormationAnchorMath's identical convention) — dropping off means
+		# moving opposite the attack direction, toward this team's own goal.
+		var attack_sign: float = 1.0 if t == 0 else -1.0
+		var pressure: float = 0.0
+		# Only this team's own pressure on an opposing carrier steps their
+		# line up. A loose ball or their own possession leaves pressure at
+		# 0.0, which settles the line to its deepest, safest default rather
+		# than inventing a reading for a phase this cache does not track.
+		if possessor_index != NO_INDEX and player_teams[possessor_index] != t:
+			pressure = _team_pressure_on_ball(t)
+		var offset: float = lerpf(LINE_OFFSET_DROPPED, LINE_OFFSET_PRESSED, pressure)
+		target_x[t] = ball_position.x - attack_sign * offset
+
+	if not _defensive_lines_ready:
+		defensive_line_x[0] = target_x[0]
+		defensive_line_x[1] = target_x[1]
+		_defensive_lines_ready = true
+		return
+
+	defensive_line_x[0] = move_toward(defensive_line_x[0], target_x[0], LINE_DEPTH_LERP_SPEED * delta)
+	defensive_line_x[1] = move_toward(defensive_line_x[1], target_x[1], LINE_DEPTH_LERP_SPEED * delta)
+
+
+## 0.0-1.0 crowding score of `team`'s players around the ball — the same
+## shape as PlayerBrain.calculate_pressure_index() but computed directly off
+## the cached arrays instead of a Node2D list, so this file never needs a
+## PlayerBrain reference. Allocation-free.
+func _team_pressure_on_ball(team: int) -> float:
+	var total: float = 0.0
+	for i: int in range(TOTAL_PLAYERS):
+		if player_nodes[i] == null or not is_instance_valid(player_nodes[i]):
+			continue
+		if player_teams[i] != team:
+			continue
+		var d: float = ball_position.distance_to(player_positions[i])
+		if d < CARRIER_PRESSURE_RADIUS:
+			total += 1.0 - (d / CARRIER_PRESSURE_RADIUS)
+	return clampf(total, 0.0, 1.0)
 
 
 ## Pseudo3DBall carries the possessor on `possessor` (a Node2D set by

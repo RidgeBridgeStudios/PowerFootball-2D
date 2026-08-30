@@ -40,8 +40,10 @@
 ## PitchBoundary (bound via bind_boundary(), used for goalkeeper positioning
 ## and, since _find_open_space_target() reads pitch_boundary.get_centre_spot()/
 ## pitch_size, for phase-shifted formation anchors too),
-## MatchWorldModel (autoload spatial cache), UtilityMath (static helpers),
-## FormationAnchorMath (static — team-phase-aware anchor drift).
+## MatchWorldModel (autoload spatial cache, including defensive_line_x — the
+## shared per-team back-line depth the OUTFIELD_DEFENDER branch of
+## _find_open_space_target() blends into its hold-shape target), UtilityMath
+## (static helpers), FormationAnchorMath (static — team-phase-aware anchor drift).
 ##
 ## Signals consumed:
 ##   GameEvents.formation_anchors_changed(team, new_anchors)
@@ -115,6 +117,25 @@ class UtilityContext:
 const PRESSURE_RADIUS: float = 180.0
 ## Distance at which the brain commits to chasing the ball rather than holding shape.
 const CHASE_RADIUS: float = 220.0
+
+## How strongly a defender's default "hold shape" X target is pulled toward
+## MatchWorldModel.defensive_line_x[team] — the shared band depth — versus
+## this player's own dynamic formation anchor. 0.0 would ignore the shared
+## line entirely; 1.0 would make every defender's anchor identical to the
+## team's line depth regardless of the manager's per-role anchor tuning.
+## Blended rather than substituted, and only applied to the "hold the line"
+## default target — a defender marking a genuine nearby threat (see
+## _find_nearest_threatening_opponent()) is still allowed off the line.
+const DEFENSIVE_LINE_DEPTH_WEIGHT: float = 0.55
+
+## Radius inside which two same-team defenders repel each other along the
+## pitch-width (Y) axis only — the "lateral spacing" half of the defensive
+## line controller, distinct from the omnidirectional _separation_force()
+## every off-ball player already gets. Kept X-blind so it never fights
+## DEFENSIVE_LINE_DEPTH_WEIGHT's pull on the same axis.
+const DEFENSIVE_LINE_SEPARATION_RADIUS: float = 90.0
+## Steering weight applied to the lateral separation force in _steer_for_action().
+const DEFENSIVE_LINE_SEPARATION_WEIGHT: float = 0.35
 
 ## Seconds the team phase reads TRANSITION after a possession change, before
 ## settling into IN_POSSESSION/OUT_OF_POSSESSION. Long enough to cover the
@@ -224,6 +245,10 @@ var _cached_intercept: Vector2 = Vector2.ZERO
 ## frames stale, which is imperceptible for an off-ball player drifting into
 ## space and saves a full roster walk every frame.
 var _cached_separation: Vector2 = Vector2.ZERO
+## Defender-only lateral (Y-axis) repulsion from nearby same-team defenders,
+## cached from the last decision tick alongside _cached_separation. See
+## _defensive_line_lateral_separation().
+var _cached_defensive_lateral: Vector2 = Vector2.ZERO
 
 ## Reused across decision ticks so evaluate_tactical_action() never allocates a
 ## generator. Reseeded per tick to keep the noise deterministic per player.
@@ -373,6 +398,8 @@ func _physics_process(delta: float) -> void:
 			current_action = evaluate_tactical_action(_find_nearby_opponents())
 			_cached_space_target = _find_open_space_target()
 			_cached_separation = _separation_force()
+			if role == Role.OUTFIELD_DEFENDER:
+				_cached_defensive_lateral = _defensive_line_lateral_separation()
 			if current_action == &"ChaseBall" or current_action == &"PanicClear":
 				_cached_intercept = _predict_intercept_position()
 
@@ -1188,15 +1215,30 @@ func _find_open_space_target() -> Vector2:
 				safe_pos = safe_pos.lerp(ball_pos, 0.08)
 				return _evaluate_off_ball_target(safe_pos)
 			else:
+				# Shared band depth: pull this defender's default hold-shape
+				# X target toward MatchWorldModel.defensive_line_x[team] — the
+				# world-level line every defender on this team reads, stepped
+				# up/dropped once per frame from ball position and pressure on
+				# the carrier (see MatchWorldModel._update_defensive_lines()).
+				# Blended with the existing dynamic anchor rather than
+				# replacing it, so per-role/manager anchor tuning still holds.
+				var line_anchor: Vector2 = dynamic_anchor
+				var world: MatchWorldModel = MatchWorldModel.instance
+				if world != null:
+					line_anchor.x = lerpf(
+						line_anchor.x, world.defensive_line_x[player.team], DEFENSIVE_LINE_DEPTH_WEIGHT)
+
 				# Mark the nearest opposing attacker who is in a dangerous
 				# position (forward of the ball). If no threat, hold the line.
 				var threat: HeavyPlayerController = _find_nearest_threatening_opponent()
 				if threat != null:
-					# Position between the threat and our own goal — not on top
-					# of them, but cutting the passing lane.
-					var goal_centre: Vector2 = dynamic_anchor  # anchor IS the defensive line
-					return threat.global_position.lerp(goal_centre, 0.45)
-				return _evaluate_off_ball_target(dynamic_anchor)
+					# Exception: a genuine nearby threat is allowed to pull
+					# this defender off the shared line entirely — only the
+					# "nothing to mark" default below is bound to it.
+					# Position between the threat and our own goal — not on
+					# top of them, but cutting the passing lane.
+					return threat.global_position.lerp(line_anchor, 0.45)
+				return _evaluate_off_ball_target(line_anchor)
 
 		_:
 			return dynamic_anchor
@@ -1349,6 +1391,39 @@ func _separation_force(sep_radius: float = 55.0) -> Vector2:
 	return force
 
 
+## Lateral-only repulsion among same-team defenders — the "lateral spacing"
+## half of the defensive-line controller (MatchWorldModel.defensive_line_x
+## supplies the depth half). Projects onto the pitch-width (Y) axis only so it
+## never fights the shared line's X pull in _find_open_space_target(): a
+## defender pulled forward to mark a threat still gets pushed sideways off a
+## teammate, but is never dragged back onto the line by this force alone.
+## Cached once per decision tick (see _cached_defensive_lateral) — a full
+## roster walk has no place in the per-frame steering path.
+func _defensive_line_lateral_separation() -> Vector2:
+	if role != Role.OUTFIELD_DEFENDER or player == null:
+		return Vector2.ZERO
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return Vector2.ZERO
+
+	var lateral_push: float = 0.0
+	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+		var other: HeavyPlayerController = world.player_nodes[i]
+		if not is_instance_valid(other) or other == player:
+			continue
+		if world.player_teams[i] != player.team:
+			continue
+		var other_brain := other.get_node_or_null("PlayerBrain") as PlayerBrain
+		if other_brain == null or other_brain.role != Role.OUTFIELD_DEFENDER:
+			continue
+		var dy: float = player.global_position.y - world.player_positions[i].y
+		var dist: float = absf(dy)
+		if dist > 0.0 and dist < DEFENSIVE_LINE_SEPARATION_RADIUS:
+			lateral_push += signf(dy) * (1.0 - dist / DEFENSIVE_LINE_SEPARATION_RADIUS)
+
+	return Vector2(0.0, lateral_push)
+
+
 func _get_ball_carrier() -> HeavyPlayerController:
 	if ball == null:
 		return null
@@ -1469,10 +1544,19 @@ func _steer_for_action() -> Vector2:
 	# side of the ball this player already favours.
 	var assist_force: Vector2 = _assist_force()
 
+	# 5. Defensive-line lateral spacing — same-role repulsion projected onto
+	# the pitch-width (Y) axis only, so the back line spreads sideways without
+	# fighting the shared depth line pulled into _cached_space_target above.
+	# Off-ball only, same guard as separation, and read from the decision-tick
+	# cache rather than recomputed here.
+	var line_lateral_force: Vector2 = Vector2.ZERO
+	if role == Role.OUTFIELD_DEFENDER and current_action != &"ChaseBall" and current_action != &"PanicClear":
+		line_lateral_force = _cached_defensive_lateral * DEFENSIVE_LINE_SEPARATION_WEIGHT
+
 	# Sprint is expressed as intent, not the resolved is_sprinting — the
 	# controller alone decides whether stamina actually allows it.
 	player.wants_sprint = current_action == &"ChaseBall" and distance > CHASE_RADIUS * 0.5
-	return (seek_force + sep_force + spring_force + assist_force).limit_length(1.0)
+	return (seek_force + sep_force + spring_force + assist_force + line_lateral_force).limit_length(1.0)
 
 
 ## Pulls a non-chasing attacker/midfielder into a forward outlet lane 120px
