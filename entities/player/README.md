@@ -68,7 +68,7 @@ HeavyPlayerController (CharacterBody2D)
 **Key Exports:**
 - `player_index: int` — World index (set by HeavyPlayerController._ready())
 - `decision_interval: float` — Lerped by ManagerDirector (0.15 to 0.35s)
-- `role: PlayerRole` — Enum (GK, DEF, MID, FWD); affects utility scoring
+- `role: PlayerRole` — Enum (GOALKEEPER, DEFENDER, MIDFIELDER, OUTFIELD_ATTACKER); affects utility scoring
 
 **Time-Slicing (Stagger):**
 - Jitter formula: `ShouldUpdate(i, f) = ((i+f) % 15 == 0)`
@@ -85,7 +85,7 @@ HeavyPlayerController (CharacterBody2D)
 - `_evaluate_pass_target()` → Candidate teammate + score
 - `_evaluate_chase_ball()` → Ball position + score
 - `_evaluate_space_run()` → Optimal off-ball space + score
-- `_should_chase_ball()` — Role-based gate; GK and FWD chase; DEF/MID context-dependent
+- `_should_chase_ball()` — Role-budget gate for **outfield players only** (OUTFIELD_ATTACKER, MIDFIELDER, DEFENDER). GOALKEEPER is explicitly excluded via the `_:` default branch (`return false # Goalkeeper handled separately`) — GK movement is driven by the dedicated GoaliePatrol/GoalieDive actions in `evaluate_tactical_action()`, not by this gate.
 - `_find_nearby_opponents()` — Scratch buffer for tactical occlusion
 
 **Mood Integration:**
