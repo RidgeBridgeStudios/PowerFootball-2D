@@ -44,6 +44,8 @@ const AUTOSWITCH_COOLDOWN: float = 3.0
 ## Seconds the pitch pauses between halves.
 const HALF_TIME_DURATION: float = 5.0
 
+const MatchStatsScene: PackedScene = preload("res://ui/MatchStatsUI.tscn")
+
 var _shake_amount: float = 0.0
 var _autoswitch_cooldown_remaining: float = 0.0
 
@@ -138,8 +140,9 @@ func _on_pregame_confirmed() -> void:
 	_offside_detector.bind(boundary, _set_piece_coordinator)
 	_penalty_shootout_coordinator.bind(_set_piece_coordinator, ball, boundary)
 
-	var team_a_name: String = _selected_home_team.team_name if _selected_home_team != null else (DataLoader.get_team(GameManager.TEAM_A).team_name if DataLoader.league != null else "Team A")
-	var team_b_name: String = _selected_away_team.team_name if _selected_away_team != null else (DataLoader.get_team(GameManager.TEAM_B).team_name if DataLoader.league != null else "Team B")
+	var team_names: Array[String] = _resolve_team_names()
+	var team_a_name: String = team_names[0]
+	var team_b_name: String = team_names[1]
 	hud.set_team_names(team_a_name, team_b_name)
 	var ref_data: RefereeData = RefereeLoader.get_random_referee()
 	match_referee.bind(ref_data, _set_piece_coordinator, team_a_name, team_b_name)
@@ -436,6 +439,14 @@ func _apply_match_config() -> void:
 		_selected_away_team = DataLoader.get_team(away_idx)
 
 	_is_practice_mode = GameManager.get_meta(&"practice_mode", false)
+
+
+## Shared by _on_pregame_confirmed() (HUD/referee binding) and _on_match_ended()
+## (the stats screen) so both read the exact same fallback chain.
+func _resolve_team_names() -> Array[String]:
+	var team_a_name: String = _selected_home_team.team_name if _selected_home_team != null else (DataLoader.get_team(GameManager.TEAM_A).team_name if DataLoader.league != null else "Team A")
+	var team_b_name: String = _selected_away_team.team_name if _selected_away_team != null else (DataLoader.get_team(GameManager.TEAM_B).team_name if DataLoader.league != null else "Team B")
+	return [team_a_name, team_b_name]
 
 
 ## Places the ball on the centre spot and returns every player to their
@@ -772,7 +783,25 @@ func _on_match_ended(winner: int) -> void:
 	# not a teardown, and the rematch flow below would restart play against an
 	# empty roster with no spawn pass left to re-register anyone. _exit_tree()
 	# owns the reset instead — it covers this path and practice mode both.
-	# TODO: full-time screen and a rematch flow; for now the pitch simply stops.
+	_show_match_stats()
+
+
+## Shows the full-time scoreboard/stats overlay. MatchStatsTracker.reset() is
+## deliberately deferred to MatchStatsUI.stats_dismissed — the tracker's
+## counts must still be readable while the overlay is up.
+func _show_match_stats() -> void:
+	MatchStatsTracker.stop_possession_sampling()
+
+	var team_names: Array[String] = _resolve_team_names()
+	var stats_ui: MatchStatsUI = MatchStatsScene.instantiate() as MatchStatsUI
+	add_child(stats_ui)
+	stats_ui.populate(team_names[0], team_names[1])
+	stats_ui.stats_dismissed.connect(_on_stats_dismissed)
+	stats_ui.show()
+
+
+func _on_stats_dismissed() -> void:
+	MatchStatsTracker.reset()
 
 
 ## Splits the live roster into each team's players and hands them to

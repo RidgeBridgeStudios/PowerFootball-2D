@@ -81,7 +81,7 @@ func _strike(player: HeavyPlayerController) -> void:
 	var speed: float = SHOT_SPEED * FIXED_POWER
 	ball.apply_kick(aim.normalized() * speed, 0.0, player)
 	player.show_action_text("SHOT")
-	GameEvents.ball_struck.emit(player, speed, FIXED_POWER)
+	GameEvents.ball_struck.emit(player, speed, FIXED_POWER, true)
 
 	if player.is_user_controlled:
 		InputHelper.rumble(0.25, 0.6, 0.15)

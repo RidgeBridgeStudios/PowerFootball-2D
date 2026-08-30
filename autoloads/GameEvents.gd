@@ -58,7 +58,12 @@ signal player_mood_changed(player: Node, tier: int)
 ## Extensions beyond the core match set: the audio and camera layers need to
 ## hear about contact, and routing it here keeps them decoupled from the FSM.
 
-signal ball_struck(player: Node, speed: float, charge_ratio: float)
+## is_shot distinguishes a shooting strike (ShotLockState, PenaltyKickState, or a
+## held ChargeKickState release) from a pass/throw (a tapped ChargeKickState
+## release or ThrowInState) — MatchStatsTracker uses it to route shot vs pass
+## counting. Existing 3-arg listeners (OffsideDetector, MoodSystem) still work
+## unmodified: Godot drops trailing emitted args a callback doesn't declare.
+signal ball_struck(player: Node, speed: float, charge_ratio: float, is_shot: bool)
 signal tackle_won(winner: Node, loser: Node)
 signal aerial_contested(player: Node, clean: bool)
 

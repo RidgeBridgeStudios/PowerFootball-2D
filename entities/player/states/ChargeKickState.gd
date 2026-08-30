@@ -137,7 +137,10 @@ func _release_kick(player: HeavyPlayerController) -> void:
 		action_label = "SHOT"
 	player.show_action_text(action_label)
 
-	GameEvents.ball_struck.emit(player, speed, charge_ratio)
+	GameEvents.ball_struck.emit(player, speed, charge_ratio, not is_tap)
+
+	if is_tap:
+		MatchStatsTracker.record_pass_attempt(player, MatchStatsTracker.is_pass_toward_teammate(player, aim))
 
 	if player.is_user_controlled:
 		InputHelper.rumble(0.25 * charge_ratio, 0.6 * charge_ratio, 0.12)

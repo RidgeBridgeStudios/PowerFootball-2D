@@ -120,7 +120,8 @@ func _release_throw(player: HeavyPlayerController) -> void:
 	# Flat trajectory is the point of a throw-in — impulse_z stays 0.
 	ball.apply_kick(aim.normalized() * speed, 0.0, player)
 	player.show_action_text("THROW")
-	GameEvents.ball_struck.emit(player, speed, charge_ratio)
+	GameEvents.ball_struck.emit(player, speed, charge_ratio, false)
+	MatchStatsTracker.record_pass_attempt(player, MatchStatsTracker.is_pass_toward_teammate(player, aim))
 	GameManager.restart_play()
 
 	# Set after apply_kick so the ball's velocity is already committed.
