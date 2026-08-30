@@ -112,6 +112,20 @@ signal formation_anchors_changed(team: int, new_anchors: Dictionary)
 ## Career mode UI connects to this to refresh the manager profile screen.
 signal manager_stats_updated(manager: ManagerData)
 
+## --- Pressing (defensive trigger detection) --------------------------------
+
+## Fired by MatchWorldModel whenever the active pressing trigger changes —
+## once when a trigger arms (active=true) and once when it expires
+## (active=false, trigger_type=MatchWorldModel.PressTrigger.NONE, carrier=null).
+## trigger_type is a MatchWorldModel.PressTrigger enum value. carrier is the
+## HeavyPlayerController the trigger concerns (nullable — a backward/square
+## pass trigger names the kicker, since the receiver is not yet known at the
+## moment the ball is struck). position is where the trigger was raised, for
+## HUD/debug overlays. Consumers should react to this signal — or read
+## MatchWorldModel.instance.press_trigger_active directly when they already
+## have a reason to be looking — rather than polling every frame.
+signal press_trigger_changed(active: bool, trigger_type: int, carrier: Node, position: Vector2)
+
 ## --- Team management (pre-game screen and pause menu) -----------------------
 
 ## Emitted by PreGameScreen once the user clicks Kick Off; match start is

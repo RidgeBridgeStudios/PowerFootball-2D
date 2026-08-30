@@ -633,6 +633,7 @@ func _bind_players() -> void:
 	# it over here — before any brain runs a decision tick.
 	if MatchWorldModel.instance != null:
 		MatchWorldModel.instance.register_ball(ball)
+		MatchWorldModel.instance.bind_boundary(boundary)
 
 	var squad_counts: Dictionary = {}
 
