@@ -89,12 +89,6 @@ const FACING_UPDATE_SPEED: float = 15.0
 ## Floor on effective acceleration so a full 180 still eventually resolves.
 const MIN_ACCELERATION_RATIO: float = 0.1
 
-## Next MatchWorldModel slot handed out to a spawning player. Players are laid
-## out declaratively as children of $Players in PitchScene.tscn, so there is no
-## spawn loop to number them — each one claims the next slot in its own _ready()
-## instead. MatchWorldModel.unregister_all() resets this between matches.
-static var _auto_index: int = 0
-
 ## This player's slot in MatchWorldModel, or -1 if registration was refused
 ## (roster already full).
 var world_index: int = -1
@@ -153,8 +147,9 @@ func _register_with_world_model() -> void:
 		push_warning("HeavyPlayerController: MatchWorldModel autoload missing; %s is uncached." % name)
 		return
 
-	world_index = world.register_player(_auto_index, self, team)
-	_auto_index += 1
+	# Pass NO_INDEX to let MatchWorldModel own the slot counter entirely, so a
+	# stale node re-registering during match teardown can't double-claim a slot.
+	world_index = world.register_player(MatchWorldModel.NO_INDEX, self, team)
 
 	if world_index >= 0 and has_node("PlayerBrain"):
 		var player_brain := get_node("PlayerBrain") as PlayerBrain

@@ -128,7 +128,6 @@ func register_ball(node: Pseudo3DBall) -> void:
 ## match's players start claiming slots from 0 again.
 func unregister_all() -> void:
 	_auto_index = 0
-	HeavyPlayerController._auto_index = 0
 	ball_node = null
 	ball_position = Vector2.ZERO
 	ball_velocity = Vector2.ZERO
