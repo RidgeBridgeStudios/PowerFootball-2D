@@ -42,7 +42,7 @@ Every major feature touches at least two layers. Single-layer systems are orname
 | autoloads/MatchWorldModel.gd | ALL spatial position reads go here. Cache of 22 players + ball. | Call get_tree().get_nodes_in_group() in _process/_physics_process |
 | autoloads/GameEvents.gd | ALL inter-system events propagate via signals on this bus. | Emit signals from components; route through GameEvents only |
 | autoloads/GameManager.gd | Match phase, score, clock, set pieces. Single source of truth. | Query multiple files for match state |
-| entities/player/PlayerBrain.gd | Utility-scored AI. Runs on 15-frame jitter per player_index. | Allocate or scan trees inside _physics_process |
+| entities/player/PlayerBrain.gd | Utility-scored AI. Runs on 15-frame jitter per player_index. Writes ONLY player.movement_intent and player.wants_sprint (desired speed scale) — never velocity, acceleration, or is_sprinting. | Allocate or scan trees inside _physics_process; write to velocity/is_sprinting directly |
 | shared/PlayerData.gd | Player attributes, traits, relationships. Persists across matches. | Mutate attributes directly; use methods only |
 | shared/CollisionLayers.gd | Layer constants. CharacterBody2D masks Layer 1+2 ONLY. | Mask Layer 3 in CharacterBody2D |
 | docs/course_implementation_specification.md | READ-ONLY. Course-derived build phases 1–10, FSM patterns, physics formulas, data models, known gotchas, and agent protocol. Consult before starting any new phase or implementing any system described in Sections 7–13. | Modify this file. It is a reference artifact only. |

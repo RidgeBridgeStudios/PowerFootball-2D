@@ -34,7 +34,7 @@ Sync contract:
 - **Signal bus:** ALL inter-system events → GameEvents.gd autoload
 - **Spatial cache:** ALL NPC position reads → MatchWorldModel.gd
 - **Collision:** CharacterBody2D MUST NOT mask Layer 3 (Ball)
-- **Brain contract:** PlayerBrain writes ONLY to player.movement_intent
+- **Brain contract:** PlayerBrain writes ONLY to player.movement_intent and player.wants_sprint (desired speed scale). It never touches velocity, acceleration, or the resolved is_sprinting — those are HeavyPlayerController's alone.
 
 ## Boot Order (project.godot)
 

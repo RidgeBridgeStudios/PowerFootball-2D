@@ -7,9 +7,14 @@
 ## different attributes read the same situation differently, and a tired player
 ## under a heavy press makes unforced errors.
 ##
-## The brain writes steering into HeavyPlayerController.movement_intent; it never
-## touches velocity directly, so CPU players are bound by exactly the same weight
-## model as the human one.
+## The brain writes exactly two fields on HeavyPlayerController — movement_intent
+## (a direction to seek) and wants_sprint (a desired speed scale) — and never
+## touches velocity, acceleration, or the resolved is_sprinting directly. All
+## physical integration (turning penalties, accel/friction curves, stamina
+## gating of sprint, move_and_slide()) belongs to the controller; a wrong
+## tactical read here can only ever surface as a mishit pass or a bad run, not
+## as broken player physics. CPU players are bound by exactly the same weight
+## model as the human one for that reason.
 ##
 ## Scheduling: the decision block is time-sliced on a 15-frame stagger keyed to
 ## player_index, so the 22 brains spread their evaluations across the interval
@@ -1230,7 +1235,9 @@ func _steer_for_action() -> Vector2:
 	# side of the ball this player already favours.
 	var assist_force: Vector2 = _assist_force()
 
-	player.is_sprinting = current_action == &"ChaseBall" and distance > CHASE_RADIUS * 0.5
+	# Sprint is expressed as intent, not the resolved is_sprinting — the
+	# controller alone decides whether stamina actually allows it.
+	player.wants_sprint = current_action == &"ChaseBall" and distance > CHASE_RADIUS * 0.5
 	return (seek_force + sep_force + spring_force + assist_force).limit_length(1.0)
 
 
@@ -1269,13 +1276,13 @@ func _steer_goalkeeper() -> Vector2:
 		_set_crowd_knockdown_enabled(true)
 		var dive_offset: Vector2 = _cached_intercept - player.global_position
 		if dive_offset.length() <= ARRIVE_RADIUS:
-			player.is_sprinting = false
+			player.wants_sprint = false
 			return Vector2.ZERO
-		player.is_sprinting = true
+		player.wants_sprint = true
 		return dive_offset.normalized()
 
 	_set_crowd_knockdown_enabled(false)
-	player.is_sprinting = false
+	player.wants_sprint = false
 
 	var target: Vector2 = _goalie_patrol_target()
 	var offset: Vector2 = target - player.global_position
