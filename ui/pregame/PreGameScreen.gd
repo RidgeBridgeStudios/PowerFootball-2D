@@ -23,6 +23,7 @@ extends CanvasLayer
 @onready var bench_list_b: VBoxContainer = $Root/MainLayout/TeamBPanel/BenchScrollB/BenchListB
 @onready var formation_diagram_a: Control = $Root/MainLayout/TeamAPanel/FormationDiagramA
 @onready var formation_diagram_b: Control = $Root/MainLayout/TeamBPanel/FormationDiagramB
+@onready var sim_toggle: CheckButton = $Root/MainLayout/CentrePanel/SimulationToggle
 @onready var kickoff_button: Button = $Root/MainLayout/CentrePanel/KickOffButton
 @onready var team_a_name: Label = $Root/MainLayout/TeamAPanel/TeamAName
 @onready var team_b_name: Label = $Root/MainLayout/TeamBPanel/TeamBName
@@ -224,6 +225,7 @@ func _rebuild_formation_diagram(team: int) -> void:
 
 
 func _on_kickoff_pressed() -> void:
+	GameManager.set_meta(&"simulate_match", sim_toggle.button_pressed)
 	_mgmt_a.apply_to_team()
 	_mgmt_b.apply_to_team()
 	GameEvents.pregame_confirmed.emit()

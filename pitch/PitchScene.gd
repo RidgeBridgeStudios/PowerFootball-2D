@@ -636,6 +636,7 @@ func _bind_players() -> void:
 		MatchWorldModel.instance.bind_boundary(boundary)
 
 	var squad_counts: Dictionary = {}
+	var is_sim: bool = GameManager.get_meta(&"simulate_match", false)
 
 	for node: Node in players.get_children():
 		var player := node as HeavyPlayerController
@@ -645,6 +646,8 @@ func _bind_players() -> void:
 		if player.brain != null:
 			player.brain.bind_ball(ball)
 			player.brain.bind_boundary(boundary)
+		if is_sim:
+			player.is_user_controlled = false
 		if player.is_user_controlled:
 			hud.bind_active_player(player)
 
