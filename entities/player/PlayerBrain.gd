@@ -482,6 +482,22 @@ func _score_dribble(ctx: UtilityContext) -> float:
 	return clampf(base, 0.0, 1.0)
 
 
+## Score for attempting a shot on goal.
+## Only legal when the player owns the ball and is within shooting range.
+## Aggression drives the base desire; proximity and pressure add urgency.
+func _score_shoot(ctx: UtilityContext) -> float:
+	if not ctx.is_possessor:
+		return 0.0
+	if ctx.dist_to_goal > 320.0:
+		return 0.0
+	var base: float = ctx.eff_aggression * 0.70
+	# The closer to goal, the harder the shot is to ignore.
+	var prox_bonus: float = clampf(1.0 - ctx.dist_to_goal / 320.0, 0.0, 1.0) * 0.30
+	# Under pressure, get the shot off before being tackled.
+	var pressure_urgency: float = ctx.pressure * ctx.eff_aggression * 0.15
+	return clampf(base + prox_bonus + pressure_urgency, 0.0, 1.0)
+
+
 ## Score for maintaining formation (conservative option).
 ## Acts as the floor: always available, but outscored whenever anything
 ## more purposeful is viable.  Rises when team lacks the ball and player
@@ -529,6 +545,7 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 		{ &"action": &"ChaseBall",         "score": _score_chase(ctx)             },
 		{ &"action": &"FindSpace",         "score": _score_find_space(ctx)        },
 		{ &"action": &"AttemptDribble",    "score": _score_dribble(ctx)           },
+		{ &"action": &"AttemptShoot",      "score": _score_shoot(ctx)             },
 		{ &"action": &"MaintainFormation", "score": _score_maintain_formation(ctx)},
 	]
 
@@ -719,6 +736,8 @@ func get_target_position() -> Vector2:
 			if _cached_pass_target != null and is_instance_valid(_cached_pass_target):
 				return _cached_pass_target.global_position + _cached_pass_target.velocity * 0.3
 			return ball.global_position
+		&"AttemptShoot":
+			return ball.global_position if ball != null else formation_anchor
 		_:
 			return _cached_space_target
 
@@ -1026,6 +1045,25 @@ func _steer_for_action() -> Vector2:
 		ball.apply_kick(clear_dir * 300.0, 0.0, player)
 		current_action = &"MaintainFormation"
 
+	# --- Shoot execution ---
+	if current_action == &"AttemptShoot" and pitch_boundary != null \
+			and player.global_position.distance_to(ball.global_position) < 80.0 \
+			and player.get_ball_in_foot_range() != null:
+		var opp_team: int = 1 - player.team
+		var goal_centre: Vector2 = pitch_boundary.get_goal_centre(opp_team)
+		# Add slight randomness based on composure — low composure = wilder shot.
+		var mood_node: MoodSystem = player.get_mood() if player != null else null
+		var eff_composure: float = clampf(composure_attribute + (mood_node.get_composure_delta() if mood_node != null else 0.0), 0.0, 1.0)
+		var spread: float = (1.0 - eff_composure) * 55.0  # pixels of Y scatter at low composure
+		var aim_y: float = goal_centre.y + _rng.randf_range(-spread, spread)
+		var aim_target: Vector2 = Vector2(goal_centre.x, aim_y)
+		var aim_dir: Vector2 = (aim_target - ball.global_position).normalized()
+		# Shot power scales with how close to goal: max 520px/s, min 380px/s.
+		var dist_ratio: float = clampf(1.0 - player.global_position.distance_to(goal_centre) / 320.0, 0.0, 1.0)
+		var shot_power: float = lerpf(380.0, 520.0, dist_ratio)
+		ball.apply_kick(aim_dir * shot_power, 0.0, player)
+		current_action = &"MaintainFormation"
+
 	# --- Seek target selection ---
 	var seek_target: Vector2
 	match current_action:
@@ -1036,6 +1074,9 @@ func _steer_for_action() -> Vector2:
 				seek_target = _cached_pass_target.global_position + _cached_pass_target.velocity * 0.3
 			else:
 				seek_target = ball.global_position
+		&"AttemptShoot":
+			# Move toward the ball to get it in foot range.
+			seek_target = ball.global_position if ball != null else player.global_position
 		_:
 			seek_target = _cached_space_target
 
