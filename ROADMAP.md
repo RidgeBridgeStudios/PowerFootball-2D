@@ -8,7 +8,7 @@ Core football mechanics that must work before anything else.
 
 - [x] Substitutions + reserves UI
 - [x] Yellow/red card implementation
-- [ ] Offside detection
+- [x] Offside detection
 - [ ] Injury system
 - [ ] Match stats screen + full-time scoreboard
 - [ ] End-of-match player ratings

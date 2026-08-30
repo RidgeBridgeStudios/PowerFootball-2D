@@ -68,6 +68,10 @@ signal red_card_shown(player: Node, team: int, is_second_yellow: bool)
 ## Fired when a sent-off player was the goalkeeper, so PitchScene can prompt an
 ## emergency substitution.
 signal goalkeeper_sent_off(team: int)
+## Fired by OffsideDetector when a player is caught offside.
+## position is the offside player's world position at the moment
+## of the call, used as the restart spot.
+signal offside_called(offside_player: Node, defending_team: int, position: Vector2)
 
 ## --- Manager events -------------------------------------------------------
 
