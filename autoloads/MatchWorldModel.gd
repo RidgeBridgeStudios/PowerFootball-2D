@@ -22,8 +22,10 @@
 ##          ball_position, ball_velocity, possessor_index,
 ##          get_opponents_of(), get_teammates_of(), nearest_opponent_dist_to()
 ##
-
-class_name MatchWorldModel
+## NOTE: class_name is intentionally absent. This script is registered as an
+## autoload singleton — Godot 4.7+ rejects class_name declarations that shadow
+## the autoload's injected global name. Access via MatchWorldModel.instance.
+##
 extends Node
 
 ## The live singleton. Assigned in _enter_tree() so it is available before any
