@@ -78,6 +78,14 @@ func is_in_state(state_name: StringName) -> bool:
 	return current_state_name == state_name
 
 
+## Returns the flyweight state instance for `state_name`, or null when unknown.
+## Lets a caller configure a state (e.g. set GoalkeeperDiveState.dive_direction)
+## before transition_to() runs its enter(). States stay one instance per player,
+## so this never allocates.
+func get_state(state_name: StringName) -> PlayerState:
+	return _states.get(state_name, null)
+
+
 ## 0.0-1.0 charge for the HUD power meter; 0.0 whenever no kick is winding up.
 ## ShotLockState, ThrowInState and PenaltyKickState also expose a charge_ratio
 ## field (shot lock-on power, throw distance, and runup progress respectively)
@@ -113,3 +121,4 @@ func _register_states() -> void:
 	_states[PlayerState.SET_PIECE_FREEZE] = SetPieceFreezeState.new()
 	_states[PlayerState.THROW_IN] = ThrowInState.new()
 	_states[PlayerState.PENALTY_KICK] = PenaltyKickState.new()
+	_states[PlayerState.GOALKEEPER_DIVE] = GoalkeeperDiveState.new()

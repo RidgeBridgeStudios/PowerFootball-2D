@@ -98,6 +98,10 @@ var _paused_human: HeavyPlayerController = null
 ## scene tree access.
 var _press_office: PressOffice = PressOffice.new()
 
+## Goalkeeper dive commitment. One brain per match (the RNG is seeded once), one
+## coordinator wiring ball_struck → dive decision → GoalkeeperDiveState transition.
+var _gk_dive_brain: GoalkeeperDiveBrain = GoalkeeperDiveBrain.new()
+
 
 func _ready() -> void:
 	randomize()
@@ -140,6 +144,8 @@ func _on_pregame_confirmed() -> void:
 	_set_piece_coordinator.bind(ball, boundary, players)
 	_offside_detector.bind(boundary, _set_piece_coordinator)
 	_penalty_shootout_coordinator.bind(_set_piece_coordinator, ball, boundary)
+
+	_setup_goalkeeper_dive_coordinator()
 
 	var team_names: Array[String] = _resolve_team_names()
 	var team_a_name: String = team_names[0]
@@ -295,6 +301,81 @@ func _on_pause_closed() -> void:
 	_paused_human = null
 	ball.unfreeze()
 	GameManager.set_phase(GameManager.MatchPhase.IN_PLAY)
+
+
+## --- Goalkeeper dive commitment ---------------------------------------------
+## One brain instance seeded once per match; ball_struck routes every shot to a
+## one-way dive decision for the opposing goalkeeper. Disconnected at full time
+## so Practice Arena (which never reaches _on_match_ended) still never double-
+## connects on a rematch — and _on_pregame_confirmed is a one-shot.
+
+func _setup_goalkeeper_dive_coordinator() -> void:
+	_gk_dive_brain.initialise(randi())
+	if not GameEvents.ball_struck.is_connected(_on_ball_struck_for_dive):
+		GameEvents.ball_struck.connect(_on_ball_struck_for_dive)
+
+
+func _teardown_goalkeeper_dive_coordinator() -> void:
+	if GameEvents.ball_struck.is_connected(_on_ball_struck_for_dive):
+		GameEvents.ball_struck.disconnect(_on_ball_struck_for_dive)
+
+
+func _on_ball_struck_for_dive(_shooter: Node, _speed: float, _charge_ratio: float, is_shot: bool) -> void:
+	if not is_shot:
+		return
+
+	# The shooter carries the attacking team; the opposing keeper defends it.
+	var shooter := _shooter as HeavyPlayerController
+	if shooter == null:
+		return
+	var opp_team: int = 1 - shooter.team
+
+	# The signal is fired by the kick states directly after apply_kick(), but it
+	# carries no ball reference — resolve the live ball from the world model.
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null or world.ball_node == null:
+		return
+	var match_ball: Pseudo3DBall = world.ball_node
+	if not is_instance_valid(match_ball):
+		return
+
+	var keeper: HeavyPlayerController = _find_goalkeeper(opp_team)
+	if keeper == null:
+		return
+
+	var shot_velocity: Vector2 = match_ball.velocity
+	if shot_velocity.x == 0.0:
+		return
+
+	var goal_line_x: float = boundary.get_goal_centre(opp_team).x
+	var direction: Vector2 = _gk_dive_brain.decide_dive(keeper, match_ball, shot_velocity, goal_line_x)
+	if direction == Vector2.ZERO:
+		return
+
+	var dive_state: GoalkeeperDiveState = \
+		keeper.state_factory.get_state(PlayerState.GOALKEEPER_DIVE) as GoalkeeperDiveState
+	if dive_state == null:
+		return
+	dive_state.dive_direction = direction
+	keeper.state_factory.transition_to(PlayerState.GOALKEEPER_DIVE)
+
+
+## The goalkeeper on `team`, resolved from the world model cache — no scene-tree
+## polling. Every read is is_instance_valid()-guarded (Practice Arena frees
+## players mid-match).
+func _find_goalkeeper(team: int) -> HeavyPlayerController:
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return null
+	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+		var p: HeavyPlayerController = world.player_nodes[i]
+		if p == null or not is_instance_valid(p):
+			continue
+		if world.player_teams[i] != team:
+			continue
+		if p.brain != null and p.brain.is_goalkeeper:
+			return p
+	return null
 
 
 func _process(delta: float) -> void:
@@ -779,6 +860,7 @@ func _on_match_ended(winner: int) -> void:
 		return
 
 	ball.freeze()
+	_teardown_goalkeeper_dive_coordinator()
 	_log_manager_stats(winner)
 	# The world model is deliberately NOT cleared here: full time is a phase,
 	# not a teardown, and the rematch flow below would restart play against an

@@ -45,6 +45,11 @@ extends Resource
 ## Close-ball control: higher keeps the ball tighter during dribbling.
 @export_range(0.0, 1.0) var close_control: float = 0.65
 
+## Goalkeeper reaction speed: 0.0 = sluggish, 1.0 = elite reactions. Feeds the
+## dive-commitment error model — a keeper with low reflexes dives the wrong way
+## more often when facing a shot.
+@export_range(0.0, 1.0) var reflexes: float = 0.6
+
 ## --- Live form and career stats — read by the pre-game screen and pause menu ---
 
 ## Per-match rolling form (0.0 - 10.0). Persists across matches; decays
