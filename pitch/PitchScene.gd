@@ -564,6 +564,13 @@ func reset_for_kickoff() -> void:
 		player.velocity = Vector2.ZERO
 		player.movement_intent = Vector2.ZERO
 		player.state_factory.transition_to(PlayerState.SET_PIECE_FREEZE)
+		# After every reposition (first kickoff, post-goal restarts, end swaps)
+		# refresh a goalkeeper's cached goal-line X so any future consumer of
+		# the cache never reads a stale spawn value. Patrol and dive logic
+		# derive the line live from the boundary, so this is cache hygiene,
+		# not correctness of the current movement model.
+		if player.brain != null and player.brain.is_goalkeeper:
+			player.brain.refresh_spawn_position()
 
 
 ## Camera feel. Kept here deliberately small.

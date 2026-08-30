@@ -35,8 +35,9 @@
 ##     the cached off-ball target so the new shape is steered to on the very
 ##     next frame rather than at the next decision tick.
 ##
-## Exposes: bind_ball(), bind_boundary(), evaluate_tactical_action(),
-##          calculate_pressure_index(), get_target_position(), ball
+## Exposes: bind_ball(), bind_boundary(), refresh_spawn_position(),
+##          evaluate_tactical_action(), calculate_pressure_index(),
+##          get_target_position(), ball
 ##
 
 class_name PlayerBrain
@@ -95,8 +96,10 @@ const CHASE_RADIUS: float = 220.0
 const ARRIVE_RADIUS: float = 24.0
 
 ## Minimum ball-velocity-to-goal alignment (dot product) for the goalkeeper's
-## per-frame dive trigger to treat the ball as a shot on target.
-const GOALIE_DIVE_DOT_THRESHOLD: float = 0.7
+## per-frame dive trigger to treat the ball as a shot on target. 0.55 admits
+## shots within ~56° of straight at goal — angled near/far-post efforts —
+## without triggering dives on clearances only vaguely goalward.
+const GOALIE_DIVE_DOT_THRESHOLD: float = 0.55
 ## Ball speed above which an aligned ground shot counts as a dive threat; an
 ## airborne ball qualifies regardless of speed.
 const GOALIE_DIVE_SPEED_THRESHOLD: float = 200.0
@@ -129,8 +132,10 @@ var ball: Pseudo3DBall = null
 var pitch_boundary: PitchBoundary = null
 var current_action: StringName = &"MaintainFormation"
 
-## Goalkeeper's own spawn X, captured once in _ready(). GoaliePatrol locks to
-## this forever — the keeper never advances off it except mid-dive.
+## Cached goalkeeper goal-line X kept for future consumers (rushes, GK swaps).
+## Refreshed by refresh_spawn_position() whenever PitchScene repositions
+## players; the live patrol/dive logic derives the line from pitch_boundary at
+## the point of use and never reads this cache.
 var _spawn_x: float = 0.0
 ## Counts down while a committed GoalieDive is in progress.
 var _goalie_dive_timer: float = 0.0
@@ -183,8 +188,6 @@ func _ready() -> void:
 	if formation_anchor == Vector2.ZERO and player != null:
 		formation_anchor = player.global_position
 	_cached_space_target = formation_anchor
-	if player != null:
-		_spawn_x = player.global_position.x
 
 	GameEvents.formation_anchors_changed.connect(_on_formation_changed)
 
@@ -198,6 +201,17 @@ func bind_ball(match_ball: Pseudo3DBall) -> void:
 ## distance to its own goal centre.
 func bind_boundary(b: PitchBoundary) -> void:
 	pitch_boundary = b
+
+
+## Re-derives the cached goalkeeper goal-line X from the boundary. PitchScene
+## calls this after repositioning players (reset_for_kickoff(), end swaps) so
+## any future consumer of the cache never reads a stale spawn value. Patrol and
+## dive logic deliberately do not depend on this cache — they derive the line
+## from pitch_boundary at the point of use — so a missed refresh can never
+## break keeper positioning again.
+func refresh_spawn_position() -> void:
+	if pitch_boundary != null and player != null:
+		_spawn_x = pitch_boundary.get_goal_centre(player.team).x
 
 
 ## False for a goalkeeper once the ball is within 50px of their own goal's
@@ -316,14 +330,17 @@ func _check_goalkeeper_dive_trigger(delta: float) -> void:
 		return
 
 	# Y-intercept of the ball's current velocity line with the keeper's own
-	# spawn_x — a straight-line projection, not a multi-step trajectory walk.
+	# goal line (the same X the patrol derives live from the boundary) — a
+	# straight-line projection, not a multi-step trajectory walk.
 	if is_zero_approx(ball_vel.x):
 		return
-	var time_to_line: float = (_spawn_x - ball.global_position.x) / ball_vel.x
-	if time_to_line < 0.0:
+	var time_to_line: float = (goal_centre.x - ball.global_position.x) / ball_vel.x
+	# 120ms tolerance: a keeper can still palm a ball that has barely crossed
+	# the line, so a strictly negative time_to_line must not kill the dive.
+	if time_to_line < -0.12:
 		return
 
-	_cached_intercept = Vector2(_spawn_x, ball.global_position.y + ball_vel.y * time_to_line)
+	_cached_intercept = Vector2(goal_centre.x, ball.global_position.y + ball_vel.y * time_to_line)
 	current_action = &"GoalieDive"
 	_goalie_dive_timer = GOALIE_DIVE_DURATION
 
@@ -1077,9 +1094,10 @@ func _assist_force() -> Vector2:
 
 
 ## Goal-line lock steering: patrol slides along Y between the posts, tracking
-## the ball, while X never leaves spawn_x except during a committed dive.
-## Replaces the outfield seek/separation/spring blend entirely — a keeper's
-## movement model is fundamentally different from an outfield player's.
+## the ball, while X stays on the goal line derived from pitch_boundary except
+## during a committed dive. Replaces the outfield seek/separation/spring blend
+## entirely — a keeper's movement model is fundamentally different from an
+## outfield player's.
 func _steer_goalkeeper() -> Vector2:
 	if player == null or ball == null:
 		return Vector2.ZERO
@@ -1109,15 +1127,18 @@ func _steer_goalkeeper() -> Vector2:
 	return offset.normalized() * proximity_factor
 
 
-## World-space patrol point: locked to spawn_x, sliding along Y between the
-## goal posts to track the ball. Shared by _steer_goalkeeper() and
-## get_target_position() so the two never drift out of sync.
+## World-space patrol point: locked to the goal-line X derived live from
+## pitch_boundary, sliding along Y between the goal posts to track the ball.
+## Shared by _steer_goalkeeper() and get_target_position() so the two never
+## drift out of sync. Deriving the line here instead of trusting a cached
+## spawn X makes the patrol correct from the very first frame and lets it
+## follow the keeper's goal automatically across end swaps.
 func _goalie_patrol_target() -> Vector2:
 	if pitch_boundary == null or player == null or ball == null:
 		return formation_anchor
 	var goal_centre: Vector2 = pitch_boundary.get_goal_centre(player.team)
 	var half_mouth: float = pitch_boundary.goal_mouth_height * 0.5
-	return Vector2(_spawn_x, clampf(ball.global_position.y, goal_centre.y - half_mouth, goal_centre.y + half_mouth))
+	return Vector2(goal_centre.x, clampf(ball.global_position.y, goal_centre.y - half_mouth, goal_centre.y + half_mouth))
 
 
 ## Enables/disables the goalkeeper's crowd-knockdown hitbox for the duration
