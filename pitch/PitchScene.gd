@@ -295,7 +295,16 @@ func _process(delta: float) -> void:
 	if _is_practice_mode:
 		_tick_practice(delta)
 	else:
-		if Input.is_action_just_pressed(&"action_switch"):
+		# During a free kick or penalty, SetPieceCoordinator owns action_switch
+		# itself (cycling the taker) — see SetPieceCoordinator.can_switch_taker().
+		# Deferring here instead of letting both handlers read the same
+		# just-pressed input keeps the HUD's active player and the
+		# coordinator's taker from disagreeing about who is controlled.
+		var taker_switch_phase: bool = (
+			GameManager.current_phase == GameManager.MatchPhase.FREE_KICK
+			or GameManager.current_phase == GameManager.MatchPhase.PENALTY_KICK
+		)
+		if not taker_switch_phase and Input.is_action_just_pressed(&"action_switch"):
 			switch_to_nearest_teammate()
 		_tick_autoswitch(delta)
 
