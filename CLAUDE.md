@@ -23,10 +23,11 @@ Sync contract:
 
 **Before implementing any feature:**
 1. @./POWERFOOTBALL_MASTER_VISION.md — Vision, roadmap, deep systems, agent protocol
-2. @./ROADMAP.md — Tactical [ ]/[x] checklist
-3. @.claude/rules/godot-47-core.md — Engine contracts
-4. @.claude/rules/soccer-physics.md — Physics invariants
-5. @.claude/rules/ai-architect.md — AI & spatial invariants
+2. @./docs/course_implementation_specification.md — Course-derived build phases, FSM blueprints, physics formulas, data models, gotchas & agent protocol
+3. @./ROADMAP.md — Tactical [ ]/[x] checklist
+4. @.claude/rules/godot-47-core.md — Engine contracts
+5. @.claude/rules/soccer-physics.md — Physics invariants
+6. @.claude/rules/ai-architect.md — AI & spatial invariants
 
 ## Architecture Quick-Reference
 

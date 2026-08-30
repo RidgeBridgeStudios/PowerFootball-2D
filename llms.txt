@@ -37,6 +37,7 @@
 ## Data Import
 
 - **docs/json-schema.md** — Complete schema for player, manager, team, league JSON import; trait bitmasks; relationships
+- **docs/course_implementation_specification.md** — Course-derived implementation spec: FSM blueprints, physics formulas (passing kinematics, GK patrol, dot-product aerial aiming), data models, 10-phase build order, known gotchas table, and AI agent session protocol. READ-ONLY.
 - **autoloads/DataLoader.gd** — JSON parsing; player/manager/team instantiation
 
 ## Static Analysis
@@ -63,6 +64,7 @@
 ## First Steps for an Agent
 
 1. Read **POWERFOOTBALL_MASTER_VISION.md** (vision, build order, context)
+1b. Read **docs/course_implementation_specification.md** (build phases, formulas, agent protocol — consult before implementing any system from the course)
 2. Read **ROADMAP.md** (current priorities)
 3. Check **.claude/rules/** (three constraint files)
 4. Identify target file in **autoloads/**, **entities/**, or **shared/**
