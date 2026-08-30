@@ -2,10 +2,10 @@
 ## RefereeLoader (Autoload singleton)
 ##
 ## Owns the live referee pool. Loads custom referees from
-## user://custom_referees.json if the file exists, otherwise builds the six
-## built-in referees. PitchScene draws a referee from here at match start
-## rather than constructing a RefereeData itself, so a future referee editor
-## only has to change what is written to user://custom_referees.json.
+## user://custom_referees.json if the file exists, otherwise loads from
+## packaged res://data/referees.json, and falls back to built-in programmatic
+## referees if neither file is present. PitchScene draws a referee from here
+## at match start rather than constructing a RefereeData itself.
 ##
 ## Depends on: RefereeData.
 ## Exposes: referee_pool, get_referee(index), get_random_referee(), save_referees()
@@ -14,6 +14,7 @@
 extends Node
 
 const CUSTOM_REFEREES_PATH: String = "user://custom_referees.json"
+const DEFAULT_REFEREES_PATH: String = "res://data/referees.json"
 
 var referee_pool: Array[RefereeData] = []
 
@@ -82,14 +83,13 @@ func _load_referees() -> void:
 	if FileAccess.file_exists(CUSTOM_REFEREES_PATH):
 		if _parse_json_referees(CUSTOM_REFEREES_PATH):
 			return
+	if FileAccess.file_exists(DEFAULT_REFEREES_PATH):
+		if _parse_json_referees(DEFAULT_REFEREES_PATH):
+			return
 	_build_default_referees()
 
 
-## Parses a JSON referee file into `referee_pool`. Parses into a local var
-## first so a malformed file can never leave `referee_pool` half-overwritten.
-## Returns false on any error (and pushes an error naming the path) —
-## `_load_referees()` falls back to the built-in referee pool when this
-## returns false.
+## Parses a JSON referee file into `referee_pool`.
 func _parse_json_referees(path: String) -> bool:
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
@@ -114,22 +114,31 @@ func _parse_json_referees(path: String) -> bool:
 
 
 func _referee_from_dict(referee_dict: Dictionary) -> RefereeData:
+	var name_str: String = referee_dict.get("referee_name", referee_dict.get("name", ""))
+	if name_str == "" and referee_dict.has("first_name"):
+		name_str = "%s %s" % [referee_dict.get("first_name", ""), referee_dict.get("last_name", "")]
+
 	var data := RefereeData.make_default(
-		referee_dict.get("name", ""),
-		referee_dict.get("nationality", "")
+		name_str,
+		referee_dict.get("nationality", "Unknown")
 	)
-	data.experience = referee_dict.get("experience", data.experience)
-	data.strictness = referee_dict.get("strictness", data.strictness)
-	data.consistency = referee_dict.get("consistency", data.consistency)
-	data.composure = referee_dict.get("composure", data.composure)
-	data.unprofessionalism = referee_dict.get("unprofessionalism", data.unprofessionalism)
-	data.incoherence = referee_dict.get("incoherence", data.incoherence)
-	data.reputation = referee_dict.get("reputation", data.reputation)
-	data.matches_officiated = referee_dict.get("matches_officiated", data.matches_officiated)
-	data.fouls_awarded = referee_dict.get("fouls_awarded", data.fouls_awarded)
-	data.penalties_awarded = referee_dict.get("penalties_awarded", data.penalties_awarded)
-	data.red_cards_issued = referee_dict.get("red_cards_issued", data.red_cards_issued)
-	data.matchup_history = referee_dict.get("matchup_history", data.matchup_history)
+	data.experience = int(referee_dict.get("experience", data.experience))
+	data.strictness = float(referee_dict.get("strictness", data.strictness))
+	data.consistency = float(referee_dict.get("consistency", data.consistency))
+	data.composure = float(referee_dict.get("composure", data.composure))
+	data.unprofessionalism = float(referee_dict.get("unprofessionalism", data.unprofessionalism))
+	data.incoherence = float(referee_dict.get("incoherence", data.incoherence))
+	data.reputation = float(referee_dict.get("reputation", data.reputation))
+
+	data.matches_officiated = int(referee_dict.get("matches_officiated", data.matches_officiated))
+	data.fouls_awarded = int(referee_dict.get("fouls_awarded", data.fouls_awarded))
+	data.penalties_awarded = int(referee_dict.get("penalties_awarded", data.penalties_awarded))
+	data.red_cards_issued = int(referee_dict.get("red_cards_issued", data.red_cards_issued))
+
+	var raw_history: Variant = referee_dict.get("matchup_history", {})
+	if typeof(raw_history) == TYPE_DICTIONARY:
+		data.matchup_history = raw_history.duplicate()
+
 	return data
 
 
@@ -137,16 +146,18 @@ func _referee_from_dict(referee_dict: Dictionary) -> RefereeData:
 
 func _build_default_referees() -> void:
 	referee_pool = [
-		_referee("Domagoj Vrban", "Dalmatian", 34, 0.72, 0.80, 0.85, 0.05, 0.10, 0.88),
-		_referee("Kjetil Ørnseth", "Nordlandic", 11, 0.35, 0.40, 0.30, 0.20, 0.70, 0.42),
-		_referee("Tomás Errecarte", "Platense", 22, 0.55, 0.65, 0.60, 0.50, 0.30, 0.55),
-		_referee("Ingrid Vaarmo", "Nordlandic", 41, 0.90, 0.88, 0.92, 0.02, 0.05, 0.95),
-		_referee("Arjun Dharmaraj", "Subcontinental", 18, 0.48, 0.55, 0.70, 0.15, 0.45, 0.60),
-		_referee("Petru Bálint", "Carpathian", 9, 0.62, 0.30, 0.45, 0.35, 0.60, 0.38),
+		_referee("Domagoj Vrban", "Dalmatian", 34, 0.72, 0.85, 0.88, 0.04, 0.08, 0.90),
+		_referee("Ingrid Vaarmo", "Nordlandic", 42, 0.88, 0.94, 0.96, 0.01, 0.03, 0.98),
+		_referee("Kjetil Ørnseth", "Nordlandic", 12, 0.32, 0.42, 0.35, 0.18, 0.65, 0.40),
+		_referee("Tomás Errecarte", "Platense", 24, 0.65, 0.58, 0.48, 0.42, 0.35, 0.62),
+		_referee("Arjun Dharmaraj", "Subcontinental", 20, 0.50, 0.68, 0.78, 0.10, 0.30, 0.68),
+		_referee("Petru Bálint", "Carpathian", 11, 0.82, 0.35, 0.42, 0.30, 0.55, 0.45),
+		_referee("Jean-Luc Vaneck", "Gallic", 38, 0.24, 0.78, 0.82, 0.08, 0.15, 0.82),
+		_referee("Kenzo Takahashi", "Far Eastern", 29, 0.78, 0.90, 0.86, 0.02, 0.06, 0.85)
 	]
 
 
-## Shared constructor for the six built-in referees.
+## Shared constructor for the built-in referees.
 func _referee(
 	referee_name: String, nationality: String, experience: int,
 	strictness: float, consistency: float, composure: float,

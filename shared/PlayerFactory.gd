@@ -70,7 +70,7 @@ static func apply(player: HeavyPlayerController, data: PlayerData, anchor: Vecto
 	# a coaching edge, not a talent rewrite.
 	var team_name: String = ""
 	if DataLoader.league != null:
-		var team_data: TeamData = DataLoader.get_team(player.team)
+		var team_data: TeamData = DataLoader.get_match_team(player.team)
 		if team_data != null:
 			team_name = team_data.team_name
 	var manager: ManagerData = ManagerLoader.get_manager_for_team(team_name)

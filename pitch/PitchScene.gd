@@ -172,8 +172,8 @@ func _on_pregame_confirmed() -> void:
 	_manager_director_a.bind(manager_a, GameManager.TEAM_A, players, boundary)
 	_manager_director_b.bind(manager_b, GameManager.TEAM_B, players, boundary)
 
-	_mgmt_a = TeamManagementData.from_team(DataLoader.get_team(GameManager.TEAM_A), manager_a)
-	_mgmt_b = TeamManagementData.from_team(DataLoader.get_team(GameManager.TEAM_B), manager_b)
+	_mgmt_a = TeamManagementData.from_team(DataLoader.get_match_team(GameManager.TEAM_A), manager_a)
+	_mgmt_b = TeamManagementData.from_team(DataLoader.get_match_team(GameManager.TEAM_B), manager_b)
 
 	reset_for_kickoff(GameManager.TEAM_A)
 	GameManager.start_match()
@@ -665,7 +665,7 @@ func _bind_players() -> void:
 		# The pre-game screen / pause menu reorder the starting XI into
 		# TeamData.lineup_indices; a squad with no lineup set yet (practice
 		# mode, or a standalone editor run) falls back to raw slot order.
-		var team: TeamData = DataLoader.get_team(player.team)
+		var team: TeamData = DataLoader.get_match_team(player.team)
 		player.squad_index = team.lineup_indices[slot] if team.lineup_indices.size() == 11 else slot
 		PlayerFactory.apply(player, DataLoader.get_player(player.team, player.squad_index), anchor)
 

@@ -2,18 +2,13 @@
 ## ManagerLoader (Autoload singleton)
 ##
 ## Owns the pool of all managers across the save file. Loads custom managers
-## from user://custom_managers.json if the file exists, otherwise builds the
-## four built-in managers. PitchScene assigns a manager to each team from
-## here at match start rather than constructing a ManagerData itself, and
-## writes career stats back through here after every match — the same
-## database-loader pattern DataLoader and RefereeLoader use, so a future
-## manager editor only has to change what is written to
-## user://custom_managers.json.
+## from user://custom_managers.json if the file exists, otherwise loads from
+## packaged res://data/managers.json, and falls back to built-in programmatic
+## managers if neither file is present. PitchScene assigns a manager to each
+## team from here at match start rather than constructing a ManagerData itself,
+## and writes career stats back through here after every match.
 ##
-## Depends on: ManagerData. DataLoader is not read at load time — only
-## get_or_assign_manager() callers pass in a team name, so no autoload
-## ordering dependency exists beyond being declared after DataLoader in
-## project.godot.
+## Depends on: ManagerData.
 ## Exposes: manager_pool, get_manager_for_team(team_name),
 ##          get_or_assign_manager(team_name), all_available(), save_managers()
 ##
@@ -21,6 +16,7 @@
 extends Node
 
 const CUSTOM_MANAGERS_PATH: String = "user://custom_managers.json"
+const DEFAULT_MANAGERS_PATH: String = "res://data/managers.json"
 
 var manager_pool: Array[ManagerData] = []
 
@@ -89,14 +85,13 @@ func _load_managers() -> void:
 	if FileAccess.file_exists(CUSTOM_MANAGERS_PATH):
 		if _parse_json_managers(CUSTOM_MANAGERS_PATH):
 			return
+	if FileAccess.file_exists(DEFAULT_MANAGERS_PATH):
+		if _parse_json_managers(DEFAULT_MANAGERS_PATH):
+			return
 	_build_default_managers()
 
 
-## Parses a JSON manager file into `manager_pool`. Parses into a local var
-## first so a malformed file can never leave `manager_pool` half-overwritten.
-## Returns false on any error (and pushes an error naming the path) —
-## `_load_managers()` falls back to the built-in manager pool when this
-## returns false.
+## Parses a JSON manager file into `manager_pool`.
 func _parse_json_managers(path: String) -> bool:
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
@@ -121,43 +116,47 @@ func _parse_json_managers(path: String) -> bool:
 
 
 func _from_dict(d: Dictionary) -> ManagerData:
+	var name_str: String = d.get("manager_name", d.get("name", ""))
+	if name_str == "" and d.has("first_name"):
+		name_str = "%s %s" % [d.get("first_name", ""), d.get("last_name", "")]
+
 	var m := ManagerData.make_default(
-		d.get("name", ""),
-		d.get("nationality", "")
+		name_str,
+		d.get("nationality", "Unknown")
 	)
-	m.experience = d.get("experience", m.experience)
+	m.experience = int(d.get("experience", m.experience))
 	m.current_team = d.get("current_team", m.current_team)
 
-	m.defensive_line = d.get("defensive_line", m.defensive_line)
-	m.tempo = d.get("tempo", m.tempo)
-	m.width = d.get("width", m.width)
-	m.pressing_intensity = d.get("pressing_intensity", m.pressing_intensity)
-	m.physicality = d.get("physicality", m.physicality)
+	m.defensive_line = float(d.get("defensive_line", m.defensive_line))
+	m.tempo = float(d.get("tempo", d.get("base_tempo", m.tempo)))
+	m.width = float(d.get("width", m.width))
+	m.pressing_intensity = float(d.get("pressing_intensity", m.pressing_intensity))
+	m.physicality = float(d.get("physicality", m.physicality))
 
 	m.preferred_formation = d.get("preferred_formation", m.preferred_formation)
 	m.attacking_formation = d.get("attacking_formation", m.attacking_formation)
 	m.defensive_formation = d.get("defensive_formation", m.defensive_formation)
 
-	m.youth_trust = d.get("youth_trust", m.youth_trust)
-	m.loyalty_bias = d.get("loyalty_bias", m.loyalty_bias)
-	m.form_sensitivity = d.get("form_sensitivity", m.form_sensitivity)
+	m.youth_trust = float(d.get("youth_trust", m.youth_trust))
+	m.loyalty_bias = float(d.get("loyalty_bias", m.loyalty_bias))
+	m.form_sensitivity = float(d.get("form_sensitivity", m.form_sensitivity))
 
-	m.preferred_min_age = d.get("preferred_min_age", m.preferred_min_age)
-	m.preferred_max_age = d.get("preferred_max_age", m.preferred_max_age)
-	m.budget_flexibility = d.get("budget_flexibility", m.budget_flexibility)
-	m.preferred_mass_min = d.get("preferred_mass_min", m.preferred_mass_min)
-	m.preferred_mass_max = d.get("preferred_mass_max", m.preferred_mass_max)
+	m.preferred_min_age = int(d.get("preferred_min_age", m.preferred_min_age))
+	m.preferred_max_age = int(d.get("preferred_max_age", m.preferred_max_age))
+	m.budget_flexibility = float(d.get("budget_flexibility", m.budget_flexibility))
+	m.preferred_mass_min = float(d.get("preferred_mass_min", m.preferred_mass_min))
+	m.preferred_mass_max = float(d.get("preferred_mass_max", m.preferred_mass_max))
 	m.prized_attribute = d.get("prized_attribute", m.prized_attribute)
 	m.preferred_playstyle = d.get("preferred_playstyle", m.preferred_playstyle)
 
-	m.traits = int(d.get("traits", m.traits))
+	m.traits = int(d.get("traits", d.get("trait_bits", m.traits)))
 
-	m.matches_managed = d.get("matches_managed", m.matches_managed)
-	m.wins = d.get("wins", m.wins)
-	m.draws = d.get("draws", m.draws)
-	m.losses = d.get("losses", m.losses)
-	m.goals_scored = d.get("goals_scored", m.goals_scored)
-	m.goals_conceded = d.get("goals_conceded", m.goals_conceded)
+	m.matches_managed = int(d.get("matches_managed", m.matches_managed))
+	m.wins = int(d.get("wins", m.wins))
+	m.draws = int(d.get("draws", m.draws))
+	m.losses = int(d.get("losses", m.losses))
+	m.goals_scored = int(d.get("goals_scored", m.goals_scored))
+	m.goals_conceded = int(d.get("goals_conceded", m.goals_conceded))
 	return m
 
 
@@ -203,16 +202,19 @@ func _build_default_managers() -> void:
 		_larrarte(),
 		_peet(),
 		_tsurumoto(),
+		_klausner(),
+		_bellini(),
+		_maccallum(),
+		_cruz(),
+		_pendelton(),
+		_wilczek()
 	]
 
 
-## A physical, defensive-minded veteran who is intensely loyal to his senior
-## players, never plays youth, and becomes volatile in the press when things
-## go wrong. Does not believe in pretty football.
 func _skok() -> ManagerData:
 	var m := ManagerData.make_default("Branimir Skok", "Dalmatian")
 	m.experience = 28
-	m.current_team = "Nordvik FC"
+	m.current_team = "FC Nordvik"
 	m.defensive_line = 0.35
 	m.tempo = 0.40
 	m.width = 0.42
@@ -235,13 +237,10 @@ func _skok() -> ManagerData:
 	return m
 
 
-## A sophisticated high-press possession coach who builds from the youth,
-## rotates ruthlessly on form, and is calculatedly charming in the media while
-## quietly working to destabilise opponents pre-match.
 func _larrarte() -> ManagerData:
 	var m := ManagerData.make_default("Sebastián Larrarte", "Platense")
 	m.experience = 41
-	m.current_team = "FC Solano"
+	m.current_team = "CD Solano"
 	m.defensive_line = 0.72
 	m.tempo = 0.78
 	m.width = 0.82
@@ -264,13 +263,10 @@ func _larrarte() -> ManagerData:
 	return m
 
 
-## A young, structured head-coach type. Demands discipline and high work-rate.
-## Gives away nothing in the press. Results-only mindset with a sharp eye for
-## composed box-to-box players.
 func _peet() -> ManagerData:
 	var m := ManagerData.make_default("Raivo Peet", "Hanseatic")
-	m.experience = 17
-	m.current_team = ""
+	m.experience = 19
+	m.current_team = "Valence Athletic"
 	m.defensive_line = 0.55
 	m.tempo = 0.58
 	m.width = 0.50
@@ -293,13 +289,10 @@ func _peet() -> ManagerData:
 	return m
 
 
-## A warm, philosophically-inclined coach who plays a wide positional game,
-## spends freely, and produces genuinely emotional press conferences that
-## consistently win the crowd over.
 func _tsurumoto() -> ManagerData:
 	var m := ManagerData.make_default("Yuki Tsurumoto", "Far Eastern")
 	m.experience = 35
-	m.current_team = ""
+	m.current_team = "Real Maritimo"
 	m.defensive_line = 0.60
 	m.tempo = 0.55
 	m.width = 0.70
@@ -316,7 +309,163 @@ func _tsurumoto() -> ManagerData:
 	m.budget_flexibility = 0.82
 	m.preferred_mass_min = 62.0
 	m.preferred_mass_max = 82.0
-	m.prized_attribute = "none"
+	m.prized_attribute = "vision"
 	m.preferred_playstyle = "pace"
 	m.traits = 64 | 128 | 8 # Sentimental | MediaSavvy | Visionary
+	return m
+
+
+func _klausner() -> ManagerData:
+	var m := ManagerData.make_default("Dietrich Klausner", "Germanic")
+	m.experience = 32
+	m.current_team = "Borussia Eisenwald"
+	m.defensive_line = 0.28
+	m.tempo = 0.45
+	m.width = 0.38
+	m.pressing_intensity = 0.40
+	m.physicality = 0.85
+	m.preferred_formation = "5-3-2"
+	m.attacking_formation = "4-3-3"
+	m.defensive_formation = "5-3-2"
+	m.youth_trust = 0.30
+	m.loyalty_bias = 0.75
+	m.form_sensitivity = 0.40
+	m.preferred_min_age = 24
+	m.preferred_max_age = 34
+	m.budget_flexibility = 0.40
+	m.preferred_mass_min = 78.0
+	m.preferred_mass_max = 96.0
+	m.prized_attribute = "aggression"
+	m.preferred_playstyle = "physical"
+	m.traits = 16 | 2 | 4 # Disciplinarian | Loyalist | Pragmatist
+	return m
+
+
+func _bellini() -> ManagerData:
+	var m := ManagerData.make_default("Giancarlo Bellini", "Ligurian")
+	m.experience = 38
+	m.current_team = "Aurora Calcio"
+	m.defensive_line = 0.68
+	m.tempo = 0.65
+	m.width = 0.75
+	m.pressing_intensity = 0.70
+	m.physicality = 0.35
+	m.preferred_formation = "4-3-3"
+	m.attacking_formation = "4-3-3"
+	m.defensive_formation = "4-4-2"
+	m.youth_trust = 0.65
+	m.loyalty_bias = 0.35
+	m.form_sensitivity = 0.60
+	m.preferred_min_age = 20
+	m.preferred_max_age = 29
+	m.budget_flexibility = 0.75
+	m.preferred_mass_min = 64.0
+	m.preferred_mass_max = 84.0
+	m.prized_attribute = "vision"
+	m.preferred_playstyle = "technical"
+	m.traits = 8 | 128 | 512 # Visionary | MediaSavvy | Idealist
+	return m
+
+
+func _maccallum() -> ManagerData:
+	var m := ManagerData.make_default("Alistair MacCallum", "Caledonian")
+	m.experience = 26
+	m.current_team = "Highland Thistle FC"
+	m.defensive_line = 0.48
+	m.tempo = 0.75
+	m.width = 0.55
+	m.pressing_intensity = 0.85
+	m.physicality = 0.90
+	m.preferred_formation = "4-4-2"
+	m.attacking_formation = "4-4-2"
+	m.defensive_formation = "5-3-2"
+	m.youth_trust = 0.40
+	m.loyalty_bias = 0.65
+	m.form_sensitivity = 0.50
+	m.preferred_min_age = 22
+	m.preferred_max_age = 32
+	m.budget_flexibility = 0.35
+	m.preferred_mass_min = 74.0
+	m.preferred_mass_max = 94.0
+	m.prized_attribute = "aggression"
+	m.preferred_playstyle = "engine"
+	m.traits = 1 | 16 | 4 # HotHead | Disciplinarian | Pragmatist
+	return m
+
+
+func _cruz() -> ManagerData:
+	var m := ManagerData.make_default("Valdemar Cruz", "Sulista")
+	m.experience = 29
+	m.current_team = "Porto Sol Stella"
+	m.defensive_line = 0.62
+	m.tempo = 0.70
+	m.width = 0.78
+	m.pressing_intensity = 0.65
+	m.physicality = 0.40
+	m.preferred_formation = "4-2-3-1"
+	m.attacking_formation = "4-3-3"
+	m.defensive_formation = "4-4-2"
+	m.youth_trust = 0.75
+	m.loyalty_bias = 0.30
+	m.form_sensitivity = 0.65
+	m.preferred_min_age = 18
+	m.preferred_max_age = 28
+	m.budget_flexibility = 0.70
+	m.preferred_mass_min = 63.0
+	m.preferred_mass_max = 82.0
+	m.prized_attribute = "composure"
+	m.preferred_playstyle = "technical"
+	m.traits = 256 | 8 | 32 # Volatile | Visionary | MindGames
+	return m
+
+
+func _pendelton() -> ManagerData:
+	var m := ManagerData.make_default("Arthur Pendelton", "Albion")
+	m.experience = 45
+	m.current_team = ""
+	m.defensive_line = 0.42
+	m.tempo = 0.50
+	m.width = 0.48
+	m.pressing_intensity = 0.45
+	m.physicality = 0.65
+	m.preferred_formation = "4-4-2"
+	m.attacking_formation = "4-3-3"
+	m.defensive_formation = "5-4-1"
+	m.youth_trust = 0.35
+	m.loyalty_bias = 0.85
+	m.form_sensitivity = 0.25
+	m.preferred_min_age = 25
+	m.preferred_max_age = 35
+	m.budget_flexibility = 0.45
+	m.preferred_mass_min = 72.0
+	m.preferred_mass_max = 92.0
+	m.prized_attribute = "composure"
+	m.preferred_playstyle = "physical"
+	m.traits = 2 | 4 | 64 # Loyalist | Pragmatist | Sentimental
+	return m
+
+
+func _wilczek() -> ManagerData:
+	var m := ManagerData.make_default("Mateusz Wilczek", "Sarmatian")
+	m.experience = 22
+	m.current_team = ""
+	m.defensive_line = 0.65
+	m.tempo = 0.80
+	m.width = 0.60
+	m.pressing_intensity = 0.92
+	m.physicality = 0.68
+	m.preferred_formation = "4-3-3"
+	m.attacking_formation = "4-3-3"
+	m.defensive_formation = "4-4-2"
+	m.youth_trust = 0.85
+	m.loyalty_bias = 0.20
+	m.form_sensitivity = 0.80
+	m.preferred_min_age = 18
+	m.preferred_max_age = 26
+	m.budget_flexibility = 0.60
+	m.preferred_mass_min = 66.0
+	m.preferred_mass_max = 86.0
+	m.prized_attribute = "aggression"
+	m.preferred_playstyle = "engine"
+	m.traits = 1 | 8 | 128 # HotHead | Visionary | MediaSavvy
 	return m

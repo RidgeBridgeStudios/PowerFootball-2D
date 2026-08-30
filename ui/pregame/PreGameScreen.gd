@@ -55,8 +55,8 @@ func setup() -> void:
 
 
 func _build_management_data() -> void:
-	var team_a: TeamData = DataLoader.get_team(GameManager.TEAM_A)
-	var team_b: TeamData = DataLoader.get_team(GameManager.TEAM_B)
+	var team_a: TeamData = DataLoader.get_match_team(GameManager.TEAM_A)
+	var team_b: TeamData = DataLoader.get_match_team(GameManager.TEAM_B)
 	var mgr_a: ManagerData = ManagerLoader.get_or_assign_manager(team_a.team_name)
 	var mgr_b: ManagerData = ManagerLoader.get_or_assign_manager(team_b.team_name)
 	_mgmt_a = TeamManagementData.from_team(team_a, mgr_a)
