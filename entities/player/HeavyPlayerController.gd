@@ -44,16 +44,16 @@ signal possession_lost
 ## winger. 70kg is the neutral reference mass.
 @export var player_mass: float = 75.0
 ## Pixels per second at full left-stick deflection.
-@export var top_speed: float = 210.0
+@export var top_speed: float = 240.0
 ## Seconds to reach top speed from a standstill, at the neutral 70kg reference
-## mass. A 75kg player takes ~0.70s, a 90kg player ~0.84s — mass scales it.
-@export var acceleration_time: float = 0.65
+## mass. A 75kg player takes ~0.43s, a 90kg player ~0.52s — mass scales it.
+@export var acceleration_time: float = 0.40
 ## Seconds to coast to a stop from top speed with no input, at the reference
-## mass. Heavier players stop faster once they stop driving forward (~33px of
+## mass. Heavier players stop faster once they stop driving forward (~29px of
 ## roll-out at 75kg) but are slower to get going again.
-@export var friction_time: float = 0.35
+@export var friction_time: float = 0.22
 ## 0.0 = turn on a dime, 1.0 = a full reversal kills all acceleration.
-@export_range(0.0, 1.0) var turning_penalty_factor: float = 0.75
+@export_range(0.0, 1.0) var turning_penalty_factor: float = 0.55
 ## Top-speed multiplier while action_sprint is held and stamina remains.
 @export var sprint_multiplier: float = 1.45
 
@@ -108,6 +108,7 @@ var is_sprinting: bool = false
 var sprint_locked: bool = false
 
 var facing_direction: Vector2 = Vector2.RIGHT
+var _input_facing: Vector2 = Vector2.RIGHT
 ## The movement vector this player acted on last tick — human stick read or the
 ## brain's steering output. States and the HUD read this rather than Input.
 var movement_intent: Vector2 = Vector2.ZERO
@@ -163,6 +164,8 @@ func _register_with_world_model() -> void:
 
 func _physics_process(delta: float) -> void:
 	movement_intent = _read_movement_intent()
+	if movement_intent.length() > 0.01:
+		_input_facing = movement_intent.normalized()
 	_update_sprint(delta)
 	# The active state owns the movement model: MoveState applies the full weight
 	# curve, DribbleState softens it, TackleState ignores input entirely. Driving
@@ -404,6 +407,10 @@ func _update_sprint(delta: float) -> void:
 
 
 func _update_facing() -> void:
+	# Human player: face the input direction, not the lagging velocity vector.
+	# CPU players keep the velocity-derived facing so their animations are truthful.
+	if is_user_controlled and movement_intent.length() > 0.01:
+		facing_direction = _input_facing
 	if velocity.length() > FACING_UPDATE_SPEED:
 		facing_direction = velocity.normalized()
 
