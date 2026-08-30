@@ -74,6 +74,9 @@ signal possession_lost
 ## PlayerFactory applies. PitchScene assigns this at bind time from each
 ## player's position in the $Players list, so scenes need no per-instance setup.
 @export var squad_index: int = 0
+## When true the shadow sprite rotates with facing_direction. Disable for
+## circular shadow art, where per-frame rotation would be pointless.
+@export var rotate_shadow: bool = true
 
 const ACTION_TEXT_SCENE: PackedScene = preload("res://ui/ActionText.tscn")
 ## Minimum seconds between action text spawns (prevents per-frame spam).
@@ -431,4 +434,6 @@ func _update_visual_anchors() -> void:
 	# the ground truth position. Same convention as Pseudo3DBall.
 	sprite.position.y = -current_z
 	sprite.rotation = facing_direction.angle()
+	if rotate_shadow:
+		shadow.rotation = facing_direction.angle()
 	shadow.position = Vector2.ZERO
