@@ -520,7 +520,7 @@ func _build_context(defenders_nearby: Array[Node2D]) -> UtilityContext:
 	# These are cached results of existing methods — call them here so every
 	# scorer sees the same answer rather than running independent scans.
 	ctx.chase_is_legal         = _should_chase_ball()
-	ctx.open_teammate_exists   = _find_best_pass_target() != null
+	ctx.open_teammate_exists   = _find_best_pass_target(ctx.pressure) != null
 
 	return ctx
 
@@ -680,7 +680,7 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 
 	# Cache the pass target now so _score_pass() and _steer_for_action()
 	# both see the same answer without a second roster walk.
-	var pass_target: HeavyPlayerController = _find_best_pass_target()
+	var pass_target: HeavyPlayerController = _find_best_pass_target(ctx.pressure)
 	if pass_target != null:
 		_cached_pass_target = pass_target
 
@@ -713,11 +713,24 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 	return best_action
 
 
-## Scores every same-team, non-GK, non-self teammate by openness (distance
-## from the nearest opponent) and forward positioning, rejecting any candidate
-## whose passing lane an opponent is standing in. Returns null if nothing
-## scores above the minimum openness threshold.
-func _find_best_pass_target() -> HeavyPlayerController:
+## Minimum PassUtilityScorer.score_pass() total a candidate must clear to be
+## considered pass-worthy at all — keeps a tightly marked, poorly angled, or
+## wildly long ball from ever outscoring "nothing open" and getting forced.
+const MIN_PASS_SCORE: float = 0.38
+
+## Set true (e.g. from the debugger) to print the scored candidate list and
+## the winner every time _find_best_pass_target() runs on this player.
+var debug_log_pass_scores: bool = false
+
+## Scores every same-team, non-GK, non-self teammate on four dimensions —
+## distance, passer facing angle, receiver pressure, and forward advancement —
+## via PassUtilityScorer, rejecting any candidate whose passing lane an
+## opponent is standing in. Returns null if nothing clears MIN_PASS_SCORE.
+##
+## passer_pressure: this player's own UtilityContext.pressure for the current
+## tick, threaded through so PassUtilityScorer can favour the safe/open outlet
+## over the ambitious forward ball when the passer is under pressure.
+func _find_best_pass_target(passer_pressure: float = 0.0) -> HeavyPlayerController:
 	if ball == null or player == null:
 		return null
 	var world: MatchWorldModel = MatchWorldModel.instance
@@ -733,7 +746,7 @@ func _find_best_pass_target() -> HeavyPlayerController:
 	eff_composure = clampf(eff_composure, 0.0, 1.0)
 
 	var best_target: HeavyPlayerController = null
-	var best_score: float = 60.0  # Minimum openness threshold in pixels
+	var best_score: float = MIN_PASS_SCORE
 
 	for c: int in range(MatchWorldModel.TOTAL_PLAYERS):
 		var candidate: HeavyPlayerController = world.player_nodes[c]
@@ -772,12 +785,28 @@ func _find_best_pass_target() -> HeavyPlayerController:
 
 		# Openness, straight off the world model — no second roster walk.
 		var min_opp_dist: float = world.nearest_opponent_dist_to(candidate_pos, player.team)
+		var distance: float = ball_pos.distance_to(candidate_pos)
+		var facing_dot: float = player.get_facing_dot(candidate_pos)
 
-		var forward_bonus: float = clampf(forward_dot, 0.0, 1.0) * 40.0
-		var score: float = min_opp_dist + forward_bonus
+		# Hot path: bare float, allocates nothing (see PassUtilityScorer docs).
+		var score: float = PassUtilityScorer.score_pass(
+			distance, facing_dot, forward_dot, min_opp_dist, passer_pressure)
+
+		if debug_log_pass_scores:
+			var breakdown: PassUtilityScorer.PassScoreBreakdown = PassUtilityScorer.score_pass_breakdown(
+				distance, facing_dot, forward_dot, min_opp_dist, passer_pressure, candidate)
+			print("[PassScorer] %s -> %s  dist=%.2f angle=%.2f pressure=%.2f adv=%.2f  total=%.3f" % [
+				player.name, candidate.name,
+				breakdown.distance_utility, breakdown.angle_utility,
+				breakdown.pressure_utility, breakdown.advancement_utility,
+				breakdown.total])
+
 		if score > best_score:
 			best_score = score
 			best_target = candidate
+
+	if debug_log_pass_scores and best_target != null:
+		print("[PassScorer] %s picks %s  total=%.3f" % [player.name, best_target.name, best_score])
 
 	return best_target
 
