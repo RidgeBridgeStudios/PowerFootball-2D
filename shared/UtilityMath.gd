@@ -24,10 +24,9 @@ extends RefCounted
 ## intercept point is simply where it already is.
 const MIN_PREDICT_SPEED: float = 10.0
 
-## Bisection steps used by calculate_intercept_point(). Four halvings resolve
-## the stop time to 1/16th, which at a typical 2s roll is ~0.12s — finer than a
-## player can react to anyway.
-const INTERCEPT_ITERATIONS: int = 4
+## Bisection steps used by calculate_intercept_point(). Eight halvings resolve
+## the stop time to 1/256th (< 3.5px error at full speed).
+const INTERCEPT_ITERATIONS: int = 8
 
 
 ## Closed-form ball intercept.
@@ -43,7 +42,7 @@ const INTERCEPT_ITERATIONS: int = 4
 ##
 ## seconds to get there. The intercept is the smallest t where t_p(t) <= t.
 ## t_p is monotone-ish and the feasible set is an interval ending at t_stop, so
-## four bisection steps over [0, t_stop] land close enough to run at.
+## bisection steps over [0, t_stop] land close enough to run at.
 ##
 ## `friction` is the combined per-second deceleration in px/s^2 — for
 ## Pseudo3DBall that is `pitch_friction * Pseudo3DBall.FRICTION_SCALE`, not the
@@ -64,19 +63,20 @@ static func calculate_intercept_point(
 
 	var b_dir: Vector2 = b_vel / b_speed
 
-	# A zero or negative friction would never stop the ball; clamp the horizon
-	# to something finite so the bisection still terminates on a sane interval.
 	var safe_friction: float = maxf(friction, 10.0)
-	var t_stop: float = clampf(b_speed / safe_friction, 0.05, 5.0)
+	var t_actual_stop: float = b_speed / safe_friction
+	var t_stop: float = clampf(t_actual_stop, 0.0, 5.0)
 
 	var safe_speed: float = maxf(p_max_speed, 1.0)
+	var max_travel: float = (b_speed * b_speed) / (2.0 * safe_friction)
 
 	var lo: float = 0.0
 	var hi: float = t_stop
 
 	for _i: int in range(INTERCEPT_ITERATIONS):
 		var mid: float = (lo + hi) * 0.5
-		var travel: float = b_speed * mid - 0.5 * safe_friction * mid * mid
+		var t_eval: float = minf(mid, t_actual_stop)
+		var travel: float = clampf(b_speed * t_eval - 0.5 * safe_friction * t_eval * t_eval, 0.0, max_travel)
 		var point: Vector2 = b_pos + b_dir * travel
 		var t_player: float = p_pos.distance_to(point) / safe_speed + reaction_time
 		if t_player <= mid:
@@ -85,9 +85,9 @@ static func calculate_intercept_point(
 		else:
 			lo = mid
 
-	var t_final: float = hi
-	var final_travel: float = b_speed * t_final - 0.5 * safe_friction * t_final * t_final
-	return b_pos + b_dir * maxf(final_travel, 0.0)
+	var t_final: float = minf(hi, t_actual_stop)
+	var final_travel: float = clampf(b_speed * t_final - 0.5 * safe_friction * t_final * t_final, 0.0, max_travel)
+	return b_pos + b_dir * final_travel
 
 
 ## Returns the closest point on segment [seg_start, seg_end] to `point`.
@@ -134,7 +134,12 @@ static func is_lane_blocked(
 	if seg_len_sq <= 0.0001:
 		return false
 
-	var t: float = clampf((defender - passer).dot(seg) / seg_len_sq, 0.0, 1.0)
+	var unconstrained_t: float = (defender - passer).dot(seg) / seg_len_sq
+	# Defender is strictly outside the passing lane segment
+	if unconstrained_t < -0.05 or unconstrained_t > 1.05:
+		return false
+
+	var t: float = clampf(unconstrained_t, 0.0, 1.0)
 	var closest: Vector2 = passer + seg * t
 	return closest.distance_squared_to(defender) < min_clearance * min_clearance
 

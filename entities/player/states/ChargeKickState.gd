@@ -25,9 +25,7 @@ const CHARGE_TIME: float = 0.8
 const TAP_THRESHOLD: float = 0.15
 const PASS_SPEED: float = 260.0
 const SHOT_SPEED: float = 620.0
-## Vertical launch speed applied to a lobbed ball at full charge. 420 puts the
-## apex around 150px, which reads clearly as a cross against the 900px pitch and
-## sits well above the 50px aerial-challenge threshold.
+## Vertical launch speed applied to a lobbed ball at full charge.
 const LOB_HEIGHT_SPEED: float = 420.0
 ## Movement is throttled while winding up — you plant to strike.
 const CHARGE_MOVE_PENALTY: float = 0.55
@@ -35,12 +33,16 @@ const CHARGE_MOVE_PENALTY: float = 0.55
 ## charge that ends a pixel or two outside the foot sensor doesn't silently
 ## whiff.
 const CONTACT_REACH: float = 48.0
+## Lockout duration applied to the kicker's foot sensor so a struck ball isn't
+## immediately re-possessed on release frames.
+const PASS_RELEASE_LOCKOUT: float = 0.50
 
 ## 0.0-1.0, read by HUD.gd for the power meter.
 var charge_ratio: float = 0.0
 
 var _held_time: float = 0.0
 var _is_lob: bool = false
+var _aim_accumulator: Vector2 = Vector2.ZERO
 
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
@@ -48,6 +50,7 @@ var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 func enter(player: HeavyPlayerController) -> void:
 	_held_time = 0.0
 	charge_ratio = 0.0
+	_aim_accumulator = Vector2.ZERO
 	_is_lob = wants(player, &"action_lob")
 
 
@@ -61,26 +64,22 @@ func process(player: HeavyPlayerController, delta: float) -> StringName:
 		return IDLE
 
 	_held_time += delta
-	charge_ratio = clampf(_held_time / CHARGE_TIME, 0.0, 1.0)
+	var raw_ratio: float = clampf(_held_time / CHARGE_TIME, 0.0, 1.0)
+	# Eased power ratio (quadratic easing curve)
+	charge_ratio = raw_ratio * raw_ratio
+
+	if player.is_user_controlled:
+		var aim_input: Vector2 = InputHelper.get_aim_vector()
+		if aim_input != Vector2.ZERO:
+			_aim_accumulator += aim_input * delta
 
 	var still_held: bool = wants(player, &"action_kick")
-	if still_held and charge_ratio < 1.0:
+	if still_held and raw_ratio < 1.0:
 		return &""
 
 	_release_kick(player)
+	player.ball_control_lockout = PASS_RELEASE_LOCKOUT
 
-	# Corner, free and goal kicks are all taken through this state (see
-	# SetPieceCoordinator._activate_set_piece). apply_kick() only sets the
-	# ball's velocity — it moves on its own next _physics_process tick — so
-	# the foot sensor still reports it as overlapping on this exact frame.
-	# In a set-piece context that stale overlap must never be read as "still
-	# have the ball": the taker just struck a dead ball away and cannot
-	# immediately resume dribbling it.
-	if GameManager.is_set_piece_active():
-		return MOVE if player.movement_intent.length() > 0.05 else IDLE
-
-	if player.get_ball_in_foot_range() != null:
-		return DRIBBLE
 	return MOVE if player.movement_intent.length() > 0.05 else IDLE
 
 
@@ -104,17 +103,14 @@ func _release_kick(player: HeavyPlayerController) -> void:
 		# Swung and missed — the charge is spent regardless.
 		return
 
-	var aim: Vector2 = Vector2.ZERO
-	if player.is_user_controlled:
-		aim = InputHelper.get_aim_vector()
-	if aim == Vector2.ZERO:
-		aim = player.facing_direction
+	var aim: Vector2 = _get_resolved_aim(player)
 
 	var is_tap: bool = _held_time < TAP_THRESHOLD
 	var speed: float = PASS_SPEED if is_tap else lerpf(PASS_SPEED, SHOT_SPEED, charge_ratio)
 	var height: float = 0.0
 	if _is_lob:
-		height = LOB_HEIGHT_SPEED * (charge_ratio * charge_ratio)
+		var lob_dist: float = lerpf(180.0, 450.0, charge_ratio)
+		height = _calculate_lob_velocity_z(lob_dist, speed, ball.gravity)
 
 	# Inherit momentum directionally: only the component of the striker's run
 	# that pushes along the aim adds weight, so a cross-body strike is not
@@ -129,7 +125,8 @@ func _release_kick(player: HeavyPlayerController) -> void:
 	var max_scatter_angle: float = deg_to_rad(12.0) * charge_ratio * scatter_mult
 	if max_scatter_angle > 0.001:
 		_rng.seed = player.get_instance_id() + GameManager.get_match_tick()
-		aim = aim.rotated(_gaussian_scatter(max_scatter_angle * 0.4))
+		var scatter: float = clampf(_gaussian_scatter(max_scatter_angle * 0.4), -max_scatter_angle, max_scatter_angle)
+		aim = aim.rotated(scatter)
 
 	ball.apply_kick(aim * speed + inherited, height, player)
 	if not is_tap and charge_ratio > 0.65:
@@ -152,7 +149,22 @@ func _release_kick(player: HeavyPlayerController) -> void:
 	if player.is_user_controlled:
 		InputHelper.rumble(0.25 * charge_ratio, 0.6 * charge_ratio, 0.12)
 
-	# TODO: split action_through into a lead-the-runner pass target.
+
+func _get_resolved_aim(player: HeavyPlayerController) -> Vector2:
+	if _aim_accumulator.length_squared() > 0.001:
+		return _aim_accumulator.normalized()
+	if player.is_user_controlled:
+		var instant_aim: Vector2 = InputHelper.get_aim_vector()
+		if instant_aim != Vector2.ZERO:
+			return instant_aim.normalized()
+	return player.facing_direction
+
+
+func _calculate_lob_velocity_z(distance: float, speed_xy: float, gravity: float = 580.0) -> float:
+	var safe_speed: float = maxf(speed_xy, 100.0)
+	var safe_dist: float = maxf(distance, 50.0)
+	var vz: float = (gravity * safe_dist) / (1.8 * safe_speed)
+	return clampf(vz, 120.0, 480.0)
 
 
 ## Box–Muller Gaussian sample scaled to `sigma`. Only mutates _rng state, no

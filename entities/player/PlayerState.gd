@@ -32,7 +32,7 @@ const PENALTY_KICK: StringName = &"PenaltyKick"
 const GOALKEEPER_DIVE: StringName = &"GoalkeeperDive"
 
 ## Ball height above which an aerial challenge becomes available.
-const AERIAL_TRIGGER_HEIGHT: float = 50.0
+const AERIAL_TRIGGER_HEIGHT: float = 10.0
 
 
 func enter(_player: HeavyPlayerController) -> void:

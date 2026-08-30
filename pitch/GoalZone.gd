@@ -36,13 +36,18 @@ func _on_body_entered(body: Node2D) -> void:
 	if ball == null:
 		return
 
-	# A ball above the crossbar is over, not in.
-	if ball.position_z > crossbar_height():
-		return
-
 	var now: float = Time.get_ticks_msec() / 1000.0
 	if now < _locked_until:
 		return
+
+	# A ball above the crossbar is over the end line: report out-of-bounds miss
+	if ball.position_z > crossbar_height():
+		_locked_until = now + retrigger_lockout
+		var toucher: HeavyPlayerController = ball.last_touched_by
+		var attacker_touched_last: bool = (toucher == null or toucher.team != defending_team)
+		GameEvents.ball_out_of_bounds.emit("end_line_goal_kick" if attacker_touched_last else "end_line_corner")
+		return
+
 	_locked_until = now + retrigger_lockout
 
 	var scoring_team: int = 1 - defending_team

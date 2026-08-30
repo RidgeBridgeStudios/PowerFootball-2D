@@ -29,6 +29,8 @@ const DISPOSSESS_IMPULSE: float = 150.0
 ## A miss that still lands the tackler this close to an opponent is judged a
 ## foul rather than a clean whiff — a proxy for "the challenge took the man".
 const FOUL_CONTACT_RADIUS: float = 40.0
+## Duration of possession lockout applied to the tackled player (victim).
+const TACKLE_DISPOSSESS_LOCKOUT: float = 0.20
 
 ## Minimum dot product (tackler facing_direction · direction_to_ball) for the
 ## challenge to be considered aimed at the ball.
@@ -42,6 +44,7 @@ const BACK_TACKLE_FOUL_DOT: float = -0.10
 var _elapsed: float = 0.0
 var _resolved: bool = false
 var _foul_checked: bool = false
+var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 
 func enter(player: HeavyPlayerController) -> void:
@@ -102,6 +105,10 @@ func _try_win_ball(player: HeavyPlayerController) -> bool:
 
 	# ── Existing win-ball path ─────────────────────────────────────────────
 	var loser: Node2D = ball.possessor
+	var victim := loser as HeavyPlayerController
+	if victim != null:
+		victim.ball_control_lockout = TACKLE_DISPOSSESS_LOCKOUT
+
 	ball.apply_kick(player.facing_direction * DISPOSSESS_IMPULSE, 0.0, player)
 	if player.can_carry_ball():
 		ball.set_possessor(player)
@@ -140,13 +147,26 @@ func _check_mistimed_foul(
 	var side_factor: float = clampf(1.0 - facing_dot / MIN_FACING_DOT, 0.0, 1.0)
 	var foul_probability: float = side_factor * (1.0 - aggression * 0.4)
 
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
-	if rng.randf() < foul_probability:
+	if _rng.randf() < foul_probability:
 		GameEvents.foul_committed.emit(player, victim, player.global_position)
 
 
 func _find_nearby_opponent(player: HeavyPlayerController) -> HeavyPlayerController:
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world != null:
+		var opp_team: int = 1 - player.team
+		var closest_opp: HeavyPlayerController = null
+		var closest_dist_sq: float = FOUL_CONTACT_RADIUS * FOUL_CONTACT_RADIUS
+		for i: int in range(world.total_registered):
+			if world.player_teams[i] != opp_team or not world.player_active[i]:
+				continue
+			var dist_sq: float = player.global_position.distance_squared_to(world.player_positions[i])
+			if dist_sq < closest_dist_sq:
+				closest_dist_sq = dist_sq
+				closest_opp = world.player_nodes[i]
+		if closest_opp != null:
+			return closest_opp
+
 	var closest: HeavyPlayerController = null
 	var closest_distance: float = FOUL_CONTACT_RADIUS
 	for node: Node in player.get_tree().get_nodes_in_group(&"players"):

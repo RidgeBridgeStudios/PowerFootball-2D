@@ -71,18 +71,42 @@ func _attempt_contact(player: HeavyPlayerController, ball: Pseudo3DBall) -> void
 	var clean: bool = _elapsed >= SWEET_SPOT_START and _elapsed <= SWEET_SPOT_END
 	_connected = true
 
+	var opp_goal_x: float = 800.0 if player.team == 0 else -800.0
+	var to_goal: Vector2 = Vector2(opp_goal_x - player.global_position.x, -player.global_position.y).normalized()
+	var facing_goal_dot: float = player.facing_direction.dot(to_goal)
+
+	var power_mult: float = 1.0
+	var launch_z: float = HEADER_DOWNWARD_Z
+	var action_name: String = "HEADER"
+
+	if ball.position_z >= 10.0 and ball.position_z <= 20.0 and facing_goal_dot > 0.0:
+		power_mult = 1.5
+		launch_z = 20.0
+		action_name = "VOLLEY"
+	elif ball.position_z >= 5.0 and ball.position_z <= 25.0 and facing_goal_dot <= 0.0:
+		power_mult = 2.0
+		launch_z = 60.0
+		action_name = "BICYCLE KICK"
+	else:
+		power_mult = 1.0
+		launch_z = HEADER_DOWNWARD_Z
+		action_name = "HEADER"
+
+	player.show_action_text(action_name)
+
 	var aim: Vector2 = Vector2.ZERO
 	if player.is_user_controlled:
 		aim = InputHelper.get_aim_vector()
 	if aim == Vector2.ZERO:
-		aim = player.facing_direction
+		aim = player.facing_direction if action_name != "BICYCLE KICK" else -player.facing_direction
 
-	if clean:
-		ball.apply_kick(aim * HEADER_SPEED, HEADER_DOWNWARD_Z, player)
-		if player.is_user_controlled:
-			InputHelper.rumble(0.3, 0.8, 0.15)
-	else:
-		# Glanced it: the ball loops off at a fraction of the pace.
-		ball.apply_kick(aim * HEADER_SPEED * MISCUE_RATIO, absf(HEADER_DOWNWARD_Z) * 0.5, player)
+	var speed: float = HEADER_SPEED * power_mult
+	if not clean:
+		speed *= MISCUE_RATIO
+		launch_z = absf(launch_z) * 0.5
+
+	ball.apply_kick(aim.normalized() * speed, launch_z, player)
+	if player.is_user_controlled and clean:
+		InputHelper.rumble(0.35 * power_mult, 0.75 * power_mult, 0.15)
 
 	GameEvents.aerial_contested.emit(player, clean)

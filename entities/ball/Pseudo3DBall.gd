@@ -135,9 +135,10 @@ func simulate_z_axis(delta: float) -> void:
 		position_z = 0.0
 		return
 
+	var prev_vz: float = velocity_z
 	velocity_z -= gravity * delta
 	velocity_z -= velocity_z * air_resistance * delta
-	position_z += velocity_z * delta
+	position_z += (prev_vz + velocity_z) * 0.5 * delta
 
 	if position_z > 0.0:
 		is_on_ground = false
@@ -156,10 +157,9 @@ func simulate_z_axis(delta: float) -> void:
 
 func simulate_xy_axis(delta: float) -> void:
 	if is_on_ground:
-		var effective_friction: float = pitch_friction * (1.0 - surface_wetness * 0.45)
-		var drag_force: float = effective_friction * velocity.length()
-		velocity = velocity.move_toward(Vector2.ZERO,
-			(drag_force + REST_DRAG_FLAT) * delta)
+		var effective_friction: float = pitch_friction * FRICTION_SCALE * (1.0 - surface_wetness * 0.45)
+		var total_deceleration: float = effective_friction + REST_DRAG_FLAT
+		velocity = velocity.move_toward(Vector2.ZERO, total_deceleration * delta)
 		if velocity.length() < rest_speed and velocity.length() > 0.5 and not _drift_applied:
 			velocity = velocity.rotated(randf_range(-0.18, 0.18)) * 0.7
 			_drift_applied = true
@@ -200,19 +200,20 @@ func predict_trajectory(impulse_xy: Vector2, impulse_z: float, steps: int = 25, 
 	var sim_pos_z: float = position_z
 	var sim_vel_z: float = impulse_z
 	var sim_grounded: bool = is_on_ground and is_zero_approx(impulse_z)
-	var effective_friction: float = pitch_friction * (1.0 - surface_wetness * 0.45)
+	var effective_friction: float = pitch_friction * FRICTION_SCALE * (1.0 - surface_wetness * 0.45)
+	var total_deceleration: float = effective_friction + REST_DRAG_FLAT
 
 	for i: int in range(steps):
 		if sim_grounded:
-			var drag_force: float = effective_friction * sim_vel_xy.length()
-			sim_vel_xy = sim_vel_xy.move_toward(Vector2.ZERO, (drag_force + REST_DRAG_FLAT) * dt)
+			sim_vel_xy = sim_vel_xy.move_toward(Vector2.ZERO, total_deceleration * dt)
 			if sim_vel_xy.length() < rest_speed:
 				sim_vel_xy = Vector2.ZERO
 		else:
 			sim_vel_xy -= sim_vel_xy * air_resistance * dt
+			var prev_sim_vz: float = sim_vel_z
 			sim_vel_z -= gravity * dt
 			sim_vel_z -= sim_vel_z * air_resistance * dt
-			sim_pos_z += sim_vel_z * dt
+			sim_pos_z += (prev_sim_vz + sim_vel_z) * 0.5 * dt
 
 			if sim_pos_z <= 0.0:
 				sim_pos_z = 0.0

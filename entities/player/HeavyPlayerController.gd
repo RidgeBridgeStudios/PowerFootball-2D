@@ -147,6 +147,11 @@ var movement_intent: Vector2 = Vector2.ZERO
 ## it without touching rendering code.
 var current_z: float = 0.0
 
+## Maximum pseudo-3D height (px) at which a ball can be controlled by ground feet.
+const MAX_CAPTURE_HEIGHT: float = 25.0
+## Duration of foot-sensor lockout after striking or losing the ball.
+var ball_control_lockout: float = 0.0
+
 var _action_text_cooldown: float = 0.0
 
 @onready var sprite: Sprite2D = $Sprite2D
@@ -208,6 +213,8 @@ func _physics_process(delta: float) -> void:
 	_update_visual_anchors()
 	if _action_text_cooldown > 0.0:
 		_action_text_cooldown = maxf(0.0, _action_text_cooldown - delta)
+	if ball_control_lockout > 0.0:
+		ball_control_lockout = maxf(0.0, ball_control_lockout - delta)
 
 
 ## Recomputes the acceleration/friction constants from the exported tuning
@@ -402,6 +409,17 @@ func can_carry_ball() -> bool:
 	return brain == null or brain.can_carry_ball()
 
 
+## Gate checked before a grounded foot capture is granted.
+func can_capture_ball(ball: Pseudo3DBall) -> bool:
+	if ball == null or ball.is_frozen:
+		return false
+	if ball_control_lockout > 0.0:
+		return false
+	if ball.position_z > MAX_CAPTURE_HEIGHT:
+		return false
+	return can_carry_ball()
+
+
 ## Spawns floating action text in world space above this player.
 ## Added to the parent (not self) so the text does not rotate with the player.
 func show_action_text(message: String) -> void:
@@ -419,23 +437,27 @@ func show_action_text(message: String) -> void:
 ## The ball currently inside the foot sensor, or null. Returns the candidate
 ## closest to this player so multi-ball overlaps resolve deterministically.
 func get_ball_in_foot_range() -> Pseudo3DBall:
-	return _nearest_ball_from(foot_sensor.get_overlapping_bodies())
+	if ball_control_lockout > 0.0:
+		return null
+	return _nearest_ball_from(foot_sensor.get_overlapping_bodies(), true)
 
 
 func get_ball_in_aerial_range() -> Pseudo3DBall:
-	return _nearest_ball_from(aerial_hitbox.get_overlapping_bodies())
+	return _nearest_ball_from(aerial_hitbox.get_overlapping_bodies(), false)
 
 
 ## Collects every Pseudo3DBall among [bodies] and returns the one closest to this
 ## player's global_position. Physics reports overlaps in internal, frame-variable
 ## order, so iterating all candidates and comparing distance keeps selection
 ## deterministic and physically correct when two balls briefly overlap.
-func _nearest_ball_from(bodies: Array) -> Pseudo3DBall:
+func _nearest_ball_from(bodies: Array, ground_check: bool = false) -> Pseudo3DBall:
 	var nearest: Pseudo3DBall = null
 	var nearest_distance_sq: float = INF
 	for body: Node2D in bodies:
 		var ball := body as Pseudo3DBall
 		if ball == null:
+			continue
+		if ground_check and not can_capture_ball(ball):
 			continue
 		var distance_sq: float = global_position.distance_squared_to(ball.global_position)
 		if distance_sq < nearest_distance_sq:
