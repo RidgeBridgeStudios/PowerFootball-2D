@@ -42,6 +42,8 @@ var charge_ratio: float = 0.0
 var _held_time: float = 0.0
 var _is_lob: bool = false
 
+var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
+
 
 func enter(player: HeavyPlayerController) -> void:
 	_held_time = 0.0
@@ -112,11 +114,13 @@ func _release_kick(player: HeavyPlayerController) -> void:
 	var speed: float = PASS_SPEED if is_tap else lerpf(PASS_SPEED, SHOT_SPEED, charge_ratio)
 	var height: float = 0.0
 	if _is_lob:
-		height = LOB_HEIGHT_SPEED * maxf(charge_ratio, 0.4)
+		height = LOB_HEIGHT_SPEED * (charge_ratio * charge_ratio)
 
-	# Inherit a slice of the striker's momentum: running onto a ball produces a
-	# heavier strike than a standing one.
-	var inherited: Vector2 = player.velocity * 0.25
+	# Inherit momentum directionally: only the component of the striker's run
+	# that pushes along the aim adds weight, so a cross-body strike is not
+	# artificially boosted by sideways run speed.
+	var run_dot: float = clampf(player.velocity.normalized().dot(aim), 0.0, 1.0)
+	var inherited: Vector2 = aim * (player.velocity.length() * run_dot * 0.30)
 
 	# Accuracy scatter: at full charge, mood determines how much aim jitter applies.
 	# A streaking player is locked in; a slumping one sprays the ball.
@@ -124,9 +128,12 @@ func _release_kick(player: HeavyPlayerController) -> void:
 	var scatter_mult: float = mood_node.get_kick_accuracy_scatter_multiplier() if mood_node != null else 1.0
 	var max_scatter_angle: float = deg_to_rad(12.0) * charge_ratio * scatter_mult
 	if max_scatter_angle > 0.001:
-		aim = aim.rotated(randf_range(-max_scatter_angle, max_scatter_angle))
+		_rng.seed = player.get_instance_id() + GameManager.get_match_tick()
+		aim = aim.rotated(_gaussian_scatter(max_scatter_angle * 0.4))
 
 	ball.apply_kick(aim * speed + inherited, height, player)
+	if not is_tap and charge_ratio > 0.65:
+		GameEvents.powerful_shot_landed.emit(player, speed, charge_ratio)
 
 	var action_label: String
 	if is_tap:
@@ -146,6 +153,14 @@ func _release_kick(player: HeavyPlayerController) -> void:
 		InputHelper.rumble(0.25 * charge_ratio, 0.6 * charge_ratio, 0.12)
 
 	# TODO: split action_through into a lead-the-runner pass target.
+
+
+## Box–Muller Gaussian sample scaled to `sigma`. Only mutates _rng state, no
+## other side effects.
+func _gaussian_scatter(sigma: float) -> float:
+	var u1: float = maxf(_rng.randf(), 0.0001)
+	var u2: float = _rng.randf()
+	return sqrt(-2.0 * log(u1)) * cos(TAU * u2) * sigma
 
 
 func _nearest_ground_ball(player: HeavyPlayerController) -> Pseudo3DBall:

@@ -292,6 +292,13 @@ func get_current_top_speed() -> float:
 	return top_speed * (sprint_multiplier if is_sprinting else 1.0)
 
 
+## Close-ball control attribute (0.0-1.0). Higher keeps the ball tighter while
+## dribbling. Reads from the bound PlayerData, falling back to a neutral 0.65.
+func get_close_control() -> float:
+	var pd: PlayerData = get_meta(&"player_data", null) as PlayerData
+	return pd.close_control if pd != null else 0.65
+
+
 ## 0.0-1.0 — how close this player is to their (possibly sprinting) top speed.
 func get_speed_ratio() -> float:
 	return clampf(velocity.length() / maxf(get_current_top_speed(), 1.0), 0.0, 1.0)

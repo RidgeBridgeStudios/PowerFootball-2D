@@ -42,6 +42,9 @@ extends Resource
 @export_range(0.0, 1.0) var aggression: float = 0.80
 @export_range(0.0, 1.0) var formation_ball_weight: float = 0.35
 
+## Close-ball control: higher keeps the ball tighter during dribbling.
+@export_range(0.0, 1.0) var close_control: float = 0.65
+
 ## --- Live form and career stats — read by the pre-game screen and pause menu ---
 
 ## Per-match rolling form (0.0 - 10.0). Persists across matches; decays

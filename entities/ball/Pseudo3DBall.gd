@@ -39,9 +39,11 @@ signal possession_changed(new_possessor: Node2D)
 ## Pixels per second squared pulling the ball back to the turf.
 @export var gravity: float = 580.0
 ## Ground drag coefficient, applied per second while rolling.
-@export var pitch_friction: float = 0.45
+@export var pitch_friction: float = 0.90
 ## Air drag coefficient, applied per second while airborne.
 @export var air_resistance: float = 0.08
+## 0 = dry, 1 = soaked. Scales the rolling friction coefficient down.
+@export var surface_wetness: float = 0.0
 ## Bounce elasticity. 0.68 gives a lively but not rubbery ball.
 @export var restitution: float = 0.68
 ## Vertical speed below which a bounce stops resolving and the ball settles.
@@ -53,6 +55,9 @@ signal possession_changed(new_possessor: Node2D)
 
 ## Scales pitch_friction into pixels/second of velocity shed per second.
 const FRICTION_SCALE: float = 200.0
+## Flat drag added on top of the proportional term so a nearly-stopped ball
+## actually settles rather than asymptotically bleeding speed forever.
+const REST_DRAG_FLAT: float = 18.0
 ## Shadow shrink/fade reference heights, in pixels.
 const SHADOW_SCALE_REFERENCE: float = 300.0
 const SHADOW_ALPHA_REFERENCE: float = 400.0
@@ -60,6 +65,8 @@ const SHADOW_ALPHA_REFERENCE: float = 400.0
 var position_z: float = 0.0
 var velocity_z: float = 0.0
 var is_on_ground: bool = true
+## One-off micro-impulse as the ball settles; reset on kick and restart.
+var _drift_applied: bool = false
 ## Frozen balls ignore all integration — used for kickoffs, throw-ins and goals.
 var is_frozen: bool = false
 
@@ -108,6 +115,7 @@ func apply_kick(impulse_xy: Vector2, impulse_z: float, kicker: HeavyPlayerContro
 	velocity_z = impulse_z
 	if impulse_z > 0.0:
 		is_on_ground = false
+	_drift_applied = false
 	last_touched_by = kicker
 	release_possession()
 	ball_kicked.emit(impulse_xy, impulse_z)
@@ -148,7 +156,13 @@ func simulate_z_axis(delta: float) -> void:
 
 func simulate_xy_axis(delta: float) -> void:
 	if is_on_ground:
-		velocity = velocity.move_toward(Vector2.ZERO, pitch_friction * FRICTION_SCALE * delta)
+		var effective_friction: float = pitch_friction * (1.0 - surface_wetness * 0.45)
+		var drag_force: float = effective_friction * velocity.length()
+		velocity = velocity.move_toward(Vector2.ZERO,
+			(drag_force + REST_DRAG_FLAT) * delta)
+		if velocity.length() < rest_speed and velocity.length() > 0.5 and not _drift_applied:
+			velocity = velocity.rotated(randf_range(-0.18, 0.18)) * 0.7
+			_drift_applied = true
 		if velocity.length() < rest_speed:
 			velocity = Vector2.ZERO
 	else:
@@ -232,6 +246,7 @@ func reset_at(spot: Vector2) -> void:
 	velocity_z = 0.0
 	position_z = 0.0
 	is_on_ground = true
+	_drift_applied = false
 	release_possession()
 	last_touched_by = null
 	render_visuals()

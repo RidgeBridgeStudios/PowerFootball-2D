@@ -71,6 +71,14 @@ var shootout_active: bool = false
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	GameEvents.powerful_shot_landed.connect(_on_powerful_shot)
+
+
+## Hit-stop: briefly slow the clock on a high-charge shot so the strike reads.
+func _on_powerful_shot(_shooter: HeavyPlayerController, _speed: float, ratio: float) -> void:
+	Engine.time_scale = 0.15
+	await get_tree().create_timer(0.055 * Engine.time_scale).timeout
+	Engine.time_scale = 1.0
 
 
 func _process(delta: float) -> void:

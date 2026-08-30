@@ -227,6 +227,23 @@ func nearest_opponent_dist_to(pos: Vector2, team: int) -> float:
 	return best
 
 
+## Position of the closest registered player NOT on `team`, or `pos` itself
+## when no opponent is registered. Allocation-free — no Arrays or Dictionaries.
+func nearest_opponent_position(pos: Vector2, team: int) -> Vector2:
+	var best_dist: float = INF
+	var best_pos: Vector2 = pos
+	for i: int in range(TOTAL_PLAYERS):
+		if player_teams[i] == team:
+			continue
+		if not is_instance_valid(player_nodes[i]):
+			continue
+		var d: float = pos.distance_to(player_positions[i])
+		if d < best_dist:
+			best_dist = d
+			best_pos = player_positions[i]
+	return best_pos
+
+
 ## True when `index` addresses a slot holding a live player.
 func is_slot_live(index: int) -> bool:
 	if index < 0 or index >= TOTAL_PLAYERS:

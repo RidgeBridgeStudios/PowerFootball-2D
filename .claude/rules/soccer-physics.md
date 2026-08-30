@@ -21,30 +21,20 @@ COLLISION MATRIX (INVARIANT):
 
 ## Compounded corrections — verified against the source
 
-### Ball friction is a PRODUCT, not the exported coefficient
-`Pseudo3DBall.pitch_friction` (default 0.45) is a coefficient, NOT a
-deceleration. The solver multiplies it by `const FRICTION_SCALE: float = 200.0`
-every time it is used:
+### Ball friction is PROPORTIONAL, not a constant deceleration
+`Pseudo3DBall.pitch_friction` (default 0.90) scales a velocity-proportional
+drag term, plus a flat rest drag:
 
 ```gdscript
 # Pseudo3DBall.simulate_xy_axis()
-velocity = velocity.move_toward(Vector2.ZERO, pitch_friction * FRICTION_SCALE * delta)
+var effective_friction: float = pitch_friction * (1.0 - surface_wetness * 0.45)
+var drag_force: float = effective_friction * velocity.length()
+velocity = velocity.move_toward(Vector2.ZERO, (drag_force + REST_DRAG_FLAT) * delta)
 ```
 
-Any predictor that wants px/s^2 must pass the product (90.0 at defaults).
-Passing `pitch_friction` alone under-decelerates the ball by 200x and every
-intercept lands far beyond where the ball actually stops.
-
-```gdscript
-# CORRECT
-UtilityMath.calculate_intercept_point(
-    player.global_position, player.get_current_top_speed(),
-    ball.global_position, ball.velocity,
-    ball.pitch_friction * Pseudo3DBall.FRICTION_SCALE, 0.08)
-
-# INCORRECT — coefficient, not acceleration
-UtilityMath.calculate_intercept_point(..., ball.pitch_friction, 0.08)
-```
+The old `FRICTION_SCALE` constant-deceleration `pitch_friction * FRICTION_SCALE * delta`
+model has been replaced by the proportional form above. `FRICTION_SCALE` is no
+longer used by `simulate_xy_axis()`.
 
 ### The ball has TWO ownership properties and they mean different things
 Do not guess one from the other:
@@ -71,3 +61,7 @@ Each point is `sim_pos_xy + Vector2(0.0, -sim_pos_z)` — the height is already
 baked into Y. That is correct for drawing an aim arc and wrong for a ground
 intercept on an airborne ball. `UtilityMath.calculate_intercept_point()`
 returns a true ground position instead.
+
+## FEEL pass (proportional friction / gaussian scatter)
+
+Ball friction is proportional (velocity * coefficient + REST_DRAG_FLAT), not constant. See Pseudo3DBall.simulate_xy_axis(). Surface wetness scales effective_friction. Scatter on shots is Gaussian, not uniform — see ChargeKickState._gaussian_scatter().

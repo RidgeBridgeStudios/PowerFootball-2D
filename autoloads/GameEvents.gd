@@ -71,6 +71,9 @@ signal player_mood_changed(player: Node, tier: int)
 signal ball_struck(player: Node, speed: float, charge_ratio: float, is_shot: bool)
 signal tackle_won(winner: Node, loser: Node)
 signal aerial_contested(player: Node, clean: bool)
+## Fired by ChargeKickState when a held, high-charge shot is released — the
+## hit-stop hook. GameManager freezes the clock briefly on this.
+signal powerful_shot_landed(shooter: HeavyPlayerController, speed: float, ratio: float)
 
 ## --- Referee events ---------------------------------------------------------
 

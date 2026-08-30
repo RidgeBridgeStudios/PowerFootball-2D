@@ -44,14 +44,6 @@ const POSSESSION_GRACE: float = 0.10
 
 ## --- Touch constants ---------------------------------------------------------
 
-## Fraction of top speed the touch imparts to the ball.
-## At 0.60 the ball stays close to the player's feet at a walk and drifts
-## a comfortable 1–2 player-widths ahead at a sprint.
-const TOUCH_SPEED_RATIO: float = 0.60
-## Seconds between dribble touches. Shorter interval + lower speed ratio =
-## finer ball control. 0.14 s gives ~7 Hz re-touch cadence — tight without
-## feeling "on a rail".
-const TOUCH_INTERVAL: float = 0.14
 ## Sprint multiplier on touch speed. The ball still drifts looser at pace,
 ## but by one body length — not three.
 const SPRINT_TOUCH_BONUS: float = 1.15
@@ -131,7 +123,16 @@ func physics_process(player: HeavyPlayerController, delta: float) -> void:
 		if player.velocity.length() > 10.0 \
 		else player.facing_direction
 
-	var carry_target: Vector2 = player.global_position + carry_dir * CARRY_OFFSET
+	var world: MatchWorldModel = MatchWorldModel.instance
+	var shield_dir: Vector2 = carry_dir
+	if world != null:
+		var nearest_opp: Vector2 = world.nearest_opponent_position(
+			player.global_position, player.team)
+		var to_opp: Vector2 = (nearest_opp - player.global_position).normalized()
+		if player.movement_intent.normalized().dot(to_opp) < -0.3:
+			shield_dir = -to_opp
+
+	var carry_target: Vector2 = player.global_position + shield_dir * CARRY_OFFSET
 	var offset: Vector2 = carry_target - ball.global_position
 
 	# --- Selective damping: kill lateral/reverse drift, preserve forward -----
@@ -154,6 +155,10 @@ func physics_process(player: HeavyPlayerController, delta: float) -> void:
 	if _touch_cooldown > 0.0:
 		return
 
+	var control: float = player.get_close_control() if player.has_method(&"get_close_control") else 0.65
+	var effective_touch_ratio: float = lerpf(0.85, 0.50, 1.0 - control)
+	var effective_interval: float = lerpf(0.10, 0.20, 1.0 - control)
+
 	# Push the ball along the running line rather than the stick line: a heavy
 	# player cannot redirect the ball faster than they can redirect themselves.
 	# Blend carry_dir toward the desired intent. At low speed the blend is 0 —
@@ -166,13 +171,13 @@ func physics_process(player: HeavyPlayerController, delta: float) -> void:
 		var blend: float = clampf(player.get_speed_ratio() * 0.5, 0.0, 0.5)
 		touch_direction = carry_dir.lerp(desired, 1.0 - blend).normalized()
 
-	var touch_speed: float = player.get_current_top_speed() * TOUCH_SPEED_RATIO
+	var touch_speed: float = player.get_current_top_speed() * effective_touch_ratio
 	if player.is_sprinting:
 		touch_speed *= SPRINT_TOUCH_BONUS
 
 	ball.apply_kick(touch_direction * touch_speed, 0.0, player)
 	ball.set_possessor(player)
-	_touch_cooldown = TOUCH_INTERVAL
+	_touch_cooldown = effective_interval
 
 	# TODO: scale touch distance by a per-player `close_control` attribute and add
 	# a shielding variant when the stick points away from the nearest defender.
