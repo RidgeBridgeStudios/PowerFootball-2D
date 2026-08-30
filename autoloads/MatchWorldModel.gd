@@ -235,6 +235,21 @@ func is_slot_live(index: int) -> bool:
 	return node != null and is_instance_valid(node)
 
 
+## Removes a sent-off player from the active cache so get_teammates_of() /
+## get_opponents_of() / nearest_opponent_dist_to() no longer count them. The
+## node is left in place (MatchReferee hides it, never frees it during a
+## match) — only the cache slot is cleared, same shape as an unregistered slot.
+func mark_player_unavailable(player: HeavyPlayerController) -> void:
+	for i: int in range(TOTAL_PLAYERS):
+		if player_nodes[i] == player:
+			player_nodes[i] = null
+			player_positions[i] = Vector2.ZERO
+			player_velocities[i] = Vector2.ZERO
+			if possessor_index == i:
+				possessor_index = NO_INDEX
+			return
+
+
 func _resize_arrays() -> void:
 	player_nodes.clear()
 	player_nodes.resize(TOTAL_PLAYERS)

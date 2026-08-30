@@ -59,6 +59,12 @@ extends Resource
 ## the next match. The pre-game screen reads this and greys out the card.
 @export var is_unavailable: bool = false
 
+## --- Transient per-match card counts -------------------------------------------
+## Reset to 0 by MatchReferee.bind() at the start of each match. Not persisted —
+## RefereeData.red_cards_issued is the career stat.
+var yellow_cards_this_match: int = 0
+var red_cards_this_match: int = 0
+
 
 static func make_default(player_name: String, shirt_number: int, position_role: String) -> PlayerData:
 	var d := PlayerData.new()
