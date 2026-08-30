@@ -42,7 +42,12 @@
 ## pitch_size, for phase-shifted formation anchors too),
 ## MatchWorldModel (autoload spatial cache, including defensive_line_x — the
 ## shared per-team back-line depth the OUTFIELD_DEFENDER branch of
-## _find_open_space_target() blends into its hold-shape target), UtilityMath
+## _find_open_space_target() blends into its hold-shape target — and
+## press_trigger_active/press_trigger_carrier, the pressing trigger detector's
+## output, read by _score_chase() via _press_trigger_chase_bonus() to favour
+## ChaseBall the moment the world model flags a football-relevant reason to
+## close down; this brain never re-derives any of those trigger conditions
+## itself, it only reacts to the flag), UtilityMath
 ## (static helpers), FormationAnchorMath (static — team-phase-aware anchor drift).
 ##
 ## Signals consumed:
@@ -117,6 +122,16 @@ class UtilityContext:
 const PRESSURE_RADIUS: float = 180.0
 ## Distance at which the brain commits to chasing the ball rather than holding shape.
 const CHASE_RADIUS: float = 220.0
+
+## Additive bonus to _score_chase() while MatchWorldModel's pressing trigger
+## detector has flagged a football-relevant reason to close down right now
+## (a backward/square pass into pressure, the carrier facing their own goal,
+## pinned on the touchline, or a heavy touch) and that trigger concerns the
+## opponent currently on the ball. Small enough that a legitimately better
+## option (a covering defender holding the line instead of diving in) can
+## still outscore it — this nudges the chase/hold-shape balance, it does not
+## override it.
+const PRESS_TRIGGER_CHASE_BONUS: float = 0.18
 
 ## How strongly a defender's default "hold shape" X target is pulled toward
 ## MatchWorldModel.defensive_line_x[team] — the shared band depth — versus
@@ -619,7 +634,28 @@ func _score_chase(ctx: UtilityContext) -> float:
 		var back_penalty: float = clampf((0.64 - facing_dot) / 1.64, 0.0, 1.0) * 0.45
 		base = clampf(base - back_penalty, 0.0, 1.0)
 
+	base += _press_trigger_chase_bonus(ctx)
+
 	return clampf(base, 0.0, 1.0)
+
+
+## Reads MatchWorldModel's pressing trigger flag rather than recomputing any
+## of its five conditions here — see MatchWorldModel's "Pressing trigger
+## detection" section for what can set it. Zero whenever: no trigger is
+## active, this player's own team already has the ball (chasing a teammate's
+## carry is not pressing), or the trigger's carrier is missing/on this
+## player's own team (a backward/square pass trigger names the kicker, so a
+## teammate's own backward pass must not boost this player's own chase score).
+func _press_trigger_chase_bonus(ctx: UtilityContext) -> float:
+	if ctx.team_has_ball or player == null:
+		return 0.0
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null or not world.press_trigger_active:
+		return 0.0
+	var carrier: HeavyPlayerController = world.press_trigger_carrier
+	if not is_instance_valid(carrier) or carrier.team == player.team:
+		return 0.0
+	return PRESS_TRIGGER_CHASE_BONUS
 
 
 ## Score for finding space (off-ball intelligent run).
