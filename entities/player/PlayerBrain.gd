@@ -58,7 +58,13 @@ extends Node
 ## Retained for .tscn backwards-compatibility only — ManagerDirector still
 ## writes it from manager pressing intensity, and removing the export would
 ## drop that value out of every serialised scene.
-@export var decision_interval: float = 0.25
+@export var decision_interval: float = 0.25:
+	set(value):
+		decision_interval = value
+		# Map the legacy seconds value back onto pressing intensity so a
+		# ManagerDirector write still drives AI update speed. 0.0 → setter
+		# input clamps to 25 frames, 0.25 → 15 frames, anything larger → 7.
+		set_pressing_intensity(clampf(value / 0.25, 0.0, 1.0))
 ## True for the goalkeeper — swaps evaluate_tactical_action() for a simple
 ## stay-near-goal/chase-goal-area rule instead of the outfield decision tree.
 @export var is_goalkeeper: bool = false
@@ -114,6 +120,10 @@ const GOALIE_KNOCKDOWN_IMPULSE: float = 220.0
 ## any given tick instead of all of them.
 const UPDATE_INTERVAL: int = 15
 
+## Running decision interval, adjusted by set_pressing_intensity(). Starts at
+## the UPDATE_INTERVAL default and is the value the stagger gate actually reads.
+var _effective_update_interval: int = UPDATE_INTERVAL
+
 ## Seconds a designated pass receiver commits to running onto the ball, ignoring
 ## its own decision tree. Without it the receiver re-evaluates mid-flight and
 ## can turn away from a pass that was played to where it was going.
@@ -143,6 +153,12 @@ var _goalie_dive_timer: float = 0.0
 ## Deprecated alongside decision_interval: the runtime no longer decrements or
 ## reads this. Kept only so any external reference still resolves.
 var _decision_cooldown: float = 0.0
+
+## Maps a 0.0–1.0 pressing intensity onto a per-decision frame interval:
+## 0.0 → 25 frames (lazy), 0.5 → 15 frames (default), 1.0 → 7 frames (high
+## press). The result is clamped to [5, 30] before being stored.
+func set_pressing_intensity(intensity: float) -> void:
+	_effective_update_interval = clampi(roundi(lerpf(25.0, 7.0, intensity)), 5, 30)
 
 ## Physics frames elapsed. Increments every frame regardless of whether this
 ## frame is a decision frame.
@@ -271,8 +287,8 @@ func _physics_process(delta: float) -> void:
 			_last_possession_team = current_possession_team
 			# Reset the frame counter so this player evaluates on its next tick.
 			# Subtracting player_index ensures the evaluation lands on a frame
-			# where ((_frame_counter + player_index) % UPDATE_INTERVAL == 0).
-			_frame_counter = UPDATE_INTERVAL - player_index - 1
+			# where ((_frame_counter + player_index) % _effective_update_interval == 0).
+			_frame_counter = _effective_update_interval - player_index - 1
 
 	# Goalkeeper dive reaction cannot wait for the 15-frame decision stagger —
 	# a shot crosses the six-yard box in a handful of physics frames — so it is
@@ -290,7 +306,7 @@ func _physics_process(delta: float) -> void:
 
 	_frame_counter += 1
 
-	if (_frame_counter + player_index) % UPDATE_INTERVAL == 0:
+	if (_frame_counter + player_index) % _effective_update_interval == 0:
 		if is_goalkeeper:
 			# GoaliePatrol is the only decision-tree action a keeper ever
 			# picks; a committed dive must not be clobbered by this re-affirm.
