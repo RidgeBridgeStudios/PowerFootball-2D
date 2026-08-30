@@ -62,7 +62,8 @@ static func get_dynamic_anchor_position(
 		ball_pos: Vector2,
 		ball_weight: float,
 		pitch_centre: Vector2,
-		pitch_size: Vector2
+		pitch_size: Vector2,
+		attack_sign: float = 1.0
 ) -> Vector2:
 	var half: Vector2 = pitch_size * 0.5
 	if half.x <= 0.0 or half.y <= 0.0:
@@ -77,7 +78,7 @@ static func get_dynamic_anchor_position(
 	var pulled_norm: Vector2 = base_norm.lerp(ball_norm, ball_weight)
 
 	var push: float = float(_PHASE_LINE_PUSH.get(phase, 0.0)) \
-		* float(_ROLE_PHASE_SENSITIVITY.get(role, 1.0))
+		* float(_ROLE_PHASE_SENSITIVITY.get(role, 1.0)) * attack_sign
 	pulled_norm.x = clampf(pulled_norm.x + push, -1.0, 1.0)
 
 	return pitch_centre + pulled_norm * half

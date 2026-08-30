@@ -108,7 +108,11 @@ static func score_pass(
 		passer_facing_dot: float,
 		forward_dot: float,
 		receiver_open_dist: float,
-		passer_pressure: float
+		passer_pressure: float,
+		w_dist: float = WEIGHT_DISTANCE,
+		w_angle: float = WEIGHT_ANGLE,
+		w_press: float = WEIGHT_PRESSURE,
+		w_adv: float = WEIGHT_ADVANCEMENT
 ) -> float:
 	if distance > MAX_USEFUL_DISTANCE:
 		return 0.0
@@ -119,7 +123,9 @@ static func score_pass(
 	var pressure_utility: float = clampf(receiver_open_dist / RECEIVER_OPEN_RADIUS, 0.0, 1.0)
 	var advancement_utility: float = clampf((forward_dot + 1.0) * 0.5, 0.0, 1.0)
 
-	return _weighted_total(distance_utility, angle_utility, pressure_utility, advancement_utility, passer_pressure)
+	return _weighted_total(
+		distance_utility, angle_utility, pressure_utility, advancement_utility,
+		passer_pressure, w_dist, w_angle, w_press, w_adv)
 
 
 ## Same math as score_pass(), but returns the full per-dimension breakdown for
@@ -132,7 +138,11 @@ static func score_pass_breakdown(
 		forward_dot: float,
 		receiver_open_dist: float,
 		passer_pressure: float,
-		receiver: HeavyPlayerController = null
+		receiver: HeavyPlayerController = null,
+		w_dist: float = WEIGHT_DISTANCE,
+		w_angle: float = WEIGHT_ANGLE,
+		w_press: float = WEIGHT_PRESSURE,
+		w_adv: float = WEIGHT_ADVANCEMENT
 ) -> PassScoreBreakdown:
 	var result := PassScoreBreakdown.new()
 	result.receiver = receiver
@@ -146,7 +156,8 @@ static func score_pass_breakdown(
 	result.advancement_utility = clampf((forward_dot + 1.0) * 0.5, 0.0, 1.0)
 	result.total = _weighted_total(
 		result.distance_utility, result.angle_utility,
-		result.pressure_utility, result.advancement_utility, passer_pressure)
+		result.pressure_utility, result.advancement_utility,
+		passer_pressure, w_dist, w_angle, w_press, w_adv)
 	return result
 
 
@@ -158,15 +169,19 @@ static func _weighted_total(
 		angle_utility: float,
 		pressure_utility: float,
 		advancement_utility: float,
-		passer_pressure: float
+		passer_pressure: float,
+		w_dist: float = WEIGHT_DISTANCE,
+		w_angle: float = WEIGHT_ANGLE,
+		w_press: float = WEIGHT_PRESSURE,
+		w_adv: float = WEIGHT_ADVANCEMENT
 ) -> float:
 	var safety_shift: float = clampf(passer_pressure, 0.0, 1.0) * PRESSURE_SAFETY_SHIFT
-	var w_pressure: float = WEIGHT_PRESSURE + WEIGHT_ADVANCEMENT * safety_shift
-	var w_advancement: float = WEIGHT_ADVANCEMENT * (1.0 - safety_shift)
+	var effective_w_pressure: float = w_press + w_adv * safety_shift
+	var effective_w_advancement: float = w_adv * (1.0 - safety_shift)
 
 	return (
-		WEIGHT_DISTANCE * distance_utility
-		+ WEIGHT_ANGLE * angle_utility
-		+ w_pressure * pressure_utility
-		+ w_advancement * advancement_utility
+		w_dist * distance_utility
+		+ w_angle * angle_utility
+		+ effective_w_pressure * pressure_utility
+		+ effective_w_advancement * advancement_utility
 	)

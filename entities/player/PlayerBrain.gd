@@ -588,6 +588,16 @@ func _check_goalkeeper_dive_trigger(delta: float) -> void:
 	_goalie_dive_timer = GOALIE_DIVE_DURATION
 
 
+## Returns +1.0 for Team A (+X attacking axis) or -1.0 for Team B (-X attacking axis).
+func _get_attack_sign() -> float:
+	return 1.0 if player != null and player.team == GameManager.TEAM_A else -1.0
+
+
+## Returns the forward attacking unit vector for this player's team.
+func _get_attack_direction() -> Vector2:
+	return Vector2(_get_attack_sign(), 0.0)
+
+
 ## Builds the UtilityContext snapshot for one decision tick.
 func _build_context(defenders_nearby: Array[Node2D]) -> UtilityContext:
 	var ctx := UtilityContext.new()
@@ -616,10 +626,11 @@ func _build_context(defenders_nearby: Array[Node2D]) -> UtilityContext:
 	else:
 		ctx.dist_to_goal = 800.0
 
-	# These are cached results of existing methods — call them here so every
-	# scorer sees the same answer rather than running independent scans.
-	ctx.chase_is_legal         = _should_chase_ball()
-	ctx.open_teammate_exists   = _find_best_pass_target(ctx.pressure) != null
+	# Cache best pass target once per tactical slice here to avoid repeating
+	# the entire 22-player evaluation loop in evaluate_tactical_action().
+	_cached_pass_target = _find_best_pass_target(ctx.pressure)
+	ctx.open_teammate_exists = _cached_pass_target != null
+	ctx.chase_is_legal       = _should_chase_ball()
 
 	return ctx
 
@@ -803,12 +814,6 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 	# Now build a scored candidate list — the highest score wins.
 	# Ties are broken by the order of the array (pass > chase > space > dribble > formation).
 
-	# Cache the pass target now so _score_pass() and _steer_for_action()
-	# both see the same answer without a second roster walk.
-	var pass_target: HeavyPlayerController = _find_best_pass_target(ctx.pressure)
-	if pass_target != null:
-		_cached_pass_target = pass_target
-
 	var candidates: Array[Dictionary] = [
 		{ &"action": &"Pass",              "score": _score_pass(ctx)              },
 		{ &"action": &"ChaseBall",         "score": _score_chase(ctx)             },
@@ -874,7 +879,7 @@ func _find_best_pass_target(passer_pressure: float = 0.0) -> HeavyPlayerControll
 	if world == null:
 		return null
 
-	var attack_dir: Vector2 = Vector2(1.0, 0.0) if player.team == GameManager.TEAM_A else Vector2(-1.0, 0.0)
+	var attack_dir: Vector2 = _get_attack_direction()
 	var ball_pos: Vector2 = ball.global_position
 
 	# Recompute effective composure locally (same pattern as evaluate_tactical_action).
@@ -935,8 +940,15 @@ func _find_best_pass_target(passer_pressure: float = 0.0) -> HeavyPlayerControll
 		var facing_dot: float = player.get_facing_dot(candidate_pos)
 
 		# Hot path: bare float, allocates nothing (see PassUtilityScorer docs).
-		var score: float = PassUtilityScorer.score_pass(
-			distance, facing_dot, forward_dot, min_opp_dist, effective_pressure)
+		var score: float
+		if player != null and player.role_config != null:
+			score = PassUtilityScorer.score_pass(
+				distance, facing_dot, forward_dot, min_opp_dist, effective_pressure,
+				player.role_config.w_dist, player.role_config.w_angle,
+				player.role_config.w_press, player.role_config.w_adv)
+		else:
+			score = PassUtilityScorer.score_pass(
+				distance, facing_dot, forward_dot, min_opp_dist, effective_pressure)
 
 		# Trust bias: how much this passer trusts THIS candidate as a receiver
 		# nudges the already-computed utility score up or down. Neutral trust
@@ -945,8 +957,15 @@ func _find_best_pass_target(passer_pressure: float = 0.0) -> HeavyPlayerControll
 			score *= TrustSystem.trust_multiplier(trust_sys.get_trust(TrustSystem.player_key(candidate)))
 
 		if debug_log_pass_scores:
-			var breakdown: PassUtilityScorer.PassScoreBreakdown = PassUtilityScorer.score_pass_breakdown(
-				distance, facing_dot, forward_dot, min_opp_dist, effective_pressure, candidate)
+			var breakdown: PassUtilityScorer.PassScoreBreakdown
+			if player != null and player.role_config != null:
+				breakdown = PassUtilityScorer.score_pass_breakdown(
+					distance, facing_dot, forward_dot, min_opp_dist, effective_pressure, candidate,
+					player.role_config.w_dist, player.role_config.w_angle,
+					player.role_config.w_press, player.role_config.w_adv)
+			else:
+				breakdown = PassUtilityScorer.score_pass_breakdown(
+					distance, facing_dot, forward_dot, min_opp_dist, effective_pressure, candidate)
 			# breakdown.total is pre-trust; `score` (post-multiplier) is what
 			# actually decides best_target below, so print both.
 			print("[PassScorer] %s -> %s  dist=%.2f angle=%.2f pressure=%.2f adv=%.2f  raw=%.3f trust_adj=%.3f" % [
@@ -1021,13 +1040,17 @@ func _should_chase_ball() -> bool:
 			return false
 
 	# Before committing to the chase, check the budget: the ball must sit
-	# within this role's max_chase_distance of the defensive line, or the
+	# within this role's max_chase_distance of its anchor, or the
 	# chase is suppressed and the player holds shape instead. The
 	# press-trigger exemption is applied inside clamp_chase_target(), so a
 	# live trigger always passes through unchanged.
-	var anchor_x: float = world.defensive_line_x[player.team]
-	var _anchor: Vector2 = Vector2(anchor_x, player.global_position.y)
-	var clamped: Vector2 = clamp_chase_target(ball_pos, _anchor, player, world)
+	var anchor_pos: Vector2
+	if role == Role.OUTFIELD_DEFENDER:
+		anchor_pos = Vector2(world.defensive_line_x[player.team], player.global_position.y)
+	else:
+		anchor_pos = formation_anchor
+
+	var clamped: Vector2 = clamp_chase_target(ball_pos, anchor_pos, player, world)
 	# If the clamped position is the same as ball_pos, the ball is within
 	# budget — proceed. Otherwise suppress the chase.
 	if clamped.distance_squared_to(ball_pos) > 1.0:
@@ -1037,9 +1060,14 @@ func _should_chase_ball() -> bool:
 
 
 ## 0.0-1.0 crowding score from opponents within PRESSURE_RADIUS.
-func calculate_pressure_index(defenders: Array[Node2D]) -> float:
+## Uses MatchWorldModel spatial grid for O(1) allocation-free evaluation when available.
+func calculate_pressure_index(defenders: Array[Node2D] = []) -> float:
 	if player == null:
 		return 0.0
+
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world != null:
+		return clampf(world.get_opponent_density(player.global_position, PRESSURE_RADIUS, player.team), 0.0, 1.0)
 
 	var total_pressure: float = 0.0
 	for defender: Node2D in defenders:
@@ -1245,7 +1273,8 @@ func clamp_chase_target(
 		player: HeavyPlayerController,
 		wm: MatchWorldModel
 ) -> Vector2:
-	if wm.press_trigger_active:
+	if wm.press_trigger_active and wm.press_trigger_carrier != null \
+			and is_instance_valid(wm.press_trigger_carrier) and wm.press_trigger_carrier.team != player.team:
 		return desired
 	var budget: float = MAX_CHASE_DEFAULT
 	if player.role_config != null:
@@ -1298,7 +1327,8 @@ func _find_open_space_target() -> Vector2:
 			ball_pos,
 			formation_ball_weight,
 			pitch_boundary.get_centre_spot(),
-			pitch_boundary.pitch_size
+			pitch_boundary.pitch_size,
+			_get_attack_sign()
 		)
 
 	match role:
@@ -1392,11 +1422,11 @@ func _find_channel_run_target(ball_pos: Vector2) -> Vector2:
 	# at the pitch's left/right ends — see PitchBoundary.get_goal_centre()).
 	# Team 0 (TEAM_A) defends the left goal and attacks toward +X; TEAM_B
 	# defends the right goal and attacks toward -X.
-	var attack_x: float
-	if player.team == GameManager.TEAM_A:
-		attack_x = lerpf(ball_pos.x, bounds.end.x - 80.0, 0.55)
-	else:
-		attack_x = lerpf(ball_pos.x, bounds.position.x + 80.0, 0.55)
+	var attack_x: float = lerpf(
+		ball_pos.x,
+		bounds.end.x - 80.0 if _get_attack_sign() > 0.0 else bounds.position.x + 80.0,
+		0.55
+	)
 
 	# Sample 5 Y positions across the pitch width (touchline to touchline),
 	# biased toward the flanks. Five is kept rather than trimmed to three: the
@@ -1445,7 +1475,7 @@ func _find_passing_triangle_position(ball_pos: Vector2) -> Vector2:
 
 	var offset_y: float = anchor_side * 140.0
 	# "Behind" the ball means toward our own goal along the X (attack) axis.
-	var offset_x: float = -60.0 if player.team == GameManager.TEAM_A else 60.0
+	var offset_x: float = -_get_attack_sign() * 60.0
 
 	var triangle_pos: Vector2 = ball_pos + Vector2(offset_x, offset_y)
 
@@ -1485,11 +1515,7 @@ func _find_nearest_threatening_opponent() -> HeavyPlayerController:
 			var d: float = player.global_position.distance_to(other_pos)
 			# Threatening if they have pushed into our defensive half (goals
 			# sit on the X ends — see PitchBoundary.get_goal_centre()).
-			var toward_goal: bool
-			if player.team == GameManager.TEAM_A:
-				toward_goal = other_pos.x < centre_x
-			else:
-				toward_goal = other_pos.x > centre_x
+			var toward_goal: bool = (other_pos.x < centre_x) if _get_attack_sign() > 0.0 else (other_pos.x > centre_x)
 			if toward_goal and d < best_dist:
 				best_dist = d
 				best = other
@@ -1798,7 +1824,7 @@ func _assist_force() -> Vector2:
 	if ball == null or player == null:
 		return Vector2.ZERO
 
-	var attack_dir: Vector2 = Vector2(1.0, 0.0) if player.team == GameManager.TEAM_A else Vector2(-1.0, 0.0)
+	var attack_dir: Vector2 = _get_attack_direction()
 	var lateral_offset: float = player.global_position.y - ball.global_position.y
 	var assist_target: Vector2 = ball.global_position + attack_dir * 120.0 + Vector2(0.0, lateral_offset)
 

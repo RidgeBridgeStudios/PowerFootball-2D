@@ -107,6 +107,8 @@ func _physics_process(delta: float) -> void:
 func reset() -> void:
 	mood_value = 0.5
 	current_tier = Tier.NORMAL
+	if _player != null:
+		_stagger_offset = maxi(_player.world_index, 0)
 
 
 func apply_delta(delta: float) -> void:
