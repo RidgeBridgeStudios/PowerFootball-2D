@@ -8,7 +8,8 @@
       "Bash(cat ROADMAP.md)",
       "Bash(cat AGENTS.md)",
       "Bash(cat AGENTS_ERRATA.md)",
-      "Bash(python3 tools/gdcheck.py)"
+      "Bash(python3 tools/gdcheck.py)",
+      "Bash(py -3 tools/gdcheck.py)"
     ]
   },
   "hooks": {
@@ -29,7 +30,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "if command -v godot >/dev/null 2>&1 && [ -f addons/gut/gut_cmdln.gd ]; then godot --headless -s addons/gut/gut_cmdln.gd -gexit > /dev/null 2>&1 || { echo 'GUT SUITE FAILED - fix before stopping.' >&2; exit 2; }; else python3 tools/gdcheck.py > /dev/null 2>&1 || { echo 'gdcheck FAILED - fix before stopping.' >&2; exit 2; }; fi"
+            "command": "if command -v godot >/dev/null 2>&1 && [ -f addons/gut/gut_cmdln.gd ]; then godot --headless -s addons/gut/gut_cmdln.gd -gexit > /dev/null 2>&1 || { echo 'GUT SUITE FAILED - fix before stopping.' >&2; exit 2; }; else (python3 tools/gdcheck.py > /dev/null 2>&1 || python tools/gdcheck.py > /dev/null 2>&1 || py -3 tools/gdcheck.py > /dev/null 2>&1) || { echo 'gdcheck FAILED - fix before stopping.' >&2; exit 2; }; fi"
           }
         ]
       }

@@ -216,9 +216,15 @@ func start_penalty_for_practice(attacking_team: int, defending_team: int) -> voi
 func start_kickoff(team: int) -> void:
 	if _ball == null or _players == null:
 		return
-	_ball.reset_at(_boundary.get_centre_spot())
+	var centre: Vector2 = _boundary.get_centre_spot()
+	# FIX: set_piece_position is normally written by start_set_piece(), which
+	# is intentionally skipped for kickoffs. Set it manually so _assign_taker()
+	# and _activate_set_piece() read the correct centre spot instead of stale
+	# data from the previous dead-ball event.
+	GameManager.set_piece_position = centre
+	_ball.reset_at(centre)
 	_ball.freeze()
-	_setup_taking_side(GameManager.MatchPhase.KICKOFF, team, _boundary.get_centre_spot())
+	_setup_taking_side(GameManager.MatchPhase.KICKOFF, team, centre)
 
 
 func _start_penalty(attacking_team: int, defending_team: int) -> void:
