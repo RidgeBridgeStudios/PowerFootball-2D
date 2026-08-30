@@ -20,12 +20,23 @@
 ##   - MoodSystem, attached as a child by PlayerFactory, whose multipliers feed
 ##     into _recalculate_movement_curve()
 ##
+## Brain/controller contract: PlayerBrain (or human input, via InputHelper)
+## expresses tactical intent through exactly two fields — movement_intent (a
+## direction, magnitude 0-1 for stick deflection) and wants_sprint (a desired
+## speed scale) — and never touches velocity, acceleration, or is_sprinting
+## directly. This controller owns turning penalties, acceleration/friction,
+## stamina-gating of sprint, and all move_and_slide() integration. A bad
+## tactical read (wrong pass target, wrong lane) should only ever surface as a
+## mishit ball, never as broken player physics — the two concerns cannot
+## corrupt each other because intent and integration are different fields
+## owned by different scripts.
+##
 ## Exposes:
 ##   - apply_kinematic_weight(input_dir, delta)
 ##   - apply_external_impulse(impulse)   knockback from tackles and collisions
 ##   - get_ball_in_foot_range() / get_ball_in_aerial_range()
 ##   - get_mood()
-##   - stamina, facing_direction, is_sprinting, movement_intent
+##   - stamina, facing_direction, is_sprinting, movement_intent, wants_sprint
 ##   - signal stamina_state_changed(ratio)
 ##   - world_index — this player's slot in MatchWorldModel, or -1 if unregistered
 ##
@@ -100,7 +111,18 @@ var base_acceleration: float = 0.0
 var base_friction: float = 0.0
 
 var stamina: float = 0.0
+## Resolved, gated sprint state actually applied to top speed this frame.
+## Never written from outside _update_sprint() — it is the OUTPUT of resolving
+## wants_sprint against stamina/sprint_locked, not an input. PlayerBrain
+## expresses sprint intent through wants_sprint instead.
 var is_sprinting: bool = false
+## Desired sprint state as expressed by the input source: human input for a
+## user-controlled player (polled directly in _update_sprint()), PlayerBrain's
+## tactical intent for a CPU one. This is the controller's one extra intent
+## channel beyond movement_intent — only the controller knows whether stamina
+## actually allows the sprint, so the brain requests it here rather than
+## asserting the resolved is_sprinting itself.
+var wants_sprint: bool = false
 ## Latched true when stamina hits zero; cleared at stamina_sprint_unlock.
 var sprint_locked: bool = false
 
@@ -392,10 +414,11 @@ func _read_movement_intent() -> Vector2:
 
 ## Sprint is a held modifier, not a toggle, and it is gated on stamina: run the
 ## tank dry and the burst is locked out until it recovers past the unlock
-## threshold. Only a human player reads the trigger here; the brain sets
-## is_sprinting itself.
+## threshold. A human player's intent is polled directly from Input here; a
+## CPU player's intent arrives pre-written on wants_sprint by PlayerBrain.
+## Either way, this function alone resolves that intent into the gated
+## is_sprinting — the one place that decides whether the sprint actually happens.
 func _update_sprint(delta: float) -> void:
-	var wants_sprint: bool = is_sprinting
 	if is_user_controlled:
 		wants_sprint = Input.is_action_pressed(&"action_sprint")
 

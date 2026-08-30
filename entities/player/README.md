@@ -15,7 +15,7 @@ HeavyPlayerController (CharacterBody2D)
        ├─ utility-scored decision trees
        ├─ time-sliced evaluation (15-frame jitter)
        ├─ tactical context from MatchWorldModel
-       └─ writes ONLY to player.movement_intent
+       └─ writes ONLY to player.movement_intent and player.wants_sprint
 ```
 
 ---
@@ -63,7 +63,7 @@ HeavyPlayerController (CharacterBody2D)
 
 ## PlayerBrain.gd
 
-**Contract:** Autonomous AI agent. Utility-scored decision making per role. Writes ONLY to `player.movement_intent`.
+**Contract:** Autonomous AI agent. Utility-scored decision making per role. Writes ONLY to `player.movement_intent` and `player.wants_sprint` — never velocity, acceleration, or the resolved `is_sprinting`.
 
 **Key Exports:**
 - `player_index: int` — World index (set by HeavyPlayerController._ready())
