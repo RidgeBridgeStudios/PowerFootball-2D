@@ -42,6 +42,7 @@ var _boundary: PitchBoundary
 ## team -> Array[HeavyPlayerController], handed in by start() rather than
 ## re-derived from the scene tree on every kick.
 var _rosters: Dictionary = {}
+var _taker_queue_indices: Array[int] = [0, 0]
 
 ## [team_a, team_b] — deliberately separate from GameManager.score, which the
 ## shootout must never write to.
@@ -83,6 +84,7 @@ func start(team_a_players: Array[HeavyPlayerController], team_b_players: Array[H
 	}
 	shootout_score = [0, 0]
 	kicks_taken = [0, 0]
+	_taker_queue_indices = [0, 0]
 	_next_team = GameManager.TEAM_A
 	_active = true
 
@@ -108,10 +110,27 @@ func _advance_to_next_kick() -> void:
 	_awaiting_resolution = false
 	_resolution_timer.stop()
 
-	# Reuses the exact spot calculation, nearest-to-spot taker assignment and
-	# confirmation flow a normal in-match penalty already goes through.
-	_set_piece_coordinator.start_penalty_for_practice(attacking_team, defending_team)
+	var shooter: HeavyPlayerController = _get_next_shooter(attacking_team)
+	if shooter != null:
+		_set_piece_coordinator.start_penalty_with_taker(attacking_team, defending_team, shooter)
+	else:
+		_set_piece_coordinator.start_penalty_for_practice(attacking_team, defending_team)
 	_position_goalkeeper(defending_team)
+
+
+func _get_next_shooter(team: int) -> HeavyPlayerController:
+	var roster: Array = _rosters.get(team, [])
+	if roster.is_empty():
+		return null
+	var idx: int = _taker_queue_indices[team] % roster.size()
+	_taker_queue_indices[team] += 1
+	var shooter: HeavyPlayerController = roster[idx] as HeavyPlayerController
+	if shooter == null or not is_instance_valid(shooter):
+		for node: Variant in roster:
+			var p := node as HeavyPlayerController
+			if p != null and is_instance_valid(p):
+				return p
+	return shooter
 
 
 ## Places the defending goalkeeper on their line, offset inward the same way
@@ -192,29 +211,42 @@ func _resolve_kick(scored: bool) -> void:
 	_advance_to_next_kick()
 
 
-## True (and the shootout has already ended) once one team cannot be caught
-## even if the other scores every remaining regulation kick — or, past
-## regulation, the instant a sudden-death round finishes with the two sides no
-## longer level. Only ever meaningful once both teams have taken the same
-## number of kicks, which happens after every second (Team B) kick.
+## True (and the shootout has ended) once one team cannot be caught
+## even if the other scores every remaining regulation kick (IFAB Law 10.3) —
+## or, past regulation, the instant a sudden-death round finishes with the two
+## sides no longer level (evaluated after pairs of kicks where n_a == n_b).
 func _check_early_termination() -> bool:
 	var team_a: int = GameManager.TEAM_A
 	var team_b: int = GameManager.TEAM_B
 	var n_a: int = kicks_taken[team_a]
 	var n_b: int = kicks_taken[team_b]
-	if n_a != n_b:
-		return false
-
-	var remaining: int = maxi(0, MAX_REGULAR_KICKS - n_a)
 	var score_a: int = shootout_score[team_a]
 	var score_b: int = shootout_score[team_b]
 
-	if score_a + remaining < score_b:
-		_end_shootout(team_b)
-		return true
-	if score_b + remaining < score_a:
-		_end_shootout(team_a)
-		return true
+	# Phase 1: Regular 5 kicks (asymmetric remaining kicks evaluation)
+	if n_a <= MAX_REGULAR_KICKS and n_b <= MAX_REGULAR_KICKS:
+		var rem_a: int = MAX_REGULAR_KICKS - n_a
+		var rem_b: int = MAX_REGULAR_KICKS - n_b
+
+		if score_a + rem_a < score_b:
+			_end_shootout(team_b)
+			return true
+		if score_b + rem_b < score_a:
+			_end_shootout(team_a)
+			return true
+
+		# Both reached 5 kicks and score is decisive
+		if n_a == MAX_REGULAR_KICKS and n_b == MAX_REGULAR_KICKS:
+			if score_a != score_b:
+				_end_shootout(team_a if score_a > score_b else team_b)
+				return true
+
+	# Phase 2: Sudden Death (must resolve strictly in complete pairs n_a == n_b)
+	if n_a > MAX_REGULAR_KICKS and n_b > MAX_REGULAR_KICKS and n_a == n_b:
+		if score_a != score_b:
+			_end_shootout(team_a if score_a > score_b else team_b)
+			return true
+
 	return false
 
 

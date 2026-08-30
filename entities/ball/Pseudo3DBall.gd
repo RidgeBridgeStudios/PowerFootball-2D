@@ -78,6 +78,11 @@ var possessor: Node2D = null
 ## from a corner when the ball goes out over the end line.
 var last_touched_by: HeavyPlayerController = null
 
+## Taker who kicked/threw the dead ball restart. Used to prevent double-touch infractions.
+var restart_taker: HeavyPlayerController = null
+## False immediately after a dead ball restart; true once another player touches the ball.
+var has_secondary_touch_occurred: bool = true
+
 @onready var ball_sprite: Sprite2D = $BallSprite
 @onready var shadow_sprite: Sprite2D = $ShadowSprite
 @onready var ball_collider: CollisionShape2D = $CollisionShape2D
@@ -117,6 +122,8 @@ func apply_kick(impulse_xy: Vector2, impulse_z: float, kicker: HeavyPlayerContro
 		is_on_ground = false
 	_drift_applied = false
 	last_touched_by = kicker
+	if kicker != null:
+		register_player_touch(kicker)
 	release_possession()
 	ball_kicked.emit(impulse_xy, impulse_z)
 
@@ -255,7 +262,32 @@ func reset_at(spot: Vector2) -> void:
 	_drift_applied = false
 	release_possession()
 	last_touched_by = null
+	restart_taker = null
+	has_secondary_touch_occurred = true
 	render_visuals()
+
+
+## Arms the anti-double-touch constraint for a set piece taker.
+func mark_set_piece_restart(taker: HeavyPlayerController) -> void:
+	restart_taker = taker
+	has_secondary_touch_occurred = false
+
+
+## Registers a player touch, returning false if this touch is an illegal double touch.
+func register_player_touch(player: HeavyPlayerController) -> bool:
+	if not has_secondary_touch_occurred and restart_taker != null:
+		if player == restart_taker:
+			return false
+		has_secondary_touch_occurred = true
+		restart_taker = null
+	return true
+
+
+## Whether a player is currently permitted to make contact with the ball.
+func can_player_touch(player: HeavyPlayerController) -> bool:
+	if not has_secondary_touch_occurred and restart_taker != null and player == restart_taker:
+		return false
+	return true
 
 
 func freeze() -> void:

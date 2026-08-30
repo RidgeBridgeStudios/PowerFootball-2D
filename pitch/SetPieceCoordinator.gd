@@ -207,6 +207,11 @@ func start_penalty_for_practice(attacking_team: int, defending_team: int) -> voi
 	_start_penalty(attacking_team, defending_team)
 
 
+## Public entry point for shootouts or specific taker assignments.
+func start_penalty_with_taker(attacking_team: int, defending_team: int, designated_taker: HeavyPlayerController) -> void:
+	_start_penalty(attacking_team, defending_team, designated_taker)
+
+
 ## Public entry point for kickoff. PitchScene has already repositioned everyone
 ## and frozen the ball; this freezes the players, picks the taker, and parks the
 ## ball on the centre spot. Unlike the other restarts this does NOT call
@@ -227,13 +232,15 @@ func start_kickoff(team: int) -> void:
 	_setup_taking_side(GameManager.MatchPhase.KICKOFF, team, centre)
 
 
-func _start_penalty(attacking_team: int, defending_team: int) -> void:
+func _start_penalty(attacking_team: int, defending_team: int, designated_taker: HeavyPlayerController = null) -> void:
 	var goal_centre: Vector2 = _boundary.get_goal_centre(defending_team)
 	var attack_direction: float = 1.0 if defending_team == 0 else -1.0
 	var position: Vector2 = goal_centre + Vector2(penalty_spot_offset * attack_direction, 0.0)
 
 	GameManager.start_penalty(attacking_team, position)
-	_setup_taking_side(GameManager.MatchPhase.PENALTY_KICK, attacking_team, position)
+	_setup_taking_side(GameManager.MatchPhase.PENALTY_KICK, attacking_team, position, designated_taker)
+	_position_goalkeeper(defending_team)
+	_clear_penalty_box_and_arc(position, defending_team)
 
 
 ## Shared setup for the three restarts whose GameManager call only needs
@@ -245,14 +252,14 @@ func _begin_set_piece(phase: int, team: int, position: Vector2) -> void:
 
 ## Common tail of every restart: freeze the pitch, park the ball, pick a taker,
 ## push the opposition back, and wait for the go-ahead.
-func _setup_taking_side(phase: int, team: int, position: Vector2) -> void:
+func _setup_taking_side(phase: int, team: int, position: Vector2, designated_taker: HeavyPlayerController = null) -> void:
 	# Snapshot before freezing — _freeze_all_players() clears is_user_controlled
 	# on every player, so _assign_taker()'s kickoff branch would otherwise always
 	# read false here regardless of which side the human actually plays.
 	var team_has_human: bool = _team_has_human(team)
 	_freeze_all_players()
 	_ball.reset_at(position)
-	_assign_taker(team, team_has_human)
+	_assign_taker(team, team_has_human, designated_taker)
 	_position_defending_players(phase)
 	_await_taker_confirmation()
 
@@ -276,7 +283,7 @@ func _freeze_all_players() -> void:
 ## be resolved by the caller before _freeze_all_players() runs (see
 ## _setup_taking_side), since that clears is_user_controlled on every player
 ## before this function ever sees it.
-func _assign_taker(team: int, kickoff_team_has_human: bool = false) -> void:
+func _assign_taker(team: int, kickoff_team_has_human: bool = false, designated_taker: HeavyPlayerController = null) -> void:
 	var spot: Vector2 = GameManager.set_piece_position
 
 	_taker_candidates.clear()
@@ -286,9 +293,15 @@ func _assign_taker(team: int, kickoff_team_has_human: bool = false) -> void:
 		if player == null or player.team != team:
 			continue
 		_taker_candidates.append(player)
-	_taker_candidates.sort_custom(func(a: HeavyPlayerController, b: HeavyPlayerController) -> bool:
-		return a.global_position.distance_to(spot) < b.global_position.distance_to(spot)
-	)
+
+	if designated_taker != null and _taker_candidates.has(designated_taker):
+		_taker_candidates.erase(designated_taker)
+		_taker_candidates.push_front(designated_taker)
+	else:
+		_taker_candidates.sort_custom(func(a: HeavyPlayerController, b: HeavyPlayerController) -> bool:
+			return a.global_position.distance_to(spot) < b.global_position.distance_to(spot)
+		)
+
 	# Recorded after sorting, in the same order, so index i of each array
 	# always describes the same player — this is each candidate's own spot
 	# at freeze time, before anyone is moved onto the ball.
@@ -343,9 +356,7 @@ func _cycle_taker(direction: int) -> void:
 	GameEvents.player_switched.emit(_current_taker)
 
 
-## Moves opposing CPU players back to a legal distance. Full wall-building
-## tactics are out of scope (see _build_defensive_wall) — this only guarantees
-## nobody stands on top of the ball.
+## Moves opposing CPU players back to a legal distance.
 func _position_defending_players(phase: int) -> void:
 	## KICKOFF: both sides must start in their own half, so this restarts with a
 	## dedicated rule instead of the wall-distance push below.
@@ -353,11 +364,12 @@ func _position_defending_players(phase: int) -> void:
 		_enforce_kickoff_halves()
 		return
 
-	if _current_taker == null:
+	if _current_taker == null or _boundary == null:
 		return
 
 	var defending_team: int = 1 - _current_taker.team
 	var spot: Vector2 = GameManager.set_piece_position
+	var pitch_rect: Rect2 = _boundary.get_pitch_rect().grow(-20.0)
 	var min_distance: float = wall_distance
 	if phase == GameManager.MatchPhase.CORNER_KICK or phase == GameManager.MatchPhase.GOAL_KICK:
 		min_distance = penalty_spot_offset
@@ -366,20 +378,37 @@ func _position_defending_players(phase: int) -> void:
 		var player := node as HeavyPlayerController
 		if player == null or player.team != defending_team or player == _current_taker:
 			continue
+
+		if phase == GameManager.MatchPhase.GOAL_KICK:
+			# Strict IFAB Law 16: Opponents must remain outside the penalty area
+			if _is_in_penalty_area(player.global_position, defending_team):
+				var goal_centre: Vector2 = _boundary.get_goal_centre(defending_team)
+				var dir: float = 1.0 if defending_team == 0 else -1.0
+				var goal_area_x: float = goal_centre.x + dir * (PENALTY_AREA_DEPTH + 30.0)
+				player.global_position.x = clampf(goal_area_x, pitch_rect.position.x, pitch_rect.end.x)
+				player.velocity = Vector2.ZERO
+				continue
+
 		var offset: Vector2 = player.global_position - spot
-		if offset.length() >= min_distance:
-			continue
-		var direction: Vector2 = offset.normalized() if offset.length() > 0.001 else Vector2.RIGHT
-		player.global_position = spot + direction * min_distance
+		if offset.length() < min_distance:
+			var direction: Vector2 = offset.normalized() if offset.length() > 0.001 else Vector2.RIGHT
+			var target_pos: Vector2 = spot + direction * min_distance
+			target_pos.x = clampf(target_pos.x, pitch_rect.position.x, pitch_rect.end.x)
+			target_pos.y = clampf(target_pos.y, pitch_rect.position.y, pitch_rect.end.y)
+			player.global_position = target_pos
+			player.velocity = Vector2.ZERO
 
 
 ## KICKOFF: constrains every outfield player to their own half of the pitch.
-## Team 0 attacks right and owns the left half (x <= centre), team 1 attacks
-## left and owns the right half (x >= centre). The taker is left on the centre
-## spot, and the defending side also honours the standard wall distance so
-## nobody crowds the ball from inside their own half.
+## Handles half-time end swapping dynamically by deriving half from goal centre X.
+## The taker is left on the centre spot, and the defending side honours the standard
+## center circle radius (176px) without spilling across the halfway line (IFAB Law 8).
 func _enforce_kickoff_halves() -> void:
-	var centre_x: float = _boundary.get_centre_spot().x
+	if _boundary == null or _current_taker == null:
+		return
+
+	var centre_spot: Vector2 = _boundary.get_centre_spot()
+	var centre_x: float = centre_spot.x
 	var defending_team: int = 1 - _current_taker.team
 	var spot: Vector2 = GameManager.set_piece_position
 
@@ -388,26 +417,27 @@ func _enforce_kickoff_halves() -> void:
 		if player == null or player == _current_taker:
 			continue
 
-		## KICKOFF: clamp each team into its own half, leaving y untouched.
-		var in_correct_half: bool
-		if player.team == 0:
-			in_correct_half = player.global_position.x <= centre_x
-		else:
-			in_correct_half = player.global_position.x >= centre_x
+		# Determine defending half from goal position (supports half-time end swapping)
+		var goal_x: float = _boundary.get_goal_centre(player.team).x
+		var defends_left: bool = goal_x < centre_x
 
+		var in_correct_half: bool = (player.global_position.x <= centre_x) if defends_left else (player.global_position.x >= centre_x)
 		if not in_correct_half:
-			var clamped_x: float = centre_x - 1.0 if player.team == 0 else centre_x + 1.0
+			var clamped_x: float = centre_x - 12.0 if defends_left else centre_x + 12.0
 			player.global_position = Vector2(clamped_x, player.global_position.y)
 			player.velocity = Vector2.ZERO
 
-		## KICKOFF: defenders also back off the centre spot by wall_distance.
-		if player.team != defending_team:
-			continue
-		var offset: Vector2 = player.global_position - spot
-		if offset.length() >= wall_distance:
-			continue
-		var direction: Vector2 = offset.normalized() if offset.length() > 0.001 else Vector2.RIGHT
-		player.global_position = spot + direction * wall_distance
+		if player.team == defending_team:
+			var offset: Vector2 = player.global_position - spot
+			if offset.length() < wall_distance:
+				var push_dir: Vector2 = offset.normalized() if offset.length() > 0.001 else (Vector2.LEFT if defends_left else Vector2.RIGHT)
+				var new_pos: Vector2 = spot + push_dir * wall_distance
+				if defends_left:
+					new_pos.x = minf(new_pos.x, centre_x - 4.0)
+				else:
+					new_pos.x = maxf(new_pos.x, centre_x + 4.0)
+				player.global_position = new_pos
+				player.velocity = Vector2.ZERO
 
 
 ## --- Confirmation and activation ----------------------------------------------
@@ -432,6 +462,7 @@ func _activate_set_piece() -> void:
 
 	_ball.reset_at(GameManager.set_piece_position)
 	_ball.unfreeze()
+	_ball.mark_set_piece_restart(_current_taker)
 
 	_current_taker.global_position = GameManager.set_piece_position
 	_current_taker.velocity = Vector2.ZERO
@@ -467,7 +498,7 @@ func _on_taker_state_changed(from_state: StringName, _to_state: StringName) -> v
 	_current_taker = null
 
 
-## --- Penalty area -------------------------------------------------------------
+## --- Penalty area & Goalkeeper ------------------------------------------------
 
 func _is_in_penalty_area(pos: Vector2, defending_team: int) -> bool:
 	var goal_centre: Vector2 = _boundary.get_goal_centre(defending_team)
@@ -476,6 +507,61 @@ func _is_in_penalty_area(pos: Vector2, defending_team: int) -> bool:
 	var depth: float = local.x * direction
 
 	return depth >= 0.0 and depth <= PENALTY_AREA_DEPTH and absf(local.y) <= PENALTY_AREA_HALF_WIDTH
+
+
+## Places the defending goalkeeper strictly on the goal line facing forward (IFAB Law 14).
+func _position_goalkeeper(defending_team: int) -> void:
+	if _players == null or _boundary == null:
+		return
+	var goal_centre: Vector2 = _boundary.get_goal_centre(defending_team)
+	var direction: float = -1.0 if defending_team == 0 else 1.0
+	var spot: Vector2 = goal_centre - Vector2(direction * 48.0, 0.0)
+
+	for node: Node in _players.get_children():
+		var p := node as HeavyPlayerController
+		if p == null or p.team != defending_team:
+			continue
+		var brain := p.get_node_or_null("PlayerBrain") as PlayerBrain
+		if brain != null and brain.is_goalkeeper:
+			p.global_position = spot
+			p.velocity = Vector2.ZERO
+			p.movement_intent = Vector2.ZERO
+			p.state_factory.transition_to(PlayerState.SET_PIECE_FREEZE)
+			break
+
+
+## Clears all non-taking outfielders (both attacking and defending) outside the penalty box and arc (IFAB Law 14).
+func _clear_penalty_box_and_arc(penalty_spot: Vector2, defending_team: int) -> void:
+	if _players == null or _boundary == null:
+		return
+	var attack_dir: float = 1.0 if defending_team == 0 else -1.0
+	var arc_radius: float = wall_distance
+	var pitch_rect: Rect2 = _boundary.get_pitch_rect().grow(-32.0)
+
+	for node: Node in _players.get_children():
+		var p := node as HeavyPlayerController
+		if p == null or p == _current_taker:
+			continue
+		var brain := p.get_node_or_null("PlayerBrain") as PlayerBrain
+		if brain != null and brain.is_goalkeeper and p.team == defending_team:
+			continue
+
+		var in_box: bool = _is_in_penalty_area(p.global_position, defending_team)
+		var dist_to_spot: float = p.global_position.distance_to(penalty_spot)
+		var in_arc: bool = dist_to_spot < arc_radius
+		var is_ahead_of_spot: bool = (p.global_position.x - penalty_spot.x) * attack_dir > -10.0
+
+		if in_box or in_arc or is_ahead_of_spot:
+			var target_x: float = penalty_spot.x - attack_dir * (PENALTY_AREA_DEPTH * 0.5 + 40.0)
+			var target_y: float = p.global_position.y
+			if absf(target_y - penalty_spot.y) < arc_radius:
+				var sign_y: float = 1.0 if target_y >= penalty_spot.y else -1.0
+				target_y = penalty_spot.y + sign_y * (arc_radius + 20.0)
+
+			target_x = clampf(target_x, pitch_rect.position.x, pitch_rect.end.x)
+			target_y = clampf(target_y, pitch_rect.position.y, pitch_rect.end.y)
+			p.global_position = Vector2(target_x, target_y)
+			p.velocity = Vector2.ZERO
 
 
 ## --- Defensive wall ------------------------------------------------------------
@@ -490,6 +576,7 @@ func _build_defensive_wall(free_kick_pos: Vector2, _defending_team: int) -> void
 	var to_goal: Vector2 = (goal_centre - free_kick_pos).normalized()
 	var wall_origin: Vector2 = free_kick_pos + to_goal * wall_distance
 	var perp: Vector2 = Vector2(-to_goal.y, to_goal.x)
+	var pitch_rect: Rect2 = _boundary.get_pitch_rect().grow(-32.0)
 
 	# Collect outfield defenders for the wall (exclude goalkeeper).
 	var defenders: Array[HeavyPlayerController] = []
@@ -512,13 +599,37 @@ func _build_defensive_wall(free_kick_pos: Vector2, _defending_team: int) -> void
 	var spacing: float = 60.0
 	var half_span: float = float(wall_size - 1) * spacing * 0.5
 
+	var wall_positions: Array[Vector2] = []
 	for i: int in range(wall_size):
 		var p: HeavyPlayerController = defenders[i]
 		var lateral_offset: float = -half_span + float(i) * spacing
-		p.global_position = wall_origin + perp * lateral_offset
+		var target_pos: Vector2 = wall_origin + perp * lateral_offset
+		target_pos.x = clampf(target_pos.x, pitch_rect.position.x, pitch_rect.end.x)
+		target_pos.y = clampf(target_pos.y, pitch_rect.position.y, pitch_rect.end.y)
+		p.global_position = target_pos
 		p.velocity = Vector2.ZERO
+		wall_positions.append(target_pos)
+
+	if wall_size >= 3:
+		_enforce_wall_attacker_separation(wall_positions, 1 - defending_team, 20.0)
 
 	GameEvents.defensive_wall_requested.emit(free_kick_pos)
+
+
+## Enforces 1m (20px) buffer for all attacking players from a 3+ player defensive wall (IFAB Law 13).
+func _enforce_wall_attacker_separation(wall_positions: Array[Vector2], attacking_team: int, buffer: float) -> void:
+	for node: Node in _players.get_children():
+		var p := node as HeavyPlayerController
+		if p == null or p.team != attacking_team or p == _current_taker:
+			continue
+		for w_pos: Vector2 in wall_positions:
+			var dist: float = p.global_position.distance_to(w_pos)
+			if dist < buffer:
+				var push_dir: Vector2 = (p.global_position - w_pos).normalized()
+				if push_dir == Vector2.ZERO:
+					push_dir = Vector2.UP
+				p.global_position = w_pos + push_dir * buffer
+				p.velocity = Vector2.ZERO
 
 
 func _opposing_team_of(player: HeavyPlayerController) -> int:

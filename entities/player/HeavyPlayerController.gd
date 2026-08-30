@@ -417,6 +417,8 @@ func can_capture_ball(ball: Pseudo3DBall) -> bool:
 		return false
 	if ball.position_z > MAX_CAPTURE_HEIGHT:
 		return false
+	if not ball.can_player_touch(self):
+		return false
 	return can_carry_ball()
 
 

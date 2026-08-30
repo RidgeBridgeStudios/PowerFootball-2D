@@ -48,6 +48,12 @@ func _on_body_entered(body: Node2D) -> void:
 		GameEvents.ball_out_of_bounds.emit("end_line_goal_kick" if attacker_touched_last else "end_line_corner")
 		return
 
+	# IFAB Law 13: A goal cannot be scored directly from an indirect free kick without a secondary touch.
+	if not GameManager.free_kick_is_direct and not ball.has_secondary_touch_occurred:
+		_locked_until = now + retrigger_lockout
+		GameEvents.ball_out_of_bounds.emit("end_line_goal_kick")
+		return
+
 	_locked_until = now + retrigger_lockout
 
 	var scoring_team: int = 1 - defending_team
