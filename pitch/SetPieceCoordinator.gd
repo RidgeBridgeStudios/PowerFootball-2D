@@ -144,12 +144,12 @@ func _start_throw_in(exit_pos: Vector2, last_toucher: HeavyPlayerController) -> 
 	var team: int = _opposing_team_of(last_toucher)
 	var rect: Rect2 = _boundary.get_pitch_rect()
 	var clamped_x: float = clampf(exit_pos.x, rect.position.x, rect.position.x + rect.size.x)
-	# A hair inside the line rather than exactly on it, so the placed ball does
-	# not sit inside the touchline sensor and immediately retrigger it.
+	# A hair outside the line rather than inside it, so the taker stands
+	# completely outside the pitch line.
 	var touchline_y: float = (
-		rect.position.y + THROW_IN_INSET
+		rect.position.y - THROW_IN_INSET
 		if exit_pos.y < _boundary.get_centre_spot().y
-		else rect.position.y + rect.size.y - THROW_IN_INSET
+		else rect.position.y + rect.size.y + THROW_IN_INSET
 	)
 	var position: Vector2 = Vector2(clamped_x, touchline_y)
 

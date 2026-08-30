@@ -37,6 +37,9 @@ signal camera_mode_changed(mode_name: String)
 ## Starting mode. Override in the Inspector or via set_mode() at runtime.
 @export var initial_mode: Mode = Mode.DYNAMIC
 
+## Margin to allow camera to show out of bounds
+@export var out_of_bounds_margin: float = 150.0
+
 ## ── Zoom levels ──────────────────────────────────────────────────────────────
 
 ## Zoom used in BALL_FOLLOW. Higher value = more zoomed in.
@@ -226,11 +229,12 @@ func _zoom_for_mode(m: Mode) -> float:
 func _compute_full_field_zoom() -> float:
 	if _pitch_rect.size == Vector2.ZERO:
 		return 0.52
+	var expanded_rect: Rect2 = _pitch_rect.grow(out_of_bounds_margin)
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
 	# 10% padding so the touchlines are not flush with the screen edge.
 	var padding: float = 0.90
-	var zoom_x: float = viewport_size.x / _pitch_rect.size.x * padding
-	var zoom_y: float = viewport_size.y / _pitch_rect.size.y * padding
+	var zoom_x: float = viewport_size.x / expanded_rect.size.x * padding
+	var zoom_y: float = viewport_size.y / expanded_rect.size.y * padding
 	# Use the smaller axis so the full pitch always fits.
 	return minf(zoom_x, zoom_y)
 
@@ -240,12 +244,13 @@ func _compute_full_field_zoom() -> float:
 func _clamp_to_pitch(pos: Vector2) -> Vector2:
 	if _pitch_rect.size == Vector2.ZERO:
 		return pos
+	var expanded_rect: Rect2 = _pitch_rect.grow(out_of_bounds_margin)
 	var viewport_size: Vector2 = get_viewport().get_visible_rect().size
 	var half_view: Vector2 = viewport_size * 0.5 / zoom
-	var min_pos: Vector2 = _pitch_rect.position + half_view
-	var max_pos: Vector2 = _pitch_rect.end      - half_view
+	var min_pos: Vector2 = expanded_rect.position + half_view
+	var max_pos: Vector2 = expanded_rect.end      - half_view
 	# If the viewport is wider than the pitch (e.g. a near full-field view),
 	# centre on the pitch on that axis rather than clamping.
-	var clamped_x: float = pos.x if half_view.x >= _pitch_rect.size.x * 0.5 else clampf(pos.x, min_pos.x, max_pos.x)
-	var clamped_y: float = pos.y if half_view.y >= _pitch_rect.size.y * 0.5 else clampf(pos.y, min_pos.y, max_pos.y)
+	var clamped_x: float = pos.x if half_view.x >= expanded_rect.size.x * 0.5 else clampf(pos.x, min_pos.x, max_pos.x)
+	var clamped_y: float = pos.y if half_view.y >= expanded_rect.size.y * 0.5 else clampf(pos.y, min_pos.y, max_pos.y)
 	return Vector2(clamped_x, clamped_y)

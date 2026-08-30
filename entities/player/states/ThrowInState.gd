@@ -64,22 +64,28 @@ func process(player: HeavyPlayerController, delta: float) -> StringName:
 	if _released:
 		return MOVE if player.movement_intent.length() > 0.05 else IDLE
 
-	# CPU takers have no button to hold. Wait one beat, then release at half
-	# charge rather than reading Input directly, which would pick up the
-	# human's device instead.
+	# CPU takers use PlayerBrain to find a target.
 	if not player.is_user_controlled:
-		_cpu_timer += delta
-		if _cpu_timer >= CPU_THROW_DELAY:
-			charge_ratio = 0.5
-			_held_time = CHARGE_TIME * charge_ratio
-			_release_throw(player)
-			return MOVE if player.movement_intent.length() > 0.05 else IDLE
+		var brain: Node = player.get_node_or_null("PlayerBrain")
+		if brain != null and brain.get("current_action") == &"Pass":
+			_held = true
+			_held_time += delta
+			charge_ratio = clampf(_held_time / CHARGE_TIME, 0.0, 1.0)
+			if charge_ratio >= 0.5:
+				_release_throw(player)
+				return MOVE if player.movement_intent.length() > 0.05 else IDLE
+		else:
+			_held = false
+			charge_ratio = 0.0
 		return &""
 
 	if wants(player, &"action_kick"):
 		_held = true
 		_held_time += delta
 		charge_ratio = clampf(_held_time / CHARGE_TIME, 0.0, 1.0)
+		if charge_ratio >= 1.0:
+			_release_throw(player)
+			return MOVE if player.movement_intent.length() > 0.05 else IDLE
 	elif _held:
 		_release_throw(player)
 		return MOVE if player.movement_intent.length() > 0.05 else IDLE
@@ -88,8 +94,10 @@ func process(player: HeavyPlayerController, delta: float) -> StringName:
 
 
 func physics_process(player: HeavyPlayerController, delta: float) -> void:
-	# Planted: friction only, same as the charge-kick wind-up.
-	player.apply_kinematic_weight(Vector2.ZERO, delta)
+	# Project the movement vector so the player can ONLY move parallel to the touchline.
+	var intent: Vector2 = player.movement_intent
+	intent.y = 0.0
+	player.apply_kinematic_weight(intent, delta)
 
 
 func _release_throw(player: HeavyPlayerController) -> void:
@@ -113,12 +121,31 @@ func _release_throw(player: HeavyPlayerController) -> void:
 	var aim: Vector2 = Vector2.ZERO
 	if player.is_user_controlled:
 		aim = InputHelper.get_aim_vector()
+	else:
+		var brain: Node = player.get_node_or_null("PlayerBrain")
+		if brain != null and brain.get("_cached_pass_target") != null:
+			var target = brain.get("_cached_pass_target")
+			aim = (target.global_position + target.velocity * 0.3) - player.global_position
 	if aim == Vector2.ZERO:
 		aim = player.facing_direction
 
 	var speed: float = lerpf(MIN_SPEED, MAX_SPEED, charge_ratio)
-	# Flat trajectory is the point of a throw-in — impulse_z stays 0.
-	ball.apply_kick(aim.normalized() * speed, 0.0, player)
+	# Apply 3D impulse so the ball is lobbed into play
+	var z_impulse: float = lerpf(150.0, 350.0, charge_ratio)
+	ball.apply_kick(aim.normalized() * speed, z_impulse, player)
+	
+	if not player.is_user_controlled:
+		var brain: Node = player.get_node_or_null("PlayerBrain")
+		if brain != null and brain.get("_cached_pass_target") != null:
+			var target = brain.get("_cached_pass_target")
+			var trust_sys = player.get_trust_system() if player.has_method("get_trust_system") else null
+			if trust_sys != null:
+				trust_sys.register_pass(TrustSystem.player_key(target))
+			var target_brain = target.get_node_or_null("PlayerBrain")
+			if target_brain != null:
+				target_brain.set("_pass_lock_timer", 0.35)
+				target_brain.set("_pass_lock_passer", ball.possessor)
+	
 	player.show_action_text("THROW")
 	GameEvents.ball_struck.emit(player, speed, charge_ratio, false)
 	MatchStatsTracker.record_pass_attempt(player, MatchStatsTracker.is_pass_toward_teammate(player, aim))

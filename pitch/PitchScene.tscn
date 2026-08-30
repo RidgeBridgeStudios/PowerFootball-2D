@@ -33,7 +33,7 @@ texture_repeat = 2
 z_index = -10
 texture = ExtResource("4_turf")
 region_enabled = true
-region_rect = Rect2(0, 0, 1728, 1024)
+region_rect = Rect2(0, 0, 2400, 1400)
 
 [node name="PitchMarkings" type="Node2D" parent="."]
 z_index = -9

@@ -411,7 +411,11 @@ func _on_formation_changed(team_id: int, new_anchors: Dictionary) -> void:
 func _physics_process(delta: float) -> void:
 	if player == null or ball == null or player.is_user_controlled:
 		return
-	if not GameManager.is_in_play():
+	var is_throw_in_taker: bool = false
+	if player.state_factory != null and player.state_factory.current_state == &"ThrowIn":
+		is_throw_in_taker = true
+
+	if not GameManager.is_in_play() and not is_throw_in_taker:
 		player.movement_intent = Vector2.ZERO
 		return
 
@@ -614,8 +618,9 @@ func _build_context(defenders_nearby: Array[Node2D]) -> UtilityContext:
 
 	ctx.dist_to_ball = player.global_position.distance_to(ball.global_position) if ball != null else INF
 	ctx.stamina_ratio = player.get_stamina_ratio()
-	ctx.team_has_ball = _team_has_ball()
-	ctx.is_possessor  = ball != null and ball.possessor == player
+	var is_throw_in_taker: bool = player != null and player.state_factory != null and player.state_factory.current_state == &"ThrowIn"
+	ctx.team_has_ball = _team_has_ball() or is_throw_in_taker
+	ctx.is_possessor  = (ball != null and ball.possessor == player) or is_throw_in_taker
 	ctx.sprint_locked = player.sprint_locked
 
 	# Forward direction toward the opponent goal. Team A attacks toward +X.
@@ -808,6 +813,13 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 
 	if ctx.pressure > 0.85 and ctx.eff_composure < 0.45:
 		return &"PanicClear"
+
+	var is_throw_in_taker: bool = player != null and player.state_factory != null and player.state_factory.current_state == &"ThrowIn"
+	if is_throw_in_taker:
+		if ctx.open_teammate_exists:
+			return &"Pass"
+		else:
+			return &"FindSpace"
 
 	# --- Utility scoring ---
 	# Hard guards above have already filtered out PanicClear.
@@ -1678,7 +1690,8 @@ func _steer_for_action(delta: float) -> Vector2:
 		_blend_timer = maxf(_blend_timer - delta, 0.0)
 
 	# --- Pass execution ---
-	if current_action == &"Pass" and _cached_pass_target != null and is_instance_valid(_cached_pass_target):
+	var is_throw_in_taker: bool = player != null and player.state_factory != null and player.state_factory.current_state == &"ThrowIn"
+	if current_action == &"Pass" and _cached_pass_target != null and is_instance_valid(_cached_pass_target) and not is_throw_in_taker:
 		if player.global_position.distance_to(ball.global_position) < 80.0 and player.get_ball_in_foot_range() != null:
 			var lead_pos: Vector2 = _cached_pass_target.global_position + _cached_pass_target.velocity * 0.3
 			var aim: Vector2 = (lead_pos - ball.global_position).normalized()
