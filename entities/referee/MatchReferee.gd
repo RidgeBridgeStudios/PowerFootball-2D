@@ -17,9 +17,19 @@
 class_name MatchReferee
 extends Node
 
+## Severity at or above which a foul earns a yellow card outright.
+const YELLOW_BASE_THRESHOLD: float = 0.65
+## Severity at or above which a foul earns a straight red (bypasses yellow).
+const RED_BASE_THRESHOLD: float = 0.88
+
 var current_data: RefereeData = null
 var _coordinator: SetPieceCoordinator = null
 var _matchup_key: String = ""
+
+## Yellow/red cards shown this match (for stats). Distinct from each
+## PlayerData's own per-player counts.
+var _yellow_cards_this_match: int = 0
+var _red_cards_this_match: int = 0
 
 ## Rises over the match. Contributes to threshold drift for composure-weak refs.
 var _match_temperature: float = 0.0
@@ -46,6 +56,9 @@ func bind(data: RefereeData, coordinator: SetPieceCoordinator, team_a_name: Stri
 	_penalties_this_match = 0
 	_stats_logged = false
 	_favoured_team = -1
+	_yellow_cards_this_match = 0
+	_red_cards_this_match = 0
+	_reset_player_card_counts()
 
 	if current_data == null:
 		return
@@ -64,6 +77,22 @@ func bind(data: RefereeData, coordinator: SetPieceCoordinator, team_a_name: Stri
 
 func get_match_temperature() -> float:
 	return clampf(_match_temperature, 0.0, 1.0)
+
+
+## Zeroes every registered player's per-match card counts. Reads the roster via
+## MatchWorldModel (never the scene tree) since it only runs once at bind time,
+## not on a hot path.
+func _reset_player_card_counts() -> void:
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return
+	for node: HeavyPlayerController in world.player_nodes:
+		if node == null or not is_instance_valid(node):
+			continue
+		var pdata: PlayerData = node.get_meta(&"player_data", null) as PlayerData
+		if pdata != null:
+			pdata.yellow_cards_this_match = 0
+			pdata.red_cards_this_match = 0
 
 
 func _base_threshold() -> float:
@@ -148,8 +177,98 @@ func _on_foul_committed(fouler: Node, victim: Node, foul_pos: Vector2) -> void:
 		_update_temperature()
 		_drift_threshold()
 		GameEvents.referee_awarded_foul.emit(self, fouler, victim, foul_pos)
+		_evaluate_card(fouler_player, severity)
 	else:
 		GameEvents.referee_played_on.emit(self, fouler, victim, foul_pos)
+
+
+## Second-order decision on top of an already-awarded foul: does this severity
+## also earn a card? Thresholds drift with referee personality and match heat,
+## same as the award-a-foul decision above.
+func _evaluate_card(fouler_player: HeavyPlayerController, severity: float) -> void:
+	if fouler_player == null or not is_instance_valid(fouler_player) or current_data == null:
+		return
+
+	var player_data: PlayerData = fouler_player.get_meta(&"player_data", null) as PlayerData
+	if player_data == null:
+		return
+
+	var effective_severity: float = severity
+	if current_data.incoherence > 0.5:
+		effective_severity = clampf(effective_severity + randf_range(-0.12, 0.12), 0.0, 1.0)
+
+	var yellow_threshold: float = YELLOW_BASE_THRESHOLD
+	var red_threshold: float = RED_BASE_THRESHOLD
+	var second_yellow_threshold: float = 0.45
+
+	if current_data.strictness > 0.7:
+		yellow_threshold -= 0.10
+		red_threshold -= 0.10
+		second_yellow_threshold -= 0.10
+	if current_data.composure < 0.3 and _match_temperature > 0.6:
+		yellow_threshold -= 0.08
+		red_threshold -= 0.08
+		second_yellow_threshold -= 0.08
+	if _favoured_team >= 0 and fouler_player.team == _favoured_team:
+		var favour_raise: float = current_data.unprofessionalism * 0.15
+		yellow_threshold += favour_raise
+		red_threshold += favour_raise
+		second_yellow_threshold += favour_raise
+
+	yellow_threshold = clampf(yellow_threshold, 0.0, 1.0)
+	red_threshold = clampf(red_threshold, 0.0, 1.0)
+	second_yellow_threshold = clampf(second_yellow_threshold, 0.0, 1.0)
+
+	# Straight red bypasses the yellow check entirely.
+	if effective_severity >= red_threshold:
+		_award_red(fouler_player, player_data, false)
+		return
+
+	var already_booked: bool = player_data.yellow_cards_this_match >= 1
+	var earns_yellow: bool = effective_severity >= yellow_threshold
+	if not earns_yellow and already_booked and effective_severity >= second_yellow_threshold:
+		earns_yellow = true
+	if not earns_yellow:
+		return
+
+	player_data.yellow_cards_this_match += 1
+	_yellow_cards_this_match += 1
+	GameEvents.yellow_card_shown.emit(fouler_player, fouler_player.team)
+
+	# Second bookable offence — immediate conversion to red.
+	if player_data.yellow_cards_this_match >= 2:
+		_award_red(fouler_player, player_data, true)
+
+
+func _award_red(fouler_player: HeavyPlayerController, player_data: PlayerData, is_second_yellow: bool) -> void:
+	player_data.red_cards_this_match += 1
+	_red_cards_this_match += 1
+	current_data.red_cards_issued += 1
+	GameEvents.red_card_shown.emit(fouler_player, fouler_player.team, is_second_yellow)
+	_send_off(fouler_player)
+
+
+## Removes the sent-off player from play without freeing them: hides the node,
+## disables its processing, marks the underlying PlayerData unavailable for the
+## next match, and drops the slot from MatchWorldModel so teammate counts stay
+## accurate. A sent-off goalkeeper additionally asks PitchScene for an
+## emergency substitution.
+func _send_off(player: HeavyPlayerController) -> void:
+	if player == null or not is_instance_valid(player):
+		return
+
+	player.hide()
+	player.process_mode = Node.PROCESS_MODE_DISABLED
+
+	var player_data: PlayerData = player.get_meta(&"player_data", null) as PlayerData
+	if player_data != null:
+		player_data.is_unavailable = true
+
+	if MatchWorldModel.instance != null:
+		MatchWorldModel.instance.mark_player_unavailable(player)
+
+	if player_data != null and player_data.position_role == "GK":
+		GameEvents.goalkeeper_sent_off.emit(player.team)
 
 
 func _on_goal_scored(_team: int) -> void:
@@ -175,5 +294,7 @@ func _log_stats() -> void:
 	matchup["matches"] = matchup.get("matches", 0) + 1
 	matchup["fouls_awarded"] = matchup.get("fouls_awarded", 0) + _fouls_this_match
 	matchup["penalties_awarded"] = matchup.get("penalties_awarded", 0) + _penalties_this_match
+	matchup["yellow_cards"] = matchup.get("yellow_cards", 0) + _yellow_cards_this_match
+	matchup["red_cards"] = matchup.get("red_cards", 0) + _red_cards_this_match
 
 	RefereeLoader.save_referees()

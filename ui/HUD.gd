@@ -68,6 +68,8 @@ func _ready() -> void:
 	GameEvents.penalty_started.connect(_on_penalty_started)
 	GameEvents.defensive_wall_requested.connect(_on_defensive_wall_requested)
 	GameEvents.substitution_made.connect(_on_substitution_made)
+	GameEvents.yellow_card_shown.connect(_on_yellow_card_shown)
+	GameEvents.red_card_shown.connect(_on_red_card_shown)
 
 	power_meter.min_value = 0.0
 	power_meter.max_value = 1.0
@@ -284,6 +286,21 @@ func _on_defensive_wall_requested(_free_kick_pos: Vector2) -> void:
 	if active_player.team != defending_team:
 		return
 	_show_wall_hint()
+
+
+func _on_yellow_card_shown(player: Node, _team: int) -> void:
+	var data: PlayerData = (player as HeavyPlayerController).get_meta(&"player_data", null) as PlayerData
+	if data == null:
+		return
+	_show_set_piece_banner("[Y] YELLOW CARD — #%d %s" % [data.shirt_number, data.player_name])
+
+
+func _on_red_card_shown(player: Node, _team: int, is_second_yellow: bool) -> void:
+	var data: PlayerData = (player as HeavyPlayerController).get_meta(&"player_data", null) as PlayerData
+	if data == null:
+		return
+	var label: String = "[R] RED CARD (2nd yellow)" if is_second_yellow else "[R] RED CARD"
+	_show_set_piece_banner("%s — #%d %s" % [label, data.shirt_number, data.player_name])
 
 
 func _show_set_piece_banner(text: String) -> void:

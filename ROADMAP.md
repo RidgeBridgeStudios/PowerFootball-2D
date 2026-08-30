@@ -7,7 +7,7 @@ Canonical feature checklist for PowerFootball-2D. Each phase should produce a me
 Core football mechanics that must work before anything else.
 
 - [x] Substitutions + reserves UI
-- [ ] Yellow/red card implementation
+- [x] Yellow/red card implementation
 - [ ] Offside detection
 - [ ] Injury system
 - [ ] Match stats screen + full-time scoreboard
