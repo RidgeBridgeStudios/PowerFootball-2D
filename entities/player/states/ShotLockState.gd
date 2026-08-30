@@ -145,6 +145,6 @@ func _fire_shot(player: HeavyPlayerController) -> void:
 
 	ball.apply_kick(aim * speed + inherited, height, player)
 	player.show_action_text("LOB SHOT" if _is_lob else "SHOT")
-	GameEvents.ball_struck.emit(player, speed, charge_ratio)
+	GameEvents.ball_struck.emit(player, speed, charge_ratio, true)
 	if player.is_user_controlled:
 		InputHelper.rumble(0.25 * charge_ratio, 0.6 * charge_ratio, 0.12)

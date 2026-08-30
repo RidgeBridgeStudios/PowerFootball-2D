@@ -10,7 +10,7 @@ Core football mechanics that must work before anything else.
 - [x] Yellow/red card implementation
 - [x] Offside detection
 - [ ] Injury system
-- [ ] Match stats screen + full-time scoreboard
+- [x] Match stats screen + full-time scoreboard
 - [ ] End-of-match player ratings
 - [ ] Goalkeeper dive commitment
 - [ ] AerialState / heading resolution
