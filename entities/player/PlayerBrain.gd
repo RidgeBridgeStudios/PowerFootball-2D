@@ -34,8 +34,11 @@
 ## Depends on: Pseudo3DBall, HeavyPlayerController (as parent node), MoodSystem
 ## (read via player.get_mood() to bias vision/composure/aggression at the
 ## decision site — mood never touches the exported attributes themselves),
-## PitchBoundary (bound via bind_boundary(), used for goalkeeper positioning),
-## MatchWorldModel (autoload spatial cache), UtilityMath (static helpers).
+## PitchBoundary (bound via bind_boundary(), used for goalkeeper positioning
+## and, since _find_open_space_target() reads pitch_boundary.get_centre_spot()/
+## pitch_size, for phase-shifted formation anchors too),
+## MatchWorldModel (autoload spatial cache), UtilityMath (static helpers),
+## FormationAnchorMath (static — team-phase-aware anchor drift).
 ##
 ## Signals consumed:
 ##   GameEvents.formation_anchors_changed(team, new_anchors)
@@ -109,6 +112,12 @@ class UtilityContext:
 const PRESSURE_RADIUS: float = 180.0
 ## Distance at which the brain commits to chasing the ball rather than holding shape.
 const CHASE_RADIUS: float = 220.0
+
+## Seconds the team phase reads TRANSITION after a possession change, before
+## settling into IN_POSSESSION/OUT_OF_POSSESSION. Long enough to cover the
+## scramble right after a turnover; short enough not to blur into the next
+## phase read. Feeds FormationAnchorMath.get_dynamic_anchor_position().
+const TRANSITION_DURATION: float = 1.5
 ## Arrival radius — inside this the player eases off instead of oscillating.
 const ARRIVE_RADIUS: float = 24.0
 
@@ -189,6 +198,11 @@ var _pass_lock_passer: HeavyPlayerController = null
 ## The team that last touched the ball as of the previous physics frame.
 ## Used to detect possession changes and force an immediate re-evaluation.
 var _last_possession_team: int = -1
+
+## Counts down from TRANSITION_DURATION after every possession change; while
+## positive, _current_team_phase() reads TRANSITION regardless of who has
+## the ball.
+var _transition_timer: float = 0.0
 
 ## Off-ball target cached from the last decision tick. _find_open_space_target()
 ## walks the whole world model, which must stay on the decision stagger rather
@@ -305,10 +319,14 @@ func _physics_process(delta: float) -> void:
 		var current_possession_team: int = ball.last_touched_by.team if ball.last_touched_by != null else -1
 		if current_possession_team != _last_possession_team:
 			_last_possession_team = current_possession_team
+			_transition_timer = TRANSITION_DURATION
 			# Reset the frame counter so this player evaluates on its next tick.
 			# Subtracting player_index ensures the evaluation lands on a frame
 			# where ((_frame_counter + player_index) % _effective_update_interval == 0).
 			_frame_counter = _effective_update_interval - player_index - 1
+
+	if _transition_timer > 0.0:
+		_transition_timer = maxf(_transition_timer - delta, 0.0)
 
 	# Goalkeeper dive reaction cannot wait for the 15-frame decision stagger —
 	# a shot crosses the six-yard box in a handful of physics frames — so it is
@@ -899,6 +917,18 @@ func _team_has_ball() -> bool:
 	return toucher.team == player.team
 
 
+## Coarse team-level phase consumed by FormationAnchorMath to shift off-ball
+## anchors. TRANSITION briefly overrides IN_POSSESSION/OUT_OF_POSSESSION right
+## after a turnover, before the team's shape has caught up with who actually
+## has the ball — see _transition_timer, armed on every possession change.
+func _current_team_phase() -> FormationAnchorMath.TeamPhase:
+	if _transition_timer > 0.0:
+		return FormationAnchorMath.TeamPhase.TRANSITION
+	if _team_has_ball():
+		return FormationAnchorMath.TeamPhase.IN_POSSESSION
+	return FormationAnchorMath.TeamPhase.OUT_OF_POSSESSION
+
+
 ## Returns the world-space position this player should move to when NOT chasing
 ## the ball. The result is role-specific and possession-aware:
 ##   - When team HAS ball: attackers run channels, mids hold a passing angle
@@ -911,9 +941,12 @@ func _find_open_space_target() -> Vector2:
 	var ball_pos: Vector2 = ball.global_position
 	var has_ball: bool = _team_has_ball()
 
-	# The shape breathes toward the ball by the team's compactness setting.
-	# Every anchor read inside this function uses the drifted anchor; the
-	# exported formation_anchor itself is never modified here.
+	# The shape breathes toward the ball by the team's compactness setting,
+	# then shifts further along the attacking axis by team phase (in/out of
+	# possession, or transitioning between the two) — see
+	# FormationAnchorMath.get_dynamic_anchor_position(). Every anchor read
+	# inside this function uses the drifted anchor; the exported
+	# formation_anchor itself is never modified here.
 	#
 	# TUNING NOTE: three branches below then lerp toward the ball a second time
 	# (the midfield's lateral press, the attacker's drop-off, the defender's
@@ -923,6 +956,16 @@ func _find_open_space_target() -> Vector2:
 	# the X axis. That is the intended direction, but the per-branch constants
 	# were tuned against a static anchor and are worth a pass on the pitch.
 	var dynamic_anchor: Vector2 = formation_anchor.lerp(ball_pos, formation_ball_weight)
+	if pitch_boundary != null:
+		dynamic_anchor = FormationAnchorMath.get_dynamic_anchor_position(
+			role,
+			_current_team_phase(),
+			formation_anchor,
+			ball_pos,
+			formation_ball_weight,
+			pitch_boundary.get_centre_spot(),
+			pitch_boundary.pitch_size
+		)
 
 	match role:
 
