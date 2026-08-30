@@ -207,6 +207,20 @@ func start_penalty_for_practice(attacking_team: int, defending_team: int) -> voi
 	_start_penalty(attacking_team, defending_team)
 
 
+## Public entry point for kickoff. PitchScene has already repositioned everyone
+## and frozen the ball; this freezes the players, picks the taker, and parks the
+## ball on the centre spot. Unlike the other restarts this does NOT call
+## GameManager.start_set_piece() — PitchScene owns the KICKOFF phase via
+## GameManager.kickoff(), and a kickoff has no positioning/phase transition to
+## perform beyond what the taker mechanic already provides.
+func start_kickoff(team: int) -> void:
+	if _ball == null or _players == null:
+		return
+	_ball.reset_at(_boundary.get_centre_spot())
+	_ball.freeze()
+	_setup_taking_side(GameManager.MatchPhase.KICKOFF, team, _boundary.get_centre_spot())
+
+
 func _start_penalty(attacking_team: int, defending_team: int) -> void:
 	var goal_centre: Vector2 = _boundary.get_goal_centre(defending_team)
 	var attack_direction: float = 1.0 if defending_team == 0 else -1.0
@@ -280,6 +294,11 @@ func _assign_taker(team: int) -> void:
 	# team the human was already controlling; otherwise it stays a CPU restart
 	# and control returns to the human's own player once play resumes.
 	_taker_is_human = _previous_active_player != null and _previous_active_player.team == team
+	# Kickoff is a special case: control is always handed to the kicking side
+	# regardless of which team was controlled before the goal, so the human who
+	# just conceded is the one holding the pad for the restart.
+	if GameManager.current_phase == GameManager.MatchPhase.KICKOFF:
+		_taker_is_human = _team_has_human(team)
 	if _taker_is_human:
 		_current_taker.is_user_controlled = true
 		# Reuse the existing player-switch channel so the HUD (power meter,
@@ -367,6 +386,7 @@ func _activate_set_piece() -> void:
 			_current_taker.state_factory.transition_to(PlayerState.THROW_IN)
 		GameManager.MatchPhase.PENALTY_KICK:
 			_current_taker.state_factory.transition_to(PlayerState.PENALTY_KICK)
+		# KICKOFF and every other restart fall through to a charge kick.
 		_:
 			_current_taker.state_factory.transition_to(PlayerState.CHARGE_KICK)
 
@@ -448,3 +468,13 @@ func _opposing_team_of(player: HeavyPlayerController) -> int:
 	if player == null:
 		return 0
 	return 1 - player.team
+
+
+## Whether any player on `team` is human-controlled. Used for kickoff, where
+## control should follow the kicking side rather than whoever held pad before.
+func _team_has_human(team: int) -> bool:
+	for node: Node in _players.get_children():
+		var player := node as HeavyPlayerController
+		if player != null and player.team == team and player.is_user_controlled:
+			return true
+	return false

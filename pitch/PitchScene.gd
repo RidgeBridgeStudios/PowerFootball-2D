@@ -164,7 +164,13 @@ func _on_pregame_confirmed() -> void:
 
 	reset_for_kickoff()
 	GameManager.start_match()
-	GameManager.restart_play()
+	# Instead of restart_play() in the same breath (which collapsed
+	# KICKOFF → IN_PLAY before any player could freeze), route the very first
+	# kickoff through the same ceremony as every post-goal restart: KICKOFF is
+	# already the phase (start_match() sets it), and the coordinator freezes
+	# everyone, assigns TEAM_A's taker, and only resumes play once the ball is
+	# actually kicked.
+	_set_piece_coordinator.start_kickoff(GameManager.TEAM_A)
 
 
 ## Practice Arena setup: strips the pitch down to one human attacker and one
@@ -532,31 +538,32 @@ func _resolve_team_names() -> Array[String]:
 
 
 ## Places the ball on the centre spot and returns every player to their
-## formation anchor.
-##
-## TODO: unify with SetPieceCoordinator. Kickoff deliberately stays on this
-## older, simpler path rather than being routed through the coordinator: it
-## has no "out of bounds" or "foul" trigger to react to, always uses the same
-## fixed centre-spot placement, and — unlike the other restarts — happens
-## before any players exist to freeze/assign a taker from on the very first
-## call. Folding it in would mean special-casing the coordinator for a case it
-## does not otherwise need to handle; left as-is until there is a real reason
-## (e.g. a kickoff-specific taker/ready-up UI) to share the machinery.
+## formation anchor, then emits kickoff_confirmed so the manager directors
+## recompute the formation anchors (this is what makes an end swap stick).
+## The actual freeze → taker → confirm → kick flow now lives in
+## SetPieceCoordinator.start_kickoff(); the coordinator owns ending the dead
+## ball via _on_taker_state_changed() once the ball has actually been struck,
+## so reset_for_kickoff() never resumes play itself.
 func reset_for_kickoff() -> void:
 	ball.reset_at(boundary.get_centre_spot())
+
+	# Emit first: ManagerDirector._on_kickoff_confirmed() re-computes every
+	# brain's formation_anchor from the (already mirrored, for the second half)
+	# formation layout, so the reposition loop below must read the fresh
+	# anchors after the emit — not the stale ones from before the swap.
+	var kickoff_team: int = GameManager.TEAM_A
+	if GameManager.last_scoring_team >= 0:
+		kickoff_team = 1 - GameManager.last_scoring_team
+	GameEvents.kickoff_confirmed.emit(kickoff_team)
 
 	for node: Node in players.get_children():
 		var player := node as HeavyPlayerController
 		if player == null:
 			continue
-		if player.brain != null and player.brain.formation_anchor != Vector2.ZERO:
-			player.global_position = player.brain.formation_anchor
+		player.global_position = player.brain.formation_anchor
 		player.velocity = Vector2.ZERO
-
-	var kickoff_team: int = GameManager.TEAM_A
-	if GameManager.last_scoring_team >= 0:
-		kickoff_team = 1 - GameManager.last_scoring_team
-	GameEvents.kickoff_confirmed.emit(kickoff_team)
+		player.movement_intent = Vector2.ZERO
+		player.state_factory.transition_to(PlayerState.SET_PIECE_FREEZE)
 
 
 ## Camera feel. Kept here deliberately small.
@@ -833,17 +840,21 @@ func _swap_ends_and_restart() -> void:
 		var anchor: Vector2 = player.brain.formation_anchor
 		player.brain.formation_anchor = Vector2(2.0 * centre_x - anchor.x, anchor.y)
 
+	_start_kickoff_flow()
+
+
+## Begins the shared kickoff ceremony: reposition everyone, enter KICKOFF, and
+## hand the dead ball to SetPieceCoordinator to freeze/take/resume. play stays
+## paused until the coordinator's _on_taker_state_changed() fires restart_play()
+## after the ball has actually been struck.
+func _start_kickoff_flow() -> void:
 	reset_for_kickoff()
-	ball.unfreeze()
 	GameManager.kickoff()
-	GameManager.restart_play()
+	_set_piece_coordinator.start_kickoff(GameManager.TEAM_A if GameManager.last_scoring_team < 0 else 1 - GameManager.last_scoring_team)
 
 
 func _on_restart_timer_timeout() -> void:
-	reset_for_kickoff()
-	ball.unfreeze()
-	GameManager.kickoff()
-	GameManager.restart_play()
+	_start_kickoff_flow()
 
 
 func _on_match_ended(winner: int) -> void:
