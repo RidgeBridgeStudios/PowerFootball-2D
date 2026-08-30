@@ -167,6 +167,11 @@ var _frame_counter: int = 0
 ## Counts down while this player is committed to a pass played to them.
 var _pass_lock_timer: float = 0.0
 
+## The player who initiated the pass that set the lock. If ball possession
+## changes away from this player before the lock expires, the pass never
+## happened and the lock is cancelled immediately.
+var _pass_lock_passer: HeavyPlayerController = null
+
 ## The team that last touched the ball as of the previous physics frame.
 ## Used to detect possession changes and force an immediate re-evaluation.
 var _last_possession_team: int = -1
@@ -300,8 +305,18 @@ func _physics_process(delta: float) -> void:
 	# not re-decide mid-flight. Checked before the frame counter so the lock is
 	# never skipped by landing on a decision frame.
 	if _pass_lock_timer > 0.0:
-		_pass_lock_timer -= delta
-		player.movement_intent = _steer_toward_ball_direct()
+		# Interrupt the lock if the passer lost the ball before the kick fired —
+		# e.g. a tackle won possession first, or the passer entered a TackleState.
+		# Committing to a run onto a ball that was never kicked strands the
+		# receiver out of formation while an opponent breaks away.
+		if ball != null and ball.possessor != _pass_lock_passer:
+			_pass_lock_timer = 0.0
+			_pass_lock_passer = null
+		else:
+			_pass_lock_timer -= delta
+			if _pass_lock_timer <= 0.0:
+				_pass_lock_passer = null
+			player.movement_intent = _steer_toward_ball_direct()
 		return
 
 	_frame_counter += 1
@@ -1061,6 +1076,7 @@ func _steer_for_action() -> Vector2:
 				_cached_pass_target.get_node_or_null("PlayerBrain") as PlayerBrain
 			if target_brain != null:
 				target_brain._pass_lock_timer = PASS_LOCK_DURATION
+				target_brain._pass_lock_passer = ball.possessor
 
 			_cached_pass_target = null
 			current_action = &"MaintainFormation"
