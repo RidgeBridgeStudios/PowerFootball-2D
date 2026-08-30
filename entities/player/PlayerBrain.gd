@@ -1012,12 +1012,12 @@ func _should_chase_ball() -> bool:
 
 	# Maximum distance from the ball at which this player will ever chase,
 	# regardless of being closest. Keeps shape when play is far away.
-	var max_dist: float
-	match role:
-		Role.OUTFIELD_ATTACKER: max_dist = 380.0
-		Role.OUTFIELD_MIDFIELDER: max_dist = 320.0
-		Role.OUTFIELD_DEFENDER: max_dist = 260.0
-		_: return false
+	var max_dist: float = (player.role_config.max_chase_distance
+			if player != null and player.role_config != null
+			else 380.0 if role == Role.OUTFIELD_ATTACKER
+			else 320.0 if role == Role.OUTFIELD_MIDFIELDER
+			else 260.0 if role == Role.OUTFIELD_DEFENDER
+			else 0.0)
 
 	var ball_pos: Vector2 = ball.global_position
 	var my_dist: float = player.global_position.distance_to(ball_pos)
@@ -1042,6 +1042,19 @@ func _should_chase_ball() -> bool:
 			closer_count += 1
 		if closer_count >= budget:
 			return false
+
+	# Before committing to the chase, check the budget: the ball must sit
+	# within this role's max_chase_distance of the defensive line, or the
+	# chase is suppressed and the player holds shape instead. The
+	# press-trigger exemption is applied inside clamp_chase_target(), so a
+	# live trigger always passes through unchanged.
+	var anchor_x: float = world.defensive_line_x[player.team]
+	var _anchor: Vector2 = Vector2(anchor_x, player.global_position.y)
+	var clamped: Vector2 = clamp_chase_target(ball_pos, _anchor, player, world)
+	# If the clamped position is the same as ball_pos, the ball is within
+	# budget — proceed. Otherwise suppress the chase.
+	if clamped.distance_squared_to(ball_pos) > 1.0:
+		return false
 
 	return true
 
@@ -1245,7 +1258,34 @@ func _evaluate_off_ball_target(anchor: Vector2) -> Vector2:
 			best_score = blended
 			best_pos = candidate
 
+	# Chase-budget clamp: the blended target may never sit beyond this
+	# player's role budget from the anchor it was built around.
+	best_pos = clamp_chase_target(best_pos, anchor, player, world)
 	return best_pos
+
+
+const MAX_CHASE_DEFAULT: float = 250.0
+
+## Clamps `desired` so it never exceeds the player's chase budget from
+## `anchor`. Budget is read from role_config when assigned; falls back
+## to MAX_CHASE_DEFAULT. Does NOT clamp when a press trigger is active,
+## because a TRIGGER_PRESS player must be free to chase the ball carrier
+## without a radius constraint.
+func clamp_chase_target(
+		desired: Vector2,
+		anchor: Vector2,
+		player: HeavyPlayerController,
+		wm: MatchWorldModel
+) -> Vector2:
+	if wm.press_trigger_active:
+		return desired
+	var budget: float = MAX_CHASE_DEFAULT
+	if player.role_config != null:
+		budget = player.role_config.max_chase_distance
+	var offset: Vector2 = desired - anchor
+	if offset.length_squared() > budget * budget:
+		return anchor + offset.normalized() * budget
+	return desired
 
 
 ## Returns the world-space position this player should move to when NOT chasing
