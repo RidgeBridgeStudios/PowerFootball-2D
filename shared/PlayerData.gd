@@ -24,9 +24,12 @@ extends Resource
 
 @export var mass: float = 75.0
 @export var top_speed: float = 210.0
-@export var acceleration_time: float = 0.65
-@export var friction_time: float = 0.35
-@export var turning_penalty: float = 0.75
+## FM2D compromise: baseline acceleration time reduced to 0.22s for snappier takeoff without feeling weightless.
+@export var acceleration_time: float = 0.22
+## FM2D compromise: friction time reduced to 0.12s for crisp stopping distance while preserving natural roll-out.
+@export var friction_time: float = 0.12
+## FM2D compromise: turning penalty reduced to 0.35 so turns feel responsive while full reversals still bleed momentum.
+@export var turning_penalty: float = 0.35
 @export var sprint_multiplier: float = 1.45
 
 ## --- Stamina -------------------------------------------------------------------
@@ -79,4 +82,22 @@ static func make_default(player_name: String, shirt_number: int, position_role: 
 	d.player_name = player_name
 	d.shirt_number = shirt_number
 	d.position_role = position_role
+	d.apply_role_defaults(position_role)
 	return d
+
+
+## Applies FM2D compromise physics defaults based on position archetype.
+func apply_role_defaults(role: String) -> void:
+	match role.to_upper():
+		"LW", "RW", "AM", "LM", "RM", "CAM", "LAM", "RAM":
+			# Wingers / attacking mids: agile acceleration (0.15s) and low turning penalty (0.25) for 1v1 take-ons.
+			acceleration_time = 0.15
+			turning_penalty = 0.25
+		"CB", "DM", "CDM", "GK":
+			# Centre-backs / defensive mids / goalkeeper: heavier acceleration (0.32s) and higher penalty (0.50) to anchor defence.
+			acceleration_time = 0.32
+			turning_penalty = 0.50
+		_:
+			# Central mids / strikers / fullbacks / default: balanced baseline compromise (0.22s accel, 0.35 turning penalty).
+			acceleration_time = 0.22
+			turning_penalty = 0.35

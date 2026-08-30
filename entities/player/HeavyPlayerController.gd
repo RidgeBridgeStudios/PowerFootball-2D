@@ -59,13 +59,16 @@ signal possession_lost
 @export var top_speed: float = 240.0
 ## Seconds to reach top speed from a standstill, at the neutral 70kg reference
 ## mass. A 75kg player takes ~0.43s, a 90kg player ~0.52s — mass scales it.
-@export var acceleration_time: float = 0.40
+## FM2D compromise: reduced to 0.22s for snappier burst while preserving mass-scaled inertia.
+@export var acceleration_time: float = 0.22
 ## Seconds to coast to a stop from top speed with no input, at the reference
 ## mass. Heavier players stop faster once they stop driving forward (~29px of
 ## roll-out at 75kg) but are slower to get going again.
-@export var friction_time: float = 0.22
+## FM2D compromise: reduced to 0.12s for crisper deceleration without feeling weightless.
+@export var friction_time: float = 0.12
 ## 0.0 = turn on a dime, 1.0 = a full reversal kills all acceleration.
-@export_range(0.0, 1.0) var turning_penalty_factor: float = 0.55
+## FM2D compromise: reduced to 0.35 so turns feel responsive but committed reversals still bleed momentum.
+@export_range(0.0, 1.0) var turning_penalty_factor: float = 0.35
 ## Top-speed multiplier while action_sprint is held and stamina remains.
 @export var sprint_multiplier: float = 1.45
 
@@ -101,12 +104,14 @@ const ACTION_TEXT_COOLDOWN: float = 0.25
 const NEUTRAL_MASS: float = 70.0
 ## Below this speed a turn costs nothing — you cannot "bleed momentum" you do
 ## not have, and applying the penalty at rest makes starting off feel mushy.
-const TURN_EVAL_SPEED: float = 10.0
+## FM2D compromise: lowered to 6.0 so turn momentum penalties engage earlier during lower-speed changes of direction.
+const TURN_EVAL_SPEED: float = 6.0
 ## Facing only updates above this speed, so a player coasting to a halt does not
 ## spin as the velocity vector decays into noise.
 const FACING_UPDATE_SPEED: float = 15.0
 ## Floor on effective acceleration so a full 180 still eventually resolves.
-const MIN_ACCELERATION_RATIO: float = 0.1
+## FM2D compromise: raised to 0.18 to prevent prolonged dead-stops on reversals while keeping defenders favored on anticipated cuts.
+const MIN_ACCELERATION_RATIO: float = 0.18
 
 ## This player's slot in MatchWorldModel, or -1 if registration was refused
 ## (roster already full).
