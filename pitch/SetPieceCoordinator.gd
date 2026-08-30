@@ -11,6 +11,12 @@
 ## so it can be reasoned about (and later tested) independently of PitchScene's
 ## layout.
 ##
+## For a human-controlled free kick or penalty, action_switch cycles the taker
+## through the rest of the attacking side (nearest-to-spot first) while
+## confirmation is still pending — see _cycle_taker(). PitchScene defers
+## action_switch to us during those two phases so the input isn't consumed
+## twice (see PitchScene._process()).
+##
 ## Depends on: GameManager, GameEvents (autoloads), PitchBoundary, Pseudo3DBall,
 ##             HeavyPlayerController, PlayerState (state name constants).
 ## Exposes: bind(ball, boundary, players), handle_out_of_bounds(), handle_foul(),
@@ -49,6 +55,18 @@ var _current_taker: HeavyPlayerController = null
 var _previous_active_player: HeavyPlayerController = null
 var _awaiting_confirmation: bool = false
 
+## Attacking-team players eligible to take the current restart, nearest to the
+## spot first (index 0 is who _assign_taker() originally picked). Parallel to
+## _taker_origins: each candidate's position at freeze time, before anyone was
+## moved onto the spot, so _cycle_taker() can hand a deselected taker back
+## their own spot instead of leaving them stacked on the ball.
+var _taker_candidates: Array[HeavyPlayerController] = []
+var _taker_origins: Array[Vector2] = []
+var _taker_index: int = 0
+## True only when this restart belongs to the human's team, i.e. cycling is
+## meaningful. A CPU taker is fixed to whoever _assign_taker() picked.
+var _taker_is_human: bool = false
+
 @onready var _confirmation_timer: Timer = $ConfirmationTimer
 
 
@@ -68,6 +86,23 @@ func _process(_delta: float) -> void:
 	if _current_taker.is_user_controlled and Input.is_action_just_pressed(&"action_kick"):
 		_confirmation_timer.stop()
 		_activate_set_piece()
+		return
+	if can_switch_taker() and Input.is_action_just_pressed(&"action_switch"):
+		_cycle_taker(1)
+
+
+## Whether action_switch should cycle the taker right now. Free kicks and
+## penalties only — the other three restarts have no CPU-facing reason to
+## expose it, and the human's own taker is always index 0 in _taker_candidates.
+func can_switch_taker() -> bool:
+	if not _awaiting_confirmation or not _taker_is_human:
+		return false
+	if _taker_candidates.size() <= 1:
+		return false
+	return (
+		GameManager.current_phase == GameManager.MatchPhase.FREE_KICK
+		or GameManager.current_phase == GameManager.MatchPhase.PENALTY_KICK
+	)
 
 
 func get_taker() -> HeavyPlayerController:
@@ -215,19 +250,25 @@ func _freeze_all_players() -> void:
 
 func _assign_taker(team: int) -> void:
 	var spot: Vector2 = GameManager.set_piece_position
-	var best: HeavyPlayerController = null
-	var best_distance: float = INF
 
+	_taker_candidates.clear()
+	_taker_origins.clear()
 	for node: Node in _players.get_children():
 		var player := node as HeavyPlayerController
 		if player == null or player.team != team:
 			continue
-		var distance: float = player.global_position.distance_to(spot)
-		if distance < best_distance:
-			best_distance = distance
-			best = player
+		_taker_candidates.append(player)
+	_taker_candidates.sort_custom(func(a: HeavyPlayerController, b: HeavyPlayerController) -> bool:
+		return a.global_position.distance_to(spot) < b.global_position.distance_to(spot)
+	)
+	# Recorded after sorting, in the same order, so index i of each array
+	# always describes the same player — this is each candidate's own spot
+	# at freeze time, before anyone is moved onto the ball.
+	for candidate: HeavyPlayerController in _taker_candidates:
+		_taker_origins.append(candidate.global_position)
 
-	_current_taker = best
+	_taker_index = 0
+	_current_taker = _taker_candidates[0] if not _taker_candidates.is_empty() else null
 	if _current_taker == null:
 		return
 
@@ -238,12 +279,35 @@ func _assign_taker(team: int) -> void:
 	# The taker is human-controlled only when the set piece belongs to the
 	# team the human was already controlling; otherwise it stays a CPU restart
 	# and control returns to the human's own player once play resumes.
-	if _previous_active_player != null and _previous_active_player.team == team:
+	_taker_is_human = _previous_active_player != null and _previous_active_player.team == team
+	if _taker_is_human:
 		_current_taker.is_user_controlled = true
 		# Reuse the existing player-switch channel so the HUD (power meter,
 		# stamina bar) and action_switch follow the new controlled player
 		# rather than going stale on whoever it was tracking before.
 		GameEvents.player_switched.emit(_current_taker)
+
+
+## Swaps the taker for the next (direction +1) or previous (-1) candidate,
+## wrapping around. Only ever called when can_switch_taker() is true, so the
+## restart is a human free kick or penalty and there is somebody to switch to.
+func _cycle_taker(direction: int) -> void:
+	var spot: Vector2 = GameManager.set_piece_position
+
+	var old_taker: HeavyPlayerController = _current_taker
+	old_taker.global_position = _taker_origins[_taker_index]
+	old_taker.velocity = Vector2.ZERO
+	old_taker.is_user_controlled = false
+
+	_taker_index = wrapi(_taker_index + direction, 0, _taker_candidates.size())
+	_current_taker = _taker_candidates[_taker_index]
+
+	_current_taker.global_position = spot
+	_current_taker.velocity = Vector2.ZERO
+	_current_taker.state_factory.transition_to(PlayerState.SET_PIECE_FREEZE)
+	_current_taker.is_user_controlled = true
+
+	GameEvents.player_switched.emit(_current_taker)
 
 
 ## Moves opposing CPU players back to a legal distance. Full wall-building
