@@ -1003,11 +1003,120 @@ func _current_team_phase() -> FormationAnchorMath.TeamPhase:
 	return FormationAnchorMath.TeamPhase.OUT_OF_POSSESSION
 
 
+## Per-role balance between staying tight to whatever tactical point the
+## caller hands to _evaluate_off_ball_target() (0.0) and drifting toward the
+## most open nearby pocket of space (1.0). This is the single place role
+## identity is expressed for off-ball positioning — defenders barely move off
+## their tactical point, attackers are freer to drift into space. TUNE HERE.
+const ROLE_SPACE_ALPHA: Dictionary = {
+	Role.OUTFIELD_DEFENDER: 0.20,
+	Role.OUTFIELD_MIDFIELDER: 0.40,
+	Role.OUTFIELD_ATTACKER: 0.65,
+}
+
+## Fan of candidate offsets sampled around the anchor point handed to
+## _evaluate_off_ball_target(), scaled per-role by ROLE_SPACE_ALPHA (a higher
+## alpha searches a wider radius) so attackers explore meaningfully more space
+## than defenders without a second tunable. Kept fixed and small — seven
+## points, one of them the anchor itself — so the evaluation stays a bounded
+## O(7) world-model reads per decision tick rather than growing with pitch size.
+const OFF_BALL_CANDIDATE_OFFSETS: Array[Vector2] = [
+	Vector2.ZERO,
+	Vector2(70.0, 0.0), Vector2(-70.0, 0.0),
+	Vector2(0.0, 70.0), Vector2(0.0, -70.0),
+	Vector2(50.0, 50.0), Vector2(-50.0, -50.0),
+]
+
+## Distance at which a candidate's openness score is already saturated at
+## 1.0 — matches the scale _find_channel_run_target() reads off
+## nearest_opponent_dist_to() so the two space heuristics feel consistent.
+const OFF_BALL_OPENNESS_RADIUS: float = 220.0
+## Distance below which a teammate standing near a candidate counts against it.
+const OFF_BALL_CROWD_RADIUS: float = 70.0
+## Distance at which a candidate's anchor-proximity score has decayed to 0.0.
+## Comfortably above the largest offset in OFF_BALL_CANDIDATE_OFFSETS (~92px
+## at the widest role radius) so every candidate still gets a graded score
+## rather than several tying at the floor.
+const OFF_BALL_ANCHOR_NORM: float = 100.0
+
+
+## Off-ball target evaluation: given a tactical anchor point [anchor] — already
+## resolved by the caller (a dynamic formation anchor, a defensive press point,
+## whatever this role's positioning logic decided is "home" for this tick) —
+## samples a small fan of nearby candidates and blends two scores per
+## candidate: proximity to [anchor], and openness (distance to the nearest
+## opponent, penalised for teammate crowding). The two are blended by this
+## player's ROLE_SPACE_ALPHA: a defender's low alpha means the anchor score
+## dominates and the player barely drifts, while an attacker's high alpha lets
+## a nearby open pocket outscore sitting exactly on the anchor.
+##
+## Reuses MatchWorldModel.nearest_opponent_dist_to() — the same allocation-free
+## openness primitive _find_channel_run_target() already uses — so this adds no
+## new spatial-query pattern to the file, and callers pass in whatever anchor
+## their existing role/phase logic already computed (formation anchor, ball
+## press point, drop-off target) rather than this function reaching for one
+## itself.
+func _evaluate_off_ball_target(anchor: Vector2) -> Vector2:
+	if player == null:
+		return anchor
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return anchor
+
+	var alpha: float = float(ROLE_SPACE_ALPHA.get(role, 0.35))
+	# Wider search radius for roles freer to roam: alpha 0.20 -> 0.6x, 0.65 -> 1.3x.
+	var radius_scale: float = lerpf(0.6, 1.3, alpha)
+
+	var has_bounds: bool = pitch_boundary != null
+	var bounds: Rect2 = pitch_boundary.get_pitch_rect() if has_bounds else Rect2()
+
+	var best_pos: Vector2 = anchor
+	var best_score: float = -INF
+
+	for base_offset: Vector2 in OFF_BALL_CANDIDATE_OFFSETS:
+		var candidate: Vector2 = anchor + base_offset * radius_scale
+		if has_bounds:
+			candidate.x = clampf(candidate.x, bounds.position.x + 20.0, bounds.end.x - 20.0)
+			candidate.y = clampf(candidate.y, bounds.position.y + 20.0, bounds.end.y - 20.0)
+
+		var anchor_score: float = 1.0 - clampf(
+			candidate.distance_to(anchor) / OFF_BALL_ANCHOR_NORM, 0.0, 1.0)
+
+		var min_opp_dist: float = world.nearest_opponent_dist_to(candidate, player.team)
+		var space_score: float = clampf(min_opp_dist / OFF_BALL_OPENNESS_RADIUS, 0.0, 1.0)
+
+		var teammate_penalty: float = 0.0
+		for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+			var mate: HeavyPlayerController = world.player_nodes[i]
+			if not is_instance_valid(mate) or mate == player:
+				continue
+			if world.player_teams[i] != player.team:
+				continue
+			var td: float = candidate.distance_to(world.player_positions[i])
+			if td < OFF_BALL_CROWD_RADIUS:
+				teammate_penalty += (OFF_BALL_CROWD_RADIUS - td) / OFF_BALL_CROWD_RADIUS
+		space_score = clampf(space_score - teammate_penalty * 0.3, 0.0, 1.0)
+
+		var blended: float = lerpf(anchor_score, space_score, alpha)
+		if blended > best_score:
+			best_score = blended
+			best_pos = candidate
+
+	return best_pos
+
+
 ## Returns the world-space position this player should move to when NOT chasing
 ## the ball. The result is role-specific and possession-aware:
 ##   - When team HAS ball: attackers run channels, mids hold a passing angle
 ##   - When team DOES NOT have ball: attackers drop off, mids track the ball
 ##     laterally, defenders mark the nearest threat or hold the line
+## Every non-run-specific branch below (i.e. everything except the attacker's
+## channel run and the midfielder's passing-triangle angle, both of which are
+## already candidate-scored space searches in their own right) routes its
+## computed tactical point through _evaluate_off_ball_target() so the final
+## off-ball target is never a bare anchor/ball lerp — it is always nudged
+## toward whichever nearby candidate best balances that role's anchor
+## discipline against open space.
 func _find_open_space_target() -> Vector2:
 	if ball == null or player == null:
 		return formation_anchor
@@ -1054,7 +1163,7 @@ func _find_open_space_target() -> Vector2:
 				# Maintain a threatening position so the team can counter.
 				var drop_target: Vector2 = dynamic_anchor
 				drop_target = drop_target.lerp(ball_pos, 0.20)
-				return drop_target
+				return _evaluate_off_ball_target(drop_target)
 
 		Role.OUTFIELD_MIDFIELDER:
 			if has_ball:
@@ -1069,7 +1178,7 @@ func _find_open_space_target() -> Vector2:
 				# tuning still shapes how far the midfield presses across.
 				var defend_pos: Vector2 = dynamic_anchor
 				defend_pos.x = lerpf(defend_pos.x, ball_pos.x, formation_ball_weight)
-				return defend_pos
+				return _evaluate_off_ball_target(defend_pos)
 
 		Role.OUTFIELD_DEFENDER:
 			if has_ball:
@@ -1077,7 +1186,7 @@ func _find_open_space_target() -> Vector2:
 				# drift forward. Compress slightly to offer a safe back-pass.
 				var safe_pos: Vector2 = dynamic_anchor
 				safe_pos = safe_pos.lerp(ball_pos, 0.08)
-				return safe_pos
+				return _evaluate_off_ball_target(safe_pos)
 			else:
 				# Mark the nearest opposing attacker who is in a dangerous
 				# position (forward of the ball). If no threat, hold the line.
@@ -1087,7 +1196,7 @@ func _find_open_space_target() -> Vector2:
 					# of them, but cutting the passing lane.
 					var goal_centre: Vector2 = dynamic_anchor  # anchor IS the defensive line
 					return threat.global_position.lerp(goal_centre, 0.45)
-				return dynamic_anchor
+				return _evaluate_off_ball_target(dynamic_anchor)
 
 		_:
 			return dynamic_anchor
