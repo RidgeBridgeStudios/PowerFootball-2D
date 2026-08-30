@@ -7,10 +7,11 @@ Autoloads are the backbone of PowerFootball-2D's layered architecture. They init
 1. **MatchWorldModel** — Spatial cache for all players and ball
 2. **GameEvents** — Signal bus for inter-system events
 3. **GameManager** — Match phase, score, clock, set piece coordination
-4. **DataLoader** — JSON parsing; player/manager/team instantiation
-5. **RefereeLoader** — Referee database
-6. **ManagerLoader** — Manager database and formation library
-7. **InputHelper** — Player input mapping
+4. **MatchStatsTracker** — Per-match team stats and per-player ratings event accumulator
+5. **DataLoader** — JSON parsing; player/manager/team instantiation
+6. **RefereeLoader** — Referee database
+7. **ManagerLoader** — Manager database and formation library
+8. **InputHelper** — Player input mapping
 
 Do not change this order without updating CLAUDE.md and all dependent systems.
 
@@ -43,12 +44,13 @@ Do not change this order without updating CLAUDE.md and all dependent systems.
 **Contract:** Central signal bus. No other system references each other directly; all communication routes here.
 
 **Critical Signals:**
-- `ball_struck(kicker, impulse_xy, impulse_z)` — Any kick action
+- `ball_struck(kicker, speed, charge_ratio, is_shot)` — Any kick action
 - `goal_scored(team, scorer)` — Ball in goal (scorer is last_touched_by; scorer.team != team is an own goal)
 - `foul_committed(offender, victim, foul_type)` — Player rule violation
 - `match_phase_changed(new_phase)` — Phase transitions
-- `player_substituted(team, off_index, on_index)` — Reserve entry
+- `substitution_made(team, player_out_idx, player_in_idx)` — Reserve entry
 - `manager_formation_changed(team, formation_name)` — Tactical shift (emitted by ManagerDirector, not ManagerLoader)
+- `formation_anchors_changed(team, new_anchors)` — World-space anchor updates for AI steering
 
 **DO NOT:**
 - Reference other autoloads or scene nodes directly from GameEvents
@@ -63,20 +65,37 @@ Do not change this order without updating CLAUDE.md and all dependent systems.
 
 **Exports:**
 - `match_clock: float` — Seconds elapsed (for UI and match flow)
-- `home_score: int`, `away_score: int` — Current score
-- `current_phase: GameManager.MatchPhase` — Enum (KICKOFF, PLAYING, HALF_TIME, FULL_TIME, etc.)
-- `half: int` — Current half (1 or 2)
+- `score: Array[int]` — Current score `[home, away]`
+- `current_phase: GameManager.MatchPhase` — Enum (PREGAME, KICKOFF, IN_PLAY, HALF_TIME, FULL_TIME, etc.)
+- `match_duration: float` — Full-time duration (default 300.0s)
 
 **Responsibilities:**
 - Drive `GameEvents.match_phase_changed` on phase transitions
 - Update clock and emit score changes
-- Coordinate set pieces via `SetPieceCoordinator.handle_*()`
+- Coordinate set pieces and penalties via `SetPieceCoordinator`
 - Call `_end_match()` when time expires
 
 **DO NOT:**
 - Make gameplay decisions (fouls, offsides, possession). That is ref/AI territory.
 - Directly modify player state
 - Emit or consume non-match-phase signals
+
+---
+
+### MatchStatsTracker.gd
+
+**Contract:** Per-match team aggregate stats and per-player event tracker for full-time ratings.
+
+**Responsibilities:**
+- Samples possession every 30 physics ticks (`POSSESSION_SAMPLE_INTERVAL = 30`) via `MatchWorldModel.possessor_index`
+- Accumulates team stats: shots (total/on target), passes (attempted/completed), fouls, cards, corners, offsides
+- Tracks per-player events keyed by `team * 1000 + squad_index`
+- Computes end-of-match player ratings (1.0–10.0) via `PlayerRatingCalculator.gd`
+- Provides match summary statistics to `MatchStatsUI.gd`
+
+**DO NOT:**
+- Query scene tree during possession sampling
+- Mutate PlayerData directly; provide rating calculations via `compute_all_ratings()`
 
 ---
 

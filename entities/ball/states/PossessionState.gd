@@ -22,6 +22,3 @@ func process(ball: Pseudo3DBall, _delta: float) -> StringName:
 	if ball.possessor == null:
 		return GROUND_ROLL
 	return &""
-
-	# TODO: track possession duration here and feed it to the match stats panel,
-	# plus a shielding modifier that resists tackles from behind.

@@ -96,15 +96,18 @@ The repo already moved from a skeleton to a substantial football simulation foun
 
 ## Immediate Match Completeness
 
-Several core football systems are still absent or only stubbed. `GameEvents.ball_out_of_bounds` exists but is never emitted, which means true touchline exits do not currently drive throw-ins, corners, or goal kicks. Offside detection is absent. `AerialState` exists in concept but does not yet drive real heading behavior. Goalkeepers can intercept and react, but do not yet have full dive commitment, hands logic, punch logic, or dropped-ball resolution.
+The core football foundation is functional, with out-of-bounds boundary routing, offside detection, goalkeeper dive commitment, substitutions and reserve bench management, referee cards, penalty shootouts, match stats, and dynamic phase-dependent formation anchors operational in Phase 1.
 
-Substitutions and reserves are missing, which is one of the biggest practical gameplay gaps. Yellow and red cards are also missing even though referee tracking fields already exist. Added time, extra time, and penalty shootout flow are not present. Audio, HUD theming, and end-of-match stats and scoreboard presentation are still absent.
+The remaining match-level gameplay features to round out full on-pitch simulation include:
+- **Injury system:** Physical knocks, stamina degradation under heavy fatigue, and forced tactical substitutions.
+- **AerialState & Heading Resolution:** Complete contest physics and directional header placement from crosses and set pieces.
+- **Through-Ball Lead Targeting:** Anticipatory passes into open space ahead of a sprinting teammate's vector.
 
 ## Deep Simulation Gaps
 
-The game's long-term identity depends on systems that are still unbuilt. These include a persistent relationship trust graph, a Power Pro-style player trait system, star-player reputation and treatment, off-pitch life events, a `WorldEvent` log, and a real career-mode calendar with league progression and transfer logic.
+The game's long-term identity depends on systems that are still in progress. These include a persistent relationship trust graph, a Power Pro-style player trait system, star-player reputation and treatment, off-pitch life events, a `WorldEvent` log, and a real career-mode calendar with league progression and transfer logic.
 
-The data layer also needs to grow. A formal `docs/json-schema.md` is needed so real clubs, players, managers, relationships, traits, preferences, and biographies can be imported systematically. The repo also still needs a root `llms.txt`, better directory-level readmes, and broader AI-agent orientation support.
+The data layer has expanded with `league.json`, `managers.json`, and `referees.json`, validated by `tools/verify_db.py`, with room for deeper relational metadata, biography seeds, and career contracts.
 
 ---
 
@@ -182,13 +185,9 @@ extends Resource
 @export var resolution_choice: int = -1
 ```
 
-This event log should feed `PressOffice`, manager decisions, player trust updates, and eventually season-long storylines. The event system is the Dwarf Fortress announcement feed of this project, translated into football logic.
-
 ## JSON Schema Direction
 
 The repo should define a complete schema for player and manager JSON authoring. That schema needs to cover football attributes, personality traits, relationships, style preferences, biography, contract data, and manager philosophy so future imports of real teams are predictable and AI-agent-friendly.
-
-A representative player entry should include role, physical tuning, decision attributes, authored trait strings, relationships keyed by teammate identity, biography, and contract metadata. Managers should extend the existing data model with cultural preference, player relations, and press personality seed text.
 
 ---
 
@@ -198,48 +197,49 @@ The strongest roadmap is to move in phases where each phase produces a meaningfu
 
 ```text
 PHASE 1 — Gameplay completeness
-  [ ] 1. Substitutions + reserves UI
-  [ ] 2. Yellow/red card implementation
-  [ ] 3. Offside detection
+  [x] 1. Substitutions + reserves UI
+  [x] 2. Yellow/red card implementation
+  [x] 3. Offside detection
   [ ] 4. Injury system
-  [ ] 5. Match stats screen + full-time scoreboard
-  [ ] 6. End-of-match player ratings
-  [ ] 7. Goalkeeper dive commitment
+  [x] 5. Match stats screen + full-time scoreboard
+  [x] 6. End-of-match player ratings
+  [x] 7. Goalkeeper dive commitment
   [ ] 8. AerialState / heading resolution
-  [ ] 9. Penalty shootout flow
+  [x] 9. Penalty shootout flow
   [ ] 10. Through-ball lead targeting
+  [x] 11. Phase-dependent dynamic formation anchors
 
 PHASE 2 — Personality and traits
-  [ ] 11. Player trait bitmask on PlayerData
-  [ ] 12. Trait effects wired into existing systems
-  [ ] 13. overall_rating and reputation derived fields
-  [ ] 14. Star-marking utility scorer
-  [ ] 15. Relationship trust graph
-  [ ] 16. Trust multiplier on pass utility
-  [ ] 17. Trust decay/gain events
+  [ ] 12. Player trait bitmask on PlayerData
+  [ ] 13. Trait effects wired into existing systems
+  [ ] 14. overall_rating and reputation derived fields
+  [ ] 15. Star-marking utility scorer
+  [ ] 16. Relationship trust graph
+  [x] 17. Trust multiplier on pass utility
+  [x] 18. Trust decay/gain events
 
 PHASE 3 — Club world
-  [ ] 18. WorldEvent struct and WorldEventLog autoload
-  [ ] 19. Substitution reaction events
-  [ ] 20. Training incidents and dressing-room confrontations
-  [ ] 21. Street football / nightlife / media events
-  [ ] 22. PressOffice consumption of WorldEvent log
-  [ ] 23. Manager response system
+  [ ] 19. WorldEvent struct and WorldEventLog autoload
+  [ ] 20. Substitution reaction events
+  [ ] 21. Training incidents and dressing-room confrontations
+  [ ] 22. Street football / nightlife / media events
+  [ ] 23. PressOffice consumption of WorldEvent log
+  [ ] 24. Manager response system
 
 PHASE 4 — Career mode
-  [ ] 24. Career calendar and scheduling
-  [ ] 25. League table persistence
-  [ ] 26. Transfer window system
-  [ ] 27. Season progression and contracts
-  [ ] 28. Staff system
-  [ ] 29. Manager Career mode unlock
+  [ ] 25. Career calendar and scheduling
+  [ ] 26. League table persistence
+  [ ] 27. Transfer window system
+  [ ] 28. Season progression and contracts
+  [ ] 29. Staff system
+  [ ] 30. Manager Career mode unlock
 
 PHASE 5 — Polish
-  [ ] 30. Audio system
-  [ ] 31. Sprite and action animation
-  [ ] 32. HUD theme and custom fonts
-  [ ] 33. Local 2-player support
-  [ ] 34. Real squad JSON database
+  [ ] 31. Audio system
+  [ ] 32. Sprite and action animation
+  [ ] 33. HUD theme and custom fonts
+  [ ] 34. Local 2-player support
+  [ ] 35. Real squad JSON database
 ```
 
 This order is better than jumping directly to career mode because it preserves the core rule that the match itself must already feel valid before the world around it becomes complex. The soul of the project depends on both, but the match foundation comes first.

@@ -24,38 +24,50 @@ HeavyPlayerController (CharacterBody2D)
 
 **Contract:** Kinematic weight model. Smooth acceleration, friction, turning penalties, stamina drain. All velocity changes route through `move_and_slide()`.
 
-**Critical Exports:**
-- `max_acceleration: float` — Base acceleration (default ~210 px/s²)
-- `max_speed: float` — Top speed (default ~210 px/s)
-- `turning_penalty_curve: Curve` — θ → penalty multiplier
-- `current_stamina: float` — 0.0 to 1.0
+**Critical Exports & Defaults:**
+- `player_mass: float = 75.0` — Mass in kg (70kg neutral reference; scales acceleration and friction)
+- `top_speed: float = 240.0` — Pixels per second at full stick deflection
+- `acceleration_time: float = 0.22` — Seconds to reach top speed from standstill
+- `friction_time: float = 0.12` — Seconds to coast to a stop from top speed with no input
+- `turning_penalty_factor: float = 0.35` — Turning penalty multiplier (0.0 = snappy, 1.0 = heavy penalty)
+- `sprint_multiplier: float = 1.45` — Speed multiplier during sprint
+- `stamina_max: float = 100.0`, `stamina_drain_rate: float = 18.0`, `stamina_recover_rate: float = 9.0`
+- `stamina_sprint_unlock: float = 20.0` — Threshold to unlock sprint after exhaustion
+- `stamina: float` — Current stamina level (0.0 to 100.0)
 
 **Key Methods:**
-- `_physics_process(delta)` — Applies weight; moves; handles collisions
-- `_apply_input_movement(input_vec)` — Human input → movement_intent
-- `apply_kick(impulse_xy, impulse_z, kicker)` — Kicks ball; releases dribble possession
-- `get_current_top_speed()` → `float` — Used by AI intercept solver
+- `apply_kinematic_weight(input_dir, delta)` — Applies weight curve, turning penalty, and momentum
+- `apply_external_impulse(impulse)` — Knockback from tackles, aerial duels, and collisions
+- `apply_player_data(p, reset_stamina)` — Re-applies squad attributes during substitutions
+- `get_current_top_speed()` → `float` — Returns sprinting or base top speed
+- `get_ball_in_foot_range()` / `get_ball_in_aerial_range()` → `Pseudo3DBall`
 
 **Key Signals:**
-- Emits to GameEvents (ball_struck, tackle_won, etc.) via state machines
+- `stamina_state_changed(ratio: float)`
+- `possession_gained` / `possession_lost`
 
 **Movement Contract:**
-- Velocity is NEVER directly assigned. Always use `move_toward(v_current, v_target, a_eff * delta)`
-- Turning penalty: `a_eff = a_base * (1.0 - penalty_curve(θ / π))`
-- No snappy turns; momentum persists
+- Velocity is NEVER directly assigned. Always use `move_toward(target_velocity, rate * delta)`
+- Turning penalty:
+  ```gdscript
+  turn_severity = clampf((1.0 - dot_heading) * 0.5, 0.0, 1.0)
+  penalty = turning_penalty_factor * turn_severity
+  effective_accel = base_acceleration * maxf(1.0 - penalty, MIN_ACCELERATION_RATIO)
+  ```
+- Sharp reversals and braking engage scaled friction brake rate.
 
 **Physics Layers:**
-- Masks layers 1 (terrain) + 2 (other players) ONLY
-- MUST NOT mask layer 3 (ball) — zeroes velocity in solver
+- Masks Layer 1 (`PitchWorld`) + Layer 2 (`PlayerBodies`) ONLY.
+- MUST NOT mask Layer 3 (`BallPhysicsBody`) — zeroes velocity in solver.
 
 **Stamina:**
-- Drain rate: sprint > running > idle
-- Recovery: faster at rest, slower while moving
-- Affects movement speed and action availability (tackles, sprints)
+- Drains while sprinting (`wants_sprint` and moving).
+- Exhaustion latches `sprint_locked = true` and emits `GameEvents.stamina_depleted`.
+- Recovers while jogging or idle; unlocks sprint once stamina $\ge 20.0$.
 
 **DO NOT:**
 - Access Ball or other players directly; use MatchWorldModel queries
-- Set velocity outside of move_toward() patterns
+- Set velocity outside of `move_toward()` patterns
 - Mask layer 3 in collision matrix
 - Query scene tree for spatial data; that is MatchWorldModel's job
 
@@ -67,30 +79,31 @@ HeavyPlayerController (CharacterBody2D)
 
 **Key Exports:**
 - `player_index: int` — World index (set by HeavyPlayerController._ready())
-- `decision_interval: float` — Lerped by ManagerDirector (0.15 to 0.35s)
-- `role: PlayerRole` — Enum (GOALKEEPER, DEFENDER, MIDFIELDER, OUTFIELD_ATTACKER); affects utility scoring
+- `decision_interval: float` — Retained for backward-compat; setter drives `set_pressing_intensity()`
+- `role: Role` — Enum (`OUTFIELD_ATTACKER`, `OUTFIELD_MIDFIELDER`, `OUTFIELD_DEFENDER`, `GOALKEEPER`)
+- `role_config: PlayerRoleConfig` — Resource with `anchor_weight` (1.0 = rigid, 0.0 = free roam; roam alpha = `1.0 - anchor_weight`)
 
 **Time-Slicing (Stagger):**
-- Jitter formula: `ShouldUpdate(i, f) = ((i+f) % 15 == 0)`
-- Frame `f` is global `MatchWorldModel.frame_counter`
-- Spreads CPU AI across 15 frames; no 22-player decision spike
+- Jitter formula: `ShouldUpdate(i, f) = ((i + f) % UPDATE_INTERVAL == 0)`
+- Frame `f` is local `_frame_counter` synced to `MatchWorldModel`
+- Spreads CPU AI across 15 frames (`UPDATE_INTERVAL = 15`); max 2 brains think per tick
 
 **Decision Loop (_physics_process if ShouldUpdate):**
 1. Build `UtilityContext` from MatchWorldModel positions
-2. Score actions: Pass, Chase, Space, Dribble, Formation
+2. Score actions: Pass, Chase, Space, Dribble, Formation, Shoot
 3. Pick highest-scoring action
 4. Steer toward target via `movement_intent`
 
 **Key Methods:**
-- `_evaluate_pass_target()` → Candidate teammate + score
-- `_evaluate_chase_ball()` → Ball position + score
-- `_evaluate_space_run()` → Optimal off-ball space + score
+- `_find_best_pass_target()` → Candidate teammate + score via `PassUtilityScorer`
+- `_score_chase()` → Ball position + pressing trigger bonuses + score
+- `_evaluate_off_ball_target()` → Optimal off-ball channel space + score
 - `_should_chase_ball()` — Role-budget gate for **outfield players only** (OUTFIELD_ATTACKER, MIDFIELDER, DEFENDER). GOALKEEPER is explicitly excluded via the `_:` default branch (`return false # Goalkeeper handled separately`) — GK movement is driven by the dedicated GoaliePatrol/GoalieDive actions in `evaluate_tactical_action()`, not by this gate.
 - `_find_nearby_opponents()` — Scratch buffer for tactical occlusion
 
 **Mood Integration:**
-- SLUMP: lowers pass accuracy, movement speed, decision confidence
-- STREAK: boosts accuracy, speed, confidence
+- SLUMP: lowers pass accuracy, increases risk aversion in pass target selection, lowers composure
+- STREAK: boosts accuracy, increases ambition on progressive passes, raises composure
 - Affects kick scatter and action selection weights
 
 **DO NOT:**
@@ -106,37 +119,25 @@ HeavyPlayerController (CharacterBody2D)
 
 States inherit from `PlayerState` and dispatch via `PlayerStateFactory`.
 
-**Base State Pattern:**
-```gdscript
-class_name IdleState
-extends PlayerState
+### State Names & Classes
 
-func enter(player: HeavyPlayerController) -> void:
-    player.is_charging_kick = false
-
-func physics_update(player: HeavyPlayerController, delta: float) -> void:
-    # apply friction, reset movement_intent, evaluate next action
-    
-func exit(player: HeavyPlayerController) -> void:
-    # cleanup if needed
-```
-
-### State Enum
-
-- **IdleState** — At rest; no input; waiting
-- **DribbleState** — Possessing ball; moving under player input or AI
-- **ChargeKickState** — Aiming pass/shot; charging power
-- **ShotLockState** — Locked aim during shot; stronger magnetism
-- **ThrowInState** — Special possess state for throw-in set piece
-- **TackleState** — Challenging opponent; brief lock, snap back
-- **AerialState** — Jumping for header; lifting z-axis
-- **KnockedDownState** — Tackled/collided; brief recovery animation
+- **IdleState (`PlayerState.IDLE`)** — At rest; no input; deceleration to rest
+- **MoveState (`PlayerState.MOVE`)** — Off-ball pursuit and running
+- **DribbleState (`PlayerState.DRIBBLE`)** — Close possession and continuous micro-magnetism
+- **ChargeKickState (`PlayerState.CHARGE_KICK`)** — Aiming and power charge for passes and shots
+- **ShotLockState (`PlayerState.SHOT_LOCK`)** — Locked travel-direction carry before striking
+- **ThrowInState (`PlayerState.THROW_IN`)** — Sideline throw-in execution
+- **TackleState (`PlayerState.TACKLE`)** — Slide/standing tackle challenge with recovery stumble
+- **AerialState (`PlayerState.AERIAL`)** — Header, volley, and bicycle kick timing window
+- **GoalkeeperDiveState (`PlayerState.GOALKEEPER_DIVE`)** — Goalkeeper commitment, dive velocity, and save window
+- **PenaltyKickState (`PlayerState.PENALTY_KICK`)** — Fixed-power penalty kick execution
+- **SetPieceFreezeState (`PlayerState.SET_PIECE_FREEZE`)** — Defensive wall and teammate freeze during dead balls
 
 **Rules:**
 - Only one state active per player at any time
-- State transitions happen via `player.change_state(NewState)`
+- State transitions happen via `state_factory.transition_to(NewState)`
 - Physics behavior (friction, magnetism, drag) varies per state
-- All state entry/exit is hooked via GameEvents
+- All state entry/exit hooks GameEvents where appropriate
 
 **Critical Contract:**
 - PlayerBrain.movement_intent drives state transitions and target selection

@@ -1,17 +1,18 @@
 # entities/ball/ — Ball Physics & Possession State
 
-The ball is the core simulation object. Pseudo-3D (z-axis for height), asymmetric friction, collision detection via Area2D (not CharacterBody2D), and possession state machine.
+The ball is the core simulation object. Pseudo-3D (z-axis for height), proportional friction and flat drag, collision with pitch boundaries and posts via CharacterBody2D (Layer 3), and possession state machine.
 
 ## Architecture Overview
 
 ```
-Pseudo3DBall (Area2D + AnimatedSprite2D)
+Pseudo3DBall (CharacterBody2D + Sprite2D + Shadow Sprite)
   ├─ x,y velocity (horizontal ground plane)
-  ├─ z height (vertical axis, rendered as Y offset)
+  ├─ z height (vertical axis, rendered as Y offset on Sprite2D)
   ├─ vz velocity (vertical axis, gravity solver)
   ├─ possessor (Node2D — active carrier, null if loose)
-  ├─ last_touched_by (HeavyPlayerController — who kicked last)
-  ├─ state machine (FreeBall, DribblingState, AirborneState, etc.)
+  ├─ last_touched_by (HeavyPlayerController — who kicked/touched last)
+  ├─ restart_taker (HeavyPlayerController — set piece taker for double-touch rules)
+  ├─ state machine (FlightState, GroundRollState, PossessionState, DeadBallState)
   └─ prediction trajectory (for aim visualization)
 ```
 
@@ -19,20 +20,27 @@ Pseudo3DBall (Area2D + AnimatedSprite2D)
 
 ## Pseudo3DBall.gd
 
-**Contract:** Single physics solver for ball. Area2D for goal/boundary detection. No collision masking against CharacterBody2D (possession is bookkeeping, not physics).
+**Contract:** Single physics solver for ball. Extends `CharacterBody2D` on `CollisionLayers.LAYER_BALL_PHYSICS` (Layer 3) masking `CollisionLayers.MASK_BALL_PHYSICS` (Layer 1 `PitchWorld` only). Never masks Layer 2 (`PlayerBodies`) to preserve player momentum.
 
-**Critical Exports:**
-- `pitch_friction: float` — Coefficient, not deceleration (default 0.45)
-- `bounce_damping: float` — Elasticity on rebound (default 0.6)
-- `max_height: float` — Z-axis limit (default 400px, for heading arcs)
-- `gravity: float` — Pseudo-gravity acceleration (default 1500 px/s²)
+**Critical Exports & Constants:**
+- `gravity: float = 580.0` — Pseudo-gravity acceleration pulling ball to turf (px/s²)
+- `pitch_friction: float = 0.90` — Ground drag coefficient applied while rolling
+- `air_resistance: float = 0.08` — Air drag coefficient applied while airborne
+- `surface_wetness: float = 0.0` — 0 = dry, 1 = soaked (scales rolling friction down)
+- `restitution: float = 0.68` — Bounce elasticity on ground contact and post rebounds
+- `bounce_threshold: float = 40.0` — Vertical speed below which bounce stops and ball settles
+- `bounce_friction_loss: float = 0.85` — Horizontal speed retained through bounce
+- `rest_speed: float = 4.0` — Speed below which rolling ball is treated as stationary
+- `FRICTION_SCALE: float = 200.0` — Scales `pitch_friction` into px/s deceleration
+- `REST_DRAG_FLAT: float = 18.0` — Flat deceleration added so ball settles cleanly
 
 **Ownership Properties (DIFFERENT MEANINGS):**
 
 | Property | Meaning | Usage |
 |---|---|---|
 | `possessor: Node2D` | Active carrier (set by DribbleState) | Who is dribbling NOW |
-| `last_touched_by: HeavyPlayerController` | Who kicked last | Differentiates goal kicks from corners |
+| `last_touched_by: HeavyPlayerController` | Who touched or kicked last | Differentiates goal kicks from corners |
+| `restart_taker: HeavyPlayerController` | Who took the dead-ball restart | Enforces anti-double-touch rules |
 
 **Critical:** Do not guess one from the other.
 
@@ -44,35 +52,40 @@ if holder == null:
 
 **Physics Formulas:**
 
-Horizontal velocity with friction:
+Horizontal ground roll deceleration:
 ```
-v_xy(t+Δt) = move_toward(v_xy, Vector2.ZERO, pitch_friction * FRICTION_SCALE * delta)
-where FRICTION_SCALE = 200.0
+effective_friction = pitch_friction * FRICTION_SCALE * (1.0 - surface_wetness * 0.45)
+total_deceleration = effective_friction + REST_DRAG_FLAT
+v_xy(t+Δt) = move_toward(v_xy, Vector2.ZERO, total_deceleration * delta)
 ```
 
-Vertical velocity with gravity:
+Vertical height integration:
 ```
-z(t+Δt) = z(t) + vz(t)*Δt - 0.5*g*(Δt)²
-vz(t+Δt) = vz(t) - g*Δt
+vz(t+Δt) = vz(t) - gravity * delta - vz(t) * air_resistance * delta
+z(t+Δt)  = z(t) + 0.5 * (vz(t) + vz(t+Δt)) * delta
 ```
 
 **Key Methods:**
-- `apply_kick(impulse_xy, impulse_z, kicker)` — Receives foot sensor impulse; clears possessor; sets last_touched_by
+- `apply_kick(impulse_xy, impulse_z, kicker)` — Strikes ball; clears possessor; sets last_touched_by
+- `apply_impulse(impulse_xy, impulse_z)` — Adds momentum without replacing (dribble touches / deflections)
 - `release_possession()` — Breaks dribble link; possessor = null
-- `set_possessor(carrier)` — Dribble binding; typically called by DribbleState
-- `predict_trajectory(steps, delta)` → `Array[Vector2]` — Render points for aim arc
-- `simulate_xy_axis(delta)` — Apply horizontal friction
-- `simulate_z_axis(delta)` — Apply gravity and ground bounce
+- `set_possessor(carrier)` — Dribble binding; called by DribbleState
+- `predict_trajectory(impulse_xy, impulse_z, steps, dt)` → `Array[Vector2]` — Discrete trajectory preview
+- `mark_set_piece_restart(taker)` — Arms anti-double-touch constraint for set piece taker
+- `register_player_touch(player)` → `bool` — Registers player touch and checks double-touch legality
+- `can_player_touch(player)` → `bool` — Checks if player is allowed to touch the ball
+- `reset_at(spot)` — Places ball for restart and zeroes velocities
+- `freeze()` / `unfreeze()` — Freezes simulation during stoppages
 
 **Rendering:**
-- Sprite Y offset = -z (height baked into Y coordinate)
-- Shadow scale = clamp(1.0 - z/300.0, 0.35, 1.0)
-- Ball appears to rise and fall as z changes
+- Sprite Y offset = `-position_z` (height baked into Y coordinate)
+- Shadow scale = `clamp(1.0 - (position_z / 300.0), 0.35, 1.0)`
+- Shadow alpha = `clamp(0.8 - (position_z / 400.0), 0.2, 0.8)`
 
 **Collision Layers:**
-- Ball is on Layer 3 (Ball)
-- Area2D senses Layer 1 (Terrain) for boundaries, Layer 2 (Player) for foot contact
-- CharacterBody2D MUST NOT mask Layer 3 (would zero velocity in solver)
+- Ball is on Layer 3 (`LAYER_BALL_PHYSICS`)
+- Masks Layer 1 (`MASK_BALL_PHYSICS` = `LAYER_PITCH_WORLD`) for walls and goal frames
+- CharacterBody2D on Layer 2 (`PlayerBodies`) MUST NOT mask Layer 3
 
 **DO NOT:**
 - Access ball.velocity directly for AI logic; use MatchWorldModel.ball_node
@@ -86,70 +99,38 @@ vz(t+Δt) = vz(t) - g*Δt
 
 States inherit from `BallState` and dispatch via `BallStateFactory`.
 
-### FreeBall
+### FlightState (`&"Flight"`)
+**Entered:** `is_airborne() == true` (z > 0 or vz > 0)
+- Full gravity and air resistance simulation
+- Detects ground bounce (`restitution` and `bounce_friction_loss`)
+- Detects aerial heading contests via player `AerialHitbox` (Layer 5)
 
-**Entered:** apply_kick() or release_possession()
-**Responsibilities:**
-- Apply friction to xy velocity
-- Apply gravity to z velocity
-- Detect ground impact (z <= 0); bounce if vz < -bounce_threshold
-- Check out-of-bounds via PitchBoundary or emit GameEvents.ball_out_of_bounds
+### GroundRollState (`&"GroundRoll"`)
+**Entered:** Ball settles on ground (`position_z <= 0` and no possessor)
+- Applies rolling friction (`pitch_friction * FRICTION_SCALE + REST_DRAG_FLAT`)
+- Settles to complete stop below `rest_speed` (4.0 px/s)
 
-**Key Signals:**
-- ball_bounced if z < 0
-- ball_out_of_bounds if outside pitch
+### PossessionState (`&"Possession"`)
+**Entered:** Player dribble state binds possession
+- Dampens ball velocity and keeps ball offset relative to player
+- Loosely bound; turning and tackles allow natural separation
 
----
-
-### DribblingState
-
-**Entered:** DribbleState (player) enters on possession grab
-**Responsibilities:**
-- Dampen ball velocity (heavy possession drag)
-- Keep ball offset relative to player (foot sensor position)
-- Apply continuous micro-possession magnetism (loose grip, allows sharp turns)
-
-**Magnetism Contract:**
-- Position pull = `lerp(ball_pos, foot_pos, magnetism_factor * delta)`
-- Magnetism factor varies by state (DribbleState < ShotLockState)
-- Player is never parented to ball; separation happens naturally via turning
+### DeadBallState (`&"DeadBall"`)
+**Entered:** `is_frozen == true` during set pieces, fouls, and celebrations
+- Motion paused until restart
 
 ---
 
-### AirborneState
+## Foot Sensor (Layer 4) & Aerial Hitbox (Layer 5)
 
-**Entered:** vz > 0 or z > ground_threshold
-**Responsibilities:**
-- Full gravity simulation
-- Aerodynamic drag (optional; currently linear)
-- Detect peak (vz crosses zero) for heading contests
-- Detect ground impact
-
-**Notes:**
-- No magnetism while airborne (loose ball)
-- Area2D collision senses aerial hitbox (Layer 5) for head challenges
-
----
-
-## Foot Sensor (Layer 4)
-
-The foot sensor is an invisible Area2D child of HeavyPlayerController that fires contact signals for possession and kicks.
-
-**Contract:**
-- Detects ball entrance (foot overlaps ball) → DribbleState entry
-- Detects ball exit (foot separates) → FreeBall state (graceful separation on sharp turns)
-- Foot sensor is NOT a physics layer (no mask/collision); pure signal detection
-- Protected in SetPieceState.enter() to prevent re-grab during set pieces
-
-**DO NOT:**
-- Query foot sensor position directly; it is an internal detail of possession
-- Override foot sensor collision; it is tuned per role (tighter for FWD, wider for DEF)
+- **Foot Sensor (Layer 4):** Area2D at player feet sensing Layer 3 (Ball). Pure signal detection for ball capture (`MAX_CAPTURE_HEIGHT = 25.0`).
+- **Aerial Hitbox (Layer 5):** Area2D above player shoulders sensing Layer 3 (Ball). Triggers `AerialState` for headers and volleys when ball `z > 25.0`.
 
 ---
 
 ## Prediction & Aim Arc
 
-**Method:** `predict_trajectory(steps, delta)` → `Array[Vector2]`
+**Method:** `predict_trajectory(impulse_xy, impulse_z, steps, dt)` → `Array[Vector2]`
 
 **Returns:** Render points where each point is `(sim_pos_xy + Vector2(0, -sim_pos_z))`
 - Height is already baked into Y; suitable for drawing aim preview
@@ -163,18 +144,15 @@ The foot sensor is an invisible Area2D child of HeavyPlayerController that fires
 
 ## Friction Model (Critical for AI)
 
-Ball friction is a PRODUCT, not a coefficient:
+Ball friction deceleration is a PRODUCT:
 
 ```gdscript
-# CORRECT — passes acceleration, not coefficient
+# CORRECT — passes deceleration in px/s², not bare coefficient
 UtilityMath.calculate_intercept_point(
     player_pos, player_speed,
     ball_pos, ball_velocity,
-    ball.pitch_friction * Pseudo3DBall.FRICTION_SCALE,  # ← product (90.0 at defaults)
-    delta)
-
-# INCORRECT — coefficient alone under-decelerates 200x
-UtilityMath.calculate_intercept_point(..., ball.pitch_friction, delta)
+    ball.pitch_friction * Pseudo3DBall.FRICTION_SCALE,  # ← 180.0 px/s² at defaults
+    0.08)
 ```
 
 ---
@@ -182,17 +160,14 @@ UtilityMath.calculate_intercept_point(..., ball.pitch_friction, delta)
 ## Possession State Transitions
 
 ```
-FreeBall
-  ↓ (foot touches)
-DribbleState (player grabs)
-  ├─ (player passes/shoots) → apply_kick() → FreeBall
-  ├─ (sharp turn) → separation → FreeBall
-  └─ (tackle interrupts) → TackleState (opponent) → FreeBall
-
-AirborneState
-  ↓ (z > threshold or vz > 0)
-  ├─ (heading contest) → AerialState (player)
-  └─ (ground impact) → FreeBall (bounce or rest)
+DeadBallState (stoppages / set pieces)
+  ↓ (unfreeze)
+GroundRollState / FlightState
+  ↓ (foot sensor overlap)
+PossessionState (player dribble)
+  ├─ (strike / pass) → apply_kick() → FlightState / GroundRollState
+  ├─ (turn separation) → release_possession() → GroundRollState
+  └─ (tackle) → tackle impulse → GroundRollState
 ```
 
 ---
@@ -208,11 +183,9 @@ var intercept_pos = UtilityMath.calculate_intercept_point(
     0.08)
 ```
 
-**Ball visibility (for offsides, etc.):**
+**Ball height:**
 ```gdscript
-var ball_height = MatchWorldModel.instance.ball_node.z
-if ball_height > AERIAL_THRESHOLD:
-    # Ball is in air; different contest rules
+var ball_height = MatchWorldModel.instance.ball_position_z
 ```
 
 **Possession holder:**
@@ -226,8 +199,7 @@ if carrier == null:
 
 ## Notes
 
-- Ball never has a parent; all motion is driven by the physics solver and possessor offsets
-- Collision detection does NOT use CharacterBody2D to avoid velocity zeroing
-- Bounce is controlled by angle and damping; spin is not yet implemented
-- Airborne prediction is used for aim visualization; ground intercept uses UtilityMath
-- Friction model is a known complexity; document thoroughly if ever changed
+- Ball never has a parent; all motion is driven by the physics solver and possessor offsets.
+- Ball is a `CharacterBody2D` colliding with Layer 1 (`PitchWorld`) via `move_and_collide()` with elastic rebound.
+- Players interact with the ball exclusively through foot sensors (Layer 4) and aerial hitboxes (Layer 5).
+

@@ -1,6 +1,6 @@
 # ui/ — HUD, Menus, & User Feedback
 
-User interface screens, HUD overlays, and menu systems.
+User interface screens, HUD overlays, match statistics, and menu systems.
 
 ## Architecture Overview
 
@@ -12,16 +12,23 @@ MainMenu.tscn (entry point)
   
 PitchScene.tscn (match)
   ├─ HUD (in-match UI)
-  │   ├─ ActionText (floating PASS/SHOT labels)
-  │   ├─ Nameplate (player info panels)
-  │   └─ Minimap (top-down position tracker)
+  │   ├─ ActionText (floating PASS/SHOT/TACKLE labels)
+  │   ├─ TouchlineBubble (manager animated quotes)
+  │   ├─ Minimap (top-down position radar)
+  │   └─ SubstitutionBanner & Referee Banners
   │
-  ├─ PauseMenu (ESC key)
-  │   └─ Formation adjustment UI
+  ├─ PauseMenu (ESC / UI pause)
+  │   ├─ Tactical formation adjustments
+  │   └─ Bench substitution UI (max 3 substitutions)
   │
   ├─ PreGameScreen (pre-match)
-  │   ├─ Lineup order editor
-  │   └─ Formation preview
+  │   ├─ Starting XI & reserve bench lineup editor
+  │   ├─ FormationDiagram preview
+  │   └─ Team tactics setup
+  │
+  ├─ MatchStatsUI (full-time screen)
+  │   ├─ Final score and team statistics
+  │   └─ Per-player 1.0–10.0 performance ratings
   │
   └─ MatchCamera (cinematic + ball-follow modes)
 ```
@@ -32,9 +39,8 @@ PitchScene.tscn (match)
 
 **Responsibilities:**
 - Display menu options (Kick Off, Practice, Career, Options, Quit)
-- Route to KickOffMenu on selection
-- Load game options
-- Launch PitchScene with selected parameters
+- Route to KickOffMenu for 8-team league match setup
+- Launch PitchScene with selected parameters via `GameManager` meta
 
 ---
 
@@ -42,57 +48,50 @@ PitchScene.tscn (match)
 
 **Responsibilities:**
 - Display pause overlay
-- Allow formation changes mid-match
-- Resume, forfeit, or return to main menu
+- Allow live formation changes mid-match
+- Execute in-match player substitutions (up to 3 per match) via `TeamManagementData`
+- Resume, restart match, or return to main menu
 
 **Signals:**
-- Emits `GameEvents.formation_changed(team, name)` on selection change
-- Note: This is distinct from `manager_formation_changed` (emitted by ManagerDirector)
+- Emits `GameEvents.substitution_made(team, out_idx, in_idx)`
+- Emits `GameEvents.formation_changed(team, name)`
 
 ---
 
 ### PreGameScreen.tscn
 
 **Responsibilities:**
-- Show team lineup
-- Allow lineup order adjustment via `TeamData.lineup_indices`
-- Display formation preview with player anchors
-- Set ready-state before match starts
+- Display starting XI and reserve bench
+- Allow lineup swapping and bench assignments before kickoff
+- Display formation preview with `FormationDiagram.gd`
+- Confirm readiness via `GameEvents.pregame_confirmed`
 
-**Current State:**
-- Implemented for phase 1 match start
-- Lineup order editing ready (reserves system is Phase 1 feature)
+---
+
+### MatchStatsUI.tscn
+
+**Responsibilities:**
+- Displayed upon `GameEvents.match_ended` at FULL_TIME
+- Shows final score, team possession percentages, total shots, shots on target, passes (completed/attempted), fouls, corners, offsides, and cards
+- Displays per-player match performance ratings (1.0–10.0) computed by `PlayerRatingCalculator.gd`
+- Provides button to return to Main Menu
 
 ---
 
 ### HUD.gd (MatchHUD)
 
 **Responsibilities:**
-- Render player nameplates (shirt number, stamina, mood indicator)
-- Render minimap with team-colored dots
-- Display action text (floating PASS/SHOT/LOB SHOT labels)
-- Show match clock, score, phase
-- Render stamina bar for controlled player
+- Render minimap with team-colored dots and ball tracking
+- Display floating action text (PASS, SHOT, LOB, TACKLE, SAVE, REBOUND)
+- Display match clock, score, current phase banner, and referee event alerts
+- Render stamina bar and facing arrow for user-controlled player
 
-**Subsystems:**
+---
 
-**ActionText.gd**
-- Spawns floating labels on ball strikes
-- Fades and despawns after delay
-- Used for visual feedback on actions
+### TouchlineBubble.gd
 
-**Nameplate.gd** (per player)
-- Shows player shirt number and name
-- Stamina indicator (bar or icon)
-- Current mood state (SLUMP/NORMAL/STREAK)
-- Highlights controlled player
-
-**Minimap.gd**
-- Top-down render of pitch with player positions
-- Home team = one color; away = another
-- GK marked distinctly from outfield
-- Ball position indicator
-- Updates from MatchWorldModel positions
+**Responsibilities:**
+- Spawns animated speech bubbles for manager reactions to key events (goals, missed chances, yellow/red cards, foul disputes).
 
 ---
 
@@ -101,15 +100,17 @@ PitchScene.tscn (match)
 All HUD updates route through signal connections:
 
 **From GameEvents:**
-- `player_switched(team, old_index, new_index)` — Update controlled player highlight
-- `ball_struck(kicker, impulse_xy, impulse_z)` — Spawn ActionText
+- `player_switched(new_player)` — Update active controlled player highlight
+- `ball_struck(player, speed, charge_ratio, is_shot)` — Spawn ActionText
 - `goal_scored(team, scorer)` — Highlight scorer, update score
 - `match_phase_changed(phase)` — Update clock/phase display
-- `foul_committed(offender, victim, type)` — Possible card display
+- `yellow_card_shown` / `red_card_shown` — Display card presentation overlays
+- `offside_called` — Display offside decision banner
+- `substitution_made` — Display player swap overlay
 
 **From MatchWorldModel:**
 - Polls `player_positions[i]` every frame for minimap
-- Polls `ball_node.global_position` and `ball_node.z` for ball render
+- Polls `ball_position` and `ball_position_z` for ball radar
 
 **DO NOT:**
 - Query scene tree for player positions; use MatchWorldModel
@@ -120,32 +121,28 @@ All HUD updates route through signal connections:
 
 ## Themes & Styling (Phase 5)
 
-Currently uses Godot default fonts and colors.
+Currently uses custom Godot theme styling with clean flat arcade visuals.
 
 **Planned (Phase 5):**
-- Custom font stack
-- Team-aware color schemes
-- Mood-state visual indicators (color/opacity changes)
-- Injury/substitution reserve panel
-- Match stats panel (end-of-match scoreboard)
+- Additional custom font stack
+- Extended team-aware stadium cosmetics
+- Audio soundscape integration
 
 ---
 
 ## Camera Systems (MatchCamera.gd)
 
-Three modes selected by player:
-
-1. **BALL_FOLLOW** — Camera centered on ball; dynamic zoom
-2. **DYNAMIC** — Weighted toward ball but includes controlled player
-3. **FULL_FIELD** — Shows entire pitch; loses detail
-
-See **entities/ball/README.md** for integration with ball prediction (aim arc visualization).
+Three modes selectable by player:
+1. **BALL_FOLLOW** — Camera centered on ball with dynamic zoom
+2. **DYNAMIC** — Weighted blend between ball and controlled player
+3. **FULL_FIELD** — Static view covering entire pitch
 
 ---
 
 ## Notes
 
-- All UI updates are passive (listen to GameEvents; never emit directly)
-- Minimap is the primary spatial feedback for off-screen players
-- Nameplate stamina is a direct read of `HeavyPlayerController.current_stamina`
-- Formation UI is independent of tactical AI (UI shows preview; ManagerDirector applies to brain)
+- All UI updates are passive (listen to GameEvents; never mutate physics state directly).
+- Minimap is the primary spatial feedback for off-screen players.
+- Stamina display reads `HeavyPlayerController.stamina` and `stamina_state_changed` signal.
+- Formation UI is independent of tactical AI (UI shows preview; ManagerDirector applies to brains).
+

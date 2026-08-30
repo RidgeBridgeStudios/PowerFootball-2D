@@ -25,7 +25,7 @@ Before implementing any feature:
 
 ## Boot Order (project.godot)
 
-MatchWorldModel → GameEvents → GameManager → DataLoader → RefereeLoader → ManagerLoader → InputHelper
+MatchWorldModel → GameEvents → GameManager → MatchStatsTracker → DataLoader → RefereeLoader → ManagerLoader → InputHelper
 
 ## Process Priority
 

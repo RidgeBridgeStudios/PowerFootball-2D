@@ -22,9 +22,9 @@ enum MatchPhase {
 	PENALTY_SHOOTOUT,
 }
 
-## The five dead-ball phases SetPieceCoordinator drives. KICKOFF is deliberately
-## excluded — it still runs through the older, simpler reset_for_kickoff() path
-## (see PitchScene.reset_for_kickoff for the TODO on unifying the two).
+## The five non-kickoff dead-ball phases SetPieceCoordinator drives via
+## handle_out_of_bounds / handle_foul. KICKOFF has its own ceremony coordinated
+## via SetPieceCoordinator.start_kickoff() and PitchScene._start_kickoff_flow().
 const SET_PIECE_PHASES: Array[MatchPhase] = [
 	MatchPhase.GOAL_KICK, MatchPhase.CORNER_KICK, MatchPhase.THROW_IN,
 	MatchPhase.FREE_KICK, MatchPhase.PENALTY_KICK,

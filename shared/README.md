@@ -1,226 +1,112 @@
 # shared/ — Data Models & Utilities
 
-Data classes, collision setup, and math helpers used throughout the codebase.
+Data classes, collision setup, role configurations, and math helpers used throughout the codebase.
 
 ## Data Models
 
 ### PlayerData.gd
 
-**Contract:** Immutable player attributes loaded from JSON. Extended at runtime by career systems.
+**Contract:** Pure data container for one player: identity, physical tuning, brain personality, live form, and transient match stats. Saveable as a `.tres` resource. Applied to `HeavyPlayerController` at spawn by `PlayerFactory` and during substitutions via `apply_player_data()`.
 
-**IMPLEMENTED Fields:**
-- `player_id: String` — Unique identifier
-- `team_id: String` — Team reference
-- `first_name: String`, `last_name: String`
-- `shirt_number: int`
-- `role: String` — Enum-like (GK, DEF, MID, FWD)
-- `height_cm: float`, `weight_kg: float`
-- `foot_preference: String` — LEFT, RIGHT, BOTH
-- `max_stamina: float` — 0.0 to 1.0
-- `aggression: float` — Affects utility scoring
-- `work_rate: float` — Affects positioning and pressing
-- `positioning_iq: float` — Affects off-ball decision quality
-- `pass_accuracy: float` — Affects kick scatter
-- `decision_speed: float` — Affects decision interval (ManagerDirector uses this)
-
-**PLANNED Fields (Part V, POWERFOOTBALL_MASTER_VISION.md):**
-- `trait_bits: int` — Bitmask for deep behavior modifiers
-- `relationships: Dictionary[String, RelationshipData]` — Trust/rivalry/history per teammate
-- `overall_rating: float` — Derived from weighted attributes
-- `reputation: float` — Accumulated career events
-- `biography: String` — Narrative context for PressOffice
-
-**DO NOT:**
-- Modify PlayerData at runtime; use WorldEvent log for career changes
-- Cache PlayerData references; query DataLoader if needed
-- Author derived fields (overall_rating, reputation); they are computed
+**Fields:**
+- **Identity:** `player_name: String`, `shirt_number: int`, `position_role: String` ("GK", "CB", "LB", "RB", "DM", "CM", "AM", "LW", "RW", "ST")
+- **Physical Tuning:** `mass: float` (default 75.0), `top_speed: float` (default 210.0), `acceleration_time: float` (0.22), `friction_time: float` (0.12), `turning_penalty: float` (0.35), `sprint_multiplier: float` (1.45)
+- **Stamina:** `stamina_max: float` (100.0), `stamina_drain: float` (18.0), `stamina_recover: float` (9.0)
+- **Brain Personality:** `vision: float` (0.75), `composure: float` (0.60), `aggression: float` (0.80), `formation_ball_weight: float` (0.35), `close_control: float` (0.65), `reflexes: float` (0.60)
+- **Form & Career Stats:** `form: float` (0.0–10.0, default 6.5), `career_goals: int`, `career_assists: int`, `last_match_rating: float`, `is_unavailable: bool`
+- **Transient Match Stats:** `yellow_cards_this_match: int`, `red_cards_this_match: int` (reset each match by `MatchReferee.bind()`)
 
 ---
 
 ### ManagerData.gd
 
-**Contract:** Manager personality and tactical preferences.
+**Contract:** Pure data container for one manager: identity, tactical philosophy, squad/signing preferences, personality traits, and career stats.
 
-**IMPLEMENTED Fields:**
-- `manager_id: String` — Unique identifier
-- `team_id: String` — Team reference
-- `first_name: String`, `last_name: String`
-- `trait_bits: int` — Personality traits (bitmask)
-- `base_tempo: float` — 0.0 to 1.0; controls pressing intensity
-- `defensive_line: String` — DEEP, MID, AGGRESSIVE
-- `build_from_back: bool` — If true, GK passes; else long balls
-
-**Formation Library:**
-- `formations: Dictionary[String, FormationData]` — Named formations with anchor positions
-- Formation name format: "4-3-3", "3-5-2", etc.
-- Anchors: array of [x, y] positions for 10 outfield players (GK implicit)
-
-**PLANNED Fields:**
-- `press_voice: String` — Speech pattern for PressOffice
-- `player_relations: Dictionary[String, ManagerRelation]` — Manager-specific player links
-
-**Usage:**
-```gdscript
-var mgr = DataLoader.instance.managers[team.manager_id]
-var formation = mgr.formations["4-3-3"]
-var anchor_pos = formation.anchors[player_anchor_index]
-```
+**Key Fields:**
+- **Identity:** `manager_name: String`, `nationality: String`, `experience: int` (1–100), `current_team: String`
+- **Tactical Philosophy:** `defensive_line: float` (0.0–1.0), `tempo: float` (0.0–1.0), `width: float` (0.0–1.0), `pressing_intensity: float` (0.0–1.0), `physicality: float` (0.0–1.0)
+- **Formations:** `preferred_formation: String` (e.g. "4-4-2"), `attacking_formation: String`, `defensive_formation: String`
+- **Squad & Signing:** `youth_trust`, `loyalty_bias`, `form_sensitivity`, `preferred_min_age`, `preferred_max_age`, `budget_flexibility`, `preferred_mass_min`, `preferred_mass_max`, `prized_attribute`, `preferred_playstyle`
+- **Personality Traits (Bitmask):** `traits: int` (`HotHead:1`, `Loyalist:2`, `Pragmatist:4`, `Visionary:8`, `Disciplinarian:16`, `MindGames:32`, `Sentimental:64`, `MediaSavvy:128`, `Volatile:256`, `Idealist:512`)
+- **Career Stats:** `matches_managed`, `wins`, `draws`, `losses`, `goals_scored`, `goals_conceded`
 
 ---
 
 ### TeamData.gd
 
-**Contract:** Team roster and configuration.
+**Contract:** Pure data container for one team: name, colour, full squad array, formation override, and starting lineup indices.
 
-**IMPLEMENTED Fields:**
-- `team_id: String` — Unique identifier
+**Fields:**
 - `team_name: String`
-- `country: String` — ISO 3166-1 alpha-2
-- `primary_color: String`, `secondary_color: String` — Hex
-- `manager_id: String` — Reference to manager
-- `player_ids: Array[String]` — Full squad in order
-- `lineup_indices: Array[int]` — Starting XI indices into player_ids
-
-**DO NOT:**
-- Modify lineup_indices at runtime; that is for substitution system (Phase 1)
-- Change team colors mid-match
+- `team_color: Color`
+- `squad: Array[PlayerData]` — Complete roster (starters + reserves)
+- `formation_override: String` — Active formation override chosen in pre-game or pause menu
+- `substitutions_made: int` — In-match substitutions counter (max 3)
+- `lineup_indices: Array[int]` — 11 indices into `squad` representing current starting/active players
 
 ---
 
-### LeagueData.gd (PLANNED)
+### TeamManagementData.gd
 
-Framework for multi-team progression (Phase 4).
+**Contract:** Lineup configuration and bench management handler. Provides validation and swaps between starting XI and bench reserves (`swap_players()`, `apply_to_team()`).
+
+---
+
+### PlayerRoleConfig.gd
+
+**Contract:** Data resource representing a single outfield role's tuning parameters (`.tres` presets in `shared/roles/`).
+- `role_name: String` ("CB", "CDM", "CM", "ST")
+- `anchor_weight: float` — Rigidity of formation anchor (1.0 = rigid, 0.0 = free roam; roam alpha = `1.0 - anchor_weight`)
+- `max_chase_distance: float` — Max distance from anchor at which player will chase ball
+- `w_dist`, `w_angle`, `w_press`, `w_adv` — Individual pass utility weights
+- `pitch_bounds: Rect2` — Normalized zone boundary
 
 ---
 
 ## Utilities
 
+### PassUtilityScorer.gd
+
+**Contract:** Pure static pass-target scoring across distance falloff (`PREFERRED_DISTANCE = 220.0`), passer facing angle, receiver pressure, and forward advancement.
+- `score_pass(...)` → `float` (bare float hot path, 0 allocations)
+- `score_pass_breakdown(...)` → `PassScoreBreakdown` (debug-inspectable breakdown)
+
+---
+
 ### UtilityMath.gd
 
-**Contract:** All AI intercept, occlusion, and sigmoid math.
+**Contract:** Analytical intercept point solver, raycast-free pass lane occlusion, and decay formulas.
 
 **Key Methods:**
-
-**Intercept Calculation:**
 ```gdscript
-func calculate_intercept_point(
-    pursuer_pos: Vector2,
-    pursuer_speed: float,
-    ball_pos: Vector2,
-    ball_velocity: Vector2,
-    ball_deceleration: float,  # friction * FRICTION_SCALE, NOT coefficient alone
-    delta: float) -> Vector2
-```
-Returns ground position where pursuer can intercept ball. Used by AI pathfinding and GK logic.
-
-**Sigmoid Scoring:**
-```gdscript
-func sigmoid(x: float, mid: float, slope: float) -> float
-```
-S-curve for utility normalization. Mid = inflection point; slope = steepness.
-
-**Lane Occlusion & Vector Projection:**
-```gdscript
-func closest_point_on_segment(point: Vector2, seg_start: Vector2, seg_end: Vector2) -> Vector2
-func distance_to_segment(point: Vector2, seg_start: Vector2, seg_end: Vector2) -> float
-func distance_squared_to_segment(point: Vector2, seg_start: Vector2, seg_end: Vector2) -> float
+func calculate_intercept_point(pursuer_pos, pursuer_speed, ball_pos, ball_velocity, ball_deceleration, delta) -> Vector2
 func is_lane_blocked(passer: Vector2, receiver: Vector2, defender: Vector2, min_clearance: float) -> bool
-```
-Calculates analytical point-to-segment vector projections and tests whether a defender breaches the pass corridor threshold without physics raycasts.
-
-**MatchWorldModel Queries:**
-```gdscript
-func is_passing_lane_open(start_pos: Vector2, end_pos: Vector2, passer_team_id: int, corridor_width: float = DEFAULT_PASS_LANE_CLEARANCE) -> bool
-func get_passing_lane_min_distance(start_pos: Vector2, end_pos: Vector2, passer_team_id: int) -> float
+func quadratic_decay(distance: float, radius: float) -> float
 ```
 
-**Distance Queries:**
-```gdscript
-func distance_to_goal(team: int, pos: Vector2) -> float
-func distance_to_ball(pos: Vector2) -> float
-```
+---
 
-**DO NOT:**
-- Call calculate_intercept_point with ball.pitch_friction alone; multiply by FRICTION_SCALE
-- Allocate vectors inside these functions (already allocation-free)
-- Call these outside decision blocks (they are cheap; pre-computation not needed)
+### FormationAnchorMath.gd
+
+**Contract:** Compactness and phase-dependent dynamic anchor calculation (shifting team shape based on possession phase: `IN_POSSESSION`, `OUT_OF_POSSESSION`, `TRANSITION`).
 
 ---
 
 ### CollisionLayers.gd
 
-**Contract:** Layer constants for physics setup. Read before any collision work.
+**Contract:** Single source of truth for the project's 6-layer collision matrix.
 
-**Layer Definitions:**
-- **Layer 1 (Terrain)** — Pitch boundary, goal zones, walls
-- **Layer 2 (Players)** — CharacterBody2D; masks/collides with 1
-- **Layer 3 (Ball)** — Ball Area2D; sensed by Layer 2 foot sensor only
-- **Layer 4 (FootSensor)** — Invisible detector on each player; senses Layer 3
-- **Layer 5 (AerialHitbox)** — For heading contests; senses Layer 3 (ball)
+| Layer | Name | Bit Constant | Objects | Masks against |
+|---|---|---|---|---|
+| 1 | `PitchWorld` | `LAYER_PITCH_WORLD = 1 << 0` | Walls, goalposts, boundaries | Players (2), Ball (3) |
+| 2 | `PlayerBodies` | `LAYER_PLAYER_BODIES = 1 << 1` | Player CharacterBody2D | PitchWorld (1), Players (2) |
+| 3 | `BallPhysicsBody` | `LAYER_BALL_PHYSICS = 1 << 2` | Ball CharacterBody2D | PitchWorld (1) only |
+| 4 | `FootSensorArea` | `LAYER_FOOT_SENSOR = 1 << 3` | Area2D at player feet | BallPhysicsBody (3) only |
+| 5 | `AerialHitboxZone` | `LAYER_AERIAL_HITBOX = 1 << 4` | Area2D above shoulders | BallPhysicsBody (3) only |
+| 6 | `BoundarySensor` | `LAYER_BOUNDARY_SENSOR = 1 << 5` | Area2D beyond pitch edges | BallPhysicsBody (3) only |
 
-**Physics Invariant:**
-- CharacterBody2D masks layers 1 + 2 ONLY
-- MUST NOT mask layer 3 (ball) — causes velocity zeroing in solver
-- Ball interaction routes through foot sensor (layer 4)
+**Critical Physics Invariant:**
+- `CharacterBody2D` (Layer 2) masks Layer 1 + 2 ONLY (never Layer 3).
+- Ball (Layer 3) masks Layer 1 ONLY.
+- All player/ball interactions route through FootSensor (Layer 4) and AerialHitbox (Layer 5).
 
-**Usage:**
-```gdscript
-const LAYER_TERRAIN = 1
-const LAYER_PLAYERS = 2
-const LAYER_BALL = 3
-const LAYER_FOOT_SENSOR = 4
-const LAYER_AERIAL = 5
-```
-
----
-
-## Extension Points (Planned)
-
-### RelationshipData (PLANNED — Part V)
-
-Per-teammate relationship tracking:
-```gdscript
-class_name RelationshipData
-extends Resource
-
-@export var trust: float = 0.5
-@export var rivalry_score: float = 0.0
-@export var history: Array[String] = []
-@export var last_interaction_match: int = 0
-```
-
-Will be stored in `PlayerData.relationships: Dictionary[String, RelationshipData]`.
-
-Plugs into utility pass scoring:
-```gdscript
-var rel: RelationshipData = carrier.player_data.relationships.get(candidate.player_id)
-var trust_weight: float = lerp(0.6, 1.2, rel.trust if rel else 0.5)
-score *= trust_weight
-```
-
-### WorldEvent (PLANNED — Part V)
-
-Career-mode event log:
-```gdscript
-class_name WorldEvent
-extends Resource
-
-@export var timestamp_match: int = 0
-@export var event_tag: String = ""  # e.g., "training_incident", "media_pressure"
-@export var primary_player_id: String = ""
-@export var secondary_player_id: String = ""
-@export var narrative_context: String = ""
-@export var resolved: bool = false
-@export var resolution_choice: int = -1
-```
-
-Will feed PressOffice and relationship updates.
-
----
-
-## Notes
-
-- All data is loaded once at boot by DataLoader and never modified (immutable by design)
-- Career-mode changes (injuries, transfers, trust) are recorded in WorldEvent log, not by modifying PlayerData
-- Trait bitmasks use single-bit flags (1, 2, 4, 8, 16, ...) for cheap testing: `(trait_bits & TRAIT_FLAG) != 0`
-- Formation anchors are normalized coordinates; multiply by pitch dimensions when applying to world

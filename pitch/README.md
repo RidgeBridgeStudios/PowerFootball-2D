@@ -53,14 +53,13 @@ func _setup_practice_arena() -> void
 **Contract:** Detects out-of-bounds and routes to set-piece coordinator.
 
 **Mechanism:**
-- Area2D around pitch perimeter (Layer 1)
-- Detects ball exit via Area2D overlap
-- Records `ball.last_touched_by` to differentiate goal kick from corner
-- Emits `GameEvents.ball_out_of_bounds(side, position, last_kicker)`
-
-**Known Gap (Phase 1):**
-- `ball_out_of_bounds` is declared but never emitted
-- Once implemented, will route to `SetPieceCoordinator.handle_out_of_bounds()`
+- StaticBody2D with Area2D perimeter sensors on `CollisionLayers.LAYER_BOUNDARY_SENSOR` (Layer 6).
+- Detects ball exit via Area2D body entered signals.
+- Checks `ball.last_touched_by` to differentiate goal kick from corner on end lines.
+- Emits `GameEvents.ball_out_of_bounds(side)` with values:
+  - `"touchline_top"` / `"touchline_bottom"` (throw-in)
+  - `"end_line_goal_kick"` / `"end_line_corner"`
+- `PitchScene.gd` intercepts and routes to `SetPieceCoordinator.handle_out_of_bounds()`.
 
 **DO NOT:**
 - Modify ball velocity; it is a passive sensor
@@ -74,17 +73,17 @@ func _setup_practice_arena() -> void
 **Contract:** Goal area detection and goal-scoring confirmation.
 
 **Mechanism:**
-- Area2D at goal mouth (Layer 1)
-- Detects ball entry; checks z-height (must be in goal)
-- Emits `GameEvents.goal_scored(team, scorer)` via `GameManager.register_goal(team, ball.last_touched_by)`
+- Area2D at goal mouth (`CollisionLayers.LAYER_PITCH_WORLD`, Layer 1).
+- Detects ball entry; checks z-height (must be in goal, `z <= 120.0`).
+- Emits `GameEvents.goal_scored(team, scorer)` via `GameManager.register_goal(team, ball.last_touched_by)`.
 
 **Integration:**
-- MatchReferee may add confirmation logic (offside check, etc.)
-- GameManager updates score and triggers PAUSE/CELEBRATION phase
+- MatchReferee tracks per-match score context and temperature.
+- GameManager updates score and triggers `GOAL_SCORED` phase.
 
 **DO NOT:**
 - Modify ball state
-- Query players; use last_touched_by from ball
+- Query players; use `last_touched_by` from ball
 
 ---
 
@@ -95,21 +94,25 @@ func _setup_practice_arena() -> void
 **Key Methods:**
 
 ```gdscript
-func handle_kickoff(team: int) -> void
-func handle_corner(attacking_team: int, corner_side: String) -> void
-func handle_goal_kick(defending_team: int) -> void
-func handle_throw_in(attacking_team: int, throw_side: String) -> void
-func handle_foul(foul_team: int, location: Vector2, foul_type: String) -> void
+func bind(ball: Pseudo3DBall, boundary: PitchBoundary, players: Node2D) -> void
+func handle_out_of_bounds(side: String, exit_pos: Vector2, last_toucher: HeavyPlayerController) -> void
+func handle_foul(fouler: HeavyPlayerController, victim: HeavyPlayerController, foul_pos: Vector2) -> void
+func handle_indirect_offside(defending_team: int, offside_pos: Vector2) -> void
+func start_kickoff(team: int) -> void
+func start_penalty_for_practice(attacking_team: int, defending_team: int) -> void
+func start_penalty_with_taker(attacking_team: int, defending_team: int, designated_taker: HeavyPlayerController) -> void
+func get_taker() -> HeavyPlayerController
 ```
 
 **Responsibilities:**
 - Position ball and players for set piece
-- Mark possession owner
+- Mark possession owner and enforce taker anti-double-touch constraints via `ball.mark_set_piece_restart()`
 - Freeze non-participating players
+- Position defensive wall at legal distance (`wall_distance = 176.0`)
 - Manage set-piece timeout (auto-resume if no input)
 
 **Integration:**
-- Receives calls from PitchBoundary, GoalZone, MatchReferee
+- Receives calls from PitchBoundary, PitchScene, OffsideDetector, and MatchReferee
 - Freezes/unfreezes PlayerBrain decision-making
 - Locks/releases input during set pieces
 
@@ -120,26 +123,32 @@ func handle_foul(foul_team: int, location: Vector2, foul_type: String) -> void
 **Visual Only.** Draws centerline, halfway, penalty boxes, corner flags.
 
 **Current State:**
-- Implemented as visual geometry
-- No collision or gameplay logic
+- Implemented as custom Node2D drawing geometry (`_draw()`).
+- No collision or gameplay logic.
 
-**Future (Phase 5):**
-- Could animate marking changes based on match state
-- Highlight penalty areas during dangerous moments
+---
+
+### Minimap.gd
+
+**Real-Time Radar HUD Component.**
+- Renders top-down 2D radar of pitch with player dots and ball position.
+- Queries `MatchWorldModel.player_positions` and `MatchWorldModel.ball_position`.
 
 ---
 
 ## Pitch Dimensions & Coordinate System
 
-**Pitch Bounds:** Normalized to [0, 100] x [0, 100] by convention
-- Actual render size determined by Camera2D zoom and viewport
+**Pitch Bounds:** Configurable via `PitchBoundary.pitch_size` (default `1600.0 x 900.0` pixels).
+- Centre spot at `(0, 0)` or `PitchBoundary.get_centre_spot()`.
+- Goals at $x = \pm 800.0$ (`goal_mouth_height = 200.0`).
 
-**Layer Mapping:**
-- Layer 1 (Terrain) — Pitch boundary, goal zones, walls
-- Layer 2 (Players) — All CharacterBody2D
-- Layer 3 (Ball) — Pseudo3DBall Area2D
-- Layer 4 (FootSensor) — Invisible player foot contact detection
-- Layer 5 (AerialHitbox) — Heading contest zones
+**Layer Mapping (6-Layer Matrix):**
+- Layer 1 (`PitchWorld`) — Pitch boundary posts, goal zones, walls
+- Layer 2 (`PlayerBodies`) — Player CharacterBody2D
+- Layer 3 (`BallPhysicsBody`) — Ball CharacterBody2D
+- Layer 4 (`FootSensorArea`) — Area2D at player feet
+- Layer 5 (`AerialHitboxZone`) — Area2D above player shoulders for aerial duels
+- Layer 6 (`BoundarySensor`) — Area2D out-of-bounds sensors
 
 ---
 
@@ -148,15 +157,16 @@ func handle_foul(foul_team: int, location: Vector2, foul_type: String) -> void
 See **.claude/rules/soccer-physics.md** and **shared/README.md** for collision layer details.
 
 **Critical:**
-- CharacterBody2D masks layers 1 + 2 ONLY (never layer 3)
-- Ball collision via Area2D, not physics
-- Foot sensor (layer 4) is pure signal detection
+- `CharacterBody2D` masks Layer 1 + 2 ONLY (never Layer 3).
+- Ball is a `CharacterBody2D` on Layer 3 masking Layer 1 only.
+- Foot sensor (Layer 4) senses Layer 3 (Ball) only.
+- Boundary sensors (Layer 6) monitor Layer 3 (Ball) only.
 
 ---
 
 ## Notes
 
-- Practice Arena is a full match with reduced player count; all systems remain active
-- Set pieces are the only time players are positioned arbitrarily (not by AI)
-- Goal detection is trigger-based (ball inside goal zone + z < threshold)
-- Boundary detection uses last_touched_by to decide corner vs. goal kick
+- Practice Arena is a full match with reduced player count (2 players); all systems remain active.
+- Set pieces are the only time players are positioned programmatically (not by AI).
+- Goal detection is trigger-based (`ball inside goal zone` + `z < threshold`).
+- Boundary detection uses `last_touched_by` to decide corner vs. goal kick.
