@@ -142,11 +142,6 @@ var ball: Pseudo3DBall = null
 var pitch_boundary: PitchBoundary = null
 var current_action: StringName = &"MaintainFormation"
 
-## Cached goalkeeper goal-line X kept for future consumers (rushes, GK swaps).
-## Refreshed by refresh_spawn_position() whenever PitchScene repositions
-## players; the live patrol/dive logic derives the line from pitch_boundary at
-## the point of use and never reads this cache.
-var _spawn_x: float = 0.0
 ## Counts down while a committed GoalieDive is in progress.
 var _goalie_dive_timer: float = 0.0
 
@@ -229,15 +224,16 @@ func bind_boundary(b: PitchBoundary) -> void:
 	pitch_boundary = b
 
 
-## Re-derives the cached goalkeeper goal-line X from the boundary. PitchScene
-## calls this after repositioning players (reset_for_kickoff(), end swaps) so
-## any future consumer of the cache never reads a stale spawn value. Patrol and
-## dive logic deliberately do not depend on this cache — they derive the line
-## from pitch_boundary at the point of use — so a missed refresh can never
-## break keeper positioning again.
+## Removed: previously refreshed a cached goalkeeper goal-line X for future
+## consumers (rushes, GK swaps). That cache (_spawn_x) is dead state — written
+## but never read — and has been deleted. Live patrol/dive logic derives the
+## line from pitch_boundary at the point of use, so no refresh is needed.
+## Kept as a no-op so the PitchScene call site and the Exposes header above stay
+## valid while the dead cache is gone. TODO(Phase-2): remove this function and
+## its call site in PitchScene.gd when the GK rush/swap consumer is implemented
+## or abandoned.
 func refresh_spawn_position() -> void:
-	if pitch_boundary != null and player != null:
-		_spawn_x = pitch_boundary.get_goal_centre(player.team).x
+	pass
 
 
 ## False for a goalkeeper once the ball is within 50px of their own goal's
