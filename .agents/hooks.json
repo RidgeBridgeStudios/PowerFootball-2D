@@ -7,7 +7,12 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 tools/hook_gdcheck.py || python tools/hook_gdcheck.py || py -3 tools/hook_gdcheck.py || python3 tools/gdcheck.py || python tools/gdcheck.py || py -3 tools/gdcheck.py",
+            "command": "python3 tools/hook_gdcheck.py || python tools/hook_gdcheck.py || py -3 tools/hook_gdcheck.py",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "python3 tools/verify_db.py || python tools/verify_db.py || py -3 tools/verify_db.py",
             "timeout": 30
           }
         ]
@@ -19,10 +24,34 @@
         "hooks": [
           {
             "type": "command",
-            "command": "python3 tools/hook_gdcheck.py || python tools/hook_gdcheck.py || py -3 tools/hook_gdcheck.py || python3 tools/gdcheck.py || python tools/gdcheck.py || py -3 tools/gdcheck.py",
+            "command": "python3 tools/hook_gdcheck.py || python tools/hook_gdcheck.py || py -3 tools/hook_gdcheck.py",
+            "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "python3 tools/dump_api.py || python tools/dump_api.py || py -3 tools/dump_api.py",
             "timeout": 30
           }
         ]
+      }
+    ],
+    "post_file_write": [
+      {
+        "matcher": "**/*.gd",
+        "command": "python3 tools/hook_gdcheck.py || python tools/hook_gdcheck.py || py -3 tools/hook_gdcheck.py",
+        "timeout": 30
+      },
+      {
+        "matcher": "data/**/*.json",
+        "command": "python3 tools/verify_db.py || python tools/verify_db.py || py -3 tools/verify_db.py",
+        "timeout": 30
+      }
+    ],
+    "pre_turn_complete": [
+      {
+        "matcher": "*",
+        "command": "python3 tools/dump_api.py || python tools/dump_api.py || py -3 tools/dump_api.py",
+        "timeout": 30
       }
     ]
   }

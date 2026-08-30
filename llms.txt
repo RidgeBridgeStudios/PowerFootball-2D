@@ -7,13 +7,16 @@
 
 ## 1. Vision & Architectural Invariants
 
+<core_invariants>
 - **docs/CORE_INVARIANTS.md** — Canonical single source of truth: Engine lock, simulation stack, choke points, and physics/AI laws.
+- **docs/API_SURFACE.md** — Auto-generated public API surface map across all 76+ scripts, exports, signals, and methods.
 - **POWERFOOTBALL_MASTER_VISION.md** — Master design vision, 5-layer simulation stack, systems design, and North Star.
 - **ROADMAP.md** — Tactical `[ ]`/`[x]` feature checklist across 5 development phases.
 - **docs/course_implementation_specification.md** — Course-derived reference specification (READ-ONLY): FSMs, formulas, gotchas.
 - **AGENTS.md** — Agent onboarding & protocol for Google Antigravity and Gemini context caching.
 - **CLAUDE.md** — Agent onboarding & entry point for Claude Code sessions.
 - **AGENTS_ERRATA.md** — Cross-agent shared memory, error logs, and pending rule proposals.
+</core_invariants>
 
 ---
 
@@ -68,6 +71,8 @@ Spatial indexing, utility scoring, time-sliced decision engines, dynamic formati
 - **entities/goalkeeper/GoalkeeperDiveBrain.gd** — Goalkeeper shot trajectory anticipation, dive commitment, and intercept triggers.
 - **entities/referee/MatchReferee.gd** — Foul evaluation, card thresholds, penalty awards, and whistle execution.
 - **entities/referee/OffsideDetector.gd** — Second-last defender line tracking and pass-release offside validation.
+- **entities/referee/MatchOfficialCrew.gd** — Complete 4-official referee crew coordinator.
+- **entities/referee/WhistleSynthesizer.gd** — Procedural referee whistle sound synthesizer.
 - **entities/manager/ManagerDirector.gd** — In-match tactical shifts, pressing tempo overrides, formation adjustments.
 </layer_2_match_ai>
 
@@ -127,9 +132,13 @@ Press office reactions, touchline dialogue, broadcast HUD, floating labels, matc
 
 <tooling>
 - **tools/gdcheck.py** — Static GDScript checker enforcing typing, valid identifiers, and Godot 4.7 API compliance.
-- **tools/hook_gdcheck.py** — Git and Antigravity hook runner for automated pre-commit / post-tool verification.
+- **tools/hook_gdcheck.py** — Git and Antigravity hook runner with XML diagnostic reporting.
+- **tools/verify_db.py** — Comprehensive database schema and constraint verification tool.
+- **tools/dump_api.py** — Automated public API surface extractor generating `docs/API_SURFACE.md`.
+- **tools/compact_errata.py** — Errata compaction tool promoting discovered rules and archiving old session state.
 - **tools/sync_rules.py** — Tool promoting rules from `AGENTS_ERRATA.md` to `.claude/rules/` and `docs/CORE_INVARIANTS.md`.
 - **tools/next_task.py** — Tool querying `ROADMAP.md` for the next unchecked Phase 1 gameplay task and relevant file context.
-- **.antigravity/commands.json** — Custom slash commands (`/verify`, `/sync-rules`, `/next-task`).
+- **tools/layer_context.py** — Targeted context injector for simulation layers 1–5.
+- **.antigravity/commands.json** — Custom slash commands (`/verify-all`, `/sync-rules`, `/compact-errata`, `/rebuild-api`, `/next-task`, `/layer-ctx`).
 - **.antigravity/hooks.json** — Lifecycle verification hooks.
 </tooling>

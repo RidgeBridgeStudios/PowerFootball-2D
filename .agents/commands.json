@@ -1,20 +1,45 @@
 {
   "commands": {
+    "verify-all": {
+      "description": "Runs complete static verification (gdcheck.py) and database schema verification (verify_db.py)",
+      "command": "python3 tools/gdcheck.py && python3 tools/verify_db.py || python tools/gdcheck.py && python tools/verify_db.py || py -3 tools/gdcheck.py && py -3 tools/verify_db.py",
+      "stream_output": true
+    },
     "verify": {
       "description": "Executes static GDScript checker (tools/gdcheck.py) and streams stdout/stderr",
       "command": "python3 tools/gdcheck.py || python tools/gdcheck.py || py -3 tools/gdcheck.py",
       "stream_output": true
     },
     "sync-rules": {
-      "description": "Parses structured logs in AGENTS_ERRATA.md and generates git commits to promote them into .claude/rules/",
+      "description": "Parses structured logs in AGENTS_ERRATA.md and promotes pending rules into .claude/rules/ and docs/CORE_INVARIANTS.md",
       "command": "python3 tools/sync_rules.py || python tools/sync_rules.py || py -3 tools/sync_rules.py",
       "stream_output": true
     },
+    "compact-errata": {
+      "description": "Promotes pending rules, compacts session_state to last 3 entries, and archives history to docs/archive/errata_history.md",
+      "command": "python3 tools/compact_errata.py || python tools/compact_errata.py || py -3 tools/compact_errata.py",
+      "stream_output": true
+    },
+    "rebuild-api": {
+      "description": "Regenerates docs/API_SURFACE.md across all 5 simulation layers from project GDScript sources",
+      "command": "python3 tools/dump_api.py || python tools/dump_api.py || py -3 tools/dump_api.py",
+      "stream_output": true
+    },
     "next-task": {
-      "description": "Reads ROADMAP.md, finds the next unchecked item in 'PHASE 1 — Gameplay Completeness', and loads the relevant file context",
+      "description": "Reads ROADMAP.md, finds the next unchecked item in 'PHASE 1 — Gameplay Completeness', and loads relevant file contexts",
       "command": "python3 tools/next_task.py || python tools/next_task.py || py -3 tools/next_task.py",
       "stream_output": true
+    },
+    "layer-ctx": {
+      "description": "Extracts targeted layer context (rules, choke points, key files) for simulation layers 1-5",
+      "command": "python3 tools/layer_context.py || python tools/layer_context.py || py -3 tools/layer_context.py",
+      "stream_output": true
     }
+  },
+  "/verify-all": {
+    "description": "Runs complete static verification (gdcheck.py) and database schema verification (verify_db.py)",
+    "command": "python3 tools/gdcheck.py && python3 tools/verify_db.py || python tools/gdcheck.py && python tools/verify_db.py || py -3 tools/gdcheck.py && py -3 tools/verify_db.py",
+    "stream_output": true
   },
   "/verify": {
     "description": "Executes static GDScript checker (tools/gdcheck.py) and streams stdout/stderr",
@@ -22,13 +47,28 @@
     "stream_output": true
   },
   "/sync-rules": {
-    "description": "Parses structured logs in AGENTS_ERRATA.md and generates git commits to promote them into .claude/rules/",
+    "description": "Parses structured logs in AGENTS_ERRATA.md and promotes pending rules into .claude/rules/ and docs/CORE_INVARIANTS.md",
     "command": "python3 tools/sync_rules.py || python tools/sync_rules.py || py -3 tools/sync_rules.py",
     "stream_output": true
   },
+  "/compact-errata": {
+    "description": "Promotes pending rules, compacts session_state to last 3 entries, and archives history to docs/archive/errata_history.md",
+    "command": "python3 tools/compact_errata.py || python tools/compact_errata.py || py -3 tools/compact_errata.py",
+    "stream_output": true
+  },
+  "/rebuild-api": {
+    "description": "Regenerates docs/API_SURFACE.md across all 5 simulation layers from project GDScript sources",
+    "command": "python3 tools/dump_api.py || python tools/dump_api.py || py -3 tools/dump_api.py",
+    "stream_output": true
+  },
   "/next-task": {
-    "description": "Reads ROADMAP.md, finds the next unchecked item in 'PHASE 1 — Gameplay Completeness', and loads the relevant file context",
+    "description": "Reads ROADMAP.md, finds the next unchecked item in 'PHASE 1 — Gameplay Completeness', and loads relevant file contexts",
     "command": "python3 tools/next_task.py || python tools/next_task.py || py -3 tools/next_task.py",
+    "stream_output": true
+  },
+  "/layer-ctx": {
+    "description": "Extracts targeted layer context (rules, choke points, key files) for simulation layers 1-5",
+    "command": "python3 tools/layer_context.py || python tools/layer_context.py || py -3 tools/layer_context.py",
     "stream_output": true
   }
 }
