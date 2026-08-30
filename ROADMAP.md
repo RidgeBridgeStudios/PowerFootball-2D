@@ -27,8 +27,8 @@ Make players feel like individuals with relationships and hidden depth.
 - [ ] overall_rating and reputation derived fields
 - [ ] Star-marking utility scorer
 - [ ] Relationship trust graph
-- [ ] Trust multiplier on pass utility
-- [ ] Trust decay/gain events
+- [x] Trust multiplier on pass utility
+- [x] Trust decay/gain events
 
 ## PHASE 3 — Club World
 
