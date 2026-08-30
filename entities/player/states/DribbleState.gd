@@ -80,6 +80,15 @@ func exit(player: HeavyPlayerController) -> void:
 
 
 func process(player: HeavyPlayerController, delta: float) -> StringName:
+	# CPU players: exit dribble when the brain has decided to shoot or pass.
+	# The brain's _steer_for_action() already handles the kick execution inline —
+	# DribbleState only needs to step aside so the next frame's movement is correct.
+	if not player.is_user_controlled:
+		var brain: PlayerBrain = player.get_node_or_null("PlayerBrain") as PlayerBrain
+		if brain != null:
+			if brain.current_action == &"AttemptShoot" or brain.current_action == &"Pass":
+				return PlayerState.MOVE
+
 	_touch_cooldown = maxf(_touch_cooldown - delta, 0.0)
 
 	var common: StringName = check_common_transitions(player)
