@@ -18,8 +18,8 @@
 ## Depends on: GameManager, GameEvents, PitchBoundary, Pseudo3DBall,
 ##             HeavyPlayerController, PlayerBrain, SetPieceCoordinator,
 ##             DataLoader, PlayerFactory, RefereeLoader, MatchReferee,
-##             ManagerLoader, ManagerData, ManagerDirector, PressOffice,
-##             TouchlineBubble, Minimap.
+##             OffsideDetector, ManagerLoader, ManagerData, ManagerDirector,
+##             PressOffice, TouchlineBubble, Minimap.
 ## Exposes: reset_for_kickoff(), shake_camera(amount)
 ##
 
@@ -74,6 +74,7 @@ var _is_practice_mode: bool = false
 @onready var hud: HUD = $HUD
 @onready var _set_piece_coordinator: SetPieceCoordinator = $SetPieceCoordinator
 @onready var match_referee: MatchReferee = $MatchReferee
+@onready var _offside_detector: OffsideDetector = $OffsideDetector
 @onready var _manager_director_a: ManagerDirector = $ManagerDirectorA
 @onready var _manager_director_b: ManagerDirector = $ManagerDirectorB
 @onready var _touchline_bubble: TouchlineBubble = $TouchlineBubble
@@ -133,6 +134,7 @@ func _on_pregame_confirmed() -> void:
 	_bind_players()
 	_bind_camera(hud.active_player)
 	_set_piece_coordinator.bind(ball, boundary, players)
+	_offside_detector.bind(boundary, _set_piece_coordinator)
 
 	var team_a_name: String = _selected_home_team.team_name if _selected_home_team != null else (DataLoader.get_team(GameManager.TEAM_A).team_name if DataLoader.league != null else "Team A")
 	var team_b_name: String = _selected_away_team.team_name if _selected_away_team != null else (DataLoader.get_team(GameManager.TEAM_B).team_name if DataLoader.league != null else "Team B")

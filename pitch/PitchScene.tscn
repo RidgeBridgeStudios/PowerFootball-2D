@@ -1,4 +1,4 @@
-[gd_scene load_steps=17 format=3]
+[gd_scene load_steps=18 format=3]
 
 [ext_resource type="Script" path="res://pitch/PitchScene.gd" id="1_pitch"]
 [ext_resource type="Script" path="res://pitch/PitchBoundary.gd" id="2_boundary"]
@@ -9,6 +9,7 @@
 [ext_resource type="PackedScene" path="res://ui/HUD.tscn" id="7_hud"]
 [ext_resource type="Script" path="res://pitch/SetPieceCoordinator.gd" id="8_set_piece"]
 [ext_resource type="Script" path="res://entities/referee/MatchReferee.gd" id="9_match_referee"]
+[ext_resource type="Script" path="res://entities/referee/OffsideDetector.gd" id="17_offside_detector"]
 [ext_resource type="Script" path="res://entities/manager/ManagerDirector.gd" id="10_manager_director"]
 [ext_resource type="Script" path="res://pitch/PitchMarkings.gd" id="11_markings"]
 [ext_resource type="PackedScene" path="res://ui/TouchlineBubble.tscn" id="12_touchline"]
@@ -245,6 +246,9 @@ one_shot = true
 
 [node name="MatchReferee" type="Node" parent="."]
 script = ExtResource("9_match_referee")
+
+[node name="OffsideDetector" type="Node" parent="."]
+script = ExtResource("17_offside_detector")
 
 [node name="ManagerDirectorA" type="Node" parent="."]
 script = ExtResource("10_manager_director")

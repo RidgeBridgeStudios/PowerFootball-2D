@@ -155,6 +155,17 @@ func _start_free_kick(team: int, foul_pos: Vector2) -> void:
 	_build_defensive_wall(foul_pos, 1 - team)
 
 
+## Public entry point for offside restarts. Identical to an indirect free kick
+## awarded to the defending team at the offside position — but the caller
+## (OffsideDetector) has already called GameManager.start_free_kick() itself
+## (to set free_kick_is_direct = false), so this only runs the coordinator-local
+## setup (freeze → assign taker → position defenders → await confirmation)
+## rather than _start_free_kick(), which would call GameManager.start_free_kick()
+## a second time and force the restart back to direct.
+func handle_indirect_offside(defending_team: int, offside_pos: Vector2) -> void:
+	_setup_taking_side(GameManager.MatchPhase.FREE_KICK, defending_team, offside_pos)
+
+
 ## Public entry point for the Practice Arena. Computes the penalty spot for
 ## `defending_team`'s goal and runs the full penalty setup.
 func start_penalty_for_practice(attacking_team: int, defending_team: int) -> void:

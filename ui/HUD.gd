@@ -70,6 +70,7 @@ func _ready() -> void:
 	GameEvents.substitution_made.connect(_on_substitution_made)
 	GameEvents.yellow_card_shown.connect(_on_yellow_card_shown)
 	GameEvents.red_card_shown.connect(_on_red_card_shown)
+	GameEvents.offside_called.connect(_on_offside_called)
 
 	power_meter.min_value = 0.0
 	power_meter.max_value = 1.0
@@ -301,6 +302,10 @@ func _on_red_card_shown(player: Node, _team: int, is_second_yellow: bool) -> voi
 		return
 	var label: String = "[R] RED CARD (2nd yellow)" if is_second_yellow else "[R] RED CARD"
 	_show_set_piece_banner("%s — #%d %s" % [label, data.shirt_number, data.player_name])
+
+
+func _on_offside_called(_offside_player: Node, _defending_team: int, _position: Vector2) -> void:
+	_show_set_piece_banner("OFFSIDE")
 
 
 func _show_set_piece_banner(text: String) -> void:
