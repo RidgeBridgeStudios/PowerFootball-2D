@@ -45,6 +45,7 @@ Every major feature touches at least two layers. Single-layer systems are orname
 | entities/player/PlayerBrain.gd | Utility-scored AI. Runs on 15-frame jitter per player_index. | Allocate or scan trees inside _physics_process |
 | shared/PlayerData.gd | Player attributes, traits, relationships. Persists across matches. | Mutate attributes directly; use methods only |
 | shared/CollisionLayers.gd | Layer constants. CharacterBody2D masks Layer 1+2 ONLY. | Mask Layer 3 in CharacterBody2D |
+| docs/course_implementation_specification.md | READ-ONLY. Course-derived build phases 1–10, FSM patterns, physics formulas, data models, known gotchas, and agent protocol. Consult before starting any new phase or implementing any system described in Sections 7–13. | Modify this file. It is a reference artifact only. |
 
 ## 4. Verification
 
