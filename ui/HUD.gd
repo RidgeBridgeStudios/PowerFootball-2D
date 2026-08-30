@@ -33,6 +33,11 @@ var active_player: HeavyPlayerController = null
 
 var _banner_tween: Tween = null
 var _wall_hint_tween: Tween = null
+var _sub_banner_tween: Tween = null
+
+## Built programmatically in _ready() — HUD.tscn has no spare label slot for
+## this, and the set piece banner it visually echoes is reserved for restarts.
+var _sub_banner_label: Label = null
 
 @onready var score_label: Label = $Root/TopBar/ScoreLabel
 @onready var clock_label: Label = $Root/TopBar/ClockLabel
@@ -62,6 +67,7 @@ func _ready() -> void:
 	GameEvents.free_kick_started.connect(_on_free_kick_started)
 	GameEvents.penalty_started.connect(_on_penalty_started)
 	GameEvents.defensive_wall_requested.connect(_on_defensive_wall_requested)
+	GameEvents.substitution_made.connect(_on_substitution_made)
 
 	power_meter.min_value = 0.0
 	power_meter.max_value = 1.0
@@ -75,6 +81,23 @@ func _ready() -> void:
 	mood_label.text = ""
 	mood_label.visible = false
 	nameplate_panel.visible = false
+
+	_sub_banner_label = Label.new()
+	_sub_banner_label.name = "SubBannerLabel"
+	_sub_banner_label.layout_mode = 1
+	_sub_banner_label.anchors_preset = 5
+	_sub_banner_label.anchor_left = 0.5
+	_sub_banner_label.anchor_right = 0.5
+	_sub_banner_label.offset_left = -220.0
+	_sub_banner_label.offset_top = 160.0
+	_sub_banner_label.offset_right = 220.0
+	_sub_banner_label.offset_bottom = 184.0
+	_sub_banner_label.grow_horizontal = 2
+	_sub_banner_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_sub_banner_label.add_theme_font_size_override("font_size", 18)
+	_sub_banner_label.modulate.a = 0.0
+	_sub_banner_label.visible = false
+	$Root.add_child(_sub_banner_label)
 
 
 func _process(_delta: float) -> void:
@@ -275,6 +298,31 @@ func _show_set_piece_banner(text: String) -> void:
 	_banner_tween.tween_interval(BANNER_HOLD_TIME)
 	_banner_tween.tween_property(set_piece_banner, "modulate:a", 0.0, BANNER_FADE_TIME)
 	_banner_tween.tween_callback(func() -> void: set_piece_banner.visible = false)
+
+
+func _on_substitution_made(team: int, player_out_idx: int, player_in_idx: int) -> void:
+	var out_data: PlayerData = DataLoader.get_player(team, player_out_idx)
+	var in_data: PlayerData = DataLoader.get_player(team, player_in_idx)
+	_show_sub_banner("↓ #%d %s   ↑ #%d %s" % [
+		out_data.shirt_number, out_data.player_name,
+		in_data.shirt_number, in_data.player_name,
+	])
+
+
+## Alpha 0→1→0 over 2s total: 0.3s in, 1.4s held, 0.3s out.
+func _show_sub_banner(text: String) -> void:
+	_sub_banner_label.text = text
+	_sub_banner_label.visible = true
+	_sub_banner_label.modulate.a = 0.0
+
+	if _sub_banner_tween != null and _sub_banner_tween.is_valid():
+		_sub_banner_tween.kill()
+
+	_sub_banner_tween = create_tween()
+	_sub_banner_tween.tween_property(_sub_banner_label, "modulate:a", 1.0, 0.3)
+	_sub_banner_tween.tween_interval(1.4)
+	_sub_banner_tween.tween_property(_sub_banner_label, "modulate:a", 0.0, 0.3)
+	_sub_banner_tween.tween_callback(func() -> void: _sub_banner_label.visible = false)
 
 
 func _show_wall_hint() -> void:

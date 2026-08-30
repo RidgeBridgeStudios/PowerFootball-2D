@@ -99,6 +99,9 @@ func _ready() -> void:
 	randomize()
 	_apply_match_config()
 
+	if not GameEvents.substitution_made.is_connected(_on_substitution_made):
+		GameEvents.substitution_made.connect(_on_substitution_made)
+
 	if _is_practice_mode:
 		_setup_practice_arena()
 	else:
@@ -530,6 +533,38 @@ func _bind_players() -> void:
 		PlayerFactory.apply(player, DataLoader.get_player(player.team, player.squad_index), anchor)
 
 	minimap.bind(players, boundary)
+
+
+## Reacts to a substitution made in PauseMenu: finds the live node whose
+## squad_index matches player_out_idx and re-applies it in place as
+## player_in_idx via HeavyPlayerController.apply_player_data() — never freed
+## and re-added, so the FSM, MatchWorldModel slot and scene position all stay
+## untouched. MatchWorldModel needs no explicit refresh: player_nodes[slot]
+## still points at the same node, the team is unchanged, and its next
+## _physics_process tick (priority -100, ahead of everything else) re-reads
+## position/velocity off that same node automatically.
+func _on_substitution_made(team: int, player_out_idx: int, player_in_idx: int) -> void:
+	var incoming_data: PlayerData = DataLoader.get_player(team, player_in_idx)
+
+	var target: HeavyPlayerController = null
+	for node: Node in players.get_children():
+		var p := node as HeavyPlayerController
+		if p == null or p.team != team or p.squad_index != player_out_idx:
+			continue
+		target = p
+		break
+
+	if target == null:
+		return
+
+	var mood_node: MoodSystem = target.get_mood()
+	var old_tier: int = mood_node.current_tier if mood_node != null else -1
+
+	target.squad_index = player_in_idx
+	target.apply_player_data(incoming_data)
+
+	if mood_node != null and int(mood_node.current_tier) != old_tier:
+		GameEvents.player_mood_changed.emit(target, int(mood_node.current_tier))
 
 
 ## Hands control to whichever teammate is closest to the ball. Control transfers

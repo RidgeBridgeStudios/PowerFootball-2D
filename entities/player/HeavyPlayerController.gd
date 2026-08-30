@@ -204,6 +204,37 @@ func _on_player_mood_changed(player: Node, _tier: int) -> void:
 		_recalculate_movement_curve()
 
 
+## Re-applies a different PlayerData onto this already-live controller for an
+## in-match substitution. Unlike PlayerFactory.apply() (spawn time only) this
+## never touches formation_anchor or FSM state — the incoming player picks up
+## exactly wherever the outgoing one stood, in whatever FSM state it left
+## behind; the state machine self-corrects on its next tick.
+func apply_player_data(p: PlayerData) -> void:
+	player_mass = p.mass
+	top_speed = p.top_speed
+	acceleration_time = p.acceleration_time
+	friction_time = p.friction_time
+	turning_penalty_factor = p.turning_penalty
+	sprint_multiplier = p.sprint_multiplier
+	stamina_max = p.stamina_max
+	stamina_drain_rate = p.stamina_drain
+	stamina_recover_rate = p.stamina_recover
+
+	_recalculate_movement_curve()
+	stamina = stamina_max
+
+	set_meta(&"player_data", p)
+
+	# Mood belongs to the player, not the pitch slot — a substitute must not
+	# inherit whatever SLUMP/STREAK the outgoing player had accumulated.
+	var mood_node: MoodSystem = get_mood()
+	if mood_node != null:
+		mood_node.reset()
+
+	if brain != null:
+		brain.apply_player_data(p)
+
+
 func _apply_collision_matrix() -> void:
 	collision_layer = CollisionLayers.LAYER_PLAYER_BODIES
 	collision_mask = CollisionLayers.MASK_PLAYER_BODIES

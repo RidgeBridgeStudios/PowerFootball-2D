@@ -182,6 +182,16 @@ func bind_boundary(b: PitchBoundary) -> void:
 	pitch_boundary = b
 
 
+## Re-applies a substitute's personality attributes onto this already-bound
+## brain. formation_anchor, role and is_goalkeeper are left untouched — the
+## incoming player inherits this slot's tactical identity exactly as-is.
+func apply_player_data(p: PlayerData) -> void:
+	vision_attribute = p.vision
+	composure_attribute = p.composure
+	aggression_attribute = p.aggression
+	formation_ball_weight = p.formation_ball_weight
+
+
 ## Adopts a new formation anchor pushed by this team's ManagerDirector.
 ## new_anchors maps player_index (int) → world-space Vector2.
 func _on_formation_changed(team_id: int, new_anchors: Dictionary) -> void:
