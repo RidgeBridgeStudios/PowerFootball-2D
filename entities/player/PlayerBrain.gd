@@ -34,6 +34,9 @@
 ## Depends on: Pseudo3DBall, HeavyPlayerController (as parent node), MoodSystem
 ## (read via player.get_mood() to bias vision/composure/aggression at the
 ## decision site — mood never touches the exported attributes themselves),
+## TrustSystem (read via player.get_trust_system() — biases which teammate
+## _find_best_pass_target() picks; registered against at the moment a CPU
+## pass is struck, resolved later by DribbleState),
 ## PitchBoundary (bound via bind_boundary(), used for goalkeeper positioning
 ## and, since _find_open_space_target() reads pitch_boundary.get_centre_spot()/
 ## pitch_size, for phase-shifted formation anchors too),
@@ -718,6 +721,18 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 ## wildly long ball from ever outscoring "nothing open" and getting forced.
 const MIN_PASS_SCORE: float = 0.38
 
+## Master switch for the mood-driven risk-aversion shift on pass-target
+## scoring — see _find_best_pass_target(). Flip to false to fall back to raw
+## passer_pressure with no mood influence, without touching the scoring math.
+const MOOD_RISK_BIAS_ENABLED: bool = true
+## Added to passer_pressure while SLUMP (panicked) — pushes weight toward the
+## safe/open receiver and away from the ambitious forward ball.
+const SLUMP_RISK_AVERSION: float = 0.35
+## Subtracted from passer_pressure while STREAK (confident) — negative pressure
+## floors at 0.0 via effective_pressure's clamp, so this only ever reduces the
+## safety shift, never inverts it into extra ambition beyond "no shift at all".
+const STREAK_RISK_AVERSION: float = -0.20
+
 ## Set true (e.g. from the debugger) to print the scored candidate list and
 ## the winner every time _find_best_pass_target() runs on this player.
 var debug_log_pass_scores: bool = false
@@ -744,6 +759,28 @@ func _find_best_pass_target(passer_pressure: float = 0.0) -> HeavyPlayerControll
 	var mood_node: MoodSystem = player.get_mood() if player != null else null
 	var eff_composure: float = composure_attribute + (mood_node.get_composure_delta() if mood_node != null else 0.0)
 	eff_composure = clampf(eff_composure, 0.0, 1.0)
+
+	# Mood-driven risk aversion: folded into the same "passer_pressure" dial
+	# PassUtilityScorer already uses to shift weight from advancement toward
+	# the safe/open receiver (PRESSURE_SAFETY_SHIFT) — a panicked SLUMP player
+	# reads as more pressured than they physically are and favours the safe
+	# ball; a confident STREAK player reads as less pressured and is more
+	# willing to attempt the progressive pass. MOOD_RISK_BIAS_ENABLED is the
+	# single switch to turn this off without touching the scoring math itself.
+	var mood_risk_aversion: float = 0.0
+	if MOOD_RISK_BIAS_ENABLED and mood_node != null:
+		match mood_node.current_tier:
+			MoodSystem.Tier.SLUMP:
+				mood_risk_aversion = SLUMP_RISK_AVERSION
+			MoodSystem.Tier.STREAK:
+				mood_risk_aversion = STREAK_RISK_AVERSION
+			_:
+				mood_risk_aversion = 0.0
+
+	var trust_sys: TrustSystem = player.get_trust_system()
+	# Loop-invariant: passer_pressure and mood_risk_aversion are both fixed for
+	# this decision tick, so this is computed once rather than per candidate.
+	var effective_pressure: float = clampf(passer_pressure + mood_risk_aversion, 0.0, 1.0)
 
 	var best_target: HeavyPlayerController = null
 	var best_score: float = MIN_PASS_SCORE
@@ -790,16 +827,24 @@ func _find_best_pass_target(passer_pressure: float = 0.0) -> HeavyPlayerControll
 
 		# Hot path: bare float, allocates nothing (see PassUtilityScorer docs).
 		var score: float = PassUtilityScorer.score_pass(
-			distance, facing_dot, forward_dot, min_opp_dist, passer_pressure)
+			distance, facing_dot, forward_dot, min_opp_dist, effective_pressure)
+
+		# Trust bias: how much this passer trusts THIS candidate as a receiver
+		# nudges the already-computed utility score up or down. Neutral trust
+		# (no history yet) is a 1.0x no-op — see TrustSystem.trust_multiplier().
+		if trust_sys != null:
+			score *= TrustSystem.trust_multiplier(trust_sys.get_trust(TrustSystem.player_key(candidate)))
 
 		if debug_log_pass_scores:
 			var breakdown: PassUtilityScorer.PassScoreBreakdown = PassUtilityScorer.score_pass_breakdown(
-				distance, facing_dot, forward_dot, min_opp_dist, passer_pressure, candidate)
-			print("[PassScorer] %s -> %s  dist=%.2f angle=%.2f pressure=%.2f adv=%.2f  total=%.3f" % [
+				distance, facing_dot, forward_dot, min_opp_dist, effective_pressure, candidate)
+			# breakdown.total is pre-trust; `score` (post-multiplier) is what
+			# actually decides best_target below, so print both.
+			print("[PassScorer] %s -> %s  dist=%.2f angle=%.2f pressure=%.2f adv=%.2f  raw=%.3f trust_adj=%.3f" % [
 				player.name, candidate.name,
 				breakdown.distance_utility, breakdown.angle_utility,
 				breakdown.pressure_utility, breakdown.advancement_utility,
-				breakdown.total])
+				breakdown.total, score])
 
 		if score > best_score:
 			best_score = score
@@ -1218,6 +1263,14 @@ func _steer_for_action() -> Vector2:
 			var lead_pos: Vector2 = _cached_pass_target.global_position + _cached_pass_target.velocity * 0.3
 			var aim: Vector2 = (lead_pos - ball.global_position).normalized()
 			ball.apply_kick(aim * 260.0, 0.0, player)
+
+			# Register this pass with the passer's TrustSystem before the
+			# target reference is cleared below — DribbleState resolves this
+			# into a trust gain (receiver controls it) or loss (an opponent
+			# cuts it out) once the ball's next possession change is observed.
+			var trust_sys: TrustSystem = player.get_trust_system()
+			if trust_sys != null:
+				trust_sys.register_pass(TrustSystem.player_key(_cached_pass_target))
 
 			# Commit the receiver to the ball for a beat. Without this the
 			# receiver's own decision tick can turn it away from a pass played

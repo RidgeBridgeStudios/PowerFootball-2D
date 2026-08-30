@@ -11,7 +11,7 @@
 ## sprinting player never outruns it. Only lateral/reverse momentum is damped;
 ## forward momentum is not braked.
 ##
-## Depends on: PlayerState, HeavyPlayerController, Pseudo3DBall.
+## Depends on: PlayerState, HeavyPlayerController, Pseudo3DBall, TrustSystem.
 ## Exposes: the PlayerState interface.
 ##
 
@@ -68,6 +68,7 @@ func enter(player: HeavyPlayerController) -> void:
 	_grace_timer = 0.0
 	var ball: Pseudo3DBall = player.get_ball_in_foot_range()
 	if ball != null and player.can_carry_ball():
+		_notify_trust_of_reception(player, ball)
 		ball.set_possessor(player)
 		_possessed_ball = ball
 		player.possession_gained.emit()
@@ -104,6 +105,7 @@ func process(player: HeavyPlayerController, delta: float) -> StringName:
 		# Ball is inside the sensor — reset grace, keep tracking.
 		_grace_timer = 0.0
 		if _possessed_ball == null:
+			_notify_trust_of_reception(player, ball_in_range)
 			_possessed_ball = ball_in_range
 			ball_in_range.set_possessor(player)
 	else:
@@ -118,6 +120,24 @@ func process(player: HeavyPlayerController, delta: float) -> StringName:
 			return MOVE if player.movement_intent.length() > 0.05 else IDLE
 
 	return &""
+
+
+## Tells whoever last touched the ball (ball.last_touched_by, read BEFORE
+## set_possessor() overwrites possession — last_touched_by itself is untouched
+## by set_possessor(), see soccer-physics.md) that `player` has just gained the
+## ball, so a pending pass registered by PlayerBrain.register_pass() can be
+## resolved as a completed link-up or an interception. No-ops for a player
+## picking the ball back up after their own touch (dribble continuation) and
+## for anyone with no TrustSystem (a goalkeeper's brain never registers a
+## pending pass, but the accessor is still safe to call).
+func _notify_trust_of_reception(player: HeavyPlayerController, ball: Pseudo3DBall) -> void:
+	var previous_toucher: HeavyPlayerController = ball.last_touched_by
+	if previous_toucher == null or previous_toucher == player:
+		return
+	var passer_trust: TrustSystem = previous_toucher.get_trust_system()
+	if passer_trust != null:
+		passer_trust.resolve_possession_change(
+			TrustSystem.player_key(player), previous_toucher.team == player.team)
 
 
 func physics_process(player: HeavyPlayerController, delta: float) -> void:

@@ -36,6 +36,7 @@
 ##   - apply_external_impulse(impulse)   knockback from tackles and collisions
 ##   - get_ball_in_foot_range() / get_ball_in_aerial_range()
 ##   - get_mood()
+##   - get_trust_system()
 ##   - stamina, facing_direction, is_sprinting, movement_intent, wants_sprint
 ##   - signal stamina_state_changed(ratio)
 ##   - world_index — this player's slot in MatchWorldModel, or -1 if unregistered
@@ -222,6 +223,13 @@ func get_mood() -> MoodSystem:
 	return get_node_or_null("MoodSystem") as MoodSystem
 
 
+## TrustSystem is attached dynamically by PlayerFactory (same reasoning as
+## get_mood() above) — this player's own memory of how much it trusts each
+## teammate as a pass target.
+func get_trust_system() -> TrustSystem:
+	return get_node_or_null("TrustSystem") as TrustSystem
+
+
 func _on_player_mood_changed(player: Node, _tier: int) -> void:
 	if player == self:
 		_recalculate_movement_curve()
@@ -259,6 +267,9 @@ func apply_player_data(p: PlayerData, reset_stamina: bool = true) -> void:
 		var mood_node: MoodSystem = get_mood()
 		if mood_node != null:
 			mood_node.reset()
+		var trust_node: TrustSystem = get_trust_system()
+		if trust_node != null:
+			trust_node.reset()
 
 	if brain != null:
 		brain.apply_player_data(p)

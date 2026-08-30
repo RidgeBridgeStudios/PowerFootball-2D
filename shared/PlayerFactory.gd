@@ -7,7 +7,7 @@
 ## controller and brain exports.
 ##
 ## Depends on: PlayerData, HeavyPlayerController, PlayerBrain, MoodSystem,
-##             DataLoader, TeamData, ManagerLoader, ManagerData.
+##             TrustSystem, DataLoader, TeamData, ManagerLoader, ManagerData.
 ## Exposes: apply(player, data, anchor)
 ##
 
@@ -54,6 +54,16 @@ static func apply(player: HeavyPlayerController, data: PlayerData, anchor: Vecto
 		player.add_child(mood)
 	else:
 		mood.reset()
+
+	# Attach or reset the trust system the same way — one TrustSystem child per
+	# controller, holding this player's own trust-in-teammate memory.
+	var trust: TrustSystem = player.get_node_or_null("TrustSystem") as TrustSystem
+	if trust == null:
+		trust = TrustSystem.new()
+		trust.name = "TrustSystem"
+		player.add_child(trust)
+	else:
+		trust.reset()
 
 	# Manager coaching bonus — prized_attribute gives a small lift to every
 	# player on the squad. +0.05, clamped to 1.0. This is intentionally small:
