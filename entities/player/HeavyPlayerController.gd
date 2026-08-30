@@ -351,22 +351,32 @@ func show_action_text(message: String) -> void:
 	_action_text_cooldown = ACTION_TEXT_COOLDOWN
 
 
-## The ball currently inside the foot sensor, or null. Duck-typed lookups are
-## avoided: the sensor only masks the ball layer, so anything it reports is one.
+## The ball currently inside the foot sensor, or null. Returns the candidate
+## closest to this player so multi-ball overlaps resolve deterministically.
 func get_ball_in_foot_range() -> Pseudo3DBall:
-	for body: Node2D in foot_sensor.get_overlapping_bodies():
-		var ball := body as Pseudo3DBall
-		if ball != null:
-			return ball
-	return null
+	return _nearest_ball_from(foot_sensor.get_overlapping_bodies())
 
 
 func get_ball_in_aerial_range() -> Pseudo3DBall:
-	for body: Node2D in aerial_hitbox.get_overlapping_bodies():
+	return _nearest_ball_from(aerial_hitbox.get_overlapping_bodies())
+
+
+## Collects every Pseudo3DBall among [bodies] and returns the one closest to this
+## player's global_position. Physics reports overlaps in internal, frame-variable
+## order, so iterating all candidates and comparing distance keeps selection
+## deterministic and physically correct when two balls briefly overlap.
+func _nearest_ball_from(bodies: Array) -> Pseudo3DBall:
+	var nearest: Pseudo3DBall = null
+	var nearest_distance_sq: float = INF
+	for body: Node2D in bodies:
 		var ball := body as Pseudo3DBall
-		if ball != null:
-			return ball
-	return null
+		if ball == null:
+			continue
+		var distance_sq: float = global_position.distance_squared_to(ball.global_position)
+		if distance_sq < nearest_distance_sq:
+			nearest_distance_sq = distance_sq
+			nearest = ball
+	return nearest
 
 
 func _read_movement_intent() -> Vector2:
