@@ -14,7 +14,7 @@ Core football mechanics that must work before anything else.
 - [ ] End-of-match player ratings
 - [ ] Goalkeeper dive commitment
 - [ ] AerialState / heading resolution
-- [ ] Penalty shootout flow
+- [x] Penalty shootout flow
 - [ ] Through-ball lead targeting
 
 ## PHASE 2 — Personality and Traits

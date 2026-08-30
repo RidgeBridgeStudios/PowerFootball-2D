@@ -19,6 +19,7 @@ extends Node
 enum MatchPhase {
 	PREGAME, KICKOFF, IN_PLAY, GOAL_SCORED, HALF_TIME, FULL_TIME,
 	GOAL_KICK, CORNER_KICK, THROW_IN, FREE_KICK, PENALTY_KICK,
+	PENALTY_SHOOTOUT,
 }
 
 ## The five dead-ball phases SetPieceCoordinator drives. KICKOFF is deliberately
@@ -59,6 +60,14 @@ var set_piece_position: Vector2 = Vector2.ZERO
 ## Whether the current free kick is direct (can score directly) or indirect.
 var free_kick_is_direct: bool = true
 
+## --- Penalty shootout --------------------------------------------------------
+
+## True for the entire shootout (including the live-ball moments inside each
+## individual kick, where current_phase cycles through PENALTY_KICK/IN_PLAY
+## just like any other penalty) — see start_shootout()/end_shootout(). Distinct
+## from current_phase == PENALTY_SHOOTOUT, which only holds between kicks.
+var shootout_active: bool = false
+
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -71,6 +80,8 @@ func _process(delta: float) -> void:
 		return
 	if get_meta(&"practice_mode", false):
 		return  # Practice Arena: FSMs run, but the clock never ticks and half/full time never fire.
+	if shootout_active:
+		return  # Penalty shootout: FSMs run for each kick, but the full-time clock never resumes.
 
 	match_time += delta
 	if not _half_time_fired and match_time >= match_duration * 0.5:
@@ -87,12 +98,21 @@ func start_match() -> void:
 	score = [0, 0]
 	last_scoring_team = -1
 	_half_time_fired = false
+	shootout_active = false
 	set_phase(MatchPhase.KICKOFF)
 	GameEvents.kickoff_started.emit()
 
 
 func register_goal(team: int) -> void:
 	if current_phase != MatchPhase.IN_PLAY:
+		return
+
+	if shootout_active:
+		# PenaltyShootoutCoordinator tracks its own shootout_score; the match
+		# score, GOAL_SCORED phase and kickoff-restart ceremony must all stay
+		# untouched here, or PitchScene's normal goal handling would hijack a
+		# shootout kick into a full kickoff reset.
+		GameEvents.goal_scored.emit(team)
 		return
 
 	score[team] += 1
@@ -189,3 +209,23 @@ func get_leading_team() -> int:
 func _end_match() -> void:
 	set_phase(MatchPhase.FULL_TIME)
 	GameEvents.match_ended.emit(get_leading_team())
+
+
+## Called once by PenaltyShootoutCoordinator when full time ends level (see
+## _end_match() above — get_leading_team() returns -1 on a draw, which is
+## PitchScene._on_match_ended()'s cue to start a shootout instead of ending
+## the match). Suspends the full-time clock without touching score or
+## last_scoring_team, both of which stay owned by the regular 90 minutes.
+func start_shootout() -> void:
+	shootout_active = true
+	set_phase(MatchPhase.PENALTY_SHOOTOUT)
+
+
+## Called once by PenaltyShootoutCoordinator once a winner is decided. Re-fires
+## match_ended exactly as a normal full-time whistle would, so PitchScene's
+## existing full-time path (stats logging, etc.) runs once, at the real end of
+## the match — winner here is always TEAM_A/TEAM_B, never a draw.
+func end_shootout(winner: int) -> void:
+	shootout_active = false
+	set_phase(MatchPhase.FULL_TIME)
+	GameEvents.match_ended.emit(winner)

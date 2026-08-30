@@ -12,11 +12,13 @@
 ## controlled. The set piece banner announces each new dead-ball restart and
 ## fades itself out; the wall hint layers a short extra line on top of it when
 ## the human is defending a free kick. The mood label shows only while the
-## active player is in SLUMP or STREAK — silent during NORMAL.
+## active player is in SLUMP or STREAK — silent during NORMAL. The shootout
+## scoreboard overlay tracks GameManager.shootout_active every frame and shows
+## each team's name, running score and a 5-dot kick history.
 ##
 ## Depends on: GameManager, GameEvents, HeavyPlayerController, MoodSystem,
-##             MatchReferee.
-## Exposes: bind_active_player(player)
+##             MatchReferee, PenaltyShootoutCoordinator.
+## Exposes: bind_active_player(player), set_team_names(a, b)
 ##
 
 class_name HUD
@@ -29,6 +31,11 @@ const METER_VISIBILITY_THRESHOLD: float = 0.02
 const BANNER_HOLD_TIME: float = 1.5
 const BANNER_FADE_TIME: float = 0.4
 
+## Dots shown per team on the shootout scoreboard overlay. Sudden-death kicks
+## past this count still update the score readout, just without a dot of
+## their own — see _on_shootout_kick_result().
+const SHOOTOUT_DOTS_PER_TEAM: int = 5
+
 var active_player: HeavyPlayerController = null
 
 var _banner_tween: Tween = null
@@ -38,6 +45,23 @@ var _sub_banner_tween: Tween = null
 ## Built programmatically in _ready() — HUD.tscn has no spare label slot for
 ## this, and the set piece banner it visually echoes is reserved for restarts.
 var _sub_banner_label: Label = null
+
+## Set once by PitchScene.set_team_names() at kickoff; used only by the
+## shootout overlay, which has no other way to learn the selected team names.
+var _team_a_name: String = "Team A"
+var _team_b_name: String = "Team B"
+
+## Shootout scoreboard overlay — built programmatically for the same reason as
+## _sub_banner_label above. Visibility tracks GameManager.shootout_active every
+## frame rather than a single phase value, because current_phase cycles through
+## PENALTY_KICK/IN_PLAY for the live moments inside each individual kick.
+var _shootout_overlay: PanelContainer = null
+var _shootout_team_a_label: Label = null
+var _shootout_team_b_label: Label = null
+var _shootout_score_label: Label = null
+var _shootout_dots_a: Array[Label] = []
+var _shootout_dots_b: Array[Label] = []
+var _shootout_overlay_was_active: bool = false
 
 @onready var score_label: Label = $Root/TopBar/ScoreLabel
 @onready var clock_label: Label = $Root/TopBar/ClockLabel
@@ -71,6 +95,7 @@ func _ready() -> void:
 	GameEvents.yellow_card_shown.connect(_on_yellow_card_shown)
 	GameEvents.red_card_shown.connect(_on_red_card_shown)
 	GameEvents.offside_called.connect(_on_offside_called)
+	GameEvents.shootout_kick_result.connect(_on_shootout_kick_result)
 
 	power_meter.min_value = 0.0
 	power_meter.max_value = 1.0
@@ -102,6 +127,8 @@ func _ready() -> void:
 	_sub_banner_label.visible = false
 	$Root.add_child(_sub_banner_label)
 
+	_build_shootout_overlay()
+
 
 func _process(_delta: float) -> void:
 	if not practice_hints_panel.visible:
@@ -109,6 +136,15 @@ func _process(_delta: float) -> void:
 		clock_label.text = GameManager.get_clock_string()
 	_update_power_meter()
 	_update_stamina_bar()
+	_update_shootout_overlay()
+
+
+## Called once by PitchScene at kickoff, alongside its other bind() calls —
+## the HUD has no other way to learn the selected team names, and this avoids
+## re-deriving them a second time from GameManager meta / DataLoader here.
+func set_team_names(team_a_name: String, team_b_name: String) -> void:
+	_team_a_name = team_a_name
+	_team_b_name = team_b_name
 
 
 ## Called once from PitchScene._setup_practice_arena() to switch the HUD into
@@ -345,6 +381,126 @@ func _show_sub_banner(text: String) -> void:
 	_sub_banner_tween.tween_interval(1.4)
 	_sub_banner_tween.tween_property(_sub_banner_label, "modulate:a", 0.0, 0.3)
 	_sub_banner_tween.tween_callback(func() -> void: _sub_banner_label.visible = false)
+
+
+## --- Penalty shootout overlay -------------------------------------------------
+
+func _build_shootout_overlay() -> void:
+	_shootout_overlay = PanelContainer.new()
+	_shootout_overlay.name = "ShootoutOverlay"
+	_shootout_overlay.layout_mode = 1
+	_shootout_overlay.anchors_preset = 5
+	_shootout_overlay.anchor_left = 0.5
+	_shootout_overlay.anchor_right = 0.5
+	_shootout_overlay.offset_left = -160.0
+	_shootout_overlay.offset_right = 160.0
+	_shootout_overlay.offset_top = 40.0
+	_shootout_overlay.offset_bottom = 130.0
+	_shootout_overlay.grow_horizontal = 2
+	_shootout_overlay.visible = false
+
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.05, 0.05, 0.05, 0.78)
+	panel_style.corner_radius_top_left = 6
+	panel_style.corner_radius_top_right = 6
+	panel_style.corner_radius_bottom_left = 6
+	panel_style.corner_radius_bottom_right = 6
+	panel_style.content_margin_left = 10.0
+	panel_style.content_margin_right = 10.0
+	panel_style.content_margin_top = 6.0
+	panel_style.content_margin_bottom = 6.0
+	_shootout_overlay.add_theme_stylebox_override("panel", panel_style)
+
+	var vbox := VBoxContainer.new()
+	vbox.alignment = BoxContainer.ALIGNMENT_CENTER
+	_shootout_overlay.add_child(vbox)
+
+	var header := HBoxContainer.new()
+	header.alignment = BoxContainer.ALIGNMENT_CENTER
+	vbox.add_child(header)
+
+	_shootout_team_a_label = Label.new()
+	_shootout_team_a_label.add_theme_font_size_override("font_size", 16)
+	header.add_child(_shootout_team_a_label)
+
+	_shootout_score_label = Label.new()
+	_shootout_score_label.add_theme_font_size_override("font_size", 18)
+	_shootout_score_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	_shootout_score_label.custom_minimum_size = Vector2(56.0, 0.0)
+	header.add_child(_shootout_score_label)
+
+	_shootout_team_b_label = Label.new()
+	_shootout_team_b_label.add_theme_font_size_override("font_size", 16)
+	header.add_child(_shootout_team_b_label)
+
+	_shootout_dots_a = _build_shootout_dot_row(vbox)
+	_shootout_dots_b = _build_shootout_dot_row(vbox)
+
+	$Root.add_child(_shootout_overlay)
+
+
+func _build_shootout_dot_row(parent: VBoxContainer) -> Array[Label]:
+	var row := HBoxContainer.new()
+	row.alignment = BoxContainer.ALIGNMENT_CENTER
+	parent.add_child(row)
+
+	var dots: Array[Label] = []
+	for i: int in range(SHOOTOUT_DOTS_PER_TEAM):
+		var dot := Label.new()
+		dot.text = "○"
+		dot.modulate = Color(0.6, 0.6, 0.6)
+		dot.add_theme_font_size_override("font_size", 16)
+		row.add_child(dot)
+		dots.append(dot)
+	return dots
+
+
+## Polled every frame rather than driven off match_phase_changed: current_phase
+## cycles through PENALTY_KICK/IN_PLAY for the live moments inside each
+## individual kick, so only GameManager.shootout_active stays true for the
+## whole shootout. The rising edge (was false, now true) is what resets the
+## overlay for a fresh shootout.
+func _update_shootout_overlay() -> void:
+	var active: bool = GameManager.shootout_active
+	if active and not _shootout_overlay_was_active:
+		_reset_shootout_overlay()
+	_shootout_overlay_was_active = active
+	_shootout_overlay.visible = active
+
+
+func _reset_shootout_overlay() -> void:
+	_shootout_team_a_label.text = _team_a_name
+	_shootout_team_b_label.text = _team_b_name
+	_shootout_score_label.text = "0 – 0"
+	for dot: Label in _shootout_dots_a:
+		dot.text = "○"
+		dot.modulate = Color(0.6, 0.6, 0.6)
+	for dot: Label in _shootout_dots_b:
+		dot.text = "○"
+		dot.modulate = Color(0.6, 0.6, 0.6)
+
+
+func _on_shootout_kick_result(team: int, kick_index: int, scored: bool) -> void:
+	var dots: Array[Label] = _shootout_dots_a if team == GameManager.TEAM_A else _shootout_dots_b
+	if kick_index >= 0 and kick_index < dots.size():
+		dots[kick_index].text = "●" if scored else "○"
+		dots[kick_index].modulate = Color(0.25, 0.85, 0.3) if scored else Color(0.85, 0.25, 0.25)
+
+	var coordinator: PenaltyShootoutCoordinator = _find_shootout_coordinator()
+	if coordinator != null:
+		_shootout_score_label.text = "%d – %d" % [
+			coordinator.shootout_score[GameManager.TEAM_A],
+			coordinator.shootout_score[GameManager.TEAM_B],
+		]
+
+
+## PitchScene is the parent of the CanvasLayer parent — walk up two levels,
+## same as _find_referee() above.
+func _find_shootout_coordinator() -> PenaltyShootoutCoordinator:
+	var scene: Node = get_parent()
+	if scene == null:
+		return null
+	return scene.get_node_or_null("PenaltyShootoutCoordinator") as PenaltyShootoutCoordinator
 
 
 func _show_wall_hint() -> void:
