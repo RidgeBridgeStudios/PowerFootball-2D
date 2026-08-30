@@ -207,6 +207,14 @@ const GOALIE_DIVE_DURATION: float = 0.5
 ## hitbox during a dive.
 const GOALIE_KNOCKDOWN_IMPULSE: float = 220.0
 
+## Safety insets from the pitch boundary edges to keep outfield players inside playable bounds.
+const PITCH_TOUCHLINE_SAFETY_MARGIN: float = 35.0
+const PITCH_ENDLINE_SAFETY_MARGIN: float = 45.0
+
+## Goalkeeper arc clamping distance off the goal line (in pixels).
+const GOALIE_ARC_MIN_DIST: float = 40.0
+const GOALIE_ARC_MAX_DIST: float = 90.0
+
 ## Physics frames between decision re-evaluations. Combined with player_index as
 ## a phase offset, this spreads 22 brains over 15 frames — at most two think on
 ## any given tick instead of all of them.
@@ -360,6 +368,33 @@ func bind_boundary(b: PitchBoundary) -> void:
 	pitch_boundary = b
 
 
+## Playable pitch rectangle inset by safety margins so players never steer out of bounds.
+func get_playable_rect() -> Rect2:
+	if pitch_boundary != null:
+		var r: Rect2 = pitch_boundary.get_pitch_rect()
+		return Rect2(
+			r.position.x + PITCH_ENDLINE_SAFETY_MARGIN,
+			r.position.y + PITCH_TOUCHLINE_SAFETY_MARGIN,
+			maxf(r.size.x - PITCH_ENDLINE_SAFETY_MARGIN * 2.0, 10.0),
+			maxf(r.size.y - PITCH_TOUCHLINE_SAFETY_MARGIN * 2.0, 10.0)
+		)
+	return Rect2(-755.0, -415.0, 1510.0, 830.0)
+
+
+## Clamps `pos` strictly inside the playable pitch rectangle.
+func clamp_to_playable_area(pos: Vector2) -> Vector2:
+	var rect: Rect2 = get_playable_rect()
+	return Vector2(
+		clampf(pos.x, rect.position.x, rect.end.x),
+		clampf(pos.y, rect.position.y, rect.end.y)
+	)
+
+
+## Validates and clamps an outfield chase target inside playable bounds.
+func validate_chase_intent(target: Vector2) -> Vector2:
+	return clamp_to_playable_area(target)
+
+
 ## Removed: previously refreshed a cached goalkeeper goal-line X for future
 ## consumers (rushes, GK swaps). That cache (_spawn_x) is dead state — written
 ## but never read — and has been deleted. Live patrol/dive logic derives the
@@ -469,10 +504,11 @@ func _physics_process(delta: float) -> void:
 
 	if (_frame_counter + player_index) % _effective_update_interval == 0:
 		if is_goalkeeper:
-			# GoaliePatrol is the only decision-tree action a keeper ever
-			# picks; a committed dive must not be clobbered by this re-affirm.
+			# GoaliePatrol / GoalieRush evaluated on decision tick; dive is triggered per frame
 			if current_action != &"GoalieDive":
 				current_action = evaluate_tactical_action(_find_nearby_opponents())
+				if current_action == &"GoalieRush":
+					_cached_intercept = _predict_intercept_position()
 		else:
 			current_action = evaluate_tactical_action(_find_nearby_opponents())
 			current_duty = _resolve_defensive_duty()
@@ -492,7 +528,8 @@ func _physics_process(delta: float) -> void:
 func _steer_toward_ball_direct() -> Vector2:
 	if ball == null or player == null:
 		return Vector2.ZERO
-	var offset: Vector2 = ball.global_position - player.global_position
+	var target: Vector2 = clamp_to_playable_area(ball.global_position)
+	var offset: Vector2 = target - player.global_position
 	if offset.length() < ARRIVE_RADIUS:
 		return Vector2.ZERO
 	return offset.normalized()
@@ -587,9 +624,23 @@ func _check_goalkeeper_dive_trigger(delta: float) -> void:
 	if time_to_line < -0.12:
 		return
 
-	_cached_intercept = Vector2(goal_centre.x, ball.global_position.y + ball_vel.y * time_to_line)
+	var half_mouth: float = pitch_boundary.goal_mouth_height * 0.5
+	var predicted_y: float = ball.global_position.y + ball_vel.y * time_to_line
+	if absf(predicted_y - goal_centre.y) > half_mouth + 40.0:
+		return
+
+	_cached_intercept = Vector2(goal_centre.x, predicted_y)
 	current_action = &"GoalieDive"
 	_goalie_dive_timer = GOALIE_DIVE_DURATION
+
+	if player.state_factory != null and player.state_factory.current_state != PlayerState.GOALKEEPER_DIVE:
+		var dive_state := player.state_factory.get_state(PlayerState.GOALKEEPER_DIVE) as GoalkeeperDiveState
+		if dive_state != null:
+			var dive_y: float = signf(predicted_y - player.global_position.y)
+			if is_zero_approx(dive_y):
+				dive_y = 1.0
+			dive_state.dive_direction = Vector2(0.0, dive_y)
+			player.state_factory.transition_to(PlayerState.GOALKEEPER_DIVE)
 
 
 ## Returns +1.0 for Team A (+X attacking axis) or -1.0 for Team B (-X attacking axis).
@@ -799,14 +850,72 @@ func _score_maintain_formation(ctx: UtilityContext) -> float:
 	return clampf(base, 0.0, 1.0)
 
 
+## True when a loose ball is inside/near the penalty box or an unpressured attacker
+## is in a 1v1 breakaway inside 280px of goal, and the goalkeeper is the closest defending player to intercept.
+func _should_goalkeeper_rush() -> bool:
+	if pitch_boundary == null or ball == null or player == null:
+		return false
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return false
+
+	var goal_centre: Vector2 = pitch_boundary.get_goal_centre(player.team)
+	var ball_pos: Vector2 = ball.global_position
+	var dist_ball_to_goal: float = ball_pos.distance_to(goal_centre)
+
+	# Condition 1: Loose ball in or near penalty box (~320px depth from goal, ~250px half-height)
+	var is_loose_near_box: bool = ball.possessor == null and absf(ball_pos.x - goal_centre.x) < 320.0 and absf(ball_pos.y - goal_centre.y) < 250.0
+
+	# Condition 2: 1v1 breakaway inside 280px with low defensive pressure on the carrier
+	var is_1v1_breakaway: bool = false
+	if ball.possessor != null and ball.possessor.team != player.team and dist_ball_to_goal < 280.0:
+		var pressure_on_carrier: float = world.get_opponent_density(ball_pos, 110.0, ball.possessor.team)
+		if pressure_on_carrier < 0.30:
+			is_1v1_breakaway = true
+
+	if not is_loose_near_box and not is_1v1_breakaway:
+		return false
+
+	# Intercept point calculation
+	var gk_top_speed: float = player.get_current_top_speed() * 1.35
+	var intercept_pt: Vector2 = UtilityMath.calculate_intercept_point(
+		player.global_position,
+		gk_top_speed,
+		ball_pos,
+		ball.velocity,
+		ball.pitch_friction * Pseudo3DBall.FRICTION_SCALE,
+		INTERCEPT_REACTION_TIME
+	)
+
+	# Don't rush outside the defensive third (> 380px of goal)
+	if intercept_pt.distance_to(goal_centre) > 380.0:
+		return false
+
+	var gk_time: float = player.global_position.distance_to(intercept_pt) / maxf(gk_top_speed, 1.0)
+
+	# Check if another defending teammate can intercept faster
+	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+		var other: HeavyPlayerController = world.player_nodes[i]
+		if not is_instance_valid(other) or other == player:
+			continue
+		if world.player_teams[i] != player.team:
+			continue
+		var other_speed: float = other.get_current_top_speed()
+		var other_time: float = world.player_positions[i].distance_to(intercept_pt) / maxf(other_speed, 1.0)
+		if other_time < gk_time * 0.85:
+			return false
+
+	_cached_intercept = intercept_pt
+	return true
+
+
 ## Turns the contextual vector into an action name. Returned names are
 ## deliberately tactical rather than mechanical — the steering layer decides how
 ## to execute them.
 func evaluate_tactical_action(defenders_nearby: Array[Node2D]) -> StringName:
 	if is_goalkeeper:
-		# GoaliePatrol is the sole decision-tree action for a keeper — the
-		# per-frame dive trigger in _check_goalkeeper_dive_trigger() is what
-		# ever moves them off it, into GoalieDive.
+		if _should_goalkeeper_rush():
+			return &"GoalieRush"
 		return &"GoaliePatrol"
 
 	var ctx: UtilityContext = _build_context(defenders_nearby)
@@ -1008,6 +1117,12 @@ func _should_chase_ball() -> bool:
 	if world == null:
 		return false
 
+	var ball_pos: Vector2 = ball.global_position
+	var play_rect: Rect2 = get_playable_rect()
+	if ball_pos.x < play_rect.position.x - 25.0 or ball_pos.x > play_rect.end.x + 25.0 \
+			or ball_pos.y < play_rect.position.y - 25.0 or ball_pos.y > play_rect.end.y + 25.0:
+		return false
+
 	# Role-based chase budget: how many players of this role are allowed to
 	# chase the ball at once. Defenders only send 1 if they are the closest;
 	# attackers can send up to 2 (striker + a supporting wide player).
@@ -1027,7 +1142,6 @@ func _should_chase_ball() -> bool:
 			else 260.0 if role == Role.OUTFIELD_DEFENDER
 			else 0.0)
 
-	var ball_pos: Vector2 = ball.global_position
 	var my_dist: float = player.global_position.distance_to(ball_pos)
 	if my_dist > max_dist:
 		return false
@@ -1095,31 +1209,38 @@ func calculate_pressure_index(defenders: Array[Node2D] = []) -> float:
 ## space-finding rather than drifting the whole shape toward the ball.
 func get_target_position() -> Vector2:
 	if ball == null:
-		return formation_anchor
+		return clamp_to_playable_area(formation_anchor)
 
 	if is_goalkeeper:
 		match current_action:
 			&"GoalieDive":
 				return _cached_intercept if _cached_intercept != Vector2.ZERO else _goalie_patrol_target()
+			&"GoalieRush":
+				return _cached_intercept if _cached_intercept != Vector2.ZERO else ball.global_position
 			_:
 				return _goalie_patrol_target()
 
+	var target: Vector2
 	match current_action:
 		&"ChaseBall", &"PanicClear", &"AttemptDribble":
 			# Prefer chasing the ball carrier rather than the raw ball position.
 			# Carrier is whoever last touched the ball and is an opponent.
 			var carrier: HeavyPlayerController = _get_ball_carrier()
 			if carrier != null:
-				return carrier.global_position
-			return ball.global_position
+				target = carrier.global_position
+			else:
+				target = ball.global_position
 		&"Pass":
 			if _cached_pass_target != null and is_instance_valid(_cached_pass_target):
-				return _cached_pass_target.global_position + _cached_pass_target.velocity * 0.3
-			return ball.global_position
+				target = _cached_pass_target.global_position + _cached_pass_target.velocity * 0.3
+			else:
+				target = ball.global_position
 		&"AttemptShoot":
-			return ball.global_position if ball != null else formation_anchor
+			target = ball.global_position if ball != null else formation_anchor
 		_:
-			return _cached_space_target
+			target = _cached_space_target
+
+	return clamp_to_playable_area(target)
 
 
 ## Closed-form intercept: where this player and the decelerating ball can first
@@ -1205,71 +1326,144 @@ const OFF_BALL_CROWD_RADIUS: float = 70.0
 const OFF_BALL_ANCHOR_NORM: float = 100.0
 
 
+## Returns true if this player is in an attacking role (ST, LW, RW, AM).
+func _is_attacking_role() -> bool:
+	if role == Role.OUTFIELD_ATTACKER:
+		return true
+	if player != null and player.role_config != null:
+		var rname: String = player.role_config.role_name
+		if rname == "ST" or rname == "LW" or rname == "RW" or rname == "AM" or rname == "CF" or rname == "SS":
+			return true
+	var pdata: PlayerData = player.get_meta(&"player_data", null) as PlayerData if player != null else null
+	if pdata != null and (pdata.position_role == "ST" or pdata.position_role == "LW" or pdata.position_role == "RW" or pdata.position_role == "AM" or pdata.position_role == "CF"):
+		return true
+	return false
+
+
 ## Off-ball target evaluation: given a tactical anchor point [anchor] — already
 ## resolved by the caller (a dynamic formation anchor, a defensive press point,
 ## whatever this role's positioning logic decided is "home" for this tick) —
-## samples a small fan of nearby candidates and blends two scores per
-## candidate: proximity to [anchor], and openness (distance to the nearest
-## opponent, penalised for teammate crowding). The two are blended by this
-## player's ROLE_SPACE_ALPHA: a defender's low alpha means the anchor score
-## dominates and the player barely drifts, while an attacker's high alpha lets
-## a nearby open pocket outscore sitting exactly on the anchor.
-##
-## Reuses MatchWorldModel.nearest_opponent_dist_to() — the same allocation-free
-## openness primitive _find_channel_run_target() already uses — so this adds no
-## new spatial-query pattern to the file, and callers pass in whatever anchor
-## their existing role/phase logic already computed (formation anchor, ball
-## press point, drop-off target) rather than this function reaching for one
-## itself.
+## samples candidate points and scores them across forward advancement, defender
+## separation, and passing lane openness from the ball carrier.
+## Blends the best candidate with [anchor] via (1.0 - player.role_config.anchor_weight).
 func _evaluate_off_ball_target(anchor: Vector2) -> Vector2:
 	if player == null:
 		return anchor
 	var world: MatchWorldModel = MatchWorldModel.instance
 	if world == null:
-		return anchor
+		return clamp_to_playable_area(anchor)
 
 	var alpha: float
 	if player != null and player.role_config != null:
-		# anchor_weight: 1.0 = rigid, 0.0 = free roam — the INVERSE of this
-		# function's roam alpha (ROLE_SPACE_ALPHA convention), so convert.
-		# Preset check: CB 0.80 -> 0.20 (old defender), CM 0.55 -> 0.45,
-		# ST 0.30 -> 0.70 (old attacker 0.65).
+		# anchor_weight: 1.0 = rigid, 0.0 = free roam — the INVERSE of roam alpha
 		alpha = 1.0 - player.role_config.anchor_weight
 	else:
 		alpha = float(ROLE_SPACE_ALPHA.get(role, 0.35))
-	# Wider search radius for roles freer to roam: alpha 0.20 -> 0.6x, 0.65 -> 1.3x.
-	var radius_scale: float = lerpf(0.6, 1.3, alpha)
 
-	var has_bounds: bool = pitch_boundary != null
-	var bounds: Rect2 = pitch_boundary.get_pitch_rect() if has_bounds else Rect2()
+	var is_attacker: bool = _is_attacking_role()
+	var in_possession: bool = _current_team_phase() == FormationAnchorMath.TeamPhase.IN_POSSESSION
+	var attack_sign: float = _get_attack_sign()
+
+	var opp_goal_centre: Vector2 = pitch_boundary.get_goal_centre(1 - player.team) if pitch_boundary != null else Vector2(attack_sign * 800.0, 0.0)
+	var pitch_len: float = pitch_boundary.pitch_size.x if pitch_boundary != null else 1600.0
+
+	var carrier_pos: Vector2 = ball.global_position if ball != null else anchor
+	var carrier: HeavyPlayerController = _get_ball_carrier()
+	if carrier != null:
+		carrier_pos = carrier.global_position
+
+	var candidates: Array[Vector2] = []
+	candidates.append(anchor)
+
+	if is_attacker and in_possession:
+		# Forward channel candidates: gaps between opposing CB-FB pairs and half-spaces
+		# 1. Forward depth penetration along attack axis
+		for fwd_dist: float in [70.0, 140.0, 210.0, 280.0]:
+			candidates.append(anchor + Vector2(attack_sign * fwd_dist, 0.0))
+
+		# 2. Diagonal channel runs (cutting inside toward half-spaces or overlapping outside)
+		var anchor_side: float = signf(anchor.y)
+		if is_zero_approx(anchor_side):
+			anchor_side = 1.0
+		for fwd_dist: float in [80.0, 160.0, 240.0]:
+			# Diagonal inside toward half-space / centre
+			candidates.append(anchor + Vector2(attack_sign * fwd_dist, -anchor_side * 80.0))
+			candidates.append(anchor + Vector2(attack_sign * fwd_dist, -anchor_side * 140.0))
+			# Diagonal outside into wide channel
+			candidates.append(anchor + Vector2(attack_sign * fwd_dist, anchor_side * 80.0))
+
+		# 3. Canonical half-space and channel depth targets
+		var fwd_depth_x: float = anchor.x + attack_sign * 150.0
+		for channel_y: float in [-320.0, -160.0, 0.0, 160.0, 320.0]:
+			candidates.append(Vector2(fwd_depth_x, channel_y))
+
+		# 4. Gaps between opposing defenders
+		var opp_def_team: int = 1 - player.team
+		var opp_def_line_x: float = world.defensive_line_x[opp_def_team]
+		var opp_y_coords: Array[float] = []
+		for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+			if world.player_teams[i] == opp_def_team and is_instance_valid(world.player_nodes[i]):
+				var opos: Vector2 = world.player_positions[i]
+				if absf(opos.x - opp_def_line_x) < 180.0:
+					opp_y_coords.append(opos.y)
+		opp_y_coords.sort()
+		if opp_y_coords.size() >= 2:
+			for k: int in range(opp_y_coords.size() - 1):
+				var gap_y: float = (opp_y_coords[k] + opp_y_coords[k + 1]) * 0.5
+				candidates.append(Vector2(opp_def_line_x - attack_sign * 30.0, gap_y))
+				candidates.append(Vector2(opp_def_line_x + attack_sign * 40.0, gap_y))
+	else:
+		# Standard candidate fan around anchor
+		var radius_scale: float = lerpf(0.6, 1.3, alpha)
+		for base_offset: Vector2 in OFF_BALL_CANDIDATE_OFFSETS:
+			candidates.append(anchor + base_offset * radius_scale)
 
 	var best_pos: Vector2 = anchor
 	var best_score: float = -INF
 
-	for base_offset: Vector2 in OFF_BALL_CANDIDATE_OFFSETS:
-		var candidate: Vector2 = anchor + base_offset * radius_scale
-		if has_bounds:
-			candidate.x = clampf(candidate.x, bounds.position.x + 20.0, bounds.end.x - 20.0)
-			candidate.y = clampf(candidate.y, bounds.position.y + 20.0, bounds.end.y - 20.0)
+	for raw_candidate: Vector2 in candidates:
+		var candidate: Vector2 = clamp_to_playable_area(raw_candidate)
 
-		var anchor_score: float = 1.0 - clampf(
-			candidate.distance_to(anchor) / OFF_BALL_ANCHOR_NORM, 0.0, 1.0)
+		# 1. Forward advancement toward opposition goal line
+		var dist_to_goal: float = candidate.distance_to(opp_goal_centre)
+		var fwd_adv: float = clampf(1.0 - (dist_to_goal / (pitch_len * 0.85)), 0.0, 1.0)
+		var fwd_progress: float = clampf((candidate.x - anchor.x) * attack_sign / 220.0, -0.5, 1.0)
+		var adv_score: float = clampf(fwd_adv * 0.65 + (fwd_progress + 0.5) * 0.5 * 0.35, 0.0, 1.0)
 
+		# 2. Separation distance from nearest defender
 		var min_opp_dist: float = world.nearest_opponent_dist_to(candidate, player.team)
-		var space_score: float = clampf(min_opp_dist / OFF_BALL_OPENNESS_RADIUS, 0.0, 1.0)
+		var sep_score: float = clampf(min_opp_dist / OFF_BALL_OPENNESS_RADIUS, 0.0, 1.0)
 
+		# 3. Passing lane openness from ball carrier
+		var lane_open: bool = world.is_passing_lane_open(carrier_pos, candidate, player.team, PASS_LANE_CLEARANCE)
+		var min_lane_dist: float = world.get_passing_lane_min_distance(carrier_pos, candidate, player.team)
+		var lane_score: float = 1.0 if lane_open else clampf(min_lane_dist / PASS_LANE_CLEARANCE, 0.0, 0.8)
+
+		# 4. Teammate crowding penalty
 		var teammate_penalty: float = world.get_teammate_density(candidate, OFF_BALL_CROWD_RADIUS, player.team, player_index)
-		space_score = clampf(space_score - teammate_penalty * 0.3, 0.0, 1.0)
 
+		# 5. Composite space score
+		var space_score: float
+		if is_attacker and in_possession:
+			space_score = adv_score * 0.35 + sep_score * 0.35 + lane_score * 0.30
+			space_score = clampf(space_score - teammate_penalty * 0.35, 0.0, 1.0)
+		else:
+			space_score = clampf(sep_score - teammate_penalty * 0.30, 0.0, 1.0)
+
+		# 6. Proximity to anchor
+		var norm_dist: float = OFF_BALL_ANCHOR_NORM * (2.5 if is_attacker and in_possession else 1.0)
+		var anchor_score: float = 1.0 - clampf(candidate.distance_to(anchor) / norm_dist, 0.0, 1.0)
+
+		# 7. Blended evaluation
 		var blended: float = lerpf(anchor_score, space_score, alpha)
 		if blended > best_score:
 			best_score = blended
 			best_pos = candidate
 
-	# Chase-budget clamp: the blended target may never sit beyond this
-	# player's role budget from the anchor it was built around.
-	best_pos = clamp_chase_target(best_pos, anchor, player, world)
-	return best_pos
+	# Blend candidate target with formation anchor using alpha (1.0 - anchor_weight)
+	var final_target: Vector2 = anchor.lerp(best_pos, alpha)
+	final_target = clamp_chase_target(final_target, anchor, player, world)
+	return clamp_to_playable_area(final_target)
 
 
 const MAX_CHASE_DEFAULT: float = 250.0
@@ -1302,34 +1496,16 @@ func clamp_chase_target(
 ##   - When team HAS ball: attackers run channels, mids hold a passing angle
 ##   - When team DOES NOT have ball: attackers drop off, mids track the ball
 ##     laterally, defenders mark the nearest threat or hold the line
-## Every non-run-specific branch below (i.e. everything except the attacker's
-## channel run and the midfielder's passing-triangle angle, both of which are
-## already candidate-scored space searches in their own right) routes its
-## computed tactical point through _evaluate_off_ball_target() so the final
-## off-ball target is never a bare anchor/ball lerp — it is always nudged
-## toward whichever nearby candidate best balances that role's anchor
-## discipline against open space.
+## Every non-run-specific branch below routes through _evaluate_off_ball_target()
+## so the final off-ball target is always nudged toward whichever nearby candidate
+## best balances that role's anchor discipline against open space.
 func _find_open_space_target() -> Vector2:
 	if ball == null or player == null:
-		return formation_anchor
+		return clamp_to_playable_area(formation_anchor)
 
 	var ball_pos: Vector2 = ball.global_position
 	var has_ball: bool = _team_has_ball()
 
-	# The shape breathes toward the ball by the team's compactness setting,
-	# then shifts further along the attacking axis by team phase (in/out of
-	# possession, or transitioning between the two) — see
-	# FormationAnchorMath.get_dynamic_anchor_position(). Every anchor read
-	# inside this function uses the drifted anchor; the exported
-	# formation_anchor itself is never modified here.
-	#
-	# TUNING NOTE: three branches below then lerp toward the ball a second time
-	# (the midfield's lateral press, the attacker's drop-off, the defender's
-	# compression). Those pulls now compound with this one, so effective
-	# ball-tracking is stronger than before the dynamic anchor existed — for a
-	# midfielder at formation_ball_weight 0.3, roughly 0.51 rather than 0.30 on
-	# the X axis. That is the intended direction, but the per-branch constants
-	# were tuned against a static anchor and are worth a pass on the pitch.
 	var dynamic_anchor: Vector2 = formation_anchor.lerp(ball_pos, formation_ball_weight)
 	if pitch_boundary != null:
 		dynamic_anchor = FormationAnchorMath.get_dynamic_anchor_position(
@@ -1342,141 +1518,91 @@ func _find_open_space_target() -> Vector2:
 			pitch_boundary.pitch_size,
 			_get_attack_sign()
 		)
+	dynamic_anchor = clamp_to_playable_area(dynamic_anchor)
 
 	match role:
 
 		Role.OUTFIELD_ATTACKER:
 			if has_ball:
-				# Find the widest open lane by sampling positions at the
-				# opponent's defensive third depth and picking the one furthest
-				# from any defender.
-				return _find_channel_run_target(ball_pos)
+				# Find the best forward channel / penetration run target
+				return _evaluate_off_ball_target(dynamic_anchor)
 			else:
-				# Defending: drop toward own half but not all the way back.
-				# Maintain a threatening position so the team can counter.
-				var drop_target: Vector2 = dynamic_anchor
-				drop_target = drop_target.lerp(ball_pos, 0.20)
+				# Defending: drop toward own half but maintain counter-attack readiness
+				var drop_target: Vector2 = dynamic_anchor.lerp(ball_pos, 0.20)
 				return _evaluate_off_ball_target(drop_target)
 
 		Role.OUTFIELD_MIDFIELDER:
 			if has_ball:
-				# Hold a passing angle: position in a triangle relative to the
-				# ball carrier, at a perpendicular offset so there is always a
-				# safe outlet pass available.
+				if _is_attacking_role():
+					return _evaluate_off_ball_target(dynamic_anchor)
 				return _find_passing_triangle_position(ball_pos)
 			else:
-				# Defensive shape: hold the formation anchor but track the
-				# ball's lateral position (press the space it is going to).
-				# Reuses formation_ball_weight so the manager's tempo/trait
-				# tuning still shapes how far the midfield presses across.
 				var defend_pos: Vector2 = dynamic_anchor
 				defend_pos.x = lerpf(defend_pos.x, ball_pos.x, formation_ball_weight)
 				return _evaluate_off_ball_target(defend_pos)
 
 		Role.OUTFIELD_DEFENDER:
 			if has_ball:
-				# When team has the ball, hold the defensive line — do NOT
-				# drift forward. Compress slightly to offer a safe back-pass.
 				var safe_pos: Vector2 = dynamic_anchor
 				safe_pos = safe_pos.lerp(ball_pos, 0.08)
 				return _evaluate_off_ball_target(safe_pos)
 			else:
-				# Cover-shadow duty overrides the default hold-line/mark-
-				# threat target below: _resolve_defensive_duty() has
-				# already named a different teammate as the presser, so
-				# this defender's job right now is cutting a passing lane
-				# near the pressing situation, not standing on the line.
 				if current_duty == DefensiveDuty.COVER_SHADOW:
 					var world_press: MatchWorldModel = MatchWorldModel.instance
 					if world_press != null and is_instance_valid(world_press.press_trigger_carrier):
-						return _cover_shadow_target(world_press.press_trigger_carrier)
+						return clamp_to_playable_area(_cover_shadow_target(world_press.press_trigger_carrier))
 
-				# Shared band depth: pull this defender's default hold-shape
-				# X target toward MatchWorldModel.defensive_line_x[team] — the
-				# world-level line every defender on this team reads, stepped
-				# up/dropped once per frame from ball position and pressure on
-				# the carrier (see MatchWorldModel._update_defensive_lines()).
-				# Blended with the existing dynamic anchor rather than
-				# replacing it, so per-role/manager anchor tuning still holds.
 				var line_anchor: Vector2 = dynamic_anchor
 				var world: MatchWorldModel = MatchWorldModel.instance
 				if world != null:
 					line_anchor.x = lerpf(
 						line_anchor.x, world.defensive_line_x[player.team], DEFENSIVE_LINE_DEPTH_WEIGHT)
 
-				# Mark the nearest opposing attacker who is in a dangerous
-				# position (forward of the ball). If no threat, hold the line.
 				var threat: HeavyPlayerController = _find_nearest_threatening_opponent()
 				if threat != null:
-					# Exception: a genuine nearby threat is allowed to pull
-					# this defender off the shared line entirely — only the
-					# "nothing to mark" default below is bound to it.
-					# Position between the threat and our own goal — not on
-					# top of them, but cutting the passing lane.
-					return threat.global_position.lerp(line_anchor, 0.45)
+					var threat_pos: Vector2 = threat.global_position.lerp(line_anchor, 0.45)
+					return clamp_to_playable_area(threat_pos)
 				return _evaluate_off_ball_target(line_anchor)
 
 		_:
-			return dynamic_anchor
+			return clamp_to_playable_area(dynamic_anchor)
 
 
-## Samples 5 lateral positions at the opponent's defensive third and returns
-## the one with the most open space (furthest average distance from defenders).
+## Channel run target evaluation: leverages _evaluate_off_ball_target with the
+## phase-shifted dynamic anchor to find purposeful forward channel penetration.
 func _find_channel_run_target(ball_pos: Vector2) -> Vector2:
 	if pitch_boundary == null or player == null:
-		return formation_anchor
-	var world: MatchWorldModel = MatchWorldModel.instance
-	if world == null:
-		return formation_anchor
-
-	var bounds: Rect2 = pitch_boundary.get_pitch_rect()
-	# Target depth: push toward the opponent's goal on the X axis (goals sit
-	# at the pitch's left/right ends — see PitchBoundary.get_goal_centre()).
-	# Team 0 (TEAM_A) defends the left goal and attacks toward +X; TEAM_B
-	# defends the right goal and attacks toward -X.
-	var attack_x: float = lerpf(
-		ball_pos.x,
-		bounds.end.x - 80.0 if _get_attack_sign() > 0.0 else bounds.position.x + 80.0,
-		0.55
-	)
-
-	# Sample 5 Y positions across the pitch width (touchline to touchline),
-	# biased toward the flanks. Five is kept rather than trimmed to three: the
-	# samples are what distinguish a near-post run from a far-post one, and
-	# collapsing them loses the wide channels this function exists to find.
-	var pitch_top: float = bounds.position.y + 40.0
-	var pitch_bottom: float = bounds.end.y - 40.0
-
-	var best_pos: Vector2 = formation_anchor
-	var best_score: float = -INF
-
-	for s: int in range(5):
-		var t: float = float(s) / 4.0
-		var candidate: Vector2 = Vector2(attack_x, lerpf(pitch_top, pitch_bottom, t))
-
-		# Openness, straight off the world model.
-		var min_opp_dist: float = world.nearest_opponent_dist_to(candidate, player.team)
-
-		# Also penalise positions where a teammate is already standing nearby.
-		var teammate_penalty: float = 0.0
-		var nearby_teammates: Array[int] = world.get_nearby_teammates(candidate, 80.0, player.team, player_index)
-		for i: int in nearby_teammates:
-			var td: float = candidate.distance_to(world.player_positions[i])
-			teammate_penalty += (80.0 - td)  # Penalise overlap
-
-		var score: float = min_opp_dist - teammate_penalty * 0.5
-		if score > best_score:
-			best_score = score
-			best_pos = candidate
-
-	return best_pos
+		return clamp_to_playable_area(formation_anchor)
+	var dynamic_anchor: Vector2 = formation_anchor.lerp(ball_pos, formation_ball_weight)
+	if pitch_boundary != null:
+		dynamic_anchor = FormationAnchorMath.get_dynamic_anchor_position(
+			role,
+			_current_team_phase(),
+			formation_anchor,
+			ball_pos,
+			formation_ball_weight,
+			pitch_boundary.get_centre_spot(),
+			pitch_boundary.pitch_size,
+			_get_attack_sign()
+		)
+	return _evaluate_off_ball_target(dynamic_anchor)
 
 
 ## Returns a position in a passing triangle: offset laterally and slightly
 ## behind the ball so the midfielder is always available for a short outlet.
 func _find_passing_triangle_position(ball_pos: Vector2) -> Vector2:
 	if player == null:
-		return formation_anchor
+		return clamp_to_playable_area(formation_anchor)
+
+	var anchor_side: float = signf(formation_anchor.y - ball_pos.y)
+	if is_zero_approx(anchor_side):
+		anchor_side = 1.0
+
+	var offset_y: float = anchor_side * 140.0
+	var offset_x: float = -_get_attack_sign() * 60.0
+
+	var triangle_pos: Vector2 = ball_pos + Vector2(offset_x, offset_y)
+	return clamp_to_playable_area(triangle_pos)
 
 	# Perpendicular offset from the ball: the pitch's width runs along Y (the
 	# goals sit on the X ends), so "wide" is a Y offset, picking whichever
@@ -1765,6 +1891,8 @@ func _steer_for_action(delta: float) -> Vector2:
 		_:
 			seek_target = _cached_space_target
 
+	seek_target = validate_chase_intent(seek_target)
+
 	# --- Three-force blend ---
 	var offset: Vector2 = seek_target - player.global_position
 	var distance: float = offset.length()
@@ -1839,7 +1967,7 @@ func _assist_force() -> Vector2:
 
 	var attack_dir: Vector2 = _get_attack_direction()
 	var lateral_offset: float = player.global_position.y - ball.global_position.y
-	var assist_target: Vector2 = ball.global_position + attack_dir * 120.0 + Vector2(0.0, lateral_offset)
+	var assist_target: Vector2 = clamp_to_playable_area(ball.global_position + attack_dir * 120.0 + Vector2(0.0, lateral_offset))
 
 	var to_assist: Vector2 = assist_target - player.global_position
 	if to_assist.is_zero_approx():
@@ -1848,10 +1976,7 @@ func _assist_force() -> Vector2:
 
 
 ## Goal-line lock steering: patrol slides along Y between the posts, tracking
-## the ball, while X stays on the goal line derived from pitch_boundary except
-## during a committed dive. Replaces the outfield seek/separation/spring blend
-## entirely — a keeper's movement model is fundamentally different from an
-## outfield player's.
+## the ball along a dynamic bisector arc off the goal line except during a committed dive or rush.
 func _steer_goalkeeper() -> Vector2:
 	if player == null or ball == null:
 		return Vector2.ZERO
@@ -1866,6 +1991,16 @@ func _steer_goalkeeper() -> Vector2:
 		return dive_offset.normalized()
 
 	_set_crowd_knockdown_enabled(false)
+
+	if current_action == &"GoalieRush":
+		player.wants_sprint = true
+		var rush_target: Vector2 = _cached_intercept if _cached_intercept != Vector2.ZERO else ball.global_position
+		rush_target = clamp_to_playable_area(rush_target)
+		var rush_offset: Vector2 = rush_target - player.global_position
+		if rush_offset.length() <= 15.0:
+			return Vector2.ZERO
+		return rush_offset.normalized()
+
 	player.wants_sprint = false
 
 	var target: Vector2 = _goalie_patrol_target()
@@ -1881,18 +2016,40 @@ func _steer_goalkeeper() -> Vector2:
 	return offset.normalized() * proximity_factor
 
 
-## World-space patrol point: locked to the goal-line X derived live from
-## pitch_boundary, sliding along Y between the goal posts to track the ball.
-## Shared by _steer_goalkeeper() and get_target_position() so the two never
-## drift out of sync. Deriving the line here instead of trusting a cached
-## spawn X makes the patrol correct from the very first frame and lets it
-## follow the keeper's goal automatically across end swaps.
+## World-space patrol point: dynamic position along the bisector angle between
+## the ball position and the two goalposts, clamped to a 40–90px arc off the goal line.
 func _goalie_patrol_target() -> Vector2:
 	if pitch_boundary == null or player == null or ball == null:
 		return formation_anchor
 	var goal_centre: Vector2 = pitch_boundary.get_goal_centre(player.team)
 	var half_mouth: float = pitch_boundary.goal_mouth_height * 0.5
-	return Vector2(goal_centre.x, clampf(ball.global_position.y, goal_centre.y - half_mouth, goal_centre.y + half_mouth))
+	var ball_pos: Vector2 = ball.global_position
+
+	var pitch_in_dir: float = 1.0 if player.team == GameManager.TEAM_A else -1.0
+	var to_ball: Vector2 = ball_pos - goal_centre
+
+	if to_ball.is_zero_approx() or to_ball.x * pitch_in_dir <= 0.0:
+		return goal_centre + Vector2(pitch_in_dir * GOALIE_ARC_MIN_DIST, 0.0)
+
+	var bisector_dir: Vector2 = to_ball.normalized()
+	var dist_to_ball: float = to_ball.length()
+
+	# Dynamic arc distance off the goal line: 40px when ball is far (>600px), up to 90px when close (<200px)
+	var t_dist: float = clampf((dist_to_ball - 200.0) / 400.0, 0.0, 1.0)
+	var arc_dist: float = clampf(lerpf(GOALIE_ARC_MAX_DIST, GOALIE_ARC_MIN_DIST, t_dist), GOALIE_ARC_MIN_DIST, GOALIE_ARC_MAX_DIST)
+
+	var patrol_pos: Vector2 = goal_centre + bisector_dir * arc_dist
+
+	# Constrain Y within the goal mouth height
+	patrol_pos.y = clampf(patrol_pos.y, goal_centre.y - half_mouth, goal_centre.y + half_mouth)
+
+	# Ensure X stays on the playing field side of the goal line
+	if pitch_in_dir > 0.0:
+		patrol_pos.x = clampf(patrol_pos.x, goal_centre.x + 35.0, goal_centre.x + 130.0)
+	else:
+		patrol_pos.x = clampf(patrol_pos.x, goal_centre.x - 130.0, goal_centre.x - 35.0)
+
+	return patrol_pos
 
 
 ## Enables/disables the goalkeeper's crowd-knockdown hitbox for the duration

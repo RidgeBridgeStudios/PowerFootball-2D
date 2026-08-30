@@ -28,9 +28,9 @@ func initialise(seed_value: int) -> void:
 
 
 ## Decides the lateral dive direction for `keeper` facing `shot_velocity`, or
-## Vector2.ZERO when the shot cannot be projected onto the keeper's goal line
-## (no horizontal component, or aimed dead-centre at the keeper so a dive is
-## pointless). The direction's Y is reflex-flipped a fraction of the time,
+## Vector2.ZERO when the shot cannot be projected onto the keeper's goal line / plane
+## (no horizontal component, or aimed dead-centre at the keeper so standing/catching is
+## appropriate). The direction's Y is reflex-flipped a fraction of the time,
 ## modelling a keeper going the wrong way under pressure.
 func decide_dive(
 	keeper: HeavyPlayerController,
@@ -42,22 +42,29 @@ func decide_dive(
 	if is_zero_approx(shot_velocity.x):
 		return Vector2.ZERO
 
-	# Straight-line projection of where the ball crosses the keeper's goal line.
-	var t: float = (goal_line_x - ball.global_position.x) / shot_velocity.x
-	if t < 0.0:
-		return Vector2.ZERO
-	var predicted_y: float = ball.global_position.y + shot_velocity.y * t
+	# Calculate time to keeper's X plane and time to goal line
+	var t_keeper: float = (keeper.global_position.x - ball.global_position.x) / shot_velocity.x
+	var t_goal: float = (goal_line_x - ball.global_position.x) / shot_velocity.x
 
-	# Dead-centre: the ball is coming straight at the keeper — standing up is
-	# the right call, not committing to a side.
-	if absf(predicted_y - keeper.global_position.y) < 30.0:
+	# If shot is moving away from both keeper and goal, ignore
+	if t_goal < 0.0 and t_keeper < 0.0:
 		return Vector2.ZERO
 
-	var raw_dir: Vector2 = Vector2(0.0, predicted_y - keeper.global_position.y).normalized()
+	# Project crossing Y at keeper's plane if forward, else at goal line
+	var t_proj: float = t_keeper if t_keeper > 0.0 else t_goal
+	var predicted_y: float = ball.global_position.y + shot_velocity.y * t_proj
+
+	# Dead-centre: ball coming straight at keeper — standing up/catching is the right call
+	if absf(predicted_y - keeper.global_position.y) < 25.0:
+		return Vector2.ZERO
+
+	var diff_y: float = predicted_y - keeper.global_position.y
+	var raw_dir: Vector2 = Vector2(0.0, signf(diff_y))
+	if is_zero_approx(raw_dir.y):
+		raw_dir.y = 1.0
 
 	# Reflex-scaled wrong-way probability. Weak reflexes flip the dive often;
-	# elite keepers almost never do. PlayerData is carried on a meta key rather
-	# than a typed property — same accessor pattern as get_close_control().
+	# elite keepers almost never do.
 	var reflexes: float = 0.6
 	var player_data: PlayerData = keeper.get_meta(&"player_data", null) as PlayerData
 	if player_data != null:

@@ -42,7 +42,7 @@ static func _slot(role: String, offset: Vector2) -> Dictionary:
 
 static func _442() -> Array[Dictionary]:
 	return [
-		_slot("GK", Vector2(-880.0, 0.0)),
+		_slot("GK", Vector2(-750.0, 0.0)),
 		_slot("CB", Vector2(-550.0, -120.0)),
 		_slot("CB", Vector2(-550.0, 120.0)),
 		_slot("LB", Vector2(-520.0, -320.0)),
@@ -58,7 +58,7 @@ static func _442() -> Array[Dictionary]:
 
 static func _433() -> Array[Dictionary]:
 	return [
-		_slot("GK", Vector2(-880.0, 0.0)),
+		_slot("GK", Vector2(-750.0, 0.0)),
 		_slot("CB", Vector2(-550.0, -120.0)),
 		_slot("CB", Vector2(-550.0, 120.0)),
 		_slot("LB", Vector2(-520.0, -320.0)),
@@ -74,7 +74,7 @@ static func _433() -> Array[Dictionary]:
 
 static func _352() -> Array[Dictionary]:
 	return [
-		_slot("GK", Vector2(-880.0, 0.0)),
+		_slot("GK", Vector2(-750.0, 0.0)),
 		_slot("CB", Vector2(-550.0, -180.0)),
 		_slot("CB", Vector2(-550.0, 0.0)),
 		_slot("CB", Vector2(-550.0, 180.0)),
@@ -93,7 +93,7 @@ static func _352() -> Array[Dictionary]:
 ## string, since the role set is fixed.
 static func _4231() -> Array[Dictionary]:
 	return [
-		_slot("GK", Vector2(-880.0, 0.0)),
+		_slot("GK", Vector2(-750.0, 0.0)),
 		_slot("CB", Vector2(-550.0, -120.0)),
 		_slot("CB", Vector2(-550.0, 120.0)),
 		_slot("LB", Vector2(-520.0, -320.0)),
@@ -112,7 +112,7 @@ static func _4231() -> Array[Dictionary]:
 ## full-back to reflect the wing-back brief.
 static func _532() -> Array[Dictionary]:
 	return [
-		_slot("GK", Vector2(-880.0, 0.0)),
+		_slot("GK", Vector2(-750.0, 0.0)),
 		_slot("CB", Vector2(-580.0, -180.0)),
 		_slot("CB", Vector2(-580.0, 0.0)),
 		_slot("CB", Vector2(-580.0, 180.0)),
