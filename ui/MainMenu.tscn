@@ -1,8 +1,9 @@
-[gd_scene load_steps=4 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://ui/MainMenu.gd" id="1_mainmenu"]
-[ext_resource type="PackedScene" path="res://ui/KickOffMenu.tscn" id="2_kickoff"]
-[ext_resource type="PackedScene" path="res://ui/OptionsMenu.tscn" id="3_options"]
+[ext_resource type="Texture2D" path="res://art/logo.png" id="2_logo"]
+[ext_resource type="PackedScene" path="res://ui/KickOffMenu.tscn" id="3_kickoff"]
+[ext_resource type="PackedScene" path="res://ui/OptionsMenu.tscn" id="4_options"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -22,31 +23,19 @@ grow_horizontal = 2
 grow_vertical = 2
 color = Color(0.0509804, 0.0588235, 0.0509804, 1)
 
-[node name="LogoBox" type="VBoxContainer" parent="."]
+[node name="LogoTexture" type="TextureRect" parent="."]
 layout_mode = 1
 anchors_preset = 5
 anchor_left = 0.5
 anchor_right = 0.5
 offset_left = -300.0
-offset_top = 60.0
+offset_top = 50.0
 offset_right = 300.0
-offset_bottom = 220.0
+offset_bottom = 160.0
 grow_horizontal = 2
-alignment = 1
-
-[node name="TitleLabel" type="Label" parent="LogoBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 56
-theme_override_colors/font_color = Color(0.909804, 0.941176, 0.913725, 1)
-horizontal_alignment = 1
-text = "POWER FOOTBALL"
-
-[node name="TitleLabel2D" type="Label" parent="LogoBox"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 72
-theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
-horizontal_alignment = 1
-text = "2D"
+texture = ExtResource("2_logo")
+expand_mode = 1
+stretch_mode = 5
 
 [node name="MenuList" type="VBoxContainer" parent="."]
 layout_mode = 1
@@ -56,9 +45,9 @@ anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
 offset_left = -180.0
-offset_top = -160.0
+offset_top = -140.0
 offset_right = 180.0
-offset_bottom = 160.0
+offset_bottom = 180.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 6
@@ -99,10 +88,10 @@ custom_minimum_size = Vector2(0, 44)
 alignment = 0
 text = "✖ Quit Game"
 
-[node name="KickOffMenu" parent="." instance=ExtResource("2_kickoff")]
+[node name="KickOffMenu" parent="." instance=ExtResource("3_kickoff")]
 layout_mode = 1
 
-[node name="OptionsMenu" parent="." instance=ExtResource("3_options")]
+[node name="OptionsMenu" parent="." instance=ExtResource("4_options")]
 layout_mode = 1
 
 [node name="ComingSoonDialog" type="AcceptDialog" parent="."]
