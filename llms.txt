@@ -135,16 +135,26 @@ Press office reactions, touchline dialogue, broadcast HUD, floating labels, matc
 
 <tooling>
 - **tools/lint_invariants.py** — Domain-specific AST invariant linter enforcing layer separation, zero allocations, collision matrix, and choke points.
+- **tools/tscn_linter.py** — Scene graph and resource resolver validating ext_resource paths, node hierarchies, and collision layer masks.
+- **tools/validate_schemas.py** — Strict JSON Schema and physical invariant validator for club databases (league, managers, referees).
+- **tools/fuzz_solvers.py** — Property-based mathematical solvers and kinematic fuzz tester (100,000 randomized iterations).
+- **tools/spatial_grid_bench.py** — 22-entity spatial query latency benchmark across multiple grid cell sizes.
+- **tools/dump_match_frames.py** — Multimodal top-down SVG frame slice generator for visual evaluation.
+- **tools/formation_ascii.py** — Terminal ASCII pitch renderer for tactical formations across match phases.
 - **tools/eval_simulation.py** — Headless simulation assertion harness and runtime telemetry evaluator.
 - **tools/dump_dep_graph.py** — Static dependency DAG builder and blast radius query tool exporting to `docs/DEPENDENCY_GRAPH.json`.
 - **tools/gdcheck.py** — Static GDScript checker enforcing typing, valid identifiers, and Godot 4.7 API compliance.
 - **tools/hook_gdcheck.py** — Combined verification hook runner with XML diagnostic reporting.
 - **tools/verify_db.py** — Comprehensive database schema and constraint verification tool.
 - **tools/dump_api.py** — Automated public API surface extractor generating `docs/API_SURFACE.md`.
+- **tools/mcp_server.py** — Standard stdio Model Context Protocol (MCP) server for agent tooling and introspection.
+- **tools/lsp_client.py** — Godot Language Server Protocol client with local static diagnostic fallback.
+- **tools/worktree_manager.py** — Automated git worktree isolation and verification sandbox manager.
 - **tools/compact_errata.py** — Errata compaction tool promoting discovered rules and archiving old session state.
 - **tools/sync_rules.py** — Tool promoting rules from `AGENTS_ERRATA.md` to `.claude/rules/` and `docs/CORE_INVARIANTS.md`.
 - **tools/next_task.py** — Tool querying `ROADMAP.md` for the next unchecked Phase 1 gameplay task and relevant file context.
 - **tools/layer_context.py** — Targeted context injector for simulation layers 1–5.
-- **.antigravity/commands.json** — Custom slash commands (`/verify-all`, `/lint-invariants`, `/eval-sim`, `/blast-radius`, `/dump-dep-graph`, `/sync-rules`, `/compact-errata`, `/rebuild-api`, `/next-task`, `/layer-ctx`).
+- **.antigravity/commands.json** — Custom slash commands (`/verify-all`, `/lint-invariants`, `/eval-sim`, `/fuzz-solvers`, `/formation-audit`, `/blast-radius`, `/dump-dep-graph`, `/sync-rules`, `/compact-errata`, `/rebuild-api`, `/next-task`, `/layer-ctx`).
 - **.antigravity/hooks.json** — Lifecycle verification hooks.
+- **.antigravity/skills/** — Antigravity workflow skills (`eval-sim`, `ast-refactor`, `formation-audit`).
 </tooling>

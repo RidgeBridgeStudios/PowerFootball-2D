@@ -277,6 +277,8 @@ TREE_CRAWL_PATTERNS = [
      "get_tree().get_nodes_in_group() in AI loops violates spatial choke point; route queries through MatchWorldModel.gd"),
     (re.compile(r'get_node\s*\(\s*["\']\/root\/'),
      "Direct /root tree crawling bypasses dependency contracts; use Autoload singletons or explicit dependency injection"),
+    (re.compile(r'get_parent\s*\(\s*\)\s*\.\s*get_parent\s*\('),
+     "Chained get_parent().get_parent() in AI logic bypasses dependency contracts; use dependency injection or direct typed references"),
 ]
 
 

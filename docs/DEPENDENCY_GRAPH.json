@@ -1,17 +1,17 @@
 {
   "total_nodes": 76,
   "layer_summary": {
-    "Layer 1 \u2014 Physics & Kinematics": 28,
-    "Layer 2 \u2014 Match AI & Spatial Navigation": 17,
-    "Layer 3 \u2014 Match Social & Dynamic Psychology": 4,
-    "Layer 4 \u2014 Club World & Persistent Entities": 10,
-    "Layer 5 \u2014 Narrative, Presentation & UI": 17
+    "Layer 1 - Physics & Kinematics": 28,
+    "Layer 2 - Match AI & Spatial Navigation": 17,
+    "Layer 3 - Match Social & Dynamic Psychology": 4,
+    "Layer 4 - Club World & Persistent Entities": 10,
+    "Layer 5 - Narrative, Presentation & UI": 17
   },
   "nodes": {
     "autoloads/DataLoader.gd": {
       "class_name": null,
       "layer": 4,
-      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "layer_name": "Layer 4 - Club World & Persistent Entities",
       "extends": "Node",
       "direct_dependencies": [
         "autoloads/GameManager.gd",
@@ -41,7 +41,7 @@
     "autoloads/GameEvents.gd": {
       "class_name": null,
       "layer": 5,
-      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "Node",
       "direct_dependencies": [
         "autoloads/GameManager.gd",
@@ -139,7 +139,7 @@
     "autoloads/GameManager.gd": {
       "class_name": null,
       "layer": 5,
-      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "Node",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -197,7 +197,7 @@
     "autoloads/InputHelper.gd": {
       "class_name": null,
       "layer": 5,
-      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "Node",
       "direct_dependencies": [],
       "direct_dependents": [
@@ -223,7 +223,7 @@
     "autoloads/ManagerLoader.gd": {
       "class_name": null,
       "layer": 4,
-      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "layer_name": "Layer 4 - Club World & Persistent Entities",
       "extends": "Node",
       "direct_dependencies": [
         "pitch/PitchScene.gd",
@@ -242,7 +242,7 @@
     "autoloads/MatchStatsTracker.gd": {
       "class_name": null,
       "layer": 3,
-      "layer_name": "Layer 3 \u2014 Match Social & Dynamic Psychology",
+      "layer_name": "Layer 3 - Match Social & Dynamic Psychology",
       "extends": "Node",
       "direct_dependencies": [
         "autoloads/DataLoader.gd",
@@ -283,7 +283,7 @@
     "autoloads/MatchWorldModel.gd": {
       "class_name": null,
       "layer": 2,
-      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "Node",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -327,7 +327,7 @@
     "autoloads/RefereeLoader.gd": {
       "class_name": null,
       "layer": 4,
-      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "layer_name": "Layer 4 - Club World & Persistent Entities",
       "extends": "Node",
       "direct_dependencies": [
         "pitch/PitchScene.gd",
@@ -344,7 +344,7 @@
     "entities/ball/BallState.gd": {
       "class_name": "BallState",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "RefCounted",
       "direct_dependencies": [
         "entities/ball/BallStateFactory.gd",
@@ -365,7 +365,7 @@
     "entities/ball/BallStateFactory.gd": {
       "class_name": "BallStateFactory",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "Node",
       "direct_dependencies": [
         "entities/ball/BallState.gd",
@@ -390,7 +390,7 @@
     "entities/ball/Pseudo3DBall.gd": {
       "class_name": "Pseudo3DBall",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "CharacterBody2D",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -444,7 +444,7 @@
     "entities/ball/states/DeadBallState.gd": {
       "class_name": "DeadBallState",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "BallState",
       "direct_dependencies": [
         "entities/ball/BallState.gd",
@@ -460,7 +460,7 @@
     "entities/ball/states/FlightState.gd": {
       "class_name": "FlightState",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "BallState",
       "direct_dependencies": [
         "entities/ball/BallState.gd",
@@ -476,7 +476,7 @@
     "entities/ball/states/GroundRollState.gd": {
       "class_name": "GroundRollState",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "BallState",
       "direct_dependencies": [
         "entities/ball/BallState.gd",
@@ -492,7 +492,7 @@
     "entities/ball/states/PossessionState.gd": {
       "class_name": "PossessionState",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "BallState",
       "direct_dependencies": [
         "entities/ball/BallState.gd",
@@ -509,7 +509,7 @@
     "entities/goalkeeper/GoalkeeperDiveBrain.gd": {
       "class_name": "GoalkeeperDiveBrain",
       "layer": 2,
-      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "RefCounted",
       "direct_dependencies": [
         "entities/ball/Pseudo3DBall.gd",
@@ -527,7 +527,7 @@
     "entities/manager/ManagerDirector.gd": {
       "class_name": "ManagerDirector",
       "layer": 2,
-      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "Node",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -561,7 +561,7 @@
     "entities/manager/PressOffice.gd": {
       "class_name": "PressOffice",
       "layer": 5,
-      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "RefCounted",
       "direct_dependencies": [
         "shared/ManagerData.gd"
@@ -577,7 +577,7 @@
     "entities/player/FacingArrow.gd": {
       "class_name": "FacingArrow",
       "layer": 5,
-      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "Node2D",
       "direct_dependencies": [
         "entities/player/HeavyPlayerController.gd",
@@ -597,7 +597,7 @@
     "entities/player/HeavyPlayerController.gd": {
       "class_name": "HeavyPlayerController",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "CharacterBody2D",
       "direct_dependencies": [
         "autoloads/DataLoader.gd",
@@ -680,7 +680,7 @@
     "entities/player/MoodSystem.gd": {
       "class_name": "MoodSystem",
       "layer": 3,
-      "layer_name": "Layer 3 \u2014 Match Social & Dynamic Psychology",
+      "layer_name": "Layer 3 - Match Social & Dynamic Psychology",
       "extends": "Node",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -717,7 +717,7 @@
     "entities/player/PlayerBrain.gd": {
       "class_name": "PlayerBrain",
       "layer": 2,
-      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "Node",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -771,7 +771,7 @@
     "entities/player/PlayerState.gd": {
       "class_name": "PlayerState",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "RefCounted",
       "direct_dependencies": [
         "entities/ball/Pseudo3DBall.gd",
@@ -806,7 +806,7 @@
     "entities/player/PlayerStateFactory.gd": {
       "class_name": "PlayerStateFactory",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "Node",
       "direct_dependencies": [
         "entities/player/HeavyPlayerController.gd",
@@ -842,7 +842,7 @@
     "entities/player/TrustSystem.gd": {
       "class_name": "TrustSystem",
       "layer": 3,
-      "layer_name": "Layer 3 \u2014 Match Social & Dynamic Psychology",
+      "layer_name": "Layer 3 - Match Social & Dynamic Psychology",
       "extends": "Node",
       "direct_dependencies": [
         "autoloads/MatchStatsTracker.gd",
@@ -867,7 +867,7 @@
     "entities/player/states/AerialState.gd": {
       "class_name": "AerialState",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "PlayerState",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -888,7 +888,7 @@
     "entities/player/states/ChargeKickState.gd": {
       "class_name": "ChargeKickState",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "PlayerState",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -920,7 +920,7 @@
     "entities/player/states/DribbleState.gd": {
       "class_name": "DribbleState",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "PlayerState",
       "direct_dependencies": [
         "autoloads/MatchWorldModel.gd",
@@ -949,7 +949,7 @@
     "entities/player/states/GoalkeeperDiveState.gd": {
       "class_name": "GoalkeeperDiveState",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "PlayerState",
       "direct_dependencies": [
         "autoloads/GameManager.gd",
@@ -970,7 +970,7 @@
     "entities/player/states/IdleState.gd": {
       "class_name": "IdleState",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "PlayerState",
       "direct_dependencies": [
         "entities/player/HeavyPlayerController.gd",
@@ -986,7 +986,7 @@
     "entities/player/states/MoveState.gd": {
       "class_name": "MoveState",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "PlayerState",
       "direct_dependencies": [
         "entities/player/HeavyPlayerController.gd",
@@ -1003,7 +1003,7 @@
     "entities/player/states/PenaltyKickState.gd": {
       "class_name": "PenaltyKickState",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "PlayerState",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -1030,7 +1030,7 @@
     "entities/player/states/SetPieceFreezeState.gd": {
       "class_name": "SetPieceFreezeState",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "PlayerState",
       "direct_dependencies": [
         "autoloads/GameManager.gd",
@@ -1049,7 +1049,7 @@
     "entities/player/states/ShotLockState.gd": {
       "class_name": "ShotLockState",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "PlayerState",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -1075,7 +1075,7 @@
     "entities/player/states/TackleState.gd": {
       "class_name": "TackleState",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "PlayerState",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -1102,7 +1102,7 @@
     "entities/player/states/ThrowInState.gd": {
       "class_name": "ThrowInState",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "PlayerState",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -1135,7 +1135,7 @@
     "entities/referee/AssistantRefereeVisual.gd": {
       "class_name": "AssistantRefereeVisual",
       "layer": 2,
-      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "Node2D",
       "direct_dependencies": [
         "autoloads/MatchWorldModel.gd",
@@ -1152,7 +1152,7 @@
     "entities/referee/CenterRefereeVisual.gd": {
       "class_name": "CenterRefereeVisual",
       "layer": 2,
-      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "Node2D",
       "direct_dependencies": [
         "autoloads/MatchWorldModel.gd",
@@ -1170,7 +1170,7 @@
     "entities/referee/FourthOfficialVisual.gd": {
       "class_name": "FourthOfficialVisual",
       "layer": 2,
-      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "Node2D",
       "direct_dependencies": [
         "autoloads/DataLoader.gd",
@@ -1188,7 +1188,7 @@
     "entities/referee/MatchOfficialCrew.gd": {
       "class_name": "MatchOfficialCrew",
       "layer": 2,
-      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "Node2D",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -1226,7 +1226,7 @@
     "entities/referee/MatchReferee.gd": {
       "class_name": "MatchReferee",
       "layer": 2,
-      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "Node",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -1264,7 +1264,7 @@
     "entities/referee/OffsideDetector.gd": {
       "class_name": "OffsideDetector",
       "layer": 2,
-      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "Node",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -1290,7 +1290,7 @@
     "entities/referee/WhistleSynthesizer.gd": {
       "class_name": "WhistleSynthesizer",
       "layer": 2,
-      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "Node2D",
       "direct_dependencies": [],
       "direct_dependents": [
@@ -1303,7 +1303,7 @@
     "pitch/GoalZone.gd": {
       "class_name": "GoalZone",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "Area2D",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -1328,7 +1328,7 @@
     "pitch/MatchCamera.gd": {
       "class_name": "MatchCamera",
       "layer": 5,
-      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "Camera2D",
       "direct_dependencies": [
         "entities/ball/Pseudo3DBall.gd",
@@ -1352,7 +1352,7 @@
     "pitch/Minimap.gd": {
       "class_name": "Minimap",
       "layer": 5,
-      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "Control",
       "direct_dependencies": [
         "entities/player/FacingArrow.gd",
@@ -1377,7 +1377,7 @@
     "pitch/PenaltyShootoutCoordinator.gd": {
       "class_name": "PenaltyShootoutCoordinator",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "Node",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -1410,7 +1410,7 @@
     "pitch/PitchBoundary.gd": {
       "class_name": "PitchBoundary",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "StaticBody2D",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -1449,7 +1449,7 @@
     "pitch/PitchMarkings.gd": {
       "class_name": "PitchMarkings",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "Node2D",
       "direct_dependencies": [
         "pitch/PitchBoundary.gd"
@@ -1464,7 +1464,7 @@
     "pitch/PitchScene.gd": {
       "class_name": "PitchScene",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "Node2D",
       "direct_dependencies": [
         "autoloads/DataLoader.gd",
@@ -1558,7 +1558,7 @@
     "pitch/SetPieceCoordinator.gd": {
       "class_name": "SetPieceCoordinator",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "Node",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -1596,7 +1596,7 @@
     "shared/CollisionLayers.gd": {
       "class_name": "CollisionLayers",
       "layer": 1,
-      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "RefCounted",
       "direct_dependencies": [
         "entities/player/HeavyPlayerController.gd"
@@ -1615,7 +1615,7 @@
     "shared/FormationAnchorMath.gd": {
       "class_name": "FormationAnchorMath",
       "layer": 2,
-      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "RefCounted",
       "direct_dependencies": [
         "entities/manager/ManagerDirector.gd",
@@ -1634,7 +1634,7 @@
     "shared/FormationLibrary.gd": {
       "class_name": "FormationLibrary",
       "layer": 2,
-      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "RefCounted",
       "direct_dependencies": [
         "entities/manager/ManagerDirector.gd"
@@ -1651,7 +1651,7 @@
     "shared/FormationRegistry.gd": {
       "class_name": "FormationRegistry",
       "layer": 2,
-      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "RefCounted",
       "direct_dependencies": [
         "shared/FormationLibrary.gd",
@@ -1669,7 +1669,7 @@
     "shared/LeagueData.gd": {
       "class_name": "LeagueData",
       "layer": 4,
-      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "layer_name": "Layer 4 - Club World & Persistent Entities",
       "extends": "Resource",
       "direct_dependencies": [
         "autoloads/DataLoader.gd",
@@ -1685,7 +1685,7 @@
     "shared/ManagerData.gd": {
       "class_name": "ManagerData",
       "layer": 4,
-      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "layer_name": "Layer 4 - Club World & Persistent Entities",
       "extends": "Resource",
       "direct_dependencies": [
         "autoloads/ManagerLoader.gd",
@@ -1713,7 +1713,7 @@
     "shared/PassUtilityScorer.gd": {
       "class_name": "PassUtilityScorer",
       "layer": 2,
-      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "RefCounted",
       "direct_dependencies": [
         "autoloads/MatchWorldModel.gd",
@@ -1732,7 +1732,7 @@
     "shared/PlayerData.gd": {
       "class_name": "PlayerData",
       "layer": 4,
-      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "layer_name": "Layer 4 - Club World & Persistent Entities",
       "extends": "Resource",
       "direct_dependencies": [
         "entities/player/HeavyPlayerController.gd",
@@ -1774,7 +1774,7 @@
     "shared/PlayerFactory.gd": {
       "class_name": "PlayerFactory",
       "layer": 4,
-      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "layer_name": "Layer 4 - Club World & Persistent Entities",
       "extends": "RefCounted",
       "direct_dependencies": [
         "autoloads/DataLoader.gd",
@@ -1805,7 +1805,7 @@
     "shared/PlayerRatingCalculator.gd": {
       "class_name": "PlayerRatingCalculator",
       "layer": 3,
-      "layer_name": "Layer 3 \u2014 Match Social & Dynamic Psychology",
+      "layer_name": "Layer 3 - Match Social & Dynamic Psychology",
       "extends": "RefCounted",
       "direct_dependencies": [
         "autoloads/MatchStatsTracker.gd",
@@ -1821,7 +1821,7 @@
     "shared/PlayerRoleConfig.gd": {
       "class_name": "PlayerRoleConfig",
       "layer": 2,
-      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "Resource",
       "direct_dependencies": [
         "entities/player/HeavyPlayerController.gd",
@@ -1838,7 +1838,7 @@
     "shared/RefereeData.gd": {
       "class_name": "RefereeData",
       "layer": 4,
-      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "layer_name": "Layer 4 - Club World & Persistent Entities",
       "extends": "Resource",
       "direct_dependencies": [
         "entities/referee/MatchReferee.gd",
@@ -1859,7 +1859,7 @@
     "shared/TeamData.gd": {
       "class_name": "TeamData",
       "layer": 4,
-      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "layer_name": "Layer 4 - Club World & Persistent Entities",
       "extends": "Resource",
       "direct_dependencies": [
         "autoloads/DataLoader.gd",
@@ -1885,7 +1885,7 @@
     "shared/TeamManagementData.gd": {
       "class_name": "TeamManagementData",
       "layer": 4,
-      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "layer_name": "Layer 4 - Club World & Persistent Entities",
       "extends": "RefCounted",
       "direct_dependencies": [
         "pitch/PitchScene.gd",
@@ -1907,7 +1907,7 @@
     "shared/UtilityMath.gd": {
       "class_name": "UtilityMath",
       "layer": 2,
-      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "RefCounted",
       "direct_dependencies": [
         "entities/ball/Pseudo3DBall.gd",
@@ -1925,7 +1925,7 @@
     "ui/ActionText.gd": {
       "class_name": "ActionText",
       "layer": 5,
-      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "Node2D",
       "direct_dependencies": [
         "entities/player/HeavyPlayerController.gd"
@@ -1942,7 +1942,7 @@
     "ui/FormationDiagram.gd": {
       "class_name": "FormationDiagram",
       "layer": 5,
-      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "Control",
       "direct_dependencies": [
         "shared/FormationRegistry.gd",
@@ -1962,7 +1962,7 @@
     "ui/HUD.gd": {
       "class_name": "HUD",
       "layer": 5,
-      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "CanvasLayer",
       "direct_dependencies": [
         "autoloads/DataLoader.gd",
@@ -2018,7 +2018,7 @@
     "ui/KickOffMenu.gd": {
       "class_name": null,
       "layer": 5,
-      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "Control",
       "direct_dependencies": [
         "autoloads/DataLoader.gd",
@@ -2042,7 +2042,7 @@
     "ui/MainMenu.gd": {
       "class_name": null,
       "layer": 5,
-      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "Control",
       "direct_dependencies": [
         "autoloads/GameManager.gd",
@@ -2061,7 +2061,7 @@
     "ui/MatchStatsUI.gd": {
       "class_name": "MatchStatsUI",
       "layer": 5,
-      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "CanvasLayer",
       "direct_dependencies": [
         "autoloads/DataLoader.gd",
@@ -2087,7 +2087,7 @@
     "ui/OptionsMenu.gd": {
       "class_name": null,
       "layer": 5,
-      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "Control",
       "direct_dependencies": [
         "autoloads/GameManager.gd",
@@ -2109,7 +2109,7 @@
     "ui/TouchlineBubble.gd": {
       "class_name": "TouchlineBubble",
       "layer": 5,
-      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "CanvasLayer",
       "direct_dependencies": [
         "pitch/PitchScene.gd"
@@ -2124,7 +2124,7 @@
     "ui/pause/PauseMenu.gd": {
       "class_name": "PauseMenu",
       "layer": 5,
-      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "CanvasLayer",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
@@ -2156,7 +2156,7 @@
     "ui/pregame/PreGameScreen.gd": {
       "class_name": "PreGameScreen",
       "layer": 5,
-      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "CanvasLayer",
       "direct_dependencies": [
         "autoloads/DataLoader.gd",

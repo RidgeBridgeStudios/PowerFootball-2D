@@ -35,6 +35,8 @@ art/**/*.tmp
 .DS_Store
 Thumbs.db
 desktop.ini
+.worktrees/
+match_frames/
 
 # Historical archive files
 docs/archive/

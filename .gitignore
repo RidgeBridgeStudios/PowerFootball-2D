@@ -8,3 +8,10 @@ export_presets.cfg
 
 # Simulation evaluation telemetry reports
 eval_report.json
+
+# Python caches & temporary test outputs
+__pycache__/
+*.pyc
+*.pyo
+.worktrees/
+match_frames/

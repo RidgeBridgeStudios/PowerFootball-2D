@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-hook_gdcheck.py — Antigravity lifecycle hook runner for GDScript static verification.
+hook_gdcheck.py — Antigravity lifecycle hook runner for comprehensive static verification.
 
-Executes gdcheck.py, and on failure exits with non-zero status and structured
-XML diagnostic output to stderr so Antigravity intercepts the failure and
-feeds actionable diagnostics back into the agent context.
+Executes gdcheck.py, lint_invariants.py, tscn_linter.py, and validate_schemas.py.
+On failure, exits with non-zero status and structured XML diagnostic output to stderr
+so Antigravity intercepts the failure and feeds actionable diagnostics back into agent context.
 """
 
 from __future__ import annotations
@@ -23,6 +23,8 @@ if hasattr(sys.stderr, "reconfigure"):
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GDCHECK_PATH = os.path.join(ROOT, "tools", "gdcheck.py")
 LINT_INVARIANTS_PATH = os.path.join(ROOT, "tools", "lint_invariants.py")
+TSCN_LINTER_PATH = os.path.join(ROOT, "tools", "tscn_linter.py")
+VALIDATE_SCHEMAS_PATH = os.path.join(ROOT, "tools", "validate_schemas.py")
 
 PROBLEM_RE = re.compile(r"^(ERROR|WARN)\s+([^:]+):(\d+)\s+(.+)$")
 
@@ -81,6 +83,28 @@ def main() -> int:
         else:
             print(proc_lint.stdout, file=sys.stderr)
         return proc_lint.returncode
+
+    # 3. Run tscn_linter.py
+    cmd_tscn = [sys.executable, TSCN_LINTER_PATH, "--xml"]
+    proc_tscn = subprocess.run(cmd_tscn, cwd=ROOT, capture_output=True, text=True)
+
+    if proc_tscn.returncode != 0:
+        if proc_tscn.stderr.strip():
+            print(proc_tscn.stderr, file=sys.stderr)
+        else:
+            print(proc_tscn.stdout, file=sys.stderr)
+        return proc_tscn.returncode
+
+    # 4. Run validate_schemas.py
+    cmd_schema = [sys.executable, VALIDATE_SCHEMAS_PATH, "--xml"]
+    proc_schema = subprocess.run(cmd_schema, cwd=ROOT, capture_output=True, text=True)
+
+    if proc_schema.returncode != 0:
+        if proc_schema.stderr.strip():
+            print(proc_schema.stderr, file=sys.stderr)
+        else:
+            print(proc_schema.stdout, file=sys.stderr)
+        return proc_schema.returncode
 
     print("{}")
     return 0

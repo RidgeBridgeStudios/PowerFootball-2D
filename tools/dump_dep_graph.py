@@ -87,12 +87,17 @@ LAYER_MAPPING = {
     "ui/": 5,
 }
 
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8", errors="replace")
+
 LAYER_NAMES = {
-    1: "Layer 1 — Physics & Kinematics",
-    2: "Layer 2 — Match AI & Spatial Navigation",
-    3: "Layer 3 — Match Social & Dynamic Psychology",
-    4: "Layer 4 — Club World & Persistent Entities",
-    5: "Layer 5 — Narrative, Presentation & UI"
+    1: "Layer 1 - Physics & Kinematics",
+    2: "Layer 2 - Match AI & Spatial Navigation",
+    3: "Layer 3 - Match Social & Dynamic Psychology",
+    4: "Layer 4 - Club World & Persistent Entities",
+    5: "Layer 5 - Narrative, Presentation & UI"
 }
 
 CLASS_NAME_RE = re.compile(r'^\s*class_name\s+([A-Za-z0-9_]+)', re.MULTILINE)
@@ -345,7 +350,7 @@ def print_blast_radius_report(report: dict[str, Any]) -> None:
     if report["choke_points_impacted"]:
         print(f"\n [!] Critical Choke Points Impacted:")
         for cp in report["choke_points_impacted"]:
-            print(f"     • {cp}")
+            print(f"     * {cp}")
 
     if report["signals_declared"]:
         print(f"\n Signals Declared:       {', '.join(report['signals_declared'])}")

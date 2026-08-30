@@ -1,8 +1,8 @@
 {
   "commands": {
     "verify-all": {
-      "description": "Runs complete static verification (gdcheck.py), domain AST invariants (lint_invariants.py), and database schema verification (verify_db.py)",
-      "command": "python3 tools/gdcheck.py && python3 tools/lint_invariants.py && python3 tools/verify_db.py || python tools/gdcheck.py && python tools/lint_invariants.py && python tools/verify_db.py || py -3 tools/gdcheck.py && py -3 tools/lint_invariants.py && py -3 tools/verify_db.py",
+      "description": "Runs complete static verification (gdcheck.py), domain AST invariants (lint_invariants.py), scene graphs (tscn_linter.py), and database schema verification (validate_schemas.py)",
+      "command": "python3 tools/gdcheck.py && python3 tools/lint_invariants.py && python3 tools/tscn_linter.py && python3 tools/validate_schemas.py || python tools/gdcheck.py && python tools/lint_invariants.py && python tools/tscn_linter.py && python tools/validate_schemas.py || py -3 tools/gdcheck.py && py -3 tools/lint_invariants.py && py -3 tools/tscn_linter.py && py -3 tools/validate_schemas.py",
       "stream_output": true
     },
     "lint-invariants": {
@@ -13,6 +13,16 @@
     "eval-sim": {
       "description": "Runs 60-second headless simulation assertion harness (tools/eval_simulation.py) asserting zero runtime invariant violations",
       "command": "python3 tools/eval_simulation.py --duration=60 || python tools/eval_simulation.py --duration=60 || py -3 tools/eval_simulation.py --duration=60",
+      "stream_output": true
+    },
+    "fuzz-solvers": {
+      "description": "Executes 100,000 property fuzzing iterations across kinematic solvers and boundary functions (tools/fuzz_solvers.py)",
+      "command": "python3 tools/fuzz_solvers.py || python tools/fuzz_solvers.py || py -3 tools/fuzz_solvers.py",
+      "stream_output": true
+    },
+    "formation-audit": {
+      "description": "Renders terminal ASCII formation spacing diagrams across tactical phases (tools/formation_ascii.py)",
+      "command": "python3 tools/formation_ascii.py --all || python tools/formation_ascii.py --all || py -3 tools/formation_ascii.py --all",
       "stream_output": true
     },
     "blast-radius": {
@@ -57,8 +67,8 @@
     }
   },
   "/verify-all": {
-    "description": "Runs complete static verification (gdcheck.py), domain AST invariants (lint_invariants.py), and database schema verification (verify_db.py)",
-    "command": "python3 tools/gdcheck.py && python3 tools/lint_invariants.py && python3 tools/verify_db.py || python tools/gdcheck.py && python tools/lint_invariants.py && python tools/verify_db.py || py -3 tools/gdcheck.py && py -3 tools/lint_invariants.py && py -3 tools/verify_db.py",
+    "description": "Runs complete static verification (gdcheck.py), domain AST invariants (lint_invariants.py), scene graphs (tscn_linter.py), and database schema verification (validate_schemas.py)",
+    "command": "python3 tools/gdcheck.py && python3 tools/lint_invariants.py && python3 tools/tscn_linter.py && python3 tools/validate_schemas.py || python tools/gdcheck.py && python tools/lint_invariants.py && python tools/tscn_linter.py && python tools/validate_schemas.py || py -3 tools/gdcheck.py && py -3 tools/lint_invariants.py && py -3 tools/tscn_linter.py && py -3 tools/validate_schemas.py",
     "stream_output": true
   },
   "/lint-invariants": {
@@ -69,6 +79,16 @@
   "/eval-sim": {
     "description": "Runs 60-second headless simulation assertion harness (tools/eval_simulation.py) asserting zero runtime invariant violations",
     "command": "python3 tools/eval_simulation.py --duration=60 || python tools/eval_simulation.py --duration=60 || py -3 tools/eval_simulation.py --duration=60",
+    "stream_output": true
+  },
+  "/fuzz-solvers": {
+    "description": "Executes 100,000 property fuzzing iterations across kinematic solvers and boundary functions (tools/fuzz_solvers.py)",
+    "command": "python3 tools/fuzz_solvers.py || python tools/fuzz_solvers.py || py -3 tools/fuzz_solvers.py",
+    "stream_output": true
+  },
+  "/formation-audit": {
+    "description": "Renders terminal ASCII formation spacing diagrams across tactical phases (tools/formation_ascii.py)",
+    "command": "python3 tools/formation_ascii.py --all || python tools/formation_ascii.py --all || py -3 tools/formation_ascii.py --all",
     "stream_output": true
   },
   "/blast-radius": {
