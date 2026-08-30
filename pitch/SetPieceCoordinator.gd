@@ -341,6 +341,12 @@ func _cycle_taker(direction: int) -> void:
 ## tactics are out of scope (see _build_defensive_wall) — this only guarantees
 ## nobody stands on top of the ball.
 func _position_defending_players(phase: int) -> void:
+	## KICKOFF: both sides must start in their own half, so this restarts with a
+	## dedicated rule instead of the wall-distance push below.
+	if phase == GameManager.MatchPhase.KICKOFF:
+		_enforce_kickoff_halves()
+		return
+
 	if _current_taker == null:
 		return
 
@@ -359,6 +365,43 @@ func _position_defending_players(phase: int) -> void:
 			continue
 		var direction: Vector2 = offset.normalized() if offset.length() > 0.001 else Vector2.RIGHT
 		player.global_position = spot + direction * min_distance
+
+
+## KICKOFF: constrains every outfield player to their own half of the pitch.
+## Team 0 attacks right and owns the left half (x <= centre), team 1 attacks
+## left and owns the right half (x >= centre). The taker is left on the centre
+## spot, and the defending side also honours the standard wall distance so
+## nobody crowds the ball from inside their own half.
+func _enforce_kickoff_halves() -> void:
+	var centre_x: float = _boundary.get_centre_spot().x
+	var defending_team: int = 1 - _current_taker.team
+	var spot: Vector2 = GameManager.set_piece_position
+
+	for node: Node in _players.get_children():
+		var player := node as HeavyPlayerController
+		if player == null or player == _current_taker:
+			continue
+
+		## KICKOFF: clamp each team into its own half, leaving y untouched.
+		var in_correct_half: bool
+		if player.team == 0:
+			in_correct_half = player.global_position.x <= centre_x
+		else:
+			in_correct_half = player.global_position.x >= centre_x
+
+		if not in_correct_half:
+			var clamped_x: float = centre_x - 1.0 if player.team == 0 else centre_x + 1.0
+			player.global_position = Vector2(clamped_x, player.global_position.y)
+			player.velocity = Vector2.ZERO
+
+		## KICKOFF: defenders also back off the centre spot by wall_distance.
+		if player.team != defending_team:
+			continue
+		var offset: Vector2 = player.global_position - spot
+		if offset.length() >= wall_distance:
+			continue
+		var direction: Vector2 = offset.normalized() if offset.length() > 0.001 else Vector2.RIGHT
+		player.global_position = spot + direction * wall_distance
 
 
 ## --- Confirmation and activation ----------------------------------------------
