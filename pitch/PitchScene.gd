@@ -20,7 +20,7 @@
 ##             DataLoader, PlayerFactory, RefereeLoader, MatchReferee,
 ##             OffsideDetector, ManagerLoader, ManagerData, ManagerDirector,
 ##             PressOffice, TouchlineBubble, Minimap.
-## Exposes: reset_for_kickoff(), shake_camera(amount)
+## Exposes: reset_for_kickoff(kickoff_team), shake_camera(amount)
 ##
 
 class_name PitchScene
@@ -162,7 +162,7 @@ func _on_pregame_confirmed() -> void:
 	_mgmt_a = TeamManagementData.from_team(DataLoader.get_team(GameManager.TEAM_A), manager_a)
 	_mgmt_b = TeamManagementData.from_team(DataLoader.get_team(GameManager.TEAM_B), manager_b)
 
-	reset_for_kickoff()
+	reset_for_kickoff(GameManager.TEAM_A)
 	GameManager.start_match()
 	# Instead of restart_play() in the same breath (which collapsed
 	# KICKOFF → IN_PLAY before any player could freeze), route the very first
@@ -540,20 +540,22 @@ func _resolve_team_names() -> Array[String]:
 ## Places the ball on the centre spot and returns every player to their
 ## formation anchor, then emits kickoff_confirmed so the manager directors
 ## recompute the formation anchors (this is what makes an end swap stick).
+## `kickoff_team` is resolved ONCE by the caller and passed in; this function
+## never reads GameManager.last_scoring_team. The caller must have entered
+## KICKOFF first (GameManager.kickoff() / start_match()) so the phase is
+## already correct while the signal handlers run.
 ## The actual freeze → taker → confirm → kick flow now lives in
 ## SetPieceCoordinator.start_kickoff(); the coordinator owns ending the dead
 ## ball via _on_taker_state_changed() once the ball has actually been struck,
 ## so reset_for_kickoff() never resumes play itself.
-func reset_for_kickoff() -> void:
+func reset_for_kickoff(kickoff_team: int) -> void:
 	ball.reset_at(boundary.get_centre_spot())
 
 	# Emit first: ManagerDirector._on_kickoff_confirmed() re-computes every
 	# brain's formation_anchor from the (already mirrored, for the second half)
 	# formation layout, so the reposition loop below must read the fresh
 	# anchors after the emit — not the stale ones from before the swap.
-	var kickoff_team: int = GameManager.TEAM_A
-	if GameManager.last_scoring_team >= 0:
-		kickoff_team = 1 - GameManager.last_scoring_team
+	# Phase is already KICKOFF here: the caller ran GameManager.kickoff().
 	GameEvents.kickoff_confirmed.emit(kickoff_team)
 
 	for node: Node in players.get_children():
@@ -850,14 +852,25 @@ func _swap_ends_and_restart() -> void:
 	_start_kickoff_flow()
 
 
-## Begins the shared kickoff ceremony: reposition everyone, enter KICKOFF, and
-## hand the dead ball to SetPieceCoordinator to freeze/take/resume. play stays
-## paused until the coordinator's _on_taker_state_changed() fires restart_play()
-## after the ball has actually been struck.
+## Begins the shared kickoff ceremony: enter KICKOFF first, then reposition
+## everyone and hand the dead ball to SetPieceCoordinator to freeze/take/resume.
+## play stays paused until the coordinator's _on_taker_state_changed() fires
+## restart_play() after the ball has actually been struck.
 func _start_kickoff_flow() -> void:
-	reset_for_kickoff()
+	# Phase first: reset_for_kickoff() emits kickoff_confirmed below, and any
+	# handler must already observe current_phase == KICKOFF.
 	GameManager.kickoff()
-	_set_piece_coordinator.start_kickoff(GameManager.TEAM_A if GameManager.last_scoring_team < 0 else 1 - GameManager.last_scoring_team)
+
+	# Snapshot the mutable kickoff decision ONCE — the exact same value feeds
+	# the reset/emit and the coordinator; nothing may re-read the field
+	# in between (it can mutate, e.g. around a shootout restart).
+	var last_scorer: int = GameManager.last_scoring_team
+	var kickoff_team: int = GameManager.TEAM_A
+	if last_scorer >= 0:
+		kickoff_team = 1 - last_scorer
+
+	reset_for_kickoff(kickoff_team)
+	_set_piece_coordinator.start_kickoff(kickoff_team)
 
 
 func _on_restart_timer_timeout() -> void:
