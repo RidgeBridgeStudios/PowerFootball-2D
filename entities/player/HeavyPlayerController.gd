@@ -207,7 +207,7 @@ func _on_player_mood_changed(player: Node, _tier: int) -> void:
 ## never touches formation_anchor or FSM state — the incoming player picks up
 ## exactly wherever the outgoing one stood, in whatever FSM state it left
 ## behind; the state machine self-corrects on its next tick.
-func apply_player_data(p: PlayerData) -> void:
+func apply_player_data(p: PlayerData, reset_stamina: bool = true) -> void:
 	player_mass = p.mass
 	top_speed = p.top_speed
 	acceleration_time = p.acceleration_time
@@ -219,15 +219,21 @@ func apply_player_data(p: PlayerData) -> void:
 	stamina_recover_rate = p.stamina_recover
 
 	_recalculate_movement_curve()
-	stamina = stamina_max
+	## When `false`, preserve current stamina and mood: use for stat
+	## recalculations (e.g. a MoodSystem-driven stat change or a debug reload)
+	## where the player is not actually being swapped. Pass `true` (the
+	## default) only for a genuine substitution — the incoming player is fresh.
+	if reset_stamina:
+		stamina = stamina_max
 
 	set_meta(&"player_data", p)
 
 	# Mood belongs to the player, not the pitch slot — a substitute must not
 	# inherit whatever SLUMP/STREAK the outgoing player had accumulated.
-	var mood_node: MoodSystem = get_mood()
-	if mood_node != null:
-		mood_node.reset()
+	if reset_stamina:
+		var mood_node: MoodSystem = get_mood()
+		if mood_node != null:
+			mood_node.reset()
 
 	if brain != null:
 		brain.apply_player_data(p)
