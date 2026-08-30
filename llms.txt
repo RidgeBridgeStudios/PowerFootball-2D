@@ -1,73 +1,135 @@
-# PowerFootball-2D — Static Repository Map
+# PowerFootball-2D — Semantic Repository Map & RAG Router
 
 **Godot 4.7 · GDScript 2.0 · Top-Down Football Simulation**
-"Dwarf Fortress with a football." Simple visuals; deep social simulation.
+"Dwarf Fortress with a football." Simple overhead visuals; deep systemic simulation.
 
-## Vision & Architecture
+---
 
-- **POWERFOOTBALL_MASTER_VISION.md** — Canonical vision, five-layer stack, roadmap, deep systems design, AI-agent protocol
-- **ROADMAP.md** — Tactical `[ ]`/`[x]` feature checklist (5 phases)
-- **CLAUDE.md** — Agent entry point; invariants, boot order, contracts
+## 1. Vision & Architectural Invariants
 
-## Core Rules (Immutable)
+- **docs/CORE_INVARIANTS.md** — Canonical single source of truth: Engine lock, simulation stack, choke points, and physics/AI laws.
+- **POWERFOOTBALL_MASTER_VISION.md** — Master design vision, 5-layer simulation stack, systems design, and North Star.
+- **ROADMAP.md** — Tactical `[ ]`/`[x]` feature checklist across 5 development phases.
+- **docs/course_implementation_specification.md** — Course-derived reference specification (READ-ONLY): FSMs, formulas, gotchas.
+- **AGENTS.md** — Agent onboarding & protocol for Google Antigravity and Gemini context caching.
+- **CLAUDE.md** — Agent onboarding & entry point for Claude Code sessions.
+- **AGENTS_ERRATA.md** — Cross-agent shared memory, error logs, and pending rule proposals.
 
-- **.claude/rules/godot-47-core.md** — Godot 4.7 syntax; forbidden APIs; scene init contracts
-- **.claude/rules/soccer-physics.md** — Ball physics formulas; collision matrix; kinematic weight rules
-- **.claude/rules/ai-architect.md** — AI time-slicing; zero scene-tree polling; allocation constraints; declarative player spawn
+---
 
-## Spatial & Event System (Choke Points)
+## 2. Five-Layer Simulation Stack (Semantic Routing)
 
-- **autoloads/MatchWorldModel.gd** — Spatial position cache; all NPC position reads route here
-- **autoloads/GameEvents.gd** — Signal bus; all inter-system events route here
-- **autoloads/GameManager.gd** — Match phase, score, clock; set piece flow control
+<layer_1_physics>
+### Layer 1 — Physics & Kinematics
+Ball physics, pseudo-3D height trajectory, player kinematic body, turning penalties, and collision bounding.
 
-## Player & Ball Physics
+- **entities/ball/Pseudo3DBall.gd** — Pseudo-3D ball physics solver (z-axis, gravity, proportional friction, shadow scaling).
+- **entities/ball/BallState.gd** — Base state for ball FSM.
+- **entities/ball/BallStateFactory.gd** — Ball state instantiation factory.
+- **entities/ball/states/FlightState.gd** — Ball in airborne parabolic trajectory.
+- **entities/ball/states/GroundRollState.gd** — Ball rolling on pitch surface with proportional friction drag.
+- **entities/ball/states/PossessionState.gd** — Ball attached to carrier dribble offset.
+- **entities/ball/states/DeadBallState.gd** — Ball stationary during set pieces or stoppages.
+- **entities/player/HeavyPlayerController.gd** — Player kinematic body, acceleration curves, turning penalties, stamina, input resolution.
+- **entities/player/PlayerState.gd** — Base player state machine class.
+- **entities/player/PlayerStateFactory.gd** — Player state machine factory.
+- **entities/player/states/MoveState.gd** — Off-ball running and pursuit steering.
+- **entities/player/states/DribbleState.gd** — Close ball control and continuous possession magnetism.
+- **entities/player/states/IdleState.gd** — Deceleration to rest and stationary stance.
+- **entities/player/states/ChargeKickState.gd** — Kick power charge and Gaussian scatter calculation.
+- **entities/player/states/TackleState.gd** — Slide/standing challenge execution and recovery delay.
+- **entities/player/states/GoalkeeperDiveState.gd** — Goalkeeper commitment, dive velocity, and save window.
+- **entities/player/states/AerialState.gd** — Jump timing, aerial contest, and heading resolution.
+- **entities/player/states/ShotLockState.gd** — Travel-direction carry lock before striking.
+- **entities/player/states/ThrowInState.gd** — Sideline throw-in positioning and delivery.
+- **entities/player/states/PenaltyKickState.gd** — Penalty spot execution and run-up.
+- **entities/player/states/SetPieceFreezeState.gd** — Wall and defensive positioning freeze during dead balls.
+- **shared/CollisionLayers.gd** — Bitmask constants (Layer 1 World, Layer 2 Players, Layer 3 Ball, Layer 4 Hitboxes).
+- **pitch/PitchBoundary.gd** — Touchlines, goal lines, ball out-of-bounds detection.
+- **pitch/GoalZone.gd** — Goal net detection areas and scorer attribution.
+- **pitch/PitchMarkings.gd** — Pitch line drawing and dimensions.
+- **pitch/PitchScene.gd** — Pitch root scene managing declarative 22-player squad and match coordinator.
+- **pitch/SetPieceCoordinator.gd** — Set-piece positioning, wall placement, and restart triggers.
+- **pitch/PenaltyShootoutCoordinator.gd** — Post-match penalty shootout turn resolution.
+</layer_1_physics>
 
-- **entities/player/HeavyPlayerController.gd** — Kinematic weight model; stamina; input handling
-- **entities/player/PlayerBrain.gd** — Utility-scored AI decisions; decision interval stagger
-- **entities/ball/Pseudo3DBall.gd** — Ball physics; z-axis; shadow rendering; friction model
+<layer_2_match_ai>
+### Layer 2 — Match AI & Spatial Navigation
+Spatial indexing, utility scoring, time-sliced decision engines, dynamic formation anchors, and officiating.
 
-## Data & Decision Systems
+- **autoloads/MatchWorldModel.gd** — Global spatial position cache of 22 players + ball; computes shared team defensive line depth (`defensive_line_x`).
+- **entities/player/PlayerBrain.gd** — Utility-scored decision engine running on 15-frame stagger; writes `movement_intent` and `wants_sprint`.
+- **shared/PassUtilityScorer.gd** — Pass candidate utility scoring (lane safety, receiver openness, forward progress, trust modifier).
+- **shared/UtilityMath.gd** — Geometric interception solver, lane raycast/occlusion math, sigmoid and exponential transforms.
+- **shared/FormationAnchorMath.gd** — Compactness lerping and phase-dependent dynamic anchor calculations (In Possession / Out of Possession / Transition).
+- **shared/FormationLibrary.gd** — Standard tactical formations (4-4-2, 4-3-3, 3-5-2, etc.) and anchor coordinate maps.
+- **shared/FormationRegistry.gd** — Formation catalog and lookup helper.
+- **shared/PlayerRoleConfig.gd** — Data-driven role tuning resource (`anchor_weight`, chase aggression, open space bias).
+- **entities/goalkeeper/GoalkeeperDiveBrain.gd** — Goalkeeper shot trajectory anticipation, dive commitment, and intercept triggers.
+- **entities/referee/MatchReferee.gd** — Foul evaluation, card thresholds, penalty awards, and whistle execution.
+- **entities/referee/OffsideDetector.gd** — Second-last defender line tracking and pass-release offside validation.
+- **entities/manager/ManagerDirector.gd** — In-match tactical shifts, pressing tempo overrides, formation adjustments.
+</layer_2_match_ai>
 
-- **shared/PlayerData.gd** — Player attributes, traits (planned), relationships (planned)
-- **shared/ManagerData.gd** — Manager personality traits; formation library; tactics
-- **shared/UtilityMath.gd** — Intercept solver; lane occlusion; sigmoid and lerp helpers
-- **shared/CollisionLayers.gd** — Layer constants; read before any physics work
+<layer_3_match_social>
+### Layer 3 — Match Social & Dynamic Psychology
+Player mood, slump/streak momentum, dynamic trust relationships, and individual match ratings.
 
-## Data Import
+- **entities/player/MoodSystem.gd** — Player form states (SLUMP / NORMAL / STREAK) modifying kick scatter and decision confidence.
+- **entities/player/TrustSystem.gd** — In-match dynamic passing trust and chemistry modifier.
+- **shared/PlayerRatingCalculator.gd** — Dynamic 1.0–10.0 performance rating algorithm based on completed passes, tackles, saves, and errors.
+- **autoloads/MatchStatsTracker.gd** — Per-player and per-team match event accumulator (shots, passes, possession, fouls).
+</layer_3_match_social>
 
-- **docs/json-schema.md** — Complete schema for player, manager, team, league JSON import; trait bitmasks; relationships
-- **docs/course_implementation_specification.md** — Course-derived implementation spec: FSM blueprints, physics formulas (passing kinematics, GK patrol, dot-product aerial aiming), data models, 10-phase build order, known gotchas table, and AI agent session protocol. READ-ONLY.
-- **autoloads/DataLoader.gd** — JSON parsing; player/manager/team instantiation
+<layer_4_club_world>
+### Layer 4 — Club World & Persistent Entities
+Persistent player profiles, manager personalities, team rosters, league databases, and JSON ingestion schemas.
 
-## Static Analysis
+- **shared/PlayerData.gd** — Persistent player attributes (speed, passing, tackling), traits, and long-term relationships.
+- **shared/TeamData.gd** — Team identity, tactics, lineup indices, shirt colors, and stadium parameters.
+- **shared/TeamManagementData.gd** — Lineup management, roster changes, and bench assignments.
+- **shared/LeagueData.gd** — League table, fixtures, season standings, and division parameters.
+- **shared/ManagerData.gd** — Manager personality profile, tactical preferences, and adaptability.
+- **shared/RefereeData.gd** — Referee strictness, foul bias, card leniency, and historical profile.
+- **shared/PlayerFactory.gd** — Procedural player generation and default roster builder.
+- **autoloads/DataLoader.gd** — JSON database ingestion for players, teams, and leagues.
+- **autoloads/ManagerLoader.gd** — Manager database JSON loader.
+- **autoloads/RefereeLoader.gd** — Referee database JSON loader.
+- **docs/json-schema.md** — Formal specification for external JSON rosters, traits, and club databases.
+</layer_4_club_world>
 
-- **tools/gdcheck.py** — Static GDScript checker; catches undeclared members, unknown types, Godot 3 APIs
-- **Verify:** `python3 tools/gdcheck.py` (run after every file write)
+<layer_5_narrative>
+### Layer 5 — Narrative, Presentation & User Interface
+Press office reactions, touchline dialogue, broadcast HUD, floating labels, match camera, and menus.
 
-## Directory Map
+- **entities/manager/PressOffice.gd** — Match narrative generation, post-game quotes, press controversy.
+- **ui/TouchlineBubble.gd** — Animated manager touchline reaction bubbles responding to match events.
+- **ui/HUD.gd** — Match clock, scoreboard, player nameplates, and minimap HUD coordinator.
+- **ui/ActionText.gd** — Floating floating action indicators (PASS, SHOT, TACKLE, SAVE).
+- **ui/FormationDiagram.gd** — Tactical formation pitch diagram renderer.
+- **ui/MatchStatsUI.gd** — Full-time match summary, shot statistics, and player ratings display.
+- **pitch/MatchCamera.gd** — Camera tracking modes (BALL_FOLLOW, DYNAMIC, FULL_FIELD).
+- **pitch/Minimap.gd** — Real-time 2D radar displaying player dots and ball position.
+- **entities/player/FacingArrow.gd** — Player orientation and pass/kick direction indicator.
+- **ui/MainMenu.gd** — Main entry screen (Kick Off, Practice, Career, Options).
+- **ui/KickOffMenu.gd** — Team selection and match setup.
+- **ui/OptionsMenu.gd** — Audio, visual, and gameplay settings.
+- **ui/pregame/PreGameScreen.gd** — Pre-match tactical setup, formation change, and lineup selection.
+- **ui/pause/PauseMenu.gd** — In-match pause menu, resume, tactical adjustments, restart.
+- **autoloads/GameEvents.gd** — Global signal hub routing all inter-system events across layers.
+- **autoloads/GameManager.gd** — Single source of truth for match lifecycle, score, clock, and set-piece states.
+- **autoloads/InputHelper.gd** — Human controller input abstraction and mapping.
+</layer_5_narrative>
 
-| Path | Purpose |
-|---|---|
-| `autoloads/` | Singletons; spatial cache, event bus, game state |
-| `entities/player/` | HeavyPlayerController, brain, state machine, decision trees |
-| `entities/ball/` | Pseudo3DBall, physics solver, possession state |
-| `entities/manager/` | Formation library, director, tactical AI |
-| `entities/referee/` | Match rules, personality-weighted decisions |
-| `shared/` | Data models, math utilities, collision setup |
-| `pitch/` | Field, boundaries, goal zones, markings |
-| `ui/` | HUD, menus, pause, pre-game, screens |
-| `tools/` | Static checkers, dev utilities |
-| `.claude/` | Claude Code configuration, rules, skills |
-| `docs/` | JSON schema, system documentation |
+---
 
-## First Steps for an Agent
+## 3. Tooling & Automation
 
-1. Read **POWERFOOTBALL_MASTER_VISION.md** (vision, build order, context)
-1b. Read **docs/course_implementation_specification.md** (build phases, formulas, agent protocol — consult before implementing any system from the course)
-2. Read **ROADMAP.md** (current priorities)
-3. Check **.claude/rules/** (three constraint files)
-4. Identify target file in **autoloads/**, **entities/**, or **shared/**
-5. Read that file's neighbors and upstream dependencies
-6. Run `python3 tools/gdcheck.py` after every edit
-7. Never cache stale architecture; re-read vision if context drift suspected
+<tooling>
+- **tools/gdcheck.py** — Static GDScript checker enforcing typing, valid identifiers, and Godot 4.7 API compliance.
+- **tools/hook_gdcheck.py** — Git and Antigravity hook runner for automated pre-commit / post-tool verification.
+- **tools/sync_rules.py** — Tool promoting rules from `AGENTS_ERRATA.md` to `.claude/rules/` and `docs/CORE_INVARIANTS.md`.
+- **tools/next_task.py** — Tool querying `ROADMAP.md` for the next unchecked Phase 1 gameplay task and relevant file context.
+- **.antigravity/commands.json** — Custom slash commands (`/verify`, `/sync-rules`, `/next-task`).
+- **.antigravity/hooks.json** — Lifecycle verification hooks.
+</tooling>

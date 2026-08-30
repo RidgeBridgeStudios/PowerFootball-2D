@@ -1,0 +1,34 @@
+{
+  "commands": {
+    "verify": {
+      "description": "Executes static GDScript checker (tools/gdcheck.py) and streams stdout/stderr",
+      "command": "python3 tools/gdcheck.py || python tools/gdcheck.py || py -3 tools/gdcheck.py",
+      "stream_output": true
+    },
+    "sync-rules": {
+      "description": "Parses structured logs in AGENTS_ERRATA.md and generates git commits to promote them into .claude/rules/",
+      "command": "python3 tools/sync_rules.py || python tools/sync_rules.py || py -3 tools/sync_rules.py",
+      "stream_output": true
+    },
+    "next-task": {
+      "description": "Reads ROADMAP.md, finds the next unchecked item in 'PHASE 1 — Gameplay Completeness', and loads the relevant file context",
+      "command": "python3 tools/next_task.py || python tools/next_task.py || py -3 tools/next_task.py",
+      "stream_output": true
+    }
+  },
+  "/verify": {
+    "description": "Executes static GDScript checker (tools/gdcheck.py) and streams stdout/stderr",
+    "command": "python3 tools/gdcheck.py || python tools/gdcheck.py || py -3 tools/gdcheck.py",
+    "stream_output": true
+  },
+  "/sync-rules": {
+    "description": "Parses structured logs in AGENTS_ERRATA.md and generates git commits to promote them into .claude/rules/",
+    "command": "python3 tools/sync_rules.py || python tools/sync_rules.py || py -3 tools/sync_rules.py",
+    "stream_output": true
+  },
+  "/next-task": {
+    "description": "Reads ROADMAP.md, finds the next unchecked item in 'PHASE 1 — Gameplay Completeness', and loads the relevant file context",
+    "command": "python3 tools/next_task.py || python tools/next_task.py || py -3 tools/next_task.py",
+    "stream_output": true
+  }
+}
