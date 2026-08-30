@@ -318,6 +318,14 @@ func get_facing_dot(target_world_pos: Vector2) -> float:
 	return facing_direction.dot(to_target.normalized())
 
 
+## Gate checked wherever ball possession is about to be granted (DribbleState,
+## TackleState). Delegates to PlayerBrain.can_carry_ball(), which is false for
+## a goalkeeper whose own goal line the ball has already crossed near — every
+## other player is always eligible.
+func can_carry_ball() -> bool:
+	return brain == null or brain.can_carry_ball()
+
+
 ## Spawns floating action text in world space above this player.
 ## Added to the parent (not self) so the text does not rotate with the player.
 func show_action_text(message: String) -> void:

@@ -12,7 +12,7 @@ Core football mechanics that must work before anything else.
 - [ ] Injury system
 - [x] Match stats screen + full-time scoreboard
 - [x] End-of-match player ratings
-- [ ] Goalkeeper dive commitment
+- [x] Goalkeeper dive commitment
 - [ ] AerialState / heading resolution
 - [x] Penalty shootout flow
 - [ ] Through-ball lead targeting
