@@ -151,6 +151,10 @@ var _frame_counter: int = 0
 ## Counts down while this player is committed to a pass played to them.
 var _pass_lock_timer: float = 0.0
 
+## The team that last touched the ball as of the previous physics frame.
+## Used to detect possession changes and force an immediate re-evaluation.
+var _last_possession_team: int = -1
+
 ## Off-ball target cached from the last decision tick. _find_open_space_target()
 ## walks the whole world model, which must stay on the decision stagger rather
 ## than the physics frame rate — get_target_position() is called from
@@ -188,6 +192,7 @@ func _ready() -> void:
 	if formation_anchor == Vector2.ZERO and player != null:
 		formation_anchor = player.global_position
 	_cached_space_target = formation_anchor
+	_last_possession_team = -1
 
 	GameEvents.formation_anchors_changed.connect(_on_formation_changed)
 
@@ -256,6 +261,18 @@ func _physics_process(delta: float) -> void:
 	if not GameManager.is_in_play():
 		player.movement_intent = Vector2.ZERO
 		return
+
+	# Detect possession changes and force an immediate re-evaluation this frame
+	# rather than waiting for the stagger interval — eliminates the 250ms
+	# "standing around" moment after every turnover.
+	if ball != null:
+		var current_possession_team: int = ball.last_touched_by.team if ball.last_touched_by != null else -1
+		if current_possession_team != _last_possession_team:
+			_last_possession_team = current_possession_team
+			# Reset the frame counter so this player evaluates on its next tick.
+			# Subtracting player_index ensures the evaluation lands on a frame
+			# where ((_frame_counter + player_index) % UPDATE_INTERVAL == 0).
+			_frame_counter = UPDATE_INTERVAL - player_index - 1
 
 	# Goalkeeper dive reaction cannot wait for the 15-frame decision stagger —
 	# a shot crosses the six-yard box in a handful of physics frames — so it is
