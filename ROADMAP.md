@@ -16,6 +16,7 @@ Core football mechanics that must work before anything else.
 - [ ] AerialState / heading resolution
 - [x] Penalty shootout flow
 - [ ] Through-ball lead targeting
+- [x] Phase-dependent dynamic formation anchors (ball-zone + possession phase)
 
 ## PHASE 2 — Personality and Traits
 
