@@ -1140,6 +1140,9 @@ func _current_team_phase() -> FormationAnchorMath.TeamPhase:
 ## most open nearby pocket of space (1.0). This is the single place role
 ## identity is expressed for off-ball positioning — defenders barely move off
 ## their tactical point, attackers are freer to drift into space. TUNE HERE.
+## ROLE_SPACE_ALPHA is kept as a fallback for any player entity that does not
+## yet have a role_config .tres assigned. New entities should always have one.
+## Remove this constant once all HeavyPlayerController scenes are migrated.
 const ROLE_SPACE_ALPHA: Dictionary = {
 	Role.OUTFIELD_DEFENDER: 0.20,
 	Role.OUTFIELD_MIDFIELDER: 0.40,
@@ -1195,7 +1198,15 @@ func _evaluate_off_ball_target(anchor: Vector2) -> Vector2:
 	if world == null:
 		return anchor
 
-	var alpha: float = float(ROLE_SPACE_ALPHA.get(role, 0.35))
+	var alpha: float
+	if player != null and player.role_config != null:
+		# anchor_weight: 1.0 = rigid, 0.0 = free roam — the INVERSE of this
+		# function's roam alpha (ROLE_SPACE_ALPHA convention), so convert.
+		# Preset check: CB 0.80 -> 0.20 (old defender), CM 0.55 -> 0.45,
+		# ST 0.30 -> 0.70 (old attacker 0.65).
+		alpha = 1.0 - player.role_config.anchor_weight
+	else:
+		alpha = float(ROLE_SPACE_ALPHA.get(role, 0.35))
 	# Wider search radius for roles freer to roam: alpha 0.20 -> 0.6x, 0.65 -> 1.3x.
 	var radius_scale: float = lerpf(0.6, 1.3, alpha)
 

@@ -89,6 +89,10 @@ signal possession_lost
 ## When true the shadow sprite rotates with facing_direction. Disable for
 ## circular shadow art, where per-frame rotation would be pointless.
 @export var rotate_shadow: bool = true
+## Role-specific tuning resource. Assign a .tres from res://shared/roles/
+## in the Inspector or via ManagerDirector at spawn time.
+## Consumed by PlayerBrain._find_open_space_target() (anchor_weight).
+@export var role_config: PlayerRoleConfig
 
 const ACTION_TEXT_SCENE: PackedScene = preload("res://ui/ActionText.tscn")
 ## Minimum seconds between action text spawns (prevents per-frame spam).
@@ -346,6 +350,21 @@ func get_speed_ratio() -> float:
 
 func get_stamina_ratio() -> float:
 	return clampf(stamina / maxf(stamina_max, 1.0), 0.0, 1.0)
+
+
+## Returns this player's anchor_weight from role_config, or -1.0 if no
+## config is assigned. A return of -1.0 means the caller's own fallback
+## applies. anchor_weight is 1.0 = rigid / 0.0 = free roam — convert with
+## (1.0 - anchor_weight) before using it as a roam-weighted alpha.
+## PlayerBrain._evaluate_off_ball_target() reads role_config directly to
+## stay allocation-free on the decision path.
+func get_role_alpha() -> float:
+	if role_config != null:
+		return role_config.anchor_weight
+	push_warning(
+		"PlayerRoleConfig not assigned on %s — using inline fallback." % name
+	)
+	return -1.0
 
 
 ## World position of the kicking/controlling zone, a little ahead of the body.
