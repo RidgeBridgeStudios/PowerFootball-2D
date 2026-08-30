@@ -40,6 +40,13 @@ signal set_piece_taken(taker: Node)
 ## HUD hint only: no wall-building AI is wired up yet (see SetPieceCoordinator).
 signal defensive_wall_requested(free_kick_pos: Vector2)
 
+## --- Penalty shootout --------------------------------------------------------
+
+## Fired by PenaltyShootoutCoordinator once a single kick resolves (scored,
+## saved, or wide). kick_index is that team's 0-based kick count so far —
+## also the dot the HUD overlay should fill in.
+signal shootout_kick_result(team: int, kick_index: int, scored: bool)
+
 ## --- Player events ---------------------------------------------------------
 
 signal player_switched(new_player: Node)

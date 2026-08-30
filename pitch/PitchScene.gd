@@ -73,6 +73,7 @@ var _is_practice_mode: bool = false
 @onready var restart_timer: Timer = $RestartTimer
 @onready var hud: HUD = $HUD
 @onready var _set_piece_coordinator: SetPieceCoordinator = $SetPieceCoordinator
+@onready var _penalty_shootout_coordinator: PenaltyShootoutCoordinator = $PenaltyShootoutCoordinator
 @onready var match_referee: MatchReferee = $MatchReferee
 @onready var _offside_detector: OffsideDetector = $OffsideDetector
 @onready var _manager_director_a: ManagerDirector = $ManagerDirectorA
@@ -135,9 +136,11 @@ func _on_pregame_confirmed() -> void:
 	_bind_camera(hud.active_player)
 	_set_piece_coordinator.bind(ball, boundary, players)
 	_offside_detector.bind(boundary, _set_piece_coordinator)
+	_penalty_shootout_coordinator.bind(_set_piece_coordinator, ball, boundary)
 
 	var team_a_name: String = _selected_home_team.team_name if _selected_home_team != null else (DataLoader.get_team(GameManager.TEAM_A).team_name if DataLoader.league != null else "Team A")
 	var team_b_name: String = _selected_away_team.team_name if _selected_away_team != null else (DataLoader.get_team(GameManager.TEAM_B).team_name if DataLoader.league != null else "Team B")
+	hud.set_team_names(team_a_name, team_b_name)
 	var ref_data: RefereeData = RefereeLoader.get_random_referee()
 	match_referee.bind(ref_data, _set_piece_coordinator, team_a_name, team_b_name)
 
@@ -662,6 +665,8 @@ func _tick_autoswitch(delta: float) -> void:
 
 
 func _on_goal_scored(scoring_team: int) -> void:
+	if GameManager.shootout_active:
+		return  # PenaltyShootoutCoordinator owns the reset between kicks.
 	ball.freeze()
 	shake_camera(1.0)
 	InputHelper.rumble(0.5, 0.9, 0.35)
@@ -749,6 +754,18 @@ func _on_restart_timer_timeout() -> void:
 
 
 func _on_match_ended(winner: int) -> void:
+	# A drawn full-time score (winner < 0 — see GameManager.get_leading_team())
+	# redirects into a shootout instead of ending the match here.
+	# PenaltyShootoutCoordinator runs the shootout entirely on its own and
+	# calls GameManager.end_shootout() once a winner is decided, which re-fires
+	# match_ended — this time with a decisive winner, so the body below runs
+	# exactly once, at the real end of the match. Practice mode never reaches
+	# this handler at all (see _setup_practice_arena()), but the guard is kept
+	# here too since a shootout only ever makes sense for a full match.
+	if winner < 0 and not _is_practice_mode:
+		_start_penalty_shootout()
+		return
+
 	ball.freeze()
 	_log_manager_stats(winner)
 	# The world model is deliberately NOT cleared here: full time is a phase,
@@ -756,6 +773,23 @@ func _on_match_ended(winner: int) -> void:
 	# empty roster with no spawn pass left to re-register anyone. _exit_tree()
 	# owns the reset instead — it covers this path and practice mode both.
 	# TODO: full-time screen and a rematch flow; for now the pitch simply stops.
+
+
+## Splits the live roster into each team's players and hands them to
+## PenaltyShootoutCoordinator, which owns the rest of the shootout.
+func _start_penalty_shootout() -> void:
+	var team_a_players: Array[HeavyPlayerController] = []
+	var team_b_players: Array[HeavyPlayerController] = []
+	for node: Node in players.get_children():
+		var p := node as HeavyPlayerController
+		if p == null:
+			continue
+		if p.team == GameManager.TEAM_A:
+			team_a_players.append(p)
+		elif p.team == GameManager.TEAM_B:
+			team_b_players.append(p)
+
+	_penalty_shootout_coordinator.start(team_a_players, team_b_players)
 
 
 ## Clears the world model roster whenever the match scene goes away, by any
@@ -789,6 +823,8 @@ func _log_manager_stats(winner: int) -> void:
 
 
 func _on_ball_out_of_bounds(side: String) -> void:
+	if GameManager.shootout_active:
+		return  # A miss the shootout coordinator already watches for itself.
 	ball.freeze()
 	_set_piece_coordinator.handle_out_of_bounds(side, ball.global_position, ball.last_touched_by)
 

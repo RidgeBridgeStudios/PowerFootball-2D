@@ -1,4 +1,4 @@
-[gd_scene load_steps=18 format=3]
+[gd_scene load_steps=19 format=3]
 
 [ext_resource type="Script" path="res://pitch/PitchScene.gd" id="1_pitch"]
 [ext_resource type="Script" path="res://pitch/PitchBoundary.gd" id="2_boundary"]
@@ -17,6 +17,7 @@
 [ext_resource type="Script" path="res://pitch/MatchCamera.gd" id="14_camera"]
 [ext_resource type="PackedScene" path="res://ui/pregame/PreGameScreen.tscn" id="15_pregame"]
 [ext_resource type="PackedScene" path="res://ui/pause/PauseMenu.tscn" id="16_pause"]
+[ext_resource type="Script" path="res://pitch/PenaltyShootoutCoordinator.gd" id="18_penalty_shootout"]
 
 [sub_resource type="RectangleShape2D" id="RectangleShape2D_goal"]
 size = Vector2(48, 200)
@@ -242,6 +243,12 @@ one_shot = true
 script = ExtResource("8_set_piece")
 
 [node name="ConfirmationTimer" type="Timer" parent="SetPieceCoordinator"]
+one_shot = true
+
+[node name="PenaltyShootoutCoordinator" type="Node" parent="."]
+script = ExtResource("18_penalty_shootout")
+
+[node name="ResolutionTimer" type="Timer" parent="PenaltyShootoutCoordinator"]
 one_shot = true
 
 [node name="MatchReferee" type="Node" parent="."]
