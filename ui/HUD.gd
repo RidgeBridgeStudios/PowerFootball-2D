@@ -81,6 +81,7 @@ var _shootout_overlay_was_active: bool = false
 func _ready() -> void:
 	GameEvents.goal_scored.connect(_on_goal_scored)
 	GameEvents.kickoff_started.connect(_on_kickoff_started)
+	GameEvents.match_phase_changed.connect(_on_match_phase_changed)
 	GameEvents.match_ended.connect(_on_match_ended)
 	GameEvents.player_switched.connect(_on_player_switched)
 	GameEvents.player_mood_changed.connect(_on_player_mood_changed)
@@ -243,13 +244,19 @@ func _on_goal_scored(team: int) -> void:
 
 func _on_kickoff_started() -> void:
 	status_label.text = "KICKOFF"
-	# TODO: replace this with a short tween-out banner rather than clearing text
-	# on the next event.
 
 	# Show referee name briefly at match start.
 	var ref_node: MatchReferee = _find_referee()
 	if ref_node != null and ref_node.current_data != null:
 		_show_set_piece_banner("Referee: " + ref_node.current_data.referee_name)
+
+
+## Clears the "KICKOFF" / "GOAL — TEAM X" status text once the restart has
+## actually been taken and play is live again — otherwise it sits under the
+## scoreboard for the rest of the match (see _on_kickoff_started above).
+func _on_match_phase_changed(phase: int) -> void:
+	if phase == GameManager.MatchPhase.IN_PLAY:
+		status_label.text = ""
 
 
 ## PitchScene is the parent of the CanvasLayer parent — walk up two levels.
