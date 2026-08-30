@@ -146,8 +146,20 @@ func physics_process(player: HeavyPlayerController, delta: float) -> void:
 
 	var dynamic_offset: float = lerpf(28.0, 16.0, player.get_close_control())
 	var carry_target: Vector2 = player.global_position + shield_dir * dynamic_offset
-	var offset: Vector2 = carry_target - ball.global_position
 
+	# --- Branch: touch frames skip the magnet entirely -----------------------
+	# A touch tick already overwrites ball.velocity via apply_kick(), so the
+	# magnet correction (selective damping + lerp) would be pure wasted work
+	# on that frame. Branch on cooldown so each frame runs exactly one block:
+	# either the touch impulse, or the magnet pull — never both.
+	if _touch_cooldown <= 0.0:
+		_apply_touch(player, carry_dir, shield_dir)
+	else:
+		_apply_magnet(ball, carry_dir, carry_target)
+		_touch_cooldown = maxf(_touch_cooldown - delta, 0.0)
+
+
+func _apply_magnet(ball: Pseudo3DBall, carry_dir: Vector2, carry_target: Vector2) -> void:
 	# --- Selective damping: kill lateral/reverse drift, preserve forward -----
 	# Project the ball's current velocity onto the carry direction; damp only
 	# the perpendicular remainder so the magnet never brakes a ball that is
@@ -157,17 +169,13 @@ func physics_process(player: HeavyPlayerController, delta: float) -> void:
 	ball.velocity = forward_component + lateral_component * LATERAL_DAMPING
 
 	# --- Magnet pull: blend toward offset-derived velocity -------------------
+	var offset: Vector2 = carry_target - ball.global_position
 	var pull_velocity: Vector2 = offset * MAGNET_STRENGTH
 	ball.velocity = ball.velocity.lerp(pull_velocity, MAGNET_BLEND)
 
-	# --- Timed touch impulse: unchanged logic --------------------------------
-	# apply_kick() below replaces ball.velocity outright, so running it after
-	# the magnet block means a touch tick always wins over the magnet pull, as
-	# intended — the touch is a deliberate strike, not a correction.
 
-	if _touch_cooldown > 0.0:
-		return
-
+func _apply_touch(player: HeavyPlayerController, carry_dir: Vector2, shield_dir: Vector2) -> void:
+	var ball: Pseudo3DBall = _possessed_ball
 	var control: float = player.get_close_control() if player.has_method(&"get_close_control") else 0.65
 	var effective_touch_ratio: float = lerpf(0.85, 0.50, 1.0 - control)
 	var effective_interval: float = lerpf(0.10, 0.20, 1.0 - control)
