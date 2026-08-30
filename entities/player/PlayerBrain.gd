@@ -527,14 +527,7 @@ func _is_pass_plan_still_valid() -> bool:
 
 	var ball_pos: Vector2 = ball.global_position
 	var target_pos: Vector2 = _cached_pass_target.global_position
-	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
-		if not is_instance_valid(world.player_nodes[i]):
-			continue
-		if world.player_teams[i] == player.team:
-			continue
-		if UtilityMath.is_lane_blocked(ball_pos, target_pos, world.player_positions[i], PASS_LANE_CLEARANCE):
-			return false
-	return true
+	return not world.is_lane_blocked_by_opponent(ball_pos, target_pos, PASS_LANE_CLEARANCE, player.team)
 
 
 ## Clean abort path for a stale plan: drop back to the conservative default
@@ -741,22 +734,19 @@ func _score_dribble(ctx: UtilityContext) -> float:
 	if player != null:
 		var world: MatchWorldModel = MatchWorldModel.instance
 		if world != null:
-			for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+			var nearby_opponents: Array[int] = world.get_nearby_opponents(player.global_position, PRESSURE_RADIUS, player.team)
+			for i: int in nearby_opponents:
 				var other: HeavyPlayerController = world.player_nodes[i]
 				if not is_instance_valid(other) or other == player:
 					continue
-				if world.player_teams[i] == player.team:
-					continue
-				var dist: float = player.global_position.distance_to(world.player_positions[i])
-				if dist < PRESSURE_RADIUS:
-					# get_facing_dot() is read live off the node rather than
-					# from the cache: the world model stores position and
-					# velocity, not heading, and facing lags velocity through a
-					# turn — which is exactly the case this check is about.
-					# 0.42 mirrors TackleState.MIN_FACING_DOT — keep in sync.
-					if other.get_facing_dot(player.global_position) >= 0.42:
-						base *= 0.40  # Opponent is set up to tackle — don't dribble in
-						break
+				# get_facing_dot() is read live off the node rather than
+				# from the cache: the world model stores position and
+				# velocity, not heading, and facing lags velocity through a
+				# turn — which is exactly the case this check is about.
+				# 0.42 mirrors TackleState.MIN_FACING_DOT — keep in sync.
+				if other.get_facing_dot(player.global_position) >= 0.42:
+					base *= 0.40  # Opponent is set up to tackle — don't dribble in
+					break
 
 	return clampf(base, 0.0, 1.0)
 
@@ -936,20 +926,7 @@ func _find_best_pass_target(passer_pressure: float = 0.0) -> HeavyPlayerControll
 
 		# Lane check: an opponent standing in the passing lane makes the pass an
 		# interception, however open the receiver looks.
-		var lane_clear: bool = true
-		for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
-			if not is_instance_valid(world.player_nodes[i]):
-				continue
-			if world.player_teams[i] == player.team:
-				continue
-			if UtilityMath.is_lane_blocked(
-					ball_pos,
-					candidate_pos,
-					world.player_positions[i],
-					PASS_LANE_CLEARANCE):
-				lane_clear = false
-				break
-		if not lane_clear:
+		if world.is_lane_blocked_by_opponent(ball_pos, candidate_pos, PASS_LANE_CLEARANCE, player.team):
 			continue
 
 		# Openness, straight off the world model — no second roster walk.
@@ -1241,16 +1218,7 @@ func _evaluate_off_ball_target(anchor: Vector2) -> Vector2:
 		var min_opp_dist: float = world.nearest_opponent_dist_to(candidate, player.team)
 		var space_score: float = clampf(min_opp_dist / OFF_BALL_OPENNESS_RADIUS, 0.0, 1.0)
 
-		var teammate_penalty: float = 0.0
-		for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
-			var mate: HeavyPlayerController = world.player_nodes[i]
-			if not is_instance_valid(mate) or mate == player:
-				continue
-			if world.player_teams[i] != player.team:
-				continue
-			var td: float = candidate.distance_to(world.player_positions[i])
-			if td < OFF_BALL_CROWD_RADIUS:
-				teammate_penalty += (OFF_BALL_CROWD_RADIUS - td) / OFF_BALL_CROWD_RADIUS
+		var teammate_penalty: float = world.get_teammate_density(candidate, OFF_BALL_CROWD_RADIUS, player.team, player_index)
 		space_score = clampf(space_score - teammate_penalty * 0.3, 0.0, 1.0)
 
 		var blended: float = lerpf(anchor_score, space_score, alpha)
@@ -1449,15 +1417,10 @@ func _find_channel_run_target(ball_pos: Vector2) -> Vector2:
 
 		# Also penalise positions where a teammate is already standing nearby.
 		var teammate_penalty: float = 0.0
-		for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
-			var mate: HeavyPlayerController = world.player_nodes[i]
-			if not is_instance_valid(mate) or mate == player:
-				continue
-			if world.player_teams[i] != player.team:
-				continue
+		var nearby_teammates: Array[int] = world.get_nearby_teammates(candidate, 80.0, player.team, player_index)
+		for i: int in nearby_teammates:
 			var td: float = candidate.distance_to(world.player_positions[i])
-			if td < 80.0:
-				teammate_penalty += (80.0 - td)  # Penalise overlap
+			teammate_penalty += (80.0 - td)  # Penalise overlap
 
 		var score: float = min_opp_dist - teammate_penalty * 0.5
 		if score > best_score:
@@ -1617,12 +1580,8 @@ func _separation_force(sep_radius: float = 55.0) -> Vector2:
 		return Vector2.ZERO
 
 	var force: Vector2 = Vector2.ZERO
-	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
-		var other: HeavyPlayerController = world.player_nodes[i]
-		if not is_instance_valid(other) or other == player:
-			continue
-		if world.player_teams[i] != player.team:
-			continue
+	var nearby_teammates: Array[int] = world.get_nearby_teammates(player.global_position, sep_radius, player.team, player_index)
+	for i: int in nearby_teammates:
 		var offset: Vector2 = player.global_position - world.player_positions[i]
 		var dist: float = offset.length()
 		if dist > 0.0 and dist < sep_radius:
@@ -1646,11 +1605,10 @@ func _defensive_line_lateral_separation() -> Vector2:
 		return Vector2.ZERO
 
 	var lateral_push: float = 0.0
-	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+	var nearby_defenders: Array[int] = world.get_nearby_teammates(player.global_position, DEFENSIVE_LINE_SEPARATION_RADIUS, player.team, player_index)
+	for i: int in nearby_defenders:
 		var other: HeavyPlayerController = world.player_nodes[i]
 		if not is_instance_valid(other) or other == player:
-			continue
-		if world.player_teams[i] != player.team:
 			continue
 		var other_brain := other.get_node_or_null("PlayerBrain") as PlayerBrain
 		if other_brain == null or other_brain.role != Role.OUTFIELD_DEFENDER:
@@ -1927,9 +1885,9 @@ func _on_crowd_knockdown_body_entered(body: Node2D) -> void:
 	opponent.apply_external_impulse(away.normalized() * GOALIE_KNOCKDOWN_IMPULSE)
 
 
-## Every opponent currently on the pitch, as Node2D so callers that take a
-## generic list keep working. Refills a member buffer rather than allocating —
-## the returned Array is overwritten by the next call.
+## Opponents near this player within PRESSURE_RADIUS, queried from MatchWorldModel's
+## spatial grid rather than scanning the whole roster. Refills a member buffer rather
+## than allocating — the returned Array is overwritten by the next call.
 func _find_nearby_opponents() -> Array[Node2D]:
 	_opponents_buffer.clear()
 	if player == null:
@@ -1938,10 +1896,6 @@ func _find_nearby_opponents() -> Array[Node2D]:
 	if world == null:
 		return _opponents_buffer
 
-	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
-		var other: HeavyPlayerController = world.player_nodes[i]
-		if not is_instance_valid(other) or other == player:
-			continue
-		if world.player_teams[i] != player.team:
-			_opponents_buffer.append(other)
+	var nearby: Array[Node2D] = world.get_nearby_opponent_nodes(player.global_position, PRESSURE_RADIUS, player.team)
+	_opponents_buffer.append_array(nearby)
 	return _opponents_buffer

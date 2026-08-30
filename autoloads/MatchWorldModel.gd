@@ -21,6 +21,10 @@
 ##          player_nodes/player_positions/player_velocities/player_teams,
 ##          ball_position, ball_velocity, possessor_index,
 ##          get_opponents_of(), get_teammates_of(), nearest_opponent_dist_to(),
+##          world_to_cell(), get_nearby_players(), get_nearby_opponents(),
+##          get_nearby_teammates(), get_nearby_opponent_nodes(),
+##          count_nearby_players(), count_nearby_opponents(), count_nearby_teammates(),
+##          get_opponent_density(), get_teammate_density(),
 ##          defensive_line_x — shared per-team defensive-line depth (world X),
 ##          recomputed every frame from ball position and carrier pressure
 ##          bind_boundary(), PressTrigger enum, press_trigger_active/type/
@@ -124,6 +128,25 @@ var _defensive_lines_ready: bool = false
 ## aliasing rule that comes with that.
 var _opponent_scratch: Array[int] = []
 var _teammate_scratch: Array[int] = []
+
+## --- Spatial Hash Grid -------------------------------------------------------
+## 2D spatial partition for fast proximity and density queries.
+## With pitch ~1600x900, 160px cells form a ~10x6 grid where each cell holds
+## 0-3 players on average. Radii queries (55-220px) inspect only 1-9 cells.
+const CELL_SIZE: float = 160.0
+const INV_CELL_SIZE: float = 1.0 / CELL_SIZE
+
+## Cell -> Array[int] of player indices (slots).
+## Buckets are reused across frames to maintain zero GC allocations.
+var _grid: Dictionary = {}
+## Track cells populated during the frame so only dirty cells are cleared.
+var _active_cells: Array[Vector2i] = []
+
+## Scratch buffers for spatial query results.
+var _nearby_players_scratch: Array[int] = []
+var _nearby_opponents_scratch: Array[int] = []
+var _nearby_teammates_scratch: Array[int] = []
+var _nearby_nodes2d_scratch: Array[Node2D] = []
 
 ## --- Pressing trigger detection ----------------------------------------------
 ## Football-relevant reasons the defending team should press right now rather
@@ -276,6 +299,12 @@ func unregister_all() -> void:
 	_clear_press_trigger()
 	_press_trigger_timer = 0.0
 	_boundary = null
+	_grid.clear()
+	_active_cells.clear()
+	_nearby_players_scratch.clear()
+	_nearby_opponents_scratch.clear()
+	_nearby_teammates_scratch.clear()
+	_nearby_nodes2d_scratch.clear()
 	_resize_arrays()
 
 
@@ -299,8 +328,38 @@ func _physics_process(delta: float) -> void:
 		player_positions[i] = node.global_position
 		player_velocities[i] = node.velocity
 
+	_update_spatial_grid()
 	_update_defensive_lines(delta)
 	_update_press_trigger(delta)
+
+
+## Converts a 2D world position into discrete spatial grid cell coordinates.
+func world_to_cell(world_pos: Vector2) -> Vector2i:
+	return Vector2i(
+		int(floorf(world_pos.x * INV_CELL_SIZE)),
+		int(floorf(world_pos.y * INV_CELL_SIZE))
+	)
+
+
+## Refreshes the spatial partition grid. Reuses cell bucket arrays to achieve
+## zero heap allocations per physics frame.
+func _update_spatial_grid() -> void:
+	for cell: Vector2i in _active_cells:
+		var bucket: Array = _grid.get(cell, [])
+		bucket.clear()
+	_active_cells.clear()
+
+	for i: int in range(TOTAL_PLAYERS):
+		var node: HeavyPlayerController = player_nodes[i]
+		if node == null or not is_instance_valid(node):
+			continue
+		var cell: Vector2i = world_to_cell(player_positions[i])
+		if not _grid.has(cell):
+			var new_bucket: Array[int] = []
+			_grid[cell] = new_bucket
+		var bucket: Array = _grid[cell]
+		bucket.append(i)
+		_active_cells.append(cell)
 
 
 ## Bound by PitchScene at match setup, mirroring PlayerBrain.bind_boundary().
@@ -343,21 +402,10 @@ func _update_defensive_lines(delta: float) -> void:
 	defensive_line_x[1] = move_toward(defensive_line_x[1], target_x[1], LINE_DEPTH_LERP_SPEED * delta)
 
 
-## 0.0-1.0 crowding score of `team`'s players around the ball — the same
-## shape as PlayerBrain.calculate_pressure_index() but computed directly off
-## the cached arrays instead of a Node2D list, so this file never needs a
-## PlayerBrain reference. Allocation-free.
+## 0.0-1.0 crowding score of `team`'s players around the ball — computed
+## directly from the spatial grid without linear scans or allocations.
 func _team_pressure_on_ball(team: int) -> float:
-	var total: float = 0.0
-	for i: int in range(TOTAL_PLAYERS):
-		if player_nodes[i] == null or not is_instance_valid(player_nodes[i]):
-			continue
-		if player_teams[i] != team:
-			continue
-		var d: float = ball_position.distance_to(player_positions[i])
-		if d < CARRIER_PRESSURE_RADIUS:
-			total += 1.0 - (d / CARRIER_PRESSURE_RADIUS)
-	return clampf(total, 0.0, 1.0)
+	return clampf(get_teammate_density(ball_position, CARRIER_PRESSURE_RADIUS, team), 0.0, 1.0)
 
 
 ## Pseudo3DBall carries the possessor on `possessor` (a Node2D set by
@@ -420,10 +468,297 @@ func get_teammates_of(index: int) -> Array[int]:
 	return _teammate_scratch
 
 
+## --- Spatial Grid Proximity & Density Queries -------------------------------
+
+## Indices of every registered player within `radius` of `pos`.
+## Scratch-buffered and allocation-free. Overwritten by the next call.
+func get_nearby_players(pos: Vector2, radius: float) -> Array[int]:
+	_nearby_players_scratch.clear()
+	if radius <= 0.0:
+		return _nearby_players_scratch
+	var r_sq: float = radius * radius
+	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
+	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
+	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
+	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+
+	for cy: int in range(min_cy, max_cy + 1):
+		for cx: int in range(min_cx, max_cx + 1):
+			var cell := Vector2i(cx, cy)
+			if not _grid.has(cell):
+				continue
+			var bucket: Array = _grid[cell]
+			for idx_variant: Variant in bucket:
+				var i: int = int(idx_variant)
+				if player_positions[i].distance_squared_to(pos) <= r_sq:
+					_nearby_players_scratch.append(i)
+	return _nearby_players_scratch
+
+
+## Indices of registered players NOT on `team` within `radius` of `pos`.
+## Scratch-buffered and allocation-free.
+func get_nearby_opponents(pos: Vector2, radius: float, team: int) -> Array[int]:
+	_nearby_opponents_scratch.clear()
+	if radius <= 0.0:
+		return _nearby_opponents_scratch
+	var r_sq: float = radius * radius
+	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
+	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
+	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
+	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+
+	for cy: int in range(min_cy, max_cy + 1):
+		for cx: int in range(min_cx, max_cx + 1):
+			var cell := Vector2i(cx, cy)
+			if not _grid.has(cell):
+				continue
+			var bucket: Array = _grid[cell]
+			for idx_variant: Variant in bucket:
+				var i: int = int(idx_variant)
+				if player_teams[i] != team and player_positions[i].distance_squared_to(pos) <= r_sq:
+					_nearby_opponents_scratch.append(i)
+	return _nearby_opponents_scratch
+
+
+## Indices of registered players on `team` within `radius` of `pos`, excluding `exclude_index`.
+## Scratch-buffered and allocation-free.
+func get_nearby_teammates(pos: Vector2, radius: float, team: int, exclude_index: int = NO_INDEX) -> Array[int]:
+	_nearby_teammates_scratch.clear()
+	if radius <= 0.0:
+		return _nearby_teammates_scratch
+	var r_sq: float = radius * radius
+	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
+	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
+	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
+	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+
+	for cy: int in range(min_cy, max_cy + 1):
+		for cx: int in range(min_cx, max_cx + 1):
+			var cell := Vector2i(cx, cy)
+			if not _grid.has(cell):
+				continue
+			var bucket: Array = _grid[cell]
+			for idx_variant: Variant in bucket:
+				var i: int = int(idx_variant)
+				if i != exclude_index and player_teams[i] == team and player_positions[i].distance_squared_to(pos) <= r_sq:
+					_nearby_teammates_scratch.append(i)
+	return _nearby_teammates_scratch
+
+
+## Node2D instances of opponents within `radius` of `pos`.
+## Scratch-buffered and allocation-free. Replaces legacy full-pitch scans.
+func get_nearby_opponent_nodes(pos: Vector2, radius: float, team: int) -> Array[Node2D]:
+	_nearby_nodes2d_scratch.clear()
+	if radius <= 0.0:
+		return _nearby_nodes2d_scratch
+	var r_sq: float = radius * radius
+	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
+	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
+	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
+	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+
+	for cy: int in range(min_cy, max_cy + 1):
+		for cx: int in range(min_cx, max_cx + 1):
+			var cell := Vector2i(cx, cy)
+			if not _grid.has(cell):
+				continue
+			var bucket: Array = _grid[cell]
+			for idx_variant: Variant in bucket:
+				var i: int = int(idx_variant)
+				if player_teams[i] != team and player_positions[i].distance_squared_to(pos) <= r_sq:
+					var node: HeavyPlayerController = player_nodes[i]
+					if node != null and is_instance_valid(node):
+						_nearby_nodes2d_scratch.append(node)
+	return _nearby_nodes2d_scratch
+
+
+## Zero-allocation count of registered players within `radius` of `pos`.
+func count_nearby_players(pos: Vector2, radius: float) -> int:
+	if radius <= 0.0:
+		return 0
+	var count: int = 0
+	var r_sq: float = radius * radius
+	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
+	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
+	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
+	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+
+	for cy: int in range(min_cy, max_cy + 1):
+		for cx: int in range(min_cx, max_cx + 1):
+			var cell := Vector2i(cx, cy)
+			if not _grid.has(cell):
+				continue
+			var bucket: Array = _grid[cell]
+			for idx_variant: Variant in bucket:
+				var i: int = int(idx_variant)
+				if player_positions[i].distance_squared_to(pos) <= r_sq:
+					count += 1
+	return count
+
+
+## Zero-allocation count of opponents within `radius` of `pos`.
+func count_nearby_opponents(pos: Vector2, radius: float, team: int) -> int:
+	if radius <= 0.0:
+		return 0
+	var count: int = 0
+	var r_sq: float = radius * radius
+	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
+	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
+	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
+	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+
+	for cy: int in range(min_cy, max_cy + 1):
+		for cx: int in range(min_cx, max_cx + 1):
+			var cell := Vector2i(cx, cy)
+			if not _grid.has(cell):
+				continue
+			var bucket: Array = _grid[cell]
+			for idx_variant: Variant in bucket:
+				var i: int = int(idx_variant)
+				if player_teams[i] != team and player_positions[i].distance_squared_to(pos) <= r_sq:
+					count += 1
+	return count
+
+
+## Zero-allocation count of teammates within `radius` of `pos`, excluding `exclude_index`.
+func count_nearby_teammates(pos: Vector2, radius: float, team: int, exclude_index: int = NO_INDEX) -> int:
+	if radius <= 0.0:
+		return 0
+	var count: int = 0
+	var r_sq: float = radius * radius
+	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
+	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
+	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
+	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+
+	for cy: int in range(min_cy, max_cy + 1):
+		for cx: int in range(min_cx, max_cx + 1):
+			var cell := Vector2i(cx, cy)
+			if not _grid.has(cell):
+				continue
+			var bucket: Array = _grid[cell]
+			for idx_variant: Variant in bucket:
+				var i: int = int(idx_variant)
+				if i != exclude_index and player_teams[i] == team and player_positions[i].distance_squared_to(pos) <= r_sq:
+					count += 1
+	return count
+
+
+## Weighted crowding score of opponents within `radius` of `pos`.
+## Uses 1.0 - (d / radius) falloff. Allocation-free.
+func get_opponent_density(pos: Vector2, radius: float, team: int) -> float:
+	if radius <= 0.0:
+		return 0.0
+	var total: float = 0.0
+	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
+	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
+	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
+	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+
+	for cy: int in range(min_cy, max_cy + 1):
+		for cx: int in range(min_cx, max_cx + 1):
+			var cell := Vector2i(cx, cy)
+			if not _grid.has(cell):
+				continue
+			var bucket: Array = _grid[cell]
+			for idx_variant: Variant in bucket:
+				var i: int = int(idx_variant)
+				if player_teams[i] != team:
+					var d: float = pos.distance_to(player_positions[i])
+					if d < radius:
+						total += 1.0 - (d / radius)
+	return total
+
+
+## Weighted crowding score of teammates on `team` within `radius` of `pos`, excluding `exclude_index`.
+## Uses 1.0 - (d / radius) falloff. Allocation-free.
+func get_teammate_density(pos: Vector2, radius: float, team: int, exclude_index: int = NO_INDEX) -> float:
+	if radius <= 0.0:
+		return 0.0
+	var total: float = 0.0
+	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
+	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
+	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
+	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+
+	for cy: int in range(min_cy, max_cy + 1):
+		for cx: int in range(min_cx, max_cx + 1):
+			var cell := Vector2i(cx, cy)
+			if not _grid.has(cell):
+				continue
+			var bucket: Array = _grid[cell]
+			for idx_variant: Variant in bucket:
+				var i: int = int(idx_variant)
+				if i != exclude_index and player_teams[i] == team:
+					var d: float = pos.distance_to(player_positions[i])
+					if d < radius:
+						total += 1.0 - (d / radius)
+	return total
+
+
+## Returns true if any opponent (not on `team`) sits within `clearance` px of the
+## segment from `from_pos` to `to_pos`. Uses the grid bounding box to only test
+## relevant cells. Allocation-free.
+func is_lane_blocked_by_opponent(from_pos: Vector2, to_pos: Vector2, clearance: float, team: int) -> bool:
+	var min_x: float = minf(from_pos.x, to_pos.x) - clearance
+	var max_x: float = maxf(from_pos.x, to_pos.x) + clearance
+	var min_y: float = minf(from_pos.y, to_pos.y) - clearance
+	var max_y: float = maxf(from_pos.y, to_pos.y) + clearance
+
+	var min_cx: int = int(floorf(min_x * INV_CELL_SIZE))
+	var max_cx: int = int(floorf(max_x * INV_CELL_SIZE))
+	var min_cy: int = int(floorf(min_y * INV_CELL_SIZE))
+	var max_cy: int = int(floorf(max_y * INV_CELL_SIZE))
+
+	for cy: int in range(min_cy, max_cy + 1):
+		for cx: int in range(min_cx, max_cx + 1):
+			var cell := Vector2i(cx, cy)
+			if not _grid.has(cell):
+				continue
+			var bucket: Array = _grid[cell]
+			for idx_variant: Variant in bucket:
+				var i: int = int(idx_variant)
+				if player_teams[i] != team:
+					if UtilityMath.is_lane_blocked(from_pos, to_pos, player_positions[i], clearance):
+						return true
+	return false
+
+
 ## Distance from `pos` to the closest registered player NOT on `team`.
-## Returns INF when no opponent is registered. Allocation-free.
+## Checks local spatial grid cells first for O(1) early exit before falling back
+## to a full roster check. Returns INF when no opponent is registered. Allocation-free.
 func nearest_opponent_dist_to(pos: Vector2, team: int) -> float:
-	var best: float = INF
+	var centre_cell: Vector2i = world_to_cell(pos)
+	var best_dist_sq: float = INF
+
+	# Search 3x3 local cells first (radius <= 160px from center cell)
+	for cy: int in range(centre_cell.y - 1, centre_cell.y + 2):
+		for cx: int in range(centre_cell.x - 1, centre_cell.x + 2):
+			var cell := Vector2i(cx, cy)
+			if not _grid.has(cell):
+				continue
+			var bucket: Array = _grid[cell]
+			for idx_variant: Variant in bucket:
+				var i: int = int(idx_variant)
+				if player_teams[i] != team:
+					var d_sq: float = pos.distance_squared_to(player_positions[i])
+					if d_sq < best_dist_sq:
+						best_dist_sq = d_sq
+
+	# If an opponent is within the safe 3x3 interior, return early without full scan.
+	var min_outer_dist_x: float = minf(
+		absf(pos.x - float(centre_cell.x - 1) * CELL_SIZE),
+		absf(float(centre_cell.x + 2) * CELL_SIZE - pos.x)
+	)
+	var min_outer_dist_y: float = minf(
+		absf(pos.y - float(centre_cell.y - 1) * CELL_SIZE),
+		absf(float(centre_cell.y + 2) * CELL_SIZE - pos.y)
+	)
+	var min_outer_dist: float = minf(min_outer_dist_x, min_outer_dist_y)
+	if best_dist_sq < min_outer_dist * min_outer_dist:
+		return sqrt(best_dist_sq)
+
+	var best: float = sqrt(best_dist_sq) if best_dist_sq < INF else INF
 	for i: int in range(TOTAL_PLAYERS):
 		var node: HeavyPlayerController = player_nodes[i]
 		if node == null or not is_instance_valid(node):
@@ -608,12 +943,8 @@ func _check_touchline_isolation_trigger() -> bool:
 	if not near_touchline:
 		return false
 
-	var nearest_support: float = INF
-	for i: int in get_teammates_of(possessor_index):
-		if not is_instance_valid(player_nodes[i]):
-			continue
-		nearest_support = minf(nearest_support, pos.distance_to(player_positions[i]))
-	if nearest_support <= ISOLATION_SUPPORT_RADIUS:
+	var team: int = player_teams[possessor_index]
+	if count_nearby_teammates(pos, ISOLATION_SUPPORT_RADIUS, team, possessor_index) > 0:
 		return false
 
 	_arm_press_trigger(PressTrigger.TOUCHLINE_ISOLATION, carrier, carrier.global_position, PRESS_TRIGGER_HOLD_SECONDS)
