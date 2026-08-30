@@ -6,8 +6,10 @@ Onboarding and agent protocol for Google Antigravity, Gemini models, and autonom
 ## 1. Core Architecture & Invariants
 
 All engine constraints, simulation layers, and critical file contracts are canonically defined in:
-👉 **[docs/CORE_INVARIANTS.md](docs/CORE_INVARIANTS.md)**
-👉 **[docs/API_SURFACE.md](docs/API_SURFACE.md)**
+- **[docs/CORE_INVARIANTS.md](docs/CORE_INVARIANTS.md)**
+- **[docs/API_SURFACE.md](docs/API_SURFACE.md)**
+- **[docs/ANTI_PATTERNS.md](docs/ANTI_PATTERNS.md)**
+- **[docs/MATH_SOLVERS.md](docs/MATH_SOLVERS.md)**
 
 Key Highlights:
 - **Engine Lock:** Godot 4.7-stable · GDScript 2.0 ONLY · Strict Typing on every variable, parameter, and return type.
@@ -25,18 +27,23 @@ python3 tools/gdcheck.py || python tools/gdcheck.py || py -3 tools/gdcheck.py
 ```
 **Strict Requirement:** Do not proceed or conclude turns until the checker output shows `0 errors`.
 
+### Invariant & Architecture AST Verification
+```bash
+python3 tools/lint_invariants.py || python tools/lint_invariants.py || py -3 tools/lint_invariants.py
+```
+
 ### Database Integrity Verification
 ```bash
 python3 tools/verify_db.py || python tools/verify_db.py || py -3 tools/verify_db.py
 ```
 
+### Headless Simulation Telemetry Verification
+```bash
+python3 tools/eval_simulation.py --duration=60 || python tools/eval_simulation.py --duration=60
+```
+
 ### Autoload Handling Contract
 `gdcheck.py` reads `[autoload]` from `project.godot` and treats every autoload name as a known type. Never add `class_name` to an autoload script.
-
-### Headless Engine Testing (when Godot 4.7 binary is available)
-```bash
-godot --headless --path . -s addons/gut/gut_cmdln.gd -gexit
-```
 </verification>
 
 <tooling>
@@ -44,7 +51,11 @@ godot --headless --path . -s addons/gut/gut_cmdln.gd -gexit
 
 | Command | Action | Description |
 |---|---|---|
-| `/verify-all` | `tools/gdcheck.py && tools/verify_db.py` | Complete GDScript & database verification |
+| `/verify-all` | `tools/gdcheck.py && tools/lint_invariants.py && tools/verify_db.py` | Complete GDScript, invariant & database verification |
+| `/lint-invariants` | `tools/lint_invariants.py` | Run domain AST invariant linter |
+| `/eval-sim` | `tools/eval_simulation.py` | Run 60s headless simulation assertion harness |
+| `/blast-radius` | `tools/dump_dep_graph.py --blast-radius` | Compute dependency DAG and blast radius |
+| `/dump-dep-graph` | `tools/dump_dep_graph.py` | Regenerate `docs/DEPENDENCY_GRAPH.json` DAG |
 | `/sync-rules` | `tools/sync_rules.py` | Promote discovered rules to `.claude/rules/` & `docs/CORE_INVARIANTS.md` |
 | `/compact-errata` | `tools/compact_errata.py` | Promote rules and compact session state history to `docs/archive/` |
 | `/rebuild-api` | `tools/dump_api.py` | Regenerate `docs/API_SURFACE.md` public API surface map |

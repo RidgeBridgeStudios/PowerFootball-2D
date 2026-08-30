@@ -68,6 +68,17 @@ var _selected_home_team: TeamData = null
 var _selected_away_team: TeamData = null
 var _is_practice_mode: bool = false
 
+## Headless simulation harness state
+var _is_headless_simulation: bool = false
+var _sim_duration: float = 60.0
+var _sim_output_json: String = "eval_report.json"
+var _sim_ticks: int = 0
+var _sim_elapsed: float = 0.0
+var _sim_nan_inf_count: int = 0
+var _sim_boundary_escape_count: int = 0
+var _sim_ai_cadence_violations: int = 0
+var _sim_anchor_samples: Array[float] = []
+
 @onready var boundary: PitchBoundary = $PitchBoundary
 @onready var ball: Pseudo3DBall = $Ball
 @onready var players: Node2D = $Players
@@ -122,6 +133,9 @@ func _ready() -> void:
 ## UI first and defers the rest — including GameManager.start_match() — to
 ## _on_pregame_confirmed(), fired once via GameEvents.pregame_confirmed.
 func _setup_normal_match() -> void:
+	if _is_headless_simulation:
+		_on_pregame_confirmed()
+		return
 	pregame.setup()
 	pregame.show()
 	GameEvents.pregame_confirmed.connect(_on_pregame_confirmed, CONNECT_ONE_SHOT)
@@ -402,6 +416,10 @@ func _find_goalkeeper(team: int) -> HeavyPlayerController:
 
 
 func _process(delta: float) -> void:
+	if _is_headless_simulation:
+		_tick_headless_telemetry(delta)
+		return
+
 	_update_camera(delta)
 	if _is_practice_mode:
 		_tick_practice(delta)
@@ -530,9 +548,31 @@ func _on_practice_restart_timeout() -> void:
 
 
 ## Reads match configuration written by MainMenu/KickOffMenu before this scene
-## loaded. Falls back to teams 0/1 and non-practice mode, so the scene still
-## runs standalone from the editor during development.
+## loaded, as well as CLI headless arguments. Falls back to teams 0/1 and
+## non-practice mode, so the scene still runs standalone from the editor.
 func _apply_match_config() -> void:
+	var cmd_args: PackedStringArray = OS.get_cmdline_args()
+	var user_args: PackedStringArray = OS.get_cmdline_user_args()
+	for arg: String in cmd_args:
+		if arg == "--run-simulation":
+			_is_headless_simulation = true
+		elif arg.begins_with("--duration="):
+			_sim_duration = arg.trim_prefix("--duration=").to_float()
+		elif arg.begins_with("--output-json="):
+			_sim_output_json = arg.trim_prefix("--output-json=")
+	for arg: String in user_args:
+		if arg == "--run-simulation":
+			_is_headless_simulation = true
+		elif arg.begins_with("--duration="):
+			_sim_duration = arg.trim_prefix("--duration=").to_float()
+		elif arg.begins_with("--output-json="):
+			_sim_output_json = arg.trim_prefix("--output-json=")
+
+	if GameManager.has_meta(&"run_simulation") and bool(GameManager.get_meta(&"run_simulation")):
+		_is_headless_simulation = true
+	if _is_headless_simulation:
+		GameManager.set_meta(&"simulate_match", true)
+
 	if GameManager.has_meta(&"home_team_index") and GameManager.has_meta(&"away_team_index"):
 		# TODO: wire these into _bind_players()/PlayerFactory once team
 		# selection needs to change which squads actually spawn — for now the
@@ -1002,3 +1042,89 @@ func _on_ball_bounced(impact_velocity: float) -> void:
 	# Only meaningful impacts shake the frame — a settling ball should not.
 	if impact_velocity > 200.0:
 		shake_camera(clampf(impact_velocity / 900.0, 0.0, 0.6))
+
+
+## --- Headless Simulation Telemetry Harness ----------------------------------
+
+func _tick_headless_telemetry(delta: float) -> void:
+	_sim_ticks += 1
+	_sim_elapsed += delta
+
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world != null:
+		# Check all players for NaN/Inf floats
+		for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+			var pos: Vector2 = world.player_positions[i]
+			var vel: Vector2 = world.player_velocities[i]
+			if is_nan(pos.x) or is_nan(pos.y) or is_inf(pos.x) or is_inf(pos.y):
+				_sim_nan_inf_count += 1
+			if is_nan(vel.x) or is_nan(vel.y) or is_inf(vel.x) or is_inf(vel.y):
+				_sim_nan_inf_count += 1
+
+			var p: HeavyPlayerController = world.player_nodes[i]
+			if is_instance_valid(p) and p.brain != null:
+				_sim_anchor_samples.append(p.brain.formation_anchor.x)
+
+		# Check ball for NaN/Inf floats
+		var ball_pos: Vector2 = world.ball_position
+		var ball_vel: Vector2 = world.ball_velocity
+		if is_nan(ball_pos.x) or is_nan(ball_pos.y) or is_inf(ball_pos.x) or is_inf(ball_pos.y):
+			_sim_nan_inf_count += 1
+		if is_nan(ball_vel.x) or is_nan(ball_vel.y) or is_inf(ball_vel.x) or is_inf(ball_vel.y):
+			_sim_nan_inf_count += 1
+
+		# Boundary escape detection: ball out of boundary rect without triggering bounds
+		if boundary != null:
+			var half_size: Vector2 = boundary.pitch_size * 0.5
+			var centre: Vector2 = boundary.get_centre_spot()
+			var dx: float = absf(ball_pos.x - centre.x)
+			var dy: float = absf(ball_pos.y - centre.y)
+			if dx > half_size.x + 300.0 or dy > half_size.y + 300.0:
+				_sim_boundary_escape_count += 1
+
+	if _sim_elapsed >= _sim_duration:
+		_finalize_headless_simulation()
+
+
+func _finalize_headless_simulation() -> void:
+	var anchor_mean: float = 0.0
+	if _sim_anchor_samples.size() > 0:
+		var sum: float = 0.0
+		for s: float in _sim_anchor_samples:
+			sum += s
+		anchor_mean = sum / float(_sim_anchor_samples.size())
+
+	var anchor_var: float = 0.0
+	if _sim_anchor_samples.size() > 1:
+		var sum_sq: float = 0.0
+		for s: float in _sim_anchor_samples:
+			var diff: float = s - anchor_mean
+			sum_sq += diff * diff
+		anchor_var = sqrt(sum_sq / float(_sim_anchor_samples.size() - 1))
+
+	var is_clean: bool = (
+		_sim_nan_inf_count == 0
+		and _sim_boundary_escape_count == 0
+		and _sim_ai_cadence_violations == 0
+	)
+
+	var report: Dictionary = {
+		"status": "pass" if is_clean else "fail",
+		"duration_simulated_sec": _sim_elapsed,
+		"ticks_simulated": _sim_ticks,
+		"nan_inf_count": _sim_nan_inf_count,
+		"boundary_escape_count": _sim_boundary_escape_count,
+		"ai_cadence_violations": _sim_ai_cadence_violations,
+		"anchor_variance": anchor_var,
+		"score": [GameManager.score[0], GameManager.score[1]],
+		"match_phase": int(GameManager.current_phase)
+	}
+
+	var json_str: String = JSON.stringify(report, "\t")
+	var file: FileAccess = FileAccess.open(_sim_output_json, FileAccess.WRITE)
+	if file != null:
+		file.store_string(json_str)
+		file.close()
+
+	print("[HEADLESS SIMULATION COMPLETED] " + json_str)
+	get_tree().quit(0 if is_clean else 1)

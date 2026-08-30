@@ -1,8 +1,28 @@
 {
   "commands": {
     "verify-all": {
-      "description": "Runs complete static verification (gdcheck.py) and database schema verification (verify_db.py)",
-      "command": "python3 tools/gdcheck.py && python3 tools/verify_db.py || python tools/gdcheck.py && python tools/verify_db.py || py -3 tools/gdcheck.py && py -3 tools/verify_db.py",
+      "description": "Runs complete static verification (gdcheck.py), domain AST invariants (lint_invariants.py), and database schema verification (verify_db.py)",
+      "command": "python3 tools/gdcheck.py && python3 tools/lint_invariants.py && python3 tools/verify_db.py || python tools/gdcheck.py && python tools/lint_invariants.py && python tools/verify_db.py || py -3 tools/gdcheck.py && py -3 tools/lint_invariants.py && py -3 tools/verify_db.py",
+      "stream_output": true
+    },
+    "lint-invariants": {
+      "description": "Executes domain AST invariant linter (tools/lint_invariants.py) to assert layer separation, zero allocations, and choke point contracts",
+      "command": "python3 tools/lint_invariants.py || python tools/lint_invariants.py || py -3 tools/lint_invariants.py",
+      "stream_output": true
+    },
+    "eval-sim": {
+      "description": "Runs 60-second headless simulation assertion harness (tools/eval_simulation.py) asserting zero runtime invariant violations",
+      "command": "python3 tools/eval_simulation.py --duration=60 || python tools/eval_simulation.py --duration=60 || py -3 tools/eval_simulation.py --duration=60",
+      "stream_output": true
+    },
+    "blast-radius": {
+      "description": "Calculates dependency DAG blast radius for a target file (tools/dump_dep_graph.py --blast-radius <target>)",
+      "command": "python3 tools/dump_dep_graph.py --blast-radius",
+      "stream_output": true
+    },
+    "dump-dep-graph": {
+      "description": "Scans all GDScript files and regenerates docs/DEPENDENCY_GRAPH.json static dependency DAG",
+      "command": "python3 tools/dump_dep_graph.py || python tools/dump_dep_graph.py || py -3 tools/dump_dep_graph.py",
       "stream_output": true
     },
     "verify": {
@@ -37,8 +57,28 @@
     }
   },
   "/verify-all": {
-    "description": "Runs complete static verification (gdcheck.py) and database schema verification (verify_db.py)",
-    "command": "python3 tools/gdcheck.py && python3 tools/verify_db.py || python tools/gdcheck.py && python tools/verify_db.py || py -3 tools/gdcheck.py && py -3 tools/verify_db.py",
+    "description": "Runs complete static verification (gdcheck.py), domain AST invariants (lint_invariants.py), and database schema verification (verify_db.py)",
+    "command": "python3 tools/gdcheck.py && python3 tools/lint_invariants.py && python3 tools/verify_db.py || python tools/gdcheck.py && python tools/lint_invariants.py && python tools/verify_db.py || py -3 tools/gdcheck.py && py -3 tools/lint_invariants.py && py -3 tools/verify_db.py",
+    "stream_output": true
+  },
+  "/lint-invariants": {
+    "description": "Executes domain AST invariant linter (tools/lint_invariants.py) to assert layer separation, zero allocations, and choke point contracts",
+    "command": "python3 tools/lint_invariants.py || python tools/lint_invariants.py || py -3 tools/lint_invariants.py",
+    "stream_output": true
+  },
+  "/eval-sim": {
+    "description": "Runs 60-second headless simulation assertion harness (tools/eval_simulation.py) asserting zero runtime invariant violations",
+    "command": "python3 tools/eval_simulation.py --duration=60 || python tools/eval_simulation.py --duration=60 || py -3 tools/eval_simulation.py --duration=60",
+    "stream_output": true
+  },
+  "/blast-radius": {
+    "description": "Calculates dependency DAG blast radius for a target file (tools/dump_dep_graph.py --blast-radius <target>)",
+    "command": "python3 tools/dump_dep_graph.py --blast-radius",
+    "stream_output": true
+  },
+  "/dump-dep-graph": {
+    "description": "Scans all GDScript files and regenerates docs/DEPENDENCY_GRAPH.json static dependency DAG",
+    "command": "python3 tools/dump_dep_graph.py || python tools/dump_dep_graph.py || py -3 tools/dump_dep_graph.py",
     "stream_output": true
   },
   "/verify": {

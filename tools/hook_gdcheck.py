@@ -22,6 +22,7 @@ if hasattr(sys.stderr, "reconfigure"):
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 GDCHECK_PATH = os.path.join(ROOT, "tools", "gdcheck.py")
+LINT_INVARIANTS_PATH = os.path.join(ROOT, "tools", "lint_invariants.py")
 
 PROBLEM_RE = re.compile(r"^(ERROR|WARN)\s+([^:]+):(\d+)\s+(.+)$")
 
@@ -41,8 +42,8 @@ def parse_gdcheck_output(raw_output: str) -> list[dict[str, str]]:
     return diagnostics
 
 
-def format_xml_diagnostics(diagnostics: list[dict[str, str]], fallback_text: str = "") -> str:
-    xml_lines = ['<verification_failure tool="gdcheck">']
+def format_xml_diagnostics(diagnostics: list[dict[str, str]], tool_name: str = "gdcheck", fallback_text: str = "") -> str:
+    xml_lines = [f'<verification_failure tool="{tool_name}">']
     if diagnostics:
         for diag in diagnostics:
             f = html.escape(diag["file"])
@@ -57,17 +58,29 @@ def format_xml_diagnostics(diagnostics: list[dict[str, str]], fallback_text: str
 
 
 def main() -> int:
-    cmd = [sys.executable, GDCHECK_PATH]
-    proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
+    # 1. Run gdcheck.py
+    cmd_gdcheck = [sys.executable, GDCHECK_PATH]
+    proc_gdcheck = subprocess.run(cmd_gdcheck, cwd=ROOT, capture_output=True, text=True)
 
-    if proc.returncode != 0:
-        combined_out = (proc.stdout or "") + "\n" + (proc.stderr or "")
+    if proc_gdcheck.returncode != 0:
+        combined_out = (proc_gdcheck.stdout or "") + "\n" + (proc_gdcheck.stderr or "")
         diagnostics = parse_gdcheck_output(combined_out)
-        xml_report = format_xml_diagnostics(diagnostics, combined_out)
+        xml_report = format_xml_diagnostics(diagnostics, "gdcheck", combined_out)
         print(xml_report, file=sys.stderr)
-        if proc.stdout.strip():
-            print(proc.stdout)
-        return proc.returncode
+        if proc_gdcheck.stdout.strip():
+            print(proc_gdcheck.stdout)
+        return proc_gdcheck.returncode
+
+    # 2. Run lint_invariants.py
+    cmd_lint = [sys.executable, LINT_INVARIANTS_PATH, "--xml"]
+    proc_lint = subprocess.run(cmd_lint, cwd=ROOT, capture_output=True, text=True)
+
+    if proc_lint.returncode != 0:
+        if proc_lint.stderr.strip():
+            print(proc_lint.stderr, file=sys.stderr)
+        else:
+            print(proc_lint.stdout, file=sys.stderr)
+        return proc_lint.returncode
 
     print("{}")
     return 0

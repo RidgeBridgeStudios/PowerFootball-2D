@@ -5,3 +5,6 @@ export_presets.cfg
 # Godot 4.4+ auto-generated UID caches for .gd/.gdshader files.
 # Godot regenerates these on demand; they are not source.
 *.uid
+
+# Simulation evaluation telemetry reports
+eval_report.json

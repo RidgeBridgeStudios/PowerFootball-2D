@@ -1,0 +1,2191 @@
+{
+  "total_nodes": 76,
+  "layer_summary": {
+    "Layer 1 \u2014 Physics & Kinematics": 28,
+    "Layer 2 \u2014 Match AI & Spatial Navigation": 17,
+    "Layer 3 \u2014 Match Social & Dynamic Psychology": 4,
+    "Layer 4 \u2014 Club World & Persistent Entities": 10,
+    "Layer 5 \u2014 Narrative, Presentation & UI": 17
+  },
+  "nodes": {
+    "autoloads/DataLoader.gd": {
+      "class_name": null,
+      "layer": 4,
+      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/GameManager.gd",
+        "pitch/PitchScene.gd",
+        "shared/LeagueData.gd",
+        "shared/PlayerData.gd",
+        "shared/PlayerFactory.gd",
+        "shared/TeamData.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/MatchStatsTracker.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/referee/FourthOfficialVisual.gd",
+        "pitch/PitchScene.gd",
+        "shared/LeagueData.gd",
+        "shared/PlayerFactory.gd",
+        "shared/TeamData.gd",
+        "ui/HUD.gd",
+        "ui/KickOffMenu.gd",
+        "ui/MatchStatsUI.gd",
+        "ui/pregame/PreGameScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "autoloads/GameEvents.gd": {
+      "class_name": null,
+      "layer": 5,
+      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/GameManager.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/manager/ManagerDirector.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/MoodSystem.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/states/ChargeKickState.gd",
+        "entities/player/states/PenaltyKickState.gd",
+        "entities/player/states/ShotLockState.gd",
+        "entities/player/states/ThrowInState.gd",
+        "entities/referee/OffsideDetector.gd",
+        "pitch/PenaltyShootoutCoordinator.gd",
+        "pitch/PitchScene.gd",
+        "pitch/SetPieceCoordinator.gd",
+        "shared/ManagerData.gd",
+        "ui/HUD.gd",
+        "ui/pause/PauseMenu.gd",
+        "ui/pregame/PreGameScreen.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameManager.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/manager/ManagerDirector.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/MoodSystem.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/states/AerialState.gd",
+        "entities/player/states/ChargeKickState.gd",
+        "entities/player/states/PenaltyKickState.gd",
+        "entities/player/states/ShotLockState.gd",
+        "entities/player/states/TackleState.gd",
+        "entities/player/states/ThrowInState.gd",
+        "entities/referee/MatchOfficialCrew.gd",
+        "entities/referee/MatchReferee.gd",
+        "entities/referee/OffsideDetector.gd",
+        "pitch/GoalZone.gd",
+        "pitch/PenaltyShootoutCoordinator.gd",
+        "pitch/PitchBoundary.gd",
+        "pitch/PitchScene.gd",
+        "pitch/SetPieceCoordinator.gd",
+        "ui/HUD.gd",
+        "ui/pause/PauseMenu.gd",
+        "ui/pregame/PreGameScreen.gd"
+      ],
+      "signals_declared": [
+        "kickoff_started",
+        "kickoff_confirmed",
+        "goal_scored",
+        "ball_out_of_bounds",
+        "foul_committed",
+        "match_ended",
+        "match_phase_changed",
+        "half_time_reached",
+        "goal_kick_started",
+        "corner_kick_started",
+        "throw_in_started",
+        "free_kick_started",
+        "penalty_started",
+        "set_piece_taken",
+        "defensive_wall_requested",
+        "shootout_kick_result",
+        "player_switched",
+        "stamina_depleted",
+        "player_mood_changed",
+        "ball_struck",
+        "tackle_won",
+        "aerial_contested",
+        "powerful_shot_landed",
+        "referee_awarded_foul",
+        "referee_played_on",
+        "yellow_card_shown",
+        "red_card_shown",
+        "goalkeeper_sent_off",
+        "offside_called",
+        "manager_formation_changed",
+        "formation_anchors_changed",
+        "manager_stats_updated",
+        "press_trigger_changed",
+        "pregame_confirmed",
+        "pause_opened",
+        "pause_closed",
+        "substitution_made",
+        "formation_changed",
+        "lineup_changed"
+      ],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "autoloads/GameManager.gd": {
+      "class_name": null,
+      "layer": 5,
+      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "pitch/PenaltyShootoutCoordinator.gd",
+        "pitch/PitchBoundary.gd",
+        "pitch/PitchScene.gd",
+        "pitch/SetPieceCoordinator.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/DataLoader.gd",
+        "autoloads/GameEvents.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/manager/ManagerDirector.gd",
+        "entities/player/MoodSystem.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/states/ChargeKickState.gd",
+        "entities/player/states/GoalkeeperDiveState.gd",
+        "entities/player/states/PenaltyKickState.gd",
+        "entities/player/states/SetPieceFreezeState.gd",
+        "entities/player/states/ThrowInState.gd",
+        "entities/referee/MatchReferee.gd",
+        "entities/referee/OffsideDetector.gd",
+        "pitch/GoalZone.gd",
+        "pitch/PenaltyShootoutCoordinator.gd",
+        "pitch/PitchScene.gd",
+        "pitch/SetPieceCoordinator.gd",
+        "ui/HUD.gd",
+        "ui/KickOffMenu.gd",
+        "ui/MainMenu.gd",
+        "ui/MatchStatsUI.gd",
+        "ui/OptionsMenu.gd",
+        "ui/pause/PauseMenu.gd",
+        "ui/pregame/PreGameScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "corner_kick_started",
+        "free_kick_started",
+        "goal_kick_started",
+        "goal_scored",
+        "half_time_reached",
+        "kickoff_started",
+        "match_ended",
+        "match_phase_changed",
+        "penalty_started",
+        "throw_in_started"
+      ],
+      "signals_connected": [
+        "powerful_shot_landed"
+      ]
+    },
+    "autoloads/InputHelper.gd": {
+      "class_name": null,
+      "layer": 5,
+      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "extends": "Node",
+      "direct_dependencies": [],
+      "direct_dependents": [
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/states/AerialState.gd",
+        "entities/player/states/ChargeKickState.gd",
+        "entities/player/states/PenaltyKickState.gd",
+        "entities/player/states/ShotLockState.gd",
+        "entities/player/states/TackleState.gd",
+        "entities/player/states/ThrowInState.gd",
+        "pitch/PitchScene.gd"
+      ],
+      "signals_declared": [
+        "gamepad_connection_changed"
+      ],
+      "signals_emitted": [
+        "gamepad_connection_changed"
+      ],
+      "signals_connected": [
+        "joy_connection_changed"
+      ]
+    },
+    "autoloads/ManagerLoader.gd": {
+      "class_name": null,
+      "layer": 4,
+      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "extends": "Node",
+      "direct_dependencies": [
+        "pitch/PitchScene.gd",
+        "shared/ManagerData.gd"
+      ],
+      "direct_dependents": [
+        "pitch/PitchScene.gd",
+        "shared/ManagerData.gd",
+        "shared/PlayerFactory.gd",
+        "ui/pregame/PreGameScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "autoloads/MatchStatsTracker.gd": {
+      "class_name": null,
+      "layer": 3,
+      "layer_name": "Layer 3 \u2014 Match Social & Dynamic Psychology",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/states/ChargeKickState.gd",
+        "entities/player/states/ThrowInState.gd",
+        "pitch/GoalZone.gd",
+        "pitch/PitchScene.gd",
+        "shared/PlayerData.gd",
+        "shared/PlayerRatingCalculator.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "entities/player/TrustSystem.gd",
+        "entities/player/states/ChargeKickState.gd",
+        "entities/player/states/ThrowInState.gd",
+        "pitch/PitchScene.gd",
+        "shared/PlayerRatingCalculator.gd",
+        "ui/MatchStatsUI.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "ball_struck",
+        "corner_kick_started",
+        "foul_committed",
+        "goal_scored",
+        "offside_called",
+        "red_card_shown",
+        "substitution_made",
+        "yellow_card_shown"
+      ]
+    },
+    "autoloads/MatchWorldModel.gd": {
+      "class_name": null,
+      "layer": 2,
+      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/states/ChargeKickState.gd",
+        "entities/player/states/DribbleState.gd",
+        "entities/player/states/TackleState.gd",
+        "entities/player/states/ThrowInState.gd",
+        "entities/referee/MatchReferee.gd",
+        "pitch/PitchBoundary.gd",
+        "pitch/PitchScene.gd",
+        "shared/FormationAnchorMath.gd",
+        "shared/UtilityMath.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/states/DribbleState.gd",
+        "entities/player/states/TackleState.gd",
+        "entities/referee/AssistantRefereeVisual.gd",
+        "entities/referee/CenterRefereeVisual.gd",
+        "entities/referee/MatchOfficialCrew.gd",
+        "entities/referee/MatchReferee.gd",
+        "entities/referee/OffsideDetector.gd",
+        "pitch/PitchScene.gd",
+        "shared/PassUtilityScorer.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "press_trigger_changed"
+      ],
+      "signals_connected": [
+        "ball_struck"
+      ]
+    },
+    "autoloads/RefereeLoader.gd": {
+      "class_name": null,
+      "layer": 4,
+      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "extends": "Node",
+      "direct_dependencies": [
+        "pitch/PitchScene.gd",
+        "shared/RefereeData.gd"
+      ],
+      "direct_dependents": [
+        "entities/referee/MatchReferee.gd",
+        "pitch/PitchScene.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/ball/BallState.gd": {
+      "class_name": "BallState",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "entities/ball/BallStateFactory.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/PlayerState.gd"
+      ],
+      "direct_dependents": [
+        "entities/ball/BallStateFactory.gd",
+        "entities/ball/states/DeadBallState.gd",
+        "entities/ball/states/FlightState.gd",
+        "entities/ball/states/GroundRollState.gd",
+        "entities/ball/states/PossessionState.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/ball/BallStateFactory.gd": {
+      "class_name": "BallStateFactory",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "Node",
+      "direct_dependencies": [
+        "entities/ball/BallState.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/ball/states/DeadBallState.gd",
+        "entities/ball/states/FlightState.gd",
+        "entities/ball/states/GroundRollState.gd",
+        "entities/ball/states/PossessionState.gd"
+      ],
+      "direct_dependents": [
+        "entities/ball/BallState.gd",
+        "entities/ball/Pseudo3DBall.gd"
+      ],
+      "signals_declared": [
+        "state_changed"
+      ],
+      "signals_emitted": [
+        "state_changed"
+      ],
+      "signals_connected": []
+    },
+    "entities/ball/Pseudo3DBall.gd": {
+      "class_name": "Pseudo3DBall",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "CharacterBody2D",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "entities/ball/BallStateFactory.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "pitch/PitchBoundary.gd",
+        "shared/CollisionLayers.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/ball/BallState.gd",
+        "entities/ball/BallStateFactory.gd",
+        "entities/ball/states/DeadBallState.gd",
+        "entities/ball/states/FlightState.gd",
+        "entities/ball/states/GroundRollState.gd",
+        "entities/ball/states/PossessionState.gd",
+        "entities/goalkeeper/GoalkeeperDiveBrain.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/PlayerState.gd",
+        "entities/player/states/AerialState.gd",
+        "entities/player/states/ChargeKickState.gd",
+        "entities/player/states/DribbleState.gd",
+        "entities/player/states/GoalkeeperDiveState.gd",
+        "entities/player/states/PenaltyKickState.gd",
+        "entities/player/states/ShotLockState.gd",
+        "entities/player/states/TackleState.gd",
+        "entities/player/states/ThrowInState.gd",
+        "pitch/GoalZone.gd",
+        "pitch/MatchCamera.gd",
+        "pitch/PenaltyShootoutCoordinator.gd",
+        "pitch/PitchBoundary.gd",
+        "pitch/PitchScene.gd",
+        "pitch/SetPieceCoordinator.gd",
+        "shared/UtilityMath.gd"
+      ],
+      "signals_declared": [
+        "ball_bounced",
+        "ball_kicked",
+        "possession_changed"
+      ],
+      "signals_emitted": [
+        "ball_bounced",
+        "ball_kicked",
+        "possession_changed"
+      ],
+      "signals_connected": []
+    },
+    "entities/ball/states/DeadBallState.gd": {
+      "class_name": "DeadBallState",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "BallState",
+      "direct_dependencies": [
+        "entities/ball/BallState.gd",
+        "entities/ball/Pseudo3DBall.gd"
+      ],
+      "direct_dependents": [
+        "entities/ball/BallStateFactory.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/ball/states/FlightState.gd": {
+      "class_name": "FlightState",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "BallState",
+      "direct_dependencies": [
+        "entities/ball/BallState.gd",
+        "entities/ball/Pseudo3DBall.gd"
+      ],
+      "direct_dependents": [
+        "entities/ball/BallStateFactory.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/ball/states/GroundRollState.gd": {
+      "class_name": "GroundRollState",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "BallState",
+      "direct_dependencies": [
+        "entities/ball/BallState.gd",
+        "entities/ball/Pseudo3DBall.gd"
+      ],
+      "direct_dependents": [
+        "entities/ball/BallStateFactory.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/ball/states/PossessionState.gd": {
+      "class_name": "PossessionState",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "BallState",
+      "direct_dependencies": [
+        "entities/ball/BallState.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/states/DribbleState.gd"
+      ],
+      "direct_dependents": [
+        "entities/ball/BallStateFactory.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/goalkeeper/GoalkeeperDiveBrain.gd": {
+      "class_name": "GoalkeeperDiveBrain",
+      "layer": 2,
+      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/states/GoalkeeperDiveState.gd",
+        "shared/PlayerData.gd"
+      ],
+      "direct_dependents": [
+        "pitch/PitchScene.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/manager/ManagerDirector.gd": {
+      "class_name": "ManagerDirector",
+      "layer": 2,
+      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "pitch/PitchBoundary.gd",
+        "shared/FormationLibrary.gd",
+        "shared/ManagerData.gd",
+        "shared/PlayerData.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "pitch/PitchScene.gd",
+        "shared/FormationAnchorMath.gd",
+        "shared/FormationLibrary.gd",
+        "shared/ManagerData.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "formation_anchors_changed",
+        "manager_formation_changed"
+      ],
+      "signals_connected": [
+        "goal_scored",
+        "kickoff_confirmed"
+      ]
+    },
+    "entities/manager/PressOffice.gd": {
+      "class_name": "PressOffice",
+      "layer": 5,
+      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "shared/ManagerData.gd"
+      ],
+      "direct_dependents": [
+        "pitch/PitchScene.gd",
+        "shared/ManagerData.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/player/FacingArrow.gd": {
+      "class_name": "FacingArrow",
+      "layer": 5,
+      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "extends": "Node2D",
+      "direct_dependencies": [
+        "entities/player/HeavyPlayerController.gd",
+        "shared/PlayerFactory.gd"
+      ],
+      "direct_dependents": [
+        "entities/player/HeavyPlayerController.gd",
+        "pitch/Minimap.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "possession_gained",
+        "possession_lost"
+      ]
+    },
+    "entities/player/HeavyPlayerController.gd": {
+      "class_name": "HeavyPlayerController",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "CharacterBody2D",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/GameEvents.gd",
+        "autoloads/InputHelper.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/manager/ManagerDirector.gd",
+        "entities/player/FacingArrow.gd",
+        "entities/player/MoodSystem.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/PlayerStateFactory.gd",
+        "entities/player/TrustSystem.gd",
+        "entities/player/states/DribbleState.gd",
+        "entities/player/states/MoveState.gd",
+        "entities/player/states/TackleState.gd",
+        "pitch/PitchScene.gd",
+        "shared/CollisionLayers.gd",
+        "shared/PlayerData.gd",
+        "shared/PlayerFactory.gd",
+        "shared/PlayerRoleConfig.gd",
+        "ui/ActionText.gd",
+        "ui/HUD.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/goalkeeper/GoalkeeperDiveBrain.gd",
+        "entities/manager/ManagerDirector.gd",
+        "entities/player/FacingArrow.gd",
+        "entities/player/MoodSystem.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/PlayerState.gd",
+        "entities/player/PlayerStateFactory.gd",
+        "entities/player/TrustSystem.gd",
+        "entities/player/states/AerialState.gd",
+        "entities/player/states/ChargeKickState.gd",
+        "entities/player/states/DribbleState.gd",
+        "entities/player/states/GoalkeeperDiveState.gd",
+        "entities/player/states/IdleState.gd",
+        "entities/player/states/MoveState.gd",
+        "entities/player/states/PenaltyKickState.gd",
+        "entities/player/states/SetPieceFreezeState.gd",
+        "entities/player/states/ShotLockState.gd",
+        "entities/player/states/TackleState.gd",
+        "entities/player/states/ThrowInState.gd",
+        "entities/referee/MatchReferee.gd",
+        "entities/referee/OffsideDetector.gd",
+        "pitch/GoalZone.gd",
+        "pitch/MatchCamera.gd",
+        "pitch/Minimap.gd",
+        "pitch/PenaltyShootoutCoordinator.gd",
+        "pitch/PitchBoundary.gd",
+        "pitch/PitchScene.gd",
+        "pitch/SetPieceCoordinator.gd",
+        "shared/CollisionLayers.gd",
+        "shared/PassUtilityScorer.gd",
+        "shared/PlayerData.gd",
+        "shared/PlayerFactory.gd",
+        "shared/PlayerRoleConfig.gd",
+        "ui/ActionText.gd",
+        "ui/HUD.gd"
+      ],
+      "signals_declared": [
+        "stamina_state_changed",
+        "possession_gained",
+        "possession_lost"
+      ],
+      "signals_emitted": [
+        "stamina_depleted",
+        "stamina_state_changed"
+      ],
+      "signals_connected": [
+        "player_mood_changed"
+      ]
+    },
+    "entities/player/MoodSystem.gd": {
+      "class_name": "MoodSystem",
+      "layer": 3,
+      "layer_name": "Layer 3 \u2014 Match Social & Dynamic Psychology",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "shared/PlayerData.gd",
+        "shared/PlayerFactory.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/TrustSystem.gd",
+        "entities/player/states/ChargeKickState.gd",
+        "entities/player/states/ShotLockState.gd",
+        "entities/referee/MatchReferee.gd",
+        "pitch/PitchScene.gd",
+        "shared/PlayerFactory.gd",
+        "ui/HUD.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "player_mood_changed"
+      ],
+      "signals_connected": [
+        "ball_struck",
+        "foul_committed",
+        "goal_scored",
+        "stamina_depleted",
+        "tackle_won"
+      ]
+    },
+    "entities/player/PlayerBrain.gd": {
+      "class_name": "PlayerBrain",
+      "layer": 2,
+      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/manager/ManagerDirector.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/MoodSystem.gd",
+        "entities/player/PlayerState.gd",
+        "entities/player/TrustSystem.gd",
+        "entities/player/states/DribbleState.gd",
+        "entities/player/states/GoalkeeperDiveState.gd",
+        "entities/player/states/TackleState.gd",
+        "pitch/PitchBoundary.gd",
+        "pitch/PitchScene.gd",
+        "shared/FormationAnchorMath.gd",
+        "shared/PassUtilityScorer.gd",
+        "shared/PlayerData.gd",
+        "shared/UtilityMath.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/manager/ManagerDirector.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/MoodSystem.gd",
+        "entities/player/PlayerState.gd",
+        "entities/player/TrustSystem.gd",
+        "entities/player/states/DribbleState.gd",
+        "entities/player/states/TackleState.gd",
+        "entities/player/states/ThrowInState.gd",
+        "pitch/PitchScene.gd",
+        "pitch/SetPieceCoordinator.gd",
+        "shared/FormationAnchorMath.gd",
+        "shared/ManagerData.gd",
+        "shared/PassUtilityScorer.gd",
+        "shared/PlayerData.gd",
+        "shared/PlayerFactory.gd",
+        "shared/PlayerRoleConfig.gd",
+        "shared/UtilityMath.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "body_entered",
+        "formation_anchors_changed"
+      ]
+    },
+    "entities/player/PlayerState.gd": {
+      "class_name": "PlayerState",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/PlayerStateFactory.gd",
+        "entities/player/states/ShotLockState.gd"
+      ],
+      "direct_dependents": [
+        "entities/ball/BallState.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/PlayerStateFactory.gd",
+        "entities/player/states/AerialState.gd",
+        "entities/player/states/ChargeKickState.gd",
+        "entities/player/states/DribbleState.gd",
+        "entities/player/states/GoalkeeperDiveState.gd",
+        "entities/player/states/IdleState.gd",
+        "entities/player/states/MoveState.gd",
+        "entities/player/states/PenaltyKickState.gd",
+        "entities/player/states/SetPieceFreezeState.gd",
+        "entities/player/states/ShotLockState.gd",
+        "entities/player/states/TackleState.gd",
+        "entities/player/states/ThrowInState.gd",
+        "pitch/PenaltyShootoutCoordinator.gd",
+        "pitch/PitchScene.gd",
+        "pitch/SetPieceCoordinator.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/player/PlayerStateFactory.gd": {
+      "class_name": "PlayerStateFactory",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "Node",
+      "direct_dependencies": [
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerState.gd",
+        "entities/player/states/AerialState.gd",
+        "entities/player/states/ChargeKickState.gd",
+        "entities/player/states/DribbleState.gd",
+        "entities/player/states/GoalkeeperDiveState.gd",
+        "entities/player/states/IdleState.gd",
+        "entities/player/states/MoveState.gd",
+        "entities/player/states/PenaltyKickState.gd",
+        "entities/player/states/SetPieceFreezeState.gd",
+        "entities/player/states/ShotLockState.gd",
+        "entities/player/states/TackleState.gd",
+        "entities/player/states/ThrowInState.gd",
+        "ui/HUD.gd"
+      ],
+      "direct_dependents": [
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerState.gd",
+        "entities/player/states/PenaltyKickState.gd",
+        "entities/player/states/ThrowInState.gd",
+        "ui/HUD.gd"
+      ],
+      "signals_declared": [
+        "state_changed"
+      ],
+      "signals_emitted": [
+        "state_changed"
+      ],
+      "signals_connected": []
+    },
+    "entities/player/TrustSystem.gd": {
+      "class_name": "TrustSystem",
+      "layer": 3,
+      "layer_name": "Layer 3 \u2014 Match Social & Dynamic Psychology",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/MatchStatsTracker.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/MoodSystem.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/states/DribbleState.gd",
+        "shared/PlayerData.gd",
+        "shared/PlayerFactory.gd"
+      ],
+      "direct_dependents": [
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/states/DribbleState.gd",
+        "entities/player/states/ThrowInState.gd",
+        "shared/PlayerFactory.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/player/states/AerialState.gd": {
+      "class_name": "AerialState",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "PlayerState",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/InputHelper.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerState.gd"
+      ],
+      "direct_dependents": [
+        "entities/player/PlayerStateFactory.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "aerial_contested"
+      ],
+      "signals_connected": []
+    },
+    "entities/player/states/ChargeKickState.gd": {
+      "class_name": "ChargeKickState",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "PlayerState",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/InputHelper.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/MoodSystem.gd",
+        "entities/player/PlayerState.gd",
+        "ui/HUD.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/player/PlayerStateFactory.gd",
+        "entities/player/states/PenaltyKickState.gd",
+        "entities/player/states/ShotLockState.gd",
+        "entities/player/states/ThrowInState.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "ball_struck",
+        "powerful_shot_landed"
+      ],
+      "signals_connected": []
+    },
+    "entities/player/states/DribbleState.gd": {
+      "class_name": "DribbleState",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "PlayerState",
+      "direct_dependencies": [
+        "autoloads/MatchWorldModel.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/PlayerState.gd",
+        "entities/player/TrustSystem.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/MatchWorldModel.gd",
+        "entities/ball/states/PossessionState.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/PlayerStateFactory.gd",
+        "entities/player/TrustSystem.gd",
+        "entities/player/states/ThrowInState.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "possession_gained",
+        "possession_lost"
+      ],
+      "signals_connected": []
+    },
+    "entities/player/states/GoalkeeperDiveState.gd": {
+      "class_name": "GoalkeeperDiveState",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "PlayerState",
+      "direct_dependencies": [
+        "autoloads/GameManager.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerState.gd"
+      ],
+      "direct_dependents": [
+        "entities/goalkeeper/GoalkeeperDiveBrain.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/PlayerStateFactory.gd",
+        "pitch/PitchScene.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/player/states/IdleState.gd": {
+      "class_name": "IdleState",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "PlayerState",
+      "direct_dependencies": [
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerState.gd"
+      ],
+      "direct_dependents": [
+        "entities/player/PlayerStateFactory.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/player/states/MoveState.gd": {
+      "class_name": "MoveState",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "PlayerState",
+      "direct_dependencies": [
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerState.gd"
+      ],
+      "direct_dependents": [
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerStateFactory.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/player/states/PenaltyKickState.gd": {
+      "class_name": "PenaltyKickState",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "PlayerState",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/InputHelper.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerState.gd",
+        "entities/player/PlayerStateFactory.gd",
+        "entities/player/states/ChargeKickState.gd",
+        "ui/HUD.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "entities/player/PlayerStateFactory.gd",
+        "pitch/PenaltyShootoutCoordinator.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "ball_struck"
+      ],
+      "signals_connected": []
+    },
+    "entities/player/states/SetPieceFreezeState.gd": {
+      "class_name": "SetPieceFreezeState",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "PlayerState",
+      "direct_dependencies": [
+        "autoloads/GameManager.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerState.gd",
+        "pitch/SetPieceCoordinator.gd"
+      ],
+      "direct_dependents": [
+        "entities/player/PlayerStateFactory.gd",
+        "pitch/PitchScene.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/player/states/ShotLockState.gd": {
+      "class_name": "ShotLockState",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "PlayerState",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/InputHelper.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/MoodSystem.gd",
+        "entities/player/PlayerState.gd",
+        "entities/player/states/ChargeKickState.gd",
+        "ui/HUD.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "entities/player/PlayerState.gd",
+        "entities/player/PlayerStateFactory.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "ball_struck"
+      ],
+      "signals_connected": []
+    },
+    "entities/player/states/TackleState.gd": {
+      "class_name": "TackleState",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "PlayerState",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/InputHelper.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/PlayerState.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/MatchWorldModel.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/PlayerStateFactory.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "foul_committed",
+        "tackle_won"
+      ],
+      "signals_connected": []
+    },
+    "entities/player/states/ThrowInState.gd": {
+      "class_name": "ThrowInState",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "PlayerState",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/InputHelper.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/PlayerState.gd",
+        "entities/player/PlayerStateFactory.gd",
+        "entities/player/TrustSystem.gd",
+        "entities/player/states/ChargeKickState.gd",
+        "entities/player/states/DribbleState.gd",
+        "pitch/SetPieceCoordinator.gd",
+        "ui/HUD.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/player/PlayerStateFactory.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "ball_struck"
+      ],
+      "signals_connected": []
+    },
+    "entities/referee/AssistantRefereeVisual.gd": {
+      "class_name": "AssistantRefereeVisual",
+      "layer": 2,
+      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "extends": "Node2D",
+      "direct_dependencies": [
+        "autoloads/MatchWorldModel.gd",
+        "pitch/PitchBoundary.gd"
+      ],
+      "direct_dependents": [
+        "entities/referee/MatchOfficialCrew.gd",
+        "pitch/Minimap.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/referee/CenterRefereeVisual.gd": {
+      "class_name": "CenterRefereeVisual",
+      "layer": 2,
+      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "extends": "Node2D",
+      "direct_dependencies": [
+        "autoloads/MatchWorldModel.gd",
+        "pitch/PitchBoundary.gd",
+        "shared/RefereeData.gd"
+      ],
+      "direct_dependents": [
+        "entities/referee/MatchOfficialCrew.gd",
+        "pitch/Minimap.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/referee/FourthOfficialVisual.gd": {
+      "class_name": "FourthOfficialVisual",
+      "layer": 2,
+      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "extends": "Node2D",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "pitch/PitchBoundary.gd",
+        "shared/PlayerData.gd"
+      ],
+      "direct_dependents": [
+        "entities/referee/MatchOfficialCrew.gd",
+        "pitch/Minimap.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/referee/MatchOfficialCrew.gd": {
+      "class_name": "MatchOfficialCrew",
+      "layer": 2,
+      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "extends": "Node2D",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/referee/AssistantRefereeVisual.gd",
+        "entities/referee/CenterRefereeVisual.gd",
+        "entities/referee/FourthOfficialVisual.gd",
+        "entities/referee/WhistleSynthesizer.gd",
+        "pitch/Minimap.gd",
+        "pitch/PitchBoundary.gd",
+        "shared/RefereeData.gd"
+      ],
+      "direct_dependents": [
+        "pitch/Minimap.gd",
+        "pitch/PitchScene.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "ball_out_of_bounds",
+        "free_kick_started",
+        "goal_scored",
+        "half_time_reached",
+        "kickoff_started",
+        "match_ended",
+        "offside_called",
+        "penalty_started",
+        "red_card_shown",
+        "referee_awarded_foul",
+        "referee_played_on",
+        "substitution_made",
+        "yellow_card_shown"
+      ]
+    },
+    "entities/referee/MatchReferee.gd": {
+      "class_name": "MatchReferee",
+      "layer": 2,
+      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/MatchWorldModel.gd",
+        "autoloads/RefereeLoader.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/MoodSystem.gd",
+        "pitch/PitchScene.gd",
+        "pitch/SetPieceCoordinator.gd",
+        "shared/PlayerData.gd",
+        "shared/RefereeData.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/MatchWorldModel.gd",
+        "pitch/PitchScene.gd",
+        "shared/PlayerData.gd",
+        "shared/RefereeData.gd",
+        "ui/HUD.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "goalkeeper_sent_off",
+        "red_card_shown",
+        "referee_awarded_foul",
+        "referee_played_on",
+        "yellow_card_shown"
+      ],
+      "signals_connected": [
+        "foul_committed",
+        "goal_scored",
+        "match_phase_changed"
+      ]
+    },
+    "entities/referee/OffsideDetector.gd": {
+      "class_name": "OffsideDetector",
+      "layer": 2,
+      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "pitch/PitchBoundary.gd",
+        "pitch/SetPieceCoordinator.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "pitch/PitchScene.gd",
+        "pitch/SetPieceCoordinator.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "offside_called"
+      ],
+      "signals_connected": [
+        "ball_struck"
+      ]
+    },
+    "entities/referee/WhistleSynthesizer.gd": {
+      "class_name": "WhistleSynthesizer",
+      "layer": 2,
+      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "extends": "Node2D",
+      "direct_dependencies": [],
+      "direct_dependents": [
+        "entities/referee/MatchOfficialCrew.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "pitch/GoalZone.gd": {
+      "class_name": "GoalZone",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "Area2D",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "shared/CollisionLayers.gd",
+        "ui/HUD.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/MatchStatsTracker.gd",
+        "pitch/PitchBoundary.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "ball_out_of_bounds"
+      ],
+      "signals_connected": [
+        "body_entered"
+      ]
+    },
+    "pitch/MatchCamera.gd": {
+      "class_name": "MatchCamera",
+      "layer": 5,
+      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "extends": "Camera2D",
+      "direct_dependencies": [
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "pitch/PitchBoundary.gd",
+        "pitch/PitchScene.gd",
+        "ui/HUD.gd"
+      ],
+      "direct_dependents": [
+        "pitch/PitchScene.gd",
+        "ui/HUD.gd"
+      ],
+      "signals_declared": [
+        "camera_mode_changed"
+      ],
+      "signals_emitted": [
+        "camera_mode_changed"
+      ],
+      "signals_connected": []
+    },
+    "pitch/Minimap.gd": {
+      "class_name": "Minimap",
+      "layer": 5,
+      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "extends": "Control",
+      "direct_dependencies": [
+        "entities/player/FacingArrow.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/referee/AssistantRefereeVisual.gd",
+        "entities/referee/CenterRefereeVisual.gd",
+        "entities/referee/FourthOfficialVisual.gd",
+        "entities/referee/MatchOfficialCrew.gd",
+        "pitch/PitchBoundary.gd",
+        "pitch/PitchMarkings.gd",
+        "pitch/PitchScene.gd",
+        "shared/PlayerData.gd"
+      ],
+      "direct_dependents": [
+        "entities/referee/MatchOfficialCrew.gd",
+        "pitch/PitchScene.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "pitch/PenaltyShootoutCoordinator.gd": {
+      "class_name": "PenaltyShootoutCoordinator",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerState.gd",
+        "entities/player/states/PenaltyKickState.gd",
+        "pitch/PitchBoundary.gd",
+        "pitch/PitchScene.gd",
+        "pitch/SetPieceCoordinator.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "pitch/PitchScene.gd",
+        "ui/HUD.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "shootout_kick_result"
+      ],
+      "signals_connected": [
+        "ball_out_of_bounds",
+        "goal_scored",
+        "set_piece_taken",
+        "timeout"
+      ]
+    },
+    "pitch/PitchBoundary.gd": {
+      "class_name": "PitchBoundary",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "StaticBody2D",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "pitch/GoalZone.gd",
+        "shared/CollisionLayers.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameManager.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/manager/ManagerDirector.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/referee/AssistantRefereeVisual.gd",
+        "entities/referee/CenterRefereeVisual.gd",
+        "entities/referee/FourthOfficialVisual.gd",
+        "entities/referee/MatchOfficialCrew.gd",
+        "entities/referee/OffsideDetector.gd",
+        "pitch/MatchCamera.gd",
+        "pitch/Minimap.gd",
+        "pitch/PenaltyShootoutCoordinator.gd",
+        "pitch/PitchMarkings.gd",
+        "pitch/PitchScene.gd",
+        "pitch/SetPieceCoordinator.gd",
+        "shared/FormationAnchorMath.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "ball_out_of_bounds"
+      ],
+      "signals_connected": [
+        "body_entered"
+      ]
+    },
+    "pitch/PitchMarkings.gd": {
+      "class_name": "PitchMarkings",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "Node2D",
+      "direct_dependencies": [
+        "pitch/PitchBoundary.gd"
+      ],
+      "direct_dependents": [
+        "pitch/Minimap.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "pitch/PitchScene.gd": {
+      "class_name": "PitchScene",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "Node2D",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/InputHelper.gd",
+        "autoloads/ManagerLoader.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchWorldModel.gd",
+        "autoloads/RefereeLoader.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/goalkeeper/GoalkeeperDiveBrain.gd",
+        "entities/manager/ManagerDirector.gd",
+        "entities/manager/PressOffice.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/MoodSystem.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/PlayerState.gd",
+        "entities/player/states/GoalkeeperDiveState.gd",
+        "entities/player/states/SetPieceFreezeState.gd",
+        "entities/referee/MatchOfficialCrew.gd",
+        "entities/referee/MatchReferee.gd",
+        "entities/referee/OffsideDetector.gd",
+        "pitch/MatchCamera.gd",
+        "pitch/Minimap.gd",
+        "pitch/PenaltyShootoutCoordinator.gd",
+        "pitch/PitchBoundary.gd",
+        "pitch/SetPieceCoordinator.gd",
+        "shared/CollisionLayers.gd",
+        "shared/ManagerData.gd",
+        "shared/PlayerData.gd",
+        "shared/PlayerFactory.gd",
+        "shared/RefereeData.gd",
+        "shared/TeamData.gd",
+        "shared/TeamManagementData.gd",
+        "ui/HUD.gd",
+        "ui/MatchStatsUI.gd",
+        "ui/TouchlineBubble.gd",
+        "ui/pause/PauseMenu.gd",
+        "ui/pregame/PreGameScreen.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/DataLoader.gd",
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/ManagerLoader.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchWorldModel.gd",
+        "autoloads/RefereeLoader.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/referee/MatchReferee.gd",
+        "pitch/MatchCamera.gd",
+        "pitch/Minimap.gd",
+        "pitch/PenaltyShootoutCoordinator.gd",
+        "pitch/SetPieceCoordinator.gd",
+        "shared/ManagerData.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamManagementData.gd",
+        "ui/HUD.gd",
+        "ui/KickOffMenu.gd",
+        "ui/MainMenu.gd",
+        "ui/MatchStatsUI.gd",
+        "ui/TouchlineBubble.gd",
+        "ui/pregame/PreGameScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "kickoff_confirmed",
+        "manager_stats_updated",
+        "player_mood_changed",
+        "player_switched"
+      ],
+      "signals_connected": [
+        "ball_bounced",
+        "ball_out_of_bounds",
+        "ball_struck",
+        "camera_mode_changed",
+        "goal_scored",
+        "half_time_reached",
+        "manager_formation_changed",
+        "match_ended",
+        "pause_closed",
+        "player_switched",
+        "pregame_confirmed",
+        "stats_dismissed",
+        "substitution_made",
+        "timeout"
+      ]
+    },
+    "pitch/SetPieceCoordinator.gd": {
+      "class_name": "SetPieceCoordinator",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/PlayerState.gd",
+        "entities/referee/OffsideDetector.gd",
+        "pitch/PitchBoundary.gd",
+        "pitch/PitchScene.gd",
+        "ui/HUD.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "entities/player/states/SetPieceFreezeState.gd",
+        "entities/player/states/ThrowInState.gd",
+        "entities/referee/MatchReferee.gd",
+        "entities/referee/OffsideDetector.gd",
+        "pitch/PenaltyShootoutCoordinator.gd",
+        "pitch/PitchScene.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "defensive_wall_requested",
+        "player_switched",
+        "set_piece_taken"
+      ],
+      "signals_connected": [
+        "state_changed",
+        "timeout"
+      ]
+    },
+    "shared/CollisionLayers.gd": {
+      "class_name": "CollisionLayers",
+      "layer": 1,
+      "layer_name": "Layer 1 \u2014 Physics & Kinematics",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "entities/player/HeavyPlayerController.gd"
+      ],
+      "direct_dependents": [
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "pitch/GoalZone.gd",
+        "pitch/PitchBoundary.gd",
+        "pitch/PitchScene.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/FormationAnchorMath.gd": {
+      "class_name": "FormationAnchorMath",
+      "layer": 2,
+      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "entities/manager/ManagerDirector.gd",
+        "entities/player/PlayerBrain.gd",
+        "pitch/PitchBoundary.gd",
+        "shared/FormationLibrary.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/MatchWorldModel.gd",
+        "entities/player/PlayerBrain.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/FormationLibrary.gd": {
+      "class_name": "FormationLibrary",
+      "layer": 2,
+      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "entities/manager/ManagerDirector.gd"
+      ],
+      "direct_dependents": [
+        "entities/manager/ManagerDirector.gd",
+        "shared/FormationAnchorMath.gd",
+        "shared/FormationRegistry.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/FormationRegistry.gd": {
+      "class_name": "FormationRegistry",
+      "layer": 2,
+      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "shared/FormationLibrary.gd",
+        "ui/FormationDiagram.gd"
+      ],
+      "direct_dependents": [
+        "ui/FormationDiagram.gd",
+        "ui/pause/PauseMenu.gd",
+        "ui/pregame/PreGameScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/LeagueData.gd": {
+      "class_name": "LeagueData",
+      "layer": 4,
+      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "shared/TeamData.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/DataLoader.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/ManagerData.gd": {
+      "class_name": "ManagerData",
+      "layer": 4,
+      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "autoloads/ManagerLoader.gd",
+        "entities/manager/ManagerDirector.gd",
+        "entities/manager/PressOffice.gd",
+        "entities/player/PlayerBrain.gd",
+        "pitch/PitchScene.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "autoloads/ManagerLoader.gd",
+        "entities/manager/ManagerDirector.gd",
+        "entities/manager/PressOffice.gd",
+        "pitch/PitchScene.gd",
+        "shared/PlayerFactory.gd",
+        "shared/TeamManagementData.gd",
+        "ui/pregame/PreGameScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/PassUtilityScorer.gd": {
+      "class_name": "PassUtilityScorer",
+      "layer": 2,
+      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "autoloads/MatchWorldModel.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "shared/UtilityMath.gd"
+      ],
+      "direct_dependents": [
+        "entities/player/PlayerBrain.gd",
+        "shared/PlayerRoleConfig.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/PlayerData.gd": {
+      "class_name": "PlayerData",
+      "layer": 4,
+      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/referee/MatchReferee.gd",
+        "pitch/PitchScene.gd",
+        "shared/PlayerFactory.gd",
+        "shared/RefereeData.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/DataLoader.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "entities/goalkeeper/GoalkeeperDiveBrain.gd",
+        "entities/manager/ManagerDirector.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/MoodSystem.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/TrustSystem.gd",
+        "entities/referee/FourthOfficialVisual.gd",
+        "entities/referee/MatchReferee.gd",
+        "pitch/Minimap.gd",
+        "pitch/PitchScene.gd",
+        "shared/ManagerData.gd",
+        "shared/PlayerFactory.gd",
+        "shared/PlayerRatingCalculator.gd",
+        "shared/RefereeData.gd",
+        "shared/TeamData.gd",
+        "shared/TeamManagementData.gd",
+        "ui/FormationDiagram.gd",
+        "ui/HUD.gd",
+        "ui/MatchStatsUI.gd",
+        "ui/pause/PauseMenu.gd",
+        "ui/pregame/PreGameScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/PlayerFactory.gd": {
+      "class_name": "PlayerFactory",
+      "layer": 4,
+      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/ManagerLoader.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/MoodSystem.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/TrustSystem.gd",
+        "shared/ManagerData.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/DataLoader.gd",
+        "entities/player/FacingArrow.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/MoodSystem.gd",
+        "entities/player/TrustSystem.gd",
+        "pitch/PitchScene.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd",
+        "ui/HUD.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/PlayerRatingCalculator.gd": {
+      "class_name": "PlayerRatingCalculator",
+      "layer": 3,
+      "layer_name": "Layer 3 \u2014 Match Social & Dynamic Psychology",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "autoloads/MatchStatsTracker.gd",
+        "shared/PlayerData.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/MatchStatsTracker.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/PlayerRoleConfig.gd": {
+      "class_name": "PlayerRoleConfig",
+      "layer": 2,
+      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "shared/PassUtilityScorer.gd"
+      ],
+      "direct_dependents": [
+        "entities/player/HeavyPlayerController.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/RefereeData.gd": {
+      "class_name": "RefereeData",
+      "layer": 4,
+      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "entities/referee/MatchReferee.gd",
+        "shared/PlayerData.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/RefereeLoader.gd",
+        "entities/referee/CenterRefereeVisual.gd",
+        "entities/referee/MatchOfficialCrew.gd",
+        "entities/referee/MatchReferee.gd",
+        "pitch/PitchScene.gd",
+        "shared/PlayerData.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/TeamData.gd": {
+      "class_name": "TeamData",
+      "layer": 4,
+      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "shared/PlayerData.gd",
+        "shared/PlayerFactory.gd",
+        "shared/TeamManagementData.gd",
+        "ui/pause/PauseMenu.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/DataLoader.gd",
+        "pitch/PitchScene.gd",
+        "shared/LeagueData.gd",
+        "shared/ManagerData.gd",
+        "shared/PlayerFactory.gd",
+        "shared/TeamManagementData.gd",
+        "ui/KickOffMenu.gd",
+        "ui/pregame/PreGameScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/TeamManagementData.gd": {
+      "class_name": "TeamManagementData",
+      "layer": 4,
+      "layer_name": "Layer 4 \u2014 Club World & Persistent Entities",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "pitch/PitchScene.gd",
+        "shared/ManagerData.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd"
+      ],
+      "direct_dependents": [
+        "pitch/PitchScene.gd",
+        "shared/TeamData.gd",
+        "ui/FormationDiagram.gd",
+        "ui/pause/PauseMenu.gd",
+        "ui/pregame/PreGameScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/UtilityMath.gd": {
+      "class_name": "UtilityMath",
+      "layer": 2,
+      "layer_name": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/PlayerBrain.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/MatchWorldModel.gd",
+        "entities/player/PlayerBrain.gd",
+        "shared/PassUtilityScorer.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "ui/ActionText.gd": {
+      "class_name": "ActionText",
+      "layer": 5,
+      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "extends": "Node2D",
+      "direct_dependencies": [
+        "entities/player/HeavyPlayerController.gd"
+      ],
+      "direct_dependents": [
+        "entities/player/HeavyPlayerController.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "finished"
+      ]
+    },
+    "ui/FormationDiagram.gd": {
+      "class_name": "FormationDiagram",
+      "layer": 5,
+      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "extends": "Control",
+      "direct_dependencies": [
+        "shared/FormationRegistry.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamManagementData.gd",
+        "ui/pause/PauseMenu.gd",
+        "ui/pregame/PreGameScreen.gd"
+      ],
+      "direct_dependents": [
+        "shared/FormationRegistry.gd",
+        "ui/pause/PauseMenu.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "ui/HUD.gd": {
+      "class_name": "HUD",
+      "layer": 5,
+      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "extends": "CanvasLayer",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/MoodSystem.gd",
+        "entities/player/PlayerStateFactory.gd",
+        "entities/referee/MatchReferee.gd",
+        "pitch/MatchCamera.gd",
+        "pitch/PenaltyShootoutCoordinator.gd",
+        "pitch/PitchScene.gd",
+        "shared/PlayerData.gd",
+        "shared/PlayerFactory.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerStateFactory.gd",
+        "entities/player/states/ChargeKickState.gd",
+        "entities/player/states/PenaltyKickState.gd",
+        "entities/player/states/ShotLockState.gd",
+        "entities/player/states/ThrowInState.gd",
+        "pitch/GoalZone.gd",
+        "pitch/MatchCamera.gd",
+        "pitch/PitchScene.gd",
+        "pitch/SetPieceCoordinator.gd",
+        "ui/MatchStatsUI.gd",
+        "ui/OptionsMenu.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "corner_kick_started",
+        "defensive_wall_requested",
+        "free_kick_started",
+        "goal_kick_started",
+        "goal_scored",
+        "kickoff_started",
+        "match_ended",
+        "match_phase_changed",
+        "offside_called",
+        "penalty_started",
+        "player_mood_changed",
+        "player_switched",
+        "red_card_shown",
+        "shootout_kick_result",
+        "substitution_made",
+        "throw_in_started",
+        "yellow_card_shown"
+      ]
+    },
+    "ui/KickOffMenu.gd": {
+      "class_name": null,
+      "layer": 5,
+      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "extends": "Control",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/GameManager.gd",
+        "pitch/PitchScene.gd",
+        "shared/TeamData.gd"
+      ],
+      "direct_dependents": [],
+      "signals_declared": [
+        "menu_closed"
+      ],
+      "signals_emitted": [
+        "menu_closed"
+      ],
+      "signals_connected": [
+        "item_selected",
+        "pressed",
+        "toggled"
+      ]
+    },
+    "ui/MainMenu.gd": {
+      "class_name": null,
+      "layer": 5,
+      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "extends": "Control",
+      "direct_dependencies": [
+        "autoloads/GameManager.gd",
+        "pitch/PitchScene.gd"
+      ],
+      "direct_dependents": [],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "confirmed",
+        "menu_closed",
+        "pressed",
+        "visibility_changed"
+      ]
+    },
+    "ui/MatchStatsUI.gd": {
+      "class_name": "MatchStatsUI",
+      "layer": 5,
+      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "extends": "CanvasLayer",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "pitch/PitchScene.gd",
+        "shared/PlayerData.gd",
+        "ui/HUD.gd"
+      ],
+      "direct_dependents": [
+        "pitch/PitchScene.gd"
+      ],
+      "signals_declared": [
+        "stats_dismissed"
+      ],
+      "signals_emitted": [
+        "stats_dismissed"
+      ],
+      "signals_connected": [
+        "pressed"
+      ]
+    },
+    "ui/OptionsMenu.gd": {
+      "class_name": null,
+      "layer": 5,
+      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "extends": "Control",
+      "direct_dependencies": [
+        "autoloads/GameManager.gd",
+        "ui/HUD.gd"
+      ],
+      "direct_dependents": [],
+      "signals_declared": [
+        "menu_closed"
+      ],
+      "signals_emitted": [
+        "menu_closed"
+      ],
+      "signals_connected": [
+        "pressed",
+        "toggled",
+        "value_changed"
+      ]
+    },
+    "ui/TouchlineBubble.gd": {
+      "class_name": "TouchlineBubble",
+      "layer": 5,
+      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "extends": "CanvasLayer",
+      "direct_dependencies": [
+        "pitch/PitchScene.gd"
+      ],
+      "direct_dependents": [
+        "pitch/PitchScene.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "ui/pause/PauseMenu.gd": {
+      "class_name": "PauseMenu",
+      "layer": 5,
+      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "extends": "CanvasLayer",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "shared/FormationRegistry.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamManagementData.gd",
+        "ui/FormationDiagram.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "pitch/PitchScene.gd",
+        "shared/TeamData.gd",
+        "ui/FormationDiagram.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "formation_changed",
+        "lineup_changed",
+        "pause_closed",
+        "pause_opened",
+        "substitution_made"
+      ],
+      "signals_connected": [
+        "item_selected",
+        "pressed"
+      ]
+    },
+    "ui/pregame/PreGameScreen.gd": {
+      "class_name": "PreGameScreen",
+      "layer": 5,
+      "layer_name": "Layer 5 \u2014 Narrative, Presentation & UI",
+      "extends": "CanvasLayer",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/ManagerLoader.gd",
+        "pitch/PitchScene.gd",
+        "shared/FormationRegistry.gd",
+        "shared/ManagerData.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd",
+        "shared/TeamManagementData.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "pitch/PitchScene.gd",
+        "ui/FormationDiagram.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "formation_changed",
+        "lineup_changed",
+        "pregame_confirmed",
+        "substitution_made"
+      ],
+      "signals_connected": [
+        "item_selected",
+        "pressed"
+      ]
+    }
+  }
+}

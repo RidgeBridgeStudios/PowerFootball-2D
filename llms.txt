@@ -10,6 +10,9 @@
 <core_invariants>
 - **docs/CORE_INVARIANTS.md** — Canonical single source of truth: Engine lock, simulation stack, choke points, and physics/AI laws.
 - **docs/API_SURFACE.md** — Auto-generated public API surface map across all 76+ scripts, exports, signals, and methods.
+- **docs/ANTI_PATTERNS.md** — Curated anti-pattern and hallucination corpus for autonomous agent reasoning.
+- **docs/MATH_SOLVERS.md** — Ground-truth mathematical solvers catalog with exact formulas, proofs, and GDScript reference code.
+- **docs/DEPENDENCY_GRAPH.json** — Static bidirectional dependency DAG and blast radius graph.
 - **POWERFOOTBALL_MASTER_VISION.md** — Master design vision, 5-layer simulation stack, systems design, and North Star.
 - **ROADMAP.md** — Tactical `[ ]`/`[x]` feature checklist across 5 development phases.
 - **docs/course_implementation_specification.md** — Course-derived reference specification (READ-ONLY): FSMs, formulas, gotchas.
@@ -51,7 +54,7 @@ Ball physics, pseudo-3D height trajectory, player kinematic body, turning penalt
 - **pitch/PitchBoundary.gd** — Touchlines, goal lines, ball out-of-bounds detection.
 - **pitch/GoalZone.gd** — Goal net detection areas and scorer attribution.
 - **pitch/PitchMarkings.gd** — Pitch line drawing and dimensions.
-- **pitch/PitchScene.gd** — Pitch root scene managing declarative 22-player squad and match coordinator.
+- **pitch/PitchScene.gd** — Pitch root scene managing declarative 22-player squad, match coordinator, and headless simulation telemetry harness.
 - **pitch/SetPieceCoordinator.gd** — Set-piece positioning, wall placement, and restart triggers.
 - **pitch/PenaltyShootoutCoordinator.gd** — Post-match penalty shootout turn resolution.
 </layer_1_physics>
@@ -131,14 +134,17 @@ Press office reactions, touchline dialogue, broadcast HUD, floating labels, matc
 ## 3. Tooling & Automation
 
 <tooling>
+- **tools/lint_invariants.py** — Domain-specific AST invariant linter enforcing layer separation, zero allocations, collision matrix, and choke points.
+- **tools/eval_simulation.py** — Headless simulation assertion harness and runtime telemetry evaluator.
+- **tools/dump_dep_graph.py** — Static dependency DAG builder and blast radius query tool exporting to `docs/DEPENDENCY_GRAPH.json`.
 - **tools/gdcheck.py** — Static GDScript checker enforcing typing, valid identifiers, and Godot 4.7 API compliance.
-- **tools/hook_gdcheck.py** — Git and Antigravity hook runner with XML diagnostic reporting.
+- **tools/hook_gdcheck.py** — Combined verification hook runner with XML diagnostic reporting.
 - **tools/verify_db.py** — Comprehensive database schema and constraint verification tool.
 - **tools/dump_api.py** — Automated public API surface extractor generating `docs/API_SURFACE.md`.
 - **tools/compact_errata.py** — Errata compaction tool promoting discovered rules and archiving old session state.
 - **tools/sync_rules.py** — Tool promoting rules from `AGENTS_ERRATA.md` to `.claude/rules/` and `docs/CORE_INVARIANTS.md`.
 - **tools/next_task.py** — Tool querying `ROADMAP.md` for the next unchecked Phase 1 gameplay task and relevant file context.
 - **tools/layer_context.py** — Targeted context injector for simulation layers 1–5.
-- **.antigravity/commands.json** — Custom slash commands (`/verify-all`, `/sync-rules`, `/compact-errata`, `/rebuild-api`, `/next-task`, `/layer-ctx`).
+- **.antigravity/commands.json** — Custom slash commands (`/verify-all`, `/lint-invariants`, `/eval-sim`, `/blast-radius`, `/dump-dep-graph`, `/sync-rules`, `/compact-errata`, `/rebuild-api`, `/next-task`, `/layer-ctx`).
 - **.antigravity/hooks.json** — Lifecycle verification hooks.
 </tooling>

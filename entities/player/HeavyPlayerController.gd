@@ -349,6 +349,13 @@ func apply_external_impulse(impulse: Vector2) -> void:
 	velocity += impulse * (NEUTRAL_MASS / maxf(player_mass, 1.0))
 
 
+## Halts all momentum immediately (used during dead-ball / set-piece freezes).
+func freeze_momentum() -> void:
+	velocity = Vector2.ZERO
+	movement_intent = Vector2.ZERO
+	is_sprinting = false
+
+
 func get_current_top_speed() -> float:
 	return top_speed * (sprint_multiplier if is_sprinting else 1.0)
 

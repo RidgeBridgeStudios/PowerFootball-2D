@@ -16,9 +16,7 @@ extends PlayerState
 
 
 func enter(player: HeavyPlayerController) -> void:
-	player.velocity = Vector2.ZERO
-	player.movement_intent = Vector2.ZERO
-	player.is_sprinting = false
+	player.freeze_momentum()
 
 
 func physics_process(player: HeavyPlayerController, delta: float) -> void:
