@@ -23,16 +23,20 @@ const HEADER_DOWNWARD_Z: float = -120.0
 ## Speed retained by a mistimed contact.
 const MISCUE_RATIO: float = 0.35
 
+const JUMP_PEAK_Z: float = 28.0   ## pixels above ground at peak
+const JUMP_GRAVITY: float = 320.0  ## px/s² pulling current_z back to 0
+
 var _elapsed: float = 0.0
 var _connected: bool = false
+var _z_velocity: float = 0.0
 
 
 func enter(player: HeavyPlayerController) -> void:
 	_elapsed = 0.0
 	_connected = false
 	player.is_sprinting = false
-	# TODO: drive player.current_z from a jump curve here so the sprite actually
-	# leaves the ground; the renderer already offsets by current_z.
+	_z_velocity = JUMP_PEAK_Z / (WINDOW * 0.5)
+	player.current_z = 0.0
 
 
 func process(player: HeavyPlayerController, delta: float) -> StringName:
@@ -52,6 +56,15 @@ func process(player: HeavyPlayerController, delta: float) -> StringName:
 func physics_process(player: HeavyPlayerController, delta: float) -> void:
 	# Airborne: no steering authority, only the momentum carried into the jump.
 	player.apply_kinematic_weight(Vector2.ZERO, delta)
+
+	_z_velocity -= JUMP_GRAVITY * delta
+	player.current_z = maxf(player.current_z + _z_velocity * delta, 0.0)
+	player.body_collider.disabled = player.current_z > 1.0
+
+
+func exit(player: HeavyPlayerController) -> void:
+	player.current_z = 0.0
+	_z_velocity = 0.0
 
 
 func _attempt_contact(player: HeavyPlayerController, ball: Pseudo3DBall) -> void:
