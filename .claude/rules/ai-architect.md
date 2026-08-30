@@ -67,6 +67,38 @@ refills it — `_find_best_pass_target()` and `_find_channel_run_target()` were
 deliberately rewritten onto `MatchWorldModel.nearest_opponent_dist_to()` rather
 than given a second call to it.
 
+### PlayerData has no stable identity — squad_index is the closest thing
+There is no `PlayerData.player_id`. Two candidates masquerade as an identity
+and neither is safe alone:
+
+- `HeavyPlayerController.world_index` — the MatchWorldModel pitch *slot*
+  (0-21). Stable for a node's lifetime, but a substitution reapplies a new
+  PlayerData onto the *same* node/slot (`apply_player_data()`), so the same
+  world_index represents two different real players over a match.
+- `HeavyPlayerController.squad_index` — index into `TeamData.squad`. Stable
+  per real player and correctly reassigned on substitution
+  (`PitchScene._on_substitution_made` sets `target.squad_index = player_in_idx`
+  *before* calling `apply_player_data()`), so `team * 1000 + squad_index` is a
+  safe synthesized per-player key across a substitution. `DataLoader.get_player
+  (team, squad_index)` resolves it back to a `PlayerData` at any time —
+  including after a red card, when `MatchWorldModel.mark_player_unavailable()`
+  has already nulled that slot in `player_nodes`. Do not cache a node
+  reference as "the player" past the moment you read it; re-resolve through
+  `DataLoader.get_player()` instead. (Used by `MatchStatsTracker`'s per-player
+  rating tracking.)
+
+### `GameEvents.goal_scored` carries no scorer by default — check the source, not the READMEs
+Several READMEs (`autoloads/README.md`, `pitch/README.md`, `ui/README.md`)
+described `goal_scored(team, scorer, assist)` while the actual signal was
+`goal_scored(team: int)` only, for a long time. `GoalZone._on_body_entered()`
+has `ball` in scope and is the only place that knows who last touched it
+before it crossed the line (`ball.last_touched_by`), so that is where a
+scorer argument has to originate if one is added — `GameManager.register_goal()`
+just threads it through. Existing listeners declaring only `(team: int)` do
+not need updating when a trailing arg is added: Godot drops emitted args a
+connected callback doesn't declare (same convention already used for
+`ball_struck`'s `is_shot` addition).
+
 ### Group scans that must NOT be routed through MatchWorldModel
 The model caches players and the ball only. These remain correct as scene-tree
 lookups and were deliberately left alone:
