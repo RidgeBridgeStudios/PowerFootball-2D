@@ -18,8 +18,8 @@
 ## Depends on: GameManager, GameEvents, PitchBoundary, Pseudo3DBall,
 ##             HeavyPlayerController, PlayerBrain, SetPieceCoordinator,
 ##             DataLoader, PlayerFactory, RefereeLoader, MatchReferee,
-##             OffsideDetector, ManagerLoader, ManagerData, ManagerDirector,
-##             PressOffice, TouchlineBubble, Minimap.
+##             MatchOfficialCrew, OffsideDetector, ManagerLoader, ManagerData,
+##             ManagerDirector, PressOffice, TouchlineBubble, Minimap.
 ## Exposes: reset_for_kickoff(kickoff_team), shake_camera(amount)
 ##
 
@@ -77,6 +77,7 @@ var _is_practice_mode: bool = false
 @onready var _set_piece_coordinator: SetPieceCoordinator = $SetPieceCoordinator
 @onready var _penalty_shootout_coordinator: PenaltyShootoutCoordinator = $PenaltyShootoutCoordinator
 @onready var match_referee: MatchReferee = $MatchReferee
+@onready var match_official_crew: MatchOfficialCrew = $MatchOfficialCrew
 @onready var _offside_detector: OffsideDetector = $OffsideDetector
 @onready var _manager_director_a: ManagerDirector = $ManagerDirectorA
 @onready var _manager_director_b: ManagerDirector = $ManagerDirectorB
@@ -163,6 +164,8 @@ func _on_pregame_confirmed() -> void:
 	hud.set_team_names(team_a_name, team_b_name)
 	var ref_data: RefereeData = RefereeLoader.get_random_referee()
 	match_referee.bind(ref_data, _set_piece_coordinator, team_a_name, team_b_name)
+	if match_official_crew != null:
+		match_official_crew.bind(boundary, ref_data)
 
 	var manager_a: ManagerData = ManagerLoader.get_or_assign_manager(team_a_name)
 	var manager_b: ManagerData = ManagerLoader.get_or_assign_manager(team_b_name)
@@ -263,6 +266,10 @@ func _setup_practice_arena() -> void:
 	GameManager.restart_play()
 
 	_set_piece_coordinator.bind(ball, boundary, players)
+
+	if match_official_crew != null:
+		match_official_crew.hide()
+		match_official_crew.process_mode = Node.PROCESS_MODE_DISABLED
 
 	hud.bind_active_player(_practice_human)
 	hud.enter_practice_mode()
@@ -662,7 +669,7 @@ func _bind_players() -> void:
 		player.squad_index = team.lineup_indices[slot] if team.lineup_indices.size() == 11 else slot
 		PlayerFactory.apply(player, DataLoader.get_player(player.team, player.squad_index), anchor)
 
-	minimap.bind(players, boundary)
+	minimap.bind(players, boundary, match_official_crew)
 
 
 ## Reacts to a substitution made in PauseMenu: finds the live node whose

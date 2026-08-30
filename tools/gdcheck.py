@@ -55,6 +55,7 @@ ENGINE_TYPES = {
     "Panel", "TextureRect", "ColorRect", "GridContainer", "MarginContainer",
     "SpinBox", "LineEdit", "TextEdit", "RichTextLabel", "CheckBox",
     "TabContainer", "SubViewport", "AudioStreamPlayer", "AudioStreamPlayer2D",
+    "AudioStream", "AudioStreamWAV", "AudioStreamGenerator", "AudioStreamMP3", "AudioStreamOggVorbis",
 }
 
 # Static-access targets that are engine singletons/utility classes rather than
