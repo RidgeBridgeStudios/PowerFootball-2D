@@ -20,7 +20,12 @@ extends Node
 
 signal kickoff_started
 signal kickoff_confirmed(team: int)
-signal goal_scored(team: int)
+## scorer is whoever last touched the ball before it crossed the line
+## (Pseudo3DBall.last_touched_by at the moment of the goal) — null if
+## unknown. scorer.team != team means an own goal. Existing 1-arg listeners
+## still work unmodified: Godot drops trailing emitted args a callback
+## doesn't declare (same convention as ball_struck's is_shot addition).
+signal goal_scored(team: int, scorer: Node)
 signal ball_out_of_bounds(side: String)
 signal foul_committed(fouler: Node, victim: Node, position: Vector2)
 signal match_ended(winner: int)

@@ -46,7 +46,7 @@ func _on_body_entered(body: Node2D) -> void:
 	_locked_until = now + retrigger_lockout
 
 	var scoring_team: int = 1 - defending_team
-	GameManager.register_goal(scoring_team)
+	GameManager.register_goal(scoring_team, ball.last_touched_by)
 
 
 ## Height of the crossbar in pixels of pseudo-3D Z.

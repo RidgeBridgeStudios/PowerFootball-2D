@@ -76,7 +76,7 @@ func _setup_practice_arena() -> void
 **Mechanism:**
 - Area2D at goal mouth (Layer 1)
 - Detects ball entry; checks z-height (must be in goal)
-- Emits `GameEvents.goal_scored(team, scorer, assist)`
+- Emits `GameEvents.goal_scored(team, scorer)` via `GameManager.register_goal(team, ball.last_touched_by)`
 
 **Integration:**
 - MatchReferee may add confirmation logic (offside check, etc.)

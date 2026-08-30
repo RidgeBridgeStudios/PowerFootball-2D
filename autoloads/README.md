@@ -44,7 +44,7 @@ Do not change this order without updating CLAUDE.md and all dependent systems.
 
 **Critical Signals:**
 - `ball_struck(kicker, impulse_xy, impulse_z)` — Any kick action
-- `goal_scored(team, scorer, assist)` — Ball in goal
+- `goal_scored(team, scorer)` — Ball in goal (scorer is last_touched_by; scorer.team != team is an own goal)
 - `foul_committed(offender, victim, foul_type)` — Player rule violation
 - `match_phase_changed(new_phase)` — Phase transitions
 - `player_substituted(team, off_index, on_index)` — Reserve entry

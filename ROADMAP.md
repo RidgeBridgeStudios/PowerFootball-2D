@@ -11,7 +11,7 @@ Core football mechanics that must work before anything else.
 - [x] Offside detection
 - [ ] Injury system
 - [x] Match stats screen + full-time scoreboard
-- [ ] End-of-match player ratings
+- [x] End-of-match player ratings
 - [ ] Goalkeeper dive commitment
 - [ ] AerialState / heading resolution
 - [x] Penalty shootout flow

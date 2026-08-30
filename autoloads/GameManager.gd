@@ -103,7 +103,7 @@ func start_match() -> void:
 	GameEvents.kickoff_started.emit()
 
 
-func register_goal(team: int) -> void:
+func register_goal(team: int, scorer: Node = null) -> void:
 	if current_phase != MatchPhase.IN_PLAY:
 		return
 
@@ -112,13 +112,13 @@ func register_goal(team: int) -> void:
 		# score, GOAL_SCORED phase and kickoff-restart ceremony must all stay
 		# untouched here, or PitchScene's normal goal handling would hijack a
 		# shootout kick into a full kickoff reset.
-		GameEvents.goal_scored.emit(team)
+		GameEvents.goal_scored.emit(team, scorer)
 		return
 
 	score[team] += 1
 	last_scoring_team = team
 	set_phase(MatchPhase.GOAL_SCORED)
-	GameEvents.goal_scored.emit(team)
+	GameEvents.goal_scored.emit(team, scorer)
 
 
 ## Puts the ball back in play after a goal, a restart or half time. The pitch

@@ -135,6 +135,7 @@ func _on_pregame_confirmed() -> void:
 	restart_timer.timeout.connect(_on_restart_timer_timeout)
 
 	_bind_players()
+	MatchStatsTracker.init_players()
 	_bind_camera(hud.active_player)
 	_set_piece_coordinator.bind(ball, boundary, players)
 	_offside_detector.bind(boundary, _set_piece_coordinator)
