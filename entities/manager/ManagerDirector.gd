@@ -203,7 +203,7 @@ func _shift_to(formation_name: String) -> void:
 	GameEvents.manager_formation_changed.emit(_team, formation_name)
 
 
-func _on_goal_scored(scoring_team: int) -> void:
+func _on_goal_scored(scoring_team: int, _scorer: Node = null) -> void:
 	if _data == null:
 		return
 

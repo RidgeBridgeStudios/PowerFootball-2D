@@ -131,7 +131,7 @@ func _set_mood(value: float) -> void:
 
 ## --- Event handlers -----------------------------------------------------------
 
-func _on_goal_scored(team: int) -> void:
+func _on_goal_scored(team: int, _scorer: Node = null) -> void:
 	if _player == null:
 		return
 	if _player.team == team:
@@ -157,7 +157,7 @@ func _on_stamina_depleted(player: Node) -> void:
 		apply_delta(-0.06)
 
 
-func _on_ball_struck(player: Node, speed: float, charge_ratio: float) -> void:
+func _on_ball_struck(player: Node, speed: float, charge_ratio: float, _is_shot: bool) -> void:
 	if player == _player and charge_ratio > 0.7 and speed > 450.0:
 		apply_delta(0.04)
 

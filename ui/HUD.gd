@@ -239,7 +239,7 @@ func _update_stamina_bar() -> void:
 	bar.modulate = Color(0.9, 0.3, 0.25) if active_player.sprint_locked else Color(0.95, 0.95, 0.95)
 
 
-func _on_goal_scored(team: int) -> void:
+func _on_goal_scored(team: int, _scorer: Node = null) -> void:
 	status_label.text = "GOAL — TEAM %s" % ("A" if team == GameManager.TEAM_A else "B")
 
 

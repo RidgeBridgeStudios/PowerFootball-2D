@@ -172,7 +172,7 @@ func _on_set_piece_taken(_taker: Node) -> void:
 	_resolution_timer.start(RESOLUTION_TIMEOUT)
 
 
-func _on_goal_scored(team: int) -> void:
+func _on_goal_scored(team: int, _scorer: Node = null) -> void:
 	if not _active or not _awaiting_resolution:
 		return
 	if team != _current_attacking_team:
