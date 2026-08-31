@@ -450,7 +450,7 @@ func _physics_process(delta: float) -> void:
 	if player == null or ball == null or player.is_user_controlled:
 		return
 	var is_throw_in_taker: bool = false
-	if player.state_factory != null and player.state_factory.current_state == &"ThrowIn":
+	if player.state_factory != null and player.state_factory.current_state_name == &"ThrowIn":
 		is_throw_in_taker = true
 
 	if not GameManager.is_in_play() and not is_throw_in_taker:
@@ -636,7 +636,7 @@ func _check_goalkeeper_dive_trigger(delta: float) -> void:
 	current_action = &"GoalieDive"
 	_goalie_dive_timer = GOALIE_DIVE_DURATION
 
-	if player.state_factory != null and player.state_factory.current_state != PlayerState.GOALKEEPER_DIVE:
+	if player.state_factory != null and player.state_factory.current_state_name != PlayerState.GOALKEEPER_DIVE:
 		var dive_state := player.state_factory.get_state(PlayerState.GOALKEEPER_DIVE) as GoalkeeperDiveState
 		if dive_state != null:
 			var dive_y: float = signf(predicted_y - player.global_position.y)
@@ -670,7 +670,7 @@ func _build_context(defenders_nearby: Array[Node2D] = []) -> UtilityContext:
 
 	_ctx.dist_to_ball = player.global_position.distance_to(ball.global_position) if ball != null else INF
 	_ctx.stamina_ratio = player.get_stamina_ratio()
-	var is_throw_in_taker: bool = player != null and player.state_factory != null and player.state_factory.current_state == &"ThrowIn"
+	var is_throw_in_taker: bool = player != null and player.state_factory != null and player.state_factory.current_state_name == &"ThrowIn"
 	_ctx.team_has_ball = _team_has_ball() or is_throw_in_taker
 	_ctx.is_possessor  = (ball != null and ball.possessor == player) or is_throw_in_taker
 	_ctx.sprint_locked = player.sprint_locked
@@ -924,7 +924,7 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D] = []) -> StringNam
 	if ctx.pressure > 0.85 and ctx.eff_composure < 0.45:
 		return &"PanicClear"
 
-	var is_throw_in_taker: bool = player != null and player.state_factory != null and player.state_factory.current_state == &"ThrowIn"
+	var is_throw_in_taker: bool = player != null and player.state_factory != null and player.state_factory.current_state_name == &"ThrowIn"
 	if is_throw_in_taker:
 		if ctx.open_teammate_exists:
 			return &"Pass"
@@ -1799,7 +1799,7 @@ func _steer_for_action(delta: float) -> Vector2:
 		_blend_timer = maxf(_blend_timer - delta, 0.0)
 
 	# --- Pass execution ---
-	var is_throw_in_taker: bool = player != null and player.state_factory != null and player.state_factory.current_state == &"ThrowIn"
+	var is_throw_in_taker: bool = player != null and player.state_factory != null and player.state_factory.current_state_name == &"ThrowIn"
 	if current_action == &"Pass" and _cached_pass_target != null and is_instance_valid(_cached_pass_target) and not is_throw_in_taker:
 		if player.global_position.distance_to(ball.global_position) < 80.0 and player.get_ball_in_foot_range() != null:
 			var lead_pos: Vector2 = _cached_pass_target.global_position + _cached_pass_target.velocity * 0.3
