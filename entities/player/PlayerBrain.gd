@@ -1202,6 +1202,19 @@ func _should_chase_ball() -> bool:
 		if closer_count >= budget:
 			return false
 
+	# A genuinely loose ball (nobody controls it) is exempt from the
+	# anchor-relative clamp below: that clamp exists to stop shape discipline
+	# collapsing while an opponent calmly dictates play from deep, not to
+	# leave an uncontrolled ball unclaimed. Without this, a ball that comes to
+	# rest outside every player's anchor budget (e.g. rolling into space after
+	# a kickoff tap) has _should_chase_ball() return false for all 22 players
+	# — none of the press triggers arm either, since they all key off a named
+	# carrier — and the match freezes with nobody ever going to get it. The
+	# role-budget and max_dist checks above still apply, so this only lets the
+	# single closest eligible player break anchor, not the whole team.
+	if ball.possessor == null:
+		return true
+
 	# Before committing to the chase, check the budget: the ball must sit
 	# within this role's max_chase_distance of its anchor, or the
 	# chase is suppressed and the player holds shape instead. The

@@ -99,6 +99,66 @@ discovered_rules:
       unchanged and still applies the low-composure veto.
     promotion_target: .claude/rules/ai-architect.md
     status: pending
+
+  - id: loose-ball-anchor-clamp-deadlock
+    discovered_date: 2026-08-31
+    discovered_by: Claude
+    category: ai
+    target_files:
+      - entities/player/PlayerBrain.gd
+      - autoloads/MatchWorldModel.gd
+    invariant: >
+      PlayerBrain._should_chase_ball()'s final gate clamps the chase target to
+      within the player's role max_chase_distance of their FORMATION ANCHOR
+      (not their current position), via clamp_chase_target(). That clamp is
+      only bypassed while MatchWorldModel.press_trigger_active names an
+      opposing carrier — but none of the four press triggers (FACING_OWN_GOAL,
+      TOUCHLINE_ISOLATION, HEAVY_TOUCH, PROLONGED_POSSESSION) can ever arm for
+      a ball nobody possesses, since all four key off a named carrier
+      (`ball.possessor` or `ball.last_touched_by`). So a ball that goes loose
+      and comes to rest outside every single player's anchor budget on both
+      teams — trivially reachable right after kickoff, since anchors haven't
+      reshaped from their kickoff-clamped positions yet, or after any
+      mis-hit/deflected pass — makes _should_chase_ball() return false for
+      all 22 players simultaneously. _score_chase() then scores 0.0 for
+      everyone, MaintainFormation wins by default, and every player sits at
+      (or oscillates near) their anchor forever: no one moves, but
+      PlayerBrain still recomputes _cached_space_target and facing_direction
+      on its usual per-player staggered cadence, so players visibly reorient
+      in place without ever closing on the ball. This is a total,
+      un-recovering match freeze, not a temporary stand-off — confirmed via a
+      user screenshot showing a stationary loose ball with a red player
+      standing ~90px away making no attempt to close it down, minutes into a
+      match. Any future press-trigger-style exemption from the anchor clamp
+      must also account for the "nobody owns the ball" case, not just
+      "an opponent owns the ball" — a named carrier is not the only condition
+      under which shape discipline should yield.
+    rationale: >
+      Traced end-to-end from the screenshot symptom: _score_chase() gates
+      hard on ctx.chase_is_legal (_should_chase_ball()) -> the anchor-relative
+      clamp_chase_target() call at the tail of _should_chase_ball() -> the
+      press-trigger exemption inside clamp_chase_target() requires
+      wm.press_trigger_carrier != null, which is never true for a loose ball
+      -> MatchWorldModel's four _check_*_trigger() functions, all of which
+      read ball.possessor/last_touched_by and do nothing when the ball is
+      simply free. This is a distinct, deeper cause from
+      press-trigger-needs-time-backstop above (that entry's PROLONGED_
+      POSSESSION fix only covers a calmly-HELD ball outstaying its welcome;
+      it cannot fire for a ball nobody is holding at all) and from
+      kickoff-backward-pass-veto-starves-taker above (fixing the initial
+      mis-pass does not help once *any* pass — a legitimate one included —
+      puts the ball somewhere no anchor currently reaches).
+    resolution: >
+      Added a loose-ball bypass in PlayerBrain._should_chase_ball(): when
+      ball.possessor == null, return true immediately after the existing
+      role-budget (closer_count < budget) and absolute max_dist checks,
+      skipping only the anchor-relative clamp. The single closest
+      role-eligible player already selected by those upstream checks is now
+      free to break formation and collect an unclaimed ball; role budgets and
+      absolute chase range are untouched, so this does not send the whole
+      team roaming.
+    promotion_target: .claude/rules/ai-architect.md
+    status: pending
 ```
 
 ## Session State
