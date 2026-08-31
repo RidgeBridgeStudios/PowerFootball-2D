@@ -1009,6 +1009,13 @@ const STREAK_RISK_AVERSION: float = -0.20
 ## the winner every time _find_best_pass_target() runs on this player.
 var debug_log_pass_scores: bool = false
 
+## Public wrapper for set pieces: a CPU-controlled taker has no run-up during
+## which the brain can steer facing_direction toward a real target the way
+## open play does, so SetPieceCoordinator resolves one directly through this
+## before forcing the taker into CHARGE_KICK. Same scoring, no behavior change.
+func find_pass_target_for_set_piece() -> HeavyPlayerController:
+	return _find_best_pass_target()
+
 ## Scores every same-team, non-GK, non-self teammate on four dimensions —
 ## distance, passer facing angle, receiver pressure, and forward advancement —
 ## via PassUtilityScorer, rejecting any candidate whose passing lane an

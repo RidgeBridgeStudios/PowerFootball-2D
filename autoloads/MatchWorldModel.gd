@@ -193,6 +193,7 @@ enum PressTrigger {
 	TOUCHLINE_ISOLATION = 3, ## Carrier is pinned near a touchline with no close support.
 	HEAVY_TOUCH = 4,         ## The ball has run loose away from its own toucher's feet, near an opponent.
 	FACING_OWN_GOAL = 5,     ## Carrier's back is to the opponent's goal while they hold the ball.
+	PROLONGED_POSSESSION = 6, ## Same possessor has held the ball continuously past a time threshold with no other trigger firing.
 }
 
 ## Seconds a continuous trigger (touchline isolation, heavy touch, facing own
@@ -234,6 +235,13 @@ const HEAVY_TOUCH_MAX_DIST: float = 130.0
 ## point deep in the carrier's own half for "facing own goal" to trigger.
 const FACING_OWN_GOAL_DOT_THRESHOLD: float = 0.5
 
+## Seconds the same possessor may hold the ball uninterrupted, with none of
+## the other trigger heuristics firing, before PROLONGED_POSSESSION forces a
+## press anyway. Backstop against an indefinite stand-off when a carrier is
+## calm enough (facing forward, mid-pitch, soft first touch) to never trip
+## FACING_OWN_GOAL / TOUCHLINE_ISOLATION / HEAVY_TOUCH on their own.
+const PROLONGED_POSSESSION_SECONDS: float = 2.5
+
 ## True while a pressing trigger is active. Read this — or, better, listen for
 ## GameEvents.press_trigger_changed — rather than re-deriving any of the
 ## conditions below in another system.
@@ -248,6 +256,12 @@ var press_trigger_position: Vector2 = Vector2.ZERO
 ## re-evaluated once this reaches zero, which is what keeps the system from
 ## flapping between contradictory reads of a fast-changing situation.
 var _press_trigger_timer: float = 0.0
+
+## Seconds the current possessor_index has held the ball uninterrupted. Reset
+## to zero whenever possessor_index changes (including to/from NO_INDEX);
+## feeds _check_prolonged_possession_trigger().
+var _possession_hold_timer: float = 0.0
+var _possession_hold_index: int = NO_INDEX
 
 ## Bound by PitchScene alongside PlayerBrain.bind_boundary() (see
 ## _bind_players()). Optional — left null in any setup that never calls
@@ -376,6 +390,12 @@ func _physics_process(delta: float) -> void:
 		ball_velocity = ball_node.velocity
 
 	possessor_index = _resolve_possessor_index()
+
+	if possessor_index != _possession_hold_index:
+		_possession_hold_index = possessor_index
+		_possession_hold_timer = 0.0
+	elif possessor_index != NO_INDEX:
+		_possession_hold_timer += delta
 
 	# Anticipatory Turnover
 	if ball_node != null and is_instance_valid(ball_node) and possessor_index != NO_INDEX and ball_node.possessor == null:
@@ -972,7 +992,9 @@ func _update_press_trigger(delta: float) -> void:
 		return
 	if _check_touchline_isolation_trigger():
 		return
-	_check_heavy_touch_trigger()
+	if _check_heavy_touch_trigger():
+		return
+	_check_prolonged_possession_trigger()
 
 
 func _arm_press_trigger(trigger: PressTrigger, carrier: HeavyPlayerController, position: Vector2, hold_seconds: float) -> void:
@@ -1111,6 +1133,26 @@ func _check_heavy_touch_trigger() -> bool:
 	_arm_press_trigger(PressTrigger.HEAVY_TOUCH, toucher, ball_position, PRESS_TRIGGER_HOLD_SECONDS)
 	return true
 
+
+## PROLONGED_POSSESSION: backstop trigger. Fires once the same possessor has
+## held the ball continuously for PROLONGED_POSSESSION_SECONDS with none of
+## the other three trigger heuristics ever catching them — e.g. a carrier who
+## calmly holds/dribbles mid-pitch facing forward, never pinned to a
+## touchline and never taking a heavy touch. Without this, _should_chase_ball()
+## / clamp_chase_target() (PlayerBrain.gd) never lift the anchor-distance
+## clamp for the pressing team, and the whole side reforms shape instead of
+## ever closing the carrier down — an indefinite stand-off.
+func _check_prolonged_possession_trigger() -> bool:
+	if possessor_index == NO_INDEX:
+		return false
+	if _possession_hold_timer < PROLONGED_POSSESSION_SECONDS:
+		return false
+	var carrier: HeavyPlayerController = player_nodes[possessor_index]
+	if not is_instance_valid(carrier):
+		return false
+
+	_arm_press_trigger(PressTrigger.PROLONGED_POSSESSION, carrier, carrier.global_position, PRESS_TRIGGER_HOLD_SECONDS)
+	return true
 
 
 func _update_tactical_grid() -> void:
