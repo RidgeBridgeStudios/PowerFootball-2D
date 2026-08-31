@@ -114,6 +114,14 @@ var _press_office: PressOffice = PressOffice.new()
 ## coordinator wiring ball_struck → dive decision → GoalkeeperDiveState transition.
 var _gk_dive_brain: GoalkeeperDiveBrain = GoalkeeperDiveBrain.new()
 
+## Momentum reading last received for the home team — see
+## _on_team_momentum_updated(). Used to detect a sharp swing since the
+## previous broadcast, not the raw value itself.
+var _last_home_momentum: float = 0.0
+## |delta| in home team momentum, since the last broadcast, that counts as a
+## swing sharp enough to voice a touchline reaction.
+const MOMENTUM_SWING_THRESHOLD: float = 0.35
+
 
 func _ready() -> void:
 	randomize()
@@ -150,6 +158,7 @@ func _on_pregame_confirmed() -> void:
 	GameEvents.ball_out_of_bounds.connect(_on_ball_out_of_bounds)
 	GameEvents.half_time_reached.connect(_on_half_time_reached)
 	GameEvents.manager_formation_changed.connect(_on_touchline_shift)
+	GameEvents.team_momentum_updated.connect(_on_team_momentum_updated)
 	ball.ball_bounced.connect(_on_ball_bounced)
 	## FIX: Guards against a broken $RestartTimer node path — a null timer here
 	## would otherwise defer every post-goal kickoff to Change 1's fallback path
@@ -876,6 +885,33 @@ func _on_touchline_shift(team: int, _new_formation: String) -> void:
 	_touchline_bubble.show_shout(display_name, quote, is_home)
 
 
+## Layer 5 narrative reaction to a sharp Team Momentum swing (Macro match
+## architecture — see MatchStatsTracker's momentum accumulator). Mirrors
+## _fire_touchline_goal_shout()'s home-perspective-only convention: the away
+## manager never gets a reaction bubble, so this only watches TEAM_A's
+## momentum. Two fixed lines rather than a PressOffice trait-flavoured quote —
+## a momentum swing isn't one of PressOffice's existing quote contexts
+## (post-match / touchline goal / touchline shift), and adding a whole new
+## trait-quote category for this one signal is out of scope here (see
+## AGENTS_ERRATA.md).
+func _on_team_momentum_updated(team: int, momentum: float) -> void:
+	if team != GameManager.TEAM_A:
+		return
+
+	var delta_m: float = momentum - _last_home_momentum
+	_last_home_momentum = momentum
+	if absf(delta_m) < MOMENTUM_SWING_THRESHOLD:
+		return
+
+	var home_data: ManagerData = _manager_director_a.get_data()
+	if home_data == null:
+		return
+
+	var quote: String = "KEEP PUSHING! NO LET UP!" if delta_m > 0.0 else "CONCENTRATE! WAKE UP!"
+	var display_name: String = home_data.manager_name if home_data.manager_name != "" else "Manager"
+	_touchline_bubble.show_shout(display_name, quote, true)
+
+
 ## HOME manager's half-time quote only.
 ## INTENTIONAL: away team half-time instructions are secret. The player only
 ## ever controls the home team, so surfacing the away manager's tactical talk
@@ -983,6 +1019,7 @@ func _show_match_stats() -> void:
 
 func _on_stats_dismissed() -> void:
 	MatchStatsTracker.reset()
+	_last_home_momentum = 0.0
 
 
 ## Splits the live roster into each team's players and hands them to

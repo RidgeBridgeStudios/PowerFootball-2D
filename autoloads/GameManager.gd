@@ -12,6 +12,9 @@
 ##   - current_phase, score, match_time, match_duration
 ##   - set_piece_team, set_piece_position, free_kick_is_direct, is_set_piece_active()
 ##   - get_clock_string(), get_score_string(), get_match_tick()
+##   - MatchStage enum, STAGE_1/2/3_FRACTION — macro pacing stage boundaries,
+##     broadcast via GameEvents.match_stage_changed and cached on
+##     MatchWorldModel.current_match_stage
 ##
 
 extends Node
@@ -36,7 +39,22 @@ const TEAM_B: int = 1
 ## Seconds the goal celebration holds before play restarts.
 const GOAL_CELEBRATION_TIME: float = 2.5
 
+## Macro temporal pacing stages (POWERFOOTBALL_MASTER_VISION.md Part V /
+## docs architecture plan "Temporal Match Stages"). Boundaries are expressed
+## as fractions of match_duration — 15/60/75 out of a real 90-minute match —
+## rather than hardcoded absolute seconds, since this project's matches
+## default to a compressed 300s arcade length (see match_duration below), not
+## the spec's literal 5400s assumption.
+enum MatchStage { SIZING_UP = 0, EQUILIBRIUM = 1, TRANSITIONS = 2, GAME_CRUNCH = 3 }
+const STAGE_1_FRACTION: float = 15.0 / 90.0
+const STAGE_2_FRACTION: float = 60.0 / 90.0
+const STAGE_3_FRACTION: float = 75.0 / 90.0
+
 var current_phase: MatchPhase = MatchPhase.PREGAME
+## Last MatchStage broadcast via GameEvents.match_stage_changed — tracked here
+## (not read back from MatchWorldModel's cache) so this stays the single
+## source of truth for match-lifecycle transitions per CORE_INVARIANTS.md.
+var _last_match_stage: MatchStage = MatchStage.SIZING_UP
 ## [team_a, team_b]
 var score: Array[int] = [0, 0]
 ## Seconds elapsed in the match.
@@ -92,6 +110,7 @@ func _process(delta: float) -> void:
 		return  # Penalty shootout: FSMs run for each kick, but the full-time clock never resumes.
 
 	match_time += delta
+	_update_match_stage()
 	if not _half_time_fired and match_time >= match_duration * 0.5:
 		_half_time_fired = true
 		set_phase(MatchPhase.HALF_TIME)   # Pauses the clock — IN_PLAY guard now exits
@@ -101,12 +120,31 @@ func _process(delta: float) -> void:
 		_end_match()
 
 
+## Checked every IN_PLAY frame alongside the half-time check above — cheap
+## fraction comparisons, no allocation. Only emits when the stage actually
+## changes, mirroring set_phase()'s early-out.
+func _update_match_stage() -> void:
+	var ratio: float = match_time / match_duration
+	var stage: MatchStage = MatchStage.GAME_CRUNCH
+	if ratio < STAGE_1_FRACTION:
+		stage = MatchStage.SIZING_UP
+	elif ratio < STAGE_2_FRACTION:
+		stage = MatchStage.EQUILIBRIUM
+	elif ratio < STAGE_3_FRACTION:
+		stage = MatchStage.TRANSITIONS
+
+	if stage != _last_match_stage:
+		_last_match_stage = stage
+		GameEvents.match_stage_changed.emit(stage)
+
+
 func start_match() -> void:
 	match_time = 0.0
 	score = [0, 0]
 	last_scoring_team = -1
 	_half_time_fired = false
 	shootout_active = false
+	_last_match_stage = MatchStage.SIZING_UP
 	set_phase(MatchPhase.KICKOFF)
 	GameEvents.kickoff_started.emit()
 

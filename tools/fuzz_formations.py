@@ -4,7 +4,8 @@ fuzz_formations.py — Dynamic Formation Anchor Property & Boundary Fuzzer.
 
 Executes 50,000 randomized property tests against `FormationAnchorMath.get_dynamic_anchor_position()`
 across all team tactical phases (`IN_POSSESSION`, `OUT_OF_POSSESSION`, `TRANSITION`), roles,
-and extreme ball positions.
+extreme ball positions, and the full macro urgency range ([-1, 1] — see
+URGENCY_MAX_DEF_LINE_SHIFT / URGENCY_COMPACTNESS_SCALE).
 
 Asserts zero invariant violations:
 1. Bounds Invariant: Anchor points never breach pitch rect boundaries.
@@ -54,6 +55,11 @@ ROLE_PHASE_SENSITIVITY = {
     Role.OUTFIELD_ATTACKER: 1.30,
 }
 
+# Macro urgency modulation — mirrors shared/FormationAnchorMath.gd's
+# URGENCY_MAX_DEF_LINE_SHIFT / URGENCY_COMPACTNESS_SCALE.
+URGENCY_MAX_DEF_LINE_SHIFT = 120.0
+URGENCY_COMPACTNESS_SCALE = 0.35
+
 
 def clampf(v: float, min_val: float, max_val: float) -> float:
     return max(min_val, min(max_val, v))
@@ -72,6 +78,7 @@ def get_dynamic_anchor_position(
     pitch_centre_x: float, pitch_centre_y: float,
     pitch_size_x: float, pitch_size_y: float,
     attack_sign: float = 1.0,
+    urgency: float = 0.0,
 ) -> tuple[float, float]:
     half_x = pitch_size_x * 0.5
     half_y = pitch_size_y * 0.5
@@ -92,8 +99,11 @@ def get_dynamic_anchor_position(
     pulled_norm_y = lerpf(base_norm_y, ball_norm_y, ball_weight)
 
     push = PHASE_LINE_PUSH.get(phase, 0.0) * ROLE_PHASE_SENSITIVITY.get(role, 1.0) * attack_sign
-    pulled_norm_x = clampf(pulled_norm_x + push, -1.0, 1.0)
-    pulled_norm_y = clampf(pulled_norm_y, -1.0, 1.0)
+    urgency_shift_norm = (urgency * URGENCY_MAX_DEF_LINE_SHIFT * attack_sign) / half_x
+    pulled_norm_x = clampf(pulled_norm_x + push + urgency_shift_norm, -1.0, 1.0)
+
+    compactness_mult = 1.0 - URGENCY_COMPACTNESS_SCALE * urgency
+    pulled_norm_y = clampf(pulled_norm_y * compactness_mult, -1.0, 1.0)
 
     return (
         pitch_centre_x + pulled_norm_x * half_x,
@@ -140,6 +150,7 @@ def run_formation_fuzzer(iterations: int = 50_000, seed: int = 42) -> int:
         ball_weight = rng.uniform(0.0, 0.6)
         attack_sign = rng.choice([1.0, -1.0])
         phase = rng.choice(phases_list)
+        urgency = rng.uniform(-1.0, 1.0)
 
         # 1. Test individual role bounds
         for role in roles_list:
@@ -148,7 +159,8 @@ def run_formation_fuzzer(iterations: int = 50_000, seed: int = 42) -> int:
 
             anchor_x, anchor_y = get_dynamic_anchor_position(
                 role, phase, base_x, base_y, ball_x, ball_y, ball_weight,
-                pitch_centre[0], pitch_centre[1], pitch_size[0], pitch_size[1], attack_sign
+                pitch_centre[0], pitch_centre[1], pitch_size[0], pitch_size[1], attack_sign,
+                urgency
             )
 
             if math.isnan(anchor_x) or math.isnan(anchor_y) or math.isinf(anchor_x) or math.isinf(anchor_y):
@@ -169,7 +181,8 @@ def run_formation_fuzzer(iterations: int = 50_000, seed: int = 42) -> int:
             by = pitch_centre[1] + norm_by * (pitch_size[1] * 0.5)
             ax, _ = get_dynamic_anchor_position(
                 role, phase, bx, by, ball_x, ball_y, ball_weight,
-                pitch_centre[0], pitch_centre[1], pitch_size[0], pitch_size[1], attack_sign
+                pitch_centre[0], pitch_centre[1], pitch_size[0], pitch_size[1], attack_sign,
+                urgency
             )
             team_anchors[role] = ax
 

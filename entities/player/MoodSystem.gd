@@ -9,6 +9,9 @@
 ## get_accel_multiplier() inside _recalculate_movement_curve(); PlayerBrain reads
 ## get_composure_delta() / get_vision_delta() / get_aggression_delta() from its
 ## own _physics_process.
+## get_composure_delta() also folds in a small ambient drift from
+## GameEvents.team_momentum_updated (own team's momentum lifts composure,
+## opponent's momentum dents it) — see "Macro momentum ambient drift" below.
 ## Depends on: GameEvents, GameManager, HeavyPlayerController (as parent node).
 ## Exposes: apply_delta(), reset(), current_tier, mood_value,
 ##          get_speed_multiplier(), get_accel_multiplier(),
@@ -43,6 +46,16 @@ const STREAK_ACCURACY_MULT: float = 0.5   # scatter halved
 const DRIFT_RATE_SLUMP: float = 0.02 / 60.0   # per second
 const DRIFT_RATE_STREAK: float = 0.01 / 60.0
 
+## --- Macro momentum ambient drift (Layer 2 -> Layer 3) -----------------------
+## MatchStatsTracker's anti-snowball momentum accumulator acts as a slow
+## ambient composure nudge on top of the tier-based deltas above — a team
+## riding a wave of momentum plays with a bit more calm, a collapsing
+## opponent rattles the other side. Deliberately small relative to the tier
+## deltas (+/-0.15 to +/-0.20) so momentum never overrides genuine SLUMP/
+## STREAK performance; see get_composure_delta().
+const MOMENTUM_COMPOSURE_OWN_SCALE: float = 0.10
+const MOMENTUM_COMPOSURE_OPPONENT_SCALE: float = 0.08
+
 ## --- State --------------------------------------------------------------------
 
 ## Physics frames between passive-drift updates, matching
@@ -63,6 +76,11 @@ var _frame_counter: int = 0
 ## Physics time accumulated since the last drift application.
 var _drift_accumulator: float = 0.0
 
+## Latest broadcast momentum for this player's own team / their opponent —
+## see _on_team_momentum_updated() and MOMENTUM_COMPOSURE_*_SCALE above.
+var _own_team_momentum: float = 0.0
+var _opponent_team_momentum: float = 0.0
+
 
 func _ready() -> void:
 	_player = get_parent() as HeavyPlayerController
@@ -76,6 +94,7 @@ func _ready() -> void:
 	GameEvents.foul_committed.connect(_on_foul_committed)
 	GameEvents.stamina_depleted.connect(_on_stamina_depleted)
 	GameEvents.ball_struck.connect(_on_ball_struck)
+	GameEvents.team_momentum_updated.connect(_on_team_momentum_updated)
 
 
 func _physics_process(delta: float) -> void:
@@ -107,6 +126,8 @@ func _physics_process(delta: float) -> void:
 func reset() -> void:
 	mood_value = 0.5
 	current_tier = Tier.NORMAL
+	_own_team_momentum = 0.0
+	_opponent_team_momentum = 0.0
 	if _player != null:
 		_stagger_offset = maxi(_player.world_index, 0)
 
@@ -162,6 +183,15 @@ func _on_ball_struck(player: Node, speed: float, charge_ratio: float, _is_shot: 
 		apply_delta(0.04)
 
 
+func _on_team_momentum_updated(team: int, momentum: float) -> void:
+	if _player == null:
+		return
+	if team == _player.team:
+		_own_team_momentum = momentum
+	else:
+		_opponent_team_momentum = momentum
+
+
 ## --- Effective-stat multipliers (pure, no side effects) -----------------------
 
 func get_speed_multiplier() -> float:
@@ -179,10 +209,14 @@ func get_accel_multiplier() -> float:
 
 
 func get_composure_delta() -> float:
+	var tier_delta: float = 0.0
 	match current_tier:
-		Tier.SLUMP: return SLUMP_COMPOSURE_DELTA
-		Tier.STREAK: return STREAK_COMPOSURE_DELTA
-		_: return 0.0
+		Tier.SLUMP: tier_delta = SLUMP_COMPOSURE_DELTA
+		Tier.STREAK: tier_delta = STREAK_COMPOSURE_DELTA
+		_: tier_delta = 0.0
+	var momentum_delta: float = (_own_team_momentum * MOMENTUM_COMPOSURE_OWN_SCALE) \
+		- (_opponent_team_momentum * MOMENTUM_COMPOSURE_OPPONENT_SCALE)
+	return tier_delta + momentum_delta
 
 
 func get_vision_delta() -> float:

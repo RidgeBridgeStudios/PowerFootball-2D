@@ -47,6 +47,17 @@ const _ROLE_PHASE_SENSITIVITY: Dictionary = {
 	PlayerBrain.Role.OUTFIELD_ATTACKER: 1.30,
 }
 
+## Macro urgency modulation (POWERFOOTBALL_MASTER_VISION.md / architecture
+## plan "Dynamic Formation & Compactness Shifts") — applied uniformly across
+## every role, on top of the existing per-role phase push above, so the whole
+## line shifts together the same way MatchWorldModel.defensive_line_x is one
+## shared depth rather than four independently-computed ones (see
+## ai-architect.md). World-px shift at |urgency| == 1.0.
+const URGENCY_MAX_DEF_LINE_SHIFT: float = 120.0
+## How much a fully positive urgency (siege) compresses lateral spread (0.65x)
+## and a fully negative urgency (preservation) expands it (1.35x).
+const URGENCY_COMPACTNESS_SCALE: float = 0.35
+
 
 ## Returns a world-space anchor for [role] that has drifted from
 ## [base_anchor] toward [ball_pos] by [ball_weight] (team compactness — same
@@ -55,6 +66,15 @@ const _ROLE_PHASE_SENSITIVITY: Dictionary = {
 ## sensitivity comes from the lerp itself: a ball deep in one normalized zone
 ## pulls the anchor toward that same normalized zone. [pitch_centre] and
 ## [pitch_size] come straight from PitchBoundary.
+##
+## [urgency] is this player's team's cached MatchWorldModel.team_urgency
+## reading ([-1, 1]) — positive urgency (chasing the game) shifts the whole
+## line further upfield and compresses lateral spread for a compact press;
+## negative urgency (protecting a lead) drops the line deep and widens the
+## shape for safe possession recycling. Applied uniformly across every role,
+## on top of the existing per-role phase push, so the back line moves as one
+## band rather than four independently-shifted dots. Defaults to 0.0 (no
+## shift) for any caller that doesn't have an urgency reading.
 static func get_dynamic_anchor_position(
 		role: PlayerBrain.Role,
 		phase: TeamPhase,
@@ -63,7 +83,8 @@ static func get_dynamic_anchor_position(
 		ball_weight: float,
 		pitch_centre: Vector2,
 		pitch_size: Vector2,
-		attack_sign: float = 1.0
+		attack_sign: float = 1.0,
+		urgency: float = 0.0
 ) -> Vector2:
 	var half: Vector2 = pitch_size * 0.5
 	if half.x <= 0.0 or half.y <= 0.0:
@@ -79,7 +100,10 @@ static func get_dynamic_anchor_position(
 
 	var push: float = float(_PHASE_LINE_PUSH.get(phase, 0.0)) \
 		* float(_ROLE_PHASE_SENSITIVITY.get(role, 1.0)) * attack_sign
-	pulled_norm.x = clampf(pulled_norm.x + push, -1.0, 1.0)
-	pulled_norm.y = clampf(pulled_norm.y, -1.0, 1.0)
+	var urgency_shift_norm: float = (urgency * URGENCY_MAX_DEF_LINE_SHIFT * attack_sign) / half.x
+	pulled_norm.x = clampf(pulled_norm.x + push + urgency_shift_norm, -1.0, 1.0)
+
+	var compactness_mult: float = 1.0 - URGENCY_COMPACTNESS_SCALE * urgency
+	pulled_norm.y = clampf(pulled_norm.y * compactness_mult, -1.0, 1.0)
 
 	return pitch_centre + pulled_norm * half

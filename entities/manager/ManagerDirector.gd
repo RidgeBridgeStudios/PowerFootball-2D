@@ -8,8 +8,13 @@
 ## an initialisation/event concern here, driven entirely off GameEvents and a
 ## once-per-goal read of GameManager's score and clock.
 ##
+## Also runs the macro Team Match Urgency evaluator on a ~1s tick (see
+## "Macro match urgency" below) and publishes it via
+## GameEvents.team_urgency_updated — MatchWorldModel caches it, PlayerBrain's
+## PassUtilityScorer/FormationAnchorMath call sites read the cache.
+##
 ## Depends on: ManagerData, FormationLibrary, GameManager, GameEvents,
-##             HeavyPlayerController, PlayerBrain, PitchBoundary.
+##             MatchWorldModel, HeavyPlayerController, PlayerBrain, PitchBoundary.
 ## Exposes: bind(), get_active_formation(), get_data().
 ##
 
@@ -37,6 +42,27 @@ var _live_pressing: float = 0.5
 ## Tracks how many goals have been conceded this match (for HotHead).
 var _goals_conceded: int = 0
 
+## --- Macro match urgency (Layer 2 tactical evaluator) -----------------------
+## Low-frequency (~1s) tick that turns scoreline + elapsed time + this
+## manager's risk disposition into a published Team Match Urgency scalar —
+## see POWERFOOTBALL_MASTER_VISION.md and the architecture plan for the full
+## derivation. GameEvents.team_urgency_updated is the only output; everything
+## downstream (PassUtilityScorer/FormationAnchorMath call sites in
+## PlayerBrain) reads the cached value off MatchWorldModel.team_urgency.
+const URGENCY_TICK_INTERVAL: float = 1.0
+const TIME_ACCEL_K: float = 1.35
+## Minimum change worth publishing — avoids GameEvents spam while urgency is
+## still converging toward an unchanged target.
+const URGENCY_PUBLISH_EPSILON: float = 0.01
+
+var _urgency_eval_timer: float = 0.0
+## Derived once at bind() time from this manager's tempo/pressing_intensity
+## sliders and traits (ManagerData has no dedicated risk field — see
+## AGENTS_ERRATA.md's "manager risk profile is derived, not authored" entry).
+## Bounded to the architecture plan's [-0.35, 0.35] band: negative = pragmatic/
+## defensive, positive = hyper-aggressive.
+var _risk_profile: float = 0.0
+
 ## Per-role formation_ball_weight band that tempo is lerped across. Keeps
 ## defenders holding their line and attackers pushing up at any tempo
 ## setting, instead of tempo flattening every role to the same drift —
@@ -60,6 +86,8 @@ func bind(data: ManagerData, team: int, players_node: Node2D, boundary: PitchBou
 	_shifted_to_defend = false
 	_live_pressing = data.pressing_intensity
 	_goals_conceded = 0
+	_risk_profile = _compute_risk_profile(data)
+	_urgency_eval_timer = 0.0
 
 	# Idealist (512): never changes tactical stance — both shift targets
 	# collapse onto the preferred formation so _check_formation_shift() has
@@ -228,3 +256,62 @@ func get_active_formation() -> String:
 
 func get_data() -> ManagerData:
 	return _data
+
+
+## Every manager's tempo (0=patient build-up, 1=direct/counter) and
+## pressing_intensity (0=passive, 1=gegenpress) already read as a risk
+## disposition — a direct, relentless manager takes more chances than a
+## patient, passive one — so risk_profile rides on those existing sliders
+## instead of adding a new @export ManagerData field just for this. Pragmatist
+## (4) pulls it further toward caution; HotHead (1) and Volatile (256) push it
+## further toward aggression.
+func _compute_risk_profile(data: ManagerData) -> float:
+	var raw: float = (data.tempo - 0.5) * 0.5 + (data.pressing_intensity - 0.5) * 0.3
+	if data.has_trait(4):
+		raw -= 0.15
+	if data.has_trait(1) or data.has_trait(256):
+		raw += 0.15
+	return clampf(raw, -0.35, 0.35)
+
+
+func _process(delta: float) -> void:
+	if _team < 0 or _data == null:
+		return
+
+	_urgency_eval_timer += delta
+	if _urgency_eval_timer >= URGENCY_TICK_INTERVAL:
+		_urgency_eval_timer -= URGENCY_TICK_INTERVAL
+		_evaluate_tactical_urgency()
+
+
+## Hyperbolic-tangent scoreline/time S-curve, dampened hard during Phase 0
+## (Cautious Sizing-Up) so no team commits to high-risk vertical play in the
+## opening minutes regardless of manager disposition. See
+## POWERFOOTBALL_MASTER_VISION.md Part V / the architecture plan for the
+## derivation of every constant here.
+func _evaluate_tactical_urgency() -> void:
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return
+
+	var t: float = GameManager.match_time
+	var duration: float = maxf(GameManager.match_duration, 1.0)
+
+	var goals_for: int = GameManager.score[_team]
+	var goals_against: int = GameManager.score[1 - _team]
+	var delta_score: float = float(goals_for - goals_against)
+
+	var time_ratio: float = clampf(t / duration, 0.0, 1.0)
+	var time_sq: float = time_ratio * time_ratio
+
+	var raw_urgency: float = tanh(-TIME_ACCEL_K * delta_score * time_sq + _risk_profile)
+
+	# Phase 0 (Cautious Sizing-Up): never let a positive urgency reading exceed
+	# 0.2, however aggressive the manager or scoreline would otherwise push it.
+	if time_ratio < GameManager.STAGE_1_FRACTION and raw_urgency > 0.0:
+		raw_urgency = minf(raw_urgency, 0.2)
+
+	var final_urgency: float = clampf(raw_urgency, -1.0, 1.0)
+
+	if absf(final_urgency - world.team_urgency[_team]) > URGENCY_PUBLISH_EPSILON:
+		GameEvents.team_urgency_updated.emit(_team, final_urgency)

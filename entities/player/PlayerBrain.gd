@@ -1152,6 +1152,21 @@ func _find_best_pass_target(passer_pressure: float = 0.0, allow_backward_pass: b
 	# this decision tick, so this is computed once rather than per candidate.
 	var effective_pressure: float = clampf(passer_pressure + mood_risk_aversion, 0.0, 1.0)
 
+	# Macro urgency modulation (architecture plan "Pass Utility Weight
+	# Modulation Functions"): a team chasing the game (positive urgency) leans
+	# harder into forward advancement and eases off the safety/pressure
+	# weighting; a team protecting a lead (negative urgency) does the inverse,
+	# favouring the safe backward/lateral recycle over the ambitious ball.
+	# Loop-invariant like effective_pressure above — computed once per
+	# decision tick, not per candidate.
+	var world_urgency: float = world.team_urgency[player.team]
+	var w_dist: float = player.role_config.w_dist if player.role_config != null else PassUtilityScorer.WEIGHT_DISTANCE
+	var w_angle: float = player.role_config.w_angle if player.role_config != null else PassUtilityScorer.WEIGHT_ANGLE
+	var base_w_press: float = player.role_config.w_press if player.role_config != null else PassUtilityScorer.WEIGHT_PRESSURE
+	var base_w_adv: float = player.role_config.w_adv if player.role_config != null else PassUtilityScorer.WEIGHT_ADVANCEMENT
+	var urgent_w_press: float = base_w_press * (1.0 - 0.45 * world_urgency)
+	var urgent_w_adv: float = base_w_adv * (1.0 + 0.6 * world_urgency)
+
 	var best_target: HeavyPlayerController = null
 	var best_score: float = MIN_PASS_SCORE
 
@@ -1189,15 +1204,9 @@ func _find_best_pass_target(passer_pressure: float = 0.0, allow_backward_pass: b
 		var facing_dot: float = 1.0 if allow_backward_pass else player.get_facing_dot(candidate_pos)
 
 		# Hot path: bare float, allocates nothing (see PassUtilityScorer docs).
-		var score: float
-		if player != null and player.role_config != null:
-			score = PassUtilityScorer.score_pass(
-				distance, facing_dot, forward_dot, min_opp_dist, effective_pressure,
-				player.role_config.w_dist, player.role_config.w_angle,
-				player.role_config.w_press, player.role_config.w_adv)
-		else:
-			score = PassUtilityScorer.score_pass(
-				distance, facing_dot, forward_dot, min_opp_dist, effective_pressure)
+		var score: float = PassUtilityScorer.score_pass(
+			distance, facing_dot, forward_dot, min_opp_dist, effective_pressure,
+			w_dist, w_angle, urgent_w_press, urgent_w_adv)
 
 		# Trust bias: how much this passer trusts THIS candidate as a receiver
 		# nudges the already-computed utility score up or down. Neutral trust
@@ -1206,15 +1215,9 @@ func _find_best_pass_target(passer_pressure: float = 0.0, allow_backward_pass: b
 			score *= TrustSystem.trust_multiplier(trust_sys.get_trust(TrustSystem.player_key(candidate)))
 
 		if debug_log_pass_scores:
-			var breakdown: PassUtilityScorer.PassScoreBreakdown
-			if player != null and player.role_config != null:
-				breakdown = PassUtilityScorer.score_pass_breakdown(
-					distance, facing_dot, forward_dot, min_opp_dist, effective_pressure, candidate,
-					player.role_config.w_dist, player.role_config.w_angle,
-					player.role_config.w_press, player.role_config.w_adv)
-			else:
-				breakdown = PassUtilityScorer.score_pass_breakdown(
-					distance, facing_dot, forward_dot, min_opp_dist, effective_pressure, candidate)
+			var breakdown: PassUtilityScorer.PassScoreBreakdown = PassUtilityScorer.score_pass_breakdown(
+				distance, facing_dot, forward_dot, min_opp_dist, effective_pressure, candidate,
+				w_dist, w_angle, urgent_w_press, urgent_w_adv)
 			# breakdown.total is pre-trust; `score` (post-multiplier) is what
 			# actually decides best_target below, so print both.
 			print("[PassScorer] %s -> %s  dist=%.2f angle=%.2f pressure=%.2f adv=%.2f  raw=%.3f trust_adj=%.3f" % [
@@ -1681,7 +1684,8 @@ func _find_open_space_target() -> Vector2:
 			formation_ball_weight,
 			pitch_boundary.get_centre_spot(),
 			pitch_boundary.pitch_size,
-			_get_attack_sign()
+			_get_attack_sign(),
+			MatchWorldModel.instance.team_urgency[player.team] if MatchWorldModel.instance != null else 0.0
 		)
 	dynamic_anchor = clamp_to_playable_area(dynamic_anchor)
 
@@ -1796,7 +1800,8 @@ func _find_channel_run_target(ball_pos: Vector2) -> Vector2:
 			formation_ball_weight,
 			pitch_boundary.get_centre_spot(),
 			pitch_boundary.pitch_size,
-			_get_attack_sign()
+			_get_attack_sign(),
+			MatchWorldModel.instance.team_urgency[player.team] if MatchWorldModel.instance != null else 0.0
 		)
 	return _evaluate_off_ball_target(dynamic_anchor)
 

@@ -416,6 +416,26 @@
         "args": [
           "team: int"
         ]
+      },
+      "team_urgency_updated": {
+        "line": 155,
+        "args": [
+          "team: int",
+          "urgency: float"
+        ]
+      },
+      "team_momentum_updated": {
+        "line": 160,
+        "args": [
+          "team: int",
+          "momentum: float"
+        ]
+      },
+      "match_stage_changed": {
+        "line": 164,
+        "args": [
+          "stage: int"
+        ]
       }
     },
     "enums": {},
@@ -428,7 +448,7 @@
     "signals": {},
     "enums": {
       "MatchPhase": {
-        "line": 19,
+        "line": 22,
         "values": [
           "PREGAME",
           "KICKOFF",
@@ -443,91 +463,121 @@
           "PENALTY_KICK",
           "PENALTY_SHOOTOUT"
         ]
+      },
+      "MatchStage": {
+        "line": 48,
+        "values": [
+          "SIZING_UP",
+          "EQUILIBRIUM",
+          "TRANSITIONS",
+          "GAME_CRUNCH"
+        ]
       }
     },
     "properties": {
       "SET_PIECE_PHASES": {
-        "line": 28,
+        "line": 31,
         "type": "Array[MatchPhase]",
         "is_const": true
       },
       "TEAM_A": {
-        "line": 33,
+        "line": 36,
         "type": "int",
         "is_const": true
       },
       "TEAM_B": {
-        "line": 34,
+        "line": 37,
         "type": "int",
         "is_const": true
       },
       "GOAL_CELEBRATION_TIME": {
-        "line": 37,
+        "line": 40,
+        "type": "float",
+        "is_const": true
+      },
+      "STAGE_1_FRACTION": {
+        "line": 49,
+        "type": "float",
+        "is_const": true
+      },
+      "STAGE_2_FRACTION": {
+        "line": 50,
+        "type": "float",
+        "is_const": true
+      },
+      "STAGE_3_FRACTION": {
+        "line": 51,
         "type": "float",
         "is_const": true
       },
       "current_phase": {
-        "line": 39,
+        "line": 53,
         "type": "MatchPhase",
         "is_export": false,
         "is_onready": false
       },
+      "_last_match_stage": {
+        "line": 57,
+        "type": "MatchStage",
+        "is_export": false,
+        "is_onready": false
+      },
       "score": {
-        "line": 41,
+        "line": 59,
         "type": "Array[int]",
         "is_export": false,
         "is_onready": false
       },
       "match_time": {
-        "line": 43,
+        "line": 61,
         "type": "float",
         "is_export": false,
         "is_onready": false
       },
       "match_duration": {
-        "line": 45,
+        "line": 63,
         "type": "float",
         "is_export": false,
         "is_onready": false
       },
       "last_scoring_team": {
-        "line": 47,
+        "line": 65,
         "type": "int",
         "is_export": false,
         "is_onready": false
       },
       "_half_time_fired": {
-        "line": 49,
+        "line": 67,
         "type": "bool",
         "is_export": false,
         "is_onready": false
       },
       "_match_tick": {
-        "line": 52,
+        "line": 70,
         "type": "int",
         "is_export": false,
         "is_onready": false
       },
       "set_piece_team": {
-        "line": 57,
+        "line": 75,
         "type": "int",
         "is_export": false,
         "is_onready": false
       },
       "set_piece_position": {
-        "line": 59,
+        "line": 77,
         "type": "Vector2",
         "is_export": false,
         "is_onready": false
       },
       "free_kick_is_direct": {
-        "line": 61,
+        "line": 79,
         "type": "bool",
         "is_export": false,
         "is_onready": false
       },
       "shootout_active": {
-        "line": 69,
+        "line": 87,
         "type": "bool",
         "is_export": false,
         "is_onready": false
@@ -535,13 +585,13 @@
     },
     "methods": {
       "_ready": {
-        "line": 72,
+        "line": 90,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_powerful_shot": {
-        "line": 78,
+        "line": 96,
         "args": [
           "_shooter: HeavyPlayerController",
           "_speed: float",
@@ -551,21 +601,27 @@
         "is_static": false
       },
       "_process": {
-        "line": 84,
+        "line": 102,
         "args": [
           "delta: float"
         ],
         "return": "void",
         "is_static": false
       },
+      "_update_match_stage": {
+        "line": 126,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
       "start_match": {
-        "line": 104,
+        "line": 141,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "register_goal": {
-        "line": 114,
+        "line": 152,
         "args": [
           "team: int",
           "scorer: Node = null"
@@ -574,19 +630,19 @@
         "is_static": false
       },
       "restart_play": {
-        "line": 134,
+        "line": 172,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "kickoff": {
-        "line": 138,
+        "line": 176,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "set_phase": {
-        "line": 143,
+        "line": 181,
         "args": [
           "phase: MatchPhase"
         ],
@@ -594,19 +650,19 @@
         "is_static": false
       },
       "is_in_play": {
-        "line": 150,
+        "line": 188,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "get_match_tick": {
-        "line": 154,
+        "line": 192,
         "args": [],
         "return": "int",
         "is_static": false
       },
       "start_set_piece": {
-        "line": 163,
+        "line": 201,
         "args": [
           "phase: MatchPhase",
           "team: int",
@@ -616,7 +672,7 @@
         "is_static": false
       },
       "start_free_kick": {
-        "line": 181,
+        "line": 219,
         "args": [
           "team: int",
           "position: Vector2",
@@ -626,7 +682,7 @@
         "is_static": false
       },
       "start_penalty": {
-        "line": 191,
+        "line": 229,
         "args": [
           "team: int",
           "position: Vector2"
@@ -635,43 +691,43 @@
         "is_static": false
       },
       "is_set_piece_active": {
-        "line": 195,
+        "line": 233,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "get_clock_string": {
-        "line": 200,
+        "line": 238,
         "args": [],
         "return": "String",
         "is_static": false
       },
       "get_score_string": {
-        "line": 205,
+        "line": 243,
         "args": [],
         "return": "String",
         "is_static": false
       },
       "get_leading_team": {
-        "line": 209,
+        "line": 247,
         "args": [],
         "return": "int",
         "is_static": false
       },
       "_end_match": {
-        "line": 217,
+        "line": 255,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "start_shootout": {
-        "line": 227,
+        "line": 265,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "end_shootout": {
-        "line": 236,
+        "line": 274,
         "args": [
           "winner: int"
         ],
@@ -943,111 +999,169 @@
     "enums": {},
     "properties": {
       "POSSESSION_SAMPLE_INTERVAL": {
-        "line": 39,
+        "line": 47,
         "type": "int",
         "is_const": true
       },
       "SHOT_ON_TARGET_THRESHOLD": {
-        "line": 42,
+        "line": 50,
         "type": "float",
         "is_const": true
       },
       "PASS_CONE_COS": {
-        "line": 44,
+        "line": 52,
         "type": "float",
         "is_const": true
       },
       "PASS_MAX_RANGE": {
-        "line": 47,
+        "line": 55,
         "type": "float",
         "is_const": true
       },
+      "MOMENTUM_DECAY_LAMBDA": {
+        "line": 64,
+        "type": "float",
+        "is_const": true
+      },
+      "MOMENTUM_PUBLISH_EPSILON": {
+        "line": 67,
+        "type": "float",
+        "is_const": true
+      },
+      "MOMENTUM_SHOT_ON_TARGET": {
+        "line": 74,
+        "type": "float",
+        "is_const": true
+      },
+      "MOMENTUM_TACKLE_WON": {
+        "line": 75,
+        "type": "float",
+        "is_const": true
+      },
+      "MOMENTUM_PASS_SEQUENCE": {
+        "line": 76,
+        "type": "float",
+        "is_const": true
+      },
+      "MOMENTUM_GOAL_CONCEDED": {
+        "line": 77,
+        "type": "float",
+        "is_const": true
+      },
+      "MOMENTUM_TURNOVER_ERROR": {
+        "line": 78,
+        "type": "float",
+        "is_const": true
+      },
+      "PASS_SEQUENCE_LENGTH": {
+        "line": 82,
+        "type": "int",
+        "is_const": true
+      },
       "shots_total": {
-        "line": 49,
+        "line": 84,
         "type": "Array[int]",
         "is_export": false,
         "is_onready": false
       },
       "shots_on_target": {
-        "line": 50,
+        "line": 85,
         "type": "Array[int]",
         "is_export": false,
         "is_onready": false
       },
       "passes_attempted": {
-        "line": 51,
+        "line": 86,
         "type": "Array[int]",
         "is_export": false,
         "is_onready": false
       },
       "passes_completed": {
-        "line": 52,
+        "line": 87,
         "type": "Array[int]",
         "is_export": false,
         "is_onready": false
       },
       "fouls": {
-        "line": 53,
+        "line": 88,
         "type": "Array[int]",
         "is_export": false,
         "is_onready": false
       },
       "yellow_cards": {
-        "line": 54,
+        "line": 89,
         "type": "Array[int]",
         "is_export": false,
         "is_onready": false
       },
       "red_cards": {
-        "line": 55,
+        "line": 90,
         "type": "Array[int]",
         "is_export": false,
         "is_onready": false
       },
       "corners": {
-        "line": 56,
+        "line": 91,
         "type": "Array[int]",
         "is_export": false,
         "is_onready": false
       },
       "offsides": {
-        "line": 57,
+        "line": 92,
         "type": "Array[int]",
         "is_export": false,
         "is_onready": false
       },
       "_possession_samples": {
-        "line": 59,
+        "line": 94,
         "type": "Array[int]",
         "is_export": false,
         "is_onready": false
       },
       "_total_possession_samples": {
-        "line": 60,
+        "line": 95,
         "type": "int",
         "is_export": false,
         "is_onready": false
       },
       "_physics_tick_count": {
-        "line": 61,
+        "line": 96,
         "type": "int",
         "is_export": false,
         "is_onready": false
       },
       "_sampling_active": {
-        "line": 62,
+        "line": 97,
         "type": "bool",
         "is_export": false,
         "is_onready": false
       },
+      "team_momentum": {
+        "line": 99,
+        "type": "Array[float]",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_last_published_momentum": {
+        "line": 104,
+        "type": "Array[float]",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_consecutive_passes": {
+        "line": 107,
+        "type": "Array[int]",
+        "is_export": false,
+        "is_onready": false
+      },
       "_player_events": {
-        "line": 68,
+        "line": 113,
         "type": "Dictionary[int, PlayerRatingCalculator.PlayerMatchEvents]",
         "is_export": false,
         "is_onready": false
       },
       "_last_passer_by_team": {
-        "line": 71,
+        "line": 116,
         "type": "Array[HeavyPlayerController]",
         "is_export": false,
         "is_onready": false
@@ -1055,21 +1169,21 @@
     },
     "methods": {
       "_ready": {
-        "line": 74,
+        "line": 119,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_physics_process": {
-        "line": 87,
+        "line": 134,
         "args": [
-          "_delta: float"
+          "delta: float"
         ],
         "return": "void",
         "is_static": false
       },
       "record_shot": {
-        "line": 113,
+        "line": 162,
         "args": [
           "player: HeavyPlayerController",
           "on_target: bool"
@@ -1078,7 +1192,7 @@
         "is_static": false
       },
       "record_pass_attempt": {
-        "line": 125,
+        "line": 174,
         "args": [
           "player: HeavyPlayerController",
           "completed: bool"
@@ -1086,8 +1200,69 @@
         "return": "void",
         "is_static": false
       },
+      "_update_momentum_decay": {
+        "line": 196,
+        "args": [
+          "delta: float"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_apply_momentum_impulse": {
+        "line": 211,
+        "args": [
+          "team: int",
+          "raw_impulse: float"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_maybe_publish_momentum": {
+        "line": 223,
+        "args": [
+          "team: int",
+          "force: bool = false"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_tackle_won": {
+        "line": 229,
+        "args": [
+          "winner: Node",
+          "_loser: Node"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_turnover_predicted": {
+        "line": 238,
+        "args": [
+          "intercepting_team: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_record_pass_sequence": {
+        "line": 246,
+        "args": [
+          "team: int",
+          "player: HeavyPlayerController"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_is_in_opponent_half": {
+        "line": 259,
+        "args": [
+          "team: int",
+          "pos: Vector2"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
       "record_foul": {
-        "line": 138,
+        "line": 267,
         "args": [
           "player: HeavyPlayerController"
         ],
@@ -1095,7 +1270,7 @@
         "is_static": false
       },
       "record_goal": {
-        "line": 150,
+        "line": 279,
         "args": [
           "player: HeavyPlayerController"
         ],
@@ -1103,7 +1278,7 @@
         "is_static": false
       },
       "record_assist": {
-        "line": 159,
+        "line": 288,
         "args": [
           "player: HeavyPlayerController"
         ],
@@ -1111,7 +1286,7 @@
         "is_static": false
       },
       "record_own_goal": {
-        "line": 165,
+        "line": 294,
         "args": [
           "player: HeavyPlayerController"
         ],
@@ -1119,7 +1294,7 @@
         "is_static": false
       },
       "get_player_events": {
-        "line": 173,
+        "line": 302,
         "args": [
           "player_id: int"
         ],
@@ -1127,13 +1302,13 @@
         "is_static": false
       },
       "compute_all_ratings": {
-        "line": 184,
+        "line": 313,
         "args": [],
         "return": "Dictionary[int, float]",
         "is_static": false
       },
       "_resolve_clean_sheet": {
-        "line": 217,
+        "line": 346,
         "args": [
           "player_data: PlayerData",
           "team: int",
@@ -1144,7 +1319,7 @@
         "is_static": false
       },
       "_get_or_create_events": {
-        "line": 226,
+        "line": 355,
         "args": [
           "player: HeavyPlayerController"
         ],
@@ -1152,7 +1327,7 @@
         "is_static": false
       },
       "_player_key": {
-        "line": 233,
+        "line": 362,
         "args": [
           "player: HeavyPlayerController"
         ],
@@ -1160,13 +1335,13 @@
         "is_static": false
       },
       "init_players": {
-        "line": 243,
+        "line": 372,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "record_corner": {
-        "line": 256,
+        "line": 385,
         "args": [
           "team_index: int"
         ],
@@ -1174,7 +1349,7 @@
         "is_static": false
       },
       "record_offside": {
-        "line": 262,
+        "line": 391,
         "args": [
           "team_index: int"
         ],
@@ -1182,7 +1357,7 @@
         "is_static": false
       },
       "is_pass_toward_teammate": {
-        "line": 272,
+        "line": 401,
         "args": [
           "player: HeavyPlayerController",
           "aim: Vector2"
@@ -1191,7 +1366,7 @@
         "is_static": false
       },
       "get_stats": {
-        "line": 292,
+        "line": 421,
         "args": [
           "team_index: int"
         ],
@@ -1199,19 +1374,19 @@
         "is_static": false
       },
       "stop_possession_sampling": {
-        "line": 318,
+        "line": 447,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "reset": {
-        "line": 324,
+        "line": 453,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_ball_struck": {
-        "line": 342,
+        "line": 474,
         "args": [
           "player: Node",
           "_speed: float",
@@ -1222,7 +1397,7 @@
         "is_static": false
       },
       "_on_foul_committed": {
-        "line": 351,
+        "line": 486,
         "args": [
           "fouler: Node",
           "_victim: Node",
@@ -1232,7 +1407,7 @@
         "is_static": false
       },
       "_on_offside_called": {
-        "line": 357,
+        "line": 492,
         "args": [
           "_offside_player: Node",
           "defending_team: int",
@@ -1242,7 +1417,7 @@
         "is_static": false
       },
       "_on_corner_kick_started": {
-        "line": 361,
+        "line": 496,
         "args": [
           "team: int",
           "_position: Vector2"
@@ -1251,7 +1426,7 @@
         "is_static": false
       },
       "_on_yellow_card_shown": {
-        "line": 365,
+        "line": 500,
         "args": [
           "player: Node",
           "team: int"
@@ -1260,7 +1435,7 @@
         "is_static": false
       },
       "_on_red_card_shown": {
-        "line": 373,
+        "line": 508,
         "args": [
           "player: Node",
           "team: int",
@@ -1270,7 +1445,7 @@
         "is_static": false
       },
       "_on_goal_scored": {
-        "line": 387,
+        "line": 522,
         "args": [
           "team: int",
           "scorer: Node"
@@ -1279,7 +1454,7 @@
         "is_static": false
       },
       "_on_substitution_made": {
-        "line": 407,
+        "line": 544,
         "args": [
           "team: int",
           "_player_out_idx: int",
@@ -1296,7 +1471,7 @@
     "signals": {},
     "enums": {
       "PressTrigger": {
-        "line": 189,
+        "line": 210,
         "values": [
           "NONE",
           "BACKWARD_PASS",
@@ -1313,435 +1488,453 @@
     },
     "properties": {
       "TOTAL_PLAYERS": {
-        "line": 58,
-        "type": "int",
-        "is_const": true
-      },
-      "NO_INDEX": {
         "line": 61,
         "type": "int",
         "is_const": true
       },
-      "DEFAULT_PASS_LANE_CLEARANCE": {
+      "NO_INDEX": {
         "line": 64,
+        "type": "int",
+        "is_const": true
+      },
+      "DEFAULT_PASS_LANE_CLEARANCE": {
+        "line": 67,
         "type": "float",
         "is_const": true
       },
       "player_nodes": {
-        "line": 71,
+        "line": 74,
         "type": "Array[HeavyPlayerController]",
         "is_export": false,
         "is_onready": false
       },
       "player_positions": {
-        "line": 72,
+        "line": 75,
         "type": "PackedVector2Array",
         "is_export": false,
         "is_onready": false
       },
       "player_velocities": {
-        "line": 73,
+        "line": 76,
         "type": "PackedVector2Array",
         "is_export": false,
         "is_onready": false
       },
       "player_teams": {
-        "line": 74,
+        "line": 77,
         "type": "PackedInt32Array",
         "is_export": false,
         "is_onready": false
       },
       "TACTICAL_GRID_WIDTH": {
-        "line": 77,
+        "line": 80,
         "type": "int",
         "is_const": true
       },
       "TACTICAL_GRID_HEIGHT": {
-        "line": 78,
-        "type": "int",
-        "is_const": true
-      },
-      "TACTICAL_CELL_W": {
-        "line": 79,
-        "type": "float",
-        "is_const": true
-      },
-      "TACTICAL_CELL_H": {
-        "line": 80,
-        "type": "float",
-        "is_const": true
-      },
-      "TACTICAL_GRID_CELLS": {
         "line": 81,
         "type": "int",
         "is_const": true
       },
-      "TACTICAL_OFFSET_X": {
+      "TACTICAL_CELL_W": {
         "line": 82,
         "type": "float",
         "is_const": true
       },
-      "TACTICAL_OFFSET_Y": {
+      "TACTICAL_CELL_H": {
         "line": 83,
         "type": "float",
         "is_const": true
       },
-      "p_pos_x": {
+      "TACTICAL_GRID_CELLS": {
+        "line": 84,
+        "type": "int",
+        "is_const": true
+      },
+      "TACTICAL_OFFSET_X": {
         "line": 85,
-        "type": "PackedFloat32Array",
-        "is_export": false,
-        "is_onready": false
+        "type": "float",
+        "is_const": true
       },
-      "p_pos_y": {
+      "TACTICAL_OFFSET_Y": {
         "line": 86,
-        "type": "PackedFloat32Array",
-        "is_export": false,
-        "is_onready": false
+        "type": "float",
+        "is_const": true
       },
-      "p_vel_x": {
-        "line": 87,
-        "type": "PackedFloat32Array",
-        "is_export": false,
-        "is_onready": false
-      },
-      "p_vel_y": {
+      "p_pos_x": {
         "line": 88,
         "type": "PackedFloat32Array",
         "is_export": false,
         "is_onready": false
       },
-      "grid_home": {
+      "p_pos_y": {
         "line": 89,
+        "type": "PackedFloat32Array",
+        "is_export": false,
+        "is_onready": false
+      },
+      "p_vel_x": {
+        "line": 90,
+        "type": "PackedFloat32Array",
+        "is_export": false,
+        "is_onready": false
+      },
+      "p_vel_y": {
+        "line": 91,
+        "type": "PackedFloat32Array",
+        "is_export": false,
+        "is_onready": false
+      },
+      "grid_home": {
+        "line": 92,
         "type": "PackedInt32Array",
         "is_export": false,
         "is_onready": false
       },
       "grid_away": {
-        "line": 90,
+        "line": 93,
         "type": "PackedInt32Array",
         "is_export": false,
         "is_onready": false
       },
       "grid_dominant": {
-        "line": 91,
+        "line": 94,
         "type": "PackedInt32Array",
         "is_export": false,
         "is_onready": false
       },
       "ball_node": {
-        "line": 96,
+        "line": 99,
         "type": "Pseudo3DBall",
         "is_export": false,
         "is_onready": false
       },
       "ball_position": {
-        "line": 97,
+        "line": 100,
         "type": "Vector2",
         "is_export": false,
         "is_onready": false
       },
       "ball_velocity": {
-        "line": 98,
+        "line": 101,
         "type": "Vector2",
         "is_export": false,
         "is_onready": false
       },
       "possessor_index": {
-        "line": 101,
+        "line": 104,
         "type": "int",
         "is_export": false,
         "is_onready": false
       },
       "_turnover_predicted": {
-        "line": 102,
+        "line": 105,
         "type": "bool",
         "is_export": false,
         "is_onready": false
       },
       "_auto_index": {
-        "line": 105,
+        "line": 108,
         "type": "int",
         "is_export": false,
         "is_onready": false
       },
       "CARRIER_PRESSURE_RADIUS": {
-        "line": 128,
+        "line": 131,
         "type": "float",
         "is_const": true
       },
       "LINE_OFFSET_DROPPED": {
-        "line": 133,
-        "type": "float",
-        "is_const": true
-      },
-      "LINE_OFFSET_PRESSED": {
         "line": 136,
         "type": "float",
         "is_const": true
       },
+      "LINE_OFFSET_PRESSED": {
+        "line": 139,
+        "type": "float",
+        "is_const": true
+      },
       "LINE_DEPTH_LERP_SPEED": {
-        "line": 140,
+        "line": 143,
         "type": "float",
         "is_const": true
       },
       "defensive_line_x": {
-        "line": 144,
-        "type": "PackedFloat32Array",
-        "is_export": false,
-        "is_onready": false
-      },
-      "team_com_x": {
         "line": 147,
         "type": "PackedFloat32Array",
         "is_export": false,
         "is_onready": false
       },
+      "team_urgency": {
+        "line": 158,
+        "type": "PackedFloat32Array",
+        "is_export": false,
+        "is_onready": false
+      },
+      "team_momentum": {
+        "line": 159,
+        "type": "PackedFloat32Array",
+        "is_export": false,
+        "is_onready": false
+      },
+      "current_match_stage": {
+        "line": 165,
+        "type": "int",
+        "is_export": false,
+        "is_onready": false
+      },
+      "team_com_x": {
+        "line": 168,
+        "type": "PackedFloat32Array",
+        "is_export": false,
+        "is_onready": false
+      },
       "team_att_x": {
-        "line": 148,
+        "line": 169,
         "type": "PackedFloat32Array",
         "is_export": false,
         "is_onready": false
       },
       "team_def_x": {
-        "line": 149,
+        "line": 170,
         "type": "PackedFloat32Array",
         "is_export": false,
         "is_onready": false
       },
       "_defensive_lines_ready": {
-        "line": 154,
+        "line": 175,
         "type": "bool",
         "is_export": false,
         "is_onready": false
       },
       "_opponent_scratch": {
-        "line": 159,
-        "type": "Array[int]",
-        "is_export": false,
-        "is_onready": false
-      },
-      "_teammate_scratch": {
-        "line": 160,
-        "type": "Array[int]",
-        "is_export": false,
-        "is_onready": false
-      },
-      "CELL_SIZE": {
-        "line": 166,
-        "type": "float",
-        "is_const": true
-      },
-      "INV_CELL_SIZE": {
-        "line": 167,
-        "type": "float",
-        "is_const": true
-      },
-      "GRID_WIDTH": {
-        "line": 169,
-        "type": "int",
-        "is_const": true
-      },
-      "GRID_HEIGHT": {
-        "line": 170,
-        "type": "int",
-        "is_const": true
-      },
-      "GRID_OFFSET_X": {
-        "line": 171,
-        "type": "float",
-        "is_const": true
-      },
-      "GRID_OFFSET_Y": {
-        "line": 172,
-        "type": "float",
-        "is_const": true
-      },
-      "_grid": {
-        "line": 174,
-        "type": "Array[Array]",
-        "is_export": false,
-        "is_onready": false
-      },
-      "_active_cells": {
-        "line": 175,
-        "type": "Array[int]",
-        "is_export": false,
-        "is_onready": false
-      },
-      "_nearby_players_scratch": {
-        "line": 178,
-        "type": "Array[int]",
-        "is_export": false,
-        "is_onready": false
-      },
-      "_nearby_opponents_scratch": {
-        "line": 179,
-        "type": "Array[int]",
-        "is_export": false,
-        "is_onready": false
-      },
-      "_nearby_teammates_scratch": {
         "line": 180,
         "type": "Array[int]",
         "is_export": false,
         "is_onready": false
       },
-      "_nearby_nodes2d_scratch": {
+      "_teammate_scratch": {
         "line": 181,
+        "type": "Array[int]",
+        "is_export": false,
+        "is_onready": false
+      },
+      "CELL_SIZE": {
+        "line": 187,
+        "type": "float",
+        "is_const": true
+      },
+      "INV_CELL_SIZE": {
+        "line": 188,
+        "type": "float",
+        "is_const": true
+      },
+      "GRID_WIDTH": {
+        "line": 190,
+        "type": "int",
+        "is_const": true
+      },
+      "GRID_HEIGHT": {
+        "line": 191,
+        "type": "int",
+        "is_const": true
+      },
+      "GRID_OFFSET_X": {
+        "line": 192,
+        "type": "float",
+        "is_const": true
+      },
+      "GRID_OFFSET_Y": {
+        "line": 193,
+        "type": "float",
+        "is_const": true
+      },
+      "_grid": {
+        "line": 195,
+        "type": "Array[Array]",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_active_cells": {
+        "line": 196,
+        "type": "Array[int]",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_nearby_players_scratch": {
+        "line": 199,
+        "type": "Array[int]",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_nearby_opponents_scratch": {
+        "line": 200,
+        "type": "Array[int]",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_nearby_teammates_scratch": {
+        "line": 201,
+        "type": "Array[int]",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_nearby_nodes2d_scratch": {
+        "line": 202,
         "type": "Array[Node2D]",
         "is_export": false,
         "is_onready": false
       },
       "PRESS_TRIGGER_HOLD_SECONDS": {
-        "line": 204,
+        "line": 225,
         "type": "float",
         "is_const": true
       },
       "PRESS_TRIGGER_PASS_HOLD_SECONDS": {
-        "line": 208,
+        "line": 229,
         "type": "float",
         "is_const": true
       },
       "PASS_FORWARD_DOT_TOLERANCE": {
-        "line": 213,
+        "line": 234,
         "type": "float",
         "is_const": true
       },
       "PASS_PRESSURE_LOOKAHEAD_SECONDS": {
-        "line": 217,
+        "line": 238,
         "type": "float",
         "is_const": true
       },
       "TOUCHLINE_MARGIN": {
-        "line": 221,
+        "line": 242,
         "type": "float",
         "is_const": true
       },
       "ISOLATION_SUPPORT_RADIUS": {
-        "line": 224,
+        "line": 245,
         "type": "float",
         "is_const": true
       },
       "HEAVY_TOUCH_MIN_DIST": {
-        "line": 231,
+        "line": 252,
         "type": "float",
         "is_const": true
       },
       "HEAVY_TOUCH_MAX_DIST": {
-        "line": 232,
+        "line": 253,
         "type": "float",
         "is_const": true
       },
       "FACING_OWN_GOAL_DOT_THRESHOLD": {
-        "line": 236,
+        "line": 257,
         "type": "float",
         "is_const": true
       },
       "PROLONGED_POSSESSION_SECONDS": {
-        "line": 243,
+        "line": 264,
         "type": "float",
         "is_const": true
       },
       "press_trigger_active": {
-        "line": 248,
+        "line": 269,
         "type": "bool",
         "is_export": false,
         "is_onready": false
       },
       "press_trigger_type": {
-        "line": 249,
+        "line": 270,
         "type": "PressTrigger",
         "is_export": false,
         "is_onready": false
       },
       "press_trigger_carrier": {
-        "line": 252,
+        "line": 273,
         "type": "HeavyPlayerController",
         "is_export": false,
         "is_onready": false
       },
       "press_trigger_position": {
-        "line": 253,
+        "line": 274,
         "type": "Vector2",
         "is_export": false,
         "is_onready": false
       },
       "_press_trigger_timer": {
-        "line": 258,
+        "line": 279,
         "type": "float",
         "is_export": false,
         "is_onready": false
       },
       "_possession_hold_timer": {
-        "line": 263,
+        "line": 284,
         "type": "float",
         "is_export": false,
         "is_onready": false
       },
       "_possession_hold_index": {
-        "line": 264,
+        "line": 285,
         "type": "int",
         "is_export": false,
         "is_onready": false
       },
       "STALL_TRACE_THRESHOLD_SECONDS": {
-        "line": 269,
+        "line": 290,
         "type": "float",
         "is_const": true
       },
       "STALL_SPEED_EPSILON": {
-        "line": 270,
+        "line": 291,
         "type": "float",
         "is_const": true
       },
       "_stall_timer": {
-        "line": 271,
+        "line": 292,
         "type": "float",
         "is_export": false,
         "is_onready": false
       },
       "_stall_traced": {
-        "line": 272,
+        "line": 293,
         "type": "bool",
         "is_export": false,
         "is_onready": false
       },
       "POSSESSION_TRACE_THRESHOLD_SECONDS": {
-        "line": 284,
+        "line": 305,
         "type": "float",
         "is_const": true
       },
       "POSSESSION_TRACE_INTERVAL_SECONDS": {
-        "line": 285,
+        "line": 306,
         "type": "float",
         "is_const": true
       },
       "_active_possession_node": {
-        "line": 286,
+        "line": 307,
         "type": "Node2D",
         "is_export": false,
         "is_onready": false
       },
       "_active_possession_timer": {
-        "line": 287,
+        "line": 308,
         "type": "float",
         "is_export": false,
         "is_onready": false
       },
       "_possession_trace_timer": {
-        "line": 288,
+        "line": 309,
         "type": "float",
         "is_export": false,
         "is_onready": false
       },
       "_boundary": {
-        "line": 293,
+        "line": 314,
         "type": "PitchBoundary",
         "is_export": false,
         "is_onready": false
       },
-      "_ball_struck_connected": {
-        "line": 300,
+      "_deferred_events_connected": {
+        "line": 321,
         "type": "bool",
         "is_export": false,
         "is_onready": false
@@ -1749,25 +1942,25 @@
     },
     "methods": {
       "_enter_tree": {
-        "line": 303,
+        "line": 324,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_ready": {
-        "line": 319,
+        "line": 340,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_exit_tree": {
-        "line": 326,
+        "line": 347,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "register_player": {
-        "line": 336,
+        "line": 357,
         "args": [
           "index: int",
           "node: HeavyPlayerController",
@@ -1777,7 +1970,7 @@
         "is_static": false
       },
       "register_ball": {
-        "line": 362,
+        "line": 383,
         "args": [
           "node: Pseudo3DBall"
         ],
@@ -1785,13 +1978,13 @@
         "is_static": false
       },
       "unregister_all": {
-        "line": 371,
+        "line": 392,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_physics_process": {
-        "line": 407,
+        "line": 433,
         "args": [
           "delta: float"
         ],
@@ -1799,7 +1992,7 @@
         "is_static": false
       },
       "world_to_cell": {
-        "line": 490,
+        "line": 519,
         "args": [
           "world_pos: Vector2"
         ],
@@ -1807,21 +2000,53 @@
         "is_static": false
       },
       "_update_spatial_grid": {
-        "line": 498,
+        "line": 527,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "bind_boundary": {
-        "line": 520,
+        "line": 549,
         "args": [
           "b: PitchBoundary"
         ],
         "return": "void",
         "is_static": false
       },
+      "get_pitch_centre_x": {
+        "line": 557,
+        "args": [],
+        "return": "float",
+        "is_static": false
+      },
+      "_on_team_urgency_updated": {
+        "line": 561,
+        "args": [
+          "team: int",
+          "urgency: float"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_team_momentum_updated": {
+        "line": 566,
+        "args": [
+          "team: int",
+          "momentum: float"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_match_stage_changed": {
+        "line": 571,
+        "args": [
+          "stage: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
       "_update_defensive_lines": {
-        "line": 527,
+        "line": 578,
         "args": [
           "delta: float"
         ],
@@ -1829,7 +2054,7 @@
         "is_static": false
       },
       "_team_pressure_on_ball": {
-        "line": 559,
+        "line": 610,
         "args": [
           "team: int"
         ],
@@ -1837,13 +2062,13 @@
         "is_static": false
       },
       "_resolve_possessor_index": {
-        "line": 568,
+        "line": 619,
         "args": [],
         "return": "int",
         "is_static": false
       },
       "get_opponents_of": {
-        "line": 593,
+        "line": 644,
         "args": [
           "team: int"
         ],
@@ -1851,7 +2076,7 @@
         "is_static": false
       },
       "get_teammates_of": {
-        "line": 606,
+        "line": 657,
         "args": [
           "index: int"
         ],
@@ -1859,7 +2084,7 @@
         "is_static": false
       },
       "get_nearby_players": {
-        "line": 627,
+        "line": 678,
         "args": [
           "pos: Vector2",
           "radius: float"
@@ -1868,7 +2093,7 @@
         "is_static": false
       },
       "get_nearby_opponents": {
-        "line": 649,
+        "line": 700,
         "args": [
           "pos: Vector2",
           "radius: float",
@@ -1878,7 +2103,7 @@
         "is_static": false
       },
       "get_nearby_teammates": {
-        "line": 671,
+        "line": 722,
         "args": [
           "pos: Vector2",
           "radius: float",
@@ -1889,7 +2114,7 @@
         "is_static": false
       },
       "get_nearby_opponent_nodes": {
-        "line": 693,
+        "line": 744,
         "args": [
           "pos: Vector2",
           "radius: float",
@@ -1899,7 +2124,7 @@
         "is_static": false
       },
       "count_nearby_players": {
-        "line": 716,
+        "line": 767,
         "args": [
           "pos: Vector2",
           "radius: float"
@@ -1908,7 +2133,7 @@
         "is_static": false
       },
       "count_nearby_opponents": {
-        "line": 737,
+        "line": 788,
         "args": [
           "pos: Vector2",
           "radius: float",
@@ -1918,7 +2143,7 @@
         "is_static": false
       },
       "count_nearby_teammates": {
-        "line": 758,
+        "line": 809,
         "args": [
           "pos: Vector2",
           "radius: float",
@@ -1929,7 +2154,7 @@
         "is_static": false
       },
       "get_opponent_density": {
-        "line": 780,
+        "line": 831,
         "args": [
           "pos: Vector2",
           "radius: float",
@@ -1939,7 +2164,7 @@
         "is_static": false
       },
       "get_teammate_density": {
-        "line": 804,
+        "line": 855,
         "args": [
           "pos: Vector2",
           "radius: float",
@@ -1950,7 +2175,7 @@
         "is_static": false
       },
       "is_lane_blocked_by_opponent": {
-        "line": 862,
+        "line": 913,
         "args": [
           "from_pos: Vector2",
           "to_pos: Vector2",
@@ -1961,7 +2186,7 @@
         "is_static": false
       },
       "get_passing_lane_min_distance": {
-        "line": 869,
+        "line": 920,
         "args": [
           "start_pos: Vector2",
           "end_pos: Vector2",
@@ -1971,7 +2196,7 @@
         "is_static": false
       },
       "nearest_opponent_dist_to": {
-        "line": 898,
+        "line": 949,
         "args": [
           "pos: Vector2",
           "team: int"
@@ -1980,7 +2205,7 @@
         "is_static": false
       },
       "nearest_opponent_position": {
-        "line": 949,
+        "line": 1000,
         "args": [
           "pos: Vector2",
           "team: int"
@@ -1989,7 +2214,7 @@
         "is_static": false
       },
       "is_slot_live": {
-        "line": 965,
+        "line": 1016,
         "args": [
           "index: int"
         ],
@@ -1997,7 +2222,7 @@
         "is_static": false
       },
       "mark_player_unavailable": {
-        "line": 976,
+        "line": 1027,
         "args": [
           "player: HeavyPlayerController"
         ],
@@ -2005,13 +2230,13 @@
         "is_static": false
       },
       "_resize_arrays": {
-        "line": 987,
+        "line": 1038,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_update_press_trigger": {
-        "line": 1008,
+        "line": 1059,
         "args": [
           "delta: float"
         ],
@@ -2019,14 +2244,6 @@
         "is_static": false
       },
       "_update_stall_watchdog": {
-        "line": 1032,
-        "args": [
-          "delta: float"
-        ],
-        "return": "void",
-        "is_static": false
-      },
-      "_update_possession_watchdog": {
         "line": 1083,
         "args": [
           "delta: float"
@@ -2034,8 +2251,16 @@
         "return": "void",
         "is_static": false
       },
+      "_update_possession_watchdog": {
+        "line": 1134,
+        "args": [
+          "delta: float"
+        ],
+        "return": "void",
+        "is_static": false
+      },
       "_arm_press_trigger": {
-        "line": 1116,
+        "line": 1167,
         "args": [
           "trigger: PressTrigger",
           "carrier: HeavyPlayerController",
@@ -2046,13 +2271,13 @@
         "is_static": false
       },
       "_clear_press_trigger": {
-        "line": 1125,
+        "line": 1176,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_ball_struck": {
-        "line": 1145,
+        "line": 1196,
         "args": [
           "struck_player: Node",
           "_speed: float",
@@ -2063,37 +2288,37 @@
         "is_static": false
       },
       "_check_facing_own_goal_trigger": {
-        "line": 1182,
+        "line": 1233,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "_check_touchline_isolation_trigger": {
-        "line": 1201,
+        "line": 1252,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "_check_heavy_touch_trigger": {
-        "line": 1228,
+        "line": 1279,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "_check_prolonged_possession_trigger": {
-        "line": 1261,
+        "line": 1312,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "_update_tactical_grid": {
-        "line": 1274,
+        "line": 1325,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "get_pitch_control_at": {
-        "line": 1340,
+        "line": 1391,
         "args": [
           "pos: Vector2",
           "team: int"
@@ -2102,7 +2327,7 @@
         "is_static": false
       },
       "get_cell_dominance": {
-        "line": 1354,
+        "line": 1405,
         "args": [
           "cell_x: int",
           "cell_y: int"
@@ -2111,7 +2336,7 @@
         "is_static": false
       },
       "is_zone_14": {
-        "line": 1359,
+        "line": 1410,
         "args": [
           "cell_x: int",
           "cell_y: int",
@@ -2803,80 +3028,107 @@
     "enums": {},
     "properties": {
       "_data": {
-        "line": 19,
+        "line": 24,
         "type": "ManagerData",
         "is_export": false,
         "is_onready": false
       },
       "_team": {
-        "line": 20,
+        "line": 25,
         "type": "int",
         "is_export": false,
         "is_onready": false
       },
       "_players_node": {
-        "line": 21,
+        "line": 26,
         "type": "Node2D",
         "is_export": false,
         "is_onready": false
       },
       "_boundary": {
-        "line": 22,
+        "line": 27,
         "type": "PitchBoundary",
         "is_export": false,
         "is_onready": false
       },
       "_active_formation": {
-        "line": 26,
-        "type": "String",
-        "is_export": false,
-        "is_onready": false
-      },
-      "_atk_formation": {
-        "line": 30,
-        "type": "String",
-        "is_export": false,
-        "is_onready": false
-      },
-      "_def_formation": {
         "line": 31,
         "type": "String",
         "is_export": false,
         "is_onready": false
       },
+      "_atk_formation": {
+        "line": 35,
+        "type": "String",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_def_formation": {
+        "line": 36,
+        "type": "String",
+        "is_export": false,
+        "is_onready": false
+      },
       "_shifted_to_attack": {
-        "line": 33,
+        "line": 38,
         "type": "bool",
         "is_export": false,
         "is_onready": false
       },
       "_shifted_to_defend": {
-        "line": 34,
+        "line": 39,
         "type": "bool",
         "is_export": false,
         "is_onready": false
       },
       "_live_pressing": {
-        "line": 36,
+        "line": 41,
         "type": "float",
         "is_export": false,
         "is_onready": false
       },
       "_goals_conceded": {
-        "line": 38,
+        "line": 43,
         "type": "int",
         "is_export": false,
         "is_onready": false
       },
+      "URGENCY_TICK_INTERVAL": {
+        "line": 52,
+        "type": "float",
+        "is_const": true
+      },
+      "TIME_ACCEL_K": {
+        "line": 53,
+        "type": "float",
+        "is_const": true
+      },
+      "URGENCY_PUBLISH_EPSILON": {
+        "line": 56,
+        "type": "float",
+        "is_const": true
+      },
+      "_urgency_eval_timer": {
+        "line": 58,
+        "type": "float",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_risk_profile": {
+        "line": 64,
+        "type": "float",
+        "is_export": false,
+        "is_onready": false
+      },
       "_BALL_WEIGHT_RANGE_BY_ROLE": {
-        "line": 45,
+        "line": 71,
         "type": "Dictionary",
         "is_const": true
       }
     },
     "methods": {
       "bind": {
-        "line": 53,
+        "line": 79,
         "args": [
           "data: ManagerData",
           "team: int",
@@ -2887,7 +3139,7 @@
         "is_static": false
       },
       "_apply_formation": {
-        "line": 85,
+        "line": 113,
         "args": [
           "formation_name: String"
         ],
@@ -2895,19 +3147,19 @@
         "is_static": false
       },
       "_apply_brain_overrides": {
-        "line": 127,
+        "line": 155,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_check_formation_shift": {
-        "line": 169,
+        "line": 197,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_shift_to": {
-        "line": 190,
+        "line": 218,
         "args": [
           "formation_name: String"
         ],
@@ -2915,7 +3167,7 @@
         "is_static": false
       },
       "_on_goal_scored": {
-        "line": 206,
+        "line": 234,
         "args": [
           "scoring_team: int",
           "_scorer: Node = null"
@@ -2924,7 +3176,7 @@
         "is_static": false
       },
       "_on_kickoff_confirmed": {
-        "line": 220,
+        "line": 248,
         "args": [
           "_kickoff_team: int"
         ],
@@ -2932,15 +3184,37 @@
         "is_static": false
       },
       "get_active_formation": {
-        "line": 225,
+        "line": 253,
         "args": [],
         "return": "String",
         "is_static": false
       },
       "get_data": {
-        "line": 229,
+        "line": 257,
         "args": [],
         "return": "ManagerData",
+        "is_static": false
+      },
+      "_compute_risk_profile": {
+        "line": 268,
+        "args": [
+          "data: ManagerData"
+        ],
+        "return": "float",
+        "is_static": false
+      },
+      "_process": {
+        "line": 277,
+        "args": [
+          "delta: float"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_evaluate_tactical_urgency": {
+        "line": 292,
+        "args": [],
+        "return": "void",
         "is_static": false
       }
     }
@@ -3918,7 +4192,7 @@
     "signals": {},
     "enums": {
       "Tier": {
-        "line": 22,
+        "line": 25,
         "values": [
           "SLUMP",
           "NORMAL",
@@ -3928,122 +4202,144 @@
     },
     "properties": {
       "SLUMP_THRESHOLD": {
-        "line": 26,
-        "type": "float",
-        "is_const": true
-      },
-      "STREAK_THRESHOLD": {
-        "line": 27,
-        "type": "float",
-        "is_const": true
-      },
-      "SLUMP_SPEED_MULT": {
         "line": 29,
         "type": "float",
         "is_const": true
       },
-      "SLUMP_ACCEL_MULT": {
+      "STREAK_THRESHOLD": {
         "line": 30,
         "type": "float",
         "is_const": true
       },
-      "SLUMP_COMPOSURE_DELTA": {
-        "line": 31,
-        "type": "float",
-        "is_const": true
-      },
-      "SLUMP_VISION_DELTA": {
+      "SLUMP_SPEED_MULT": {
         "line": 32,
         "type": "float",
         "is_const": true
       },
-      "SLUMP_AGGRESSION_DELTA": {
+      "SLUMP_ACCEL_MULT": {
         "line": 33,
         "type": "float",
         "is_const": true
       },
-      "SLUMP_ACCURACY_MULT": {
+      "SLUMP_COMPOSURE_DELTA": {
         "line": 34,
         "type": "float",
         "is_const": true
       },
-      "STREAK_SPEED_MULT": {
+      "SLUMP_VISION_DELTA": {
+        "line": 35,
+        "type": "float",
+        "is_const": true
+      },
+      "SLUMP_AGGRESSION_DELTA": {
         "line": 36,
         "type": "float",
         "is_const": true
       },
-      "STREAK_ACCEL_MULT": {
+      "SLUMP_ACCURACY_MULT": {
         "line": 37,
         "type": "float",
         "is_const": true
       },
-      "STREAK_COMPOSURE_DELTA": {
-        "line": 38,
-        "type": "float",
-        "is_const": true
-      },
-      "STREAK_VISION_DELTA": {
+      "STREAK_SPEED_MULT": {
         "line": 39,
         "type": "float",
         "is_const": true
       },
-      "STREAK_AGGRESSION_DELTA": {
+      "STREAK_ACCEL_MULT": {
         "line": 40,
         "type": "float",
         "is_const": true
       },
-      "STREAK_ACCURACY_MULT": {
+      "STREAK_COMPOSURE_DELTA": {
         "line": 41,
         "type": "float",
         "is_const": true
       },
-      "DRIFT_RATE_SLUMP": {
+      "STREAK_VISION_DELTA": {
+        "line": 42,
+        "type": "float",
+        "is_const": true
+      },
+      "STREAK_AGGRESSION_DELTA": {
         "line": 43,
         "type": "float",
         "is_const": true
       },
-      "DRIFT_RATE_STREAK": {
+      "STREAK_ACCURACY_MULT": {
         "line": 44,
         "type": "float",
         "is_const": true
       },
+      "DRIFT_RATE_SLUMP": {
+        "line": 46,
+        "type": "float",
+        "is_const": true
+      },
+      "DRIFT_RATE_STREAK": {
+        "line": 47,
+        "type": "float",
+        "is_const": true
+      },
+      "MOMENTUM_COMPOSURE_OWN_SCALE": {
+        "line": 56,
+        "type": "float",
+        "is_const": true
+      },
+      "MOMENTUM_COMPOSURE_OPPONENT_SCALE": {
+        "line": 57,
+        "type": "float",
+        "is_const": true
+      },
       "UPDATE_INTERVAL": {
-        "line": 53,
+        "line": 66,
         "type": "int",
         "is_const": true
       },
       "mood_value": {
-        "line": 55,
+        "line": 68,
         "type": "float",
         "is_export": false,
         "is_onready": false
       },
       "current_tier": {
-        "line": 56,
+        "line": 69,
         "type": "Tier",
         "is_export": false,
         "is_onready": false
       },
       "_player": {
-        "line": 57,
+        "line": 70,
         "type": "HeavyPlayerController",
         "is_export": false,
         "is_onready": false
       },
       "_stagger_offset": {
-        "line": 61,
+        "line": 74,
         "type": "int",
         "is_export": false,
         "is_onready": false
       },
       "_frame_counter": {
-        "line": 62,
+        "line": 75,
         "type": "int",
         "is_export": false,
         "is_onready": false
       },
       "_drift_accumulator": {
-        "line": 64,
+        "line": 77,
+        "type": "float",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_own_team_momentum": {
+        "line": 81,
+        "type": "float",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_opponent_team_momentum": {
+        "line": 82,
         "type": "float",
         "is_export": false,
         "is_onready": false
@@ -4051,13 +4347,13 @@
     },
     "methods": {
       "_ready": {
-        "line": 67,
+        "line": 85,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_physics_process": {
-        "line": 81,
+        "line": 100,
         "args": [
           "delta: float"
         ],
@@ -4065,13 +4361,13 @@
         "is_static": false
       },
       "reset": {
-        "line": 107,
+        "line": 126,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "apply_delta": {
-        "line": 114,
+        "line": 135,
         "args": [
           "delta: float"
         ],
@@ -4079,7 +4375,7 @@
         "is_static": false
       },
       "_set_mood": {
-        "line": 118,
+        "line": 139,
         "args": [
           "value: float"
         ],
@@ -4087,7 +4383,7 @@
         "is_static": false
       },
       "_on_goal_scored": {
-        "line": 134,
+        "line": 155,
         "args": [
           "team: int",
           "_scorer: Node = null"
@@ -4096,7 +4392,7 @@
         "is_static": false
       },
       "_on_tackle_won": {
-        "line": 143,
+        "line": 164,
         "args": [
           "winner: Node",
           "loser: Node"
@@ -4105,7 +4401,7 @@
         "is_static": false
       },
       "_on_foul_committed": {
-        "line": 150,
+        "line": 171,
         "args": [
           "fouler: Node",
           "_victim: Node",
@@ -4115,7 +4411,7 @@
         "is_static": false
       },
       "_on_stamina_depleted": {
-        "line": 155,
+        "line": 176,
         "args": [
           "player: Node"
         ],
@@ -4123,7 +4419,7 @@
         "is_static": false
       },
       "_on_ball_struck": {
-        "line": 160,
+        "line": 181,
         "args": [
           "player: Node",
           "speed: float",
@@ -4133,38 +4429,47 @@
         "return": "void",
         "is_static": false
       },
+      "_on_team_momentum_updated": {
+        "line": 186,
+        "args": [
+          "team: int",
+          "momentum: float"
+        ],
+        "return": "void",
+        "is_static": false
+      },
       "get_speed_multiplier": {
-        "line": 167,
+        "line": 197,
         "args": [],
         "return": "float",
         "is_static": false
       },
       "get_accel_multiplier": {
-        "line": 174,
+        "line": 204,
         "args": [],
         "return": "float",
         "is_static": false
       },
       "get_composure_delta": {
-        "line": 181,
+        "line": 211,
         "args": [],
         "return": "float",
         "is_static": false
       },
       "get_vision_delta": {
-        "line": 188,
+        "line": 222,
         "args": [],
         "return": "float",
         "is_static": false
       },
       "get_aggression_delta": {
-        "line": 195,
+        "line": 229,
         "args": [],
         "return": "float",
         "is_static": false
       },
       "get_kick_accuracy_scatter_multiplier": {
-        "line": 202,
+        "line": 236,
         "args": [],
         "return": "float",
         "is_static": false
@@ -4555,32 +4860,32 @@
         "is_onready": false
       },
       "ROLE_SPACE_ALPHA": {
-        "line": 1462,
+        "line": 1465,
         "type": "Dictionary",
         "is_const": true
       },
       "OFF_BALL_CANDIDATE_OFFSETS": {
-        "line": 1474,
+        "line": 1477,
         "type": "Array[Vector2]",
         "is_const": true
       },
       "OFF_BALL_OPENNESS_RADIUS": {
-        "line": 1484,
+        "line": 1487,
         "type": "float",
         "is_const": true
       },
       "OFF_BALL_CROWD_RADIUS": {
-        "line": 1486,
+        "line": 1489,
         "type": "float",
         "is_const": true
       },
       "OFF_BALL_ANCHOR_NORM": {
-        "line": 1491,
+        "line": 1494,
         "type": "float",
         "is_const": true
       },
       "MAX_CHASE_DEFAULT": {
-        "line": 1634,
+        "line": 1637,
         "type": "float",
         "is_const": true
       }
@@ -4819,13 +5124,13 @@
         "is_static": false
       },
       "_should_chase_ball": {
-        "line": 1241,
+        "line": 1244,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "calculate_pressure_index": {
-        "line": 1355,
+        "line": 1358,
         "args": [
           "defenders: Array[Node2D] = []"
         ],
@@ -4833,37 +5138,37 @@
         "is_static": false
       },
       "get_target_position": {
-        "line": 1375,
+        "line": 1378,
         "args": [],
         "return": "Vector2",
         "is_static": false
       },
       "_predict_intercept_position": {
-        "line": 1418,
+        "line": 1421,
         "args": [],
         "return": "Vector2",
         "is_static": false
       },
       "_team_has_ball": {
-        "line": 1433,
+        "line": 1436,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "_current_team_phase": {
-        "line": 1446,
+        "line": 1449,
         "args": [],
         "return": "FormationAnchorMath.TeamPhase",
         "is_static": false
       },
       "_is_attacking_role": {
-        "line": 1495,
+        "line": 1498,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "_evaluate_off_ball_target": {
-        "line": 1514,
+        "line": 1517,
         "args": [
           "anchor: Vector2"
         ],
@@ -4871,13 +5176,13 @@
         "is_static": false
       },
       "_find_open_space_target": {
-        "line": 1667,
+        "line": 1670,
         "args": [],
         "return": "Vector2",
         "is_static": false
       },
       "_find_channel_run_target": {
-        "line": 1786,
+        "line": 1790,
         "args": [
           "ball_pos: Vector2"
         ],
@@ -4885,7 +5190,7 @@
         "is_static": false
       },
       "_find_passing_triangle_position": {
-        "line": 1806,
+        "line": 1811,
         "args": [
           "ball_pos: Vector2"
         ],
@@ -4893,19 +5198,19 @@
         "is_static": false
       },
       "_find_nearest_threatening_opponent": {
-        "line": 1823,
+        "line": 1828,
         "args": [],
         "return": "HeavyPlayerController",
         "is_static": false
       },
       "_resolve_defensive_duty": {
-        "line": 1864,
+        "line": 1869,
         "args": [],
         "return": "DefensiveDuty",
         "is_static": false
       },
       "_cover_shadow_target": {
-        "line": 1911,
+        "line": 1916,
         "args": [
           "carrier: HeavyPlayerController"
         ],
@@ -4913,7 +5218,7 @@
         "is_static": false
       },
       "_separation_force": {
-        "line": 1931,
+        "line": 1936,
         "args": [
           "sep_radius: float = 55.0"
         ],
@@ -4921,19 +5226,19 @@
         "is_static": false
       },
       "_defensive_line_lateral_separation": {
-        "line": 1956,
+        "line": 1961,
         "args": [],
         "return": "Vector2",
         "is_static": false
       },
       "_get_ball_carrier": {
-        "line": 1980,
+        "line": 1985,
         "args": [],
         "return": "HeavyPlayerController",
         "is_static": false
       },
       "_steer_for_action": {
-        "line": 1993,
+        "line": 1998,
         "args": [
           "delta: float"
         ],
@@ -4941,7 +5246,7 @@
         "is_static": false
       },
       "_apply_intent_blend": {
-        "line": 2196,
+        "line": 2201,
         "args": [
           "raw_intent: Vector2"
         ],
@@ -4949,25 +5254,25 @@
         "is_static": false
       },
       "_assist_force": {
-        "line": 2207,
+        "line": 2212,
         "args": [],
         "return": "Vector2",
         "is_static": false
       },
       "_steer_goalkeeper": {
-        "line": 2227,
+        "line": 2232,
         "args": [],
         "return": "Vector2",
         "is_static": false
       },
       "_goalie_patrol_target": {
-        "line": 2268,
+        "line": 2273,
         "args": [],
         "return": "Vector2",
         "is_static": false
       },
       "_set_crowd_knockdown_enabled": {
-        "line": 2305,
+        "line": 2310,
         "args": [
           "enabled: bool"
         ],
@@ -4975,7 +5280,7 @@
         "is_static": false
       },
       "_on_crowd_knockdown_body_entered": {
-        "line": 2321,
+        "line": 2326,
         "args": [
           "body: Node2D"
         ],
@@ -4983,7 +5288,7 @@
         "is_static": false
       },
       "_find_nearby_opponents": {
-        "line": 2334,
+        "line": 2339,
         "args": [],
         "return": "Array[Node2D]",
         "is_static": false
@@ -8965,41 +9270,52 @@
         "type": "GoalkeeperDiveBrain",
         "is_export": false,
         "is_onready": false
+      },
+      "_last_home_momentum": {
+        "line": 120,
+        "type": "float",
+        "is_export": false,
+        "is_onready": false
+      },
+      "MOMENTUM_SWING_THRESHOLD": {
+        "line": 123,
+        "type": "float",
+        "is_const": true
       }
     },
     "methods": {
       "_ready": {
-        "line": 118,
+        "line": 126,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_setup_normal_match": {
-        "line": 135,
+        "line": 143,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_pregame_confirmed": {
-        "line": 147,
+        "line": 155,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_setup_practice_arena": {
-        "line": 206,
+        "line": 215,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_practice_keeper_spot": {
-        "line": 302,
+        "line": 311,
         "args": [],
         "return": "Vector2",
         "is_static": false
       },
       "_input": {
-        "line": 310,
+        "line": 319,
         "args": [
           "event: InputEvent"
         ],
@@ -9007,31 +9323,31 @@
         "is_static": false
       },
       "_open_pause_menu": {
-        "line": 326,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_on_pause_closed": {
         "line": 335,
         "args": [],
         "return": "void",
         "is_static": false
       },
+      "_on_pause_closed": {
+        "line": 344,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
       "_setup_goalkeeper_dive_coordinator": {
-        "line": 349,
+        "line": 358,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_teardown_goalkeeper_dive_coordinator": {
-        "line": 355,
+        "line": 364,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_ball_struck_for_dive": {
-        "line": 360,
+        "line": 369,
         "args": [
           "_shooter: Node",
           "_speed: float",
@@ -9042,7 +9358,7 @@
         "is_static": false
       },
       "_find_goalkeeper": {
-        "line": 403,
+        "line": 412,
         "args": [
           "team: int"
         ],
@@ -9050,7 +9366,7 @@
         "is_static": false
       },
       "_process": {
-        "line": 418,
+        "line": 427,
         "args": [
           "delta: float"
         ],
@@ -9058,7 +9374,7 @@
         "is_static": false
       },
       "_tick_practice": {
-        "line": 441,
+        "line": 450,
         "args": [
           "delta: float"
         ],
@@ -9066,37 +9382,37 @@
         "is_static": false
       },
       "_hold_gk_freeze": {
-        "line": 473,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_do_practice_reset": {
         "line": 482,
         "args": [],
         "return": "void",
         "is_static": false
       },
-      "_do_practice_freekick": {
-        "line": 503,
+      "_do_practice_reset": {
+        "line": 491,
         "args": [],
         "return": "void",
         "is_static": false
       },
-      "_do_practice_penalty": {
+      "_do_practice_freekick": {
         "line": 512,
         "args": [],
         "return": "void",
         "is_static": false
       },
+      "_do_practice_penalty": {
+        "line": 521,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
       "_do_practice_toggle_gk": {
-        "line": 516,
+        "line": 525,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_practice_goal_scored": {
-        "line": 528,
+        "line": 537,
         "args": [
           "_team: int",
           "_scorer: Node = null"
@@ -9105,7 +9421,7 @@
         "is_static": false
       },
       "_on_practice_out_of_bounds": {
-        "line": 537,
+        "line": 546,
         "args": [
           "_side: String"
         ],
@@ -9113,25 +9429,25 @@
         "is_static": false
       },
       "_on_practice_restart_timeout": {
-        "line": 545,
+        "line": 554,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_apply_match_config": {
-        "line": 553,
+        "line": 562,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_resolve_team_names": {
-        "line": 591,
+        "line": 600,
         "args": [],
         "return": "Array[String]",
         "is_static": false
       },
       "reset_for_kickoff": {
-        "line": 608,
+        "line": 617,
         "args": [
           "kickoff_team: int"
         ],
@@ -9139,7 +9455,7 @@
         "is_static": false
       },
       "shake_camera": {
-        "line": 629,
+        "line": 638,
         "args": [
           "amount: float"
         ],
@@ -9147,7 +9463,7 @@
         "is_static": false
       },
       "_update_camera": {
-        "line": 636,
+        "line": 645,
         "args": [
           "delta: float"
         ],
@@ -9155,7 +9471,7 @@
         "is_static": false
       },
       "_bind_camera": {
-        "line": 650,
+        "line": 659,
         "args": [
           "human: HeavyPlayerController"
         ],
@@ -9163,7 +9479,7 @@
         "is_static": false
       },
       "_on_player_switched_for_camera": {
-        "line": 670,
+        "line": 679,
         "args": [
           "new_player: Node"
         ],
@@ -9171,13 +9487,13 @@
         "is_static": false
       },
       "_bind_players": {
-        "line": 676,
+        "line": 685,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_substitution_made": {
-        "line": 723,
+        "line": 732,
         "args": [
           "team: int",
           "player_out_idx: int",
@@ -9187,13 +9503,13 @@
         "is_static": false
       },
       "switch_to_nearest_teammate": {
-        "line": 750,
+        "line": 759,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_tick_autoswitch": {
-        "line": 780,
+        "line": 789,
         "args": [
           "delta: float"
         ],
@@ -9201,7 +9517,7 @@
         "is_static": false
       },
       "_on_goal_scored": {
-        "line": 831,
+        "line": 840,
         "args": [
           "scoring_team: int",
           "_scorer: Node = null"
@@ -9210,7 +9526,7 @@
         "is_static": false
       },
       "_fire_touchline_goal_shout": {
-        "line": 850,
+        "line": 859,
         "args": [
           "scoring_team: int"
         ],
@@ -9218,7 +9534,7 @@
         "is_static": false
       },
       "_on_touchline_shift": {
-        "line": 864,
+        "line": 873,
         "args": [
           "team: int",
           "_new_formation: String"
@@ -9226,32 +9542,41 @@
         "return": "void",
         "is_static": false
       },
+      "_on_team_momentum_updated": {
+        "line": 897,
+        "args": [
+          "team: int",
+          "momentum: float"
+        ],
+        "return": "void",
+        "is_static": false
+      },
       "_on_half_time_reached": {
-        "line": 883,
+        "line": 919,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_swap_ends_and_restart": {
-        "line": 903,
+        "line": 939,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_start_kickoff_flow": {
-        "line": 920,
+        "line": 956,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_restart_timer_timeout": {
-        "line": 937,
+        "line": 973,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_match_ended": {
-        "line": 947,
+        "line": 983,
         "args": [
           "winner: int"
         ],
@@ -9259,31 +9584,31 @@
         "is_static": false
       },
       "_show_match_stats": {
-        "line": 973,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_on_stats_dismissed": {
-        "line": 984,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_start_penalty_shootout": {
-        "line": 990,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_exit_tree": {
         "line": 1009,
         "args": [],
         "return": "void",
         "is_static": false
       },
+      "_on_stats_dismissed": {
+        "line": 1020,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_start_penalty_shootout": {
+        "line": 1027,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_exit_tree": {
+        "line": 1046,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
       "_log_manager_stats": {
-        "line": 1016,
+        "line": 1053,
         "args": [
           "winner: int"
         ],
@@ -9291,7 +9616,7 @@
         "is_static": false
       },
       "_on_ball_out_of_bounds": {
-        "line": 1035,
+        "line": 1072,
         "args": [
           "side: String"
         ],
@@ -9299,7 +9624,7 @@
         "is_static": false
       },
       "_on_ball_bounced": {
-        "line": 1042,
+        "line": 1079,
         "args": [
           "impact_velocity: float"
         ],
@@ -9307,7 +9632,7 @@
         "is_static": false
       },
       "_tick_headless_telemetry": {
-        "line": 1050,
+        "line": 1087,
         "args": [
           "delta: float"
         ],
@@ -9315,7 +9640,7 @@
         "is_static": false
       },
       "_finalize_headless_simulation": {
-        "line": 1090,
+        "line": 1127,
         "args": [],
         "return": "void",
         "is_static": false
@@ -9820,6 +10145,16 @@
       "_ROLE_PHASE_SENSITIVITY": {
         "line": 43,
         "type": "Dictionary",
+        "is_const": true
+      },
+      "URGENCY_MAX_DEF_LINE_SHIFT": {
+        "line": 56,
+        "type": "float",
+        "is_const": true
+      },
+      "URGENCY_COMPACTNESS_SCALE": {
+        "line": 59,
+        "type": "float",
         "is_const": true
       }
     },

@@ -140,3 +140,25 @@ signal pause_closed
 signal substitution_made(team: int, player_out_idx: int, player_in_idx: int)
 signal formation_changed(team: int, new_formation: String)
 signal lineup_changed(team: int)
+
+## --- Macro match architecture (urgency, momentum, stage) --------------------
+## Layer 2 (ManagerDirector) evaluates urgency and stage on a low-frequency
+## tick and publishes scalars here; MatchWorldModel is the sole listener that
+## caches them (team_urgency / team_momentum / current_match_stage), so every
+## hot-path reader (PlayerBrain, PassUtilityScorer/FormationAnchorMath call
+## sites) reads a cached float instead of re-deriving it. See
+## POWERFOOTBALL_MASTER_VISION.md and AGENTS_ERRATA.md for the formulas.
+
+## Fired by ManagerDirector roughly once per second when a team's computed
+## Match Urgency changes by more than a small epsilon. urgency is [-1, 1]:
+## negative = protecting a lead / playing safe, positive = chasing the game.
+signal team_urgency_updated(team: int, urgency: float)
+## Fired by MatchStatsTracker whenever its anti-snowball momentum accumulator
+## for `team` changes by more than a small epsilon — either a discrete event
+## impulse (shot on target, tackle won, goal conceded, ...) or a continuous
+## decay tick catching up past the publish threshold. momentum is [-1, 1].
+signal team_momentum_updated(team: int, momentum: float)
+## Fired by GameManager when the match crosses a macro temporal stage
+## boundary (see GameManager.MatchStage). stage is a GameManager.MatchStage
+## value: 0 = Sizing-Up, 1 = Equilibrium, 2 = Transitions, 3 = Game-Crunch.
+signal match_stage_changed(stage: int)

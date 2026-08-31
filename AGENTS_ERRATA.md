@@ -803,6 +803,89 @@ discovered_rules:
       values for all three were left completely unchanged.
     promotion_target: .claude/rules/soccer-physics.md
     status: pending
+
+  - id: manager-risk-profile-is-derived-not-authored
+    discovered_date: 2026-08-31
+    discovered_by: Claude
+    category: architecture
+    target_files:
+      - entities/manager/ManagerDirector.gd
+      - shared/ManagerData.gd
+    invariant: >
+      ManagerData has no risk-disposition field. The macro Match Urgency
+      formula (U = tanh(-K * delta_score * time_ratio^2 + risk_profile))
+      needs one per manager, so ManagerDirector._compute_risk_profile()
+      derives it at bind() time from ManagerData.tempo and
+      pressing_intensity (both already-existing 0..1 sliders), adjusted by
+      the Pragmatist(4)/HotHead(1)/Volatile(256) trait bits, then clamps to
+      [-0.35, 0.35]. Do not add a new @export risk_profile field to
+      ManagerData for this — it would require touching every authored .tres
+      resource, generate_db.py, and verify_db.py for a value that is fully
+      recoverable from fields that already exist.
+    rationale: >
+      Read shared/ManagerData.gd in full before wiring the macro urgency
+      architecture (POWERFOOTBALL_MASTER_VISION.md / the 2D Football Engine
+      Architecture Plan PDF) — the plan's own illustrative ManagerDirector
+      sample simply declares `@export var manager_risk_profile: float`, which
+      does not exist anywhere in this repo and would be a schema-widening
+      change disproportionate to what the value needs to represent.
+    promotion_target: .claude/rules/ai-architect.md
+    status: pending
+
+  - id: match-stage-boundaries-are-fractions-not-literal-seconds
+    discovered_date: 2026-08-31
+    discovered_by: Claude
+    category: architecture
+    target_files:
+      - autoloads/GameManager.gd
+    invariant: >
+      GameManager.match_duration defaults to 300.0 (a 5-minute arcade match),
+      not a real 90-minute/5400s fixture. Any macro temporal system (match
+      stages, urgency's time_ratio, future pacing logic) must express its
+      boundaries as fractions of match_duration (GameManager.STAGE_1/2/3_
+      FRACTION = 15/60/75 out of 90) and read `match_time / match_duration`,
+      never a hardcoded absolute-seconds threshold like the architecture
+      plan's own illustrative code (`if t < 900.0`). A literal-seconds
+      threshold silently never fires, or always fires instantly, once
+      match_duration is anything other than 5400.
+    rationale: >
+      The docs architecture plan's ManagerDirector/MatchWorldModel code
+      samples hardcode 900.0/3600.0/4500.0/5400.0 throughout, calibrated to
+      a real 90-minute match. Cross-checked against the actual
+      GameManager.gd, which is explicitly a compressed-clock arcade design
+      ("300.0 = a 5 minute match").
+    promotion_target: .claude/rules/ai-architect.md
+    status: pending
+
+  - id: touchline-bubble-is-one-shared-instance-home-perspective-only
+    discovered_date: 2026-08-31
+    discovered_by: Claude
+    category: architecture
+    target_files:
+      - ui/TouchlineBubble.gd
+      - pitch/PitchScene.gd
+    invariant: >
+      There is exactly one $TouchlineBubble node (a CanvasLayer), not one per
+      manager — PitchScene repositions it bottom-left/right per call via the
+      `is_home: bool` argument to show_shout(). By established convention
+      (see _fire_touchline_goal_shout()'s own comment), the AWAY manager
+      never gets a reaction bubble — the touchline shout is deliberately a
+      home-perspective-only feature, matching what a player watching their
+      own team's dugout would see. Any new touchline-reaction trigger (e.g.
+      a momentum-swing shout) must follow this same home-only convention and
+      stay routed through PitchScene, which alone holds the ManagerData/
+      display-name context TouchlineBubble itself intentionally has none of
+      ("Depends on: nothing — driven entirely by show_shout() calls").
+    rationale: >
+      The architecture plan's illustrative TouchlineBubble sample assumes
+      two independent per-team instances, each with its own
+      `manager_team_id: int` export and its own GameEvents subscription —
+      that shape does not match this repo's actual scene graph or its
+      established home-perspective convention, and copying it verbatim
+      would have either duplicated the node or broken the away-team-silent
+      behavior other systems already rely on.
+    promotion_target: .claude/rules/ai-architect.md
+    status: pending
 ```
 
 ## Session State
@@ -822,42 +905,6 @@ discovered_rules:
 #   new_rules_discovered: []
 
 session_state:
-  - date: 2026-08-31
-    agent: Antigravity (Principal Repo & Agent Inference Harness Architect)
-    task: "Comprehensive Repository & Agent Inference Harness Transformation across 6 Phases: Implemented tools/tscn_linter.py (scene graph & collision linter), tools/validate_schemas.py (strict JSON schema validator), tools/fuzz_solvers.py (100k property fuzz testing suite), tools/spatial_grid_bench.py (22-entity spatial query latency benchmark), tools/dump_match_frames.py (multimodal SVG frame exporter), tools/formation_ascii.py (terminal ASCII tactical pitch renderer), tools/mcp_server.py (standard stdio Model Context Protocol server), tools/lsp_client.py (Godot LSP bridge with static fallback), tools/worktree_manager.py (automated git worktree sandbox manager), and authored .antigravity/skills/ (eval-sim, ast-refactor, formation-audit). Synchronized .antigravity/commands.json, .agents/commands.json, .antigravity/hooks.json, .aiexclude, AGENTS.md, llms.txt, and tools/README.md."
-    files_modified:
-      - tools/lint_invariants.py
-      - tools/tscn_linter.py
-      - tools/validate_schemas.py
-      - tools/fuzz_solvers.py
-      - tools/spatial_grid_bench.py
-      - tools/dump_match_frames.py
-      - tools/formation_ascii.py
-      - tools/mcp_server.py
-      - tools/lsp_client.py
-      - tools/worktree_manager.py
-      - tools/dump_dep_graph.py
-      - tools/hook_gdcheck.py
-      - tools/README.md
-      - .antigravity/skills/eval-sim/SKILL.md
-      - .antigravity/skills/ast-refactor/SKILL.md
-      - .antigravity/skills/formation-audit/SKILL.md
-      - .antigravity/commands.json
-      - .agents/commands.json
-      - .antigravity/scratchpad.md
-      - .aiexclude
-      - AGENTS.md
-      - llms.txt
-      - AGENTS_ERRATA.md
-    gdcheck_status: "pass, 0 errors, 0 warnings (76 scripts)"
-    invariants_consulted:
-      - docs/CORE_INVARIANTS.md
-      - docs/API_SURFACE.md
-      - docs/ANTI_PATTERNS.md
-      - docs/MATH_SOLVERS.md
-      - AGENTS.md
-      - llms.txt
-
   - date: 2026-08-31
     agent: Antigravity (Principal Engine Architect & Static Analysis Specialist)
     task: "Low-Level Engine Optimization, Deterministic Replay, Linters & Symbolic Slicing Suite: Refactored MatchWorldModel.gd with typed Array[int] spatial grid buckets and distance_squared_to() comparisons; replaced transient allocations and distance_to sorting across ActionText.gd, TouchlineBubble.gd, SetPieceCoordinator.gd, PitchScene.gd, and PlayerBrain.gd; created tools/lint_stringnames.py (&'string_name' literal enforcement), tools/lint_allocations.py (hot-path allocation & distance sorting linter), tools/lint_signal_races.py (signal emission race condition auditor), tools/lint_shadowing.py (parameter & variable shadowing linter), tools/audit_process_modes.py (process mode consistency auditor), tools/replay_test.py (100% bit-exact 60Hz replay test harness across 1,800 ticks), tools/generate_symbols.py (AST symbol map -> docs/SYMBOLS.json), tools/codebase_slice.py (targeted symbol & method slicing CLI), tools/semantic_search.py (zero-dependency BM25 retrieval indexer), tools/benchmark_math.py (mathematical solvers benchmark), tools/fuzz_formations.py (50k property-based dynamic anchor fuzzer), tools/git_pre_commit.py (pre-commit installer & verifier), and authored .antigravity/skills/ (formation-fuzzer, perf-benchmark). Synchronized .antigravity/commands.json, .agents/commands.json, .antigravity/hooks.json, .agents/hooks.json, llms.txt, and AGENTS.md."
@@ -960,6 +1007,68 @@ session_state:
       - llms.txt
     next_steps: "All verification gates, AST linters, MCP servers, fuzzers, and postmortem rules are fully active and verified at 100% safety."
     new_rules_discovered: []
+
+  - date: 2026-08-31
+    agent: Claude
+    task: >
+      Implemented the macro match architecture (Team Match Urgency, an
+      anti-snowball Team Momentum accumulator, and 4 temporal Match Stages)
+      per POWERFOOTBALL_MASTER_VISION.md / "2D Football Engine Architecture
+      Plan.pdf", adapted to this repo's real signal signatures and scoring
+      functions rather than the plan's illustrative generic samples (see the
+      3 new discovered_rules entries above). GameEvents gained 3 signals
+      (team_urgency_updated, team_momentum_updated, match_stage_changed).
+      GameManager owns MatchStage (fraction-of-match_duration boundaries) and
+      broadcasts transitions. ManagerDirector runs a ~1s urgency tick per
+      team (tanh scoreline/time S-curve + a derived risk_profile, Phase-0
+      dampened). MatchStatsTracker owns momentum: continuous decay + 5
+      discrete event impulses (shot on target/tackle won/goal conceded/
+      turnover/5-pass sequence in the opponent's half), quadratically
+      self-dampened. MatchWorldModel caches all three as the hot-path read
+      surface. PlayerBrain's _find_best_pass_target() modulates
+      PassUtilityScorer's w_press/w_adv by urgency (loop-invariant, computed
+      once per decision tick); its two FormationAnchorMath.
+      get_dynamic_anchor_position() call sites thread urgency through a new
+      trailing optional param (default 0.0) that shifts the shared
+      defensive-line depth and scales lateral compactness. MoodSystem folds
+      an ambient own/opponent momentum term into get_composure_delta().
+      PitchScene reacts to a sharp home-team momentum swing (|delta| > 0.35)
+      with a fixed-text touchline shout, matching the existing
+      home-perspective-only convention. tools/fuzz_formations.py's Python
+      mirror of get_dynamic_anchor_position() was updated in lockstep and
+      re-run (50k iterations, urgency in [-1,1]) — 0 boundary/ordering/NaN
+      violations.
+    files_modified:
+      - autoloads/GameEvents.gd
+      - autoloads/GameManager.gd
+      - autoloads/MatchWorldModel.gd
+      - autoloads/MatchStatsTracker.gd
+      - entities/manager/ManagerDirector.gd
+      - entities/player/MoodSystem.gd
+      - entities/player/PlayerBrain.gd
+      - shared/FormationAnchorMath.gd
+      - pitch/PitchScene.gd
+      - tools/fuzz_formations.py
+      - AGENTS_ERRATA.md
+    gdcheck_status: "pass, 0 errors, 0 warnings (76 scripts)"
+    invariants_consulted:
+      - docs/CORE_INVARIANTS.md
+      - .claude/rules/godot-47-core.md
+      - .claude/rules/soccer-physics.md
+      - .claude/rules/ai-architect.md
+      - .claude/rules/gdscript-antipatterns.md
+    next_steps: >
+      verify_gate.py --full passes (15/15). No PressOffice quote category
+      exists yet for a momentum-swing touchline reaction (see
+      touchline-bubble-is-one-shared-instance-home-perspective-only above) —
+      a future task could add trait-flavored variants there instead of the
+      current two fixed strings. Sprint-threshold urgency modulation
+      (PlayerBrain.wants_sprint) was intentionally left out — not in the
+      task's 5 numbered formula specs, and no existing call site needed it.
+    new_rules_discovered:
+      - manager-risk-profile-is-derived-not-authored
+      - match-stage-boundaries-are-fractions-not-literal-seconds
+      - touchline-bubble-is-one-shared-instance-home-perspective-only
 ```
 
 ## Error Log

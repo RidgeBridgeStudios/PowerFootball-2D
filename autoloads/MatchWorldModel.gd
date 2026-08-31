@@ -33,6 +33,9 @@
 ##          carrier/position — the pressing trigger detector (see "Pressing
 ##          trigger detection" below); GameEvents.press_trigger_changed is the
 ##          preferred way to consume it
+##          team_urgency/team_momentum/current_match_stage — macro match
+##          architecture cache, written from GameEvents.team_urgency_updated /
+##          team_momentum_updated / match_stage_changed; get_pitch_centre_x()
 ##
 ## Pressing trigger detection: a small, cheap read of state this file already
 ## caches (plus one signal subscription for pass events) that answers "is
@@ -142,6 +145,24 @@ const LINE_DEPTH_LERP_SPEED: float = 220.0
 ## Per-team [TEAM_A, TEAM_B] defensive line depth, world-space X. Read by
 ## PlayerBrain via MatchWorldModel.instance.defensive_line_x[team].
 var defensive_line_x: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+
+## --- Macro match architecture cache (urgency, momentum, stage) --------------
+## Per-team [TEAM_A, TEAM_B] scalars written by the GameEvents listeners below
+## in response to ManagerDirector (urgency) and MatchStatsTracker (momentum)
+## publishing on GameEvents — this node never computes either value itself,
+## it only caches the latest broadcast so hot-path readers (PlayerBrain,
+## PassUtilityScorer/FormationAnchorMath call sites) never touch a signal
+## connection or re-derive the math per decision tick. Both ranges are
+## [-1.0, 1.0]; positive urgency/momentum favours attacking risk, negative
+## favours safety/preservation.
+var team_urgency: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+var team_momentum: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+## Plain int mirror of GameManager.MatchStage, kept as int (not the enum type)
+## so this file does not need to reference GameManager's type at parse time —
+## GameManager loads AFTER this autoload in project.godot's boot order (see
+## class doc "Depends on:"). GameManager is the source of truth; this is a
+## read-only cache updated via GameEvents.match_stage_changed.
+var current_match_stage: int = 0
 
 ## --- Sacchi Compactness Cache ---
 var team_com_x: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
@@ -297,7 +318,7 @@ var _boundary: PitchBoundary = null
 ## (see class doc "Depends on:") so nothing else has to load before it, which
 ## means GameEvents does not exist yet when this node's own _ready() runs.
 ## By the first physics frame every autoload is guaranteed ready.
-var _ball_struck_connected: bool = false
+var _deferred_events_connected: bool = false
 
 
 func _enter_tree() -> void:
@@ -377,6 +398,11 @@ func unregister_all() -> void:
 	defensive_line_x[0] = 0.0
 	defensive_line_x[1] = 0.0
 	_defensive_lines_ready = false
+	team_urgency[0] = 0.0
+	team_urgency[1] = 0.0
+	team_momentum[0] = 0.0
+	team_momentum[1] = 0.0
+	current_match_stage = 0
 	team_com_x[0] = 0.0
 	team_com_x[1] = 0.0
 	team_att_x[0] = 0.0
@@ -405,9 +431,12 @@ func unregister_all() -> void:
 ## --- Per-frame refresh ------------------------------------------------------
 
 func _physics_process(delta: float) -> void:
-	if not _ball_struck_connected:
+	if not _deferred_events_connected:
 		GameEvents.ball_struck.connect(_on_ball_struck)
-		_ball_struck_connected = true
+		GameEvents.team_urgency_updated.connect(_on_team_urgency_updated)
+		GameEvents.team_momentum_updated.connect(_on_team_momentum_updated)
+		GameEvents.match_stage_changed.connect(_on_match_stage_changed)
+		_deferred_events_connected = true
 
 	if ball_node != null and is_instance_valid(ball_node):
 		ball_position = ball_node.global_position
@@ -519,6 +548,28 @@ func _update_spatial_grid() -> void:
 ## without it.
 func bind_boundary(b: PitchBoundary) -> void:
 	_boundary = b
+
+
+## World-space X of the pitch centre, or 0.0 if bind_boundary() was never
+## called (e.g. Practice Arena). Lets a caller (MatchStatsTracker's opponent-
+## half check, for instance) answer "which half is this position in" without
+## holding its own PitchBoundary reference.
+func get_pitch_centre_x() -> float:
+	return _boundary.get_centre_spot().x if _boundary != null else 0.0
+
+
+func _on_team_urgency_updated(team: int, urgency: float) -> void:
+	if team == 0 or team == 1:
+		team_urgency[team] = urgency
+
+
+func _on_team_momentum_updated(team: int, momentum: float) -> void:
+	if team == 0 or team == 1:
+		team_momentum[team] = momentum
+
+
+func _on_match_stage_changed(stage: int) -> void:
+	current_match_stage = stage
 
 
 ## Recomputes both teams' shared line depth from the ball's position and
