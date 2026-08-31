@@ -344,6 +344,8 @@ var _ctx: UtilityContext = UtilityContext.new()
 ## decision tick rather than reallocated. Only _find_nearby_opponents() writes
 ## it, and only one call is live at a time.
 var _opponents_buffer: Array[Node2D] = []
+var _off_ball_candidates: Array[Vector2] = []
+var _opp_y_coords: Array[float] = []
 
 
 func _ready() -> void:
@@ -468,7 +470,7 @@ func _physics_process(delta: float) -> void:
 			# Reset the frame counter so this player evaluates on its next tick.
 			# Subtracting player_index ensures the evaluation lands on a frame
 			# where ((_frame_counter + player_index) % 15 == 0).
-			_frame_counter = (15 * 16) - player_index - 1
+			_frame_counter = 360 - player_index - 1
 
 	if _transition_timer > 0.0:
 		_transition_timer = maxf(_transition_timer - delta, 0.0)
@@ -505,7 +507,14 @@ func _physics_process(delta: float) -> void:
 
 	_frame_counter += 1
 
-	if (_frame_counter + player_index) % 15 == 0:
+	var dist_to_ball_sq: float = player.global_position.distance_squared_to(ball.global_position) if ball != null else 1000000.0
+	var current_cadence: int = 45
+	if (ball != null and ball.possessor == player) or dist_to_ball_sq < 90000.0:
+		current_cadence = 8
+	elif dist_to_ball_sq <= 490000.0:
+		current_cadence = 20
+
+	if (_frame_counter + player_index) % current_cadence == 0:
 		if is_goalkeeper:
 			# GoaliePatrol / GoalieRush evaluated on decision tick; dive is triggered per frame
 			if current_action != &"GoalieDive":
@@ -585,7 +594,7 @@ func _is_pass_plan_still_valid() -> bool:
 func _abort_action_plan() -> void:
 	_cached_pass_target = null
 	current_action = &"MaintainFormation"
-	_frame_counter = (15 * 16) - player_index - 1
+	_frame_counter = 360 - player_index - 1
 
 
 ## Runs every physics frame for a goalkeeper — not gated by UPDATE_INTERVAL —
@@ -1386,14 +1395,14 @@ func _evaluate_off_ball_target(anchor: Vector2) -> Vector2:
 	if carrier != null:
 		carrier_pos = carrier.global_position
 
-	var candidates: Array[Vector2] = []
-	candidates.append(anchor)
+	_off_ball_candidates.clear()
+	_off_ball_candidates.append(anchor)
 
 	if is_attacker and in_possession:
 		# Forward channel candidates: gaps between opposing CB-FB pairs and half-spaces
 		# 1. Forward depth penetration along attack axis
 		for fwd_dist: float in [70.0, 140.0, 210.0, 280.0]:
-			candidates.append(anchor + Vector2(attack_sign * fwd_dist, 0.0))
+			_off_ball_candidates.append(anchor + Vector2(attack_sign * fwd_dist, 0.0))
 
 		# 2. Diagonal channel runs (cutting inside toward half-spaces or overlapping outside)
 		var anchor_side: float = signf(anchor.y)
@@ -1401,41 +1410,41 @@ func _evaluate_off_ball_target(anchor: Vector2) -> Vector2:
 			anchor_side = 1.0
 		for fwd_dist: float in [80.0, 160.0, 240.0]:
 			# Diagonal inside toward half-space / centre
-			candidates.append(anchor + Vector2(attack_sign * fwd_dist, -anchor_side * 80.0))
-			candidates.append(anchor + Vector2(attack_sign * fwd_dist, -anchor_side * 140.0))
+			_off_ball_candidates.append(anchor + Vector2(attack_sign * fwd_dist, -anchor_side * 80.0))
+			_off_ball_candidates.append(anchor + Vector2(attack_sign * fwd_dist, -anchor_side * 140.0))
 			# Diagonal outside into wide channel
-			candidates.append(anchor + Vector2(attack_sign * fwd_dist, anchor_side * 80.0))
+			_off_ball_candidates.append(anchor + Vector2(attack_sign * fwd_dist, anchor_side * 80.0))
 
 		# 3. Canonical half-space and channel depth targets
 		var fwd_depth_x: float = anchor.x + attack_sign * 150.0
 		for channel_y: float in [-320.0, -160.0, 0.0, 160.0, 320.0]:
-			candidates.append(Vector2(fwd_depth_x, channel_y))
+			_off_ball_candidates.append(Vector2(fwd_depth_x, channel_y))
 
 		# 4. Gaps between opposing defenders
 		var opp_def_team: int = 1 - player.team
 		var opp_def_line_x: float = world.defensive_line_x[opp_def_team]
-		var opp_y_coords: Array[float] = []
+		_opp_y_coords.clear()
 		for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
 			if world.player_teams[i] == opp_def_team and is_instance_valid(world.player_nodes[i]):
 				var opos: Vector2 = world.player_positions[i]
 				if absf(opos.x - opp_def_line_x) < 180.0:
-					opp_y_coords.append(opos.y)
-		opp_y_coords.sort()
-		if opp_y_coords.size() >= 2:
-			for k: int in range(opp_y_coords.size() - 1):
-				var gap_y: float = (opp_y_coords[k] + opp_y_coords[k + 1]) * 0.5
-				candidates.append(Vector2(opp_def_line_x - attack_sign * 30.0, gap_y))
-				candidates.append(Vector2(opp_def_line_x + attack_sign * 40.0, gap_y))
+					_opp_y_coords.append(opos.y)
+		_opp_y_coords.sort()
+		if _opp_y_coords.size() >= 2:
+			for k: int in range(_opp_y_coords.size() - 1):
+				var gap_y: float = (_opp_y_coords[k] + _opp_y_coords[k + 1]) * 0.5
+				_off_ball_candidates.append(Vector2(opp_def_line_x - attack_sign * 30.0, gap_y))
+				_off_ball_candidates.append(Vector2(opp_def_line_x + attack_sign * 40.0, gap_y))
 	else:
 		# Standard candidate fan around anchor
 		var radius_scale: float = lerpf(0.6, 1.3, alpha)
 		for base_offset: Vector2 in OFF_BALL_CANDIDATE_OFFSETS:
-			candidates.append(anchor + base_offset * radius_scale)
+			_off_ball_candidates.append(anchor + base_offset * radius_scale)
 
 	var best_pos: Vector2 = anchor
 	var best_score: float = -INF
 
-	for raw_candidate: Vector2 in candidates:
+	for raw_candidate: Vector2 in _off_ball_candidates:
 		var candidate: Vector2 = clamp_to_playable_area(raw_candidate)
 
 		# 1. Forward advancement toward opposition goal line

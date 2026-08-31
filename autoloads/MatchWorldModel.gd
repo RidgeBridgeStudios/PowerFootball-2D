@@ -141,11 +141,13 @@ var _teammate_scratch: Array[int] = []
 const CELL_SIZE: float = 160.0
 const INV_CELL_SIZE: float = 1.0 / CELL_SIZE
 
-## Cell -> Array[int] of player indices (slots).
-## Buckets are reused across frames to maintain zero GC allocations.
-var _grid: Dictionary = {}
-## Track cells populated during the frame so only dirty cells are cleared.
-var _active_cells: Array[Vector2i] = []
+const GRID_WIDTH: int = 24
+const GRID_HEIGHT: int = 16
+const GRID_OFFSET_X: float = 1920.0
+const GRID_OFFSET_Y: float = 1280.0
+
+var _grid: Array[Array] = []
+var _active_cells: Array[int] = []
 
 ## Scratch buffers for spatial query results.
 var _nearby_players_scratch: Array[int] = []
@@ -237,6 +239,9 @@ var _ball_struck_connected: bool = false
 
 func _enter_tree() -> void:
 	instance = self
+	_grid.resize(GRID_WIDTH * GRID_HEIGHT)
+	for i: int in range(GRID_WIDTH * GRID_HEIGHT):
+		_grid[i] = [] as Array[int]
 	_resize_arrays()
 
 
@@ -304,7 +309,9 @@ func unregister_all() -> void:
 	_clear_press_trigger()
 	_press_trigger_timer = 0.0
 	_boundary = null
-	_grid.clear()
+	for cell_idx: int in range(GRID_WIDTH * GRID_HEIGHT):
+		var bucket: Array = _grid[cell_idx]
+		bucket.clear()
 	_active_cells.clear()
 	_nearby_players_scratch.clear()
 	_nearby_opponents_scratch.clear()
@@ -340,17 +347,16 @@ func _physics_process(delta: float) -> void:
 
 ## Converts a 2D world position into discrete spatial grid cell coordinates.
 func world_to_cell(world_pos: Vector2) -> Vector2i:
-	return Vector2i(
-		int(floorf(world_pos.x * INV_CELL_SIZE)),
-		int(floorf(world_pos.y * INV_CELL_SIZE))
-	)
+	var cx: int = clampi(int((world_pos.x + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var cy: int = clampi(int((world_pos.y + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
+	return Vector2i(cx, cy)
 
 
 ## Refreshes the spatial partition grid. Reuses cell bucket arrays to achieve
 ## zero heap allocations per physics frame.
 func _update_spatial_grid() -> void:
-	for cell: Vector2i in _active_cells:
-		var clear_bucket: Array[int] = _grid.get(cell, [] as Array[int])
+	for cell_idx: int in _active_cells:
+		var clear_bucket: Array = _grid[cell_idx]
 		clear_bucket.clear()
 	_active_cells.clear()
 
@@ -358,13 +364,13 @@ func _update_spatial_grid() -> void:
 		var node: HeavyPlayerController = player_nodes[i]
 		if node == null or not is_instance_valid(node):
 			continue
-		var cell: Vector2i = world_to_cell(player_positions[i])
-		if not _grid.has(cell):
-			var new_bucket: Array[int] = []
-			_grid[cell] = new_bucket
-		var bucket: Array[int] = _grid[cell]
+		var cx: int = clampi(int((player_positions[i].x + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+		var cy: int = clampi(int((player_positions[i].y + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
+		var cell_idx: int = cy * GRID_WIDTH + cx
+		var bucket: Array = _grid[cell_idx]
+		if bucket.is_empty():
+			_active_cells.append(cell_idx)
 		bucket.append(i)
-		_active_cells.append(cell)
 
 
 ## Bound by PitchScene at match setup, mirroring PlayerBrain.bind_boundary().
@@ -482,17 +488,15 @@ func get_nearby_players(pos: Vector2, radius: float) -> Array[int]:
 	if radius <= 0.0:
 		return _nearby_players_scratch
 	var r_sq: float = radius * radius
-	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
-	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
-	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
-	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+	var min_cx: int = clampi(int((pos.x - radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var max_cx: int = clampi(int((pos.x + radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var min_cy: int = clampi(int((pos.y - radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
+	var max_cy: int = clampi(int((pos.y + radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
 
 	for cy: int in range(min_cy, max_cy + 1):
+		var row_offset: int = cy * GRID_WIDTH
 		for cx: int in range(min_cx, max_cx + 1):
-			var cell := Vector2i(cx, cy)
-			if not _grid.has(cell):
-				continue
-			var bucket: Array[int] = _grid[cell]
+			var bucket: Array = _grid[row_offset + cx]
 			for i: int in bucket:
 				if player_positions[i].distance_squared_to(pos) <= r_sq:
 					_nearby_players_scratch.append(i)
@@ -506,17 +510,15 @@ func get_nearby_opponents(pos: Vector2, radius: float, team: int) -> Array[int]:
 	if radius <= 0.0:
 		return _nearby_opponents_scratch
 	var r_sq: float = radius * radius
-	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
-	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
-	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
-	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+	var min_cx: int = clampi(int((pos.x - radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var max_cx: int = clampi(int((pos.x + radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var min_cy: int = clampi(int((pos.y - radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
+	var max_cy: int = clampi(int((pos.y + radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
 
 	for cy: int in range(min_cy, max_cy + 1):
+		var row_offset: int = cy * GRID_WIDTH
 		for cx: int in range(min_cx, max_cx + 1):
-			var cell := Vector2i(cx, cy)
-			if not _grid.has(cell):
-				continue
-			var bucket: Array[int] = _grid[cell]
+			var bucket: Array = _grid[row_offset + cx]
 			for i: int in bucket:
 				if player_teams[i] != team and player_positions[i].distance_squared_to(pos) <= r_sq:
 					_nearby_opponents_scratch.append(i)
@@ -530,17 +532,15 @@ func get_nearby_teammates(pos: Vector2, radius: float, team: int, exclude_index:
 	if radius <= 0.0:
 		return _nearby_teammates_scratch
 	var r_sq: float = radius * radius
-	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
-	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
-	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
-	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+	var min_cx: int = clampi(int((pos.x - radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var max_cx: int = clampi(int((pos.x + radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var min_cy: int = clampi(int((pos.y - radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
+	var max_cy: int = clampi(int((pos.y + radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
 
 	for cy: int in range(min_cy, max_cy + 1):
+		var row_offset: int = cy * GRID_WIDTH
 		for cx: int in range(min_cx, max_cx + 1):
-			var cell := Vector2i(cx, cy)
-			if not _grid.has(cell):
-				continue
-			var bucket: Array[int] = _grid[cell]
+			var bucket: Array = _grid[row_offset + cx]
 			for i: int in bucket:
 				if i != exclude_index and player_teams[i] == team and player_positions[i].distance_squared_to(pos) <= r_sq:
 					_nearby_teammates_scratch.append(i)
@@ -554,17 +554,15 @@ func get_nearby_opponent_nodes(pos: Vector2, radius: float, team: int) -> Array[
 	if radius <= 0.0:
 		return _nearby_nodes2d_scratch
 	var r_sq: float = radius * radius
-	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
-	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
-	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
-	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+	var min_cx: int = clampi(int((pos.x - radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var max_cx: int = clampi(int((pos.x + radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var min_cy: int = clampi(int((pos.y - radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
+	var max_cy: int = clampi(int((pos.y + radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
 
 	for cy: int in range(min_cy, max_cy + 1):
+		var row_offset: int = cy * GRID_WIDTH
 		for cx: int in range(min_cx, max_cx + 1):
-			var cell := Vector2i(cx, cy)
-			if not _grid.has(cell):
-				continue
-			var bucket: Array[int] = _grid[cell]
+			var bucket: Array = _grid[row_offset + cx]
 			for i: int in bucket:
 				if player_teams[i] != team and player_positions[i].distance_squared_to(pos) <= r_sq:
 					var node: HeavyPlayerController = player_nodes[i]
@@ -579,17 +577,15 @@ func count_nearby_players(pos: Vector2, radius: float) -> int:
 		return 0
 	var count: int = 0
 	var r_sq: float = radius * radius
-	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
-	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
-	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
-	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+	var min_cx: int = clampi(int((pos.x - radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var max_cx: int = clampi(int((pos.x + radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var min_cy: int = clampi(int((pos.y - radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
+	var max_cy: int = clampi(int((pos.y + radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
 
 	for cy: int in range(min_cy, max_cy + 1):
+		var row_offset: int = cy * GRID_WIDTH
 		for cx: int in range(min_cx, max_cx + 1):
-			var cell := Vector2i(cx, cy)
-			if not _grid.has(cell):
-				continue
-			var bucket: Array[int] = _grid[cell]
+			var bucket: Array = _grid[row_offset + cx]
 			for i: int in bucket:
 				if player_positions[i].distance_squared_to(pos) <= r_sq:
 					count += 1
@@ -602,17 +598,15 @@ func count_nearby_opponents(pos: Vector2, radius: float, team: int) -> int:
 		return 0
 	var count: int = 0
 	var r_sq: float = radius * radius
-	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
-	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
-	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
-	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+	var min_cx: int = clampi(int((pos.x - radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var max_cx: int = clampi(int((pos.x + radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var min_cy: int = clampi(int((pos.y - radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
+	var max_cy: int = clampi(int((pos.y + radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
 
 	for cy: int in range(min_cy, max_cy + 1):
+		var row_offset: int = cy * GRID_WIDTH
 		for cx: int in range(min_cx, max_cx + 1):
-			var cell := Vector2i(cx, cy)
-			if not _grid.has(cell):
-				continue
-			var bucket: Array[int] = _grid[cell]
+			var bucket: Array = _grid[row_offset + cx]
 			for i: int in bucket:
 				if player_teams[i] != team and player_positions[i].distance_squared_to(pos) <= r_sq:
 					count += 1
@@ -625,17 +619,15 @@ func count_nearby_teammates(pos: Vector2, radius: float, team: int, exclude_inde
 		return 0
 	var count: int = 0
 	var r_sq: float = radius * radius
-	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
-	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
-	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
-	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+	var min_cx: int = clampi(int((pos.x - radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var max_cx: int = clampi(int((pos.x + radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var min_cy: int = clampi(int((pos.y - radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
+	var max_cy: int = clampi(int((pos.y + radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
 
 	for cy: int in range(min_cy, max_cy + 1):
+		var row_offset: int = cy * GRID_WIDTH
 		for cx: int in range(min_cx, max_cx + 1):
-			var cell := Vector2i(cx, cy)
-			if not _grid.has(cell):
-				continue
-			var bucket: Array[int] = _grid[cell]
+			var bucket: Array = _grid[row_offset + cx]
 			for i: int in bucket:
 				if i != exclude_index and player_teams[i] == team and player_positions[i].distance_squared_to(pos) <= r_sq:
 					count += 1
@@ -649,17 +641,15 @@ func get_opponent_density(pos: Vector2, radius: float, team: int) -> float:
 		return 0.0
 	var total: float = 0.0
 	var r_sq: float = radius * radius
-	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
-	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
-	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
-	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+	var min_cx: int = clampi(int((pos.x - radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var max_cx: int = clampi(int((pos.x + radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var min_cy: int = clampi(int((pos.y - radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
+	var max_cy: int = clampi(int((pos.y + radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
 
 	for cy: int in range(min_cy, max_cy + 1):
+		var row_offset: int = cy * GRID_WIDTH
 		for cx: int in range(min_cx, max_cx + 1):
-			var cell := Vector2i(cx, cy)
-			if not _grid.has(cell):
-				continue
-			var bucket: Array[int] = _grid[cell]
+			var bucket: Array = _grid[row_offset + cx]
 			for i: int in bucket:
 				if player_teams[i] != team:
 					var d_sq: float = pos.distance_squared_to(player_positions[i])
@@ -675,17 +665,15 @@ func get_teammate_density(pos: Vector2, radius: float, team: int, exclude_index:
 		return 0.0
 	var total: float = 0.0
 	var r_sq: float = radius * radius
-	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
-	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
-	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
-	var max_cy: int = int(floorf((pos.y + radius) * INV_CELL_SIZE))
+	var min_cx: int = clampi(int((pos.x - radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var max_cx: int = clampi(int((pos.x + radius + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var min_cy: int = clampi(int((pos.y - radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
+	var max_cy: int = clampi(int((pos.y + radius + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
 
 	for cy: int in range(min_cy, max_cy + 1):
+		var row_offset: int = cy * GRID_WIDTH
 		for cx: int in range(min_cx, max_cx + 1):
-			var cell := Vector2i(cx, cy)
-			if not _grid.has(cell):
-				continue
-			var bucket: Array[int] = _grid[cell]
+			var bucket: Array = _grid[row_offset + cx]
 			for i: int in bucket:
 				if i != exclude_index and player_teams[i] == team:
 					var d_sq: float = pos.distance_squared_to(player_positions[i])
@@ -713,17 +701,15 @@ func is_passing_lane_open(
 	var min_y: float = minf(start_pos.y, end_pos.y) - corridor_width
 	var max_y: float = maxf(start_pos.y, end_pos.y) + corridor_width
 
-	var min_cx: int = int(floorf(min_x * INV_CELL_SIZE))
-	var max_cx: int = int(floorf(max_x * INV_CELL_SIZE))
-	var min_cy: int = int(floorf(min_y * INV_CELL_SIZE))
-	var max_cy: int = int(floorf(max_y * INV_CELL_SIZE))
+	var min_cx: int = clampi(int((min_x + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var max_cx: int = clampi(int((max_x + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var min_cy: int = clampi(int((min_y + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
+	var max_cy: int = clampi(int((max_y + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
 
 	for cy: int in range(min_cy, max_cy + 1):
+		var row_offset: int = cy * GRID_WIDTH
 		for cx: int in range(min_cx, max_cx + 1):
-			var cell := Vector2i(cx, cy)
-			if not _grid.has(cell):
-				continue
-			var bucket: Array[int] = _grid[cell]
+			var bucket: Array = _grid[row_offset + cx]
 			for i: int in bucket:
 				if player_teams[i] != passer_team_id:
 					if UtilityMath.is_lane_blocked(start_pos, end_pos, player_positions[i], corridor_width):
@@ -743,15 +729,27 @@ func is_lane_blocked_by_opponent(from_pos: Vector2, to_pos: Vector2, clearance: 
 ## Allocation-free.
 func get_passing_lane_min_distance(start_pos: Vector2, end_pos: Vector2, passer_team_id: int) -> float:
 	var min_dist_sq: float = INF
-	for i: int in range(TOTAL_PLAYERS):
-		var node: HeavyPlayerController = player_nodes[i]
-		if node == null or not is_instance_valid(node):
-			continue
-		if player_teams[i] == passer_team_id:
-			continue
-		var d_sq: float = UtilityMath.distance_squared_to_segment(player_positions[i], start_pos, end_pos)
-		if d_sq < min_dist_sq:
-			min_dist_sq = d_sq
+
+	var min_x: float = minf(start_pos.x, end_pos.x) - 160.0
+	var max_x: float = maxf(start_pos.x, end_pos.x) + 160.0
+	var min_y: float = minf(start_pos.y, end_pos.y) - 160.0
+	var max_y: float = maxf(start_pos.y, end_pos.y) + 160.0
+
+	var min_cx: int = clampi(int((min_x + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var max_cx: int = clampi(int((max_x + GRID_OFFSET_X) * INV_CELL_SIZE), 0, GRID_WIDTH - 1)
+	var min_cy: int = clampi(int((min_y + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
+	var max_cy: int = clampi(int((max_y + GRID_OFFSET_Y) * INV_CELL_SIZE), 0, GRID_HEIGHT - 1)
+
+	for cy: int in range(min_cy, max_cy + 1):
+		var row_offset: int = cy * GRID_WIDTH
+		for cx: int in range(min_cx, max_cx + 1):
+			var bucket: Array = _grid[row_offset + cx]
+			for i: int in bucket:
+				if player_teams[i] != passer_team_id:
+					var d_sq: float = UtilityMath.distance_squared_to_segment(player_positions[i], start_pos, end_pos)
+					if d_sq < min_dist_sq:
+						min_dist_sq = d_sq
+
 	return sqrt(min_dist_sq) if min_dist_sq < INF else INF
 
 
@@ -762,27 +760,33 @@ func nearest_opponent_dist_to(pos: Vector2, team: int) -> float:
 	var centre_cell: Vector2i = world_to_cell(pos)
 	var best_dist_sq: float = INF
 
+	var min_cy: int = clampi(centre_cell.y - 1, 0, GRID_HEIGHT - 1)
+	var max_cy: int = clampi(centre_cell.y + 1, 0, GRID_HEIGHT - 1)
+	var min_cx: int = clampi(centre_cell.x - 1, 0, GRID_WIDTH - 1)
+	var max_cx: int = clampi(centre_cell.x + 1, 0, GRID_WIDTH - 1)
+
 	# Search 3x3 local cells first (radius <= 160px from center cell)
-	for cy: int in range(centre_cell.y - 1, centre_cell.y + 2):
-		for cx: int in range(centre_cell.x - 1, centre_cell.x + 2):
-			var cell := Vector2i(cx, cy)
-			if not _grid.has(cell):
-				continue
-			var bucket: Array[int] = _grid[cell]
+	for cy: int in range(min_cy, max_cy + 1):
+		var row_offset: int = cy * GRID_WIDTH
+		for cx: int in range(min_cx, max_cx + 1):
+			var bucket: Array = _grid[row_offset + cx]
 			for i: int in bucket:
 				if player_teams[i] != team:
 					var d_sq: float = pos.distance_squared_to(player_positions[i])
 					if d_sq < best_dist_sq:
 						best_dist_sq = d_sq
 
+	var centre_cell_world_x: float = float(centre_cell.x) * CELL_SIZE - GRID_OFFSET_X
+	var centre_cell_world_y: float = float(centre_cell.y) * CELL_SIZE - GRID_OFFSET_Y
+
 	# If an opponent is within the safe 3x3 interior, return early without full scan.
 	var min_outer_dist_x: float = minf(
-		absf(pos.x - float(centre_cell.x - 1) * CELL_SIZE),
-		absf(float(centre_cell.x + 2) * CELL_SIZE - pos.x)
+		absf(pos.x - (centre_cell_world_x - CELL_SIZE)),
+		absf((centre_cell_world_x + CELL_SIZE * 2.0) - pos.x)
 	)
 	var min_outer_dist_y: float = minf(
-		absf(pos.y - float(centre_cell.y - 1) * CELL_SIZE),
-		absf(float(centre_cell.y + 2) * CELL_SIZE - pos.y)
+		absf(pos.y - (centre_cell_world_y - CELL_SIZE)),
+		absf((centre_cell_world_y + CELL_SIZE * 2.0) - pos.y)
 	)
 	var min_outer_dist: float = minf(min_outer_dist_x, min_outer_dist_y)
 	if best_dist_sq < min_outer_dist * min_outer_dist:

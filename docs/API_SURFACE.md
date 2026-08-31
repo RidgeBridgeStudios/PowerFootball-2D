@@ -576,6 +576,10 @@
 - `const LINE_DEPTH_LERP_SPEED: float = 220.0`
 - `const CELL_SIZE: float = 160.0`
 - `const INV_CELL_SIZE: float = 1.0 / CELL_SIZE`
+- `const GRID_WIDTH: int = 24`
+- `const GRID_HEIGHT: int = 16`
+- `const GRID_OFFSET_X: float = 1920.0`
+- `const GRID_OFFSET_Y: float = 1280.0`
 - `const PRESS_TRIGGER_HOLD_SECONDS: float = 1.4`
 - `const PRESS_TRIGGER_PASS_HOLD_SECONDS: float = 1.1`
 - `const PASS_FORWARD_DOT_TOLERANCE: float = 0.25`
