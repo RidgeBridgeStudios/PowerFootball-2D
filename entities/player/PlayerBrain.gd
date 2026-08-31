@@ -1014,7 +1014,7 @@ var debug_log_pass_scores: bool = false
 ## open play does, so SetPieceCoordinator resolves one directly through this
 ## before forcing the taker into CHARGE_KICK. Same scoring, no behavior change.
 func find_pass_target_for_set_piece() -> HeavyPlayerController:
-	return _find_best_pass_target()
+	return _find_best_pass_target(0.0, true)
 
 ## Scores every same-team, non-GK, non-self teammate on four dimensions —
 ## distance, passer facing angle, receiver pressure, and forward advancement —
@@ -1024,7 +1024,13 @@ func find_pass_target_for_set_piece() -> HeavyPlayerController:
 ## passer_pressure: this player's own UtilityContext.pressure for the current
 ## tick, threaded through so PassUtilityScorer can favour the safe/open outlet
 ## over the ambitious forward ball when the passer is under pressure.
-func _find_best_pass_target(passer_pressure: float = 0.0) -> HeavyPlayerController:
+##
+## allow_backward_pass: bypasses the low-composure backward-pass veto below.
+## Kickoff (and any other restart where IFAB rules confine every teammate to
+## the passer's own half) leaves a low-composure taker with zero forward
+## candidates by construction, so find_pass_target_for_set_piece() sets this
+## true rather than let the veto force a null target — see AGENTS_ERRATA.md.
+func _find_best_pass_target(passer_pressure: float = 0.0, allow_backward_pass: bool = false) -> HeavyPlayerController:
 	if ball == null or player == null:
 		return null
 	var world: MatchWorldModel = MatchWorldModel.instance
@@ -1078,7 +1084,7 @@ func _find_best_pass_target(passer_pressure: float = 0.0) -> HeavyPlayerControll
 		var to_candidate: Vector2 = candidate_pos - ball_pos
 		var forward_dot: float = to_candidate.normalized().dot(attack_dir)
 		# No backward passes unless composure is high (safety valve under pressure).
-		if forward_dot < -0.2 and eff_composure < 0.55:
+		if forward_dot < -0.2 and eff_composure < 0.55 and not allow_backward_pass:
 			continue
 
 		# Lane check: an opponent standing in the passing lane makes the pass an
