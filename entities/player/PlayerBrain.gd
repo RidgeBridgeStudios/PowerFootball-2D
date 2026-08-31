@@ -1146,8 +1146,8 @@ func _should_chase_ball() -> bool:
 			else 260.0 if role == Role.OUTFIELD_DEFENDER
 			else 0.0)
 
-	var my_dist: float = player.global_position.distance_to(ball_pos)
-	if my_dist > max_dist:
+	var my_dist_sq: float = player.global_position.distance_squared_to(ball_pos)
+	if my_dist_sq > max_dist * max_dist:
 		return false
 
 	# Count how many same-role same-team players are closer to the ball than me.
@@ -1164,7 +1164,7 @@ func _should_chase_ball() -> bool:
 		var other_brain := other.get_node_or_null("PlayerBrain") as PlayerBrain
 		if other_brain == null or other_brain.role != role:
 			continue
-		if world.player_positions[i].distance_to(ball_pos) < my_dist:
+		if world.player_positions[i].distance_squared_to(ball_pos) < my_dist_sq:
 			closer_count += 1
 		if closer_count >= budget:
 			return false
@@ -1664,7 +1664,7 @@ func _resolve_defensive_duty() -> DefensiveDuty:
 	if not is_instance_valid(carrier) or carrier.team == player.team:
 		return DefensiveDuty.NONE
 
-	var my_dist: float = player.global_position.distance_to(carrier.global_position)
+	var my_dist_sq: float = player.global_position.distance_squared_to(carrier.global_position)
 	var someone_closer: bool = false
 	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
 		var other: HeavyPlayerController = world.player_nodes[i]
@@ -1675,10 +1675,10 @@ func _resolve_defensive_duty() -> DefensiveDuty:
 		var other_brain := other.get_node_or_null("PlayerBrain") as PlayerBrain
 		if other_brain == null or other_brain.role != Role.OUTFIELD_DEFENDER:
 			continue
-		var other_dist: float = world.player_positions[i].distance_to(carrier.global_position)
+		var other_dist_sq: float = world.player_positions[i].distance_squared_to(carrier.global_position)
 		# Tie-break on player_index so an exact distance tie still resolves to
 		# a single presser instead of both defenders claiming the duty.
-		if other_dist < my_dist or (is_equal_approx(other_dist, my_dist) and i < player_index):
+		if other_dist_sq < my_dist_sq or (is_equal_approx(other_dist_sq, my_dist_sq) and i < player_index):
 			someone_closer = true
 			break
 

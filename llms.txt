@@ -12,6 +12,7 @@
 - **docs/API_SURFACE.md** — Auto-generated public API surface map across all 76+ scripts, exports, signals, and methods.
 - **docs/ANTI_PATTERNS.md** — Curated anti-pattern and hallucination corpus for autonomous agent reasoning.
 - **docs/MATH_SOLVERS.md** — Ground-truth mathematical solvers catalog with exact formulas, proofs, and GDScript reference code.
+- **docs/SYMBOLS.json** — Complete line-indexed symbol map across all 76 classes, 764 methods, 925 properties, and 52 signals.
 - **docs/DEPENDENCY_GRAPH.json** — Static bidirectional dependency DAG and blast radius graph.
 - **POWERFOOTBALL_MASTER_VISION.md** — Master design vision, 5-layer simulation stack, systems design, and North Star.
 - **ROADMAP.md** — Tactical `[ ]`/`[x]` feature checklist across 5 development phases.
@@ -135,6 +136,18 @@ Press office reactions, touchline dialogue, broadcast HUD, floating labels, matc
 
 <tooling>
 - **tools/lint_invariants.py** — Domain-specific AST invariant linter enforcing layer separation, zero allocations, collision matrix, and choke points.
+- **tools/lint_stringnames.py** — StringName literal linter enforcing `&"string_name"` on signal and metadata invocations.
+- **tools/lint_shadowing.py** — Parameter shadowing linter preventing collisions with member variables and autoload singletons.
+- **tools/lint_allocations.py** — Allocation & distance-sorting linter enforcing `distance_squared_to()` and zero transient RNG instantiations.
+- **tools/lint_signal_races.py** — Signal race condition linter enforcing state variable updates prior to signal dispatch.
+- **tools/audit_process_modes.py** — Process mode consistency auditor verifying pausable entities vs always-processing coordinators.
+- **tools/replay_test.py** — Deterministic headless simulation replay harness asserting frame-for-frame bit-exact identity across seeds.
+- **tools/fuzz_formations.py** — Dynamic formation anchor property fuzzer asserting 100% boundary safety and depth ordering across 50,000 iterations.
+- **tools/benchmark_math.py** — Mathematical solvers micro-benchmark suite measuring throughput and execution latency.
+- **tools/generate_symbols.py** — Lightweight symbolic indexer generating `docs/SYMBOLS.json` line-indexed symbol map.
+- **tools/codebase_slice.py** — Targeted code slicing CLI utility extracting functions, enums, signals, or class headers.
+- **tools/semantic_search.py** — Zero-dependency local BM25 knowledge retrieval querying rules, specs, and docstrings.
+- **tools/git_pre_commit.py** — Git pre-commit hook installer and complete verification suite runner.
 - **tools/tscn_linter.py** — Scene graph and resource resolver validating ext_resource paths, node hierarchies, and collision layer masks.
 - **tools/validate_schemas.py** — Strict JSON Schema and physical invariant validator for club databases (league, managers, referees).
 - **tools/fuzz_solvers.py** — Property-based mathematical solvers and kinematic fuzz tester (100,000 randomized iterations).
@@ -154,7 +167,7 @@ Press office reactions, touchline dialogue, broadcast HUD, floating labels, matc
 - **tools/sync_rules.py** — Tool promoting rules from `AGENTS_ERRATA.md` to `.claude/rules/` and `docs/CORE_INVARIANTS.md`.
 - **tools/next_task.py** — Tool querying `ROADMAP.md` for the next unchecked Phase 1 gameplay task and relevant file context.
 - **tools/layer_context.py** — Targeted context injector for simulation layers 1–5.
-- **.antigravity/commands.json** — Custom slash commands (`/verify-all`, `/lint-invariants`, `/eval-sim`, `/fuzz-solvers`, `/formation-audit`, `/blast-radius`, `/dump-dep-graph`, `/sync-rules`, `/compact-errata`, `/rebuild-api`, `/next-task`, `/layer-ctx`).
+- **.antigravity/commands.json** — Custom slash commands (`/verify-all`, `/slice`, `/search`, `/benchmark`, `/fuzz-formations`, `/replay-test`, `/gen-symbols`, `/lint-invariants`, `/eval-sim`, `/fuzz-solvers`, `/formation-audit`, `/blast-radius`, `/dump-dep-graph`, `/sync-rules`, `/compact-errata`, `/rebuild-api`, `/next-task`, `/layer-ctx`).
 - **.antigravity/hooks.json** — Lifecycle verification hooks.
-- **.antigravity/skills/** — Antigravity workflow skills (`eval-sim`, `ast-refactor`, `formation-audit`).
+- **.antigravity/skills/** — Antigravity workflow skills (`eval-sim`, `ast-refactor`, `formation-audit`, `formation-fuzzer`, `perf-benchmark`).
 </tooling>

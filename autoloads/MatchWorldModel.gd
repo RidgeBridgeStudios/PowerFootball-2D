@@ -350,7 +350,7 @@ func world_to_cell(world_pos: Vector2) -> Vector2i:
 ## zero heap allocations per physics frame.
 func _update_spatial_grid() -> void:
 	for cell: Vector2i in _active_cells:
-		var bucket: Array = _grid.get(cell, [])
+		var bucket: Array[int] = _grid.get(cell, [] as Array[int])
 		bucket.clear()
 	_active_cells.clear()
 
@@ -362,7 +362,7 @@ func _update_spatial_grid() -> void:
 		if not _grid.has(cell):
 			var new_bucket: Array[int] = []
 			_grid[cell] = new_bucket
-		var bucket: Array = _grid[cell]
+		var bucket: Array[int] = _grid[cell]
 		bucket.append(i)
 		_active_cells.append(cell)
 
@@ -492,9 +492,8 @@ func get_nearby_players(pos: Vector2, radius: float) -> Array[int]:
 			var cell := Vector2i(cx, cy)
 			if not _grid.has(cell):
 				continue
-			var bucket: Array = _grid[cell]
-			for idx_variant: Variant in bucket:
-				var i: int = int(idx_variant)
+			var bucket: Array[int] = _grid[cell]
+			for i: int in bucket:
 				if player_positions[i].distance_squared_to(pos) <= r_sq:
 					_nearby_players_scratch.append(i)
 	return _nearby_players_scratch
@@ -517,9 +516,8 @@ func get_nearby_opponents(pos: Vector2, radius: float, team: int) -> Array[int]:
 			var cell := Vector2i(cx, cy)
 			if not _grid.has(cell):
 				continue
-			var bucket: Array = _grid[cell]
-			for idx_variant: Variant in bucket:
-				var i: int = int(idx_variant)
+			var bucket: Array[int] = _grid[cell]
+			for i: int in bucket:
 				if player_teams[i] != team and player_positions[i].distance_squared_to(pos) <= r_sq:
 					_nearby_opponents_scratch.append(i)
 	return _nearby_opponents_scratch
@@ -542,9 +540,8 @@ func get_nearby_teammates(pos: Vector2, radius: float, team: int, exclude_index:
 			var cell := Vector2i(cx, cy)
 			if not _grid.has(cell):
 				continue
-			var bucket: Array = _grid[cell]
-			for idx_variant: Variant in bucket:
-				var i: int = int(idx_variant)
+			var bucket: Array[int] = _grid[cell]
+			for i: int in bucket:
 				if i != exclude_index and player_teams[i] == team and player_positions[i].distance_squared_to(pos) <= r_sq:
 					_nearby_teammates_scratch.append(i)
 	return _nearby_teammates_scratch
@@ -567,9 +564,8 @@ func get_nearby_opponent_nodes(pos: Vector2, radius: float, team: int) -> Array[
 			var cell := Vector2i(cx, cy)
 			if not _grid.has(cell):
 				continue
-			var bucket: Array = _grid[cell]
-			for idx_variant: Variant in bucket:
-				var i: int = int(idx_variant)
+			var bucket: Array[int] = _grid[cell]
+			for i: int in bucket:
 				if player_teams[i] != team and player_positions[i].distance_squared_to(pos) <= r_sq:
 					var node: HeavyPlayerController = player_nodes[i]
 					if node != null and is_instance_valid(node):
@@ -593,9 +589,8 @@ func count_nearby_players(pos: Vector2, radius: float) -> int:
 			var cell := Vector2i(cx, cy)
 			if not _grid.has(cell):
 				continue
-			var bucket: Array = _grid[cell]
-			for idx_variant: Variant in bucket:
-				var i: int = int(idx_variant)
+			var bucket: Array[int] = _grid[cell]
+			for i: int in bucket:
 				if player_positions[i].distance_squared_to(pos) <= r_sq:
 					count += 1
 	return count
@@ -617,9 +612,8 @@ func count_nearby_opponents(pos: Vector2, radius: float, team: int) -> int:
 			var cell := Vector2i(cx, cy)
 			if not _grid.has(cell):
 				continue
-			var bucket: Array = _grid[cell]
-			for idx_variant: Variant in bucket:
-				var i: int = int(idx_variant)
+			var bucket: Array[int] = _grid[cell]
+			for i: int in bucket:
 				if player_teams[i] != team and player_positions[i].distance_squared_to(pos) <= r_sq:
 					count += 1
 	return count
@@ -641,9 +635,8 @@ func count_nearby_teammates(pos: Vector2, radius: float, team: int, exclude_inde
 			var cell := Vector2i(cx, cy)
 			if not _grid.has(cell):
 				continue
-			var bucket: Array = _grid[cell]
-			for idx_variant: Variant in bucket:
-				var i: int = int(idx_variant)
+			var bucket: Array[int] = _grid[cell]
+			for i: int in bucket:
 				if i != exclude_index and player_teams[i] == team and player_positions[i].distance_squared_to(pos) <= r_sq:
 					count += 1
 	return count
@@ -655,6 +648,7 @@ func get_opponent_density(pos: Vector2, radius: float, team: int) -> float:
 	if radius <= 0.0:
 		return 0.0
 	var total: float = 0.0
+	var r_sq: float = radius * radius
 	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
 	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
 	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
@@ -665,13 +659,12 @@ func get_opponent_density(pos: Vector2, radius: float, team: int) -> float:
 			var cell := Vector2i(cx, cy)
 			if not _grid.has(cell):
 				continue
-			var bucket: Array = _grid[cell]
-			for idx_variant: Variant in bucket:
-				var i: int = int(idx_variant)
+			var bucket: Array[int] = _grid[cell]
+			for i: int in bucket:
 				if player_teams[i] != team:
-					var d: float = pos.distance_to(player_positions[i])
-					if d < radius:
-						total += 1.0 - (d / radius)
+					var d_sq: float = pos.distance_squared_to(player_positions[i])
+					if d_sq < r_sq:
+						total += 1.0 - (sqrt(d_sq) / radius)
 	return total
 
 
@@ -681,6 +674,7 @@ func get_teammate_density(pos: Vector2, radius: float, team: int, exclude_index:
 	if radius <= 0.0:
 		return 0.0
 	var total: float = 0.0
+	var r_sq: float = radius * radius
 	var min_cx: int = int(floorf((pos.x - radius) * INV_CELL_SIZE))
 	var max_cx: int = int(floorf((pos.x + radius) * INV_CELL_SIZE))
 	var min_cy: int = int(floorf((pos.y - radius) * INV_CELL_SIZE))
@@ -691,13 +685,12 @@ func get_teammate_density(pos: Vector2, radius: float, team: int, exclude_index:
 			var cell := Vector2i(cx, cy)
 			if not _grid.has(cell):
 				continue
-			var bucket: Array = _grid[cell]
-			for idx_variant: Variant in bucket:
-				var i: int = int(idx_variant)
+			var bucket: Array[int] = _grid[cell]
+			for i: int in bucket:
 				if i != exclude_index and player_teams[i] == team:
-					var d: float = pos.distance_to(player_positions[i])
-					if d < radius:
-						total += 1.0 - (d / radius)
+					var d_sq: float = pos.distance_squared_to(player_positions[i])
+					if d_sq < r_sq:
+						total += 1.0 - (sqrt(d_sq) / radius)
 	return total
 
 
@@ -730,9 +723,8 @@ func is_passing_lane_open(
 			var cell := Vector2i(cx, cy)
 			if not _grid.has(cell):
 				continue
-			var bucket: Array = _grid[cell]
-			for idx_variant: Variant in bucket:
-				var i: int = int(idx_variant)
+			var bucket: Array[int] = _grid[cell]
+			for i: int in bucket:
 				if player_teams[i] != passer_team_id:
 					if UtilityMath.is_lane_blocked(start_pos, end_pos, player_positions[i], corridor_width):
 						return false
@@ -776,9 +768,8 @@ func nearest_opponent_dist_to(pos: Vector2, team: int) -> float:
 			var cell := Vector2i(cx, cy)
 			if not _grid.has(cell):
 				continue
-			var bucket: Array = _grid[cell]
-			for idx_variant: Variant in bucket:
-				var i: int = int(idx_variant)
+			var bucket: Array[int] = _grid[cell]
+			for i: int in bucket:
 				if player_teams[i] != team:
 					var d_sq: float = pos.distance_squared_to(player_positions[i])
 					if d_sq < best_dist_sq:
@@ -797,32 +788,32 @@ func nearest_opponent_dist_to(pos: Vector2, team: int) -> float:
 	if best_dist_sq < min_outer_dist * min_outer_dist:
 		return sqrt(best_dist_sq)
 
-	var best: float = sqrt(best_dist_sq) if best_dist_sq < INF else INF
+	var best_sq: float = best_dist_sq
 	for i: int in range(TOTAL_PLAYERS):
 		var node: HeavyPlayerController = player_nodes[i]
 		if node == null or not is_instance_valid(node):
 			continue
 		if player_teams[i] == team:
 			continue
-		var d: float = pos.distance_to(player_positions[i])
-		if d < best:
-			best = d
-	return best
+		var d_sq: float = pos.distance_squared_to(player_positions[i])
+		if d_sq < best_sq:
+			best_sq = d_sq
+	return sqrt(best_sq) if best_sq < INF else INF
 
 
 ## Position of the closest registered player NOT on `team`, or `pos` itself
 ## when no opponent is registered. Allocation-free — no Arrays or Dictionaries.
 func nearest_opponent_position(pos: Vector2, team: int) -> Vector2:
-	var best_dist: float = INF
+	var best_dist_sq: float = INF
 	var best_pos: Vector2 = pos
 	for i: int in range(TOTAL_PLAYERS):
 		if player_teams[i] == team:
 			continue
 		if not is_instance_valid(player_nodes[i]):
 			continue
-		var d: float = pos.distance_to(player_positions[i])
-		if d < best_dist:
-			best_dist = d
+		var d_sq: float = pos.distance_squared_to(player_positions[i])
+		if d_sq < best_dist_sq:
+			best_dist_sq = d_sq
 			best_pos = player_positions[i]
 	return best_pos
 
@@ -1010,8 +1001,8 @@ func _check_heavy_touch_trigger() -> bool:
 	if toucher_index == NO_INDEX:
 		return false
 
-	var dist: float = ball_position.distance_to(player_positions[toucher_index])
-	if dist < HEAVY_TOUCH_MIN_DIST or dist > HEAVY_TOUCH_MAX_DIST:
+	var dist_sq: float = ball_position.distance_squared_to(player_positions[toucher_index])
+	if dist_sq < HEAVY_TOUCH_MIN_DIST * HEAVY_TOUCH_MIN_DIST or dist_sq > HEAVY_TOUCH_MAX_DIST * HEAVY_TOUCH_MAX_DIST:
 		return false
 	if nearest_opponent_dist_to(ball_position, player_teams[toucher_index]) > CARRIER_PRESSURE_RADIUS:
 		return false

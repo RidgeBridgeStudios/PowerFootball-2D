@@ -299,7 +299,7 @@ func _assign_taker(team: int, kickoff_team_has_human: bool = false, designated_t
 		_taker_candidates.push_front(designated_taker)
 	else:
 		_taker_candidates.sort_custom(func(a: HeavyPlayerController, b: HeavyPlayerController) -> bool:
-			return a.global_position.distance_to(spot) < b.global_position.distance_to(spot)
+			return a.global_position.distance_squared_to(spot) < b.global_position.distance_squared_to(spot)
 		)
 
 	# Recorded after sorting, in the same order, so index i of each array
@@ -591,7 +591,7 @@ func _build_defensive_wall(free_kick_pos: Vector2, _defending_team: int) -> void
 
 	# Sort by proximity to the free kick spot; take the 4 closest.
 	defenders.sort_custom(func(a: HeavyPlayerController, b: HeavyPlayerController) -> bool:
-		return a.global_position.distance_to(free_kick_pos) < b.global_position.distance_to(free_kick_pos)
+		return a.global_position.distance_squared_to(free_kick_pos) < b.global_position.distance_squared_to(free_kick_pos)
 	)
 	var wall_size: int = mini(defenders.size(), 4)
 

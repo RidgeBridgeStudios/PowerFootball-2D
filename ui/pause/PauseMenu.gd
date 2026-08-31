@@ -40,6 +40,7 @@ var _is_open: bool = false
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	hide()
 	resume_btn.pressed.connect(close)
 	team_a_sub_btn.pressed.connect(func(): _switch_sub_team(GameManager.TEAM_A))

@@ -79,6 +79,7 @@ var _shootout_overlay_was_active: bool = false
 
 
 func _ready() -> void:
+	process_mode = Node.PROCESS_MODE_ALWAYS
 	GameEvents.goal_scored.connect(_on_goal_scored)
 	GameEvents.kickoff_started.connect(_on_kickoff_started)
 	GameEvents.match_phase_changed.connect(_on_match_phase_changed)

@@ -753,14 +753,15 @@ func switch_to_nearest_teammate() -> void:
 		return
 
 	var best: HeavyPlayerController = null
-	var best_distance: float = INF
+	var best_dist_sq: float = INF
+	var ball_pos: Vector2 = ball.global_position
 	for node: Node in players.get_children():
 		var player := node as HeavyPlayerController
 		if player == null or player == current or player.team != current.team:
 			continue
-		var distance: float = player.global_position.distance_to(ball.global_position)
-		if distance < best_distance:
-			best_distance = distance
+		var dist_sq: float = player.global_position.distance_squared_to(ball_pos)
+		if dist_sq < best_dist_sq:
+			best_dist_sq = dist_sq
 			best = player
 
 	if best == null:

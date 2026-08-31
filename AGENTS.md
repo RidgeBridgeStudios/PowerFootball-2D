@@ -10,6 +10,7 @@ All engine constraints, simulation layers, and critical file contracts are canon
 - **[docs/API_SURFACE.md](docs/API_SURFACE.md)**
 - **[docs/ANTI_PATTERNS.md](docs/ANTI_PATTERNS.md)**
 - **[docs/MATH_SOLVERS.md](docs/MATH_SOLVERS.md)**
+- **[docs/SYMBOLS.json](docs/SYMBOLS.json)**
 - **[docs/DEPENDENCY_GRAPH.json](docs/DEPENDENCY_GRAPH.json)**
 
 Key Highlights:
@@ -33,6 +34,46 @@ python3 tools/gdcheck.py || python tools/gdcheck.py || py -3 tools/gdcheck.py
 python3 tools/lint_invariants.py || python tools/lint_invariants.py || py -3 tools/lint_invariants.py
 ```
 
+### StringName Literal Verification
+```bash
+python3 tools/lint_stringnames.py || python tools/lint_stringnames.py || py -3 tools/lint_stringnames.py
+```
+
+### Variable & Autoload Shadowing Linter
+```bash
+python3 tools/lint_shadowing.py || python tools/lint_shadowing.py || py -3 tools/lint_shadowing.py
+```
+
+### Allocation & Distance-Sorting Linter
+```bash
+python3 tools/lint_allocations.py || python tools/lint_allocations.py || py -3 tools/lint_allocations.py
+```
+
+### Signal Race Condition Linter
+```bash
+python3 tools/lint_signal_races.py || python tools/lint_signal_races.py || py -3 tools/lint_signal_races.py
+```
+
+### Process Mode Contract Auditor
+```bash
+python3 tools/audit_process_modes.py || python tools/audit_process_modes.py || py -3 tools/audit_process_modes.py
+```
+
+### Deterministic Replay Test Harness
+```bash
+python3 tools/replay_test.py || python tools/replay_test.py || py -3 tools/replay_test.py
+```
+
+### Dynamic Formation & Boundary Fuzzing
+```bash
+python3 tools/fuzz_formations.py || python tools/fuzz_formations.py || py -3 tools/fuzz_formations.py
+```
+
+### Mathematical Solvers Micro-Benchmark
+```bash
+python3 tools/benchmark_math.py || python tools/benchmark_math.py || py -3 tools/benchmark_math.py
+```
+
 ### Scene Graph & Resource Verification
 ```bash
 python3 tools/tscn_linter.py || python tools/tscn_linter.py || py -3 tools/tscn_linter.py
@@ -40,17 +81,7 @@ python3 tools/tscn_linter.py || python tools/tscn_linter.py || py -3 tools/tscn_
 
 ### Database Integrity Verification
 ```bash
-python3 tools/validate_schemas.py || python tools/validate_schemas.py || py -3 tools/validate_schemas.py
-```
-
-### Mathematical Solver Property Fuzzing
-```bash
-python3 tools/fuzz_solvers.py || python tools/fuzz_solvers.py || py -3 tools/fuzz_solvers.py
-```
-
-### Headless Simulation Telemetry Verification
-```bash
-python3 tools/eval_simulation.py --duration=60 || python tools/eval_simulation.py --duration=60
+python3 tools/verify_db.py || python tools/verify_db.py || py -3 tools/verify_db.py
 ```
 
 ### Autoload Handling Contract
@@ -62,7 +93,13 @@ python3 tools/eval_simulation.py --duration=60 || python tools/eval_simulation.p
 
 | Command | Action | Description |
 |---|---|---|
-| `/verify-all` | `tools/gdcheck.py && tools/lint_invariants.py && tools/tscn_linter.py && tools/validate_schemas.py` | Complete GDScript, invariant, scene & database verification |
+| `/verify-all` | `tools/git_pre_commit.py` | Complete verification suite (gdcheck, invariants, tscn, stringnames, shadowing, db) |
+| `/slice` | `tools/codebase_slice.py` | Extract targeted class methods, enums, or headers with line numbers |
+| `/search` | `tools/semantic_search.py` | Query BM25 local keyword index across specs, rules, and GDScript docstrings |
+| `/benchmark` | `tools/benchmark_math.py` | Run mathematical solvers micro-benchmark suite |
+| `/fuzz-formations` | `tools/fuzz_formations.py` | Run 50,000 property-based stress tests on formation anchors |
+| `/replay-test` | `tools/replay_test.py` | Run deterministic simulation replay verification (0 bit-drift) |
+| `/gen-symbols` | `tools/generate_symbols.py` | Regenerate `docs/SYMBOLS.json` line-indexed symbol map |
 | `/lint-invariants` | `tools/lint_invariants.py` | Run domain AST invariant linter |
 | `/eval-sim` | `tools/eval_simulation.py` | Run 60s headless simulation assertion harness |
 | `/fuzz-solvers` | `tools/fuzz_solvers.py` | Run 100,000 property fuzzing iterations across mathematical solvers |

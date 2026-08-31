@@ -60,5 +60,5 @@ func show_shout(manager_name: String, quote: String, is_home: bool) -> void:
 
 	_hide_tween = create_tween()
 	_hide_tween.tween_interval(DISPLAY_DURATION)
-	_hide_tween.tween_property(bubble_panel, "modulate:a", 0.0, FADE_DURATION)
+	_hide_tween.tween_property(bubble_panel, &"modulate:a", 0.0, FADE_DURATION)
 	_hide_tween.tween_callback(func() -> void: bubble_panel.visible = false)

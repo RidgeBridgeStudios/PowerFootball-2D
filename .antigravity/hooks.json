@@ -31,6 +31,11 @@
             "type": "command",
             "command": "python3 tools/dump_api.py || python tools/dump_api.py || py -3 tools/dump_api.py",
             "timeout": 30
+          },
+          {
+            "type": "command",
+            "command": "python3 tools/generate_symbols.py || python tools/generate_symbols.py || py -3 tools/generate_symbols.py",
+            "timeout": 30
           }
         ]
       }
@@ -51,6 +56,11 @@
       {
         "matcher": "*",
         "command": "python3 tools/dump_api.py || python tools/dump_api.py || py -3 tools/dump_api.py",
+        "timeout": 30
+      },
+      {
+        "matcher": "*",
+        "command": "python3 tools/generate_symbols.py || python tools/generate_symbols.py || py -3 tools/generate_symbols.py",
         "timeout": 30
       }
     ]

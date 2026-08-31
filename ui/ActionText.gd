@@ -18,15 +18,13 @@ extends Node2D
 func show_text(message: String) -> void:
 	label.text = message.to_upper()
 
-	var rng := RandomNumberGenerator.new()
-	rng.randomize()
-	position.x += rng.randf_range(-6.0, 6.0)
+	position.x += randf_range(-6.0, 6.0)
 
 	var end_pos: Vector2 = position + Vector2(0.0, -rise_distance)
 	var tween: Tween = create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(self, "position", end_pos, lifetime)\
+	tween.tween_property(self, &"position", end_pos, lifetime)\
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
-	tween.tween_property(self, "modulate:a", 0.0, lifetime)\
+	tween.tween_property(self, &"modulate:a", 0.0, lifetime)\
 		.set_trans(Tween.TRANS_SINE).set_ease(Tween.EASE_OUT)
 	tween.finished.connect(queue_free)

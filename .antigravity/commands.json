@@ -1,13 +1,43 @@
 {
   "commands": {
     "verify-all": {
-      "description": "Runs complete static verification (gdcheck.py), domain AST invariants (lint_invariants.py), scene graphs (tscn_linter.py), and database schema verification (validate_schemas.py)",
-      "command": "python3 tools/gdcheck.py && python3 tools/lint_invariants.py && python3 tools/tscn_linter.py && python3 tools/validate_schemas.py || python tools/gdcheck.py && python tools/lint_invariants.py && python tools/tscn_linter.py && python tools/validate_schemas.py || py -3 tools/gdcheck.py && py -3 tools/lint_invariants.py && py -3 tools/tscn_linter.py && py -3 tools/validate_schemas.py",
+      "description": "Runs complete static verification (gdcheck.py), domain AST invariants (lint_invariants.py), scene graphs (tscn_linter.py), StringNames (lint_stringnames.py), shadowing (lint_shadowing.py), and database verification (verify_db.py)",
+      "command": "python3 tools/gdcheck.py && python3 tools/lint_invariants.py && python3 tools/tscn_linter.py && python3 tools/lint_stringnames.py && python3 tools/lint_shadowing.py && python3 tools/verify_db.py || python tools/gdcheck.py && python tools/lint_invariants.py && python tools/tscn_linter.py && python tools/lint_stringnames.py && python tools/lint_shadowing.py && python tools/verify_db.py || py -3 tools/gdcheck.py && py -3 tools/lint_invariants.py && py -3 tools/tscn_linter.py && py -3 tools/lint_stringnames.py && py -3 tools/lint_shadowing.py && py -3 tools/verify_db.py",
       "stream_output": true
     },
     "lint-invariants": {
       "description": "Executes domain AST invariant linter (tools/lint_invariants.py) to assert layer separation, zero allocations, and choke point contracts",
       "command": "python3 tools/lint_invariants.py || python tools/lint_invariants.py || py -3 tools/lint_invariants.py",
+      "stream_output": true
+    },
+    "slice": {
+      "description": "Extracts targeted class methods, enums, signal declarations, or class headers without loading full files (tools/codebase_slice.py)",
+      "command": "python3 tools/codebase_slice.py || python tools/codebase_slice.py || py -3 tools/codebase_slice.py",
+      "stream_output": true
+    },
+    "search": {
+      "description": "Performs zero-dependency BM25 keyword search across markdown rules, specs, and GDScript docstrings (tools/semantic_search.py)",
+      "command": "python3 tools/semantic_search.py || python tools/semantic_search.py || py -3 tools/semantic_search.py",
+      "stream_output": true
+    },
+    "benchmark": {
+      "description": "Runs mathematical solvers micro-benchmark suite (tools/benchmark_math.py)",
+      "command": "python3 tools/benchmark_math.py || python tools/benchmark_math.py || py -3 tools/benchmark_math.py",
+      "stream_output": true
+    },
+    "fuzz-formations": {
+      "description": "Executes 50,000 property-based stress tests asserting formation anchor safety and defensive line depths (tools/fuzz_formations.py)",
+      "command": "python3 tools/fuzz_formations.py || python tools/fuzz_formations.py || py -3 tools/fuzz_formations.py",
+      "stream_output": true
+    },
+    "replay-test": {
+      "description": "Executes deterministic simulation replay verification asserting 0 bit-drift across fixed PRNG seeds (tools/replay_test.py)",
+      "command": "python3 tools/replay_test.py || python tools/replay_test.py || py -3 tools/replay_test.py",
+      "stream_output": true
+    },
+    "gen-symbols": {
+      "description": "Generates docs/SYMBOLS.json indexing every class, signal, enum, property, and method (tools/generate_symbols.py)",
+      "command": "python3 tools/generate_symbols.py || python tools/generate_symbols.py || py -3 tools/generate_symbols.py",
       "stream_output": true
     },
     "eval-sim": {
@@ -67,13 +97,43 @@
     }
   },
   "/verify-all": {
-    "description": "Runs complete static verification (gdcheck.py), domain AST invariants (lint_invariants.py), scene graphs (tscn_linter.py), and database schema verification (validate_schemas.py)",
-    "command": "python3 tools/gdcheck.py && python3 tools/lint_invariants.py && python3 tools/tscn_linter.py && python3 tools/validate_schemas.py || python tools/gdcheck.py && python tools/lint_invariants.py && python tools/tscn_linter.py && python tools/validate_schemas.py || py -3 tools/gdcheck.py && py -3 tools/lint_invariants.py && py -3 tools/tscn_linter.py && py -3 tools/validate_schemas.py",
+    "description": "Runs complete static verification (gdcheck.py), domain AST invariants (lint_invariants.py), scene graphs (tscn_linter.py), StringNames (lint_stringnames.py), shadowing (lint_shadowing.py), and database verification (verify_db.py)",
+    "command": "python3 tools/gdcheck.py && python3 tools/lint_invariants.py && python3 tools/tscn_linter.py && python3 tools/lint_stringnames.py && python3 tools/lint_shadowing.py && python3 tools/verify_db.py || python tools/gdcheck.py && python tools/lint_invariants.py && python tools/tscn_linter.py && python tools/lint_stringnames.py && python tools/lint_shadowing.py && python tools/verify_db.py || py -3 tools/gdcheck.py && py -3 tools/lint_invariants.py && py -3 tools/tscn_linter.py && py -3 tools/lint_stringnames.py && py -3 tools/lint_shadowing.py && py -3 tools/verify_db.py",
     "stream_output": true
   },
   "/lint-invariants": {
     "description": "Executes domain AST invariant linter (tools/lint_invariants.py) to assert layer separation, zero allocations, and choke point contracts",
     "command": "python3 tools/lint_invariants.py || python tools/lint_invariants.py || py -3 tools/lint_invariants.py",
+    "stream_output": true
+  },
+  "/slice": {
+    "description": "Extracts targeted class methods, enums, signal declarations, or class headers without loading full files (tools/codebase_slice.py)",
+    "command": "python3 tools/codebase_slice.py || python tools/codebase_slice.py || py -3 tools/codebase_slice.py",
+    "stream_output": true
+  },
+  "/search": {
+    "description": "Performs zero-dependency BM25 keyword search across markdown rules, specs, and GDScript docstrings (tools/semantic_search.py)",
+    "command": "python3 tools/semantic_search.py || python tools/semantic_search.py || py -3 tools/semantic_search.py",
+    "stream_output": true
+  },
+  "/benchmark": {
+    "description": "Runs mathematical solvers micro-benchmark suite (tools/benchmark_math.py)",
+    "command": "python3 tools/benchmark_math.py || python tools/benchmark_math.py || py -3 tools/benchmark_math.py",
+    "stream_output": true
+  },
+  "/fuzz-formations": {
+    "description": "Executes 50,000 property-based stress tests asserting formation anchor safety and defensive line depths (tools/fuzz_formations.py)",
+    "command": "python3 tools/fuzz_formations.py || python tools/fuzz_formations.py || py -3 tools/fuzz_formations.py",
+    "stream_output": true
+  },
+  "/replay-test": {
+    "description": "Executes deterministic simulation replay verification asserting 0 bit-drift across fixed PRNG seeds (tools/replay_test.py)",
+    "command": "python3 tools/replay_test.py || python tools/replay_test.py || py -3 tools/replay_test.py",
+    "stream_output": true
+  },
+  "/gen-symbols": {
+    "description": "Generates docs/SYMBOLS.json indexing every class, signal, enum, property, and method (tools/generate_symbols.py)",
+    "command": "python3 tools/generate_symbols.py || python tools/generate_symbols.py || py -3 tools/generate_symbols.py",
     "stream_output": true
   },
   "/eval-sim": {
