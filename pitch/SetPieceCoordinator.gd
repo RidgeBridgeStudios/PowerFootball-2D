@@ -467,6 +467,19 @@ func _activate_set_piece() -> void:
 	_current_taker.global_position = GameManager.set_piece_position
 	_current_taker.velocity = Vector2.ZERO
 
+	# A CPU taker was frozen (SetPieceFreezeState) then teleported onto its
+	# restart spot, so its facing_direction is stale — whatever it last was
+	# while moving, unrelated to any teammate. ChargeKickState aims a CPU
+	# kick along facing_direction (no stick input to fall back on), so
+	# without this a kickoff/free kick/corner "pass" fires in an arbitrary
+	# stale direction and can gift the ball straight to an opponent.
+	if not _current_taker.is_user_controlled:
+		var taker_brain: PlayerBrain = _current_taker.get_node_or_null("PlayerBrain") as PlayerBrain
+		if taker_brain != null:
+			var pass_target: HeavyPlayerController = taker_brain.find_pass_target_for_set_piece()
+			if pass_target != null:
+				_current_taker.facing_direction = _current_taker.global_position.direction_to(pass_target.global_position)
+
 	_current_taker.state_factory.state_changed.connect(_on_taker_state_changed)
 
 	match GameManager.current_phase:
