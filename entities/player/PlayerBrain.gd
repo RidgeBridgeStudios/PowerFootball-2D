@@ -467,8 +467,8 @@ func _physics_process(delta: float) -> void:
 			_transition_timer = TRANSITION_DURATION
 			# Reset the frame counter so this player evaluates on its next tick.
 			# Subtracting player_index ensures the evaluation lands on a frame
-			# where ((_frame_counter + player_index) % _effective_update_interval == 0).
-			_frame_counter = (_effective_update_interval * 16) - player_index - 1
+			# where ((_frame_counter + player_index) % 15 == 0).
+			_frame_counter = (15 * 16) - player_index - 1
 
 	if _transition_timer > 0.0:
 		_transition_timer = maxf(_transition_timer - delta, 0.0)
@@ -505,7 +505,7 @@ func _physics_process(delta: float) -> void:
 
 	_frame_counter += 1
 
-	if (_frame_counter + player_index) % _effective_update_interval == 0:
+	if (_frame_counter + player_index) % 15 == 0:
 		if is_goalkeeper:
 			# GoaliePatrol / GoalieRush evaluated on decision tick; dive is triggered per frame
 			if current_action != &"GoalieDive":
@@ -585,7 +585,7 @@ func _is_pass_plan_still_valid() -> bool:
 func _abort_action_plan() -> void:
 	_cached_pass_target = null
 	current_action = &"MaintainFormation"
-	_frame_counter = (_effective_update_interval * 16) - player_index - 1
+	_frame_counter = (15 * 16) - player_index - 1
 
 
 ## Runs every physics frame for a goalkeeper — not gated by UPDATE_INTERVAL —
@@ -921,9 +921,6 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D] = []) -> StringNam
 
 	var ctx: UtilityContext = _build_context(defenders_nearby)
 
-	if ctx.pressure > 0.85 and ctx.eff_composure < 0.45:
-		return &"PanicClear"
-
 	var is_throw_in_taker: bool = player != null and player.state_factory != null and player.state_factory.current_state_name == &"ThrowIn"
 	if is_throw_in_taker:
 		if ctx.open_teammate_exists:
@@ -939,6 +936,12 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D] = []) -> StringNam
 
 	var best_action: StringName = &"MaintainFormation"
 	var best_score: float = clampf(_score_maintain_formation(ctx) + _rng.randf_range(-0.04, 0.04), 0.0, 1.0)
+
+	if ctx.pressure > 0.85 and ctx.eff_composure < 0.45:
+		var s_panic: float = clampf(0.85 + _rng.randf_range(-0.04, 0.04), 0.0, 1.0)
+		if s_panic > best_score:
+			best_score = s_panic
+			best_action = &"PanicClear"
 
 	var s_pass: float = clampf(_score_pass(ctx) + _rng.randf_range(-0.04, 0.04), 0.0, 1.0)
 	if s_pass > best_score:
@@ -964,6 +967,13 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D] = []) -> StringNam
 	if s_shoot > best_score:
 		best_score = s_shoot
 		best_action = &"AttemptShoot"
+
+	# Fallback utility floor: if the ball carrier has zero viable offensive options,
+	# force a desperation clearance rather than freezing in possession.
+	if ctx.is_possessor:
+		var max_offensive: float = maxf(s_pass, maxf(s_dribble, s_shoot))
+		if max_offensive <= 0.05:
+			best_action = &"PanicClear"
 
 	return best_action
 
@@ -1871,6 +1881,13 @@ func _steer_for_action(delta: float) -> Vector2:
 		&"AttemptShoot":
 			# Move toward the ball to get it in foot range.
 			seek_target = ball.global_position if ball != null else player.global_position
+		&"AttemptDribble":
+			var attack_dir: Vector2 = _get_attack_direction()
+			var dribble_target: Vector2 = player.global_position + attack_dir * 150.0
+			if pitch_boundary != null:
+				var opp_goal: Vector2 = pitch_boundary.get_goal_centre(1 - player.team)
+				dribble_target = player.global_position.lerp(opp_goal, 0.3)
+			seek_target = dribble_target
 		_:
 			seek_target = _cached_space_target
 

@@ -4244,58 +4244,58 @@
         "is_onready": false
       },
       "MIN_PASS_SCORE": {
-        "line": 974,
+        "line": 977,
         "type": "float",
         "is_const": true
       },
       "MOOD_RISK_BIAS_ENABLED": {
-        "line": 979,
+        "line": 982,
         "type": "bool",
         "is_const": true
       },
       "SLUMP_RISK_AVERSION": {
-        "line": 982,
+        "line": 985,
         "type": "float",
         "is_const": true
       },
       "STREAK_RISK_AVERSION": {
-        "line": 986,
+        "line": 989,
         "type": "float",
         "is_const": true
       },
       "debug_log_pass_scores": {
-        "line": 990,
+        "line": 993,
         "type": "bool",
         "is_export": false,
         "is_onready": false
       },
       "ROLE_SPACE_ALPHA": {
-        "line": 1301,
+        "line": 1304,
         "type": "Dictionary",
         "is_const": true
       },
       "OFF_BALL_CANDIDATE_OFFSETS": {
-        "line": 1313,
+        "line": 1316,
         "type": "Array[Vector2]",
         "is_const": true
       },
       "OFF_BALL_OPENNESS_RADIUS": {
-        "line": 1323,
+        "line": 1326,
         "type": "float",
         "is_const": true
       },
       "OFF_BALL_CROWD_RADIUS": {
-        "line": 1325,
+        "line": 1328,
         "type": "float",
         "is_const": true
       },
       "OFF_BALL_ANCHOR_NORM": {
-        "line": 1330,
+        "line": 1333,
         "type": "float",
         "is_const": true
       },
       "MAX_CHASE_DEFAULT": {
-        "line": 1473,
+        "line": 1476,
         "type": "float",
         "is_const": true
       }
@@ -4513,7 +4513,7 @@
         "is_static": false
       },
       "_find_best_pass_target": {
-        "line": 1000,
+        "line": 1003,
         "args": [
           "passer_pressure: float = 0.0"
         ],
@@ -4521,13 +4521,13 @@
         "is_static": false
       },
       "_should_chase_ball": {
-        "line": 1117,
+        "line": 1120,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "calculate_pressure_index": {
-        "line": 1194,
+        "line": 1197,
         "args": [
           "defenders: Array[Node2D] = []"
         ],
@@ -4535,37 +4535,37 @@
         "is_static": false
       },
       "get_target_position": {
-        "line": 1214,
+        "line": 1217,
         "args": [],
         "return": "Vector2",
         "is_static": false
       },
       "_predict_intercept_position": {
-        "line": 1257,
+        "line": 1260,
         "args": [],
         "return": "Vector2",
         "is_static": false
       },
       "_team_has_ball": {
-        "line": 1272,
+        "line": 1275,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "_current_team_phase": {
-        "line": 1285,
+        "line": 1288,
         "args": [],
         "return": "FormationAnchorMath.TeamPhase",
         "is_static": false
       },
       "_is_attacking_role": {
-        "line": 1334,
+        "line": 1337,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "_evaluate_off_ball_target": {
-        "line": 1353,
+        "line": 1356,
         "args": [
           "anchor: Vector2"
         ],
@@ -4573,13 +4573,13 @@
         "is_static": false
       },
       "_find_open_space_target": {
-        "line": 1506,
+        "line": 1509,
         "args": [],
         "return": "Vector2",
         "is_static": false
       },
       "_find_channel_run_target": {
-        "line": 1577,
+        "line": 1580,
         "args": [
           "ball_pos: Vector2"
         ],
@@ -4587,7 +4587,7 @@
         "is_static": false
       },
       "_find_passing_triangle_position": {
-        "line": 1597,
+        "line": 1600,
         "args": [
           "ball_pos: Vector2"
         ],
@@ -4595,19 +4595,19 @@
         "is_static": false
       },
       "_find_nearest_threatening_opponent": {
-        "line": 1614,
+        "line": 1617,
         "args": [],
         "return": "HeavyPlayerController",
         "is_static": false
       },
       "_resolve_defensive_duty": {
-        "line": 1655,
+        "line": 1658,
         "args": [],
         "return": "DefensiveDuty",
         "is_static": false
       },
       "_cover_shadow_target": {
-        "line": 1702,
+        "line": 1705,
         "args": [
           "carrier: HeavyPlayerController"
         ],
@@ -4615,7 +4615,7 @@
         "is_static": false
       },
       "_separation_force": {
-        "line": 1722,
+        "line": 1725,
         "args": [
           "sep_radius: float = 55.0"
         ],
@@ -4623,19 +4623,19 @@
         "is_static": false
       },
       "_defensive_line_lateral_separation": {
-        "line": 1747,
+        "line": 1750,
         "args": [],
         "return": "Vector2",
         "is_static": false
       },
       "_get_ball_carrier": {
-        "line": 1771,
+        "line": 1774,
         "args": [],
         "return": "HeavyPlayerController",
         "is_static": false
       },
       "_steer_for_action": {
-        "line": 1784,
+        "line": 1787,
         "args": [
           "delta: float"
         ],
@@ -4643,7 +4643,7 @@
         "is_static": false
       },
       "_apply_intent_blend": {
-        "line": 1932,
+        "line": 1942,
         "args": [
           "raw_intent: Vector2"
         ],
@@ -4651,25 +4651,25 @@
         "is_static": false
       },
       "_assist_force": {
-        "line": 1943,
+        "line": 1953,
         "args": [],
         "return": "Vector2",
         "is_static": false
       },
       "_steer_goalkeeper": {
-        "line": 1963,
+        "line": 1973,
         "args": [],
         "return": "Vector2",
         "is_static": false
       },
       "_goalie_patrol_target": {
-        "line": 2004,
+        "line": 2014,
         "args": [],
         "return": "Vector2",
         "is_static": false
       },
       "_set_crowd_knockdown_enabled": {
-        "line": 2041,
+        "line": 2051,
         "args": [
           "enabled: bool"
         ],
@@ -4677,7 +4677,7 @@
         "is_static": false
       },
       "_on_crowd_knockdown_body_entered": {
-        "line": 2057,
+        "line": 2067,
         "args": [
           "body: Node2D"
         ],
@@ -4685,7 +4685,7 @@
         "is_static": false
       },
       "_find_nearby_opponents": {
-        "line": 2070,
+        "line": 2080,
         "args": [],
         "return": "Array[Node2D]",
         "is_static": false
