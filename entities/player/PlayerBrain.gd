@@ -724,8 +724,19 @@ func _score_pass(ctx: UtilityContext) -> float:
 func _score_chase(ctx: UtilityContext) -> float:
 	if not ctx.chase_is_legal:
 		return 0.0
-	# Normalise distance — 0 px = 1.0, CHASE_RADIUS = 0.0.
-	var prox: float = clampf(1.0 - ctx.dist_to_ball / CHASE_RADIUS, 0.0, 1.0)
+	# A loose ball has already been legality-gated in _should_chase_ball() to
+	# the single closest role-eligible player (role budget + closer_count),
+	# so proximity has already done its job by the time we get here.
+	# Re-scoring it against CHASE_RADIUS (220px — tuned for contesting a ball
+	# an OPPONENT still controls nearby) crushes prox to 0 for any loose ball
+	# farther out, even though _should_chase_ball() now permits chasing a
+	# loose ball well past 220px. With prox=0 the only remaining term is
+	# eff_aggression*0.30 (~0.1-0.2), which _score_maintain_formation's
+	# anchor-urgency term (up to 0.55) reliably beats — silently re-freezing
+	# the exact case the loose-ball legality bypass exists to fix. A loose,
+	# legal chase floors proximity at 1.0 instead.
+	var prox: float = 1.0 if (ball != null and ball.possessor == null) \
+			else clampf(1.0 - ctx.dist_to_ball / CHASE_RADIUS, 0.0, 1.0)
 	var base: float = prox * 0.55
 	base += ctx.eff_aggression * 0.30
 	# Sprint-locked players can still chase but don't score as highly —
@@ -782,6 +793,17 @@ func _score_find_space(ctx: UtilityContext) -> float:
 		return 0.0
 	# Only make attacking runs when team has possession.
 	if not ctx.team_has_ball:
+		return 0.0
+	# team_has_ball is last-touch-based (_team_has_ball()) and stays true even
+	# once the ball has gone fully loose with nobody controlling it — without
+	# this, a fast/visionary attacker's FindSpace score can comfortably
+	# outscore ChaseBall's for the one player legally closest to a stalled
+	# ball, sending them running further away instead of winning it back.
+	# Only suppress FindSpace for THIS player when they are themselves the
+	# legal chaser for that loose ball — a genuinely different teammate can
+	# still make a supporting run while someone else goes to win it. See
+	# AGENTS_ERRATA.md (find-space-outscores-chase-on-loose-ball).
+	if ctx.chase_is_legal and ball != null and ball.possessor == null:
 		return 0.0
 	var base: float = ctx.eff_vision * 0.60
 	# Fresh legs make runs more dangerous.
@@ -850,6 +872,15 @@ func _score_shoot(ctx: UtilityContext) -> float:
 ## more purposeful is viable.  Rises when team lacks the ball and player
 ## is far from anchor — getting back into shape.
 func _score_maintain_formation(ctx: UtilityContext) -> float:
+	# "Holding shape" is an off-ball concept — a possessor can never legally
+	# choose it. Without this guard the flat 0.20 floor below outscores a
+	# real-but-weak Pass/Dribble/Shoot score (anything under 0.20), which
+	# sits ABOVE the evaluate_tactical_action() PanicClear fallback's <= 0.05
+	# threshold, so the carrier freezes in possession instead of either
+	# executing that weak option or falling through to a desperation clear.
+	# Mirrors the same possessor guard on _score_find_space() above.
+	if ctx.is_possessor:
+		return 0.0
 	# Base desirability: modest but non-zero — always an option.
 	var base: float = 0.20
 	if not ctx.team_has_ball:
@@ -945,10 +976,15 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D] = []) -> StringNam
 	_rng.seed = noise_seed
 
 	var best_action: StringName = &"MaintainFormation"
-	var best_score: float = clampf(_score_maintain_formation(ctx) + _rng.randf_range(-0.04, 0.04), 0.0, 1.0)
+	var s_maintain: float = clampf(_score_maintain_formation(ctx) + _rng.randf_range(-0.04, 0.04), 0.0, 1.0)
+	var best_score: float = s_maintain
 
+	## -1.0 = never evaluated this tick (the composure/pressure panic gate
+	## below did not open) — kept distinct from a real 0.0 score for the
+	## debug_log_action_scores printout.
+	var s_panic: float = -1.0
 	if ctx.pressure > 0.85 and ctx.eff_composure < 0.45:
-		var s_panic: float = clampf(0.85 + _rng.randf_range(-0.04, 0.04), 0.0, 1.0)
+		s_panic = clampf(0.85 + _rng.randf_range(-0.04, 0.04), 0.0, 1.0)
 		if s_panic > best_score:
 			best_score = s_panic
 			best_action = &"PanicClear"
@@ -985,6 +1021,30 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D] = []) -> StringNam
 		if max_offensive <= 0.05:
 			best_action = &"PanicClear"
 
+	if debug_log_action_scores or _trace_next_decision:
+		# Steering-layer fields (velocity/movement_intent/foot-range) alongside
+		# the decision-layer scores, so a single line answers both "what did
+		# it decide" and "what is it actually doing about it" — movement_intent
+		# is the value _steer_for_action() wrote on the PREVIOUS tick (this
+		# print runs before this tick's steering call). _trace_this_tick is
+		# left armed (not cleared here) so _steer_for_action(), called right
+		# after this returns within the same physics tick, can print the
+		# FRESH seek_target/force breakdown for the decision made just above
+		# and clear it there — giving one matched pair of lines per traced
+		# tick instead of one stale-by-a-tick line.
+		var dist_to_ball_now: float = player.global_position.distance_to(ball.global_position) if ball != null else -1.0
+		var in_foot_range: bool = player.get_ball_in_foot_range() != null
+		print("[ActionScorer] %s picks %s  maintain=%.3f panic=%s pass=%.3f chase=%.3f space=%.3f dribble=%.3f shoot=%.3f  possessor=%s team_has_ball=%s chase_legal=%s open_teammate=%s dist_to_ball=%.1f  pos=%s vel_len=%.1f intent=%s intent_len=%.2f wants_sprint=%s dist_to_ball_now=%.1f in_foot_range=%s pass_target=%s" % [
+			player.name, best_action,
+			s_maintain, ("%.3f" % s_panic) if s_panic >= 0.0 else "n/a",
+			s_pass, s_chase, s_space, s_dribble, s_shoot,
+			ctx.is_possessor, ctx.team_has_ball, ctx.chase_is_legal, ctx.open_teammate_exists,
+			ctx.dist_to_ball,
+			player.global_position, player.velocity.length(), player.movement_intent, player.movement_intent.length(),
+			player.wants_sprint, dist_to_ball_now, in_foot_range,
+			_cached_pass_target.name if is_instance_valid(_cached_pass_target) else "null"])
+		_trace_this_tick = true
+
 	return best_action
 
 
@@ -1008,6 +1068,31 @@ const STREAK_RISK_AVERSION: float = -0.20
 ## Set true (e.g. from the debugger) to print the scored candidate list and
 ## the winner every time _find_best_pass_target() runs on this player.
 var debug_log_pass_scores: bool = false
+
+## Set true (e.g. via the Remote scene tree Inspector while the game is
+## running, or from the debugger) to print every evaluate_tactical_action()
+## action score plus the winner, every decision tick, for this player. Cheap
+## to toggle at runtime — no rebuild needed to point it at whichever player
+## is exhibiting a bad decision.
+var debug_log_action_scores: bool = false
+
+## One-shot version of the above: armed externally (MatchWorldModel's stall
+## watchdog calls trace_next_decision() on whichever player is closest to a
+## ball that has sat unpossessed and stationary for a couple of seconds) to
+## force exactly one [ActionScorer] printout on this player's next decision
+## tick, then auto-clears. Kept separate from debug_log_action_scores so an
+## automatic watchdog trigger never turns into permanent per-tick spam.
+var _trace_next_decision: bool = false
+
+## Set (not cleared) by evaluate_tactical_action() alongside the
+## [ActionScorer] print above for exactly the same tick, so
+## _steer_for_action() — called right after, same physics tick — knows to
+## print its own [Steer] line (seek_target/force breakdown) for that same
+## decision, then clears both this and _trace_next_decision itself.
+var _trace_this_tick: bool = false
+
+func trace_next_decision() -> void:
+	_trace_next_decision = true
 
 ## Public wrapper for set pieces: a CPU-controlled taker has no run-up during
 ## which the brain can steer facing_direction toward a real target the way
@@ -1095,7 +1180,13 @@ func _find_best_pass_target(passer_pressure: float = 0.0, allow_backward_pass: b
 		# Openness, straight off the world model — no second roster walk.
 		var min_opp_dist: float = world.nearest_opponent_dist_to(candidate_pos, player.team)
 		var distance: float = ball_pos.distance_to(candidate_pos)
-		var facing_dot: float = player.get_facing_dot(candidate_pos)
+		# A restart taker's facing_direction is leftover from before the
+		# whistle (whatever it last was while moving pre-freeze) — it does not
+		# represent a committed body orientation the way it does in open play,
+		# so scoring the angle dimension against it would unfairly punish
+		# exactly the backward candidates allow_backward_pass exists to
+		# unlock. Treat a restart taker as equally "facing" every candidate.
+		var facing_dot: float = 1.0 if allow_backward_pass else player.get_facing_dot(candidate_pos)
 
 		# Hot path: bare float, allocates nothing (see PassUtilityScorer docs).
 		var score: float
@@ -1150,6 +1241,16 @@ func _find_best_pass_target(passer_pressure: float = 0.0, allow_backward_pass: b
 func _should_chase_ball() -> bool:
 	if ball == null or player == null:
 		return false
+	# A possessor already has the ball — "chasing" it is a category error, not
+	# a real option. Every sibling score function (_score_find_space,
+	# _score_maintain_formation, _score_dribble, _score_shoot, _score_pass)
+	# already excludes the possessor case; _score_chase()/_should_chase_ball()
+	# never got the same guard. Since a possessor is by definition standing
+	# right next to their own ball, _score_chase()'s proximity term scores
+	# them very highly (routinely 0.7+), crowding out Pass/AttemptDribble —
+	# see AGENTS_ERRATA.md (possessor-can-chase-own-ball).
+	if ball.possessor == player:
+		return false
 	var world: MatchWorldModel = MatchWorldModel.instance
 	if world == null:
 		return false
@@ -1179,8 +1280,21 @@ func _should_chase_ball() -> bool:
 			else 260.0 if role == Role.OUTFIELD_DEFENDER
 			else 0.0)
 
+	# A genuinely loose ball (nobody controls it) is exempt from this absolute
+	# range cap too, not just the anchor-relative clamp further down — see
+	# bresenham-threat-shadowed-real-lane-check-match-wide / the loose-ball
+	# freeze notes in AGENTS_ERRATA.md. The cap exists to stop a player being
+	# pulled out of shape chasing a ball an OPPONENT is dictating from deep;
+	# it has no such justification against a ball nobody owns. Without this,
+	# a loose ball that comes to rest farther than EVERY player's max_dist
+	# (not just outside their anchor budget) still freezes the whole team,
+	# since this check runs before the ball.possessor == null bypass below
+	# ever gets a chance to fire. The role-budget loop right after this still
+	# applies, so only the single closest eligible player per role goes.
+	var is_loose: bool = ball.possessor == null
+
 	var my_dist_sq: float = player.global_position.distance_squared_to(ball_pos)
-	if my_dist_sq > max_dist * max_dist:
+	if not is_loose and my_dist_sq > max_dist * max_dist:
 		return false
 
 	# Count how many same-role same-team players are closer to the ball than me.
@@ -1203,16 +1317,17 @@ func _should_chase_ball() -> bool:
 			return false
 
 	# A genuinely loose ball (nobody controls it) is exempt from the
-	# anchor-relative clamp below: that clamp exists to stop shape discipline
-	# collapsing while an opponent calmly dictates play from deep, not to
-	# leave an uncontrolled ball unclaimed. Without this, a ball that comes to
-	# rest outside every player's anchor budget (e.g. rolling into space after
-	# a kickoff tap) has _should_chase_ball() return false for all 22 players
+	# anchor-relative clamp below too, for the same reason as the max_dist
+	# bypass above: that clamp exists to stop shape discipline collapsing
+	# while an opponent calmly dictates play from deep, not to leave an
+	# uncontrolled ball unclaimed. Without this, a ball that comes to rest
+	# outside every player's anchor budget (e.g. rolling into space after a
+	# kickoff tap) has _should_chase_ball() return false for all 22 players
 	# — none of the press triggers arm either, since they all key off a named
 	# carrier — and the match freezes with nobody ever going to get it. The
-	# role-budget and max_dist checks above still apply, so this only lets the
-	# single closest eligible player break anchor, not the whole team.
-	if ball.possessor == null:
+	# role-budget loop above still applies, so this only lets the single
+	# closest eligible player break anchor, not the whole team.
+	if is_loose:
 		return true
 
 	# Before committing to the chase, check the budget: the ball must sit
@@ -1981,7 +2096,18 @@ func _steer_for_action(delta: float) -> Vector2:
 	var offset: Vector2 = seek_target - player.global_position
 	var distance: float = offset.length()
 
-	if distance <= ARRIVE_RADIUS:
+	# ChaseBall/PanicClear/AttemptShoot all seek the ball's own position and
+	# must physically close on it to trigger foot-sensor pickup or a kick —
+	# unlike settling into a stationary FORMATION anchor or PASS position,
+	# "arrived" here means touching the ball, not merely being nearby. The
+	# generic arrival cushion below (tuned for the former) zeroes
+	# movement_intent the instant distance drops under ARRIVE_RADIUS (24px),
+	# which can permanently strand a player who correctly chose to chase but
+	# is still meaningfully short of the ball — see AGENTS_ERRATA.md
+	# (arrive-radius-strands-correct-chase-decision).
+	var must_reach_ball: bool = current_action == &"ChaseBall" \
+			or current_action == &"PanicClear" or current_action == &"AttemptShoot"
+	if distance <= ARRIVE_RADIUS and not must_reach_ball:
 		return Vector2.ZERO
 
 	# 1. Seek force
@@ -2018,7 +2144,18 @@ func _steer_for_action(delta: float) -> Vector2:
 	# controller alone decides whether stamina actually allows it.
 	player.wants_sprint = current_action == &"ChaseBall" and distance > CHASE_RADIUS * 0.5
 	var sacchi_force: Vector2 = Vector2.ZERO
-	if role == Role.OUTFIELD_DEFENDER or role == Role.OUTFIELD_MIDFIELDER or role == Role.OUTFIELD_ATTACKER:
+	# Off-ball only, same guard as sep_force/line_lateral_force above (and for
+	# the same reason): this is an ambient team-shape nudge, and it can reach
+	# its full clamped magnitude (1.0) at just 200px of excess team spread —
+	# routine during any transition or counter-attack, not a rare edge case.
+	# Summed unguarded into a ChaseBall/PanicClear/AttemptShoot seek force
+	# (themselves often well under 1.0 — deflection alone maxes at 1.0 only
+	# at long range) before the final .limit_length(1.0) clamp, a maxed-out
+	# sacchi_force can all but cancel a correct, decisive chase — see
+	# AGENTS_ERRATA.md (sacchi-force-cancels-urgent-ball-actions).
+	var applies_to_ball_actions: bool = current_action != &"ChaseBall" \
+			and current_action != &"PanicClear" and current_action != &"AttemptShoot"
+	if applies_to_ball_actions and (role == Role.OUTFIELD_DEFENDER or role == Role.OUTFIELD_MIDFIELDER or role == Role.OUTFIELD_ATTACKER):
 		var world: MatchWorldModel = MatchWorldModel.instance
 		if world != null:
 			var com_x: float = world.team_com_x[player.team]
@@ -2034,7 +2171,17 @@ func _steer_for_action(delta: float) -> Vector2:
 				sacchi_force = Vector2(f_mag, 0.0)
 
 	var raw_intent: Vector2 = (seek_force + sep_force + spring_force + assist_force + line_lateral_force + sacchi_force).limit_length(1.0)
-	return _apply_intent_blend(raw_intent)
+	var blended_intent: Vector2 = _apply_intent_blend(raw_intent)
+
+	if _trace_this_tick:
+		print("[Steer] %s action=%s seek_target=%s offset=%s distance=%.1f deflection=%.2f  seek=%s sep=%s spring=%s assist=%s line_lat=%s sacchi=%s  raw_intent=%s(len=%.2f) blended=%s(len=%.2f)" % [
+			player.name, current_action, seek_target, offset, distance, deflection,
+			seek_force, sep_force, spring_force, assist_force, line_lateral_force, sacchi_force,
+			raw_intent, raw_intent.length(), blended_intent, blended_intent.length()])
+		_trace_this_tick = false
+		_trace_next_decision = false
+
+	return blended_intent
 
 
 ## Eases from _blend_from_intent toward [raw_intent] over INTENT_BLEND_DURATION

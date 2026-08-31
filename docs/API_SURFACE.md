@@ -246,6 +246,7 @@
 - `const HEADER_SPEED: float = 420.0`
 - `const HEADER_DOWNWARD_Z: float = -120.0`
 - `const MISCUE_RATIO: float = 0.35`
+- `const FACING_CLARITY_THRESHOLD: float = 0.2`
 - `const JUMP_PEAK_Z: float = 28.0`
 - `const JUMP_GRAVITY: float = 320.0`
 
@@ -285,6 +286,7 @@
 - `const CARRY_OFFSET: float = 22.0`
 - `const MAGNET_STRENGTH: float = 55.0`
 - `const MAGNET_BLEND: float = 0.85`
+- `const FORWARD_OVERSHOOT_SOFTEN: float = 0.20`
 - `const LATERAL_DAMPING: float = 0.6`
 - `const POSSESSION_GRACE: float = 0.10`
 - `const SPRINT_TOUCH_BONUS: float = 1.15`
@@ -412,8 +414,8 @@
 
 **Constants:**
 - `const CHARGE_TIME: float = 0.6`
-- `const MIN_SPEED: float = 300.0`
-- `const MAX_SPEED: float = 700.0`
+- `const MIN_SPEED: float = 120.0`
+- `const MAX_SPEED: float = 260.0`
 - `const CPU_THROW_DELAY: float = 0.1`
 - `const NEARBY_BALL_RADIUS: float = 40.0`
 
@@ -597,6 +599,10 @@
 - `const HEAVY_TOUCH_MAX_DIST: float = 130.0`
 - `const FACING_OWN_GOAL_DOT_THRESHOLD: float = 0.5`
 - `const PROLONGED_POSSESSION_SECONDS: float = 2.5`
+- `const STALL_TRACE_THRESHOLD_SECONDS: float = 2.0`
+- `const STALL_SPEED_EPSILON: float = 15.0`
+- `const POSSESSION_TRACE_THRESHOLD_SECONDS: float = 1.5`
+- `const POSSESSION_TRACE_INTERVAL_SECONDS: float = 0.5`
 
 **Public Methods:**
 - `func register_player(index: int, node: HeavyPlayerController, team: int) -> int`
@@ -625,7 +631,6 @@
 - `func get_pitch_control_at(pos: Vector2, team: int) -> float`
 - `func get_cell_dominance(cell_x: int, cell_y: int) -> int`
 - `func is_zone_14(cell_x: int, cell_y: int, attacking_team: int) -> bool`
-- `func get_bresenham_threat(start_pos: Vector2, end_pos: Vector2, passer_team_id: int) -> int`
 
 ---
 
@@ -714,6 +719,7 @@
 - `func can_carry_ball() -> bool`
 - `func apply_player_data(p: PlayerData) -> void`
 - `func evaluate_tactical_action(defenders_nearby: Array[Node2D] = []) -> StringName`
+- `func trace_next_decision() -> void`
 - `func find_pass_target_for_set_piece() -> HeavyPlayerController`
 - `func calculate_pressure_index(defenders: Array[Node2D] = []) -> float`
 - `func get_target_position() -> Vector2`

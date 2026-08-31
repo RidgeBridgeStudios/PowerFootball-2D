@@ -35,6 +35,13 @@ const MAGNET_STRENGTH: float = 55.0
 ## 0.85 locks the ball onto the carry target within ~1 frame at 60 Hz.
 const MAGNET_BLEND: float = 0.85
 
+## Fraction of MAGNET_STRENGTH applied to a FORWARD overshoot past
+## carry_target (the ball got out ahead of the offset — normal right after a
+## touch, not drift). Kept well below 1.0 so the magnet doesn't fight a
+## touch's own momentum hard enough to flip velocity into reverse every
+## cycle. Lateral/reverse offset is unaffected by this — see _apply_magnet().
+const FORWARD_OVERSHOOT_SOFTEN: float = 0.20
+
 ## Fraction of the ball's lateral (perpendicular-to-travel) velocity kept each
 ## tick while possessed. Only sideways/reverse drift is damped — forward
 ## momentum along the carry direction is left untouched so the magnet never
@@ -189,8 +196,25 @@ func _apply_magnet(ball: Pseudo3DBall, carry_dir: Vector2, carry_target: Vector2
 	ball.velocity = forward_component + lateral_component * LATERAL_DAMPING
 
 	# --- Magnet pull: blend toward offset-derived velocity -------------------
+	# Split the position offset along the same forward/lateral axes as the
+	# velocity damping above. A touch kick (up to ~340px/s at a sprint) can
+	# send the ball meaningfully past the 16-28px carry_target offset within
+	# a frame or two — that overshoot is the touch doing its job, not drift.
+	# Correcting it at full MAGNET_STRENGTH every following magnet frame
+	# fights the touch's own momentum hard enough to flip velocity from
+	# strongly forward to meaningfully backward in a single blend step,
+	# which then overshoots the other way and repeats — reading as the ball
+	# visibly bouncing/jittering in a small area rather than smoothly
+	# following the dribbler. Lateral/reverse drift — the actual "turn
+	# sharply and the ball runs away from you" case this magnet exists for —
+	# still gets the full, intentionally strong pull; only a FORWARD
+	# overshoot along carry_dir is softened. See AGENTS_ERRATA.md
+	# (dribble-magnet-forward-overshoot-oscillation).
 	var offset: Vector2 = carry_target - ball.global_position
-	var pull_velocity: Vector2 = offset * MAGNET_STRENGTH
+	var forward_offset: float = offset.dot(carry_dir)
+	var lateral_offset: Vector2 = offset - carry_dir * forward_offset
+	var forward_strength: float = MAGNET_STRENGTH if forward_offset >= 0.0 else MAGNET_STRENGTH * FORWARD_OVERSHOOT_SOFTEN
+	var pull_velocity: Vector2 = carry_dir * forward_offset * forward_strength + lateral_offset * MAGNET_STRENGTH
 	ball.velocity = ball.velocity.lerp(pull_velocity, MAGNET_BLEND)
 
 

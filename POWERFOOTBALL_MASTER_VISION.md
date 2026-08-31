@@ -162,6 +162,19 @@ The repo already has a useful pattern in manager traits. `PlayerData` should gai
 
 Each trait should modify a system that already exists instead of creating a parallel architecture. `DeepRunner` alters off-ball channel weighting, `PressureImmune` resists SLUMP logic, `HotHeadedTackler` increases foul probability, `StreetBaller` influences off-pitch injury events, and `PrideGlory` affects substitution reaction outcomes.
 
+## Aerial Contact Personality Weighting (Future Refinement)
+
+`AerialState._attempt_contact()` currently picks header / volley / bicycle kick from a pure geometry read — ball height and `facing_goal_dot` only (see `AGENTS_ERRATA.md`'s `bicycle-kick-dominates-ambiguous-facing` for the header-default fix already applied there). It has no access to attributes, traits, or match context, so every eligible player attempts a bicycle kick with the same willingness in the 89th minute of a scoreless draw as in the 3rd minute of a friendly.
+
+Once heading-relevant attributes/traits exist, `_attempt_contact()`'s branch should weight *willingness* to attempt the flashier, higher-risk strikes (volley, and especially bicycle kick) rather than deciding on geometry alone:
+
+- **Heading skill/preference** — a low heading attribute (or a trait leaning away from aerial ability) should bias toward the safe, reliable header even when the geometry would otherwise permit a volley/bicycle attempt; a confident/skilled header of the ball should commit to headers more often too, not just default into them by elimination.
+- **Match desperation** — losing (or drawing when a win is needed) in the closing minutes should raise willingness to gamble on a bicycle kick, mirroring how `MoodSystem`/composure already bias other risk-taking (see `PassUtilityScorer.PRESSURE_SAFETY_SHIFT` for the existing pattern of a match-state signal reshaping a weighted choice).
+- **Proximity to goal** — a bicycle kick struck from distance is mostly cosmetic risk with no reward; the willingness weighting should scale up sharply only inside real shooting range, not uniformly across the pitch.
+- **Personality trait** — `StreetBaller` (already listed above, currently only wired to off-pitch injury events) is the natural existing hook for "attempts flashy strikes more readily" rather than inventing a new bitmask flag.
+
+This is deliberately a *willingness* weighting layered on top of the existing geometry gate, not a replacement for it — the height/facing conditions still decide what's physically possible; attributes/traits/match-state should decide what a given player *chooses* to attempt among the options geometry allows.
+
 ## Star System
 
 `PlayerData` should gain derived `overall_rating` and `reputation` fields. `overall_rating` is calculated from weighted football attributes rather than authored by hand, while `reputation` accumulates over career events and decays slowly over time. This distinction allows some players to be efficient but not famous, and others to be famous enough to distort tactical behavior.

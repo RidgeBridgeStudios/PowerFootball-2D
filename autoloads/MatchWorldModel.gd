@@ -263,6 +263,30 @@ var _press_trigger_timer: float = 0.0
 var _possession_hold_timer: float = 0.0
 var _possession_hold_index: int = NO_INDEX
 
+## Stall watchdog: automatic, zero-setup diagnostic for the "loose ball sits
+## unclaimed" class of bug. Fires exactly once per stall episode — no manual
+## Remote-tree flag toggling required. See _update_stall_watchdog().
+const STALL_TRACE_THRESHOLD_SECONDS: float = 2.0
+const STALL_SPEED_EPSILON: float = 15.0
+var _stall_timer: float = 0.0
+var _stall_traced: bool = false
+
+## Possession watchdog: automatic diagnostic for "one player holds the ball
+## and never does anything with it." Tracks ball_node.possessor directly
+## (the true active carrier — DribbleState/TackleState, per soccer-physics.md
+## — not the last_touched_by fallback _possession_hold_timer above also
+## counts, which would keep this firing after the ball had already gone
+## loose). Once the SAME active possessor has held continuously past this
+## threshold, fires a repeating (not one-shot) [ActionScorer] trace on them
+## every POSSESSION_TRACE_INTERVAL_SECONDS, building a time-series log of
+## exactly what that player's brain is deciding and steering toward for as
+## long as the possession episode lasts. See _update_possession_watchdog().
+const POSSESSION_TRACE_THRESHOLD_SECONDS: float = 1.5
+const POSSESSION_TRACE_INTERVAL_SECONDS: float = 0.5
+var _active_possession_node: Node2D = null
+var _active_possession_timer: float = 0.0
+var _possession_trace_timer: float = 0.0
+
 ## Bound by PitchScene alongside PlayerBrain.bind_boundary() (see
 ## _bind_players()). Optional — left null in any setup that never calls
 ## bind_boundary(), in which case TOUCHLINE_ISOLATION alone never fires.
@@ -458,6 +482,8 @@ func _physics_process(delta: float) -> void:
 			team_def_x[t] = min_x if t == 0 else max_x
 
 	_update_press_trigger(delta)
+	_update_stall_watchdog(delta)
+	_update_possession_watchdog(delta)
 
 
 ## Converts a 2D world position into discrete spatial grid cell coordinates.
@@ -809,8 +835,6 @@ func is_passing_lane_open(
 		passer_team_id: int,
 		corridor_width: float = DEFAULT_PASS_LANE_CLEARANCE
 ) -> bool:
-	return get_bresenham_threat(start_pos, end_pos, passer_team_id) <= 100
-
 	var min_x: float = minf(start_pos.x, end_pos.x) - corridor_width
 	var max_x: float = maxf(start_pos.x, end_pos.x) + corridor_width
 	var min_y: float = minf(start_pos.y, end_pos.y) - corridor_width
@@ -995,6 +1019,98 @@ func _update_press_trigger(delta: float) -> void:
 	if _check_heavy_touch_trigger():
 		return
 	_check_prolonged_possession_trigger()
+
+
+## Automatic, zero-setup diagnostic for the "loose ball sits unclaimed, no
+## one acts on it" class of bug. Tracks how long the ball has been both
+## unpossessed and near-stationary; once that exceeds
+## STALL_TRACE_THRESHOLD_SECONDS, arms exactly one [ActionScorer] trace on
+## whichever live player is currently closest to the ball, then latches so it
+## never fires again for the same stall episode (only resets once the ball
+## moves or gets possessed again). No Remote-tree flag toggling required —
+## the trace appears in Output on its own the next time this freezes.
+func _update_stall_watchdog(delta: float) -> void:
+	if ball_node == null or not is_instance_valid(ball_node):
+		_stall_timer = 0.0
+		_stall_traced = false
+		return
+
+	var is_loose: bool = ball_node.possessor == null
+	var is_slow: bool = ball_node.velocity.length() < STALL_SPEED_EPSILON
+
+	if not (is_loose and is_slow):
+		_stall_timer = 0.0
+		_stall_traced = false
+		return
+
+	_stall_timer += delta
+	if _stall_timer < STALL_TRACE_THRESHOLD_SECONDS or _stall_traced:
+		return
+
+	_stall_traced = true
+
+	var closest_idx: int = -1
+	var closest_dist_sq: float = INF
+	for i: int in range(TOTAL_PLAYERS):
+		var node: HeavyPlayerController = player_nodes[i]
+		if node == null or not is_instance_valid(node):
+			continue
+		var d: float = player_positions[i].distance_squared_to(ball_position)
+		if d < closest_dist_sq:
+			closest_dist_sq = d
+			closest_idx = i
+
+	if closest_idx == -1:
+		return
+
+	var closest_node: HeavyPlayerController = player_nodes[closest_idx]
+	print("[StallWatchdog] Ball stalled %.1fs at %s (velocity=%.1f px/s). Closest player: %s (team %d, %.1fpx away). Forcing one [ActionScorer] trace on that player's next decision tick." % [
+		_stall_timer, ball_position, ball_node.velocity.length(),
+		closest_node.name, player_teams[closest_idx], sqrt(closest_dist_sq)])
+
+	var brain := closest_node.get_node_or_null("PlayerBrain") as PlayerBrain
+	if brain != null:
+		brain.trace_next_decision()
+
+
+## Automatic diagnostic for "one player holds the ball and jogs around never
+## passing/shooting/dribbling with purpose." Unlike _update_stall_watchdog()
+## (one-shot, fires on a STATIONARY loose ball), this repeats for as long as
+## the SAME player keeps active possession, producing a time-series log via
+## repeated [ActionScorer] traces — exactly what's needed to see a decision
+## flip-flopping or staying stuck over several seconds, not just a single
+## snapshot. No Remote-tree flag toggling required.
+func _update_possession_watchdog(delta: float) -> void:
+	if ball_node == null or not is_instance_valid(ball_node):
+		_active_possession_node = null
+		_active_possession_timer = 0.0
+		_possession_trace_timer = 0.0
+		return
+
+	var holder: Node2D = ball_node.possessor
+	if holder != _active_possession_node:
+		_active_possession_node = holder
+		_active_possession_timer = 0.0
+		_possession_trace_timer = 0.0
+
+	if holder == null:
+		return
+
+	_active_possession_timer += delta
+	if _active_possession_timer < POSSESSION_TRACE_THRESHOLD_SECONDS:
+		return
+
+	_possession_trace_timer -= delta
+	if _possession_trace_timer > 0.0:
+		return
+	_possession_trace_timer = POSSESSION_TRACE_INTERVAL_SECONDS
+
+	var holder_controller := holder as HeavyPlayerController
+	if holder_controller == null:
+		return
+	var brain := holder_controller.get_node_or_null("PlayerBrain") as PlayerBrain
+	if brain != null:
+		brain.trace_next_decision()
 
 
 func _arm_press_trigger(trigger: PressTrigger, carrier: HeavyPlayerController, position: Vector2, hold_seconds: float) -> void:
@@ -1245,44 +1361,3 @@ func is_zone_14(cell_x: int, cell_y: int, attacking_team: int) -> bool:
 		return (cell_x == 8 or cell_x == 9) and (cell_y == 3 or cell_y == 4)
 	else:
 		return (cell_x == 2 or cell_x == 3) and (cell_y == 3 or cell_y == 4)
-
-
-
-func get_bresenham_threat(start_pos: Vector2, end_pos: Vector2, passer_team_id: int) -> int:
-	var cx1: int = clampi(int((start_pos.x + TACTICAL_OFFSET_X) / TACTICAL_CELL_W), 0, TACTICAL_GRID_WIDTH - 1)
-	var cy1: int = clampi(int((start_pos.y + TACTICAL_OFFSET_Y) / TACTICAL_CELL_H), 0, TACTICAL_GRID_HEIGHT - 1)
-	var cx2: int = clampi(int((end_pos.x + TACTICAL_OFFSET_X) / TACTICAL_CELL_W), 0, TACTICAL_GRID_WIDTH - 1)
-	var cy2: int = clampi(int((end_pos.y + TACTICAL_OFFSET_Y) / TACTICAL_CELL_H), 0, TACTICAL_GRID_HEIGHT - 1)
-	
-	var threat: int = 0
-	var dx: int = absi(cx2 - cx1)
-	var dy: int = -absi(cy2 - cy1)
-	var sx: int = 1 if cx1 < cx2 else -1
-	var sy: int = 1 if cy1 < cy2 else -1
-	var err: int = dx + dy
-	
-	var x: int = cx1
-	var y: int = cy1
-	var steps: int = 0
-	
-	while steps < 12:
-		if x >= 0 and x < TACTICAL_GRID_WIDTH and y >= 0 and y < TACTICAL_GRID_HEIGHT:
-			var idx: int = y * TACTICAL_GRID_WIDTH + x
-			if passer_team_id == 0:
-				threat += grid_away[idx]
-			else:
-				threat += grid_home[idx]
-		
-		if x == cx2 and y == cy2:
-			break
-		
-		var e2: int = 2 * err
-		if e2 >= dy:
-			err += dy
-			x += sx
-		if e2 <= dx:
-			err += dx
-			y += sy
-		steps += 1
-		
-	return threat

@@ -25,8 +25,16 @@ extends PlayerState
 
 ## Seconds of hold to reach a full-distance throw.
 const CHARGE_TIME: float = 0.6
-const MIN_SPEED: float = 300.0
-const MAX_SPEED: float = 700.0
+## A hand-thrown restart is physically weaker than a kicked ball — MAX_SPEED
+## is capped at ChargeKickState.PASS_SPEED (260.0) rather than exceeding it.
+## Previously 300.0-700.0, which made even a lightly-charged throw-in faster
+## than ChargeKickState.PASS_SPEED (260.0) and a fully-charged one faster
+## than SHOT_SPEED (620.0) — a two-handed overhead toss out-pacing a
+## full-power kicked strike, which is why throws were crossing the full
+## width of the pitch. See AGENTS_ERRATA.md
+## (throw-in-speed-exceeds-kicked-shot-speed).
+const MIN_SPEED: float = 120.0
+const MAX_SPEED: float = 260.0
 ## Seconds a CPU taker waits before auto-throwing. Gives GameManager/
 ## SetPieceCoordinator a frame to finish placing the ball before the throw is
 ## evaluated, so the CPU doesn't fire at charge_ratio 0 on its very first tick.
@@ -132,8 +140,15 @@ func _release_throw(player: HeavyPlayerController) -> void:
 		aim = player.facing_direction
 
 	var speed: float = lerpf(MIN_SPEED, MAX_SPEED, charge_ratio)
-	# Apply 3D impulse so the ball is lobbed into play
-	var z_impulse: float = lerpf(150.0, 350.0, charge_ratio)
+	# Apply 3D impulse so the ball is lobbed into play. Pseudo3DBall.
+	# air_resistance (0.08) is a slow exponential decay — the ball keeps
+	# almost all of its horizontal speed for the whole time it's airborne,
+	# unlike the much stronger ground friction. A long hang time therefore
+	# directly multiplies total throw distance on top of MIN/MAX_SPEED, so
+	# this is scaled down proportionately with the speed reduction above
+	# rather than left at its old range (150.0-350.0) while only the
+	# horizontal speed was fixed.
+	var z_impulse: float = lerpf(60.0, 150.0, charge_ratio)
 	ball.apply_kick(aim.normalized() * speed, z_impulse, player)
 
 	if not player.is_user_controlled and pass_target != null:

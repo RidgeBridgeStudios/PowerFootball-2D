@@ -23,6 +23,19 @@ const HEADER_DOWNWARD_Z: float = -120.0
 ## Speed retained by a mistimed contact.
 const MISCUE_RATIO: float = 0.35
 
+## Volley/bicycle kick each require facing_goal_dot to clear this threshold
+## in their respective direction — matching the existing "clear enough to
+## act on" convention used elsewhere for a facing/direction read (see
+## PlayerBrain._find_best_pass_target()'s forward_dot < -0.2 backward-pass
+## veto). Without this, "not facing goal" (dot <= 0.0) covers a full 180°
+## arc, so bicycle kick fired for any merely-ambiguous facing_direction —
+## routine for a throw-in receiver who has just turned in to meet the ball
+## rather than squared up to goal — instead of the course spec's
+## deliberately rare, spectacular case. Header is the default for
+## everything inside this neutral band. See AGENTS_ERRATA.md
+## (bicycle-kick-dominates-ambiguous-facing).
+const FACING_CLARITY_THRESHOLD: float = 0.2
+
 const JUMP_PEAK_Z: float = 28.0   ## pixels above ground at peak
 const JUMP_GRAVITY: float = 320.0  ## px/s² pulling current_z back to 0
 
@@ -79,11 +92,11 @@ func _attempt_contact(player: HeavyPlayerController, ball: Pseudo3DBall) -> void
 	var launch_z: float = HEADER_DOWNWARD_Z
 	var action_name: String = "HEADER"
 
-	if ball.position_z >= 10.0 and ball.position_z <= 20.0 and facing_goal_dot > 0.0:
+	if ball.position_z >= 10.0 and ball.position_z <= 20.0 and facing_goal_dot > FACING_CLARITY_THRESHOLD:
 		power_mult = 1.5
 		launch_z = 20.0
 		action_name = "VOLLEY"
-	elif ball.position_z >= 5.0 and ball.position_z <= 25.0 and facing_goal_dot <= 0.0:
+	elif ball.position_z >= 5.0 and ball.position_z <= 25.0 and facing_goal_dot < -FACING_CLARITY_THRESHOLD:
 		power_mult = 2.0
 		launch_z = 60.0
 		action_name = "BICYCLE KICK"
