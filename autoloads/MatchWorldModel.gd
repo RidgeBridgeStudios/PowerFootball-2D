@@ -1244,4 +1244,3 @@ func get_bresenham_threat(start_pos: Vector2, end_pos: Vector2, passer_team_id: 
 		steps += 1
 		
 	return threat
-
