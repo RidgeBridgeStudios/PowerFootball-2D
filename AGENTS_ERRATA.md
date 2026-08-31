@@ -159,6 +159,66 @@ discovered_rules:
       team roaming.
     promotion_target: .claude/rules/ai-architect.md
     status: pending
+
+  - id: ball-struck-signal-arg-count-mismatch
+    discovered_date: 2026-08-31
+    discovered_by: Claude
+    category: engine
+    target_files:
+      - entities/player/MoodSystem.gd
+      - ui/HUD.gd
+      - entities/referee/MatchReferee.gd
+      - pitch/PitchScene.gd
+      - pitch/PenaltyShootoutCoordinator.gd
+      - entities/manager/ManagerDirector.gd
+    invariant: >
+      Confirmed live (user-provided Godot Output log, not just static
+      analysis) that Godot 4.7 raises "Error calling from signal '<name>' to
+      callable: ... Method expected N argument(s), but called with M" on
+      every single emission for a connected callback that declares fewer
+      parameters than the signal currently emits. This directly falsifies
+      the prior ai-architect.md claim that Godot silently drops unwanted
+      trailing args — that claim was written from assumption, never run,
+      per godot-47-core.md's "no engine in this container" note.
+      MoodSystem._on_ball_struck() still declared 3 params after
+      ball_struck gained a trailing is_shot: bool, so it errored on every
+      kick in the match (dozens of times in a single short match) and its
+      composure-on-powerful-shot logic silently never ran. The same
+      under-declared-handler pattern was found (via a full sweep of every
+      GameEvents.<signal>.connect() call against its signal's current
+      declared arg count) on goal_scored in six more listeners — HUD.gd,
+      MatchReferee.gd, PitchScene.gd (both _on_goal_scored and
+      _on_practice_goal_scored), PenaltyShootoutCoordinator.gd, and
+      ManagerDirector.gd — none yet triggered in the reported freeze only
+      because no goal had been scored in the test matches. Whenever a
+      trailing parameter is added to an existing GameEvents signal, grep
+      every `GameEvents.<signal>.connect(...)` call and update every
+      connected handler's signature in the same change — a param the
+      handler doesn't need can just take a default value (e.g.
+      `_scorer: Node = null`).
+    rationale: >
+      User reported a total CPU-vs-CPU match freeze after kickoff
+      (loose-ball-anchor-clamp-deadlock above) that persisted after that fix
+      was applied and pulled. Asked the user to paste the Godot Output log
+      rather than guess a third blind fix; the pasted log's ~30 repeated
+      ChargeKickState.gd:144 / MoodSystem.gd signal errors were the first
+      concrete, empirical evidence gathered in this investigation (this
+      sandbox has no Godot binary to run the match itself — see
+      godot-47-core.md). Fixed on sight since it is unambiguously a real
+      bug regardless of whether it is THE freeze cause; a
+      [FreezeTrace] diagnostic print (temporary, PlayerBrain.gd,
+      DEBUG_FREEZE_TRACE) was left active in the same push in case the
+      freeze itself turns out to be unrelated to this signal bug.
+    resolution: >
+      Added the missing trailing parameter to all 7 under-declared handlers
+      (MoodSystem._on_ball_struck, plus 6 goal_scored listeners), verified
+      with a full-repo sweep script cross-checking every
+      GameEvents.<signal>.connect() call's handler arg count against the
+      signal's declared arg count (0 remaining mismatches across 62
+      connections checked). Corrected the false claim in
+      .claude/rules/ai-architect.md.
+    promotion_target: .claude/rules/ai-architect.md
+    status: promoted
 ```
 
 ## Session State

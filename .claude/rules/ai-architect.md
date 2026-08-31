@@ -94,10 +94,32 @@ described `goal_scored(team, scorer, assist)` while the actual signal was
 has `ball` in scope and is the only place that knows who last touched it
 before it crossed the line (`ball.last_touched_by`), so that is where a
 scorer argument has to originate if one is added — `GameManager.register_goal()`
-just threads it through. Existing listeners declaring only `(team: int)` do
-not need updating when a trailing arg is added: Godot drops emitted args a
-connected callback doesn't declare (same convention already used for
-`ball_struck`'s `is_shot` addition).
+just threads it through.
+
+**Correction, verified against a live run:** the claim that used to follow
+this ("existing listeners declaring only `(team: int)` do not need updating
+... Godot drops emitted args a connected callback doesn't declare") is
+**false** and was never actually run — see
+`godot-47-core.md`'s "no engine in this container" note; it was asserted,
+not tested. Godot 4.7's signal dispatch raises `Error calling from signal
+'<name>' to callable: ... Method expected N argument(s), but called with M`
+for every connected callback that declares fewer parameters than the signal
+currently emits, logged once per emission, and does not update the
+callback's variables. (It does *not* abort the dispatch loop — other
+correctly-signatured listeners on the same signal still run — but the
+under-declared one silently never executes its body, every single time.)
+This was confirmed live: `ball_struck` gained a trailing `is_shot: bool`
+and `MoodSystem._on_ball_struck()` was never updated to match, so it threw
+this error on *every kick in the match* and its mood-on-powerful-shot logic
+silently never ran; `goal_scored` gained `scorer: Node` and six listeners
+across `HUD.gd`, `MatchReferee.gd`, `PitchScene.gd` (both handlers),
+`PenaltyShootoutCoordinator.gd`, `ManagerDirector.gd`, and `MoodSystem.gd`
+had the same latent bug, waiting to fire on the first goal of any match.
+**Adding a trailing parameter to an existing `GameEvents` signal is not a
+free, no-migration change** — grep every `GameEvents.<signal>.connect(...)`
+call and update every connected handler's signature (extra params can take
+a default value, e.g. `_scorer: Node = null`, when the handler doesn't need
+them) in the same change.
 
 ### Defensive line depth is computed ONCE in MatchWorldModel, never per-defender
 `MatchWorldModel.defensive_line_x` (a `PackedFloat32Array[2]`, indexed by

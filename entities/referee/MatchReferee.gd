@@ -271,7 +271,7 @@ func _send_off(player: HeavyPlayerController) -> void:
 		GameEvents.goalkeeper_sent_off.emit(player.team)
 
 
-func _on_goal_scored(_team: int) -> void:
+func _on_goal_scored(_team: int, _scorer: Node = null) -> void:
 	_update_temperature()
 	_drift_threshold()
 

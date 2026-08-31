@@ -525,7 +525,7 @@ func _do_practice_toggle_gk() -> void:
 	hud.set_practice_gk_label(_practice_gk_frozen)
 
 
-func _on_practice_goal_scored(_team: int) -> void:
+func _on_practice_goal_scored(_team: int, _scorer: Node = null) -> void:
 	ball.freeze()
 	shake_camera(1.0)
 	InputHelper.rumble(0.35, 0.7, 0.25)
@@ -828,7 +828,7 @@ func _tick_autoswitch(delta: float) -> void:
 	GameEvents.player_switched.emit(best)
 
 
-func _on_goal_scored(scoring_team: int) -> void:
+func _on_goal_scored(scoring_team: int, _scorer: Node = null) -> void:
 	if GameManager.shootout_active:
 		return  # PenaltyShootoutCoordinator owns the reset between kicks.
 	ball.freeze()
