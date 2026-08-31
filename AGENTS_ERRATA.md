@@ -18,7 +18,37 @@ Cross-agent shared memory and escape hatch for autonomous agent sessions (Antigr
 #     promotion_target: string (path to rulebook destination)
 #     status: pending | promoted
 
-discovered_rules: []
+discovered_rules:
+  - id: press-trigger-needs-time-backstop
+    discovered_date: 2026-08-31
+    discovered_by: Claude
+    category: ai
+    target_files:
+      - autoloads/MatchWorldModel.gd
+      - entities/player/PlayerBrain.gd
+    invariant: >
+      The three original press triggers (FACING_OWN_GOAL, TOUCHLINE_ISOLATION,
+      HEAVY_TOUCH) are all narrow heuristics on the ball carrier's current
+      posture/position — none of them fire on a carrier who calmly holds or
+      dribbles mid-pitch facing forward. Since PlayerBrain._should_chase_ball()
+      /clamp_chase_target() only lift the anchor-distance chase clamp while
+      MatchWorldModel.press_trigger_active names an opposing carrier, a calm
+      carrier outside every defender/midfielder's anchor-relative chase radius
+      produces an indefinite, self-sustaining stand-off: the whole
+      non-possessing side scores MaintainFormation forever with nothing to
+      break it. Any future trigger heuristic added to this system must be
+      accompanied by, or covered by, a time-based backstop trigger (see
+      PROLONGED_POSSESSION, MatchWorldModel.gd) — do not assume posture-based
+      heuristics alone are sufficient to guarantee a press eventually happens.
+    rationale: >
+      Confirmed via full reads of _should_chase_ball(), clamp_chase_target(),
+      _update_press_trigger(), and all three _check_*_trigger() functions —
+      a CPU-vs-CPU match reported by the user froze into a permanent
+      white-presses-once-then-both-teams-stand-still state after a kickoff
+      mis-pass put the ball on a calmly-holding opponent, exactly matching
+      this gap.
+    promotion_target: .claude/rules/ai-architect.md
+    status: pending
 ```
 
 ## Session State
@@ -235,4 +265,50 @@ error_log:
       - autoloads/MatchWorldModel.gd
       - ui/HUD.gd
       - autoloads/DataLoader.gd
+
+  - id: ERR-20260831-01
+    date: 2026-08-31
+    agent: Claude
+    subsystem: ai
+    symptom: >
+      User-reported CPU-vs-CPU match froze permanently: white kicked off, the
+      ball ended up with red, white pressed briefly, then both teams stood
+      still indefinitely (match clock kept running, so IN_PLAY was never
+      stuck — the freeze was a decision-layer stand-off, not a phase-gate bug).
+    root_cause: >
+      Two compounding issues. (1) ChargeKickState._get_resolved_aim() falls
+      back to player.facing_direction for any non-user-controlled taker
+      (_aim_accumulator is only ever filled when is_user_controlled). A CPU
+      kickoff/set-piece taker was frozen in SetPieceFreezeState then teleported
+      onto its restart spot by _apply_formation() — neither step touches
+      facing_direction — so the kickoff tap fired along a stale direction with
+      no regard for teammates, often landing near an opponent parked only
+      wall_distance (176px) away. (2) Once the opponent settled into calm
+      possession, PlayerBrain._should_chase_ball()/clamp_chase_target() only
+      allow a player to chase beyond its formation-anchor-relative radius while
+      MatchWorldModel.press_trigger_active names that carrier — and none of
+      the three prior triggers (FACING_OWN_GOAL, TOUCHLINE_ISOLATION,
+      HEAVY_TOUCH) fire for a carrier who just holds the ball calmly facing
+      forward mid-pitch. With no trigger ever arming, every player on the
+      non-possessing side defaults to MaintainFormation forever — see the
+      press-trigger-needs-time-backstop discovered_rule above.
+    resolution: >
+      Added a 4th press trigger, PROLONGED_POSSESSION (MatchWorldModel.gd):
+      a _possession_hold_timer resets whenever possessor_index changes and
+      accumulates otherwise; _check_prolonged_possession_trigger() arms the
+      trigger once the same possessor has held the ball for
+      PROLONGED_POSSESSION_SECONDS (2.5s) with no other trigger having fired.
+      No changes were needed to _should_chase_ball(), clamp_chase_target(),
+      _score_chase(), or _resolve_defensive_duty() — all already treat
+      press_trigger_active/press_trigger_carrier generically across trigger
+      types. Separately, added PlayerBrain.find_pass_target_for_set_piece()
+      (thin public wrapper over the existing _find_best_pass_target()) and
+      call it from SetPieceCoordinator._activate_set_piece() to orient a CPU
+      taker's facing_direction at a real teammate before forcing CHARGE_KICK,
+      covering every CPU-taken restart (kickoff, free kick, corner), not just
+      kickoff.
+    affected_files:
+      - autoloads/MatchWorldModel.gd
+      - entities/player/PlayerBrain.gd
+      - pitch/SetPieceCoordinator.gd
 ```
