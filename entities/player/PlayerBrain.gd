@@ -1608,27 +1608,6 @@ func _find_passing_triangle_position(ball_pos: Vector2) -> Vector2:
 	var triangle_pos: Vector2 = ball_pos + Vector2(offset_x, offset_y)
 	return clamp_to_playable_area(triangle_pos)
 
-	# Perpendicular offset from the ball: the pitch's width runs along Y (the
-	# goals sit on the X ends), so "wide" is a Y offset, picking whichever
-	# touchline side this player's anchor already favours.
-	var anchor_side: float = signf(formation_anchor.y - ball_pos.y)
-	if anchor_side == 0.0:
-		anchor_side = 1.0
-
-	var offset_y: float = anchor_side * 140.0
-	# "Behind" the ball means toward our own goal along the X (attack) axis.
-	var offset_x: float = -_get_attack_sign() * 60.0
-
-	var triangle_pos: Vector2 = ball_pos + Vector2(offset_x, offset_y)
-
-	# Clamp to pitch bounds.
-	if pitch_boundary != null:
-		var bounds: Rect2 = pitch_boundary.get_pitch_rect()
-		triangle_pos.x = clampf(triangle_pos.x, bounds.position.x + 30.0, bounds.end.x - 30.0)
-		triangle_pos.y = clampf(triangle_pos.y, bounds.position.y + 30.0, bounds.end.y - 30.0)
-
-	return triangle_pos
-
 
 ## Returns the nearest opponent who is in a threatening forward position
 ## (ahead of the defensive line, between the defender and goal).
