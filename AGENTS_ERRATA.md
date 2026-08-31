@@ -49,6 +49,56 @@ discovered_rules:
       this gap.
     promotion_target: .claude/rules/ai-architect.md
     status: pending
+
+  - id: kickoff-backward-pass-veto-starves-taker
+    discovered_date: 2026-08-31
+    discovered_by: Claude
+    category: ai
+    target_files:
+      - entities/player/PlayerBrain.gd
+      - pitch/SetPieceCoordinator.gd
+    invariant: >
+      _find_best_pass_target()'s low-composure safety valve
+      (`if forward_dot < -0.2 and eff_composure < 0.55: continue`) rejects any
+      candidate positioned behind the passer along the attack axis. At
+      kickoff, SetPieceCoordinator._enforce_kickoff_halves() confines every
+      outfield player except the taker — who stands exactly on the centre
+      spot / halfway line — to their own half, i.e. structurally behind the
+      taker. For any taker with composure_attribute below 0.55 this makes
+      forward_dot < -0.2 for literally every teammate, so the loop rejects
+      every candidate and find_pass_target_for_set_piece() returns null.
+      _activate_set_piece() then leaves the CPU taker's stale
+      facing_direction untouched, ChargeKickState fires an immediate CPU tap
+      (CPU never holds action_kick, so _held_time is one physics frame — always
+      a tap) along that stale forward-facing direction, and the ball rolls
+      into the opponent's half where — by the same half-confinement rule — no
+      teammate can be standing. Immediate kickoff turnover, exactly matching
+      the "kickoff mis-pass" symptom in press-trigger-needs-time-backstop
+      above. Any future caller of _find_best_pass_target() for a restart
+      where IFAB rules confine the receiving side to one half (kickoff today,
+      potentially others later) must pass allow_backward_pass=true, or the
+      veto will silently starve it of every candidate whenever the taker's
+      composure rolls low.
+    rationale: >
+      Traced end-to-end: SetPieceCoordinator._enforce_kickoff_halves()
+      (clamps all non-taker players, both teams, to their own half) ->
+      PlayerBrain._find_best_pass_target()'s composure-gated backward-pass
+      continue -> SetPieceCoordinator._activate_set_piece()'s
+      pass_target-null branch (facing_direction left untouched) ->
+      ChargeKickState._release_kick()'s CPU-always-taps-instantly path
+      (wants() always false for a non-user-controlled player, so
+      still_held is always false and _held_time is a single physics frame).
+      User-reported: every kickoff, the kicking team passes into the
+      opponent's half and immediately loses possession.
+    resolution: >
+      Added allow_backward_pass: bool = false to
+      PlayerBrain._find_best_pass_target(); find_pass_target_for_set_piece()
+      now calls _find_best_pass_target(0.0, true) so restart takers can
+      target a real teammate regardless of composure. The normal open-play
+      caller (evaluate_tactical_action(), via _cached_pass_target) is
+      unchanged and still applies the low-composure veto.
+    promotion_target: .claude/rules/ai-architect.md
+    status: pending
 ```
 
 ## Session State
