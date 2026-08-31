@@ -37,6 +37,7 @@ Thumbs.db
 desktop.ini
 .worktrees/
 match_frames/
+eval_report.json
 
 # Historical archive files
 docs/archive/

@@ -242,13 +242,13 @@ func _setup_practice_arena() -> void:
 	# a Set so a duplicate never gets queue_free()'d twice.
 	var to_free: Dictionary = {}
 	for node: Node in players.get_children():
-		var p := node as HeavyPlayerController
-		if p == null or p == human_player or p == keeper_player:
+		var extra_player := node as HeavyPlayerController
+		if extra_player == null or extra_player == human_player or extra_player == keeper_player:
 			continue
-		to_free[p] = true
-	for p: HeavyPlayerController in to_free.keys():
-		if is_instance_valid(p):
-			p.queue_free()
+		to_free[extra_player] = true
+	for doomed_player: HeavyPlayerController in to_free.keys():
+		if is_instance_valid(doomed_player):
+			doomed_player.queue_free()
 
 	await get_tree().process_frame
 

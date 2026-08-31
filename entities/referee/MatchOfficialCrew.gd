@@ -150,13 +150,12 @@ func _on_offside_called(offside_player: Node, defending_team: int, position: Vec
 func _on_ball_out_of_bounds(side: String) -> void:
 	var world: MatchWorldModel = MatchWorldModel.instance
 	var ball_pos: Vector2 = world.ball_position if world != null else Vector2.ZERO
+	var dir_x: float = world.ball_velocity.x if world != null else 1.0
 
 	match side:
 		"touchline_top":
-			var dir_x: float = world.ball_velocity.x if world != null else 1.0
 			linesman_top.signal_throw_in(dir_x)
 		"touchline_bottom":
-			var dir_x: float = world.ball_velocity.x if world != null else -1.0
 			linesman_bottom.signal_throw_in(dir_x)
 		"end_line_corner":
 			if ball_pos.x >= 0.0:

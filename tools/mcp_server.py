@@ -3,7 +3,9 @@
 mcp_server.py — Model Context Protocol (MCP) Standard stdio Server for PowerFootball-2D.
 
 Exposes domain tools and spatial introspection endpoints over JSON-RPC 2.0 stdio MCP:
-- get_layer_invariants: Retrieve contracts, choke points, and active files for layers 1-5.
+- get_blast_radius: Analyze dependency DAG and calculate downstream impact blast radius.
+- extract_code_slice: Extract targeted class methods, enums, or headers without full file reads.
+- query_layer_invariants / get_layer_invariants: Retrieve contracts, choke points, and active files for layers 1-5.
 - inspect_scene_tree: Parse .tscn scene graphs, node hierarchies, and collision masks.
 - query_spatial_cache: Query player positions, velocities, and tactical anchors.
 - run_property_test: Run static analyzers, invariant linters, fuzzers, and headless evaluations.
@@ -32,6 +34,51 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # ---------------------------------------------------------------------------
 # Tool Implementations
 # ---------------------------------------------------------------------------
+def tool_get_blast_radius(target_file: str) -> dict[str, Any]:
+    from dump_dep_graph import scan_repository, calculate_blast_radius
+
+    norm_path = target_file.replace("\\", "/").replace("res://", "")
+    nodes, _ = scan_repository()
+    res = calculate_blast_radius(norm_path, nodes)
+    return res
+
+
+def tool_extract_code_slice(file_path: str, func: str = "", enum: str = "", class_header: bool = False, raw: bool = False) -> dict[str, Any]:
+    from codebase_slice import slice_function, slice_enum, slice_class_header
+
+    norm_path = file_path.replace("\\", "/").replace("res://", "")
+    full_path = os.path.join(ROOT, norm_path) if not os.path.isabs(norm_path) else norm_path
+
+    if not os.path.exists(full_path):
+        return {"error": f"File not found: {file_path}"}
+
+    with open(full_path, "r", encoding="utf-8", errors="replace") as f:
+        content = f.read()
+
+    lines = content.splitlines()
+    result_slice = []
+
+    if func:
+        result_slice = slice_function(lines, func)
+    elif enum:
+        result_slice = slice_enum(lines, enum)
+    elif class_header:
+        result_slice = slice_class_header(lines)
+    else:
+        result_slice = slice_class_header(lines)
+
+    if not result_slice:
+        return {"file": file_path, "found": False, "slice": "Symbol not found in target file."}
+
+    slice_text = "\n".join(f"{line_num:4d}: {line}" if not raw else line for line_num, line in result_slice)
+    return {
+        "file": os.path.relpath(full_path, ROOT).replace("\\", "/"),
+        "found": True,
+        "line_count": len(result_slice),
+        "slice": slice_text
+    }
+
+
 def tool_get_layer_invariants(layer: int | str) -> dict[str, Any]:
     from layer_context import LAYER_ALIASES, LAYER_DATA
 
@@ -124,20 +171,28 @@ def tool_run_property_test(module: str) -> dict[str, Any]:
     mod = module.lower().strip()
     cmd = []
 
-    if mod in ("gdcheck", "static"):
+    if mod in ("gate", "verify_gate", "fast"):
+        cmd = [sys.executable, os.path.join(ROOT, "tools", "verify_gate.py"), "--fast"]
+    elif mod in ("gdcheck", "static"):
         cmd = [sys.executable, os.path.join(ROOT, "tools", "gdcheck.py")]
     elif mod in ("lint_invariants", "invariants"):
         cmd = [sys.executable, os.path.join(ROOT, "tools", "lint_invariants.py")]
+    elif mod in ("lint_scope", "scope"):
+        cmd = [sys.executable, os.path.join(ROOT, "tools", "lint_scope.py")]
+    elif mod in ("lint_type_comparisons", "type_cmp"):
+        cmd = [sys.executable, os.path.join(ROOT, "tools", "lint_type_comparisons.py")]
     elif mod in ("tscn", "tscn_linter"):
         cmd = [sys.executable, os.path.join(ROOT, "tools", "tscn_linter.py")]
     elif mod in ("verify_db", "db", "schemas"):
         cmd = [sys.executable, os.path.join(ROOT, "tools", "validate_schemas.py")]
     elif mod in ("fuzz", "fuzz_solvers"):
         cmd = [sys.executable, os.path.join(ROOT, "tools", "fuzz_solvers.py"), "--iterations=10000"]
+    elif mod in ("fuzz_formations", "formations"):
+        cmd = [sys.executable, os.path.join(ROOT, "tools", "fuzz_formations.py"), "--iterations=5000"]
     elif mod in ("eval_sim", "sim"):
         cmd = [sys.executable, os.path.join(ROOT, "tools", "eval_simulation.py"), "--duration=10"]
     else:
-        return {"error": f"Unknown test module '{module}'. Available: gdcheck, invariants, tscn, db, fuzz, sim."}
+        return {"error": f"Unknown test module '{module}'. Available: gate, gdcheck, invariants, scope, type_cmp, tscn, db, fuzz, formations, sim."}
 
     proc = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
     return {
@@ -150,16 +205,52 @@ def tool_run_property_test(module: str) -> dict[str, Any]:
 
 
 # ---------------------------------------------------------------------------
-# MCP JSON-RPC Server
+# MCP JSON-RPC Server Metadata
 # ---------------------------------------------------------------------------
 TOOLS_METADATA = [
     {
-        "name": "get_layer_invariants",
+        "name": "get_blast_radius",
+        "description": "Analyze repository dependency graph and compute blast radius for changes to a specific script.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "target_file": {"type": "string", "description": "Path to file to analyze (e.g. autoloads/MatchWorldModel.gd)"}
+            },
+            "required": ["target_file"]
+        }
+    },
+    {
+        "name": "extract_code_slice",
+        "description": "Extract targeted class methods, enums, or headers from GDScript files with line numbers.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "file_path": {"type": "string", "description": "Relative path to .gd file"},
+                "func": {"type": "string", "description": "Optional function name to extract"},
+                "enum": {"type": "string", "description": "Optional enum name to extract"},
+                "class_header": {"type": "boolean", "description": "Extract class header and members"}
+            },
+            "required": ["file_path"]
+        }
+    },
+    {
+        "name": "query_layer_invariants",
         "description": "Extract domain invariant laws, choke point contracts, and key file paths for simulation layers 1-5.",
         "inputSchema": {
             "type": "object",
             "properties": {
                 "layer": {"type": ["integer", "string"], "description": "Simulation layer number (1-5) or alias (physics, ai, social, club, narrative)"}
+            },
+            "required": ["layer"]
+        }
+    },
+    {
+        "name": "get_layer_invariants",
+        "description": "Alias for query_layer_invariants.",
+        "inputSchema": {
+            "type": "object",
+            "properties": {
+                "layer": {"type": ["integer", "string"], "description": "Simulation layer number (1-5) or alias"}
             },
             "required": ["layer"]
         }
@@ -192,7 +283,7 @@ TOOLS_METADATA = [
         "inputSchema": {
             "type": "object",
             "properties": {
-                "module": {"type": "string", "description": "Test module name: gdcheck, invariants, tscn, db, fuzz, sim"}
+                "module": {"type": "string", "description": "Test module name: gate, gdcheck, invariants, scope, type_cmp, tscn, db, fuzz, formations, sim"}
             },
             "required": ["module"]
         }
@@ -230,14 +321,24 @@ def handle_json_rpc(request: dict[str, Any]) -> dict[str, Any]:
         tool_name = params.get("name")
         args = params.get("arguments", {})
 
-        if tool_name == "get_layer_invariants":
+        if tool_name == "get_blast_radius":
+            res = tool_get_blast_radius(args.get("target_file", ""))
+        elif tool_name == "extract_code_slice":
+            res = tool_extract_code_slice(
+                file_path=args.get("file_path", ""),
+                func=args.get("func", ""),
+                enum=args.get("enum", ""),
+                class_header=args.get("class_header", False),
+                raw=args.get("raw", False)
+            )
+        elif tool_name in ("query_layer_invariants", "get_layer_invariants"):
             res = tool_get_layer_invariants(args.get("layer", 1))
         elif tool_name == "inspect_scene_tree":
             res = tool_inspect_scene_tree(args.get("scene_path", ""))
         elif tool_name == "query_spatial_cache":
             res = tool_query_spatial_cache(args.get("entity_id", 0))
         elif tool_name == "run_property_test":
-            res = tool_run_property_test(args.get("module", "gdcheck"))
+            res = tool_run_property_test(args.get("module", "gate"))
         else:
             return {
                 "jsonrpc": "2.0",
@@ -269,11 +370,12 @@ def handle_json_rpc(request: dict[str, Any]) -> dict[str, Any]:
 
 
 def main() -> int:
-    # If run in CLI test mode
     if len(sys.argv) > 1 and sys.argv[1] == "--test":
-        print("[mcp_server] Running test call to 'get_layer_invariants'...")
+        print("[mcp_server] Running self-test...")
         res = tool_get_layer_invariants(2)
-        print(json.dumps(res, indent=2))
+        print("Layer 2 Invariants:\n", json.dumps(res, indent=2))
+        blast = tool_get_blast_radius("autoloads/MatchWorldModel.gd")
+        print("\nBlast Radius:\n", json.dumps(blast, indent=2))
         return 0
 
     # stdio JSON-RPC loop

@@ -177,8 +177,8 @@ func _compute_target_position() -> Vector2:
 	match _mode:
 		Mode.BALL_FOLLOW:
 			# Lead slightly in the direction the ball is travelling.
-			var lead: Vector2 = _ball_velocity().limit_length(max_lead_distance) * velocity_lead_strength
-			return ball_pos + lead
+			var follow_lead: Vector2 = _ball_velocity().limit_length(max_lead_distance) * velocity_lead_strength
+			return ball_pos + follow_lead
 
 		Mode.DYNAMIC:
 			if _human == null:
@@ -187,8 +187,8 @@ func _compute_target_position() -> Vector2:
 			# ball as the star of the show while giving the human player enough
 			# screen presence to anticipate the next touch.
 			var weighted: Vector2 = ball_pos * 0.65 + _human.global_position * 0.35
-			var lead: Vector2 = _ball_velocity().limit_length(max_lead_distance) * velocity_lead_strength * 0.6
-			return weighted + lead
+			var dyn_lead: Vector2 = _ball_velocity().limit_length(max_lead_distance) * velocity_lead_strength * 0.6
+			return weighted + dyn_lead
 
 		Mode.FULL_FIELD:
 			return _pitch_rect.get_center()

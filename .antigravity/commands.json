@@ -1,8 +1,8 @@
 {
   "commands": {
     "verify-all": {
-      "description": "Runs complete static verification (gdcheck.py), domain AST invariants (lint_invariants.py), scene graphs (tscn_linter.py), StringNames (lint_stringnames.py), shadowing (lint_shadowing.py), and database verification (verify_db.py)",
-      "command": "python3 tools/gdcheck.py && python3 tools/lint_invariants.py && python3 tools/tscn_linter.py && python3 tools/lint_stringnames.py && python3 tools/lint_shadowing.py && python3 tools/verify_db.py || python tools/gdcheck.py && python tools/lint_invariants.py && python tools/tscn_linter.py && python tools/lint_stringnames.py && python tools/lint_shadowing.py && python tools/verify_db.py || py -3 tools/gdcheck.py && py -3 tools/lint_invariants.py && py -3 tools/tscn_linter.py && py -3 tools/lint_stringnames.py && py -3 tools/lint_shadowing.py && py -3 tools/verify_db.py",
+      "description": "Runs full verification suite (tools/verify_gate.py --full) including static linters, scope & type checks, scene graph, property fuzzers, and index regenerations",
+      "command": "python3 tools/verify_gate.py --full || python tools/verify_gate.py --full || py -3 tools/verify_gate.py --full",
       "stream_output": true
     },
     "lint-invariants": {

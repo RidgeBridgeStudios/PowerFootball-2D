@@ -350,8 +350,8 @@ func world_to_cell(world_pos: Vector2) -> Vector2i:
 ## zero heap allocations per physics frame.
 func _update_spatial_grid() -> void:
 	for cell: Vector2i in _active_cells:
-		var bucket: Array[int] = _grid.get(cell, [] as Array[int])
-		bucket.clear()
+		var clear_bucket: Array[int] = _grid.get(cell, [] as Array[int])
+		clear_bucket.clear()
 	_active_cells.clear()
 
 	for i: int in range(TOTAL_PLAYERS):
@@ -795,9 +795,9 @@ func nearest_opponent_dist_to(pos: Vector2, team: int) -> float:
 			continue
 		if player_teams[i] == team:
 			continue
-		var d_sq: float = pos.distance_squared_to(player_positions[i])
-		if d_sq < best_sq:
-			best_sq = d_sq
+		var cand_d_sq: float = pos.distance_squared_to(player_positions[i])
+		if cand_d_sq < best_sq:
+			best_sq = cand_d_sq
 	return sqrt(best_sq) if best_sq < INF else INF
 
 

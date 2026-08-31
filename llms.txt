@@ -135,7 +135,10 @@ Press office reactions, touchline dialogue, broadcast HUD, floating labels, matc
 ## 3. Tooling & Automation
 
 <tooling>
+- **tools/verify_gate.py** — Unified verification orchestrator running --fast (<150ms post-write gate) and --full (pre-turn completion battery).
 - **tools/lint_invariants.py** — Domain-specific AST invariant linter enforcing layer separation, zero allocations, collision matrix, and choke points.
+- **tools/lint_scope.py** — Postmortem AST scope linter catching duplicate variable declarations and dead code across function blocks.
+- **tools/lint_type_comparisons.py** — Postmortem type safety linter preventing Object vs String/StringName equality comparisons.
 - **tools/lint_stringnames.py** — StringName literal linter enforcing `&"string_name"` on signal and metadata invocations.
 - **tools/lint_shadowing.py** — Parameter shadowing linter preventing collisions with member variables and autoload singletons.
 - **tools/lint_allocations.py** — Allocation & distance-sorting linter enforcing `distance_squared_to()` and zero transient RNG instantiations.

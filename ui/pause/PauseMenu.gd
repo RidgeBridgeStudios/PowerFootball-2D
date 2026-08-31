@@ -118,19 +118,19 @@ func _rebuild_sub_lists() -> void:
 		starters_list.add_child(btn)
 
 	for bi in range(mgmt.bench.size()):
-		var sq_idx: int = mgmt.bench[bi]
-		var p: PlayerData = mgmt.team.squad[sq_idx]
-		var btn := Button.new()
-		btn.text = "#%d  %s  [%s]  Form:%.1f%s" % [
-			p.shirt_number, p.player_name, p.position_role, p.form,
-			"  ⚠ UNAVAILABLE" if p.is_unavailable else ""
+		var bench_sq_idx: int = mgmt.bench[bi]
+		var bench_p: PlayerData = mgmt.team.squad[bench_sq_idx]
+		var bench_btn := Button.new()
+		bench_btn.text = "#%d  %s  [%s]  Form:%.1f%s" % [
+			bench_p.shirt_number, bench_p.player_name, bench_p.position_role, bench_p.form,
+			"  ⚠ UNAVAILABLE" if bench_p.is_unavailable else ""
 		]
-		btn.disabled = p.is_unavailable or mgmt.substitutions_used >= 3
-		if p.is_unavailable:
-			btn.modulate = Color(0.55, 0.55, 0.55)
+		bench_btn.disabled = bench_p.is_unavailable or mgmt.substitutions_used >= 3
+		if bench_p.is_unavailable:
+			bench_btn.modulate = Color(0.55, 0.55, 0.55)
 		var b := bi
-		btn.pressed.connect(func(): _on_bench_clicked(b))
-		bench_list.add_child(btn)
+		bench_btn.pressed.connect(func(): _on_bench_clicked(b))
+		bench_list.add_child(bench_btn)
 
 
 func _on_starter_clicked(slot: int) -> void:

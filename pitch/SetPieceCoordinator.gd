@@ -581,13 +581,13 @@ func _build_defensive_wall(free_kick_pos: Vector2, _defending_team: int) -> void
 	# Collect outfield defenders for the wall (exclude goalkeeper).
 	var defenders: Array[HeavyPlayerController] = []
 	for node: Node in _players.get_children():
-		var p := node as HeavyPlayerController
-		if p == null or p.team != defending_team:
+		var cand_def := node as HeavyPlayerController
+		if cand_def == null or cand_def.team != defending_team:
 			continue
-		var brain := p.get_node_or_null("PlayerBrain") as PlayerBrain
+		var brain := cand_def.get_node_or_null("PlayerBrain") as PlayerBrain
 		if brain != null and brain.is_goalkeeper:
 			continue
-		defenders.append(p)
+		defenders.append(cand_def)
 
 	# Sort by proximity to the free kick spot; take the 4 closest.
 	defenders.sort_custom(func(a: HeavyPlayerController, b: HeavyPlayerController) -> bool:
@@ -601,13 +601,13 @@ func _build_defensive_wall(free_kick_pos: Vector2, _defending_team: int) -> void
 
 	var wall_positions: Array[Vector2] = []
 	for i: int in range(wall_size):
-		var p: HeavyPlayerController = defenders[i]
+		var wall_player: HeavyPlayerController = defenders[i]
 		var lateral_offset: float = -half_span + float(i) * spacing
 		var target_pos: Vector2 = wall_origin + perp * lateral_offset
 		target_pos.x = clampf(target_pos.x, pitch_rect.position.x, pitch_rect.end.x)
 		target_pos.y = clampf(target_pos.y, pitch_rect.position.y, pitch_rect.end.y)
-		p.global_position = target_pos
-		p.velocity = Vector2.ZERO
+		wall_player.global_position = target_pos
+		wall_player.velocity = Vector2.ZERO
 		wall_positions.append(target_pos)
 
 	if wall_size >= 3:

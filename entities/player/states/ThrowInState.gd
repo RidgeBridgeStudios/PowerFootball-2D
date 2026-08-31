@@ -119,13 +119,15 @@ func _release_throw(player: HeavyPlayerController) -> void:
 		return
 
 	var aim: Vector2 = Vector2.ZERO
+	var ai_brain: PlayerBrain = player.brain
+	var pass_target: HeavyPlayerController = null
+	if not player.is_user_controlled and ai_brain != null:
+		pass_target = ai_brain.get("_cached_pass_target") as HeavyPlayerController
+		if pass_target != null:
+			aim = (pass_target.global_position + pass_target.velocity * 0.3) - player.global_position
+
 	if player.is_user_controlled:
 		aim = InputHelper.get_aim_vector()
-	else:
-		var brain: Node = player.get_node_or_null("PlayerBrain")
-		if brain != null and brain.get("_cached_pass_target") != null:
-			var target = brain.get("_cached_pass_target")
-			aim = (target.global_position + target.velocity * 0.3) - player.global_position
 	if aim == Vector2.ZERO:
 		aim = player.facing_direction
 
@@ -133,18 +135,15 @@ func _release_throw(player: HeavyPlayerController) -> void:
 	# Apply 3D impulse so the ball is lobbed into play
 	var z_impulse: float = lerpf(150.0, 350.0, charge_ratio)
 	ball.apply_kick(aim.normalized() * speed, z_impulse, player)
-	
-	if not player.is_user_controlled:
-		var brain: Node = player.get_node_or_null("PlayerBrain")
-		if brain != null and brain.get("_cached_pass_target") != null:
-			var target = brain.get("_cached_pass_target")
-			var trust_sys = player.get_trust_system() if player.has_method("get_trust_system") else null
-			if trust_sys != null:
-				trust_sys.register_pass(TrustSystem.player_key(target))
-			var target_brain = target.get_node_or_null("PlayerBrain")
-			if target_brain != null:
-				target_brain.set("_pass_lock_timer", 0.35)
-				target_brain.set("_pass_lock_passer", ball.possessor)
+
+	if not player.is_user_controlled and pass_target != null:
+		var trust_sys: TrustSystem = player.get_trust_system() if player.has_method(&"get_trust_system") else null
+		if trust_sys != null:
+			trust_sys.register_pass(TrustSystem.player_key(pass_target))
+		var target_brain: PlayerBrain = pass_target.brain
+		if target_brain != null:
+			target_brain.set(&"_pass_lock_timer", 0.35)
+			target_brain.set(&"_pass_lock_passer", ball.possessor)
 	
 	player.show_action_text("THROW")
 	GameEvents.ball_struck.emit(player, speed, charge_ratio, false)

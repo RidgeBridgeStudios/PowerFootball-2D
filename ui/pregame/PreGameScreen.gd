@@ -161,12 +161,12 @@ func _rebuild_team_lists(
 		starter_list.add_child(card)
 
 	for bi in range(mgmt.bench.size()):
-		var squad_idx: int = mgmt.bench[bi]
-		var p: PlayerData = mgmt.team.squad[squad_idx]
-		var card: Button = _make_player_card(p, true)
+		var bench_squad_idx: int = mgmt.bench[bi]
+		var bench_p: PlayerData = mgmt.team.squad[bench_squad_idx]
+		var bench_card: Button = _make_player_card(bench_p, true)
 		var b := bi
-		card.pressed.connect(func(): _on_bench_clicked(team, b))
-		bench_list_box.add_child(card)
+		bench_card.pressed.connect(func(): _on_bench_clicked(team, b))
+		bench_list_box.add_child(bench_card)
 
 
 ## Build a single player card Button. Shows shirt number, name, position,

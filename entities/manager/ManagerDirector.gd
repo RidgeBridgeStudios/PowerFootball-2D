@@ -91,9 +91,9 @@ func _apply_formation(formation_name: String) -> void:
 
 	var team_players: Array[HeavyPlayerController] = []
 	for node: Node in _players_node.get_children():
-		var player := node as HeavyPlayerController
-		if player != null and player.team == _team:
-			team_players.append(player)
+		var p := node as HeavyPlayerController
+		if p != null and p.team == _team:
+			team_players.append(p)
 	var by_squad_index := func(a: HeavyPlayerController, b: HeavyPlayerController) -> bool:
 		return a.squad_index < b.squad_index
 	team_players.sort_custom(by_squad_index)

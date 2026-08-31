@@ -6108,7 +6108,7 @@
         "is_static": false
       },
       "_find_nearby_ball": {
-        "line": 158,
+        "line": 157,
         "args": [
           "player: HeavyPlayerController",
           "radius: float"
@@ -7005,7 +7005,7 @@
         "is_static": false
       },
       "_on_substitution_made": {
-        "line": 173,
+        "line": 172,
         "args": [
           "team: int",
           "player_out_idx: int",
@@ -7015,7 +7015,7 @@
         "is_static": false
       },
       "_on_goal_scored": {
-        "line": 177,
+        "line": 176,
         "args": [
           "_team: int",
           "_scorer: Node = null"
@@ -7024,19 +7024,19 @@
         "is_static": false
       },
       "_on_kickoff_started": {
-        "line": 183,
+        "line": 182,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_half_time_reached": {
-        "line": 188,
+        "line": 187,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_match_ended": {
-        "line": 192,
+        "line": 191,
         "args": [
           "_winner: int"
         ],
@@ -7044,7 +7044,7 @@
         "is_static": false
       },
       "_on_free_kick_started": {
-        "line": 196,
+        "line": 195,
         "args": [
           "_team: int",
           "position: Vector2",
@@ -7054,7 +7054,7 @@
         "is_static": false
       },
       "_on_penalty_started": {
-        "line": 201,
+        "line": 200,
         "args": [
           "_team: int",
           "position: Vector2"
@@ -7063,19 +7063,19 @@
         "is_static": false
       },
       "get_center_ref": {
-        "line": 208,
+        "line": 207,
         "args": [],
         "return": "CenterRefereeVisual",
         "is_static": false
       },
       "get_linesmen": {
-        "line": 212,
+        "line": 211,
         "args": [],
         "return": "Array[AssistantRefereeVisual]",
         "is_static": false
       },
       "get_fourth_official": {
-        "line": 216,
+        "line": 215,
         "args": [],
         "return": "FourthOfficialVisual",
         "is_static": false
