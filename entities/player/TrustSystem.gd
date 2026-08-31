@@ -37,12 +37,12 @@ extends Node
 ## --- Tuning — the single place to retune trust behaviour ---------------------
 
 ## Trust value read for a teammate the passer has no history with yet.
-const NEUTRAL_TRUST: float = 0.5
-const MIN_TRUST: float = 0.15
-const MAX_TRUST: float = 0.95
+const NEUTRAL_TRUST: float = 1.0
+const MIN_TRUST: float = 0.5
+const MAX_TRUST: float = 1.5
 
 ## Applied to trust[target] when a pass to that exact target completes.
-const RECEPTION_TRUST_DELTA: float = 0.10
+const RECEPTION_TRUST_DELTA: float = 0.04
 ## Applied to trust[target] when a pass to that exact target is intercepted.
 const INTERCEPTION_TRUST_DELTA: float = -0.12
 
@@ -66,7 +66,7 @@ static var trust_bias_enabled: bool = true
 
 ## --- State ---------------------------------------------------------------------
 
-var _trust: Dictionary = {}   # int (player_key) -> float
+var _trust: PackedFloat32Array = PackedFloat32Array()
 
 var _player: HeavyPlayerController = null
 
@@ -76,8 +76,12 @@ var _pending_target_key: int = -1
 var _pending_timer: float = 0.0
 
 
+
 func _ready() -> void:
+	_trust.resize(22)
+	_trust.fill(NEUTRAL_TRUST)
 	_player = get_parent() as HeavyPlayerController
+
 	if _player == null:
 		push_error("TrustSystem must be a child of HeavyPlayerController.")
 
@@ -93,7 +97,7 @@ func _physics_process(delta: float) -> void:
 ## Called by PlayerFactory at match start (and on substitution) — clears
 ## accumulated trust and any in-flight pending pass.
 func reset() -> void:
-	_trust.clear()
+	_trust.fill(NEUTRAL_TRUST)
 	_pending_target_key = -1
 	_pending_timer = 0.0
 
@@ -126,12 +130,16 @@ func resolve_possession_change(new_holder_key: int, same_team: bool) -> void:
 ## Trust this player currently holds toward the given teammate, defaulting to
 ## NEUTRAL_TRUST for a candidate with no history yet.
 func get_trust(target_key: int) -> float:
-	return _trust.get(target_key, NEUTRAL_TRUST)
-
+	var idx: int = target_key % 1000
+	if idx >= 0 and idx < 22:
+		return _trust[idx]
+	return NEUTRAL_TRUST
 
 func _adjust(target_key: int, delta: float) -> void:
-	var current: float = _trust.get(target_key, NEUTRAL_TRUST)
-	_trust[target_key] = clampf(current + delta, MIN_TRUST, MAX_TRUST)
+	var idx: int = target_key % 1000
+	if idx >= 0 and idx < 22:
+		var current: float = _trust[idx]
+		_trust[idx] = clampf(current + delta, MIN_TRUST, MAX_TRUST)
 
 
 ## Maps a 0.0-1.0 trust value onto a gentle multiplier for pass-utility scores.

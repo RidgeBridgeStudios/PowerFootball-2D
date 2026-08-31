@@ -75,6 +75,9 @@ signal aerial_contested(player: Node, clean: bool)
 ## hit-stop hook. GameManager freezes the clock briefly on this.
 signal powerful_shot_landed(shooter: HeavyPlayerController, speed: float, ratio: float)
 
+## Fired 0.3s before a predicted interception
+signal anticipatory_turnover_predicted(team: int)
+
 ## --- Referee events ---------------------------------------------------------
 
 ## Fired when the referee decides to award a foul. HUD and audio react to this.

@@ -161,3 +161,27 @@ static func quadratic_decay(distance: float, max_distance: float) -> float:
 ## threshold.
 static func sigmoid(value: float, midpoint: float, steepness: float) -> float:
 	return 1.0 / (1.0 + exp(-steepness * (value - midpoint)))
+
+
+
+static func solve_pass_intercept(
+		passer_pos: Vector2,
+		p_recv: Vector2,
+		v_recv: Vector2,
+		v_b0: float = 520.0,
+		c: float = 1.5
+) -> float:
+	var lo: float = 0.0
+	var hi: float = 4.0
+	var safe_c: float = maxf(c, 0.1)
+	for i: int in range(8):
+		var mid: float = (lo + hi) * 0.5
+		var p_lead: Vector2 = p_recv + v_recv * mid
+		var dist: float = passer_pos.distance_to(p_lead)
+		var d_ball: float = v_b0 * (1.0 - exp(-safe_c * mid)) / safe_c
+		if d_ball >= dist:
+			hi = mid
+		else:
+			lo = mid
+	return hi
+

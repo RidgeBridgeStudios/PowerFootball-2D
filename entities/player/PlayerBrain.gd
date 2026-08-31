@@ -107,6 +107,7 @@ enum Role { OUTFIELD_ATTACKER, OUTFIELD_MIDFIELDER, OUTFIELD_DEFENDER, GOALKEEPE
 enum DefensiveDuty {
 	NONE,          ## No active trigger, or this role does not take a duty.
 	TRIGGER_PRESS, ## The one defender closest to the trigger carrier — closes down.
+	COVER_SUPPORT, ##
 	COVER_SHADOW,  ## A nearby defender not pressing — cuts a likely passing lane instead.
 	MARKING,       ## Reserved fallback label — currently folded into RETREAT's target.
 	RETREAT,       ## Too far from the trigger to be relevant — hold the defensive line.
@@ -1567,19 +1568,67 @@ func _find_open_space_target() -> Vector2:
 		Role.OUTFIELD_DEFENDER:
 			if has_ball:
 				var safe_pos: Vector2 = dynamic_anchor
-				safe_pos = safe_pos.lerp(ball_pos, 0.08)
-				return _evaluate_off_ball_target(safe_pos)
+				if absf(formation_anchor.y) > 120.0:
+					var is_rb: bool = formation_anchor.y > 0.0
+					var is_lb: bool = formation_anchor.y < 0.0
+					var opposite_advanced: bool = false
+					var world: MatchWorldModel = MatchWorldModel.instance
+					if world != null:
+						for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+							if world.player_teams[i] == player.team and world.player_nodes[i] != player:
+								var px: float = world.p_pos_x[i]
+								var py: float = world.p_pos_y[i]
+								var advanced_x: float = px * _get_attack_sign()
+								if advanced_x > 0.0 and absf(py) > 180.0:
+									if (is_lb and py > 0.0) or (is_rb and py < 0.0):
+										opposite_advanced = true
+										break
+					if opposite_advanced:
+						var clamped_y: float = clampf(safe_pos.y, -180.0, 180.0)
+						safe_pos = Vector2(safe_pos.x, clamped_y)
+						return clamp_to_playable_area(safe_pos)
+					safe_pos = safe_pos.lerp(ball_pos, 0.08)
+					return _evaluate_off_ball_target(safe_pos)
+				else:
+					safe_pos = safe_pos.lerp(ball_pos, 0.08)
+					var target: Vector2 = _evaluate_off_ball_target(safe_pos)
+					if pitch_boundary != null:
+						var max_adv: float = pitch_boundary.get_centre_spot().x - 60.0 * _get_attack_sign()
+						if _get_attack_sign() > 0.0:
+							target.x = minf(target.x, max_adv)
+						else:
+							target.x = maxf(target.x, max_adv)
+					return clamp_to_playable_area(target)
 			else:
-				if current_duty == DefensiveDuty.COVER_SHADOW:
-					var world_press: MatchWorldModel = MatchWorldModel.instance
-					if world_press != null and is_instance_valid(world_press.press_trigger_carrier):
-						return clamp_to_playable_area(_cover_shadow_target(world_press.press_trigger_carrier))
-
-				var line_anchor: Vector2 = dynamic_anchor
 				var world: MatchWorldModel = MatchWorldModel.instance
+				if current_duty == DefensiveDuty.COVER_SUPPORT:
+					if world != null and is_instance_valid(world.press_trigger_carrier):
+						var carrier_pos: Vector2 = world.press_trigger_carrier.global_position
+						var opp_goal: Vector2 = pitch_boundary.get_goal_centre(player.team)
+						var btg_axis: Vector2 = (opp_goal - carrier_pos).normalized()
+						var sup_pos: Vector2 = carrier_pos + btg_axis * 50.0
+						return clamp_to_playable_area(sup_pos)
+				if current_duty == DefensiveDuty.COVER_SHADOW:
+					if world != null and is_instance_valid(world.press_trigger_carrier):
+						var cx: int = clampi(int((player.global_position.x + MatchWorldModel.TACTICAL_OFFSET_X) / MatchWorldModel.TACTICAL_CELL_W), 0, MatchWorldModel.TACTICAL_GRID_WIDTH - 1)
+						var cy: int = clampi(int((player.global_position.y + MatchWorldModel.TACTICAL_OFFSET_Y) / MatchWorldModel.TACTICAL_CELL_H), 0, MatchWorldModel.TACTICAL_GRID_HEIGHT - 1)
+						var best_threat: int = -1
+						var best_cell: Vector2 = player.global_position
+						for dy: int in range(-1, 2):
+							for dx: int in range(-1, 2):
+								var nx: int = cx + dx
+								var ny: int = cy + dy
+								if nx >= 0 and nx < MatchWorldModel.TACTICAL_GRID_WIDTH and ny >= 0 and ny < MatchWorldModel.TACTICAL_GRID_HEIGHT:
+									var idx: int = ny * MatchWorldModel.TACTICAL_GRID_WIDTH + nx
+									var threat: int = world.grid_away[idx] if player.team == 0 else world.grid_home[idx]
+									if threat > best_threat:
+										best_threat = threat
+										best_cell = Vector2(float(nx) * MatchWorldModel.TACTICAL_CELL_W - MatchWorldModel.TACTICAL_OFFSET_X + MatchWorldModel.TACTICAL_CELL_W * 0.5, float(ny) * MatchWorldModel.TACTICAL_CELL_H - MatchWorldModel.TACTICAL_OFFSET_Y + MatchWorldModel.TACTICAL_CELL_H * 0.5)
+						return clamp_to_playable_area(best_cell)
+				
+				var line_anchor: Vector2 = dynamic_anchor
 				if world != null:
-					line_anchor.x = lerpf(
-						line_anchor.x, world.defensive_line_x[player.team], DEFENSIVE_LINE_DEPTH_WEIGHT)
+					line_anchor.x = lerpf(line_anchor.x, world.defensive_line_x[player.team], DEFENSIVE_LINE_DEPTH_WEIGHT)
 
 				var threat: HeavyPlayerController = _find_nearest_threatening_opponent()
 				if threat != null:
@@ -1684,7 +1733,7 @@ func _resolve_defensive_duty() -> DefensiveDuty:
 		return DefensiveDuty.NONE
 
 	var my_dist_sq: float = player.global_position.distance_squared_to(carrier.global_position)
-	var someone_closer: bool = false
+	var closer_count: int = 0
 	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
 		var other: HeavyPlayerController = world.player_nodes[i]
 		if not is_instance_valid(other) or other == player:
@@ -1695,15 +1744,15 @@ func _resolve_defensive_duty() -> DefensiveDuty:
 		if other_brain == null or other_brain.role != Role.OUTFIELD_DEFENDER:
 			continue
 		var other_dist_sq: float = world.player_positions[i].distance_squared_to(carrier.global_position)
-		# Tie-break on player_index so an exact distance tie still resolves to
-		# a single presser instead of both defenders claiming the duty.
 		if other_dist_sq < my_dist_sq or (is_equal_approx(other_dist_sq, my_dist_sq) and i < player_index):
-			someone_closer = true
-			break
+			closer_count += 1
 
-	if not someone_closer:
+	var my_dist: float = sqrt(my_dist_sq)
+	if closer_count == 0:
 		return DefensiveDuty.TRIGGER_PRESS
-	if my_dist <= COVER_SHADOW_RADIUS:
+	elif closer_count == 1 and my_dist <= COVER_SHADOW_RADIUS:
+		return DefensiveDuty.COVER_SUPPORT
+	elif closer_count == 2 and my_dist <= COVER_SHADOW_RADIUS:
 		return DefensiveDuty.COVER_SHADOW
 	# Too far from the pressing situation to usefully shadow a lane — label
 	# only, the pre-existing hold-shape branch in _find_open_space_target()
@@ -1942,7 +1991,23 @@ func _steer_for_action(delta: float) -> Vector2:
 	# Sprint is expressed as intent, not the resolved is_sprinting — the
 	# controller alone decides whether stamina actually allows it.
 	player.wants_sprint = current_action == &"ChaseBall" and distance > CHASE_RADIUS * 0.5
-	var raw_intent: Vector2 = (seek_force + sep_force + spring_force + assist_force + line_lateral_force).limit_length(1.0)
+	var sacchi_force: Vector2 = Vector2.ZERO
+	if role == Role.OUTFIELD_DEFENDER or role == Role.OUTFIELD_MIDFIELDER or role == Role.OUTFIELD_ATTACKER:
+		var world: MatchWorldModel = MatchWorldModel.instance
+		if world != null:
+			var com_x: float = world.team_com_x[player.team]
+			var att_x: float = world.team_att_x[player.team]
+			var def_x: float = world.team_def_x[player.team]
+			var L_team: float = absf(att_x - def_x)
+			if L_team > 340.0:
+				var K_sacchi: float = 0.0025
+				var p_x: float = player.global_position.x
+				var f_mag: float = -K_sacchi * ((L_team - 340.0) * (L_team - 340.0)) * signf(p_x - com_x)
+				# 0.25 scale for 10px stretch, limit max to 1.0
+				f_mag = clampf(f_mag / 100.0, -1.0, 1.0)
+				sacchi_force = Vector2(f_mag, 0.0)
+
+	var raw_intent: Vector2 = (seek_force + sep_force + spring_force + assist_force + line_lateral_force + sacchi_force).limit_length(1.0)
 	return _apply_intent_blend(raw_intent)
 
 

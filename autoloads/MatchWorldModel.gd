@@ -73,6 +73,24 @@ var player_positions: PackedVector2Array = PackedVector2Array()
 var player_velocities: PackedVector2Array = PackedVector2Array()
 var player_teams: PackedInt32Array = PackedInt32Array()
 
+## --- Tactical Pitch Control Grid (12x8) ---
+const TACTICAL_GRID_WIDTH: int = 12
+const TACTICAL_GRID_HEIGHT: int = 8
+const TACTICAL_CELL_W: float = 106.6666
+const TACTICAL_CELL_H: float = 90.0
+const TACTICAL_GRID_CELLS: int = 96
+const TACTICAL_OFFSET_X: float = 640.0
+const TACTICAL_OFFSET_Y: float = 360.0
+
+var p_pos_x: PackedFloat32Array = PackedFloat32Array()
+var p_pos_y: PackedFloat32Array = PackedFloat32Array()
+var p_vel_x: PackedFloat32Array = PackedFloat32Array()
+var p_vel_y: PackedFloat32Array = PackedFloat32Array()
+var grid_home: PackedInt32Array = PackedInt32Array()
+var grid_away: PackedInt32Array = PackedInt32Array()
+var grid_dominant: PackedInt32Array = PackedInt32Array()
+
+
 ## --- Ball cache -------------------------------------------------------------
 
 var ball_node: Pseudo3DBall = null
@@ -81,6 +99,7 @@ var ball_velocity: Vector2 = Vector2.ZERO
 ## Index into player_nodes of whoever currently has the ball, or NO_INDEX.
 ## Resolved from Pseudo3DBall.possessor, falling back to last_touched_by.
 var possessor_index: int = NO_INDEX
+var _turnover_predicted: bool = false
 
 ## Next slot handed out by register_player() when a caller passes NO_INDEX.
 var _auto_index: int = 0
@@ -123,6 +142,12 @@ const LINE_DEPTH_LERP_SPEED: float = 220.0
 ## Per-team [TEAM_A, TEAM_B] defensive line depth, world-space X. Read by
 ## PlayerBrain via MatchWorldModel.instance.defensive_line_x[team].
 var defensive_line_x: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+
+## --- Sacchi Compactness Cache ---
+var team_com_x: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+var team_att_x: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+var team_def_x: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+
 
 ## False until the first _update_defensive_lines() call, so that call can snap
 ## straight to its target instead of gliding in from a stale 0.0 at kickoff.
@@ -243,6 +268,14 @@ func _enter_tree() -> void:
 	for i: int in range(GRID_WIDTH * GRID_HEIGHT):
 		_grid[i] = [] as Array[int]
 	_resize_arrays()
+	p_pos_x.resize(TOTAL_PLAYERS)
+	p_pos_y.resize(TOTAL_PLAYERS)
+	p_vel_x.resize(TOTAL_PLAYERS)
+	p_vel_y.resize(TOTAL_PLAYERS)
+	grid_home.resize(TACTICAL_GRID_CELLS)
+	grid_away.resize(TACTICAL_GRID_CELLS)
+	grid_dominant.resize(TACTICAL_GRID_CELLS)
+
 
 
 func _ready() -> void:
@@ -306,6 +339,13 @@ func unregister_all() -> void:
 	defensive_line_x[0] = 0.0
 	defensive_line_x[1] = 0.0
 	_defensive_lines_ready = false
+	team_com_x[0] = 0.0
+	team_com_x[1] = 0.0
+	team_att_x[0] = 0.0
+	team_att_x[1] = 0.0
+	team_def_x[0] = 0.0
+	team_def_x[1] = 0.0
+
 	_clear_press_trigger()
 	_press_trigger_timer = 0.0
 	_boundary = null
@@ -313,6 +353,10 @@ func unregister_all() -> void:
 		var bucket: Array = _grid[cell_idx]
 		bucket.clear()
 	_active_cells.clear()
+	for i: int in range(TACTICAL_GRID_CELLS):
+		grid_home[i] = 0
+		grid_away[i] = 0
+		grid_dominant[i] = -1
 	_nearby_players_scratch.clear()
 	_nearby_opponents_scratch.clear()
 	_nearby_teammates_scratch.clear()
@@ -333,15 +377,66 @@ func _physics_process(delta: float) -> void:
 
 	possessor_index = _resolve_possessor_index()
 
+	# Anticipatory Turnover
+	if ball_node != null and is_instance_valid(ball_node) and possessor_index != NO_INDEX and ball_node.possessor == null:
+		var poss_team: int = player_teams[possessor_index]
+		var b_vel: Vector2 = ball_node.velocity
+		if b_vel.length() > 50.0:
+			var best_tti: float = 999.0
+			var best_team: int = -1
+			for i: int in range(TOTAL_PLAYERS):
+				if player_teams[i] != -1:
+					var p_pos: Vector2 = p_pos_x[i] * Vector2.RIGHT + p_pos_y[i] * Vector2.DOWN
+					# Approximation since we cannot use UtilityMath easily without importing or calling it statically
+					var dist: float = p_pos.distance_to(ball_node.global_position)
+					# Assuming speed 350.0 max
+					var tti: float = dist / 350.0
+					if tti < best_tti:
+						best_tti = tti
+						best_team = player_teams[i]
+			
+			if best_team != poss_team and best_tti <= 0.3:
+				if not _turnover_predicted:
+					_turnover_predicted = true
+					GameEvents.anticipatory_turnover_predicted.emit(best_team)
+			elif best_team == poss_team:
+				_turnover_predicted = false
+	elif ball_node != null and ball_node.possessor != null:
+		_turnover_predicted = false
+
 	for i: int in range(TOTAL_PLAYERS):
 		var node: HeavyPlayerController = player_nodes[i]
 		if node == null or not is_instance_valid(node):
 			continue
 		player_positions[i] = node.global_position
 		player_velocities[i] = node.velocity
+		p_pos_x[i] = player_positions[i].x
+		p_pos_y[i] = player_positions[i].y
+		p_vel_x[i] = player_velocities[i].x
+		p_vel_y[i] = player_velocities[i].y
 
 	_update_spatial_grid()
+	_update_tactical_grid()
 	_update_defensive_lines(delta)
+	for t: int in range(2):
+		var count: float = 0.0
+		var sum_x: float = 0.0
+		var min_x: float = INF
+		var max_x: float = -INF
+		for i: int in range(TOTAL_PLAYERS):
+			if player_teams[i] == t:
+				var px: float = p_pos_x[i]
+				sum_x += px
+				count += 1.0
+				if px < min_x:
+					min_x = px
+				if px > max_x:
+					max_x = px
+		if count > 0.0:
+			team_com_x[t] = sum_x / count
+			team_att_x[t] = max_x if t == 0 else min_x
+			team_def_x[t] = min_x if t == 0 else max_x
+
 	_update_press_trigger(delta)
 
 
@@ -687,14 +782,14 @@ func get_teammate_density(pos: Vector2, radius: float, team: int, exclude_index:
 ##
 ## Performs an analytical point-to-segment distance / vector projection check.
 ## Uses the spatial grid bounding box to test only relevant cells. Allocation-free.
+
 func is_passing_lane_open(
 		start_pos: Vector2,
 		end_pos: Vector2,
 		passer_team_id: int,
 		corridor_width: float = DEFAULT_PASS_LANE_CLEARANCE
 ) -> bool:
-	if corridor_width <= 0.0:
-		return true
+	return get_bresenham_threat(start_pos, end_pos, passer_team_id) <= 100
 
 	var min_x: float = minf(start_pos.x, end_pos.x) - corridor_width
 	var max_x: float = maxf(start_pos.x, end_pos.x) + corridor_width
@@ -929,6 +1024,8 @@ func _on_ball_struck(struck_player: Node, _speed: float, _charge_ratio: float, i
 		trigger = PressTrigger.BACKWARD_PASS
 	elif forward_dot <= PASS_FORWARD_DOT_TOLERANCE:
 		trigger = PressTrigger.SQUARE_PASS
+	elif _speed < 200.0: # slow pass or airborne pass
+		trigger = PressTrigger.BACKWARD_PASS # reusing trigger type since it just activates press
 	if trigger == PressTrigger.NONE:
 		return
 
@@ -1013,3 +1110,138 @@ func _check_heavy_touch_trigger() -> bool:
 
 	_arm_press_trigger(PressTrigger.HEAVY_TOUCH, toucher, ball_position, PRESS_TRIGGER_HOLD_SECONDS)
 	return true
+
+
+
+func _update_tactical_grid() -> void:
+	for i: int in range(TACTICAL_GRID_CELLS):
+		grid_home[i] = 0
+		grid_away[i] = 0
+		grid_dominant[i] = -1
+
+	var I_BASE: int = 1000
+	var K_D: int = 300
+	var K_V: int = 150
+
+	for i: int in range(TOTAL_PLAYERS):
+		if player_teams[i] != 0 and player_teams[i] != 1:
+			continue
+		
+		var px: float = p_pos_x[i]
+		var py: float = p_pos_y[i]
+		var vx: float = p_vel_x[i]
+		var vy: float = p_vel_y[i]
+		
+		var cx: int = clampi(int((px + TACTICAL_OFFSET_X) / TACTICAL_CELL_W), 0, TACTICAL_GRID_WIDTH - 1)
+		var cy: int = clampi(int((py + TACTICAL_OFFSET_Y) / TACTICAL_CELL_H), 0, TACTICAL_GRID_HEIGHT - 1)
+		
+		var speed: float = sqrt(vx * vx + vy * vy)
+		var v_norm_x: float = 0.0
+		var v_norm_y: float = 0.0
+		if speed > 0.1:
+			v_norm_x = vx / speed
+			v_norm_y = vy / speed
+		
+		for dy: int in range(-2, 3):
+			for dx: int in range(-2, 3):
+				var nx: int = cx + dx
+				var ny: int = cy + dy
+				if nx >= 0 and nx < TACTICAL_GRID_WIDTH and ny >= 0 and ny < TACTICAL_GRID_HEIGHT:
+					var cell_idx: int = ny * TACTICAL_GRID_WIDTH + nx
+					
+					var cell_world_x: float = float(nx) * TACTICAL_CELL_W - TACTICAL_OFFSET_X + TACTICAL_CELL_W * 0.5
+					var cell_world_y: float = float(ny) * TACTICAL_CELL_H - TACTICAL_OFFSET_Y + TACTICAL_CELL_H * 0.5
+					
+					var dir_x: float = cell_world_x - px
+					var dir_y: float = cell_world_y - py
+					var dist: float = sqrt(dir_x * dir_x + dir_y * dir_y)
+					var dir_norm_x: float = 0.0
+					var dir_norm_y: float = 0.0
+					if dist > 0.0001:
+						dir_norm_x = dir_x / dist
+						dir_norm_y = dir_y / dist
+					
+					var v_dot_dir: float = v_norm_x * dir_norm_x + v_norm_y * dir_norm_y
+					var manhattan_dist: float = absf(float(dx)) + absf(float(dy))
+					
+					var influence: int = maxi(0, I_BASE - int(float(K_D) * manhattan_dist) + int(float(K_V) * v_dot_dir))
+					
+					if player_teams[i] == 0:
+						grid_home[cell_idx] += influence
+					else:
+						grid_away[cell_idx] += influence
+
+	for i: int in range(TACTICAL_GRID_CELLS):
+		if grid_home[i] > grid_away[i]:
+			grid_dominant[i] = 0
+		elif grid_away[i] > grid_home[i]:
+			grid_dominant[i] = 1
+		else:
+			grid_dominant[i] = -1
+
+func get_pitch_control_at(pos: Vector2, team: int) -> float:
+	var cx: int = clampi(int((pos.x + TACTICAL_OFFSET_X) / TACTICAL_CELL_W), 0, TACTICAL_GRID_WIDTH - 1)
+	var cy: int = clampi(int((pos.y + TACTICAL_OFFSET_Y) / TACTICAL_CELL_H), 0, TACTICAL_GRID_HEIGHT - 1)
+	var idx: int = cy * TACTICAL_GRID_WIDTH + cx
+	var h: float = float(grid_home[idx])
+	var a: float = float(grid_away[idx])
+	var total: float = h + a
+	if total <= 0.0:
+		return 0.5
+	if team == 0:
+		return h / total
+	else:
+		return a / total
+
+func get_cell_dominance(cell_x: int, cell_y: int) -> int:
+	if cell_x < 0 or cell_x >= TACTICAL_GRID_WIDTH or cell_y < 0 or cell_y >= TACTICAL_GRID_HEIGHT:
+		return -1
+	return grid_dominant[cell_y * TACTICAL_GRID_WIDTH + cell_x]
+
+func is_zone_14(cell_x: int, cell_y: int, attacking_team: int) -> bool:
+	if attacking_team == 0:
+		return (cell_x == 8 or cell_x == 9) and (cell_y == 3 or cell_y == 4)
+	else:
+		return (cell_x == 2 or cell_x == 3) and (cell_y == 3 or cell_y == 4)
+
+
+
+func get_bresenham_threat(start_pos: Vector2, end_pos: Vector2, passer_team_id: int) -> int:
+	var cx1: int = clampi(int((start_pos.x + TACTICAL_OFFSET_X) / TACTICAL_CELL_W), 0, TACTICAL_GRID_WIDTH - 1)
+	var cy1: int = clampi(int((start_pos.y + TACTICAL_OFFSET_Y) / TACTICAL_CELL_H), 0, TACTICAL_GRID_HEIGHT - 1)
+	var cx2: int = clampi(int((end_pos.x + TACTICAL_OFFSET_X) / TACTICAL_CELL_W), 0, TACTICAL_GRID_WIDTH - 1)
+	var cy2: int = clampi(int((end_pos.y + TACTICAL_OFFSET_Y) / TACTICAL_CELL_H), 0, TACTICAL_GRID_HEIGHT - 1)
+	
+	var threat: int = 0
+	var dx: int = absi(cx2 - cx1)
+	var dy: int = -absi(cy2 - cy1)
+	var sx: int = 1 if cx1 < cx2 else -1
+	var sy: int = 1 if cy1 < cy2 else -1
+	var err: int = dx + dy
+	
+	var x: int = cx1
+	var y: int = cy1
+	var steps: int = 0
+	
+	while steps < 12:
+		if x >= 0 and x < TACTICAL_GRID_WIDTH and y >= 0 and y < TACTICAL_GRID_HEIGHT:
+			var idx: int = y * TACTICAL_GRID_WIDTH + x
+			if passer_team_id == 0:
+				threat += grid_away[idx]
+			else:
+				threat += grid_home[idx]
+		
+		if x == cx2 and y == cy2:
+			break
+		
+		var e2: int = 2 * err
+		if e2 >= dy:
+			err += dy
+			x += sx
+		if e2 <= dx:
+			err += dx
+			y += sy
+		steps += 1
+		
+	return threat
+
