@@ -194,4 +194,68 @@ error_log:
       - autoloads/MatchWorldModel.gd
       - ui/HUD.gd
       - autoloads/DataLoader.gd
+
+  - id: ERR-20260831-01
+    date: 2026-08-31
+    agent: Antigravity (Gemini 3.7 Flash)
+    subsystem: ai
+    symptom: >
+      Godot failed to boot with a wall of parse errors, all rooted at
+      PlayerBrain.gd:1614 ("There is already a variable named anchor_side
+      declared in this scope"), cascading into every file that references
+      PlayerBrain as a static type (HeavyPlayerController.gd,
+      MatchWorldModel.gd, TackleState.gd, SetPieceCoordinator.gd,
+      OffsideDetector.gd, PenaltyShootoutCoordinator.gd, PitchScene.gd,
+      FormationAnchorMath.gd).
+    root_cause: >
+      _find_passing_triangle_position() was edited to add a `return` partway
+      through the function, but the old function body below the new return
+      was never deleted. That dead code redeclared `var anchor_side` a
+      second time in the same function scope, which GDScript's parser
+      rejects unconditionally — it does not matter that the code is
+      unreachable, redeclaration is a static/parse-time error, not a
+      runtime one. A single parse failure in a class referenced as a type
+      annotation elsewhere fails every dependent script too, so the error
+      list looked repo-wide when the defect was one function.
+    resolution: >
+      Deleted the unreachable duplicate block below the return, keeping
+      only the reachable version above it. Lesson for the editing agent:
+      after inserting an early `return` (or any early-exit) into an
+      existing function, always check whether code following it became
+      dead, and delete dead code rather than leaving it in place — GDScript
+      treats a second `var` declaration in the same scope as a hard parse
+      error even when it can never execute.
+    affected_files:
+      - entities/player/PlayerBrain.gd
+
+  - id: ERR-20260831-02
+    date: 2026-08-31
+    agent: Antigravity (Gemini 3.7 Flash)
+    subsystem: ai
+    symptom: >
+      After ERR-20260831-01 was fixed, Godot still failed to boot with
+      "Invalid operands 'PlayerState' and 'StringName' for '==' operator"
+      at five sites in PlayerBrain.gd, cascading into DribbleState.gd,
+      PlayerStateFactory.gd, HeavyPlayerController.gd, and
+      MatchWorldModel.gd.
+    root_cause: >
+      PlayerStateFactory exposes two distinct members that are easy to
+      conflate: `current_state` (the live PlayerState RefCounted instance)
+      and `current_state_name` (a StringName). Five call sites in
+      PlayerBrain.gd compared `state_factory.current_state` directly
+      against StringName literals (&"ThrowIn", PlayerState.GOALKEEPER_DIVE)
+      instead of `state_factory.current_state_name`. Strictly-typed
+      GDScript has no == operator between a custom RefCounted class and
+      StringName, so this is a parse-time type error, not a logic bug
+      caught at runtime.
+    resolution: >
+      Changed all five comparisons to use `current_state_name`. Lesson:
+      before comparing any `*.current_state`-shaped member against a
+      StringName/enum literal, check the declaring class for a sibling
+      `*_name` (or enum) field — a "get current state" API in this
+      codebase very often exposes the live object and its identifying
+      name as two separate typed members, and only the name field is
+      comparable to a literal.
+    affected_files:
+      - entities/player/PlayerBrain.gd
 ```
