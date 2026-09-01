@@ -56,6 +56,7 @@ ENGINE_TYPES = {
     "SpinBox", "LineEdit", "TextEdit", "RichTextLabel", "CheckBox",
     "TabContainer", "SubViewport", "AudioStreamPlayer", "AudioStreamPlayer2D",
     "AudioStream", "AudioStreamWAV", "AudioStreamGenerator", "AudioStreamMP3", "AudioStreamOggVorbis",
+    "Material", "ShaderMaterial", "Shader", "CanvasItemMaterial",
 }
 
 # Static-access targets that are engine singletons/utility classes rather than

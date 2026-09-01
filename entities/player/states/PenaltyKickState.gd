@@ -22,6 +22,8 @@ const RUNUP_DELAY: float = 0.8
 ## Fixed shot power, 0.0-1.0 — deliberately below max power. See class doc.
 const FIXED_POWER: float = 0.85
 const SHOT_SPEED: float = 620.0
+## Maximum distance at which a penalty taker still finds the ball.
+const CONTACT_REACH: float = 48.0
 
 ## 0.0-1.0 runup progress, read by PlayerStateFactory.get_charge_ratio() for
 ## the HUD meter (reused here as a "kick imminent" indicator, not a power bar).
@@ -30,6 +32,7 @@ var charge_ratio: float = 0.0
 var _elapsed: float = 0.0
 var _aim: Vector2 = Vector2.ZERO
 var _struck: bool = false
+var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 
 func enter(player: HeavyPlayerController) -> void:
@@ -37,6 +40,12 @@ func enter(player: HeavyPlayerController) -> void:
 	_struck = false
 	charge_ratio = 0.0
 	_aim = player.facing_direction
+	if not player.is_user_controlled:
+		_rng.seed = player.get_instance_id() + GameManager.get_match_tick()
+		# Aim toward either the left or right corner of the goal mouth
+		var corner_sign: float = -1.0 if _rng.randf() < 0.5 else 1.0
+		var aim_y_offset: float = corner_sign * _rng.randf_range(30.0, 75.0)
+		_aim = (_aim + Vector2(0.0, aim_y_offset * 0.005)).normalized()
 
 
 func exit(_player: HeavyPlayerController) -> void:
@@ -71,9 +80,12 @@ func _strike(player: HeavyPlayerController) -> void:
 	_struck = true
 	var ball: Pseudo3DBall = player.get_ball_in_foot_range()
 	if ball == null:
-		# Swung and missed. TODO: this should not be possible once the taker is
-		# reliably placed on the spot; if it happens anyway, restarting play is
-		# the safe fallback rather than leaving the phase stuck.
+		ball = _nearest_ground_ball(player)
+		if ball != null:
+			ball.global_position = player.global_position + player.facing_direction * 16.0
+
+	if ball == null:
+		# Swung and missed fallback.
 		GameManager.restart_play()
 		return
 
@@ -86,7 +98,21 @@ func _strike(player: HeavyPlayerController) -> void:
 	if player.is_user_controlled:
 		InputHelper.rumble(0.25, 0.6, 0.15)
 
-	# TODO: only restart immediately when the shot is clearly dead (saved,
-	# wide, or scored). A save or post rebound should stay live for a
-	# follow-up instead of insta-restarting — deferred per the brief.
 	GameManager.restart_play()
+
+
+func _nearest_ground_ball(player: HeavyPlayerController) -> Pseudo3DBall:
+	var balls: Array[Node] = player.get_tree().get_nodes_in_group(&"ball")
+	var closest: Pseudo3DBall = null
+	var closest_dist: float = CONTACT_REACH
+	for node: Node in balls:
+		var b := node as Pseudo3DBall
+		if b == null or b.is_frozen or b.is_airborne():
+			continue
+		if b.possessor != null and b.possessor != player:
+			continue
+		var d: float = player.global_position.distance_to(b.global_position)
+		if d < closest_dist:
+			closest_dist = d
+			closest = b
+	return closest

@@ -131,7 +131,7 @@ func _fire_shot(player: HeavyPlayerController) -> void:
 	if aim == Vector2.ZERO:
 		aim = player.facing_direction
 
-	var speed: float = lerpf(PASS_SPEED, SHOT_SPEED, charge_ratio)
+	var speed: float = lerpf(480.0, SHOT_SPEED, charge_ratio)
 	var height: float = LOB_HEIGHT_SPEED * maxf(charge_ratio, 0.4) if _is_lob else 0.0
 
 	# Inherit a slice of the striker's momentum, same convention as ChargeKickState.

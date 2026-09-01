@@ -557,6 +557,9 @@ func _physics_process(delta: float) -> void:
 		var max_x: float = -INF
 		for i: int in range(TOTAL_PLAYERS):
 			if player_teams[i] == t:
+				var p_node: HeavyPlayerController = player_nodes[i]
+				if p_node != null and is_instance_valid(p_node) and p_node.brain != null and p_node.brain.is_goalkeeper:
+					continue
 				var px: float = p_pos_x[i]
 				sum_x += px
 				count += 1.0
@@ -616,6 +619,16 @@ func bind_boundary(b: PitchBoundary) -> void:
 ## holding its own PitchBoundary reference.
 func get_pitch_centre_x() -> float:
 	return _boundary.get_centre_spot().x if _boundary != null else 0.0
+
+
+## Dimensions of the pitch playing field in world pixels.
+func get_pitch_size() -> Vector2:
+	return _boundary.pitch_size if _boundary != null else Vector2(1600.0, 900.0)
+
+
+## World-space rectangle covering the playable pitch.
+func get_pitch_rect() -> Rect2:
+	return _boundary.get_pitch_rect() if _boundary != null else Rect2(-800.0, -450.0, 1600.0, 900.0)
 
 
 func _on_team_urgency_updated(team: int, urgency: float) -> void:
@@ -1277,6 +1290,9 @@ func _accumulate_spacing_sample() -> void:
 		for i: int in range(TOTAL_PLAYERS):
 			if player_teams[i] != t:
 				continue
+			var node_i: HeavyPlayerController = player_nodes[i]
+			if node_i != null and is_instance_valid(node_i) and node_i.brain != null and node_i.brain.is_goalkeeper:
+				continue
 			var px: float = p_pos_x[i]
 			var py: float = p_pos_y[i]
 			min_x = minf(min_x, px)
@@ -1288,6 +1304,9 @@ func _accumulate_spacing_sample() -> void:
 			var best_j: int = NO_INDEX
 			for j: int in range(TOTAL_PLAYERS):
 				if j == i or player_teams[j] != t:
+					continue
+				var node_j: HeavyPlayerController = player_nodes[j]
+				if node_j != null and is_instance_valid(node_j) and node_j.brain != null and node_j.brain.is_goalkeeper:
 					continue
 				var d_sq: float = Vector2(px - p_pos_x[j], py - p_pos_y[j]).length_squared()
 				if d_sq < best_d_sq:

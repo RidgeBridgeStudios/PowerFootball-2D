@@ -197,6 +197,9 @@ var current_z: float = 0.0
 
 ## Maximum pseudo-3D height (px) at which a ball can be controlled by ground feet.
 const MAX_CAPTURE_HEIGHT: float = 25.0
+## Maximum reach (radius & height) for a goalkeeper catching the ball with hands.
+const GOALKEEPER_CATCH_RADIUS: float = 34.0
+const GOALKEEPER_CATCH_MAX_HEIGHT: float = 65.0
 ## Duration of foot-sensor lockout after striking or losing the ball.
 var ball_control_lockout: float = 0.0
 
@@ -523,10 +526,19 @@ func can_carry_ball() -> bool:
 	return brain == null or brain.can_carry_ball()
 
 
+## Returns whether this player is actively holding the ball in hands (GoalkeeperHoldState).
+func is_holding_ball() -> bool:
+	return state_factory != null and state_factory.current_state_name == PlayerState.GOALKEEPER_HOLD
+
+
 ## Gate checked before a grounded foot capture is granted.
 func can_capture_ball(ball: Pseudo3DBall) -> bool:
 	if ball == null or ball.is_frozen:
 		return false
+	if ball.possessor != null and ball.possessor is HeavyPlayerController:
+		var carrier := ball.possessor as HeavyPlayerController
+		if carrier != self and carrier.is_holding_ball():
+			return false
 	if ball_control_lockout > 0.0:
 		return false
 	if ball.position_z > MAX_CAPTURE_HEIGHT:
@@ -534,6 +546,40 @@ func can_capture_ball(ball: Pseudo3DBall) -> bool:
 	if not ball.can_player_touch(self):
 		return false
 	return can_carry_ball()
+
+
+## Evaluates whether the match ball is within hand-catching reach for this goalkeeper.
+## Only valid for a goalkeeper inside their defending penalty area, and disallows intentional
+## back-passes kicked by a teammate.
+func get_ball_in_catch_range() -> Pseudo3DBall:
+	if brain == null or not brain.is_goalkeeper:
+		return null
+	if ball_control_lockout > 0.0:
+		return null
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null or world.ball_node == null:
+		return null
+	var match_ball: Pseudo3DBall = world.ball_node
+	if not is_instance_valid(match_ball) or match_ball.is_frozen:
+		return null
+	if match_ball.position_z > GOALKEEPER_CATCH_MAX_HEIGHT:
+		return null
+
+	var boundary: PitchBoundary = brain.pitch_boundary if brain != null else null
+	if boundary == null and get_parent() != null and get_parent().has_node("PitchBoundary"):
+		boundary = get_parent().get_node("PitchBoundary") as PitchBoundary
+	if boundary == null or not boundary.is_in_penalty_area(global_position, team):
+		return null
+
+	if match_ball.last_touched_by != null and match_ball.last_touched_by != self \
+			and match_ball.last_touched_by.team == team and not match_ball.is_airborne():
+		return null
+
+	var dist_sq: float = global_position.distance_squared_to(match_ball.global_position)
+	if dist_sq <= GOALKEEPER_CATCH_RADIUS * GOALKEEPER_CATCH_RADIUS:
+		return match_ball
+
+	return null
 
 
 ## Spawns floating action text in world space above this player.
@@ -604,15 +650,16 @@ func _update_sprint(delta: float) -> void:
 	is_sprinting = wants_sprint and is_moving and not sprint_locked
 
 	var previous_ratio: float = get_stamina_ratio()
+	var time_dilation_scale: float = GameManager.get_time_scale() / (GameManager.SIMULATED_HALF_DURATION / GameManager.BASE_HALF_DURATION_REAL_SEC)
 
 	if is_sprinting:
-		stamina = maxf(stamina - stamina_drain_rate * delta, 0.0)
+		stamina = maxf(stamina - stamina_drain_rate * time_dilation_scale * delta, 0.0)
 		if stamina <= 0.0 and not sprint_locked:
 			sprint_locked = true
 			is_sprinting = false
 			GameEvents.stamina_depleted.emit(self)
 	else:
-		stamina = minf(stamina + stamina_recover_rate * delta, stamina_max)
+		stamina = minf(stamina + stamina_recover_rate * time_dilation_scale * delta, stamina_max)
 		if sprint_locked and stamina >= stamina_sprint_unlock:
 			sprint_locked = false
 
@@ -623,9 +670,47 @@ func _update_sprint(delta: float) -> void:
 
 func _update_facing() -> void:
 	# Human player: face the input direction, not the lagging velocity vector.
-	# CPU players keep the velocity-derived facing so their animations are truthful.
 	if is_user_controlled and movement_intent.length() > 0.01:
 		facing_direction = _input_facing
+		return
+
+	# If carrying the ball, face movement velocity or input intent.
+	var is_possessor: bool = brain != null and brain.ball != null and brain.ball.possessor == self
+	if is_possessor:
+		if velocity.length() > FACING_UPDATE_SPEED:
+			facing_direction = velocity.normalized()
+		elif movement_intent.length() > 0.01:
+			facing_direction = movement_intent.normalized()
+		return
+
+	# High-speed sprint off-ball (breakaway run or recovery sprint): face velocity
+	if is_sprinting and velocity.length() > 150.0:
+		facing_direction = velocity.normalized()
+		return
+
+	# Off-ball positioning, jogging, jockeying, or holding shape:
+	# Orient toward the ball (open body shape) so players watch the play.
+	var ball_pos: Vector2 = Vector2.ZERO
+	var has_ball: bool = false
+	if brain != null and brain.ball != null:
+		ball_pos = brain.ball.global_position
+		has_ball = true
+	elif MatchWorldModel.instance != null and MatchWorldModel.instance.ball_node != null:
+		ball_pos = MatchWorldModel.instance.ball_position
+		has_ball = true
+
+	if has_ball:
+		var to_ball: Vector2 = ball_pos - global_position
+		if to_ball.length_squared() > 100.0:
+			var ball_facing: Vector2 = to_ball.normalized()
+			if velocity.length() > FACING_UPDATE_SPEED:
+				# Moving: blend 65% toward ball + 35% toward movement direction
+				facing_direction = (ball_facing * 0.65 + velocity.normalized() * 0.35).normalized()
+			else:
+				# Stationary / settled at anchor: face the ball directly
+				facing_direction = ball_facing
+			return
+
 	if velocity.length() > FACING_UPDATE_SPEED:
 		facing_direction = velocity.normalized()
 

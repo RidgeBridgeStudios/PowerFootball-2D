@@ -102,7 +102,7 @@ func _base_threshold() -> float:
 
 func _update_temperature() -> void:
 	var goal_diff_factor: float = absf(float(GameManager.score[0] - GameManager.score[1])) * 0.08
-	var time_factor: float = GameManager.match_time / GameManager.match_duration
+	var time_factor: float = GameManager.get_match_time_ratio()
 	var foul_factor: float = _fouls_this_match * 0.03
 	_match_temperature = clampf(goal_diff_factor + time_factor * 0.4 + foul_factor, 0.0, 1.0)
 
@@ -159,8 +159,8 @@ func _on_foul_committed(fouler: Node, victim: Node, foul_pos: Vector2) -> void:
 		bias = favour_sign * current_data.unprofessionalism * 0.25
 
 	var effective_threshold: float = clampf(_current_foul_threshold + bias, 0.10, 0.90)
-	var roll: float = randf()
-	var award_foul: bool = severity > effective_threshold or roll < (severity / (effective_threshold + 0.01))
+	var roll_noise: float = randf_range(-0.08, 0.08)
+	var award_foul: bool = (severity + roll_noise) >= effective_threshold
 
 	# Incoherence override: an incoherent referee can randomly reverse their
 	# decision under high match temperature.

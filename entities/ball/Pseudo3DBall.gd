@@ -61,6 +61,8 @@ const REST_DRAG_FLAT: float = 18.0
 ## Shadow shrink/fade reference heights, in pixels.
 const SHADOW_SCALE_REFERENCE: float = 300.0
 const SHADOW_ALPHA_REFERENCE: float = 400.0
+## Visual rolling radius used to integrate physical rotation per distance traveled.
+const BALL_VISUAL_RADIUS: float = 4.0
 
 var position_z: float = 0.0
 var velocity_z: float = 0.0
@@ -69,6 +71,12 @@ var is_on_ground: bool = true
 var _drift_applied: bool = false
 ## Frozen balls ignore all integration — used for kickoffs, throw-ins and goals.
 var is_frozen: bool = false
+
+## 3D orientation basis updated continuously as the ball rolls and tumbles.
+var _ball_basis: Basis = Basis.IDENTITY
+## Aerial spin axis and angular speed imparted by kicks and deflections.
+var _air_spin_axis: Vector3 = Vector3.UP
+var _air_spin_speed: float = 0.0
 
 ## The player loosely controlling the ball, if any. Typed as Node2D rather than
 ## HeavyPlayerController so the ball stays independent of the player module.
@@ -109,6 +117,7 @@ func _physics_process(delta: float) -> void:
 		# rebound is always a hard surface worth hearing.
 		ball_bounced.emit(velocity.length())
 
+	update_rolling_rotation(delta)
 	render_visuals()
 
 
@@ -120,6 +129,12 @@ func apply_kick(impulse_xy: Vector2, impulse_z: float, kicker: HeavyPlayerContro
 	velocity_z = impulse_z
 	if impulse_z > 0.0:
 		is_on_ground = false
+		_air_spin_speed = clampf(impulse_xy.length() * 0.025 + impulse_z * 0.035, 4.0, 20.0)
+		var kick_len: float = impulse_xy.length()
+		var kick_dir: Vector2 = impulse_xy / kick_len if kick_len > 0.001 else Vector2.RIGHT
+		_air_spin_axis = Vector3(-kick_dir.y * 0.7 + randf_range(-0.3, 0.3), kick_dir.x * 0.7 + randf_range(-0.3, 0.3), randf_range(-0.6, 0.6)).normalized()
+	else:
+		_air_spin_speed = 0.0
 	_drift_applied = false
 	last_touched_by = kicker
 	if kicker != null:
@@ -156,10 +171,12 @@ func simulate_z_axis(delta: float) -> void:
 		velocity_z = -velocity_z * restitution
 		velocity *= bounce_friction_loss
 		is_on_ground = false
+		_air_spin_speed *= 0.6
 		ball_bounced.emit(absf(velocity_z))
 	else:
 		velocity_z = 0.0
 		is_on_ground = true
+		_air_spin_speed = 0.0
 
 
 func simulate_xy_axis(delta: float) -> void:
@@ -186,6 +203,27 @@ func move_with_rebound() -> KinematicCollision2D:
 	return collision
 
 
+func update_rolling_rotation(delta: float) -> void:
+	var speed_sq: float = velocity.length_squared()
+	if is_on_ground:
+		if speed_sq > 0.01:
+			var speed: float = sqrt(speed_sq)
+			var delta_rot: float = (speed * delta) / BALL_VISUAL_RADIUS
+			var roll_axis: Vector3 = Vector3(-velocity.y / speed, velocity.x / speed, 0.0)
+			_ball_basis = Basis(roll_axis, delta_rot) * _ball_basis
+			_ball_basis = _ball_basis.orthonormalized()
+	else:
+		if _air_spin_speed > 0.01:
+			_ball_basis = Basis(_air_spin_axis, _air_spin_speed * delta) * _ball_basis
+			_air_spin_speed = move_toward(_air_spin_speed, 0.0, 0.5 * delta)
+		if speed_sq > 1.0:
+			var speed_xy: float = sqrt(speed_sq)
+			var air_roll_speed: float = (speed_xy / BALL_VISUAL_RADIUS) * 0.45
+			var air_axis: Vector3 = Vector3(-velocity.y / speed_xy, velocity.x / speed_xy, 0.0)
+			_ball_basis = Basis(air_axis, air_roll_speed * delta) * _ball_basis
+		_ball_basis = _ball_basis.orthonormalized()
+
+
 func render_visuals() -> void:
 	# Height lifts the sprite up the screen; the shadow marks the true ground
 	# position so aerial balls stay readable.
@@ -195,6 +233,11 @@ func render_visuals() -> void:
 	shadow_sprite.scale = Vector2(shadow_scale, shadow_scale)
 	shadow_sprite.modulate.a = clampf(0.8 - (position_z / SHADOW_ALPHA_REFERENCE), 0.2, 0.8)
 	shadow_sprite.position = Vector2.ZERO
+
+	var shader_mat: ShaderMaterial = ball_sprite.material as ShaderMaterial
+	if shader_mat != null:
+		shader_mat.set_shader_parameter(&"ball_rotation", _ball_basis)
+
 
 
 ## Discrete numerical integration of a prospective kick, for the aim preview arc.
@@ -248,6 +291,10 @@ func release_possession() -> void:
 	set_possessor(null)
 
 
+## Tracks whether the dead-ball restart has not yet been struck for the first time.
+var _is_first_touch_pending: bool = false
+
+
 func is_airborne() -> bool:
 	return position_z > 0.0 or not is_on_ground
 
@@ -260,10 +307,12 @@ func reset_at(spot: Vector2) -> void:
 	position_z = 0.0
 	is_on_ground = true
 	_drift_applied = false
+	_air_spin_speed = 0.0
 	release_possession()
 	last_touched_by = null
 	restart_taker = null
 	has_secondary_touch_occurred = true
+	_is_first_touch_pending = false
 	render_visuals()
 
 
@@ -271,22 +320,30 @@ func reset_at(spot: Vector2) -> void:
 func mark_set_piece_restart(taker: HeavyPlayerController) -> void:
 	restart_taker = taker
 	has_secondary_touch_occurred = false
+	_is_first_touch_pending = true
 
 
 ## Registers a player touch, returning false if this touch is an illegal double touch.
 func register_player_touch(player: HeavyPlayerController) -> bool:
-	if not has_secondary_touch_occurred and restart_taker != null:
-		if player == restart_taker:
+	if restart_taker != null:
+		if _is_first_touch_pending and player == restart_taker:
+			_is_first_touch_pending = false
+			return true
+		if not has_secondary_touch_occurred and player == restart_taker:
 			return false
 		has_secondary_touch_occurred = true
+		_is_first_touch_pending = false
 		restart_taker = null
 	return true
 
 
 ## Whether a player is currently permitted to make contact with the ball.
 func can_player_touch(player: HeavyPlayerController) -> bool:
-	if not has_secondary_touch_occurred and restart_taker != null and player == restart_taker:
-		return false
+	if restart_taker != null and player == restart_taker:
+		if _is_first_touch_pending:
+			return true
+		if not has_secondary_touch_occurred:
+			return false
 	return true
 
 

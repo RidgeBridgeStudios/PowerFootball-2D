@@ -306,6 +306,10 @@ func _assign_taker(team: int, kickoff_team_has_human: bool = false, designated_t
 		_taker_candidates.push_front(designated_taker)
 	else:
 		_taker_candidates.sort_custom(func(a: HeavyPlayerController, b: HeavyPlayerController) -> bool:
+			var a_is_gk: bool = a.brain != null and a.brain.is_goalkeeper
+			var b_is_gk: bool = b.brain != null and b.brain.is_goalkeeper
+			if a_is_gk != b_is_gk and GameManager.current_phase != GameManager.MatchPhase.GOAL_KICK:
+				return not a_is_gk
 			return a.global_position.distance_squared_to(spot) < b.global_position.distance_squared_to(spot)
 		)
 
@@ -378,27 +382,34 @@ func _position_defending_players(phase: int) -> void:
 	if _current_taker == null or _boundary == null:
 		return
 
-	var defending_team: int = 1 - _current_taker.team
+	var taker_team: int = _current_taker.team
+	var defending_team: int = 1 - taker_team
 	var spot: Vector2 = GameManager.set_piece_position
 	var pitch_rect: Rect2 = _boundary.get_pitch_rect().grow(-20.0)
 	var min_distance: float = wall_distance
 	if phase == GameManager.MatchPhase.CORNER_KICK or phase == GameManager.MatchPhase.GOAL_KICK:
 		min_distance = penalty_spot_offset
 
+	# Check if this set piece is being taken from inside the taking team's own penalty area
+	# (IFAB Law 13/16: Opponents must remain outside the penalty area until the ball is in play).
+	var is_defensive_box_restart: bool = (
+		phase == GameManager.MatchPhase.GOAL_KICK
+		or (phase == GameManager.MatchPhase.FREE_KICK and _is_in_penalty_area(spot, taker_team))
+	)
+
 	for node: Node in _players.get_children():
 		var player := node as HeavyPlayerController
 		if player == null or player.team != defending_team or player == _current_taker:
 			continue
 
-		if phase == GameManager.MatchPhase.GOAL_KICK:
-			# Strict IFAB Law 16: Opponents must remain outside the penalty area
-			if _is_in_penalty_area(player.global_position, defending_team):
-				var goal_centre: Vector2 = _boundary.get_goal_centre(defending_team)
-				var dir: float = 1.0 if defending_team == 0 else -1.0
+		if is_defensive_box_restart:
+			# Strict IFAB Law 13 & 16: Opponents must remain outside the taking team's penalty area
+			if _is_in_penalty_area(player.global_position, taker_team):
+				var goal_centre: Vector2 = _boundary.get_goal_centre(taker_team)
+				var dir: float = 1.0 if taker_team == 0 else -1.0
 				var goal_area_x: float = goal_centre.x + dir * (PENALTY_AREA_DEPTH + 30.0)
 				player.global_position.x = clampf(goal_area_x, pitch_rect.position.x, pitch_rect.end.x)
 				player.velocity = Vector2.ZERO
-				continue
 
 		var offset: Vector2 = player.global_position - spot
 		if offset.length() < min_distance:
@@ -551,23 +562,17 @@ func _activate_set_piece() -> void:
 	# without this a kickoff/free kick/corner "pass" fires in an arbitrary
 	# stale direction and can gift the ball straight to an opponent.
 	if not _current_taker.is_user_controlled:
-		var taker_brain: PlayerBrain = _current_taker.get_node_or_null("PlayerBrain") as PlayerBrain
-		var pass_target: HeavyPlayerController = taker_brain.find_pass_target_for_set_piece() if taker_brain != null else null
-		if pass_target != null:
-			_current_taker.facing_direction = _current_taker.global_position.direction_to(pass_target.global_position)
-		elif _boundary != null:
-			# find_pass_target_for_set_piece() can legally return null (no
-			# candidate clears MIN_PASS_SCORE, or every lane is blocked) —
-			# that used to leave facing_direction at whatever stale value it
-			# held before the freeze, which can point anywhere, including
-			# back out of bounds. ChargeKickState's CPU path always fires an
-			# immediate tap (wants() is always false for a non-user-controlled
-			# player), so a stale out-of-bounds facing taps a corner/free
-			# kick/goal kick straight back out and can hand the restart to
-			# the other team. Aiming at the pitch centre from any restart
-			# spot is always a safe, in-bounds fallback (see AGENTS_ERRATA.md:
-			# corner-kick-stale-facing-direction-no-fallback).
-			_current_taker.facing_direction = _current_taker.global_position.direction_to(_boundary.get_centre_spot())
+		var opp_goal: Vector2 = _boundary.get_goal_centre(1 - _current_taker.team) if _boundary != null else Vector2.ZERO
+		if (GameManager.current_phase == GameManager.MatchPhase.PENALTY_KICK \
+				or GameManager.current_phase == GameManager.MatchPhase.GOAL_KICK) and _boundary != null:
+			_current_taker.facing_direction = _current_taker.global_position.direction_to(opp_goal)
+		else:
+			var taker_brain: PlayerBrain = _current_taker.get_node_or_null("PlayerBrain") as PlayerBrain
+			var pass_target: HeavyPlayerController = taker_brain.find_pass_target_for_set_piece() if taker_brain != null else null
+			if pass_target != null:
+				_current_taker.facing_direction = _current_taker.global_position.direction_to(pass_target.global_position)
+			elif _boundary != null:
+				_current_taker.facing_direction = _current_taker.global_position.direction_to(opp_goal)
 
 	_current_taker.state_factory.state_changed.connect(_on_taker_state_changed)
 

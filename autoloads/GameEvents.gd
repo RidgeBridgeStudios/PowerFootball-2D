@@ -31,6 +31,9 @@ signal foul_committed(fouler: Node, victim: Node, position: Vector2)
 signal match_ended(winner: int)
 signal match_phase_changed(phase: int)
 signal half_time_reached
+signal half_time_started
+signal half_time_ended
+signal stoppage_time_announced(added_minutes: int, half: int)
 
 ## --- Set pieces --------------------------------------------------------------
 

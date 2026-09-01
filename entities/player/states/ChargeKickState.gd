@@ -106,6 +106,17 @@ func _release_kick(player: HeavyPlayerController) -> void:
 	var aim: Vector2 = _get_resolved_aim(player)
 
 	var is_tap: bool = _held_time < TAP_THRESHOLD
+	# CPU set-piece tuning: Goal kicks and corner kicks are delivered as lofted kicks
+	if not player.is_user_controlled and GameManager.is_set_piece_active():
+		if GameManager.current_phase == GameManager.MatchPhase.GOAL_KICK:
+			is_tap = false
+			charge_ratio = 0.85
+			_is_lob = true
+		elif GameManager.current_phase == GameManager.MatchPhase.CORNER_KICK:
+			is_tap = false
+			charge_ratio = 0.70
+			_is_lob = true
+
 	var speed: float = PASS_SPEED if is_tap else lerpf(PASS_SPEED, SHOT_SPEED, charge_ratio)
 	var height: float = 0.0
 	if _is_lob:

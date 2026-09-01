@@ -33,11 +33,22 @@ extends StaticBody2D
 ## Thickness of the touchline/end-line out-of-bounds sensors.
 @export var sensor_thickness: float = 32.0
 
+## Canonical penalty area dimensions in pixels.
+const PENALTY_AREA_DEPTH: float = 200.0
+const PENALTY_AREA_HEIGHT: float = 380.0
+
+## Whether team defending ends are swapped (e.g., during the second half).
+var sides_flipped: bool = false
+
 
 func _ready() -> void:
 	collision_layer = CollisionLayers.LAYER_PITCH_WORLD
 	collision_mask = CollisionLayers.MASK_PITCH_WORLD
 	build_boundaries()
+
+
+func set_sides_flipped(flipped: bool) -> void:
+	sides_flipped = flipped
 
 
 ## Rebuilds every wall and sensor. Safe to call at runtime after resizing.
@@ -63,10 +74,33 @@ func get_centre_spot() -> Vector2:
 	return global_position
 
 
-## World position of a goal line centre. team 0 defends the left goal.
+## World position of a goal line centre. Dynamically tracks half-time side swapping.
 func get_goal_centre(team: int) -> Vector2:
-	var direction: float = -1.0 if team == 0 else 1.0
+	var defends_left: bool = (team == 0) if not sides_flipped else (team != 0)
+	var direction: float = -1.0 if defends_left else 1.0
 	return global_position + Vector2(direction * pitch_size.x * 0.5, 0.0)
+
+
+## Returns whether a world-space point lies within the defending team's penalty box.
+func is_in_penalty_area(pos: Vector2, defending_team: int) -> bool:
+	var goal_centre: Vector2 = get_goal_centre(defending_team)
+	var defends_left: bool = (defending_team == 0) if not sides_flipped else (defending_team != 0)
+	var inward_dir: float = 1.0 if defends_left else -1.0
+	var local: Vector2 = pos - goal_centre
+	var depth: float = local.x * inward_dir
+	var half_height: float = PENALTY_AREA_HEIGHT * 0.5
+	return depth >= 0.0 and depth <= PENALTY_AREA_DEPTH and absf(local.y) <= half_height
+
+
+## World-space bounding rectangle of the defending team's penalty box.
+func get_penalty_area_rect(defending_team: int) -> Rect2:
+	var goal_centre: Vector2 = get_goal_centre(defending_team)
+	var defends_left: bool = (defending_team == 0) if not sides_flipped else (defending_team != 0)
+	var half_height: float = PENALTY_AREA_HEIGHT * 0.5
+	if defends_left:
+		return Rect2(goal_centre.x, goal_centre.y - half_height, PENALTY_AREA_DEPTH, PENALTY_AREA_HEIGHT)
+	else:
+		return Rect2(goal_centre.x - PENALTY_AREA_DEPTH, goal_centre.y - half_height, PENALTY_AREA_DEPTH, PENALTY_AREA_HEIGHT)
 
 
 ## Short hard stubs right at the goal mouth edges — the posts — so a shot that
@@ -152,7 +186,8 @@ func _on_ball_crossed_boundary(ball: Pseudo3DBall, side: String) -> void:
 		"touchline_top", "touchline_bottom":
 			GameEvents.ball_out_of_bounds.emit(side)
 		"end_line_left", "end_line_right":
-			var defending_team: int = 0 if side == "end_line_left" else 1
+			var is_left: bool = (side == "end_line_left")
+			var defending_team: int = (0 if is_left else 1) if not sides_flipped else (1 if is_left else 0)
 			var toucher: HeavyPlayerController = ball.last_touched_by
 			# No recorded touch (e.g. it rolled out untouched): default to the
 			# simpler goal kick rather than guessing a corner.

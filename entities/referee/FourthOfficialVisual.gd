@@ -18,11 +18,15 @@ const BODY_RADIUS: float = 6.5
 const SHADOW_OFFSET_Y: float = 4.0
 const BOARD_HOLD_DURATION: float = 3.6
 
+enum BoardMode { SUB, STOPPAGE }
+
 var _boundary: PitchBoundary = null
+var _board_mode: BoardMode = BoardMode.SUB
 var _is_presenting_board: bool = false
 var _board_timer: float = 0.0
 var _out_number: int = 0
 var _in_number: int = 0
+var _stoppage_minutes: int = 0
 var _board_alpha: float = 0.0
 var _board_scale: float = 0.8
 
@@ -37,6 +41,7 @@ const COLOR_BOARD_BG: Color = Color(0.08, 0.08, 0.10, 0.95)
 const COLOR_BOARD_BORDER: Color = Color(0.35, 0.35, 0.40, 1.0)
 const COLOR_LED_RED: Color = Color(1.0, 0.15, 0.15, 1.0)
 const COLOR_LED_GREEN: Color = Color(0.15, 1.0, 0.25, 1.0)
+const COLOR_LED_AMBER: Color = Color(1.0, 0.75, 0.10, 1.0)
 
 
 func _ready() -> void:
@@ -56,6 +61,7 @@ func bind(boundary: PitchBoundary) -> void:
 
 func reset() -> void:
 	_is_presenting_board = false
+	_board_mode = BoardMode.SUB
 	_board_timer = 0.0
 	_board_alpha = 0.0
 	_board_scale = 0.8
@@ -65,6 +71,7 @@ func reset() -> void:
 
 
 func present_substitution(team: int, out_idx: int, in_idx: int) -> void:
+	_board_mode = BoardMode.SUB
 	var out_player: PlayerData = DataLoader.get_player(team, out_idx)
 	var in_player: PlayerData = DataLoader.get_player(team, in_idx)
 
@@ -73,6 +80,15 @@ func present_substitution(team: int, out_idx: int, in_idx: int) -> void:
 
 	_is_presenting_board = true
 	_board_timer = BOARD_HOLD_DURATION
+	_board_alpha = 0.0
+	_board_scale = 0.75
+
+
+func present_stoppage_time(added_minutes: int) -> void:
+	_board_mode = BoardMode.STOPPAGE
+	_stoppage_minutes = added_minutes
+	_is_presenting_board = true
+	_board_timer = BOARD_HOLD_DURATION + 0.8
 	_board_alpha = 0.0
 	_board_scale = 0.75
 
@@ -115,9 +131,12 @@ func _draw() -> void:
 	# 3. Head (facing downward onto pitch)
 	draw_circle(Vector2(0.0, BODY_RADIUS * 0.3), BODY_RADIUS * 0.45, COLOR_SKIN)
 
-	# 4. Electronic Substitution Board
+	# 4. Electronic Board
 	if _is_presenting_board and _board_alpha > 0.01:
-		_draw_substitution_board()
+		if _board_mode == BoardMode.SUB:
+			_draw_substitution_board()
+		else:
+			_draw_stoppage_board()
 
 
 func _draw_substitution_board() -> void:
@@ -161,3 +180,34 @@ func _draw_substitution_board() -> void:
 	var in_pos: Vector2 = right_box.get_center() + Vector2(-in_size.x * 0.5, in_size.y * 0.35)
 	var green_col: Color = Color(COLOR_LED_GREEN.r, COLOR_LED_GREEN.g, COLOR_LED_GREEN.b, _board_alpha)
 	draw_string(font, in_pos, in_str, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, green_col)
+
+
+func _draw_stoppage_board() -> void:
+	var board_center: Vector2 = Vector2(0.0, -22.0)
+	var board_size: Vector2 = Vector2(48.0, 24.0) * _board_scale
+	var board_rect := Rect2(board_center - board_size * 0.5, board_size)
+
+	# Board casing & bevel
+	var casing_col: Color = COLOR_BOARD_BG
+	casing_col.a = _board_alpha
+	draw_rect(board_rect, casing_col, true)
+	draw_rect(board_rect, Color(COLOR_BOARD_BORDER.r, COLOR_BOARD_BORDER.g, COLOR_BOARD_BORDER.b, _board_alpha), false, 1.5)
+
+	# Arms holding board
+	var arm_col: Color = Color(COLOR_SKIN.r, COLOR_SKIN.g, COLOR_SKIN.b, _board_alpha)
+	draw_line(Vector2(-BODY_RADIUS * 0.7, 0.0), board_center + Vector2(-board_size.x * 0.35, board_size.y * 0.4), arm_col, 2.0)
+	draw_line(Vector2(BODY_RADIUS * 0.7, 0.0), board_center + Vector2(board_size.x * 0.35, board_size.y * 0.4), arm_col, 2.0)
+
+	# LED inner box
+	var inner_box := Rect2(board_rect.position + Vector2(2.0, 2.0), board_size - Vector2(4.0, 4.0))
+	draw_rect(inner_box, Color(0.03, 0.03, 0.02, _board_alpha * 0.85), true)
+
+	var font: Font = ThemeDB.fallback_font
+	var font_size: int = int(14.0 * _board_scale)
+
+	# Amber/Orange Stoppage Time Numeral (e.g. "+3")
+	var stop_str: String = "+%d" % _stoppage_minutes
+	var stop_size: Vector2 = font.get_string_size(stop_str, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size)
+	var stop_pos: Vector2 = inner_box.get_center() + Vector2(-stop_size.x * 0.5, stop_size.y * 0.35)
+	var amber_col: Color = Color(COLOR_LED_AMBER.r, COLOR_LED_AMBER.g, COLOR_LED_AMBER.b, _board_alpha)
+	draw_string(font, stop_pos, stop_str, HORIZONTAL_ALIGNMENT_CENTER, -1, font_size, amber_col)

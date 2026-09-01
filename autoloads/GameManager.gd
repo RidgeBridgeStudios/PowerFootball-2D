@@ -20,7 +20,8 @@
 extends Node
 
 enum MatchPhase {
-	PREGAME, KICKOFF, IN_PLAY, GOAL_SCORED, HALF_TIME, FULL_TIME,
+	PREGAME, FIRST_HALF, KICKOFF, IN_PLAY, GOAL_SCORED, HALF_TIME,
+	SECOND_HALF, FULL_TIME, EXTRA_TIME,
 	GOAL_KICK, CORNER_KICK, THROW_IN, FREE_KICK, PENALTY_KICK,
 	PENALTY_SHOOTOUT,
 }
@@ -39,12 +40,14 @@ const TEAM_B: int = 1
 ## Seconds the goal celebration holds before play restarts.
 const GOAL_CELEBRATION_TIME: float = 2.5
 
+## Simulated 90-minute match duration (5400s) split into two 45-minute halves (2700s).
+const SIMULATED_HALF_DURATION: float = 45.0 * 60.0   # 2700.0s
+const SIMULATED_MATCH_DURATION: float = 90.0 * 60.0  # 5400.0s
+const BASE_HALF_DURATION_REAL_SEC: float = 150.0
+
 ## Macro temporal pacing stages (POWERFOOTBALL_MASTER_VISION.md Part V /
 ## docs architecture plan "Temporal Match Stages"). Boundaries are expressed
-## as fractions of match_duration — 15/60/75 out of a real 90-minute match —
-## rather than hardcoded absolute seconds, since this project's matches
-## default to a compressed 300s arcade length (see match_duration below), not
-## the spec's literal 5400s assumption.
+## as fractions of SIMULATED_MATCH_DURATION (15/60/75 out of 90 minutes).
 enum MatchStage { SIZING_UP = 0, EQUILIBRIUM = 1, TRANSITIONS = 2, GAME_CRUNCH = 3 }
 const STAGE_1_FRACTION: float = 15.0 / 90.0
 const STAGE_2_FRACTION: float = 60.0 / 90.0
@@ -59,8 +62,16 @@ var _last_match_stage: MatchStage = MatchStage.SIZING_UP
 var score: Array[int] = [0, 0]
 ## Seconds elapsed in the match.
 var match_time: float = 0.0
-## Full-time whistle, in seconds. 300.0 = a 5 minute match.
+## Real seconds per 45-minute half (default: 150.0s for a 5-minute full match).
+var half_duration_real_sec: float = 150.0
+## Full-time whistle in real seconds (synchronized to 2.0 * half_duration_real_sec).
 var match_duration: float = 300.0
+## Simulated match clock in in-game seconds (0.0 to 5400.0).
+var simulated_match_time: float = 0.0
+## Active half of the match (1 = First Half, 2 = Second Half, 3+ = Extra Time).
+var current_half: int = 1
+## Team that kicked off the match in the first half.
+var match_opening_kickoff_team: int = TEAM_A
 ## The team that scored most recently — the pitch uses it to set up the restart.
 var last_scoring_team: int = -1
 ## Guards GameEvents.half_time_reached so it only fires once per match.
@@ -68,6 +79,12 @@ var _half_time_fired: bool = false
 ## Monotonically incrementing counter stepped every frame. Used by PlayerBrain
 ## to vary per-player noise seeds between decision ticks.
 var _match_tick: int = 0
+
+## Stoppage time calculation & announcements
+var _accumulated_stoppage_sec: float = 60.0
+var stoppage_minutes_half_1: int = 0
+var stoppage_minutes_half_2: int = 0
+var _stoppage_announced: bool = false
 
 ## --- Set pieces --------------------------------------------------------------
 
@@ -90,13 +107,57 @@ var shootout_active: bool = false
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	GameEvents.powerful_shot_landed.connect(_on_powerful_shot)
+	GameEvents.goal_scored.connect(_on_goal_stoppage)
+	GameEvents.substitution_made.connect(_on_sub_stoppage)
+	GameEvents.yellow_card_shown.connect(_on_card_stoppage)
+	GameEvents.red_card_shown.connect(_on_card_stoppage)
+	GameEvents.foul_committed.connect(_on_foul_stoppage)
+
+
+func _on_goal_stoppage(_team: int, _scorer: Node = null) -> void:
+	_accumulated_stoppage_sec += 45.0
+
+
+func _on_sub_stoppage(_team: int, _out_idx: int, _in_idx: int) -> void:
+	_accumulated_stoppage_sec += 30.0
+
+
+func _on_card_stoppage(_player: Node, _team: int, _extra: Variant = null) -> void:
+	_accumulated_stoppage_sec += 25.0
+
+
+func _on_foul_stoppage(_fouler: Node, _victim: Node, _pos: Vector2) -> void:
+	_accumulated_stoppage_sec += 10.0
 
 
 ## Hit-stop: briefly slow the clock on a high-charge shot so the strike reads.
-func _on_powerful_shot(_shooter: HeavyPlayerController, _speed: float, ratio: float) -> void:
+func _on_powerful_shot(_shooter: HeavyPlayerController, _speed: float, _ratio: float) -> void:
 	Engine.time_scale = 0.15
 	await get_tree().create_timer(0.055 * Engine.time_scale).timeout
 	Engine.time_scale = 1.0
+
+
+## Calculates the time dilation factor mapping real elapsed seconds to in-game seconds.
+func get_time_scale() -> float:
+	return SIMULATED_HALF_DURATION / maxf(half_duration_real_sec, 1.0)
+
+
+## Normalized match progress in range [0.0, 1.0] across the 90 simulated minutes.
+func get_match_time_ratio() -> float:
+	return clampf(simulated_match_time / SIMULATED_MATCH_DURATION, 0.0, 1.0)
+
+
+func get_announced_stoppage_minutes() -> int:
+	return stoppage_minutes_half_1 if current_half == 1 else stoppage_minutes_half_2
+
+
+func is_in_stoppage_time() -> bool:
+	return (current_half == 1 and simulated_match_time >= SIMULATED_HALF_DURATION) or (current_half >= 2 and simulated_match_time >= SIMULATED_MATCH_DURATION)
+
+
+func set_half_duration(real_sec: float) -> void:
+	half_duration_real_sec = maxf(real_sec, 10.0)
+	match_duration = half_duration_real_sec * 2.0
 
 
 func _process(delta: float) -> void:
@@ -110,21 +171,39 @@ func _process(delta: float) -> void:
 		return  # Penalty shootout: FSMs run for each kick, but the full-time clock never resumes.
 
 	match_time += delta
+	simulated_match_time += delta * get_time_scale()
 	_update_match_stage()
-	if not _half_time_fired and match_time >= match_duration * 0.5:
-		_half_time_fired = true
-		set_phase(MatchPhase.HALF_TIME)   # Pauses the clock — IN_PLAY guard now exits
-		GameEvents.half_time_reached.emit()
-	if match_time >= match_duration:
-		match_time = match_duration
-		_end_match()
+
+	if current_half == 1:
+		if simulated_match_time >= SIMULATED_HALF_DURATION and not _stoppage_announced:
+			_stoppage_announced = true
+			stoppage_minutes_half_1 = clampi(int(ceil(_accumulated_stoppage_sec / 60.0)), 1, 6)
+			GameEvents.stoppage_time_announced.emit(stoppage_minutes_half_1, 1)
+
+		var target_h1_end: float = SIMULATED_HALF_DURATION + float(stoppage_minutes_half_1 * 60)
+		if not _half_time_fired and simulated_match_time >= target_h1_end:
+			simulated_match_time = target_h1_end
+			_half_time_fired = true
+			set_phase(MatchPhase.HALF_TIME)   # Pauses the clock — IN_PLAY guard now exits
+			GameEvents.half_time_started.emit()
+			GameEvents.half_time_reached.emit()
+	elif current_half >= 2:
+		if simulated_match_time >= SIMULATED_MATCH_DURATION and not _stoppage_announced:
+			_stoppage_announced = true
+			stoppage_minutes_half_2 = clampi(int(ceil(_accumulated_stoppage_sec / 60.0)), 1, 9)
+			GameEvents.stoppage_time_announced.emit(stoppage_minutes_half_2, 2)
+
+		var target_h2_end: float = SIMULATED_MATCH_DURATION + float(stoppage_minutes_half_2 * 60)
+		if simulated_match_time >= target_h2_end:
+			simulated_match_time = target_h2_end
+			_end_match()
 
 
 ## Checked every IN_PLAY frame alongside the half-time check above — cheap
 ## fraction comparisons, no allocation. Only emits when the stage actually
 ## changes, mirroring set_phase()'s early-out.
 func _update_match_stage() -> void:
-	var ratio: float = match_time / match_duration
+	var ratio: float = get_match_time_ratio()
 	var stage: MatchStage = MatchStage.GAME_CRUNCH
 	if ratio < STAGE_1_FRACTION:
 		stage = MatchStage.SIZING_UP
@@ -140,12 +219,30 @@ func _update_match_stage() -> void:
 
 func start_match() -> void:
 	match_time = 0.0
+	simulated_match_time = 0.0
+	current_half = 1
+	match_duration = half_duration_real_sec * 2.0
 	score = [0, 0]
 	last_scoring_team = -1
 	_half_time_fired = false
 	shootout_active = false
+	match_opening_kickoff_team = TEAM_A
+	_accumulated_stoppage_sec = 60.0
+	stoppage_minutes_half_1 = 0
+	stoppage_minutes_half_2 = 0
+	_stoppage_announced = false
 	_last_match_stage = MatchStage.SIZING_UP
 	set_phase(MatchPhase.KICKOFF)
+	GameEvents.kickoff_started.emit()
+
+
+func start_second_half() -> void:
+	current_half = 2
+	simulated_match_time = SIMULATED_HALF_DURATION
+	_accumulated_stoppage_sec = 120.0
+	_stoppage_announced = false
+	set_phase(MatchPhase.KICKOFF)
+	GameEvents.half_time_ended.emit()
 	GameEvents.kickoff_started.emit()
 
 
@@ -234,10 +331,22 @@ func is_set_piece_active() -> bool:
 	return SET_PIECE_PHASES.has(current_phase)
 
 
-## "MM:SS", counting up from 0:00.
+## "MM:SS" format across the simulated 90 minutes (00:00 to 45:00, 45:00 to 90:00).
+## Stoppage time displays as 45:00 +X or 90:00 +X when exceeding regulation half time.
 func get_clock_string() -> String:
-	var total: int = int(match_time)
-	return "%d:%02d" % [total / 60, total % 60]
+	var total_sec: int = int(simulated_match_time)
+	if current_half == 1 and total_sec >= int(SIMULATED_HALF_DURATION):
+		var extra_half1: int = (total_sec - int(SIMULATED_HALF_DURATION) + 59) / 60
+		var display_added1: int = maxi(stoppage_minutes_half_1, extra_half1)
+		return "45:00 +%d" % display_added1
+	elif current_half >= 2 and total_sec >= int(SIMULATED_MATCH_DURATION):
+		var extra_half2: int = (total_sec - int(SIMULATED_MATCH_DURATION) + 59) / 60
+		var display_added2: int = maxi(stoppage_minutes_half_2, extra_half2)
+		return "90:00 +%d" % display_added2
+
+	var minutes: int = total_sec / 60
+	var seconds: int = total_sec % 60
+	return "%02d:%02d" % [minutes, seconds]
 
 
 func get_score_string() -> String:

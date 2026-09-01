@@ -24,6 +24,10 @@ func process(player: HeavyPlayerController, _delta: float) -> StringName:
 	if common != &"":
 		return common
 
+	var catch_ball: Pseudo3DBall = player.get_ball_in_catch_range()
+	if catch_ball != null:
+		return GOALKEEPER_HOLD
+
 	var nearby_ball: Pseudo3DBall = player.get_ball_in_foot_range()
 	if nearby_ball != null and (nearby_ball.possessor == null or nearby_ball.possessor == player):
 		return DRIBBLE

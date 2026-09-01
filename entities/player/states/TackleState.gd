@@ -107,6 +107,8 @@ func _try_win_ball(player: HeavyPlayerController) -> bool:
 	var loser: Node2D = ball.possessor
 	var victim := loser as HeavyPlayerController
 	if victim != null:
+		if victim.is_holding_ball():
+			return false
 		victim.ball_control_lockout = TACKLE_DISPOSSESS_LOCKOUT
 
 	ball.apply_kick(player.facing_direction * DISPOSSESS_IMPULSE, 0.0, player)
@@ -132,23 +134,32 @@ func _check_mistimed_foul(
 	if victim == null:
 		return
 
+	var effective_facing: float = facing_dot if not is_zero_approx(facing_dot) else player.get_facing_dot(victim.global_position)
+
 	# A fully back-facing challenge is always a foul — no attribute saves it.
-	if facing_dot < BACK_TACKLE_FOUL_DOT:
-		GameEvents.foul_committed.emit(player, victim, player.global_position)
+	if effective_facing < BACK_TACKLE_FOUL_DOT:
+		GameEvents.foul_committed.emit(player, victim, victim.global_position)
 		return
 
-	# Side-on misses: foul probability scales with how off-angle the challenge
-	# was, reduced by the aggression attribute (aggressive players are better
-	# at last-ditch side challenges).
 	var brain: PlayerBrain = player.get_node_or_null("PlayerBrain") as PlayerBrain
 	var aggression: float = brain.aggression_attribute if brain != null else 0.5
 
-	# side_factor: 0.0 = perfectly aimed (MIN_FACING_DOT), 1.0 = side-on (dot ≤ 0)
-	var side_factor: float = clampf(1.0 - facing_dot / MIN_FACING_DOT, 0.0, 1.0)
-	var foul_probability: float = side_factor * (1.0 - aggression * 0.4)
+	# If roughly facing forward (effective_facing >= MIN_FACING_DOT), a miss is
+	# only a foul if the player had heavy body collision contact with the victim (< 24px)
+	if effective_facing >= MIN_FACING_DOT:
+		var dist_sq: float = player.global_position.distance_squared_to(victim.global_position)
+		if dist_sq < 24.0 * 24.0:
+			var foul_prob: float = 0.25 * (1.0 - aggression * 0.4)
+			if _rng.randf() < foul_prob:
+				GameEvents.foul_committed.emit(player, victim, victim.global_position)
+		return
+
+	# Side-on misses (effective_facing < MIN_FACING_DOT)
+	var side_factor: float = clampf(1.0 - effective_facing / MIN_FACING_DOT, 0.0, 1.0)
+	var foul_probability: float = side_factor * 0.60 * (1.0 - aggression * 0.3)
 
 	if _rng.randf() < foul_probability:
-		GameEvents.foul_committed.emit(player, victim, player.global_position)
+		GameEvents.foul_committed.emit(player, victim, victim.global_position)
 
 
 func _find_nearby_opponent(player: HeavyPlayerController) -> HeavyPlayerController:

@@ -71,6 +71,41 @@ var _urgency_eval_timer: float = 0.0
 ## defensive, positive = hyper-aggressive.
 var _risk_profile: float = 0.0
 
+const _ROLE_CONFIGS: Dictionary = {
+	"CB": preload("res://shared/roles/role_cb.tres"),
+	"LB": preload("res://shared/roles/role_lb.tres"),
+	"RB": preload("res://shared/roles/role_rb.tres"),
+	"DM": preload("res://shared/roles/role_dm.tres"),
+	"CDM": preload("res://shared/roles/role_cdm.tres"),
+	"CM": preload("res://shared/roles/role_cm.tres"),
+	"LM": preload("res://shared/roles/role_lm.tres"),
+	"RM": preload("res://shared/roles/role_rm.tres"),
+	"LW": preload("res://shared/roles/role_lw.tres"),
+	"RW": preload("res://shared/roles/role_rw.tres"),
+	"AM": preload("res://shared/roles/role_am.tres"),
+	"CAM": preload("res://shared/roles/role_am.tres"),
+	"ST": preload("res://shared/roles/role_st.tres"),
+	"CF": preload("res://shared/roles/role_st.tres"),
+}
+
+const _ROLE_ENUM_MAP: Dictionary = {
+	"GK": PlayerBrain.Role.GOALKEEPER,
+	"CB": PlayerBrain.Role.OUTFIELD_DEFENDER,
+	"LB": PlayerBrain.Role.OUTFIELD_DEFENDER,
+	"RB": PlayerBrain.Role.OUTFIELD_DEFENDER,
+	"DM": PlayerBrain.Role.OUTFIELD_MIDFIELDER,
+	"CDM": PlayerBrain.Role.OUTFIELD_MIDFIELDER,
+	"CM": PlayerBrain.Role.OUTFIELD_MIDFIELDER,
+	"LM": PlayerBrain.Role.OUTFIELD_MIDFIELDER,
+	"RM": PlayerBrain.Role.OUTFIELD_MIDFIELDER,
+	"LW": PlayerBrain.Role.OUTFIELD_ATTACKER,
+	"RW": PlayerBrain.Role.OUTFIELD_ATTACKER,
+	"AM": PlayerBrain.Role.OUTFIELD_ATTACKER,
+	"CAM": PlayerBrain.Role.OUTFIELD_ATTACKER,
+	"ST": PlayerBrain.Role.OUTFIELD_ATTACKER,
+	"CF": PlayerBrain.Role.OUTFIELD_ATTACKER,
+}
+
 ## Per-role formation_ball_weight band that tempo is lerped across. Keeps
 ## defenders holding their line and attackers pushing up at any tempo
 ## setting, instead of tempo flattening every role to the same drift —
@@ -147,16 +182,22 @@ func _apply_formation(formation_name: String) -> void:
 
 		var slot_index: int = clampi(i, 0, layout.size() - 1)
 		var slot: Dictionary = layout[slot_index]
+		var role_str: String = slot["role"]
 		var offset: Vector2 = slot["anchor_offset"]
 
-		var anchor: Vector2 = pitch_centre + offset if _team == GameManager.TEAM_A else pitch_centre - offset
+		var defends_left: bool = (_team == GameManager.TEAM_A) if not _boundary.sides_flipped else (_team != GameManager.TEAM_A)
+		var anchor: Vector2 = pitch_centre + offset if defends_left else pitch_centre - offset
 		player.brain.formation_anchor = anchor
+		player.brain.role = _ROLE_ENUM_MAP.get(role_str, PlayerBrain.Role.OUTFIELD_MIDFIELDER)
+		player.brain.is_goalkeeper = (role_str == "GK")
+		if _ROLE_CONFIGS.has(role_str):
+			player.role_config = _ROLE_CONFIGS[role_str]
 		new_anchors[player.brain.player_index] = anchor
 
 		# Convenience tag for career mode UI only — does not affect physics.
 		var pdata: PlayerData = player.get_meta(&"player_data", null) as PlayerData
 		if pdata != null:
-			pdata.position_role = slot["role"]
+			pdata.position_role = role_str
 
 	GameEvents.formation_anchors_changed.emit(_team, new_anchors)
 
@@ -201,7 +242,7 @@ func _apply_brain_overrides() -> void:
 			brain.composure_attribute = maxf(brain.composure_attribute, 0.40)
 
 
-## Reads GameManager.score and GameManager.match_time. Evaluates once per goal
+## Reads GameManager.score and GameManager.get_match_time_ratio(). Evaluates once per goal
 ## event — never per-frame.
 func _check_formation_shift() -> void:
 	if _data == null:
@@ -210,8 +251,8 @@ func _check_formation_shift() -> void:
 	var our_score: int = GameManager.score[_team]
 	var their_score: int = GameManager.score[1 - _team]
 	var diff: int = our_score - their_score
-	var time_left: float = GameManager.match_duration - GameManager.match_time
-	var late_game: bool = time_left < GameManager.match_duration * 0.30
+	var time_ratio: float = GameManager.get_match_time_ratio()
+	var late_game: bool = time_ratio >= 0.70
 
 	# Pragmatist (4) shifts to defend at +1 goal lead instead of +2.
 	var defend_threshold: int = 1 if _data.has_trait(4) else 2
@@ -303,14 +344,11 @@ func _evaluate_tactical_urgency() -> void:
 	if world == null:
 		return
 
-	var t: float = GameManager.match_time
-	var duration: float = maxf(GameManager.match_duration, 1.0)
-
 	var goals_for: int = GameManager.score[_team]
 	var goals_against: int = GameManager.score[1 - _team]
 	var delta_score: float = float(goals_for - goals_against)
 
-	var time_ratio: float = clampf(t / duration, 0.0, 1.0)
+	var time_ratio: float = GameManager.get_match_time_ratio()
 	var time_sq: float = time_ratio * time_ratio
 
 	var raw_urgency: float = tanh(-TIME_ACCEL_K * delta_score * time_sq + _risk_profile)

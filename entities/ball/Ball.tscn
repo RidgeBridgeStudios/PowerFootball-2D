@@ -1,9 +1,16 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=8 format=3]
 
 [ext_resource type="Script" path="res://entities/ball/Pseudo3DBall.gd" id="1_ball"]
 [ext_resource type="Texture2D" path="res://art/ball.png" id="2_ball_tex"]
 [ext_resource type="Texture2D" path="res://art/shadow.png" id="3_shadow"]
 [ext_resource type="Script" path="res://entities/ball/BallStateFactory.gd" id="4_fsm"]
+[ext_resource type="Shader" path="res://entities/ball/Pseudo3DBall.gdshader" id="5_shader"]
+[ext_resource type="Texture2D" path="res://art/ball_classic_texture.png" id="6_classic_tex"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_ball"]
+resource_local_to_scene = true
+shader = ExtResource("5_shader")
+shader_parameter/ball_texture = ExtResource("6_classic_tex")
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_ball"]
 radius = 4.0
@@ -18,6 +25,7 @@ scale = Vector2(0.5, 0.5)
 texture = ExtResource("3_shadow")
 
 [node name="BallSprite" type="Sprite2D" parent="."]
+material = SubResource("ShaderMaterial_ball")
 texture = ExtResource("2_ball_tex")
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="."]

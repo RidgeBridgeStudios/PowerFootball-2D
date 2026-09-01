@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="PlayerRoleConfig" format=3]
+
+
+[ext_resource type="Script" path="res://shared/PlayerRoleConfig.gd" id="PlayerRoleConfig.gd"]
+
+
+[resource]
+script = ExtResource("PlayerRoleConfig.gd")
+role_name = "AM"
+anchor_weight = 0.45
+max_chase_distance = 340.0
+w_dist = 0.22
+w_angle = 0.20
+w_press = 0.25
+w_adv = 0.33
+pitch_bounds = Rect2(-0.2, -0.5, 0.7, 1.0)

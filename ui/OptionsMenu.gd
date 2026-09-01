@@ -14,6 +14,15 @@ extends Control
 
 signal menu_closed
 
+const DURATION_OPTIONS: Array[Dictionary] = [
+	{"label": "2.5 min half (5 min match)", "seconds": 150.0},
+	{"label": "3 min half (6 min match)", "seconds": 180.0},
+	{"label": "4 min half (8 min match)", "seconds": 240.0},
+	{"label": "5 min half (10 min match)", "seconds": 300.0},
+	{"label": "10 min half (20 min match)", "seconds": 600.0},
+	{"label": "45 min half (90 min full real-time match)", "seconds": 2700.0},
+]
+
 @onready var slider_master: HSlider = $Panel/Layout/AudioSection/MasterRow/MasterSlider
 @onready var slider_music: HSlider = $Panel/Layout/AudioSection/MusicRow/MusicSlider
 @onready var slider_sfx: HSlider = $Panel/Layout/AudioSection/SfxRow/SfxSlider
@@ -22,6 +31,7 @@ signal menu_closed
 @onready var lbl_sfx: Label = $Panel/Layout/AudioSection/SfxRow/SfxValueLabel
 @onready var chk_fullscreen: CheckButton = $Panel/Layout/GraphicsSection/FullscreenRow/FullscreenCheck
 @onready var chk_fps: CheckButton = $Panel/Layout/GraphicsSection/FpsRow/FpsCheck
+@onready var opt_half_length: OptionButton = $Panel/Layout/GameplaySection/HalfLengthRow/HalfLengthOption
 @onready var btn_back: Button = $Panel/Layout/BackButton
 
 
@@ -32,11 +42,34 @@ func _ready() -> void:
 	slider_sfx.value_changed.connect(_on_sfx_changed)
 	chk_fullscreen.toggled.connect(_on_fullscreen_toggled)
 	chk_fps.toggled.connect(_on_fps_toggled)
+	if opt_half_length != null:
+		opt_half_length.item_selected.connect(_on_half_length_selected)
 	btn_back.pressed.connect(_on_back_pressed)
 
+	_populate_durations()
 	_on_master_changed(slider_master.value)
 	_on_music_changed(slider_music.value)
 	_on_sfx_changed(slider_sfx.value)
+
+
+func _populate_durations() -> void:
+	if opt_half_length == null:
+		return
+	opt_half_length.clear()
+	var selected_idx: int = 0
+	for i: int in range(DURATION_OPTIONS.size()):
+		var opt: Dictionary = DURATION_OPTIONS[i]
+		opt_half_length.add_item(opt["label"])
+		if is_equal_approx(opt["seconds"], GameManager.half_duration_real_sec):
+			selected_idx = i
+	opt_half_length.select(selected_idx)
+
+
+func _on_half_length_selected(index: int) -> void:
+	if index >= 0 and index < DURATION_OPTIONS.size():
+		var sec: float = DURATION_OPTIONS[index]["seconds"]
+		GameManager.set_half_duration(sec)
+		GameManager.set_meta(&"half_duration_real_sec", sec)
 
 
 func open() -> void:

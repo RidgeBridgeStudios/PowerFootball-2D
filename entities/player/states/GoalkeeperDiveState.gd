@@ -26,6 +26,10 @@ const DIVE_DURATION: float = 0.55
 ## First fraction of the duration spent accelerating before decelerating.
 const ACCEL_PHASE: float = 0.60
 
+## Maximum radius and height for intercepting/saving a ball during a dive.
+const DIVE_SAVE_RADIUS: float = 38.0
+const DIVE_SAVE_MAX_HEIGHT: float = 70.0
+
 ## The lateral dive direction, normalised, set by the coordinator before the
 ## transition. x is always 0.0 (dives track the Y goal line); y is ±1.0.
 var dive_direction: Vector2 = Vector2.ZERO
@@ -56,6 +60,19 @@ func process(player: HeavyPlayerController, _delta: float) -> StringName:
 	# for the restart rather than finish an obsolete dive.
 	if GameManager.current_phase != GameManager.MatchPhase.IN_PLAY:
 		return IDLE
+
+	# Intercept and catch the ball if it enters dive reach during the lunge
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world != null and world.ball_node != null and is_instance_valid(world.ball_node):
+		var match_ball: Pseudo3DBall = world.ball_node
+		if not match_ball.is_frozen and match_ball.position_z <= DIVE_SAVE_MAX_HEIGHT:
+			var dist_sq: float = player.global_position.distance_squared_to(match_ball.global_position)
+			if dist_sq <= DIVE_SAVE_RADIUS * DIVE_SAVE_RADIUS:
+				var hold_state := player.state_factory.get_state(PlayerState.GOALKEEPER_HOLD) as GoalkeeperHoldState
+				if hold_state != null:
+					hold_state.was_diving_save = true
+					hold_state.was_shot = true
+				return GOALKEEPER_HOLD
 
 	if _elapsed >= dive_duration:
 		return IDLE

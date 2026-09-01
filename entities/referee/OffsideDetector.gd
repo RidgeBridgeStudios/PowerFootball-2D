@@ -39,6 +39,9 @@ func _on_ball_struck(striker: Node, _speed: float, _charge_ratio: float, _is_sho
 		return
 	if _boundary == null or _coordinator == null:
 		return
+	# IFAB Law 11: Shots on goal are directed at goal, not passes to teammates.
+	if _is_shot:
+		return
 
 	var striker_player := striker as HeavyPlayerController
 	if striker_player == null:
@@ -60,17 +63,27 @@ func _on_ball_struck(striker: Node, _speed: float, _charge_ratio: float, _is_sho
 		_coordinator.handle_indirect_offside(defending_team, offside_pos)
 
 
-## Nearest attacking player (excluding the striker) to the ball's projected
-## landing spot. Returns null when no such player is registered.
+## Nearest attacking player (excluding the striker) in the passing lane / trajectory
+## cone of the ball's projected landing spot. Returns null when no valid target exists.
 func _find_intended_recipient(striker: HeavyPlayerController, attacking_team: int) -> HeavyPlayerController:
 	var world: MatchWorldModel = MatchWorldModel.instance
 	if world == null:
 		return null
 
-	var projected: Vector2 = world.ball_position + world.ball_velocity * OFFSIDE_LOOKAHEAD_SECONDS
+	var ball_vel: Vector2 = world.ball_velocity
+	if ball_vel.length_squared() < 2500.0:  # < 50 px/s
+		return null
+
+	var attack_direction: float = 1.0 if attacking_team == 0 else -1.0
+	# Backward passes cannot result in an offside receiver ahead of the ball.
+	if ball_vel.x * attack_direction <= 0.0:
+		return null
+
+	var pass_dir: Vector2 = ball_vel.normalized()
+	var projected: Vector2 = world.ball_position + ball_vel * OFFSIDE_LOOKAHEAD_SECONDS
 
 	var best: HeavyPlayerController = null
-	var best_dist: float = INF
+	var best_dist: float = 180.0  # Max distance to intended landing zone
 	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
 		var node: HeavyPlayerController = world.player_nodes[i]
 		if node == null or not is_instance_valid(node):
@@ -79,6 +92,14 @@ func _find_intended_recipient(striker: HeavyPlayerController, attacking_team: in
 			continue
 		if node == striker:
 			continue
+
+		var to_candidate: Vector2 = world.player_positions[i] - world.ball_position
+		if to_candidate.length_squared() < 1.0:
+			continue
+		var forward_dot: float = pass_dir.dot(to_candidate.normalized())
+		if forward_dot < 0.5:
+			continue  # Not in the direction of the pass
+
 		var dist: float = world.player_positions[i].distance_to(projected)
 		if dist < best_dist:
 			best_dist = dist
@@ -94,13 +115,13 @@ func _compute_offside_line(defending_team: int) -> float:
 	if world == null or _boundary == null:
 		return 0.0
 
-	# Same sign convention as PitchBoundary.get_goal_centre(): team 0 defends
-	# the negative-X goal, team 1 the positive-X goal.
-	var goal_direction: float = -1.0 if defending_team == 0 else 1.0
+	# Derives goal direction from the defending team's goal position, supporting half-time end swapping.
+	var goal_x: float = _boundary.get_goal_centre(defending_team).x
+	var goal_direction: float = -1.0 if goal_x < _boundary.get_centre_spot().x else 1.0
 
 	var deepest_score: float = -INF
 	var second_deepest_score: float = -INF
-	var second_deepest_x: float = _boundary.get_goal_centre(defending_team).x
+	var second_deepest_x: float = goal_x
 
 	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
 		var node: HeavyPlayerController = world.player_nodes[i]
@@ -122,7 +143,7 @@ func _compute_offside_line(defending_team: int) -> float:
 			second_deepest_x = px
 
 	if second_deepest_score == -INF:
-		return _boundary.get_goal_centre(defending_team).x
+		return goal_x
 
 	return second_deepest_x
 
@@ -137,9 +158,10 @@ func _is_offside(player: HeavyPlayerController, offside_line_x: float, attacking
 	if world == null:
 		return false
 
-	# Attacking team 0 advances toward +X (team 1's goal); team 1 toward -X.
-	var attack_direction: float = 1.0 if attacking_team == 0 else -1.0
+	# Attacking direction toward the opponent's goal.
+	var opp_goal_x: float = _boundary.get_goal_centre(1 - attacking_team).x
 	var centre_x: float = _boundary.get_centre_spot().x
+	var attack_direction: float = 1.0 if opp_goal_x > centre_x else -1.0
 	var player_x: float = player.global_position.x
 
 	var past_halfway: bool = (player_x - centre_x) * attack_direction > 0.0

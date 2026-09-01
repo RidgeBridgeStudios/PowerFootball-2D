@@ -107,6 +107,8 @@ func _connect_signals() -> void:
 		GameEvents.free_kick_started.connect(_on_free_kick_started)
 	if not GameEvents.penalty_started.is_connected(_on_penalty_started):
 		GameEvents.penalty_started.connect(_on_penalty_started)
+	if not GameEvents.stoppage_time_announced.is_connected(_on_stoppage_time_announced):
+		GameEvents.stoppage_time_announced.connect(_on_stoppage_time_announced)
 
 
 ## --- GameEvents Handlers ---------------------------------------------------
@@ -171,6 +173,11 @@ func _on_ball_out_of_bounds(side: String) -> void:
 
 func _on_substitution_made(team: int, player_out_idx: int, player_in_idx: int) -> void:
 	fourth_official.present_substitution(team, player_out_idx, player_in_idx)
+
+
+func _on_stoppage_time_announced(added_minutes: int, _half: int) -> void:
+	if fourth_official != null:
+		fourth_official.present_stoppage_time(added_minutes)
 
 
 func _on_goal_scored(_team: int, _scorer: Node = null) -> void:

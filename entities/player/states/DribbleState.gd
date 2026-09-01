@@ -255,6 +255,37 @@ func _apply_touch(player: HeavyPlayerController, carry_dir: Vector2, shield_dir:
 	if shield_dir != carry_dir:
 		touch_direction = touch_direction.lerp(shield_dir, 0.4).normalized()
 
+	# Deflect touch direction safely inward when carrying near the pitch perimeter
+	var world_model: MatchWorldModel = MatchWorldModel.instance
+	if world_model != null:
+		var pitch_size: Vector2 = world_model.get_pitch_size()
+		var half_pitch: Vector2 = pitch_size * 0.5
+		var margin_top: float = player.global_position.y - (-half_pitch.y)
+		var margin_bot: float = half_pitch.y - player.global_position.y
+		if margin_top < 50.0 and touch_direction.y < 0.0:
+			var damp_t: float = 1.0 - clampf(margin_top / 50.0, 0.0, 1.0)
+			touch_direction.y = lerpf(touch_direction.y, 0.05, damp_t)
+			if touch_direction.length_squared() > 0.0001:
+				touch_direction = touch_direction.normalized()
+		elif margin_bot < 50.0 and touch_direction.y > 0.0:
+			var damp_b: float = 1.0 - clampf(margin_bot / 50.0, 0.0, 1.0)
+			touch_direction.y = lerpf(touch_direction.y, -0.05, damp_b)
+			if touch_direction.length_squared() > 0.0001:
+				touch_direction = touch_direction.normalized()
+
+		var margin_left: float = player.global_position.x - (-half_pitch.x)
+		var margin_right: float = half_pitch.x - player.global_position.x
+		if margin_left < 50.0 and touch_direction.x < 0.0:
+			var damp_l: float = 1.0 - clampf(margin_left / 50.0, 0.0, 1.0)
+			touch_direction.x = lerpf(touch_direction.x, 0.05, damp_l)
+			if touch_direction.length_squared() > 0.0001:
+				touch_direction = touch_direction.normalized()
+		elif margin_right < 50.0 and touch_direction.x > 0.0:
+			var damp_r: float = 1.0 - clampf(margin_right / 50.0, 0.0, 1.0)
+			touch_direction.x = lerpf(touch_direction.x, -0.05, damp_r)
+			if touch_direction.length_squared() > 0.0001:
+				touch_direction = touch_direction.normalized()
+
 	var touch_speed: float = player.get_current_top_speed() * effective_touch_ratio
 	if player.is_sprinting:
 		touch_speed *= SPRINT_TOUCH_BONUS

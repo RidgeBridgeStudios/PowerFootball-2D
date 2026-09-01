@@ -80,6 +80,8 @@ var _sim_ai_cadence_violations: int = 0
 var _sim_anchor_samples: Array[float] = []
 
 @onready var boundary: PitchBoundary = $PitchBoundary
+@onready var goal_zone_a: GoalZone = $GoalZoneA
+@onready var goal_zone_b: GoalZone = $GoalZoneB
 @onready var ball: Pseudo3DBall = $Ball
 @onready var players: Node2D = $Players
 @onready var camera: Camera2D = $MatchCamera
@@ -397,6 +399,10 @@ func _on_ball_struck_for_dive(_shooter: Node, _speed: float, _charge_ratio: floa
 	var goal_line_x: float = boundary.get_goal_centre(opp_team).x
 	var direction: Vector2 = _gk_dive_brain.decide_dive(keeper, match_ball, shot_velocity, goal_line_x)
 	if direction == Vector2.ZERO:
+		var hold_state: GoalkeeperHoldState = \
+			keeper.state_factory.get_state(PlayerState.GOALKEEPER_HOLD) as GoalkeeperHoldState
+		if hold_state != null:
+			hold_state.was_shot = true
 		return
 
 	var dive_state: GoalkeeperDiveState = \
@@ -592,6 +598,10 @@ func _apply_match_config() -> void:
 		var away_idx: int = GameManager.get_meta(&"away_team_index")
 		_selected_home_team = DataLoader.get_team(home_idx)
 		_selected_away_team = DataLoader.get_team(away_idx)
+
+	if GameManager.has_meta(&"half_duration_real_sec"):
+		var half_sec: float = float(GameManager.get_meta(&"half_duration_real_sec"))
+		GameManager.set_half_duration(half_sec)
 
 	_is_practice_mode = GameManager.get_meta(&"practice_mode", false)
 
@@ -957,9 +967,15 @@ func _on_half_time_reached() -> void:
 	_swap_ends_and_restart()
 
 
-## Mirrors every player's formation_anchor around the pitch centre X and fires
-## a second-half kickoff.
+## Mirrors every player's formation_anchor around the pitch centre X, swaps goal defending teams, and fires
+## a second-half kickoff with possession awarded to the team that did not start the 1st half.
 func _swap_ends_and_restart() -> void:
+	boundary.set_sides_flipped(true)
+	if goal_zone_a != null:
+		goal_zone_a.defending_team = 1
+	if goal_zone_b != null:
+		goal_zone_b.defending_team = 0
+
 	var centre_x: float = boundary.get_centre_spot().x
 
 	for node: Node in players.get_children():
@@ -969,7 +985,13 @@ func _swap_ends_and_restart() -> void:
 		var anchor: Vector2 = player.brain.formation_anchor
 		player.brain.formation_anchor = Vector2(2.0 * centre_x - anchor.x, anchor.y)
 
-	_start_kickoff_flow()
+	GameManager.current_half = 2
+	GameManager.simulated_match_time = GameManager.SIMULATED_HALF_DURATION
+	GameEvents.half_time_ended.emit()
+
+	# 2nd half kickoff is awarded to the team that did NOT start the 1st half:
+	var second_half_kickoff_team: int = 1 - GameManager.match_opening_kickoff_team
+	_start_kickoff_flow_for_team(second_half_kickoff_team)
 
 
 ## Begins the shared kickoff ceremony: enter KICKOFF first, then reposition
@@ -977,18 +999,18 @@ func _swap_ends_and_restart() -> void:
 ## play stays paused until the coordinator's _on_taker_state_changed() fires
 ## restart_play() after the ball has actually been struck.
 func _start_kickoff_flow() -> void:
-	# Phase first: reset_for_kickoff() emits kickoff_confirmed below, and any
-	# handler must already observe current_phase == KICKOFF.
-	GameManager.kickoff()
-
-	# Snapshot the mutable kickoff decision ONCE — the exact same value feeds
-	# the reset/emit and the coordinator; nothing may re-read the field
-	# in between (it can mutate, e.g. around a shootout restart).
 	var last_scorer: int = GameManager.last_scoring_team
-	var kickoff_team: int = GameManager.TEAM_A
+	var kickoff_team: int = GameManager.match_opening_kickoff_team
 	if last_scorer >= 0:
 		kickoff_team = 1 - last_scorer
 
+	_start_kickoff_flow_for_team(kickoff_team)
+
+
+func _start_kickoff_flow_for_team(kickoff_team: int) -> void:
+	# Phase first: reset_for_kickoff() emits kickoff_confirmed below, and any
+	# handler must already observe current_phase == KICKOFF.
+	GameManager.kickoff()
 	reset_for_kickoff(kickoff_team)
 	_set_piece_coordinator.start_kickoff(kickoff_team)
 
@@ -1004,15 +1026,10 @@ func _on_restart_timer_timeout() -> void:
 
 
 func _on_match_ended(winner: int) -> void:
-	# A drawn full-time score (winner < 0 — see GameManager.get_leading_team())
-	# redirects into a shootout instead of ending the match here.
-	# PenaltyShootoutCoordinator runs the shootout entirely on its own and
-	# calls GameManager.end_shootout() once a winner is decided, which re-fires
-	# match_ended — this time with a decisive winner, so the body below runs
-	# exactly once, at the real end of the match. Practice mode never reaches
-	# this handler at all (see _setup_practice_arena()), but the guard is kept
-	# here too since a shootout only ever makes sense for a full match.
-	if winner < 0 and not _is_practice_mode:
+	# A drawn full-time score (winner < 0) redirects into a shootout only if
+	# knockout mode or shootout is explicitly enabled; otherwise it concludes as a normal draw.
+	var allow_shootout: bool = GameManager.get_meta(&"knockout_mode", false) or GameManager.get_meta(&"allow_shootout", false)
+	if winner < 0 and not _is_practice_mode and allow_shootout:
 		_start_penalty_shootout()
 		return
 

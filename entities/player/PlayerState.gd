@@ -30,6 +30,7 @@ const SET_PIECE_FREEZE: StringName = &"SetPieceFreeze"
 const THROW_IN: StringName = &"ThrowIn"
 const PENALTY_KICK: StringName = &"PenaltyKick"
 const GOALKEEPER_DIVE: StringName = &"GoalkeeperDive"
+const GOALKEEPER_HOLD: StringName = &"GoalkeeperHold"
 
 ## Ball height above which an aerial challenge becomes available.
 const AERIAL_TRIGGER_HEIGHT: float = 10.0

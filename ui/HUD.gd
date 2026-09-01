@@ -98,6 +98,9 @@ func _ready() -> void:
 	GameEvents.red_card_shown.connect(_on_red_card_shown)
 	GameEvents.offside_called.connect(_on_offside_called)
 	GameEvents.shootout_kick_result.connect(_on_shootout_kick_result)
+	GameEvents.half_time_started.connect(_on_half_time_started)
+	GameEvents.half_time_ended.connect(_on_half_time_ended)
+	GameEvents.stoppage_time_announced.connect(_on_stoppage_time_announced)
 
 	power_meter.min_value = 0.0
 	power_meter.max_value = 1.0
@@ -258,6 +261,23 @@ func _on_kickoff_started() -> void:
 func _on_match_phase_changed(phase: int) -> void:
 	if phase == GameManager.MatchPhase.IN_PLAY:
 		status_label.text = ""
+	elif phase == GameManager.MatchPhase.HALF_TIME:
+		status_label.text = "HALF TIME"
+
+
+func _on_half_time_started() -> void:
+	status_label.text = "HALF TIME"
+	_show_set_piece_banner("HALF TIME")
+
+
+func _on_half_time_ended() -> void:
+	status_label.text = "2ND HALF"
+	_show_set_piece_banner("SECOND HALF")
+
+
+func _on_stoppage_time_announced(added_minutes: int, _half: int) -> void:
+	status_label.text = "ADDED TIME: +%d MIN" % added_minutes
+	_show_set_piece_banner("+%d MIN ADDED TIME" % added_minutes)
 
 
 ## PitchScene is the parent of the CanvasLayer parent — walk up two levels.

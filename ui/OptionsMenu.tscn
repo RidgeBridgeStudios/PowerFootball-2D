@@ -167,6 +167,30 @@ text = "Show FPS"
 [node name="FpsCheck" type="CheckButton" parent="Panel/Layout/GraphicsSection/FpsRow"]
 layout_mode = 2
 
+[node name="Separator2" type="HSeparator" parent="Panel/Layout"]
+layout_mode = 2
+
+[node name="GameplaySection" type="VBoxContainer" parent="Panel/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="GameplayLabel" type="Label" parent="Panel/Layout/GameplaySection"]
+layout_mode = 2
+text = "GAMEPLAY"
+theme_override_colors/font_color = Color(0.419608, 0.486275, 0.423529, 1)
+
+[node name="HalfLengthRow" type="HBoxContainer" parent="Panel/Layout/GameplaySection"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HalfLengthLabel" type="Label" parent="Panel/Layout/GameplaySection/HalfLengthRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Half Duration"
+
+[node name="HalfLengthOption" type="OptionButton" parent="Panel/Layout/GameplaySection/HalfLengthRow"]
+layout_mode = 2
+
 [node name="BackButton" type="Button" parent="Panel/Layout"]
 layout_mode = 2
 text = "← Back"

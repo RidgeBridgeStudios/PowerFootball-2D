@@ -16,12 +16,22 @@ signal menu_closed
 
 const ACCENT_COLOR: Color = Color(0.24, 0.86, 0.41)
 
+const DURATION_OPTIONS: Array[Dictionary] = [
+	{"label": "2.5 min half (5 min match)", "seconds": 150.0},
+	{"label": "3 min half (6 min match)", "seconds": 180.0},
+	{"label": "4 min half (8 min match)", "seconds": 240.0},
+	{"label": "5 min half (10 min match)", "seconds": 300.0},
+	{"label": "10 min half (20 min match)", "seconds": 600.0},
+	{"label": "45 min half (90 min full real-time match)", "seconds": 2700.0},
+]
+
 @onready var btn_vs_cpu: Button = $Panel/Layout/ModeRow/VsCpuButton
 @onready var btn_vs_player: Button = $Panel/Layout/ModeRow/VsPlayerButton
 @onready var home_list: ItemList = $Panel/Layout/TeamRow/HomePanel/HomeList
 @onready var away_list: ItemList = $Panel/Layout/TeamRow/AwayPanel/AwayList
 @onready var home_selected_label: Label = $Panel/Layout/TeamRow/HomePanel/HomeSelectedLabel
 @onready var away_selected_label: Label = $Panel/Layout/TeamRow/AwayPanel/AwaySelectedLabel
+@onready var duration_option: OptionButton = $Panel/Layout/DurationRow/DurationOption
 @onready var hint_label: Label = $Panel/Layout/HintLabel
 @onready var btn_back: Button = $Panel/Layout/ButtonRow/BackButton
 @onready var btn_confirm: Button = $Panel/Layout/ButtonRow/ConfirmButton
@@ -37,10 +47,13 @@ func _ready() -> void:
 	btn_vs_player.toggled.connect(_on_vs_player_toggled)
 	home_list.item_selected.connect(_on_home_selected)
 	away_list.item_selected.connect(_on_away_selected)
+	if duration_option != null:
+		duration_option.item_selected.connect(_on_duration_selected)
 	btn_back.pressed.connect(_on_back_pressed)
 	btn_confirm.pressed.connect(_on_confirm_pressed)
 
 	_populate_teams()
+	_populate_durations()
 	_style_lists()
 	_update_confirm()
 
@@ -129,11 +142,31 @@ func _update_confirm() -> void:
 		btn_confirm.grab_focus()
 
 
+func _populate_durations() -> void:
+	if duration_option == null:
+		return
+	duration_option.clear()
+	var selected_idx: int = 0
+	for i: int in range(DURATION_OPTIONS.size()):
+		var opt: Dictionary = DURATION_OPTIONS[i]
+		duration_option.add_item(opt["label"])
+		if is_equal_approx(opt["seconds"], GameManager.half_duration_real_sec):
+			selected_idx = i
+	duration_option.select(selected_idx)
+
+
+func _on_duration_selected(index: int) -> void:
+	if index >= 0 and index < DURATION_OPTIONS.size():
+		var sec: float = DURATION_OPTIONS[index]["seconds"]
+		GameManager.set_half_duration(sec)
+
+
 func _on_confirm_pressed() -> void:
 	GameManager.set_meta(&"home_team_index", home_team_index)
 	GameManager.set_meta(&"away_team_index", away_team_index)
 	GameManager.set_meta(&"vs_mode", vs_mode)
 	GameManager.set_meta(&"practice_mode", false)
+	GameManager.set_meta(&"half_duration_real_sec", GameManager.half_duration_real_sec)
 	get_tree().change_scene_to_file("res://pitch/PitchScene.tscn")
 
 
