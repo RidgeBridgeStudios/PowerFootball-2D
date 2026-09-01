@@ -36,6 +36,8 @@
 ##          team_urgency/team_momentum/current_match_stage — macro match
 ##          architecture cache, written from GameEvents.team_urgency_updated /
 ##          team_momentum_updated / match_stage_changed; get_pitch_centre_x()
+##          get_active_possession_hold_seconds() — how long the current true
+##          possessor (ball_node.possessor) has held continuously
 ##
 ## Pressing trigger detection: a small, cheap read of state this file already
 ## caches (plus one signal subscription for pass events) that answers "is
@@ -1220,6 +1222,18 @@ func _update_possession_watchdog(delta: float) -> void:
 	var brain := holder_controller.get_node_or_null("PlayerBrain") as PlayerBrain
 	if brain != null:
 		brain.trace_next_decision()
+
+
+## Seconds the CURRENT active possessor (ball_node.possessor, tracked by
+## _update_possession_watchdog() above) has held the ball continuously; 0.0
+## while the ball is loose. Deliberately NOT _possession_hold_timer — that one
+## tracks possessor_index, which falls back to last_touched_by when the ball
+## is loose (see soccer-physics.md), so it can read nonzero for a player who
+## is not actually the true controlled carrier. Any caller gating behaviour on
+## "how long has THIS player actually had the ball" (e.g. PlayerBrain's
+## "La Pausa" standstill-breaker) wants this one instead.
+func get_active_possession_hold_seconds() -> float:
+	return _active_possession_timer if _active_possession_node != null else 0.0
 
 
 ## --- Spacing / crowding diagnostics ---------------------------------------

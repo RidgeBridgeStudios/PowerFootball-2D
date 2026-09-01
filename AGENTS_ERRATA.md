@@ -948,6 +948,468 @@ discovered_rules:
       show.
     promotion_target: .claude/rules/ai-architect.md
     status: pending
+
+  - id: verify-external-agent-prompts-against-source-before-executing
+    discovered_date: 2026-09-01
+    discovered_by: Claude
+    category: architecture
+    target_files:
+      - entities/player/HeavyPlayerController.gd
+    invariant: >
+      A batch of externally-authored "[EXECUTION MODE: FULL AUTONOMY]"
+      upgrade prompts (for a different agent, Google Antigravity) described
+      Phase 1 as "couple movement_intent to fatigue... three-tier metabolic
+      model to throttle wants_sprint" as if no such system existed. A first
+      grep pass for stamina|fatigue|metabolic returned zero hits and nearly
+      caused this session to build a duplicate stamina system from scratch.
+      A second, more careful grep (case-insensitive, one term at a time)
+      found a complete existing system on HeavyPlayerController: stamina/
+      stamina_max/stamina_drain_rate/stamina_recover_rate/sprint_locked/
+      stamina_sprint_unlock, a stamina_depleted signal, a HUD stamina bar,
+      and per-player PlayerData-driven tuning — just a binary gate (full
+      sprint speed until stamina hits 0, then a hard lock), not tiered. Any
+      externally-authored "upgrade this subsystem" prompt must be checked
+      against an actual grep/read of the target files before being treated
+      as greenfield — do not trust a prompt's own characterization of what
+      does or does not already exist, and do not trust a single grep result
+      without a second, narrower pass when the stakes of being wrong are
+      "build a whole duplicate subsystem."
+    rationale: >
+      Same session also found tools/fuzz_formations.py, tools/eval_simulation.py
+      and tools/verify_gate.py (three of the four prompts' VERIFY commands)
+      genuinely exist with matching CLI flags, so the batch was not pure
+      fabrication either — parts were grounded, parts were not, which is
+      exactly why each phase needs individual verification rather than a
+      blanket trust/distrust call.
+    resolution: >
+      Implemented the corrected Phase 1 on HeavyPlayerController.gd only:
+      (1) FatigueTier enum (FRESH/TIRED/EXHAUSTED) read from the existing
+      get_stamina_ratio(), consumed by get_current_top_speed() to scale both
+      sprint_multiplier and base top_speed per tier — sprint_locked's hard
+      zero-stamina cutoff is untouched, the tiers just make the approach to
+      it progressive instead of a cliff. (2) _resolve_sprint_jostle(delta),
+      called once per physics tick immediately after move_and_slide() (must
+      run there — it reads that same call's get_slide_collision()/_count()),
+      applies a small continuous apply_external_impulse() push (never a
+      direct velocity write — see soccer-physics.md) between two
+      HeavyPlayerController bodies that collide while both exceed
+      JOSTLE_MIN_SPEED and their velocity headings agree within
+      JOSTLE_HEADING_DOT_MIN=0.70 (side-by-side sprinting, not a crossing run
+      or a tackle). Only the lower get_instance_id() of the colliding pair
+      computes and applies the exchange, to both bodies, so the two sides'
+      independent _physics_process() calls do not each push the other and
+      double the effect. Reused apply_external_impulse() rather than adding
+      a second impulse API — its doc comment already named "collisions" as
+      an intended caller, alongside TackleState's existing one-shot lunge.
+      The prompt's own formula ("θ_impact ≤ 45° AND v̂_A·v̂_B > 0.70") is
+      numerically the same threshold stated twice (cos 45° ≈ 0.7071) rather
+      than two independent conditions, so only the one real heading-alignment
+      test was implemented — documented inline rather than inventing an
+      unjustifiable second angle metric to satisfy the letter of the prompt.
+      Did not touch acceleration/friction curves, PlayerBrain, or any other
+      file — verify_gate.py --fast (gdcheck + all lints + tscn_linter +
+      verify_db) passes clean.
+    promotion_target: .claude/rules/ai-architect.md
+    status: pending
+
+  - id: possession-hold-timer-has-two-non-interchangeable-variants
+    discovered_date: 2026-09-01
+    discovered_by: Claude
+    category: ai
+    target_files:
+      - autoloads/MatchWorldModel.gd
+      - entities/player/PlayerBrain.gd
+    invariant: >
+      MatchWorldModel has TWO possession-duration timers and they are not
+      interchangeable. _possession_hold_timer (feeds PROLONGED_POSSESSION,
+      the press-trigger backstop) is keyed off possessor_index /
+      _resolve_possessor_index(), which falls back to last_touched_by when
+      the ball is loose (soccer-physics.md's documented possessor/
+      last_touched_by split) — it can read nonzero for a player who is not
+      the actual controlled carrier right now. _active_possession_timer
+      (private; feeds the [ActionScorer] possession watchdog trace) is keyed
+      directly off ball_node.possessor, exactly matching PlayerBrain's own
+      ctx.is_possessor definition ((ball != null and ball.possessor ==
+      player) or is_throw_in_taker). A second externally-authored
+      "[TARGETED EDIT]" prompt (this one scoped to UtilityMath.gd/
+      PassUtilityScorer.gd/MatchWorldModel.gd for an xT grid + "La Pausa"
+      holding-play cap) explicitly named "_possession_hold_timer" as the one
+      to reuse for forcing a standstill carrier to act — the wrong one for
+      that purpose; using it would let the new logic fire based on loose-ball
+      last-touch time rather than genuine held possession, or fail to fire
+      promptly on a real transfer. Any future consumer of "how long has the
+      ball been held" must pick deliberately between the two based on
+      whether it cares about the true active carrier (is_possessor semantics
+      — use the possession-watchdog timer) or the broader
+      press-trigger-relevant "who's effectively in control including a
+      loose exchange" reading (possessor_index semantics).
+    rationale: >
+      Same class of near-miss as verify-external-agent-prompts-against-
+      source-before-executing (Phase 1, same file's sibling PR) — an
+      external prompt named a real, existing symbol, but the wrong one for
+      the stated intent. Caught by tracing what possessor_index and
+      ctx.is_possessor are each actually keyed on rather than trusting the
+      prompt's own attribution once the name was confirmed to exist.
+    resolution: >
+      Added MatchWorldModel.get_active_possession_hold_seconds() (returns
+      _active_possession_timer, 0.0 while _active_possession_node is null)
+      as the public accessor — PlayerBrain never previously read any
+      underscore-prefixed MatchWorldModel field directly, so this also
+      preserves that convention instead of reaching into a private field
+      across files. evaluate_tactical_action()'s existing possessor floor
+      ("if max_offensive <= 0.05: PanicClear") now has an elif: when
+      best_action resolved to MaintainFormation with ctx.open_teammate_exists
+      false and get_active_possession_hold_seconds() >
+      LA_PAUSA_HOLD_SECONDS (1.0s), force AttemptDribble (if s_dribble clears
+      the same 0.05 bar as the floor above) or PanicClear otherwise. Also
+      added UtilityMath.XT_GRID (flat 16x10 PackedFloat32Array, row*16+col,
+      hand-authored analytic shape — this project has no real match data to
+      fit an xT model from, documented as such rather than presented as a
+      real football-analytics table) and get_xt_value(pitch_pos, pitch_size,
+      attack_sign), zero-allocation. PassUtilityScorer.score_pass()/
+      score_pass_breakdown() gained a trailing xt_value: float = -1.0 param
+      (appended, not inserted, so existing positional call sites are
+      unaffected) blending it into advancement_utility as
+      (direction_dot_utility + xt_value) * 0.5 when supplied.
+      _find_best_pass_target()'s candidate loop computes xt_value per
+      candidate from candidate_pos - pitch_boundary.get_centre_spot() (the
+      centre-spot offset makes it correct even if a boundary is not
+      origin-centred, rather than assuming the common-case default is always
+      true). gdcheck + full lint suite (verify_gate.py --fast) and both
+      prompt-specified checks (fuzz_solvers.py, eval_simulation.py
+      --duration=60) pass; note both of those are Python-side property/
+      analytical harnesses, not the actual GDScript executing in Godot (no
+      engine in this sandbox — godot-47-core.md), so they confirm the
+      surrounding math properties and simulation invariants hold, not that
+      this specific new GDScript is runtime-exercised.
+    promotion_target: .claude/rules/ai-architect.md
+    status: pending
+
+  - id: defender-marking-was-uncoordinated-and-boundary-clamp-already-existed
+    discovered_date: 2026-09-01
+    discovered_by: Claude
+    category: ai
+    target_files:
+      - entities/player/PlayerBrain.gd
+      - shared/FormationAnchorMath.gd
+    invariant: >
+      A third externally-authored "[TARGETED EDIT]" prompt (scoped to
+      FormationAnchorMath.gd + PlayerBrain.gd, greedy marking + anchor
+      boundary clamping) had one task that was real and one that was already
+      done. Real: _find_nearest_threatening_opponent() was, and had always
+      been, purely local — every OUTFIELD_DEFENDER independently picked its
+      own nearest opposing OUTFIELD_ATTACKER with zero coordination, so
+      several defenders could converge on the same threat while another went
+      unmarked (the DefensiveDuty enum even has a MARKING case whose own
+      comment admits "Reserved fallback label — currently folded into
+      RETREAT's target" — never wired up). Already done:
+      FormationAnchorMath.get_dynamic_anchor_position() already clamps both
+      axes to [-1,1] normalized pitch-half space unconditionally at the end
+      of the function (pulled_norm.x/.y both go through clampf(...,-1.0,1.0)
+      before the pitch_centre + pulled_norm*half conversion back to world
+      space) — the clamp is not inside any of the three TeamPhase branches,
+      so it already applies identically across IN_POSSESSION/
+      OUT_OF_POSSESSION/TRANSITION. FormationAnchorMath.gd is only 109 lines
+      total, all in this one function — there was nowhere else a per-phase
+      unclamped path could hide. Confirmed empirically, not just by reading:
+      fuzz_formations.py --iterations=50000 reports 0 boundary violations
+      and 0 line inversions with FormationAnchorMath.gd completely untouched
+      this session.
+    rationale: >
+      Third occurrence of this pattern across this prompt batch (Phase
+      1's stamina system, Phase 2's xT/possession-timer prompt) — a task
+      list generated from an architecture doc without reading the actual
+      repo state will describe both real gaps and already-shipped work in
+      the same confident voice, with no signal distinguishing them. Read the
+      target file fully (109 lines here — cheap) before trusting either
+      claim.
+    resolution: >
+      FormationAnchorMath.gd: untouched, zero diff — task was already
+      satisfied. PlayerBrain.gd: added a team-wide greedy bipartite marking
+      pass (_recompute_team_marking()), deliberately the greedy
+      approximation named in the prompt's own invariant rules (NOT Hungarian
+      — O(A^2 + A*D) <= 121+121 fixed comparisons over pre-sized static
+      PackedInt32Array/PackedByteArray/PackedFloat32Array scratch, zero
+      per-call allocation). Threat term reuses UtilityMath.get_xt_value()
+      (added for the previous prompt in this batch) rather than inventing a
+      parallel "threat" metric — the receiver-zone danger score xT already
+      is is exactly what "threat" means here. Cost formula's dist_sq/
+      goal_dist_sq terms are normalized against pitch_size-derived
+      references before the prompt's literal 0.5/0.3/0.2 weights are
+      applied — as given (raw px^2 against a 0.2-weighted 0..1 threat term)
+      the threat term would have been numerically inert, tens-of-thousands
+      vs low single digits, silently defeating the stated goal of favouring
+      high-threat assignments. Coordination/staleness: the assignment is
+      genuinely team-wide (which no single PlayerBrain instance's own state
+      can hold), so it lives in a `static var` shared across every PlayerBrain
+      instance (same category of pattern as HeavyPlayerController's
+      static _auto_index counter, ai-architect.md) rather than in
+      MatchWorldModel — the prompt's own file scope named only
+      FormationAnchorMath.gd + PlayerBrain.gd, not MatchWorldModel.gd, so
+      this stayed inside that boundary. Recompute is gated by a per-team
+      last-recompute-tick check (_maybe_recompute_team_marking(),
+      MARKING_REASSIGN_INTERVAL_TICKS=15 match ticks) so the whole team's
+      O(A^2+A*D) pass runs roughly once per cadence window rather than once
+      per defender (5-6x redundant otherwise, since every defender's own
+      decision tick would otherwise independently trigger an identical
+      recompute). Wired into the ONE existing consumer,
+      _find_nearest_threatening_opponent(), which now prefers the
+      coordinated assignment and falls back to the old local nearest-pick
+      only when no assignment exists yet — this automatically fixes its
+      three existing call sites (_resolve_defensive_duty(),
+      _cover_shadow_target() via _find_open_space_target(), and
+      _find_open_space_target()'s own direct use) without touching any of
+      them individually. Confirmed every call site sits inside
+      evaluate_tactical_action()'s existing (_frame_counter + player_index)
+      % current_cadence decision-tick gate (none are reached from
+      per-frame _steer_for_action()) before relying on that gate to satisfy
+      "executed exclusively on the 15-frame AI decision stagger" — note
+      current_cadence is actually a dynamic 8/20/45 depending on ball
+      proximity, not a literal constant 15, despite that being the
+      project-wide shorthand every doc (including this file) uses for "the
+      decision-tick gate"; did not change that naming or behaviour, out of
+      scope for this task. gdcheck + full lint suite (verify_gate.py --fast)
+      and the prompt-specified check (fuzz_formations.py --iterations=50000)
+      pass: 0 boundary violations, 0 line inversions.
+    promotion_target: .claude/rules/ai-architect.md
+    status: pending
+
+  - id: stage-3-fraction-is-83-percent-not-90-and-urgency-doesnt-self-saturate
+    discovered_date: 2026-09-01
+    discovered_by: Claude
+    category: ai
+    target_files:
+      - autoloads/GameManager.gd
+      - entities/manager/ManagerDirector.gd
+    invariant: >
+      GameManager.STAGE_3_FRACTION = 75.0/90.0 ~= 0.833, not 0.90. A fourth
+      externally-authored prompt (emergency tactics: GameEvents.gd +
+      ManagerDirector.gd + PitchScene.gd + TouchlineBubble.gd) described the
+      trigger condition in prose as "match time > 90% (GameManager.
+      STAGE_3_FRACTION)" — citing the right symbol, wrong paraphrase of its
+      value, same failure shape as this batch's other three prompts (real
+      name, wrong attribute). Used the actual constant, not the prompt's 90%
+      claim. Separately, and unlike the other three prompts in this batch,
+      one part of this one was genuinely NOT redundant with existing code
+      even though it looked like it might be: _evaluate_tactical_urgency()'s
+      tanh(-TIME_ACCEL_K * delta_score * time_sq + risk_profile) already
+      produces high urgency when trailing late (time_sq -> 1, delta_score
+      negative), so "push the defensive line" might have seemed already
+      covered — but tanh saturation means it does NOT reach the full +-1.0
+      that drives FormationAnchorMath's URGENCY_MAX_DEF_LINE_SHIFT=120px
+      push: trailing by exactly 1 goal exactly at STAGE_3_FRACTION only
+      computes tanh(1.35*0.694 + risk_profile) = tanh([0.587, 1.287]) ~=
+      [0.53, 0.86] depending on the manager's risk_profile ([-0.35, 0.35]) —
+      i.e. roughly a 64-103px push, not 120px, and not a discrete
+      escalation. Do not assume "the continuous formula already goes there
+      eventually" means "the discrete emergency case is already handled" —
+      check the actual saturation numerically before deciding a task is
+      redundant, the same way you'd check a claimed-missing feature actually
+      exists before building it.
+    rationale: >
+      Verified by hand-computing the tanh argument at the trigger boundary
+      rather than eyeballing "urgency goes up late + trailing, so this must
+      already be covered" — the same discipline as the batch's other three
+      entries, applied to catch a false-negative (looks redundant, isn't)
+      instead of the usual false-positive (looks new, already exists).
+    resolution: >
+      Added GameEvents.emergency_tactics_triggered(team, tactic_type) —
+      genuinely new signal name, verified no collision. ManagerDirector gets
+      a one-shot _emergency_tactics_triggered bool (same pattern as the
+      existing _shifted_to_attack/_shifted_to_defend flags, reset in
+      bind()): the first _evaluate_tactical_urgency() tick where
+      time_ratio >= GameManager.STAGE_3_FRACTION and delta_score <= -1.0,
+      it forces final_urgency = 1.0 for that tick's existing
+      GameEvents.team_urgency_updated emit (reusing the exact existing
+      +120px mechanism rather than adding a parallel defensive-line
+      override) and separately emits emergency_tactics_triggered once.
+      PitchScene.gd connects it and follows the ALREADY-DOCUMENTED
+      touchline-bubble-is-one-shared-instance-home-perspective-only
+      convention exactly (gates on team == GameManager.TEAM_A, matches
+      _on_team_momentum_updated()'s fixed-quote-line style rather than
+      routing through PressOffice — ALL_OUT_ATTACK isn't one of
+      PressOffice's existing quote contexts and PressOffice.gd is outside
+      this task's file scope, so inventing a new trait-quote category for
+      it would have been scope creep). This is the one prompt in the batch
+      whose stated invariants (home-perspective-only, signal-argument-count
+      matching) were themselves accurate and worth trusting outright rather
+      than needing correction. gdcheck + full lint suite + the
+      prompt-specified python3 tools/verify_gate.py --full (15 steps,
+      including eval_simulation/fuzz_solvers/fuzz_formations/dump_api/
+      generate_symbols/compact_errata) all pass. Note --full's
+      compact_errata step has the side effect of reformatting this file and
+      archiving old session_state entries into docs/archive/
+      errata_history.md every time it runs — expected, not a regression.
+    promotion_target: .claude/rules/ai-architect.md
+    status: pending
+
+  - id: dribble-claim-ignores-existing-possessor-dual-driver-jitter
+    discovered_date: 2026-09-01
+    discovered_by: Claude
+    category: physics
+    target_files:
+      - entities/player/states/DribbleState.gd
+      - entities/player/states/MoveState.gd
+      - entities/player/states/IdleState.gd
+    invariant: >
+      DribbleState.enter() and the ball-in-range branch of DribbleState.
+      process() called ball.set_possessor(player) whenever a ball was in foot
+      range, with no check on ball.possessor's existing value, and
+      DribbleState.physics_process() drove _apply_touch()/_apply_magnet()
+      against its own cached _possessed_ball with no check that
+      ball.possessor == player. Foot sensor radius (15px, HeavyPlayer.tscn)
+      exceeds a dribble carry-target offset of only 16-28px
+      (DribbleState.physics_process()'s dynamic_offset), so a second player's
+      foot sensor overlapping the same ball is routine, not an edge case. That
+      second player's DribbleState.enter() silently stole ball.possessor while
+      the original carrier's own DribbleState instance never noticed and kept
+      driving the same ball's velocity every physics tick — two players'
+      physics_process() calls fighting over one ball every frame. Any future
+      DribbleState entry or claim path must gate on
+      (ball.possessor == null or ball.possessor == player) before calling
+      set_possessor(), and physics_process() must independently re-check
+      ball.possessor == player every tick rather than trusting process() to
+      catch a stale claim in time — process() runs on PlayerStateFactory's
+      frame-rate _process() callback (set_physics_process(false) in its
+      _ready()) while physics_process() runs on the fixed-rate tick driven
+      from HeavyPlayerController._physics_process(); these are independently
+      scheduled, so a possessor reassignment (e.g. a tackle win, which
+      explicitly reassigns possessor to the winner without touching the
+      victim's own DribbleState instance) can go unnoticed by process() for
+      one or more physics ticks. The physics_process() guard, not the entry
+      guards, is what bounds that gap. MoveState.process() and
+      IdleState.process() carried the identical unguarded
+      "get_ball_in_foot_range() != null -> return DRIBBLE" transition, so a
+      defender merely shadowing a held ball would still flicker into a
+      hollow, immediately-bounced DribbleState every frame-rate tick even
+      after DribbleState's own guards were fixed — closed at the same time.
+    rationale: >
+      User reported the ball "jitters and jumps around" during CPU-vs-CPU play
+      and that it "confuses the players." Root-caused by direct reads of
+      DribbleState.gd, MoveState.gd, IdleState.gd, PlayerState.gd (confirming
+      check_common_transitions()'s action_tackle gate is unconditionally false
+      for any non-user-controlled player, so the foot-sensor steal was the
+      entire de facto CPU defensive mechanism — see the companion entry
+      cpu-players-never-gated-into-tackle-state), HeavyPlayer.tscn (confirmed
+      foot sensor radius 15.0 vs body collision radius 7.0), and every state
+      that transitions to DRIBBLE or calls set_possessor() project-wide (4
+      call sites total, all HeavyPlayerController, confirmed by grep) to rule
+      out any legitimate flow depending on DribbleState silently reassigning a
+      non-null, non-self possessor — none exists; TackleState's win path
+      already explicitly sets possessor itself before returning DRIBBLE, and
+      PenaltyKickState always calls apply_kick() (which releases possession)
+      before ever reaching DRIBBLE. PlayerBrain.evaluate_tactical_action()
+      keys heavily on ctx.is_possessor/ball.possessor for scoring, so the
+      flickering possessor/last_touched_by state during a contest also
+      destabilized every other player's decision inputs nearby — the
+      "confuses the players" half of the report. Design validated by a
+      dedicated Plan sub-agent pass, which independently re-read
+      PlayerStateFactory.gd and confirmed the process()/physics_process()
+      cadence split is real (not assumed) and is what makes the
+      physics_process() guard load-bearing rather than a redundant safety net.
+      This sandbox has no Godot binary (godot-47-core.md); the fix is a traced
+      control-flow correction, not a captured runtime log — needs live
+      playtest confirmation that the visible jitter is gone.
+    resolution: >
+      Added an (ball.possessor == null or ball.possessor == player) guard to
+      DribbleState.enter()'s and process()'s claim branches, and an
+      `or ball.possessor != player` clause to physics_process()'s existing
+      early-return guard. Extended the same guard one level up into
+      MoveState.process() and IdleState.process()'s own DRIBBLE-transition
+      checks so a defender shadowing an opponent's held ball stays in
+      MoveState/IdleState instead of flickering into a no-op DribbleState
+      every frame-rate tick — confirmed via FacingArrow.gd (the only
+      possession_lost/possession_gained listener) that the flicker itself was
+      cosmetically inert, but the pointless enter()/exit() churn and a
+      transient one-tick DRIBBLE_SPEED_PENALTY stutter were worth closing at
+      the source. Must ship alongside cpu-players-never-gated-into-
+      tackle-state — this fix alone removes CPU defenders' only dispossession
+      mechanism (the very bug being fixed), so landing it without real
+      tackling would be a defensive regression, not a neutral bug fix.
+    promotion_target: .claude/rules/soccer-physics.md
+    status: pending
+
+  - id: cpu-players-never-gated-into-tackle-state
+    discovered_date: 2026-09-01
+    discovered_by: Claude
+    category: ai
+    target_files:
+      - entities/player/HeavyPlayerController.gd
+      - entities/player/PlayerState.gd
+      - entities/player/PlayerBrain.gd
+    invariant: >
+      PlayerState.check_common_transitions()'s only gate into TACKLE was
+      wants(player, &"action_tackle"), and PlayerState.wants() unconditionally
+      returns false for any not player.is_user_controlled. A repo-wide grep
+      confirmed action_tackle has no other reference anywhere, so TackleState
+      was structurally unreachable for every CPU player — the only defensive
+      mechanism CPU-vs-CPU play had was the foot-sensor steal covered by
+      dribble-claim-ignores-existing-possessor-dual-driver-jitter, which is
+      costless and silent, not a real challenge. HeavyPlayerController now
+      exposes a third brain-intent channel, wants_tackle (mirroring the
+      existing wants_sprint convention: human input read directly where
+      consumed, CPU intent pre-written by PlayerBrain each physics tick),
+      which check_common_transitions() ORs into the same TACKLE gate.
+      PlayerBrain._should_attempt_tackle() (called every physics tick from
+      _steer_for_action(), which already runs every frame regardless of the
+      15-frame-equivalent decision stagger — see ai-architect.md) commits only
+      when current_action == &"ChaseBall" (reusing every existing role-budget/
+      anchor-clamp/loose-ball gate that already decides this is a legal,
+      worthwhile chase), the ball is held by an opposing HeavyPlayerController
+      (never a teammate, never a loose ball), the defender is within
+      TACKLE_ATTEMPT_RANGE, and already clears TackleState.MIN_FACING_DOT —
+      the same facing threshold TackleState itself re-checks at the moment of
+      contact, so the AI's "is this worth attempting" question is exactly
+      "would I actually pass TackleState's own check," not an independently-
+      tuned duplicate. current_action is not reset when TackleState is
+      entered (nothing in TackleState.gd touches it), so without
+      TACKLE_ATTEMPT_COOLDOWN a defender whose ChaseBall/proximity/facing
+      conditions still hold the instant a miss's RECOVERY window ends
+      (routine — a miss typically leaves the tackler still close to and
+      facing the dribbler) would re-lunge every ~0.73s indefinitely — any
+      future reflex wired into _steer_for_action() the same way must consider
+      whether current_action can go stale across the FSM state it triggers,
+      the same trap this one required a cooldown to avoid.
+    rationale: >
+      User explicitly requested CPU players get real tackling routed through
+      the existing TackleState rather than a new synchronous side-channel
+      (unlike Pass/PanicClear/AttemptShoot, which _steer_for_action() already
+      executes directly via ball.apply_kick(), bypassing ChargeKickState/
+      ShotLockState entirely for CPU players — that precedent was considered
+      and rejected here specifically because it would have discarded
+      TackleState's windup/contact-window/foul-risk contest instead of
+      reusing it). Confirmed TackleState._try_win_ball()/_check_mistimed_foul()
+      never reference is_user_controlled (input-agnostic, safe to reuse
+      as-is). Read PlayerBrain.evaluate_tactical_action() and
+      _should_chase_ball() in full (independently, via a dedicated Plan
+      sub-agent validation pass) to confirm current_action == &"ChaseBall" is
+      a sound trigger: it is already the established mechanism for closing
+      down an opponent's held ball (_score_chase()'s own comment: CHASE_RADIUS
+      is "tuned for contesting a ball an OPPONENT still controls nearby"),
+      correctly excludes a loose ball (ball.possessor == null fails the `as
+      HeavyPlayerController` cast used for the opposing-team check), and
+      inherits every documented press-trigger/loose-ball/chase-radius fix in
+      this file for free since it never re-derives chase legality itself.
+      Goalkeepers are structurally excluded (evaluate_tactical_action() never
+      returns &"ChaseBall" for is_goalkeeper) — sweeper-keeper tackling is out
+      of scope. Confirmed via a project-wide grep of .set_possessor( (4 call
+      sites, all passing HeavyPlayerController) that the `as
+      HeavyPlayerController` cast on ball.possessor is always safe. This
+      sandbox has no Godot binary (godot-47-core.md) — the tackle-spam risk
+      and its cooldown fix are derived from tracing current_action's actual
+      lifetime across a TackleState commitment, not a captured trace, and need
+      live playtest confirmation of tackle frequency/feel.
+    resolution: >
+      Added wants_tackle (HeavyPlayerController), the check_common_
+      transitions() OR clause (PlayerState), and _should_attempt_tackle() plus
+      TACKLE_ATTEMPT_RANGE/TACKLE_ATTEMPT_COOLDOWN/_tackle_cooldown
+      (PlayerBrain), wired into _steer_for_action() alongside the existing
+      wants_sprint assignment. Must ship together with dribble-claim-ignores-
+      existing-possessor-dual-driver-jitter: that fix alone removes the only
+      dispossession mechanism CPU defenders had, so this entry supplies the
+      real replacement in the same change rather than leaving a gap.
+    promotion_target: .claude/rules/ai-architect.md
+    status: pending
 ```
 
 ## Session State
@@ -967,54 +1429,6 @@ discovered_rules:
 #   new_rules_discovered: []
 
 session_state:
-  - date: 2026-08-31
-    agent: Antigravity (Principal Engine Architect & Static Analysis Specialist)
-    task: "Low-Level Engine Optimization, Deterministic Replay, Linters & Symbolic Slicing Suite: Refactored MatchWorldModel.gd with typed Array[int] spatial grid buckets and distance_squared_to() comparisons; replaced transient allocations and distance_to sorting across ActionText.gd, TouchlineBubble.gd, SetPieceCoordinator.gd, PitchScene.gd, and PlayerBrain.gd; created tools/lint_stringnames.py (&'string_name' literal enforcement), tools/lint_allocations.py (hot-path allocation & distance sorting linter), tools/lint_signal_races.py (signal emission race condition auditor), tools/lint_shadowing.py (parameter & variable shadowing linter), tools/audit_process_modes.py (process mode consistency auditor), tools/replay_test.py (100% bit-exact 60Hz replay test harness across 1,800 ticks), tools/generate_symbols.py (AST symbol map -> docs/SYMBOLS.json), tools/codebase_slice.py (targeted symbol & method slicing CLI), tools/semantic_search.py (zero-dependency BM25 retrieval indexer), tools/benchmark_math.py (mathematical solvers benchmark), tools/fuzz_formations.py (50k property-based dynamic anchor fuzzer), tools/git_pre_commit.py (pre-commit installer & verifier), and authored .antigravity/skills/ (formation-fuzzer, perf-benchmark). Synchronized .antigravity/commands.json, .agents/commands.json, .antigravity/hooks.json, .agents/hooks.json, llms.txt, and AGENTS.md."
-    files_modified:
-      - autoloads/MatchWorldModel.gd
-      - ui/ActionText.gd
-      - ui/TouchlineBubble.gd
-      - pitch/SetPieceCoordinator.gd
-      - pitch/PitchScene.gd
-      - entities/player/PlayerBrain.gd
-      - ui/HUD.gd
-      - ui/pause/PauseMenu.gd
-      - tools/lint_stringnames.py
-      - tools/lint_allocations.py
-      - tools/lint_signal_races.py
-      - tools/lint_shadowing.py
-      - tools/audit_process_modes.py
-      - tools/replay_test.py
-      - tools/generate_symbols.py
-      - tools/codebase_slice.py
-      - tools/semantic_search.py
-      - tools/benchmark_math.py
-      - tools/fuzz_formations.py
-      - tools/git_pre_commit.py
-      - docs/SYMBOLS.json
-      - docs/API_SURFACE.md
-      - .antigravity/skills/formation-fuzzer/SKILL.md
-      - .antigravity/skills/perf-benchmark/SKILL.md
-      - .agents/skills/formation-fuzzer/SKILL.md
-      - .agents/skills/perf-benchmark/SKILL.md
-      - .antigravity/commands.json
-      - .agents/commands.json
-      - .antigravity/hooks.json
-      - .agents/hooks.json
-      - AGENTS.md
-      - llms.txt
-      - AGENTS_ERRATA.md
-    gdcheck_status: "pass, 0 errors, 0 warnings (76 scripts)"
-    invariants_consulted:
-      - docs/CORE_INVARIANTS.md
-      - docs/API_SURFACE.md
-      - docs/ANTI_PATTERNS.md
-      - docs/MATH_SOLVERS.md
-      - AGENTS.md
-      - llms.txt
-    next_steps: "All engine optimizations, linters, replay harnesses, fuzzers, and symbolic slicers are 100% active and verified."
-    new_rules_discovered: []
-
   - date: 2026-08-31
     agent: Antigravity (Principal Engine Architect & Autonomous Inference Harness Master)
     task: "Complete 7-Phase Repository Transformation into Autonomous Agent Reasoning & Evaluation Environment: Implemented tools/lint_scope.py (duplicate local variable declaration & dead-code AST linter), tools/lint_type_comparisons.py (Object vs StringName comparison safety linter), tools/verify_gate.py (unified fast & full verification gate orchestrator); refactored variable shadowing in MatchWorldModel.gd, ManagerDirector.gd, ThrowInState.gd, MatchOfficialCrew.gd, MatchCamera.gd, PitchScene.gd, SetPieceCoordinator.gd, PauseMenu.gd, and PreGameScreen.gd; configured .antigravity/mcp.json and .agents/mcp.json with stdio MCP server tools; authored complete skills across .antigravity/skills/ and .agents/skills/; updated docs/ANTI_PATTERNS.md with full 12-item Godot 4.7 pitfall matrix; synced rules across .claude/rules/ and .agents/rules/ including gdscript-antipatterns.md; embedded strict typing and autonomous XML guardrails into AGENTS.md; updated llms.txt, .aiexclude, .antigravity/hooks.json, and .agents/hooks.json."
@@ -1449,5 +1863,101 @@ error_log:
       the time rather than a guaranteed-every-time starve, and widening it
       is a pass-quality tuning question, not required to prevent the freeze.
     affected_files:
+      - entities/player/states/ThrowInState.gd
+
+  - id: ERR-20260901-01
+    date: 2026-09-01
+    agent: Claude
+    subsystem: ai
+    symptom: >
+      User-reported crash on a live match: "Invalid access to property or key
+      'total_registered' on a base object of type 'Node (MatchWorldModel.gd)'"
+      raised from TackleState._find_nearby_opponent() (called from
+      _check_mistimed_foul() <- _try_win_ball() <- process()), killing the
+      state machine's _process() the first time a tackle attempt actually
+      reached the mistimed-foul check.
+    root_cause: >
+      TackleState._find_nearby_opponent() read `world.total_registered` and
+      indexed `world.player_active[i]` — neither member exists anywhere on
+      MatchWorldModel (verified by grep across the whole file: only
+      TOTAL_PLAYERS, the const, and is_slot_live(index), the actual per-slot
+      liveness check, exist). This predates this session's own changes —
+      TackleState.gd was not in the working tree's modified-files list before
+      this session touched anything else, so the buggy call was already
+      committed. Reads as the same shape as ball-struck-signal-arg-count-
+      mismatch (see cpu-players-never-gated-into-tackle-state and
+      verify-external-agent-prompts-against-source-before-executing above):
+      code written against an API surface that either never existed under
+      those names on MatchWorldModel or was renamed/removed during that
+      file's grid-based rewrite (TOTAL_PLAYERS/is_slot_live are exactly the
+      shaped replacements) without every caller being updated to match — and
+      it went unnoticed because GDScript resolves member access on a
+      dynamically-typed local at runtime, not at gdcheck's static-check time,
+      so a wrong property name on `world: MatchWorldModel` (a real static
+      type) still only surfaces the first time that exact code path executes.
+    resolution: >
+      Rewrote the loop to use MatchWorldModel.TOTAL_PLAYERS (the constant,
+      called on the class since it's a const, not an instance member) in
+      place of world.total_registered, and world.is_slot_live(i) in place of
+      world.player_active[i] — is_slot_live() already does the intended
+      "is this slot's node non-null and valid" check (see its doc comment),
+      so behavior is unchanged from what the broken code was clearly trying
+      to do, just against the API that actually exists.
+    affected_files:
+      - entities/player/states/TackleState.gd
+
+  - id: throw-in-ball-outside-chase-legality-rect
+    date: 2026-09-01
+    agent: Claude
+    subsystem: ai
+    symptom: >
+      User-reported, with a full Godot Output log: a CPU-vs-CPU match's ball
+      went out for a throw-in, the throw released normally, but the ball then
+      sat motionless just outside the pitch, with every player clustered far
+      away and nobody ever approaching it — [StallWatchdog] logged it
+      stationary at (48.44982, 474.0), velocity 0. A screenshot confirmed the
+      ball resting outside the touchline with no player nearby. Not a crash —
+      the match kept running, but play never resumed.
+    root_cause: >
+      Two independent bugs compounded. (1) PlayerBrain._should_chase_ball()'s
+      out-of-play gate compared ball_pos against get_playable_rect() + 25px —
+      but get_playable_rect() is already inset from the true pitch edge by
+      PITCH_TOUCHLINE_SAFETY_MARGIN (35px) / PITCH_ENDLINE_SAFETY_MARGIN
+      (45px) for STEERING clamps (validate_chase_intent/
+      clamp_to_playable_area), not the actual out-of-bounds boundary. With a
+      900px-tall pitch (touchline at y=450), that put the gate's effective
+      edge at 415+25=440, while a throw-in ball legitimately rests
+      SetPieceCoordinator.THROW_IN_INSET (24px) past the TRUE touchline
+      (y=474 here) — comfortably past the true edge, but 34px beyond the
+      gate. So _should_chase_ball() returned false for all 22 players
+      whenever a throw-in ball came to rest loose in that zone, the exact
+      same failure shape as loose-ball-anchor-clamp-deadlock above but from a
+      different gate. (2) Compounding it: ThrowInState._release_throw()'s
+      no-pass-target fallback aimed using player.facing_direction verbatim —
+      stale from before the taker froze for the restart (see
+      throw-in-cpu-taker-never-releases-without-pass-target) and with no
+      guaranteed inward (toward pitch centre) component. Here it had ~zero Y
+      component, so the released ball travelled entirely along the touchline
+      (y pinned at 474.0 from release to rest) instead of into the pitch,
+      landing it squarely in the now-unreachable strip from bug (1).
+    resolution: >
+      (1) Added PlayerBrain.CHASE_OUT_OF_BOUNDS_TOLERANCE (45px) and changed
+      _should_chase_ball()'s gate to measure against the RAW pitch rect
+      (pitch_boundary.get_pitch_rect()) instead of get_playable_rect(),
+      comfortably covering THROW_IN_INSET. Also changed _steer_for_action()
+      to skip validate_chase_intent()'s safety-inset clamp entirely for
+      must_reach_ball actions (ChaseBall/PanicClear/AttemptShoot) — legality
+      and the actual steering target now agree, so a player cleared to chase
+      such a ball isn't then clamped short of it by the same inset rect.
+      Ordinary FindSpace/MaintainFormation/Pass targets are still clamped to
+      the safety-inset rect as before; only genuinely must-reach-the-ball
+      actions get the wider allowance. (2) Rewrote the facing_direction
+      fallback in ThrowInState._release_throw() to force a real inward Y
+      component (sign toward pitch centre from the taker's own position),
+      keeping facing_direction.x for left/right lean. A real pass-target aim
+      or human input is untouched — only the "nothing better to aim at"
+      fallback changed.
+    affected_files:
+      - entities/player/PlayerBrain.gd
       - entities/player/states/ThrowInState.gd
 ```

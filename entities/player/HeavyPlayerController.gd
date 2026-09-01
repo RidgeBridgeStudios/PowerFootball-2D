@@ -21,15 +21,16 @@
 ##     into _recalculate_movement_curve()
 ##
 ## Brain/controller contract: PlayerBrain (or human input, via InputHelper)
-## expresses tactical intent through exactly two fields — movement_intent (a
-## direction, magnitude 0-1 for stick deflection) and wants_sprint (a desired
-## speed scale) — and never touches velocity, acceleration, or is_sprinting
-## directly. This controller owns turning penalties, acceleration/friction,
-## stamina-gating of sprint, and all move_and_slide() integration. A bad
-## tactical read (wrong pass target, wrong lane) should only ever surface as a
-## mishit ball, never as broken player physics — the two concerns cannot
-## corrupt each other because intent and integration are different fields
-## owned by different scripts.
+## expresses tactical intent through exactly three fields — movement_intent (a
+## direction, magnitude 0-1 for stick deflection), wants_sprint (a desired
+## speed scale) and wants_tackle (a desired tackle commit) — and never touches
+## velocity, acceleration, is_sprinting, or the state machine directly. This
+## controller owns turning penalties, acceleration/friction, stamina-gating of
+## sprint, and all move_and_slide() integration. A bad tactical read (wrong
+## pass target, wrong lane) should only ever surface as a mishit ball, never
+## as broken player physics — the two concerns cannot corrupt each other
+## because intent and integration are different fields owned by different
+## scripts.
 ##
 ## Exposes:
 ##   - apply_kinematic_weight(input_dir, delta)
@@ -37,9 +38,23 @@
 ##   - get_ball_in_foot_range() / get_ball_in_aerial_range()
 ##   - get_mood()
 ##   - get_trust_system()
-##   - stamina, facing_direction, is_sprinting, movement_intent, wants_sprint
+##   - get_fatigue_tier() / get_stamina_ratio()
+##   - stamina, facing_direction, is_sprinting, movement_intent, wants_sprint,
+##     wants_tackle
 ##   - signal stamina_state_changed(ratio)
 ##   - world_index — this player's slot in MatchWorldModel, or -1 if unregistered
+##
+## Fatigue: get_current_top_speed() scales both sprint and base top speed by
+## FatigueTier (FRESH/TIRED/EXHAUSTED, from get_stamina_ratio()) so a tiring
+## player visibly slows well before sprint_locked's hard zero-stamina cutoff,
+## instead of running at full pace right up to the cliff edge.
+##
+## Contact: _resolve_sprint_jostle(), called once per physics tick right after
+## move_and_slide(), reads that same call's slide collisions and exchanges a
+## small continuous apply_external_impulse() push (not a direct velocity
+## write) between two players who collide while both sprinting in roughly the
+## same direction — a side-by-side shoulder duel, distinct from TackleState's
+## one-shot lunge knockback.
 ##
 
 class_name HeavyPlayerController
@@ -79,6 +94,29 @@ signal possession_lost
 @export var stamina_recover_rate: float = 9.0
 ## Stamina must climb back above this before sprint unlocks after exhaustion.
 @export var stamina_sprint_unlock: float = 20.0
+
+## Three-tier metabolic model: get_current_top_speed() scales top speed by
+## tier so speed degrades progressively as stamina drains, rather than
+## holding full pace until sprint_locked's hard cutoff at zero. Ratio
+## boundaries only — sprint_locked (zero stamina) still owns the hard floor.
+enum FatigueTier { FRESH, TIRED, EXHAUSTED }
+## Stamina ratio at/below which a player drops from FRESH to TIRED.
+const FATIGUE_TIRED_RATIO: float = 0.6
+## Stamina ratio at/below which a player drops from TIRED to EXHAUSTED.
+const FATIGUE_EXHAUSTED_RATIO: float = 0.25
+## Sprint top-speed multiplier per tier, applied on top of sprint_multiplier.
+const FATIGUE_SPRINT_SCALE: Dictionary = {
+	FatigueTier.FRESH: 1.0,
+	FatigueTier.TIRED: 0.85,
+	FatigueTier.EXHAUSTED: 0.65,
+}
+## Base (non-sprint) top-speed multiplier per tier — fatigue slows jogging
+## too, just far less severely than it slows sprinting.
+const FATIGUE_BASE_SCALE: Dictionary = {
+	FatigueTier.FRESH: 1.0,
+	FatigueTier.TIRED: 0.95,
+	FatigueTier.EXHAUSTED: 0.85,
+}
 
 ## --- Identity / control ----------------------------------------------------
 
@@ -135,6 +173,16 @@ var is_sprinting: bool = false
 var wants_sprint: bool = false
 ## Latched true when stamina hits zero; cleared at stamina_sprint_unlock.
 var sprint_locked: bool = false
+## Desired tackle-commit state, expressed the same way as wants_sprint: human
+## input reads action_tackle directly (PlayerState.wants()); CPU intent is
+## pre-written here each physics tick by PlayerBrain
+## (PlayerBrain._should_attempt_tackle(), called from _steer_for_action()).
+## PlayerState.check_common_transitions() ORs this in alongside the human
+## action_tackle read as the sole gate into TackleState. Always false for a
+## user-controlled player — PlayerBrain._physics_process() bails out
+## immediately for one (see is_user_controlled) — so this can never fight a
+## human's own tackle input.
+var wants_tackle: bool = false
 
 var facing_direction: Vector2 = Vector2.RIGHT
 var _input_facing: Vector2 = Vector2.RIGHT
@@ -209,6 +257,7 @@ func _physics_process(delta: float) -> void:
 	# consumed by move_and_slide, with no one-frame lag.
 	state_factory.physics_update(delta)
 	move_and_slide()
+	_resolve_sprint_jostle(delta)
 	_update_facing()
 	_update_visual_anchors()
 	if _action_text_cooldown > 0.0:
@@ -349,6 +398,50 @@ func apply_external_impulse(impulse: Vector2) -> void:
 	velocity += impulse * (NEUTRAL_MASS / maxf(player_mass, 1.0))
 
 
+## --- Contact / jostling -----------------------------------------------------
+
+## Cosine of the max heading misalignment for a shoulder-to-shoulder jostle —
+## 0.70 ≈ cos(45°), so this is the same "within ~45° of each other" test
+## expressed as a dot product: two players running roughly the same direction.
+## A larger misalignment reads as a crossing run or a tackle, not a side-by-
+## side duel, and is left to plain move_and_slide separation.
+const JOSTLE_HEADING_DOT_MIN: float = 0.70
+## Both players must be moving at least this fast (px/s) for contact to read
+## as a sprinting duel rather than incidental jogging contact.
+const JOSTLE_MIN_SPEED: float = 100.0
+## Continuous push-apart strength (px/s, scaled by delta below) while two
+## sprinting players stay in contact — a per-frame nudge, not a one-shot
+## knockback like TackleState's lunge.
+const JOSTLE_IMPULSE_PER_SECOND: float = 90.0
+
+
+## Reads this tick's move_and_slide() collisions (must run right after it) and
+## exchanges a small apply_external_impulse() push between self and any other
+## HeavyPlayerController both sprinting in roughly the same direction — see
+## JOSTLE_HEADING_DOT_MIN. Only the lower instance ID of the pair computes and
+## applies the exchange, so both bodies do not each push the other every
+## frame and double the effect.
+func _resolve_sprint_jostle(delta: float) -> void:
+	for i: int in range(get_slide_collision_count()):
+		var collision: KinematicCollision2D = get_slide_collision(i)
+		var other: HeavyPlayerController = collision.get_collider() as HeavyPlayerController
+		if other == null or get_instance_id() >= other.get_instance_id():
+			continue
+
+		if velocity.length() < JOSTLE_MIN_SPEED or other.velocity.length() < JOSTLE_MIN_SPEED:
+			continue
+
+		var heading_dot: float = velocity.normalized().dot(other.velocity.normalized())
+		if heading_dot < JOSTLE_HEADING_DOT_MIN:
+			continue
+
+		# get_normal() points away from the collision surface, back toward
+		# self — i.e. the direction self should be nudged to separate.
+		var push: Vector2 = collision.get_normal() * JOSTLE_IMPULSE_PER_SECOND * delta
+		apply_external_impulse(push)
+		other.apply_external_impulse(-push)
+
+
 ## Halts all momentum immediately (used during dead-ball / set-piece freezes).
 func freeze_momentum() -> void:
 	velocity = Vector2.ZERO
@@ -357,7 +450,21 @@ func freeze_momentum() -> void:
 
 
 func get_current_top_speed() -> float:
-	return top_speed * (sprint_multiplier if is_sprinting else 1.0)
+	var tier: FatigueTier = get_fatigue_tier()
+	if is_sprinting:
+		return top_speed * sprint_multiplier * float(FATIGUE_SPRINT_SCALE.get(tier, 1.0))
+	return top_speed * float(FATIGUE_BASE_SCALE.get(tier, 1.0))
+
+
+## Three-tier read of get_stamina_ratio() — FRESH above FATIGUE_TIRED_RATIO,
+## EXHAUSTED at/below FATIGUE_EXHAUSTED_RATIO, TIRED between the two.
+func get_fatigue_tier() -> FatigueTier:
+	var ratio: float = get_stamina_ratio()
+	if ratio <= FATIGUE_EXHAUSTED_RATIO:
+		return FatigueTier.EXHAUSTED
+	if ratio <= FATIGUE_TIRED_RATIO:
+		return FatigueTier.TIRED
+	return FatigueTier.FRESH
 
 
 ## Close-ball control attribute (0.0-1.0). Higher keeps the ball tighter while

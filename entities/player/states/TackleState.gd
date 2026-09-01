@@ -157,8 +157,8 @@ func _find_nearby_opponent(player: HeavyPlayerController) -> HeavyPlayerControll
 		var opp_team: int = 1 - player.team
 		var closest_opp: HeavyPlayerController = null
 		var closest_dist_sq: float = FOUL_CONTACT_RADIUS * FOUL_CONTACT_RADIUS
-		for i: int in range(world.total_registered):
-			if world.player_teams[i] != opp_team or not world.player_active[i]:
+		for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+			if world.player_teams[i] != opp_team or not world.is_slot_live(i):
 				continue
 			var dist_sq: float = player.global_position.distance_squared_to(world.player_positions[i])
 			if dist_sq < closest_dist_sq:

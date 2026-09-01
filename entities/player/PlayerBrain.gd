@@ -137,6 +137,29 @@ const PRESSURE_RADIUS: float = 180.0
 ## Distance at which the brain commits to chasing the ball rather than holding shape.
 const CHASE_RADIUS: float = 220.0
 
+## Distance inside which a ChaseBall-committed defender's lunge has a
+## realistic chance of reaching foot-sensor range (15px, HeavyPlayer.tscn)
+## before TackleState's own WINDUP+WINDOW elapses. Order-of-magnitude matched
+## to TackleState.FOUL_CONTACT_RADIUS (40.0) and ShotLockState.
+## CLOSE_ENOUGH_DIST (32.0) — both existing "close enough to commit" radii.
+const TACKLE_ATTEMPT_RANGE: float = 36.0
+
+## Minimum gap between CPU-initiated tackle attempts by the same brain.
+## TackleState's own WINDUP(0.08)+WINDOW(0.2)+RECOVERY(0.45)=0.73s already
+## locks the FSM out of re-entering TACKLE, but current_action is not reset
+## when TackleState is entered (nothing in TackleState.gd touches it), so
+## _should_attempt_tackle() would otherwise keep re-evaluating true every
+## physics tick for the whole tackle. On a miss, ball.possessor is untouched —
+## so without this, a defender whose distance/facing still qualify the
+## instant RECOVERY ends (routine — a miss typically leaves the tackler still
+## close to and facing the dribbler) would re-lunge immediately, every
+## RECOVERY cycle. Re-armed every tick the trigger condition holds (including
+## through the tackle animation itself, since current_action stays stale), so
+## this is a floor measured from the LAST qualifying tick, not the first
+## attempt — intentionally conservative. See AGENTS_ERRATA.md
+## (cpu-players-never-gated-into-tackle-state).
+const TACKLE_ATTEMPT_COOLDOWN: float = 1.5
+
 ## Additive bonus to _score_chase() while MatchWorldModel's pressing trigger
 ## detector has flagged a football-relevant reason to close down right now
 ## (a backward/square pass into pressure, the carrier facing their own goal,
@@ -166,6 +189,47 @@ const COVER_SHADOW_RADIUS: float = 320.0
 ## threat; 0.5 is the lane midpoint, which reads on screen as "cutting the
 ## pass" rather than either "guarding the ball" or "marking the man".
 const COVER_SHADOW_LANE_RATIO: float = 0.5
+
+## --- Greedy marking assignment ----------------------------------------------
+## _find_nearest_threatening_opponent() used to be purely local: every
+## defender independently picked its own nearest OUTFIELD_ATTACKER, with no
+## coordination, so several defenders could (and in practice did — see the
+## crowding-space-creation-diagnostics investigation) converge on the same
+## dangerous attacker while another went completely unmarked. This section
+## adds a team-wide greedy bipartite pass — attackers processed highest-threat
+## first, each getting the lowest-cost still-unassigned defender — that
+## _find_nearest_threatening_opponent() now prefers when available. Not an
+## optimal (Hungarian) solver: ai-architect.md forbids an O(N^3) solver with
+## runtime matrix allocation here, so this is deliberately the cheaper greedy
+## approximation instead, O(A^2 + A*D) <= 11*11+11*11 fixed comparisons.
+const MAX_MARKING_SLOTS: int = 11
+const NO_MARK_INDEX: int = -1
+## Recompute cadence in GameManager match ticks — matches the cadence of the
+## decision tick this is only ever triggered from (see
+## _maybe_recompute_team_marking()), so this does not itself add a faster
+## polling loop.
+const MARKING_REASSIGN_INTERVAL_TICKS: int = 15
+
+## Indexed by world_index (0..TOTAL_PLAYERS-1); NO_MARK_INDEX if unassigned.
+## Shared across every PlayerBrain instance on purpose — the assignment is a
+## team-wide result, not a per-player one, and no per-instance array could
+## hold it. Sized for MatchWorldModel.TOTAL_PLAYERS (22) once at class load,
+## never resized after.
+static var _marking_assignment: PackedInt32Array = PackedInt32Array([
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+	-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+])
+## Match tick _marking_assignment was last recomputed for, per team.
+static var _marking_last_tick: PackedInt32Array = PackedInt32Array([-1, -1])
+
+## Fixed-size scratch for _recompute_team_marking(), reused in place every
+## call so the O(A^2 + A*D) pass never allocates. MAX_MARKING_SLOTS covers the
+## worst case of a full outfield contingent (10) with room to spare.
+static var _mark_defender_idx: PackedInt32Array = PackedInt32Array([0,0,0,0,0,0,0,0,0,0,0])
+static var _mark_defender_used: PackedByteArray = PackedByteArray([0,0,0,0,0,0,0,0,0,0,0])
+static var _mark_attacker_idx: PackedInt32Array = PackedInt32Array([0,0,0,0,0,0,0,0,0,0,0])
+static var _mark_attacker_threat: PackedFloat32Array = PackedFloat32Array([0,0,0,0,0,0,0,0,0,0,0])
+static var _mark_attacker_used: PackedByteArray = PackedByteArray([0,0,0,0,0,0,0,0,0,0,0])
 
 ## How strongly a defender's default "hold shape" X target is pulled toward
 ## MatchWorldModel.defensive_line_x[team] — the shared band depth — versus
@@ -211,6 +275,25 @@ const GOALIE_KNOCKDOWN_IMPULSE: float = 220.0
 ## Safety insets from the pitch boundary edges to keep outfield players inside playable bounds.
 const PITCH_TOUCHLINE_SAFETY_MARGIN: float = 35.0
 const PITCH_ENDLINE_SAFETY_MARGIN: float = 45.0
+
+## How far beyond the RAW pitch rect (PitchBoundary.get_pitch_rect(), not the
+## PITCH_TOUCHLINE/ENDLINE_SAFETY_MARGIN-inset get_playable_rect()) a ball is
+## still considered chaseable in _should_chase_ball()'s out-of-play gate.
+## Deliberately generous relative to SetPieceCoordinator.THROW_IN_INSET
+## (24px) — a throw-in ball legitimately rests just past the true touchline
+## while waiting to be released, and needs a nearby player to still be able
+## to close it down once it lands loose in that zone. See AGENTS_ERRATA.md
+## (throw-in-ball-outside-chase-legality-rect).
+const CHASE_OUT_OF_BOUNDS_TOLERANCE: float = 45.0
+
+## "La Pausa" standstill-breaker: a possessor who has held the ball this long
+## with no open teammate and would otherwise settle on MaintainFormation gets
+## forced into AttemptDribble/PanicClear instead — see evaluate_tactical_action().
+const LA_PAUSA_HOLD_SECONDS: float = 1.0
+## Same "is this option worth anything at all" bar the existing max_offensive
+## <= 0.05 floor below uses, reused here so AttemptDribble is only chosen over
+## PanicClear when dribbling is genuinely viable, not just nonzero.
+const LA_PAUSA_MIN_DRIBBLE_SCORE: float = 0.05
 
 ## Goalkeeper arc clamping distance off the goal line (in pixels).
 const GOALIE_ARC_MIN_DIST: float = 40.0
@@ -301,6 +384,10 @@ var _last_possession_team: int = -1
 ## the ball.
 var _transition_timer: float = 0.0
 
+## Counts down after each CPU-initiated tackle attempt; see
+## PlayerBrain.TACKLE_ATTEMPT_COOLDOWN and _should_attempt_tackle().
+var _tackle_cooldown: float = 0.0
+
 ## Off-ball target cached from the last decision tick. _find_open_space_target()
 ## walks the whole world model, which must stay on the decision stagger rather
 ## than the physics frame rate — get_target_position() is called from
@@ -310,6 +397,11 @@ var _cached_space_target: Vector2 = Vector2.ZERO
 ## Teammate targeted by the last "Pass" decision. Cleared once the pass is
 ## struck or the decision changes away from passing.
 var _cached_pass_target: HeavyPlayerController = null
+## Final (post-trust, post-isolation) score _find_best_pass_target() gave
+## _cached_pass_target, so _score_pass() can react to "how good is this pass"
+## rather than only "does one exist." Stale once _cached_pass_target is
+## cleared, but never read except alongside a non-null _cached_pass_target.
+var _cached_pass_score: float = 0.0
 ## Predicted ball-intercept point cached from the last decision tick, used
 ## while chasing/clearing so steering doesn't recompute the intercept every
 ## physics frame.
@@ -475,6 +567,8 @@ func _physics_process(delta: float) -> void:
 
 	if _transition_timer > 0.0:
 		_transition_timer = maxf(_transition_timer - delta, 0.0)
+	if _tackle_cooldown > 0.0:
+		_tackle_cooldown = maxf(_tackle_cooldown - delta, 0.0)
 
 	# Goalkeeper dive reaction cannot wait for the 15-frame decision stagger —
 	# a shot crosses the six-yard box in a handful of physics frames — so it is
@@ -715,6 +809,11 @@ func _score_pass(ctx: UtilityContext) -> float:
 	base += ctx.eff_composure * 0.10 * (1.0 - ctx.pressure)
 	# Low stamina hurries decisions — a tired player passes sooner.
 	base += (1.0 - ctx.stamina_ratio) * 0.10
+	# An exceptionally good pass (isolated receiver, well angled) should be
+	# able to override dribbling/other actions outright rather than only
+	# nudging this score within its normal band.
+	if _cached_pass_score > 0.80:
+		base += 0.20
 	return clampf(base, 0.0, 1.0)
 
 
@@ -1021,6 +1120,17 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D] = []) -> StringNam
 		if max_offensive <= 0.05:
 			best_action = &"PanicClear"
 
+		# La Pausa: distinct from the floor above (which catches "nothing is any
+		# good"). This catches "something is fine but MaintainFormation still
+		# won and I'm dawdling on the ball regardless" — a genuine standstill,
+		# not a scoring edge case. Uses MatchWorldModel's possession watchdog
+		# timer rather than brain-local state, since brains run on a 15-frame
+		# stagger (ai-architect.md) and would miss ticks trying to self-time.
+		elif best_action == &"MaintainFormation" and not ctx.open_teammate_exists \
+				and MatchWorldModel.instance != null \
+				and MatchWorldModel.instance.get_active_possession_hold_seconds() > LA_PAUSA_HOLD_SECONDS:
+			best_action = &"AttemptDribble" if s_dribble > LA_PAUSA_MIN_DRIBBLE_SCORE else &"PanicClear"
+
 	# Opt-in crowding/space-creation diagnostics — see MatchWorldModel.
 	# debug_spacing_diagnostics. No-op (single bool check) when disabled.
 	if player != null and MatchWorldModel.instance != null and MatchWorldModel.instance.debug_spacing_diagnostics:
@@ -1057,6 +1167,24 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D] = []) -> StringNam
 ## considered pass-worthy at all — keeps a tightly marked, poorly angled, or
 ## wildly long ball from ever outscoring "nothing open" and getting forced.
 const MIN_PASS_SCORE: float = 0.38
+
+## Isolation reward applied on top of PassUtilityScorer's own pressure_utility
+## dimension (see score_pass()'s RECEIVER_OPEN_RADIUS=160px weighting) — that
+## dimension already favours an open receiver, but only mildly (WEIGHT_PRESSURE
+## share of the total). This is a much stronger, super-linear bonus layered on
+## at the consumption site in _find_best_pass_target() so a genuinely isolated
+## teammate can decisively win over dribbling/other actions, without touching
+## PassUtilityScorer's own documented weighted formula (that file is pure and
+## takes no MatchWorldModel reads of its own — see its class doc). Uses the
+## squared-distance ramp for a convex reward curve (isolation pays off faster
+## as an opponent gets further away); computed from min_opp_dist, which
+## _find_best_pass_target() already has from world.nearest_opponent_dist_to(),
+## so no new spatial query or WorldModel accessor is needed for this.
+const ISOLATION_RAD_SQ: float = 57600.0  # 240px * 240px
+## min_opp_dist beyond this earns a flat bonus on top of the ramp above —
+## rewards a receiver with real running room, not just "technically open."
+const ISOLATION_BONUS_DIST: float = 220.0
+const ISOLATION_BONUS_SCORE: float = 0.30
 
 ## Master switch for the mood-driven risk-aversion shift on pass-target
 ## scoring — see _find_best_pass_target(). Flip to false to fall back to raw
@@ -1172,6 +1300,13 @@ func _find_best_pass_target(passer_pressure: float = 0.0, allow_backward_pass: b
 	var urgent_w_press: float = base_w_press * (1.0 - 0.45 * world_urgency)
 	var urgent_w_adv: float = base_w_adv * (1.0 + 0.6 * world_urgency)
 
+	# xT lookup is loop-invariant on everything except candidate_pos: pitch
+	# size and the origin-centred offset UtilityMath.get_xt_value() expects
+	# (see its doc comment) don't change per candidate this tick.
+	var xt_pitch_size: Vector2 = pitch_boundary.pitch_size if pitch_boundary != null else Vector2(1728.0, 1024.0)
+	var xt_origin: Vector2 = pitch_boundary.get_centre_spot() if pitch_boundary != null else Vector2.ZERO
+	var xt_attack_sign: float = attack_dir.x
+
 	var best_target: HeavyPlayerController = null
 	var best_score: float = MIN_PASS_SCORE
 
@@ -1207,11 +1342,12 @@ func _find_best_pass_target(passer_pressure: float = 0.0, allow_backward_pass: b
 		# exactly the backward candidates allow_backward_pass exists to
 		# unlock. Treat a restart taker as equally "facing" every candidate.
 		var facing_dot: float = 1.0 if allow_backward_pass else player.get_facing_dot(candidate_pos)
+		var xt_value: float = UtilityMath.get_xt_value(candidate_pos - xt_origin, xt_pitch_size, xt_attack_sign)
 
 		# Hot path: bare float, allocates nothing (see PassUtilityScorer docs).
 		var score: float = PassUtilityScorer.score_pass(
 			distance, facing_dot, forward_dot, min_opp_dist, effective_pressure,
-			w_dist, w_angle, urgent_w_press, urgent_w_adv)
+			w_dist, w_angle, urgent_w_press, urgent_w_adv, xt_value)
 
 		# Trust bias: how much this passer trusts THIS candidate as a receiver
 		# nudges the already-computed utility score up or down. Neutral trust
@@ -1219,16 +1355,25 @@ func _find_best_pass_target(passer_pressure: float = 0.0, allow_backward_pass: b
 		if trust_sys != null:
 			score *= TrustSystem.trust_multiplier(trust_sys.get_trust(TrustSystem.player_key(candidate)))
 
+		# Isolation reward: layered on top of the trust-adjusted score
+		# rather than folded into PassUtilityScorer's own weighted total
+		# (see ISOLATION_RAD_SQ doc comment above for why).
+		var iso_dist_sq: float = min_opp_dist * min_opp_dist
+		var u_free: float = clampf(iso_dist_sq / ISOLATION_RAD_SQ, 0.0, 1.75)
+		score *= u_free
+		if min_opp_dist > ISOLATION_BONUS_DIST:
+			score += ISOLATION_BONUS_SCORE
+
 		if debug_log_pass_scores:
 			var breakdown: PassUtilityScorer.PassScoreBreakdown = PassUtilityScorer.score_pass_breakdown(
 				distance, facing_dot, forward_dot, min_opp_dist, effective_pressure, candidate,
-				w_dist, w_angle, urgent_w_press, urgent_w_adv)
+				w_dist, w_angle, urgent_w_press, urgent_w_adv, xt_value)
 			# breakdown.total is pre-trust; `score` (post-multiplier) is what
 			# actually decides best_target below, so print both.
-			print("[PassScorer] %s -> %s  dist=%.2f angle=%.2f pressure=%.2f adv=%.2f  raw=%.3f trust_adj=%.3f" % [
+			print("[PassScorer] %s -> %s  dist=%.2f angle=%.2f pressure=%.2f adv=%.2f xt=%.2f  raw=%.3f trust_adj=%.3f" % [
 				player.name, candidate.name,
 				breakdown.distance_utility, breakdown.angle_utility,
-				breakdown.pressure_utility, breakdown.advancement_utility,
+				breakdown.pressure_utility, breakdown.advancement_utility, xt_value,
 				breakdown.total, score])
 
 		if score > best_score:
@@ -1238,6 +1383,7 @@ func _find_best_pass_target(passer_pressure: float = 0.0, allow_backward_pass: b
 	if debug_log_pass_scores and best_target != null:
 		print("[PassScorer] %s picks %s  total=%.3f" % [player.name, best_target.name, best_score])
 
+	_cached_pass_score = best_score if best_target != null else 0.0
 	return best_target
 
 
@@ -1264,9 +1410,21 @@ func _should_chase_ball() -> bool:
 		return false
 
 	var ball_pos: Vector2 = ball.global_position
-	var play_rect: Rect2 = get_playable_rect()
-	if ball_pos.x < play_rect.position.x - 25.0 or ball_pos.x > play_rect.end.x + 25.0 \
-			or ball_pos.y < play_rect.position.y - 25.0 or ball_pos.y > play_rect.end.y + 25.0:
+	# Deliberately the RAW pitch rect here, not get_playable_rect() — that one
+	# is inset by PITCH_TOUCHLINE/ENDLINE_SAFETY_MARGIN for STEERING clamps
+	# (validate_chase_intent/clamp_to_playable_area), so its edge already sits
+	# 35-45px inside the true touchline/end line. A throw-in ball rests
+	# THROW_IN_INSET (24px) past the true touchline while waiting to be
+	# collected; gating chase legality on the inset rect made that entire
+	# legitimate restart zone permanently unreachable by every player's
+	# _should_chase_ball(), freezing the match once a throw ever landed loose
+	# there. See AGENTS_ERRATA.md (throw-in-ball-outside-chase-legality-rect).
+	var out_of_play_rect: Rect2 = pitch_boundary.get_pitch_rect() if pitch_boundary != null \
+			else Rect2(-800.0, -450.0, 1600.0, 900.0)
+	if ball_pos.x < out_of_play_rect.position.x - CHASE_OUT_OF_BOUNDS_TOLERANCE \
+			or ball_pos.x > out_of_play_rect.end.x + CHASE_OUT_OF_BOUNDS_TOLERANCE \
+			or ball_pos.y < out_of_play_rect.position.y - CHASE_OUT_OF_BOUNDS_TOLERANCE \
+			or ball_pos.y > out_of_play_rect.end.y + CHASE_OUT_OF_BOUNDS_TOLERANCE:
 		return false
 
 	# Role-based chase budget: how many players of this role are allowed to
@@ -1828,14 +1986,143 @@ func _find_passing_triangle_position(ball_pos: Vector2) -> Vector2:
 	return clamp_to_playable_area(triangle_pos)
 
 
+## Gate for _recompute_team_marking(): only an OUTFIELD_DEFENDER calls this,
+## and only from _find_nearest_threatening_opponent(), which is itself only
+## ever reached from inside evaluate_tactical_action()'s decision-tick gate
+## (_resolve_defensive_duty() and _find_open_space_target(), both cached at
+## the same tick — see the (_frame_counter + player_index) % current_cadence
+## gate) — never from per-frame steering. That call chain is what satisfies
+## ai-architect.md's "15-frame AI decision stagger" requirement here; this
+## function adds its own per-team dedup on top so the whole team's assignment
+## is recomputed roughly once per cadence window rather than once per
+## defender (5-6x redundant work for an identical deterministic result).
+func _maybe_recompute_team_marking() -> void:
+	if player == null:
+		return
+	var tick: int = GameManager.get_match_tick()
+	if tick - _marking_last_tick[player.team] < MARKING_REASSIGN_INTERVAL_TICKS:
+		return
+	_marking_last_tick[player.team] = tick
+	_recompute_team_marking()
+
+
+## Team-wide greedy bipartite marking pass for player.team's defenders against
+## the opposing OUTFIELD_ATTACKERs. Writes _marking_assignment for every
+## defender slot found; clears stale entries first so a defender who left the
+## roster (red card — MatchWorldModel.mark_player_unavailable()) doesn't keep
+## a stale target. See the class section header above for the algorithm
+## shape and why it is greedy rather than optimal.
+func _recompute_team_marking() -> void:
+	if player == null or pitch_boundary == null:
+		return
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return
+
+	var my_team: int = player.team
+	var opp_attack_sign: float = -_get_attack_sign()
+	var pitch_size: Vector2 = pitch_boundary.pitch_size
+	var xt_origin: Vector2 = pitch_boundary.get_centre_spot()
+	var our_goal: Vector2 = pitch_boundary.get_goal_centre(my_team)
+	# Cost normalizers so the dist_sq/goal_dist_sq terms (px^2, easily in the
+	# tens of thousands) don't drown out the (1.0 - threat) term (0..1) before
+	# the formula's own weights ever get applied — derived from pitch_size
+	# rather than a fixed pixel constant so this stays correct if the pitch
+	# rect ever changes. See MARKING cost formula below.
+	var norm_dist_sq: float = maxf(pitch_size.x * pitch_size.x * 0.25, 1.0)
+	var norm_goal_sq: float = maxf(pitch_size.x * pitch_size.x, 1.0)
+
+	var defender_count: int = 0
+	var attacker_count: int = 0
+	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+		if defender_count >= MAX_MARKING_SLOTS and attacker_count >= MAX_MARKING_SLOTS:
+			break
+		var node: HeavyPlayerController = world.player_nodes[i]
+		if not is_instance_valid(node):
+			continue
+		var brain := node.get_node_or_null("PlayerBrain") as PlayerBrain
+		if brain == null:
+			continue
+		if world.player_teams[i] == my_team:
+			if brain.role == Role.OUTFIELD_DEFENDER and defender_count < MAX_MARKING_SLOTS:
+				_mark_defender_idx[defender_count] = i
+				_mark_defender_used[defender_count] = 0
+				defender_count += 1
+		elif brain.role == Role.OUTFIELD_ATTACKER and attacker_count < MAX_MARKING_SLOTS:
+			var pos: Vector2 = world.player_positions[i]
+			_mark_attacker_idx[attacker_count] = i
+			_mark_attacker_threat[attacker_count] = UtilityMath.get_xt_value(pos - xt_origin, pitch_size, opp_attack_sign)
+			_mark_attacker_used[attacker_count] = 0
+			attacker_count += 1
+
+	# Clear this tick's defender slots up front — a defender_count that
+	# shrank since the last pass (red card) must not leave a stale target
+	# sitting in a world_index no longer visited below.
+	for d: int in range(defender_count):
+		_marking_assignment[_mark_defender_idx[d]] = NO_MARK_INDEX
+
+	# Greedy: highest-threat unassigned attacker first, paired with its
+	# lowest-cost unassigned defender, repeat. No sort needed — attacker_count
+	# is tiny (<= 11), so a linear max-scan per step is simpler than sorting
+	# and costs the same in the worst case.
+	for _step: int in range(attacker_count):
+		var pick_a: int = -1
+		var pick_a_threat: float = -1.0
+		for a: int in range(attacker_count):
+			if _mark_attacker_used[a] != 0:
+				continue
+			if _mark_attacker_threat[a] > pick_a_threat:
+				pick_a_threat = _mark_attacker_threat[a]
+				pick_a = a
+		if pick_a == -1:
+			break
+		_mark_attacker_used[pick_a] = 1
+
+		var attacker_pos: Vector2 = world.player_positions[_mark_attacker_idx[pick_a]]
+		var goal_dist_sq: float = attacker_pos.distance_squared_to(our_goal)
+		# C = dist_sq * 0.5 + goal_dist_sq * 0.3 + (1.0 - threat) * 0.2, with
+		# dist_sq/goal_dist_sq normalized to 0..1 first (see norm_*_sq above).
+		var goal_term: float = clampf(goal_dist_sq / norm_goal_sq, 0.0, 1.0) * 0.3
+		var threat_term: float = (1.0 - pick_a_threat) * 0.2
+
+		var pick_d: int = -1
+		var best_cost: float = INF
+		for d: int in range(defender_count):
+			if _mark_defender_used[d] != 0:
+				continue
+			var dist_sq: float = world.player_positions[_mark_defender_idx[d]].distance_squared_to(attacker_pos)
+			var cost: float = clampf(dist_sq / norm_dist_sq, 0.0, 1.0) * 0.5 + goal_term + threat_term
+			if cost < best_cost:
+				best_cost = cost
+				pick_d = d
+		if pick_d == -1:
+			continue
+		_mark_defender_used[pick_d] = 1
+		_marking_assignment[_mark_defender_idx[pick_d]] = _mark_attacker_idx[pick_a]
+
+
 ## Returns the nearest opponent who is in a threatening forward position
-## (ahead of the defensive line, between the defender and goal).
+## (ahead of the defensive line, between the defender and goal). An
+## OUTFIELD_DEFENDER prefers its _recompute_team_marking() assignment when one
+## exists — coordinated across the whole back line rather than each defender
+## picking independently — falling back to the old local nearest-distance
+## pick only when no coordinated assignment is available yet (e.g. no
+## opposing OUTFIELD_ATTACKER currently qualifies).
 func _find_nearest_threatening_opponent() -> HeavyPlayerController:
 	if player == null or pitch_boundary == null:
 		return null
 	var world: MatchWorldModel = MatchWorldModel.instance
 	if world == null:
 		return null
+
+	if role == Role.OUTFIELD_DEFENDER:
+		_maybe_recompute_team_marking()
+		var assigned_idx: int = _marking_assignment[player_index] \
+			if player_index >= 0 and player_index < _marking_assignment.size() else NO_MARK_INDEX
+		if assigned_idx != NO_MARK_INDEX:
+			var assigned_node: HeavyPlayerController = world.player_nodes[assigned_idx]
+			if is_instance_valid(assigned_node):
+				return assigned_node
 
 	var centre_x: float = pitch_boundary.get_centre_spot().x
 	var best: HeavyPlayerController = null
@@ -1938,7 +2225,7 @@ func _cover_shadow_target(carrier: HeavyPlayerController) -> Vector2:
 
 ## Repels this player from teammates within sep_radius so off-ball players
 ## don't stack on top of each other.
-func _separation_force(sep_radius: float = 55.0) -> Vector2:
+func _separation_force(sep_radius: float = 110.0) -> Vector2:
 	if player == null:
 		return Vector2.ZERO
 	var world: MatchWorldModel = MatchWorldModel.instance
@@ -1951,7 +2238,12 @@ func _separation_force(sep_radius: float = 55.0) -> Vector2:
 		var offset: Vector2 = player.global_position - world.player_positions[i]
 		var dist: float = offset.length()
 		if dist > 0.0 and dist < sep_radius:
-			force += offset.normalized() * (1.0 - dist / sep_radius)
+			# Cubic falloff: barely nudges teammates near the edge of the
+			# radius, ramps up sharply only once genuinely crowded — softer
+			# than the old linear (1 - dist/radius) at long range, stronger
+			# at short range.
+			var ratio: float = (sep_radius - dist) / sep_radius
+			force += offset.normalized() * (ratio * ratio * ratio) * 0.85
 	return force
 
 
@@ -1996,6 +2288,61 @@ func _get_ball_carrier() -> HeavyPlayerController:
 	return null
 
 
+## CPU-only reflex: is this the moment a ChaseBall-committed defender should
+## commit to a tackle lunge, rather than just continuing to close down?
+## Mirrors wants_sprint's pattern — a per-frame reflex set in
+## _steer_for_action(), not a decision-tick-gated tactical choice. Reuses
+## ChaseBall's own legality/scoring gate as the "worth closing down" question
+## and asks a narrower, TackleState-mirroring "worth committing" one on top:
+## the ball must be live and held by an OPPONENT (never a teammate, never a
+## loose ball — DribbleState already handles picking up a loose one), close
+## enough for the lunge to plausibly connect, and already faced well enough
+## that TackleState's own MIN_FACING_DOT re-check at the moment of contact
+## would not immediately call it a foul anyway. See AGENTS_ERRATA.md
+## (cpu-players-never-gated-into-tackle-state).
+func _should_attempt_tackle() -> bool:
+	if current_action != &"ChaseBall":
+		return false
+	if _tackle_cooldown > 0.0:
+		return false
+	if ball.is_airborne():
+		return false
+
+	var holder: HeavyPlayerController = ball.possessor as HeavyPlayerController
+	if holder == null or holder.team == player.team:
+		return false
+
+	if player.global_position.distance_squared_to(ball.global_position) \
+			> TACKLE_ATTEMPT_RANGE * TACKLE_ATTEMPT_RANGE:
+		return false
+
+	if player.get_facing_dot(ball.global_position) < TackleState.MIN_FACING_DOT:
+		return false
+
+	return true
+
+
+## 8-way probe directions for AttemptDribble's open-space scan (see the
+## &"AttemptDribble" case below) — pre-allocated PackedVector2Array so the
+## per-frame scan never constructs a Vector2 array. Same 8-way convention as
+## the course spec's digital aiming (docs/course_implementation_specification.md
+## Section 2), reused here for "which way should I run with the ball" instead
+## of aim input.
+const DRIBBLE_PROBES: PackedVector2Array = [
+	Vector2(1, 0), Vector2(0.707, 0.707), Vector2(0, 1), Vector2(-0.707, 0.707),
+	Vector2(-1, 0), Vector2(-0.707, -0.707), Vector2(0, -1), Vector2(0.707, -0.707),
+]
+## How far ahead (world-px) each dribble probe samples for opponent proximity.
+const DRIBBLE_PROBE_DIST: float = 70.0
+## Weight on a probe's alignment with the attacking direction — dominant term,
+## so "run at goal" always wins over "run into the emptiest corner."
+const DRIBBLE_FORWARD_WEIGHT: float = 0.40
+## Weight on a probe's clearance from the nearest opponent, scaled so a fully
+## open ~300px probe (world_to_cell's 160px cells make that a realistic local
+## max) contributes roughly the same order of magnitude as the forward term
+## above rather than swamping it.
+const DRIBBLE_SPACE_WEIGHT: float = 0.0008
+
 ## Blends three forces into the final movement_intent: a seek toward the
 ## current action's target, separation from teammates (off-ball only, so
 ## chasers aren't pushed off the intercept line), and a gentle formation
@@ -2016,6 +2363,15 @@ func _steer_for_action(delta: float) -> Vector2:
 		_blend_prev_action = current_action
 	elif _blend_timer > 0.0:
 		_blend_timer = maxf(_blend_timer - delta, 0.0)
+
+	# --- Tackle reflex ---
+	# Recomputed every frame like wants_sprint below, not gated to the
+	# decision-tick cadence. Always false for a human — PlayerBrain never
+	# runs for one, see _physics_process()'s is_user_controlled bail-out — so
+	# this can never fight a human's own action_tackle input.
+	player.wants_tackle = _should_attempt_tackle()
+	if player.wants_tackle:
+		_tackle_cooldown = TACKLE_ATTEMPT_COOLDOWN
 
 	# --- Pass execution ---
 	var is_throw_in_taker: bool = player != null and player.state_factory != null and player.state_factory.current_state_name == &"ThrowIn"
@@ -2091,20 +2447,36 @@ func _steer_for_action(delta: float) -> Vector2:
 			# Move toward the ball to get it in foot range.
 			seek_target = ball.global_position if ball != null else player.global_position
 		&"AttemptDribble":
-			var attack_dir: Vector2 = _get_attack_direction()
-			var dribble_target: Vector2 = player.global_position + attack_dir * 150.0
+			# Score all 8 probe directions on forward alignment + local
+			# opponent clearance, rather than committing to a single fixed
+			# attack_dir/goal-lerp target — lets the carrier bend the run
+			# around a defender standing directly ahead instead of dribbling
+			# straight into them. Falls back to attack_dir itself if no probe
+			# beats it (e.g. surrounded on all sides).
+			var world_probe: MatchWorldModel = MatchWorldModel.instance
+			# Prefer the true bearing to the opponent's goal mouth over the flat
+			# attack_dir (X-only) so a wide player's run still converges toward
+			# goal instead of just marching straight downfield.
+			var forward_ref: Vector2 = _get_attack_direction()
 			if pitch_boundary != null:
 				var opp_goal: Vector2 = pitch_boundary.get_goal_centre(1 - player.team)
-				dribble_target = player.global_position.lerp(opp_goal, 0.3)
-			seek_target = dribble_target
+				var to_goal: Vector2 = opp_goal - player.global_position
+				if to_goal.length_squared() > 0.0001:
+					forward_ref = to_goal.normalized()
+			var best_probe_dir: Vector2 = forward_ref
+			var best_probe_score: float = -INF
+			if world_probe != null:
+				for i: int in range(DRIBBLE_PROBES.size()):
+					var probe_dir: Vector2 = DRIBBLE_PROBES[i]
+					var probe_pos: Vector2 = player.global_position + probe_dir * DRIBBLE_PROBE_DIST
+					var probe_score: float = probe_dir.dot(forward_ref) * DRIBBLE_FORWARD_WEIGHT \
+						+ world_probe.nearest_opponent_dist_to(probe_pos, player.team) * DRIBBLE_SPACE_WEIGHT
+					if probe_score > best_probe_score:
+						best_probe_score = probe_score
+						best_probe_dir = probe_dir
+			seek_target = player.global_position + best_probe_dir * DRIBBLE_PROBE_DIST
 		_:
 			seek_target = _cached_space_target
-
-	seek_target = validate_chase_intent(seek_target)
-
-	# --- Three-force blend ---
-	var offset: Vector2 = seek_target - player.global_position
-	var distance: float = offset.length()
 
 	# ChaseBall/PanicClear/AttemptShoot all seek the ball's own position and
 	# must physically close on it to trigger foot-sensor pickup or a kick —
@@ -2117,6 +2489,22 @@ func _steer_for_action(delta: float) -> Vector2:
 	# (arrive-radius-strands-correct-chase-decision).
 	var must_reach_ball: bool = current_action == &"ChaseBall" \
 			or current_action == &"PanicClear" or current_action == &"AttemptShoot"
+
+	# validate_chase_intent()'s safety-margin inset rect exists to keep
+	# ordinary formation/space/pass targets off the touchline, but a ball a
+	# player was just legally cleared to chase (_should_chase_ball()'s own,
+	# more permissive out-of-play check) can legitimately sit past that inset
+	# — e.g. a throw-in resting THROW_IN_INSET past the true touchline.
+	# Clamping a must-reach-ball target to the inset rect would strand the
+	# chaser short of a ball it was correctly sent to collect. See
+	# AGENTS_ERRATA.md (throw-in-ball-outside-chase-legality-rect).
+	if not must_reach_ball:
+		seek_target = validate_chase_intent(seek_target)
+
+	# --- Three-force blend ---
+	var offset: Vector2 = seek_target - player.global_position
+	var distance: float = offset.length()
+
 	if distance <= ARRIVE_RADIUS and not must_reach_ball:
 		return Vector2.ZERO
 

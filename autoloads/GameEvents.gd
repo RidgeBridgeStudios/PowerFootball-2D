@@ -162,3 +162,15 @@ signal team_momentum_updated(team: int, momentum: float)
 ## boundary (see GameManager.MatchStage). stage is a GameManager.MatchStage
 ## value: 0 = Sizing-Up, 1 = Equilibrium, 2 = Transitions, 3 = Game-Crunch.
 signal match_stage_changed(stage: int)
+
+## Fired once per team, at most once per match, by ManagerDirector when that
+## team is trailing by >= 1 goal at time_ratio >= GameManager.STAGE_3_FRACTION
+## (Game-Crunch) — a discrete narrative event (Layer 4 tactical directive ->
+## Layer 5 touchline reaction), NOT a third cached macro scalar alongside
+## team_urgency_updated/team_momentum_updated above: there is no
+## MatchWorldModel cache for this one, listen directly (PitchScene does, for
+## the touchline shout — see its home-perspective-only convention in
+## AGENTS_ERRATA.md). tactic_type is currently always &"ALL_OUT_ATTACK"; kept
+## as a StringName rather than a bool so a second emergency tactic can be
+## added later without a new signal.
+signal emergency_tactics_triggered(team: int, tactic_type: StringName)

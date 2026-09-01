@@ -18,8 +18,15 @@
 ##   pressure      — receiver_open_dist remapped so a marked receiver scores
 ##                    low and a free one scores high (MatchWorldModel.
 ##                    nearest_opponent_dist_to() supplies the distance).
-##   advancement   — forward_dot remapped from [-1,1] to [0,1]: how much the
-##                    pass progresses the team toward the opponent goal.
+##   advancement   — forward_dot remapped from [-1,1] to [0,1] (how much the
+##                    pass's direction progresses toward the opponent goal),
+##                    blended with UtilityMath.get_xt_value() for the
+##                    receiver's actual pitch zone when a caller supplies one
+##                    (xt_value param) — direction alone rewards any forward
+##                    ball equally, xT additionally rewards landing in a
+##                    genuinely dangerous zone (e.g. central final third)
+##                    over a forward-but-low-value one (e.g. a sideways-deep
+##                    touchline ball that still has forward_dot > 0).
 ##
 ## The four WEIGHT_* constants below are the single place to retune passing
 ## behaviour project-wide. They do not need to sum to 1.0 — candidates are only
@@ -38,7 +45,9 @@
 ## PassScoreBreakdown object for debugging — call it only from debug-gated
 ## code, never unconditionally in the per-candidate loop.
 ##
-## Depends on: UtilityMath (quadratic_decay for the distance curve).
+## Depends on: UtilityMath (quadratic_decay for the distance curve; the
+## caller, not this file, calls get_xt_value() and passes the result in as
+## xt_value — this class still performs no spatial lookups of its own).
 ## Exposes: score_pass(), score_pass_breakdown(), PassScoreBreakdown
 ##
 
@@ -103,6 +112,9 @@ class PassScoreBreakdown:
 ## passer_pressure: 0.0-1.0 pressure reading on the PASSER (PlayerBrain.
 ##   UtilityContext.pressure) — shifts weight toward the safe/open dimension
 ##   and away from forward ambition as it rises.
+## xt_value: UtilityMath.get_xt_value() for the receiver's pitch zone, or
+##   -1.0 (default) to skip it — advancement_utility then falls back to pure
+##   forward_dot, unchanged from before this parameter existed.
 static func score_pass(
 		distance: float,
 		passer_facing_dot: float,
@@ -112,7 +124,8 @@ static func score_pass(
 		w_dist: float = WEIGHT_DISTANCE,
 		w_angle: float = WEIGHT_ANGLE,
 		w_press: float = WEIGHT_PRESSURE,
-		w_adv: float = WEIGHT_ADVANCEMENT
+		w_adv: float = WEIGHT_ADVANCEMENT,
+		xt_value: float = -1.0
 ) -> float:
 	if distance > MAX_USEFUL_DISTANCE:
 		return 0.0
@@ -126,7 +139,9 @@ static func score_pass(
 
 	var angle_utility: float = clampf((passer_facing_dot + 1.0) * 0.5, 0.0, 1.0)
 	var pressure_utility: float = clampf(receiver_open_dist / RECEIVER_OPEN_RADIUS, 0.0, 1.0)
-	var advancement_utility: float = clampf((forward_dot + 1.0) * 0.5, 0.0, 1.0)
+	var direction_advancement: float = clampf((forward_dot + 1.0) * 0.5, 0.0, 1.0)
+	var advancement_utility: float = direction_advancement if xt_value < 0.0 \
+		else clampf((direction_advancement + xt_value) * 0.5, 0.0, 1.0)
 
 	return _weighted_total(
 		distance_utility, angle_utility, pressure_utility, advancement_utility,
@@ -147,7 +162,8 @@ static func score_pass_breakdown(
 		w_dist: float = WEIGHT_DISTANCE,
 		w_angle: float = WEIGHT_ANGLE,
 		w_press: float = WEIGHT_PRESSURE,
-		w_adv: float = WEIGHT_ADVANCEMENT
+		w_adv: float = WEIGHT_ADVANCEMENT,
+		xt_value: float = -1.0
 ) -> PassScoreBreakdown:
 	var result := PassScoreBreakdown.new()
 	result.receiver = receiver
@@ -162,7 +178,9 @@ static func score_pass_breakdown(
 
 	result.angle_utility = clampf((passer_facing_dot + 1.0) * 0.5, 0.0, 1.0)
 	result.pressure_utility = clampf(receiver_open_dist / RECEIVER_OPEN_RADIUS, 0.0, 1.0)
-	result.advancement_utility = clampf((forward_dot + 1.0) * 0.5, 0.0, 1.0)
+	var direction_advancement: float = clampf((forward_dot + 1.0) * 0.5, 0.0, 1.0)
+	result.advancement_utility = direction_advancement if xt_value < 0.0 \
+		else clampf((direction_advancement + xt_value) * 0.5, 0.0, 1.0)
 	result.total = _weighted_total(
 		result.distance_utility, result.angle_utility,
 		result.pressure_utility, result.advancement_utility,

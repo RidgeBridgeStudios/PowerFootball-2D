@@ -160,7 +160,17 @@ func _release_throw(player: HeavyPlayerController) -> void:
 	if player.is_user_controlled:
 		aim = InputHelper.get_aim_vector()
 	if aim == Vector2.ZERO:
-		aim = player.facing_direction
+		# facing_direction is leftover from whatever the taker was doing before
+		# the whistle (see AGENTS_ERRATA.md's note on this under
+		# throw-in-cpu-taker-never-releases-without-pass-target) and can point
+		# along the touchline rather than into the pitch. Thrown that way, the
+		# ball never advances past the touchline row it was released from and
+		# just rolls along it — see AGENTS_ERRATA.md
+		# (throw-in-ball-outside-chase-legality-rect). A real throw-in always
+		# has a real inward component, so force one here, keeping whatever
+		# left/right lean facing_direction had.
+		var inward_y: float = -signf(player.global_position.y) if not is_zero_approx(player.global_position.y) else 1.0
+		aim = Vector2(player.facing_direction.x, inward_y)
 
 	var speed: float = lerpf(MIN_SPEED, MAX_SPEED, charge_ratio)
 	# Apply 3D impulse so the ball is lobbed into play. Pseudo3DBall.

@@ -47,6 +47,20 @@ const _ROLE_PHASE_SENSITIVITY: Dictionary = {
 	PlayerBrain.Role.OUTFIELD_ATTACKER: 1.30,
 }
 
+## Per-role ball_weight applied to the Y (lateral/width) axis only, decoupled
+## from the caller-supplied [ball_weight] which still drives the X (line
+## depth) axis unchanged. Without this split, a winger/fullback's lateral
+## position collapses toward the ball's own Y by the same full weight as its
+## depth does, so the whole back line and both flanks bunch up around
+## whichever touchline the ball is on instead of holding the pitch's width.
+## Lower values here keep a role wider; TUNE HERE for width discipline per role.
+const _ROLE_Y_BALL_WEIGHT: Dictionary = {
+	PlayerBrain.Role.GOALKEEPER: 0.15,
+	PlayerBrain.Role.OUTFIELD_DEFENDER: 0.15,
+	PlayerBrain.Role.OUTFIELD_MIDFIELDER: 0.20,
+	PlayerBrain.Role.OUTFIELD_ATTACKER: 0.30,
+}
+
 ## Macro urgency modulation (POWERFOOTBALL_MASTER_VISION.md / architecture
 ## plan "Dynamic Formation & Compactness Shifts") — applied uniformly across
 ## every role, on top of the existing per-role phase push above, so the whole
@@ -96,7 +110,13 @@ static func get_dynamic_anchor_position(
 	var ball_norm: Vector2 = ((ball_pos - pitch_centre) / half).clamp(
 		Vector2(-1.0, -1.0), Vector2(1.0, 1.0))
 
-	var pulled_norm: Vector2 = base_norm.lerp(ball_norm, ball_weight)
+	# X (line depth) keeps the full caller-supplied ball_weight; Y (width)
+	# uses the role's own, generally lower, weight — see _ROLE_Y_BALL_WEIGHT.
+	var y_ball_weight: float = float(_ROLE_Y_BALL_WEIGHT.get(role, ball_weight))
+	var pulled_norm: Vector2 = Vector2(
+		lerpf(base_norm.x, ball_norm.x, ball_weight),
+		lerpf(base_norm.y, ball_norm.y, y_ball_weight)
+	)
 
 	var push: float = float(_PHASE_LINE_PUSH.get(phase, 0.0)) \
 		* float(_ROLE_PHASE_SENSITIVITY.get(role, 1.0)) * attack_sign

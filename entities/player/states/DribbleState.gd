@@ -74,7 +74,8 @@ func enter(player: HeavyPlayerController) -> void:
 	_touch_cooldown = 0.0
 	_grace_timer = 0.0
 	var ball: Pseudo3DBall = player.get_ball_in_foot_range()
-	if ball != null and player.can_carry_ball():
+	if ball != null and player.can_carry_ball() \
+			and (ball.possessor == null or ball.possessor == player):
 		_notify_trust_of_reception(player, ball)
 		ball.set_possessor(player)
 		_possessed_ball = ball
@@ -108,15 +109,20 @@ func process(player: HeavyPlayerController, delta: float) -> StringName:
 
 	var ball_in_range: Pseudo3DBall = player.get_ball_in_foot_range()
 
-	if ball_in_range != null and player.can_carry_ball():
-		# Ball is inside the sensor — reset grace, keep tracking.
+	if ball_in_range != null and player.can_carry_ball() \
+			and (ball_in_range.possessor == null or ball_in_range.possessor == player):
+		# Ball is inside the sensor and legitimately available — reset grace,
+		# keep tracking.
 		_grace_timer = 0.0
 		if _possessed_ball == null:
 			_notify_trust_of_reception(player, ball_in_range)
 			_possessed_ball = ball_in_range
 			ball_in_range.set_possessor(player)
 	else:
-		# Ball has left the sensor. Check grace window before dropping.
+		# Ball has left the sensor, or someone else now legitimately owns it
+		# (e.g. a won tackle) — check grace window before dropping. See
+		# AGENTS_ERRATA.md (dribble-claim-ignores-existing-possessor-dual-
+		# driver-jitter).
 		if _possessed_ball != null and _possessed_ball.possessor == player:
 			_grace_timer += delta
 			if _grace_timer >= POSSESSION_GRACE:
@@ -151,7 +157,14 @@ func physics_process(player: HeavyPlayerController, delta: float) -> void:
 	player.apply_kinematic_weight(player.movement_intent * DRIBBLE_SPEED_PENALTY, delta)
 
 	var ball: Pseudo3DBall = _possessed_ball
-	if ball == null or ball.is_airborne():
+	# possessor != player: someone else won this ball (e.g. a tackle) since
+	# our last process() tick. process() and physics_process() run on
+	# independently-scheduled callbacks (see PlayerStateFactory.gd), so this
+	# guard — not process()'s own bookkeeping — is what actually stops a
+	# dispossessed player from still driving the ball's velocity. See
+	# AGENTS_ERRATA.md (dribble-claim-ignores-existing-possessor-dual-driver-
+	# jitter).
+	if ball == null or ball.is_airborne() or ball.possessor != player:
 		return
 
 	# --- Carry direction: where the player is physically travelling ----------

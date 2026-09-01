@@ -11,7 +11,10 @@
 ## Also runs the macro Team Match Urgency evaluator on a ~1s tick (see
 ## "Macro match urgency" below) and publishes it via
 ## GameEvents.team_urgency_updated — MatchWorldModel caches it, PlayerBrain's
-## PassUtilityScorer/FormationAnchorMath call sites read the cache.
+## PassUtilityScorer/FormationAnchorMath call sites read the cache. Within
+## that same tick, a one-shot emergency-tactics escalation can force urgency
+## to +1.0 and emit GameEvents.emergency_tactics_triggered — see
+## _evaluate_tactical_urgency().
 ##
 ## Depends on: ManagerData, FormationLibrary, GameManager, GameEvents,
 ##             MatchWorldModel, HeavyPlayerController, PlayerBrain, PitchBoundary.
@@ -37,6 +40,11 @@ var _def_formation: String = ""
 
 var _shifted_to_attack: bool = false
 var _shifted_to_defend: bool = false
+## One-shot, like the two flags above: fires GameEvents.
+## emergency_tactics_triggered and forces team_urgency to +1.0 (see
+## _evaluate_tactical_urgency()) the first time this team is trailing in
+## Game-Crunch, then never again this match.
+var _emergency_tactics_triggered: bool = false
 ## Runtime pressing intensity — HotHead trait raises this after two conceded.
 var _live_pressing: float = 0.5
 ## Tracks how many goals have been conceded this match (for HotHead).
@@ -84,6 +92,7 @@ func bind(data: ManagerData, team: int, players_node: Node2D, boundary: PitchBou
 
 	_shifted_to_attack = false
 	_shifted_to_defend = false
+	_emergency_tactics_triggered = false
 	_live_pressing = data.pressing_intensity
 	_goals_conceded = 0
 	_risk_profile = _compute_risk_profile(data)
@@ -312,6 +321,21 @@ func _evaluate_tactical_urgency() -> void:
 		raw_urgency = minf(raw_urgency, 0.2)
 
 	var final_urgency: float = clampf(raw_urgency, -1.0, 1.0)
+
+	# Emergency tactics: one-shot escalation distinct from the smooth formula
+	# above. Trailing this late already pushes raw_urgency high via
+	# delta_score*time_sq, but tanh saturation means it is not necessarily at
+	# the full +1.0 (the max URGENCY_MAX_DEF_LINE_SHIFT=120px defensive-line
+	# push FormationAnchorMath.gd applies at |urgency|==1.0) an actual
+	# "all out attack" gamble calls for — e.g. trailing by exactly 1 goal right
+	# at GameManager.STAGE_3_FRACTION only reads ~0.5-0.9 depending on risk
+	# profile, not 1.0. Force the full push once, as a discrete directive
+	# rather than something PlayerBrain has to keep independently re-deriving
+	# a threshold check against — see GameEvents.emergency_tactics_triggered.
+	if not _emergency_tactics_triggered and time_ratio >= GameManager.STAGE_3_FRACTION and delta_score <= -1.0:
+		_emergency_tactics_triggered = true
+		final_urgency = 1.0
+		GameEvents.emergency_tactics_triggered.emit(_team, &"ALL_OUT_ATTACK")
 
 	if absf(final_urgency - world.team_urgency[_team]) > URGENCY_PUBLISH_EPSILON:
 		GameEvents.team_urgency_updated.emit(_team, final_urgency)

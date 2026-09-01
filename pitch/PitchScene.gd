@@ -159,6 +159,7 @@ func _on_pregame_confirmed() -> void:
 	GameEvents.half_time_reached.connect(_on_half_time_reached)
 	GameEvents.manager_formation_changed.connect(_on_touchline_shift)
 	GameEvents.team_momentum_updated.connect(_on_team_momentum_updated)
+	GameEvents.emergency_tactics_triggered.connect(_on_emergency_tactics_triggered)
 	ball.ball_bounced.connect(_on_ball_bounced)
 	## FIX: Guards against a broken $RestartTimer node path — a null timer here
 	## would otherwise defer every post-goal kickoff to Change 1's fallback path
@@ -908,6 +909,28 @@ func _on_team_momentum_updated(team: int, momentum: float) -> void:
 		return
 
 	var quote: String = "KEEP PUSHING! NO LET UP!" if delta_m > 0.0 else "CONCENTRATE! WAKE UP!"
+	var display_name: String = home_data.manager_name if home_data.manager_name != "" else "Manager"
+	_touchline_bubble.show_shout(display_name, quote, true)
+
+
+## Layer 4 (ManagerDirector) -> Layer 5 reaction to a one-shot emergency
+## tactics directive (trailing late in Game-Crunch — see ManagerDirector.
+## _evaluate_tactical_urgency()). Mirrors _on_team_momentum_updated()'s
+## home-perspective-only convention and fixed-line quote: ALL_OUT_ATTACK is
+## not one of PressOffice's existing quote contexts (touchline_goal/
+## touchline_goal_conceded/touchline_shift/pre_match) and PressOffice.gd is
+## outside this feature's scope, so this does not add a new trait-quote
+## category for it either.
+func _on_emergency_tactics_triggered(team: int, tactic_type: StringName) -> void:
+	if team != GameManager.TEAM_A:
+		return
+
+	var home_data: ManagerData = _manager_director_a.get_data()
+	if home_data == null:
+		return
+
+	var quote: String = "EVERYONE FORWARD! WE GO ALL OUT!" if tactic_type == &"ALL_OUT_ATTACK" \
+		else "CHANGE OF PLAN — NEW ORDERS NOW!"
 	var display_name: String = home_data.manager_name if home_data.manager_name != "" else "Manager"
 	_touchline_bubble.show_shout(display_name, quote, true)
 

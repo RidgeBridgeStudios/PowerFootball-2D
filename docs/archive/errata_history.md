@@ -216,3 +216,51 @@ session_state_archive:
       - AGENTS.md
       - llms.txt
 
+  - date: 2026-08-31
+    agent: Antigravity (Principal Engine Architect & Static Analysis Specialist)
+    task: "Low-Level Engine Optimization, Deterministic Replay, Linters & Symbolic Slicing Suite: Refactored MatchWorldModel.gd with typed Array[int] spatial grid buckets and distance_squared_to() comparisons; replaced transient allocations and distance_to sorting across ActionText.gd, TouchlineBubble.gd, SetPieceCoordinator.gd, PitchScene.gd, and PlayerBrain.gd; created tools/lint_stringnames.py (&'string_name' literal enforcement), tools/lint_allocations.py (hot-path allocation & distance sorting linter), tools/lint_signal_races.py (signal emission race condition auditor), tools/lint_shadowing.py (parameter & variable shadowing linter), tools/audit_process_modes.py (process mode consistency auditor), tools/replay_test.py (100% bit-exact 60Hz replay test harness across 1,800 ticks), tools/generate_symbols.py (AST symbol map -> docs/SYMBOLS.json), tools/codebase_slice.py (targeted symbol & method slicing CLI), tools/semantic_search.py (zero-dependency BM25 retrieval indexer), tools/benchmark_math.py (mathematical solvers benchmark), tools/fuzz_formations.py (50k property-based dynamic anchor fuzzer), tools/git_pre_commit.py (pre-commit installer & verifier), and authored .antigravity/skills/ (formation-fuzzer, perf-benchmark). Synchronized .antigravity/commands.json, .agents/commands.json, .antigravity/hooks.json, .agents/hooks.json, llms.txt, and AGENTS.md."
+    files_modified:
+      - autoloads/MatchWorldModel.gd
+      - ui/ActionText.gd
+      - ui/TouchlineBubble.gd
+      - pitch/SetPieceCoordinator.gd
+      - pitch/PitchScene.gd
+      - entities/player/PlayerBrain.gd
+      - ui/HUD.gd
+      - ui/pause/PauseMenu.gd
+      - tools/lint_stringnames.py
+      - tools/lint_allocations.py
+      - tools/lint_signal_races.py
+      - tools/lint_shadowing.py
+      - tools/audit_process_modes.py
+      - tools/replay_test.py
+      - tools/generate_symbols.py
+      - tools/codebase_slice.py
+      - tools/semantic_search.py
+      - tools/benchmark_math.py
+      - tools/fuzz_formations.py
+      - tools/git_pre_commit.py
+      - docs/SYMBOLS.json
+      - docs/API_SURFACE.md
+      - .antigravity/skills/formation-fuzzer/SKILL.md
+      - .antigravity/skills/perf-benchmark/SKILL.md
+      - .agents/skills/formation-fuzzer/SKILL.md
+      - .agents/skills/perf-benchmark/SKILL.md
+      - .antigravity/commands.json
+      - .agents/commands.json
+      - .antigravity/hooks.json
+      - .agents/hooks.json
+      - AGENTS.md
+      - llms.txt
+      - AGENTS_ERRATA.md
+    gdcheck_status: "pass, 0 errors, 0 warnings (76 scripts)"
+    invariants_consulted:
+      - docs/CORE_INVARIANTS.md
+      - docs/API_SURFACE.md
+      - docs/ANTI_PATTERNS.md
+      - docs/MATH_SOLVERS.md
+      - AGENTS.md
+      - llms.txt
+    next_steps: "All engine optimizations, linters, replay harnesses, fuzzers, and symbolic slicers are 100% active and verified."
+    new_rules_discovered: []
+

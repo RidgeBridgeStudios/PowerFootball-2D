@@ -24,7 +24,8 @@ func process(player: HeavyPlayerController, _delta: float) -> StringName:
 	if common != &"":
 		return common
 
-	if player.get_ball_in_foot_range() != null:
+	var nearby_ball: Pseudo3DBall = player.get_ball_in_foot_range()
+	if nearby_ball != null and (nearby_ball.possessor == null or nearby_ball.possessor == player):
 		return DRIBBLE
 
 	if player.movement_intent.length() <= IDLE_THRESHOLD and player.velocity.length() <= IDLE_SPEED:

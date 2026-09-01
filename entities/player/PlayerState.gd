@@ -59,7 +59,7 @@ func check_common_transitions(player: HeavyPlayerController) -> StringName:
 	if aerial_ball != null and aerial_ball.position_z > AERIAL_TRIGGER_HEIGHT:
 		return AERIAL
 
-	if wants(player, &"action_tackle"):
+	if wants(player, &"action_tackle") or player.wants_tackle:
 		return TACKLE
 
 	if wants(player, &"action_kick"):
