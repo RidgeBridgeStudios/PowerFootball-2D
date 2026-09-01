@@ -114,7 +114,12 @@ func get_taker() -> HeavyPlayerController:
 ## is decided). last_toucher may be null if nobody touched the ball last.
 func handle_out_of_bounds(side: String, exit_pos: Vector2, last_toucher: HeavyPlayerController) -> void:
 	if _boundary == null or _ball == null or _players == null:
+		push_warning("[SetPiece] handle_out_of_bounds side=%s ABORTED — unbound (_boundary=%s _ball=%s _players=%s)" % [
+			side, _boundary != null, _ball != null, _players != null])
 		return
+	print("[SetPiece] handle_out_of_bounds side=%s exit_pos=%s last_toucher=%s (awaiting_confirmation=%s current_taker=%s)" % [
+		side, exit_pos, last_toucher.name if last_toucher != null else "null",
+		_awaiting_confirmation, _current_taker.name if _current_taker != null else "null"])
 
 	match side:
 		"touchline_top", "touchline_bottom":
@@ -261,6 +266,8 @@ func _setup_taking_side(phase: int, team: int, position: Vector2, designated_tak
 	_ball.reset_at(position)
 	_assign_taker(team, team_has_human, designated_taker)
 	_position_defending_players(phase)
+	if phase == GameManager.MatchPhase.CORNER_KICK:
+		_position_attacking_players_for_corner(team, position)
 	_await_taker_confirmation()
 
 
@@ -311,11 +318,15 @@ func _assign_taker(team: int, kickoff_team_has_human: bool = false, designated_t
 	_taker_index = 0
 	_current_taker = _taker_candidates[0] if not _taker_candidates.is_empty() else null
 	if _current_taker == null:
+		print("[SetPiece] _assign_taker team=%d FOUND NO CANDIDATES (spot=%s)" % [team, spot])
 		return
 
 	_current_taker.global_position = spot
 	_current_taker.velocity = Vector2.ZERO
 	_current_taker.state_factory.transition_to(PlayerState.SET_PIECE_FREEZE)
+	print("[SetPiece] _assign_taker team=%d taker=%s placed_at=%s (spot=%s, dist=%.1fpx) candidates=%d" % [
+		team, _current_taker.name, _current_taker.global_position, spot,
+		_current_taker.global_position.distance_to(spot), _taker_candidates.size()])
 
 	# The taker is human-controlled only when the set piece belongs to the
 	# team the human was already controlling; otherwise it stays a CPU restart
@@ -399,6 +410,59 @@ func _position_defending_players(phase: int) -> void:
 			player.velocity = Vector2.ZERO
 
 
+## Sends the attacking side's non-taker outfield players into realistic
+## crossing positions (near post, six-yard box, far post, edge-of-box
+## cutback) instead of leaving them wherever they stood when the corner was
+## won — SetPieceFreezeState holds them there until GameManager.restart_play()
+## fires, exactly like the defending wall/line positioning above, so this is
+## the attacking-side mirror of _position_defending_players() rather than a
+## run the players make themselves. GK is exempt. See AGENTS_ERRATA.md:
+## corner-kick-no-attacking-box-runs.
+func _position_attacking_players_for_corner(attacking_team: int, corner_spot: Vector2) -> void:
+	if _boundary == null or _players == null:
+		return
+
+	var defending_team: int = 1 - attacking_team
+	var goal_centre: Vector2 = _boundary.get_goal_centre(defending_team)
+	# Same "into the pitch, away from the goal line" sign convention as
+	# _is_in_penalty_area()'s `direction`.
+	var into_pitch: float = 1.0 if defending_team == 0 else -1.0
+	var corner_side: float = signf(corner_spot.y - _boundary.get_centre_spot().y)
+	if is_zero_approx(corner_side):
+		corner_side = 1.0
+	var pitch_rect: Rect2 = _boundary.get_pitch_rect().grow(-20.0)
+
+	# Priority order for however many attackers are actually available.
+	var box_targets: Array[Vector2] = [
+		goal_centre + Vector2(into_pitch * 60.0, corner_side * -70.0),   # near post
+		goal_centre + Vector2(into_pitch * 90.0, corner_side * 10.0),    # six-yard box, central
+		goal_centre + Vector2(into_pitch * 70.0, corner_side * 90.0),    # far post
+		goal_centre + Vector2(into_pitch * 260.0, corner_side * 40.0),   # edge-of-box cutback
+	]
+
+	var attackers: Array[HeavyPlayerController] = []
+	for node: Node in _players.get_children():
+		var p := node as HeavyPlayerController
+		if p == null or p.team != attacking_team or p == _current_taker:
+			continue
+		var brain := p.get_node_or_null("PlayerBrain") as PlayerBrain
+		if brain != null and brain.is_goalkeeper:
+			continue
+		attackers.append(p)
+
+	attackers.sort_custom(func(a: HeavyPlayerController, b: HeavyPlayerController) -> bool:
+		return a.global_position.distance_squared_to(goal_centre) < b.global_position.distance_squared_to(goal_centre)
+	)
+
+	var count: int = mini(attackers.size(), box_targets.size())
+	for i: int in range(count):
+		var target: Vector2 = box_targets[i]
+		target.x = clampf(target.x, pitch_rect.position.x, pitch_rect.end.x)
+		target.y = clampf(target.y, pitch_rect.position.y, pitch_rect.end.y)
+		attackers[i].global_position = target
+		attackers[i].velocity = Vector2.ZERO
+
+
 ## KICKOFF: constrains every outfield player to their own half of the pitch.
 ## Handles half-time end swapping dynamically by deriving half from goal centre X.
 ## The taker is left on the centre spot, and the defending side honours the standard
@@ -444,9 +508,19 @@ func _enforce_kickoff_halves() -> void:
 
 func _await_taker_confirmation() -> void:
 	if _current_taker == null:
+		# No eligible taker was found (e.g. an empty _taker_candidates list).
+		# Every player was already pushed into SET_PIECE_FREEZE by
+		# _freeze_all_players(), and SetPieceFreezeState only ever hands back
+		# to Idle once GameManager.is_in_play() is true again — so silently
+		# returning here left the whole match frozen forever with no recovery
+		# path (see AGENTS_ERRATA.md: corner-kick-empty-taker-permanent-freeze).
+		push_warning("SetPieceCoordinator: no eligible taker for phase %d — aborting restart instead of freezing the match." % GameManager.current_phase)
+		GameManager.restart_play()
 		return
 	_awaiting_confirmation = true
 	var delay: float = confirmation_timeout if _current_taker.is_user_controlled else cpu_confirmation_delay
+	print("[SetPiece] awaiting confirmation: taker=%s human=%s delay=%.2fs phase=%d" % [
+		_current_taker.name, _current_taker.is_user_controlled, delay, GameManager.current_phase])
 	_confirmation_timer.start(delay)
 
 
@@ -458,7 +532,10 @@ func _on_confirmation_timer_timeout() -> void:
 func _activate_set_piece() -> void:
 	_awaiting_confirmation = false
 	if _current_taker == null:
+		print("[SetPiece] _activate_set_piece: current_taker is null — nothing to activate")
 		return
+	print("[SetPiece] _activate_set_piece: taker=%s phase=%d taker_pos_before=%s set_piece_pos=%s" % [
+		_current_taker.name, GameManager.current_phase, _current_taker.global_position, GameManager.set_piece_position])
 
 	_ball.reset_at(GameManager.set_piece_position)
 	_ball.unfreeze()
@@ -475,10 +552,22 @@ func _activate_set_piece() -> void:
 	# stale direction and can gift the ball straight to an opponent.
 	if not _current_taker.is_user_controlled:
 		var taker_brain: PlayerBrain = _current_taker.get_node_or_null("PlayerBrain") as PlayerBrain
-		if taker_brain != null:
-			var pass_target: HeavyPlayerController = taker_brain.find_pass_target_for_set_piece()
-			if pass_target != null:
-				_current_taker.facing_direction = _current_taker.global_position.direction_to(pass_target.global_position)
+		var pass_target: HeavyPlayerController = taker_brain.find_pass_target_for_set_piece() if taker_brain != null else null
+		if pass_target != null:
+			_current_taker.facing_direction = _current_taker.global_position.direction_to(pass_target.global_position)
+		elif _boundary != null:
+			# find_pass_target_for_set_piece() can legally return null (no
+			# candidate clears MIN_PASS_SCORE, or every lane is blocked) —
+			# that used to leave facing_direction at whatever stale value it
+			# held before the freeze, which can point anywhere, including
+			# back out of bounds. ChargeKickState's CPU path always fires an
+			# immediate tap (wants() is always false for a non-user-controlled
+			# player), so a stale out-of-bounds facing taps a corner/free
+			# kick/goal kick straight back out and can hand the restart to
+			# the other team. Aiming at the pitch centre from any restart
+			# spot is always a safe, in-bounds fallback (see AGENTS_ERRATA.md:
+			# corner-kick-stale-facing-direction-no-fallback).
+			_current_taker.facing_direction = _current_taker.global_position.direction_to(_boundary.get_centre_spot())
 
 	_current_taker.state_factory.state_changed.connect(_on_taker_state_changed)
 
@@ -500,6 +589,8 @@ func _on_taker_state_changed(from_state: StringName, _to_state: StringName) -> v
 	if not taking_states.has(from_state):
 		return
 
+	print("[SetPiece] _on_taker_state_changed: from=%s to=%s taker=%s — calling restart_play()" % [
+		from_state, _to_state, _current_taker.name if _current_taker != null else "null(!)"])
 	_current_taker.state_factory.state_changed.disconnect(_on_taker_state_changed)
 	GameEvents.set_piece_taken.emit(_current_taker)
 	GameManager.restart_play()

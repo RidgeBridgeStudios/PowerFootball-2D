@@ -60,6 +60,10 @@ func enter(_player: HeavyPlayerController) -> void:
 	_released = false
 	_cpu_timer = 0.0
 	charge_ratio = 0.0
+	var balls: Array[Node] = _player.get_tree().get_nodes_in_group(&"ball")
+	var ball_pos: Vector2 = balls[0].global_position if balls.size() > 0 else Vector2.INF
+	print("[SetPiece] ThrowInState.enter: taker=%s taker_pos=%s ball_pos=%s human=%s" % [
+		_player.name, _player.global_position, ball_pos, _player.is_user_controlled])
 
 
 func exit(_player: HeavyPlayerController) -> void:
@@ -72,19 +76,28 @@ func process(player: HeavyPlayerController, delta: float) -> StringName:
 	if _released:
 		return MOVE if player.movement_intent.length() > 0.05 else IDLE
 
-	# CPU takers use PlayerBrain to find a target.
+	# CPU takers charge unconditionally and throw once both CPU_THROW_DELAY
+	# and half-charge have elapsed — _release_throw() already prefers a real
+	# PlayerBrain._cached_pass_target when one exists (set as a side effect of
+	# _build_context(), regardless of which action ultimately won), falling
+	# back to facing_direction otherwise. This used to only ever progress
+	# while current_action == &"Pass", but PlayerBrain's dedicated
+	# is_throw_in_taker branch returns &"FindSpace" instead whenever no
+	# teammate clears the pass-viability threshold — a normal, frequent
+	# outcome, not an edge case. When that happened this branch reset to
+	# _held = false every tick and never released, and since
+	# GameManager.restart_play() is only ever called from inside
+	# _release_throw(), every other player stayed frozen in
+	# SET_PIECE_FREEZE forever. See AGENTS_ERRATA.md
+	# (throw-in-cpu-taker-never-releases-without-pass-target).
 	if not player.is_user_controlled:
-		var brain: Node = player.get_node_or_null("PlayerBrain")
-		if brain != null and brain.get("current_action") == &"Pass":
-			_held = true
-			_held_time += delta
-			charge_ratio = clampf(_held_time / CHARGE_TIME, 0.0, 1.0)
-			if charge_ratio >= 0.5:
-				_release_throw(player)
-				return MOVE if player.movement_intent.length() > 0.05 else IDLE
-		else:
-			_held = false
-			charge_ratio = 0.0
+		_cpu_timer += delta
+		_held = true
+		_held_time += delta
+		charge_ratio = clampf(_held_time / CHARGE_TIME, 0.0, 1.0)
+		if _cpu_timer >= CPU_THROW_DELAY and charge_ratio >= 0.5:
+			_release_throw(player)
+			return MOVE if player.movement_intent.length() > 0.05 else IDLE
 		return &""
 
 	if wants(player, &"action_kick"):
@@ -118,13 +131,23 @@ func _release_throw(player: HeavyPlayerController) -> void:
 
 	if ball == null:
 		# Nothing to throw — the phase may have already moved on elsewhere.
+		var nearby: Array[Node] = player.get_tree().get_nodes_in_group(&"ball")
+		var nearest_ball_pos: Vector2 = nearby[0].global_position if nearby.size() > 0 else Vector2.INF
+		print("[SetPiece] _release_throw: %s found NO BALL (taker_pos=%s nearest_ball_pos=%s dist=%.1f charge=%.2f)" % [
+			player.name, player.global_position, nearest_ball_pos,
+			player.global_position.distance_to(nearest_ball_pos), charge_ratio])
 		_released = true
 		return
 
 	# Someone else grabbed the ball before the throw fired; do nothing.
 	if ball.possessor != null and ball.possessor != player:
+		print("[SetPiece] _release_throw: %s ball already possessed by %s — skipping throw" % [
+			player.name, ball.possessor.name])
 		_released = true
 		return
+
+	print("[SetPiece] _release_throw: %s throwing — taker_pos=%s ball_pos=%s charge=%.2f" % [
+		player.name, player.global_position, ball.global_position, charge_ratio])
 
 	var aim: Vector2 = Vector2.ZERO
 	var ai_brain: PlayerBrain = player.brain

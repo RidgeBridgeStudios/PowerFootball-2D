@@ -313,6 +313,62 @@ var _possession_trace_timer: float = 0.0
 ## bind_boundary(), in which case TOUCHLINE_ISOLATION alone never fires.
 var _boundary: PitchBoundary = null
 
+## Spacing/crowding diagnostics: opt-in instrumentation for the "crowding,
+## no space creation" investigation (see AGENTS_ERRATA.md:
+## crowding-space-creation-diagnostics). Disabled by default so normal play
+## pays zero cost. Flip this true (Remote tab, or edit the default below),
+## let a CPU-vs-CPU match run, and read the Godot Output panel:
+## [SpacingReport] prints every SPACING_REPORT_INTERVAL_SECONDS with the
+## current window's numbers; [SpacingSummary] prints once at full time with
+## match-long averages. See _update_spacing_diagnostics()/_print_spacing_
+## summary() below and PlayerBrain.evaluate_tactical_action()'s
+## record_decision() call for how the action-tally half is fed.
+@export var debug_spacing_diagnostics: bool = true
+
+const SPACING_REPORT_INTERVAL_SECONDS: float = 15.0
+## Physics frames between spatial samples (~10/sec at 60fps) — the O(11²)
+## nearest-teammate scan per team is cheap, but there is no reason to pay it
+## every single physics frame just to average it away a moment later.
+const SPACING_SAMPLE_STRIDE: int = 6
+## Same-team players within this radius of the ball count as "clumped" on it.
+const SPACING_CLUMP_RADIUS: float = 100.0
+
+## action index <-> DecisionAction, and role index <-> PlayerBrain.Role
+## (OUTFIELD_ATTACKER=0, OUTFIELD_MIDFIELDER=1, OUTFIELD_DEFENDER=2,
+## GOALKEEPER=3 — never actually recorded since evaluate_tactical_action()
+## returns for goalkeepers before reaching record_decision()'s call site).
+enum DecisionAction { MAINTAIN_FORMATION, PANIC_CLEAR, PASS, CHASE_BALL, FIND_SPACE, ATTEMPT_DRIBBLE, ATTEMPT_SHOOT, UNKNOWN }
+const ACTION_COUNT: int = 8
+const ROLE_COUNT: int = 4
+
+var _spacing_report_timer: float = 0.0
+var _spacing_sample_frame_counter: int = 0
+var _spacing_window_samples: int = 0
+var _spacing_total_samples: int = 0
+
+# Parallel per-team ([team 0, team 1]) running sums — window resets every
+# report, total accumulates for the full-time summary. Mirrors the existing
+# team_com_x/team_att_x/team_def_x parallel-array convention above.
+var _window_nearest_sum: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+var _total_nearest_sum: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+var _window_width_sum: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+var _total_width_sum: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+var _window_length_sum: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+var _total_length_sum: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+var _window_clump_sum: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+var _total_clump_sum: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+
+var _match_worst_nearest_dist: PackedFloat32Array = PackedFloat32Array([INF, INF])
+var _match_worst_pair_a: Array[int] = [NO_INDEX, NO_INDEX]
+var _match_worst_pair_b: Array[int] = [NO_INDEX, NO_INDEX]
+
+# Decision tally, flattened as team * ACTION_COUNT + action / team * ROLE_COUNT + role.
+var _action_tally: PackedInt32Array = PackedInt32Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
+var _possessor_ticks_total: PackedInt32Array = PackedInt32Array([0, 0])
+var _possessor_pass_available_ticks: PackedInt32Array = PackedInt32Array([0, 0])
+var _role_offball_ticks: PackedInt32Array = PackedInt32Array([0, 0, 0, 0, 0, 0, 0, 0])
+var _role_findspace_ticks: PackedInt32Array = PackedInt32Array([0, 0, 0, 0, 0, 0, 0, 0])
+
 ## Deferred to the first _physics_process() rather than connected in
 ## _ready(): this autoload is deliberately declared first in project.godot
 ## (see class doc "Depends on:") so nothing else has to load before it, which
@@ -436,6 +492,7 @@ func _physics_process(delta: float) -> void:
 		GameEvents.team_urgency_updated.connect(_on_team_urgency_updated)
 		GameEvents.team_momentum_updated.connect(_on_team_momentum_updated)
 		GameEvents.match_stage_changed.connect(_on_match_stage_changed)
+		GameEvents.match_phase_changed.connect(_on_match_phase_changed_for_diagnostics)
 		_deferred_events_connected = true
 
 	if ball_node != null and is_instance_valid(ball_node):
@@ -513,6 +570,7 @@ func _physics_process(delta: float) -> void:
 	_update_press_trigger(delta)
 	_update_stall_watchdog(delta)
 	_update_possession_watchdog(delta)
+	_update_spacing_diagnostics(delta)
 
 
 ## Converts a 2D world position into discrete spatial grid cell coordinates.
@@ -1162,6 +1220,229 @@ func _update_possession_watchdog(delta: float) -> void:
 	var brain := holder_controller.get_node_or_null("PlayerBrain") as PlayerBrain
 	if brain != null:
 		brain.trace_next_decision()
+
+
+## --- Spacing / crowding diagnostics ---------------------------------------
+## Opt-in instrumentation for the "crowding, no space creation" investigation.
+## See debug_spacing_diagnostics above for how to turn it on and what to read.
+
+func _update_spacing_diagnostics(delta: float) -> void:
+	if not debug_spacing_diagnostics:
+		return
+	_spacing_report_timer += delta
+	_spacing_sample_frame_counter += 1
+	if _spacing_sample_frame_counter >= SPACING_SAMPLE_STRIDE:
+		_spacing_sample_frame_counter = 0
+		_accumulate_spacing_sample()
+	if _spacing_report_timer >= SPACING_REPORT_INTERVAL_SECONDS:
+		_spacing_report_timer = 0.0
+		_print_spacing_report()
+
+
+## One spatial sample: per team, the average distance from each player to
+## their single nearest teammate (the "crowding index" — low means players
+## are stacked on top of each other), the team's on-pitch bounding box
+## (width/length — "is the pitch actually being used"), and how many
+## teammates are within SPACING_CLUMP_RADIUS of the ball right now. Feeds
+## both the window (periodic report) and total (full-time summary) sums.
+## O(TOTAL_PLAYERS^2), but only runs every SPACING_SAMPLE_STRIDE frames and
+## only while debug_spacing_diagnostics is on — never in the default path.
+func _accumulate_spacing_sample() -> void:
+	_spacing_window_samples += 1
+	_spacing_total_samples += 1
+
+	for t: int in range(2):
+		var min_x: float = INF
+		var max_x: float = -INF
+		var min_y: float = INF
+		var max_y: float = -INF
+		var nearest_sum: float = 0.0
+		var nearest_count: int = 0
+		var clump_count: int = 0
+
+		for i: int in range(TOTAL_PLAYERS):
+			if player_teams[i] != t:
+				continue
+			var px: float = p_pos_x[i]
+			var py: float = p_pos_y[i]
+			min_x = minf(min_x, px)
+			max_x = maxf(max_x, px)
+			min_y = minf(min_y, py)
+			max_y = maxf(max_y, py)
+
+			var best_d_sq: float = INF
+			var best_j: int = NO_INDEX
+			for j: int in range(TOTAL_PLAYERS):
+				if j == i or player_teams[j] != t:
+					continue
+				var d_sq: float = Vector2(px - p_pos_x[j], py - p_pos_y[j]).length_squared()
+				if d_sq < best_d_sq:
+					best_d_sq = d_sq
+					best_j = j
+			if best_j != NO_INDEX:
+				var d: float = sqrt(best_d_sq)
+				nearest_sum += d
+				nearest_count += 1
+				if d < _match_worst_nearest_dist[t]:
+					_match_worst_nearest_dist[t] = d
+					_match_worst_pair_a[t] = i
+					_match_worst_pair_b[t] = best_j
+
+			if ball_node != null and is_instance_valid(ball_node):
+				var to_ball_sq: float = Vector2(px - ball_position.x, py - ball_position.y).length_squared()
+				if to_ball_sq <= SPACING_CLUMP_RADIUS * SPACING_CLUMP_RADIUS:
+					clump_count += 1
+
+		var avg_nearest: float = (nearest_sum / float(nearest_count)) if nearest_count > 0 else 0.0
+		var width: float = (max_y - min_y) if max_y > min_y else 0.0
+		var length: float = (max_x - min_x) if max_x > min_x else 0.0
+
+		_window_nearest_sum[t] += avg_nearest
+		_total_nearest_sum[t] += avg_nearest
+		_window_width_sum[t] += width
+		_total_width_sum[t] += width
+		_window_length_sum[t] += length
+		_total_length_sum[t] += length
+		_window_clump_sum[t] += float(clump_count)
+		_total_clump_sum[t] += float(clump_count)
+
+
+func _print_spacing_report() -> void:
+	if _spacing_window_samples == 0:
+		return
+	var n: float = float(_spacing_window_samples)
+	var pitch_w: float = _boundary.pitch_size.y if _boundary != null else 0.0
+	var pitch_l: float = _boundary.pitch_size.x if _boundary != null else 0.0
+
+	for t: int in range(2):
+		var avg_nearest: float = _window_nearest_sum[t] / n
+		var avg_width: float = _window_width_sum[t] / n
+		var avg_length: float = _window_length_sum[t] / n
+		var avg_clump: float = _window_clump_sum[t] / n
+		var width_pct: float = (avg_width / pitch_w * 100.0) if pitch_w > 0.0 else -1.0
+		var length_pct: float = (avg_length / pitch_l * 100.0) if pitch_l > 0.0 else -1.0
+		print("[SpacingReport] team=%d avg_nearest_teammate=%.1fpx width=%.0fpx(%.0f%%) length=%.0fpx(%.0f%%) avg_players_within_%.0fpx_of_ball=%.2f" % [
+			t, avg_nearest, avg_width, width_pct, avg_length, length_pct, SPACING_CLUMP_RADIUS, avg_clump])
+
+	_window_nearest_sum[0] = 0.0
+	_window_nearest_sum[1] = 0.0
+	_window_width_sum[0] = 0.0
+	_window_width_sum[1] = 0.0
+	_window_length_sum[0] = 0.0
+	_window_length_sum[1] = 0.0
+	_window_clump_sum[0] = 0.0
+	_window_clump_sum[1] = 0.0
+	_spacing_window_samples = 0
+
+
+func _action_tally_index(action: StringName) -> int:
+	match action:
+		&"MaintainFormation": return DecisionAction.MAINTAIN_FORMATION
+		&"PanicClear": return DecisionAction.PANIC_CLEAR
+		&"Pass": return DecisionAction.PASS
+		&"ChaseBall": return DecisionAction.CHASE_BALL
+		&"FindSpace": return DecisionAction.FIND_SPACE
+		&"AttemptDribble": return DecisionAction.ATTEMPT_DRIBBLE
+		&"AttemptShoot": return DecisionAction.ATTEMPT_SHOOT
+		_: return DecisionAction.UNKNOWN
+
+
+func _action_tally_label(idx: int) -> String:
+	match idx:
+		DecisionAction.MAINTAIN_FORMATION: return "MaintainFormation"
+		DecisionAction.PANIC_CLEAR: return "PanicClear"
+		DecisionAction.PASS: return "Pass"
+		DecisionAction.CHASE_BALL: return "ChaseBall"
+		DecisionAction.FIND_SPACE: return "FindSpace"
+		DecisionAction.ATTEMPT_DRIBBLE: return "AttemptDribble"
+		DecisionAction.ATTEMPT_SHOOT: return "AttemptShoot"
+		_: return "Unknown"
+
+
+func _role_label(r: int) -> String:
+	match r:
+		0: return "ATT"
+		1: return "MID"
+		2: return "DEF"
+		_: return "GK"
+
+
+## Called once per outfield decision tick from
+## PlayerBrain.evaluate_tactical_action() when debug_spacing_diagnostics is
+## on. Cheap counter increments only — no allocation — so the cost is opt-in
+## and negligible even across all 22 players' staggered decision ticks.
+func record_decision(team: int, role: int, action: StringName, is_possessor: bool, open_teammate_exists: bool) -> void:
+	if not debug_spacing_diagnostics or team < 0 or team > 1:
+		return
+
+	_action_tally[team * ACTION_COUNT + _action_tally_index(action)] += 1
+
+	if is_possessor:
+		_possessor_ticks_total[team] += 1
+		if open_teammate_exists:
+			_possessor_pass_available_ticks[team] += 1
+	elif role >= 0 and role < ROLE_COUNT:
+		_role_offball_ticks[team * ROLE_COUNT + role] += 1
+		if action == &"FindSpace":
+			_role_findspace_ticks[team * ROLE_COUNT + role] += 1
+
+
+func _on_match_phase_changed_for_diagnostics(phase: int) -> void:
+	if debug_spacing_diagnostics and phase == GameManager.MatchPhase.FULL_TIME:
+		_print_spacing_summary()
+
+
+## Match-long aggregate — read this one at full time for the actual verdict
+## rather than eyeballing the periodic [SpacingReport] windows individually.
+func _print_spacing_summary() -> void:
+	print("[SpacingSummary] ==== Crowding / space-creation report (%d spatial samples) ====" % _spacing_total_samples)
+
+	var pitch_w: float = _boundary.pitch_size.y if _boundary != null else 0.0
+	var pitch_l: float = _boundary.pitch_size.x if _boundary != null else 0.0
+	var n: float = maxf(float(_spacing_total_samples), 1.0)
+
+	for t: int in range(2):
+		var avg_nearest: float = _total_nearest_sum[t] / n
+		var avg_width: float = _total_width_sum[t] / n
+		var avg_length: float = _total_length_sum[t] / n
+		var avg_clump: float = _total_clump_sum[t] / n
+		var width_pct: float = (avg_width / pitch_w * 100.0) if pitch_w > 0.0 else -1.0
+		var length_pct: float = (avg_length / pitch_l * 100.0) if pitch_l > 0.0 else -1.0
+
+		var worst_a_name: String = "?"
+		var worst_b_name: String = "?"
+		if _match_worst_pair_a[t] != NO_INDEX and is_instance_valid(player_nodes[_match_worst_pair_a[t]]):
+			worst_a_name = player_nodes[_match_worst_pair_a[t]].name
+		if _match_worst_pair_b[t] != NO_INDEX and is_instance_valid(player_nodes[_match_worst_pair_b[t]]):
+			worst_b_name = player_nodes[_match_worst_pair_b[t]].name
+
+		print("[SpacingSummary] team=%d avg_nearest_teammate=%.1fpx width_used=%.0f%% length_used=%.0f%% avg_players_within_%.0fpx_of_ball=%.2f worst_clump=%.1fpx(%s<->%s)" % [
+			t, avg_nearest, width_pct, length_pct, SPACING_CLUMP_RADIUS, avg_clump,
+			_match_worst_nearest_dist[t], worst_a_name, worst_b_name])
+
+		var poss_total: int = _possessor_ticks_total[t]
+		var poss_pct: float = (float(_possessor_pass_available_ticks[t]) / float(poss_total) * 100.0) if poss_total > 0 else -1.0
+		print("[SpacingSummary] team=%d possessor_had_open_teammate=%.1f%% (%d/%d possessor decision ticks)" % [
+			t, poss_pct, _possessor_pass_available_ticks[t], poss_total])
+
+		for r: int in range(3):
+			var off_total: int = _role_offball_ticks[t * ROLE_COUNT + r]
+			var fs_count: int = _role_findspace_ticks[t * ROLE_COUNT + r]
+			var fs_pct: float = (float(fs_count) / float(off_total) * 100.0) if off_total > 0 else -1.0
+			print("[SpacingSummary] team=%d role=%s FindSpace_rate=%.1f%% (%d/%d off-ball decision ticks)" % [
+				t, _role_label(r), fs_pct, fs_count, off_total])
+
+		var action_line: String = "[SpacingSummary] team=%d action_distribution:" % t
+		var team_action_total: int = 0
+		for a: int in range(ACTION_COUNT):
+			team_action_total += _action_tally[t * ACTION_COUNT + a]
+		for a: int in range(ACTION_COUNT):
+			var count: int = _action_tally[t * ACTION_COUNT + a]
+			if count == 0:
+				continue
+			var pct: float = (float(count) / float(team_action_total) * 100.0) if team_action_total > 0 else 0.0
+			action_line += " %s=%.1f%%" % [_action_tally_label(a), pct]
+		print(action_line)
 
 
 func _arm_press_trigger(trigger: PressTrigger, carrier: HeavyPlayerController, position: Vector2, hold_seconds: float) -> void:

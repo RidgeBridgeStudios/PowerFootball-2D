@@ -886,6 +886,68 @@ discovered_rules:
       behavior other systems already rely on.
     promotion_target: .claude/rules/ai-architect.md
     status: pending
+
+  - id: crowding-space-creation-diagnostics
+    discovered_date: 2026-08-31
+    discovered_by: Claude
+    category: ai
+    target_files:
+      - autoloads/MatchWorldModel.gd
+      - entities/player/PlayerBrain.gd
+    invariant: >
+      Do not add a second, competing crowding/spacing instrumentation system.
+      MatchWorldModel.debug_spacing_diagnostics (@export, so it is also
+      toggleable live via the Debugger's Remote scene tree while a match is
+      running — currently defaulted to true at the user's request for an
+      active diagnostic pass; flip back to false once the crowding
+      investigation is done, since the periodic [SpacingReport] print is
+      noise for anyone not actively reading it) gates a full opt-in
+      reporting pipeline: a periodic
+      [SpacingReport] print every SPACING_REPORT_INTERVAL_SECONDS (15s) with
+      the current window's numbers, and one [SpacingSummary] print at
+      GameManager.MatchPhase.FULL_TIME with match-long averages. Metrics
+      covered: per-team avg-nearest-teammate distance (the core "crowding
+      index"), team bounding-box width/length as a % of pitch_size ("is the
+      pitch actually being used"), avg count of same-team players within
+      SPACING_CLUMP_RADIUS (100px) of the ball, the single worst
+      nearest-teammate distance of the match plus which two named players,
+      possessor-had-open-teammate rate (direct measure of "was there ever
+      anyone to pass to"), FindSpace-chosen rate per role (ATT/MID/DEF), and
+      the full action-choice distribution per team
+      (MaintainFormation/Pass/ChaseBall/FindSpace/AttemptDribble/
+      AttemptShoot/PanicClear as % of decisions). The spatial half
+      (_accumulate_spacing_sample()) is self-contained in MatchWorldModel,
+      sampled every SPACING_SAMPLE_STRIDE physics frames (not every frame —
+      O(TOTAL_PLAYERS^2) per sample) purely from the existing
+      p_pos_x/p_pos_y/player_teams cache, zero scene-tree polling. The
+      decision half needs one line in PlayerBrain.evaluate_tactical_action():
+      a MatchWorldModel.instance.record_decision(player.team, role,
+      best_action, ctx.is_possessor, ctx.open_teammate_exists) call placed
+      after the PanicClear fallback floor and before the existing
+      debug_log_action_scores print block. Both halves are single-bool-gated
+      no-ops when debug_spacing_diagnostics is false, so normal play (and
+      every existing debug flag) is unaffected. Extend the existing
+      DecisionAction enum / _action_tally_index() match statement rather than
+      inventing a parallel tally if a new named action is ever added to
+      evaluate_tactical_action().
+    rationale: >
+      User asked to dig into the "crowding, sloppy play, no space creation,
+      players run around like ants" report plus a follow-up ("a player near
+      the kickoff circle jogs slowly toward the middle doing nothing else")
+      and explicitly asked for debugging tools they could read from the
+      Godot Output panel after letting a CPU-vs-CPU match run themselves,
+      rather than more blind tuning changes — this sandbox has no Godot
+      binary (godot-47-core.md) so tuning constants here cannot be verified
+      by actually playing a match. Built on the existing StallWatchdog/
+      PossessionWatchdog/[ActionScorer]/[Steer] diagnostic-print conventions
+      already in these two files rather than introducing a new pattern.
+    resolution: >
+      Not a bug fix — a capability addition. See target_files above. Findings
+      from actually running it are expected to land as a follow-up error_log
+      or discovered_rules entry once the user reports back what the reports
+      show.
+    promotion_target: .claude/rules/ai-architect.md
+    status: pending
 ```
 
 ## Session State
@@ -1069,6 +1131,77 @@ session_state:
       - manager-risk-profile-is-derived-not-authored
       - match-stage-boundaries-are-fractions-not-literal-seconds
       - touchline-bubble-is-one-shared-instance-home-perspective-only
+
+  - date: 2026-08-31
+    agent: Claude
+    task: >
+      Investigating a SECOND, distinct throw-in freeze reported live after
+      the ERR-20260831-03 fix (ThrowInState CPU branch no longer gated on
+      current_action == &"Pass") was already in place. This run's evidence
+      does not match ERR-20260831-03's shape: [SpacingReport] numbers were
+      still changing between the two windows shown (not bit-for-bit frozen
+      like the first report), so most players were still moving — only the
+      ball was stuck, at a throw-in-formula-exact position (y=474.0 = pitch
+      half.y(450) + THROW_IN_INSET(24), matching _start_throw_in()), with
+      the closest player 213px away (a correctly-placed taker should read
+      ~0px). Traced _release_throw()'s two early-return branches (no ball
+      found / ball already possessed by someone else) and confirmed by
+      re-reading ThrowInState.process()'s caller that both branches still
+      transition the FSM to MOVE/IDLE unconditionally right after calling
+      _release_throw(), which still fires _on_taker_state_changed() and
+      still calls GameManager.restart_play() — so that specific theory
+      (silent no-op leaving the phase stuck) does not hold up on a second
+      read; did not change that code. Separately noticed, while reading
+      _activate_set_piece()/_on_taker_state_changed(), that _current_taker
+      is a single mutable SetPieceCoordinator field with no per-restart
+      snapshotting: the state_changed signal connected in
+      _activate_set_piece() closes over _current_taker by reference, so if
+      a second handle_out_of_bounds() ever fires (and reassigns
+      _current_taker to a new taker) before the FIRST taker's own
+      THROW_IN-\>MOVE/IDLE transition fires, _on_taker_state_changed()
+      would try to disconnect the signal from the WRONG (new) taker when
+      the original one's transition eventually arrives — a real fragility,
+      but no confirmed evidence yet that reentrancy is actually happening
+      this session, so this was recorded rather than "fixed" preemptively.
+      Chose instrumentation over a third speculative patch per the
+      Error Compounding Rule in course_implementation_specification.md
+      Section 15 ("if a bug cannot be resolved in 2 iterations, stop").
+    files_modified:
+      - pitch/SetPieceCoordinator.gd
+      - entities/player/states/ThrowInState.gd
+    gdcheck_status: "pass, 0 errors, 0 warnings (76 scripts)"
+    invariants_consulted:
+      - AGENTS_ERRATA.md (ERR-20260831-02, ERR-20260831-03, crowding-space-creation-diagnostics)
+      - .claude/rules/godot-47-core.md
+      - .claude/rules/ai-architect.md
+    next_steps: >
+      Added an always-on (no debug flag needed) [SetPiece] breadcrumb trail
+      covering the full restart lifecycle: handle_out_of_bounds() entry
+      (also logs _awaiting_confirmation/_current_taker at call time, so a
+      re-entrant second trigger while the first restart is still pending is
+      immediately visible), _assign_taker() (taker name + placed position +
+      distance from the intended spot, or an explicit "FOUND NO
+      CANDIDATES" line), _await_taker_confirmation() (delay chosen),
+      _activate_set_piece() (taker position vs set_piece_position
+      immediately before the ball is placed — this is the key line: if the
+      taker is already far from the spot HERE, the drift happened during
+      the SET_PIECE_FREEZE await-confirmation window, which should be
+      physically impossible since that state applies zero movement intent
+      every frame; if the taker is still ~0px away here but drifts before
+      the next stall report, the drift happened inside ThrowInState
+      itself, e.g. via PlayerBrain writing a large movement_intent for the
+      is_throw_in_taker FindSpace branch that ThrowInState.physics_process()
+      then applies along the touchline), ThrowInState.enter() (taker pos vs
+      ball pos at state entry), and ThrowInState._release_throw() (all
+      three outcomes: no ball found, ball already possessed by someone
+      else, or a real throw — each with taker/ball positions and the
+      resulting distance). Next session: get a fresh log from the user with
+      this instrumentation in place. Whichever [SetPiece] line is the LAST
+      one printed before the freeze pinpoints the exact failing step
+      without further guessing — do not add a fourth speculative code fix
+      before that log exists.
+    new_rules_discovered:
+      - throw-in-taker-current-taker-is-unscoped-mutable-state
 ```
 
 ## Error Log
@@ -1174,4 +1307,147 @@ error_log:
       - autoloads/MatchWorldModel.gd
       - entities/player/PlayerBrain.gd
       - pitch/SetPieceCoordinator.gd
+
+  - id: ERR-20260831-02
+    date: 2026-08-31
+    agent: Claude
+    subsystem: ai
+    symptom: >
+      User-reported: during a corner kick, the CPU taker never actually
+      takes the corner, no attacking teammate makes a run into the box, the
+      corner "goes to the other team," and the match then freezes. Also
+      reported separately in the same session: a ball carrier near the
+      centre circle jogs slowly toward the middle "doing nothing else."
+    root_cause: >
+      Three separate gaps, found by reading SetPieceCoordinator.gd end to
+      end (this sandbox has no Godot binary — see godot-47-core.md — so this
+      is a code-trace conclusion, not a captured log of this exact freeze).
+      (1) _activate_set_piece() only overwrites a CPU taker's stale
+      facing_direction when find_pass_target_for_set_piece() returns a real
+      teammate (the ERR-20260831-01 fix). That function can still legally
+      return null (no candidate clears MIN_PASS_SCORE, or every lane is
+      blocked) — plausible at a corner, where most attacking teammates are
+      still wherever they stood when the corner was won, not yet inside the
+      box. When it does, facing_direction is left at whatever stale value it
+      held from open play, which can point anywhere including out of
+      bounds. ChargeKickState's CPU path always fires an immediate tap
+      (wants() is always false for a non-user-controlled player, so
+      _held_time is one physics frame), so a stale out-of-bounds facing taps
+      the corner straight back out — explaining "does not take the corner"
+      and "goes to the other team" (the re-triggered out-of-bounds event can
+      hand the restart to the opposite side). (2) _await_taker_confirmation()
+      silently `return`s when _assign_taker() leaves _current_taker null
+      (empty _taker_candidates). _freeze_all_players() has already pushed
+      all 22 players into SetPieceFreezeState, which only ever hands back to
+      Idle once GameManager.is_in_play() is true — never set, since nothing
+      ever calls GameManager.restart_play() on this path. This is the same
+      class of total, un-recovering freeze as loose-ball-anchor-clamp-
+      deadlock above, just triggered from set-piece taker assignment instead
+      of the decision layer. (3) No code repositions the attacking side's
+      non-taker outfielders during a corner — _position_defending_players()
+      only handles the defending team, so attackers just stay frozen
+      wherever they stood, which is why "teammates go up in the box" never
+      happens; this is a missing feature, not a crash. The centre-circle
+      jog report is very likely the general "crowded, no space" symptom
+      (also raised in this session, not yet independently root-caused)
+      manifesting most visibly right after a kickoff, when both sides are
+      still clustered near the halfway line from _enforce_kickoff_halves()
+      — _score_pass returns 0 with no open teammate, leaving a low-but-
+      nonzero AttemptDribble as the only real option — rather than a
+      distinct centre-circle-specific bug; no dedicated circle-radius logic
+      exists outside the kickoff freeze itself.
+    resolution: >
+      (1) _activate_set_piece(): when find_pass_target_for_set_piece()
+      returns null for a CPU taker, aim facing_direction at
+      _boundary.get_centre_spot() instead of leaving it stale — always a
+      safe, in-bounds direction from any restart spot. (2)
+      _await_taker_confirmation(): if _current_taker is null, push_warning()
+      and call GameManager.restart_play() directly instead of returning
+      silently, so the match resumes (ball sits loose at the restart spot,
+      picked up by normal ChaseBall logic) instead of freezing forever. (3)
+      Added _position_attacking_players_for_corner(), called from
+      _setup_taking_side() only for CORNER_KICK, mirroring the existing
+      _position_defending_players()/_build_defensive_wall() teleport-based
+      positioning pattern: sends up to 4 non-taker, non-GK attackers (sorted
+      nearest-to-goal first) to near-post/six-yard-box/far-post/edge-of-box
+      spots relative to the defending goal, clamped to the pitch rect. They
+      stay parked there via SetPieceFreezeState until restart_play() fires,
+      same as the defensive wall. Did not touch the general crowding/space-
+      creation question (sep_radius=55px in PlayerBrain._separation_force()
+      looks small relative to pitch scale, and _score_pass returning a hard
+      0.0 whenever open_teammate_exists is false looks like the main lever)
+      — flagged for the user as needing live playtesting to tune safely,
+      since this sandbox cannot run a match to verify a tuning change
+      actually reduces clumping rather than just moving the symptom.
+    affected_files:
+      - pitch/SetPieceCoordinator.gd
+
+  - id: ERR-20260831-03
+    date: 2026-08-31
+    agent: Claude
+    subsystem: ai
+    symptom: >
+      User-reported, and this time empirically confirmed via a pasted Godot
+      Output log rather than a code-trace guess: a CPU-vs-CPU match froze
+      permanently during a throw-in at 1:23. The freshly-added
+      [SpacingReport] diagnostics (crowding-space-creation-diagnostics above)
+      caught it directly — dozens of consecutive [SpacingReport] lines with
+      bit-for-bit identical numbers (avg_nearest_teammate, width, length, all
+      to the same decimal) proved every player's position had genuinely
+      stopped changing, not just that the AI was picking a bad but
+      technically-moving action. Immediately preceding the freeze:
+      [StallWatchdog] logged the ball motionless at (-206.7, -474.0) — 24px
+      outside the pitch rect on the touchline, exactly THROW_IN_INSET from
+      SetPieceCoordinator._start_throw_in() — with the closest player 77.2px
+      away, i.e. not the taker (a correctly-placed taker would read ~0px).
+    root_cause: >
+      ThrowInState.process()'s CPU branch only ever charged/released the
+      throw while PlayerBrain.evaluate_tactical_action() returned &"Pass"
+      for that player this tick (`brain.get("current_action") == &"Pass"`).
+      But PlayerBrain has a dedicated is_throw_in_taker branch (~line 965)
+      that returns &"FindSpace" instead whenever ctx.open_teammate_exists is
+      false — normal and frequent, not an edge case, since a throw-in taker
+      stands outside the pitch with every other player still frozen in
+      SET_PIECE_FREEZE wherever they stood when the ball went out, so a
+      pass-worthy candidate is far from guaranteed. When that happened, the
+      CPU branch's else clause reset `_held = false; charge_ratio = 0.0`
+      every single tick and returned &"" (stay in ThrowInState) — forever,
+      since nothing else ever forces current_action back to &"Pass" for a
+      teammate who never becomes open. GameManager.restart_play() is only
+      ever called from inside ThrowInState._release_throw(), and
+      SetPieceFreezeState (every OTHER player, both teams) only ever hands
+      back to Idle once GameManager.is_in_play() is true — so the entire
+      match locked up permanently. Confirms the SAME failure shape as
+      corner-kick-empty-taker-permanent-freeze (ERR-20260831-02) and the
+      whole loose-ball-anchor-clamp-deadlock chain: a set-piece/decision path
+      that assumes an eventual "real" action will become available, with no
+      time-bound fallback if it never does. Tellingly, ThrowInState already
+      declared `_cpu_timer` and a `CPU_THROW_DELAY` constant with a doc
+      comment describing exactly this auto-throw-after-a-delay fallback —
+      neither was ever actually wired into the CPU branch, i.e. this reads
+      as an incomplete refactor (the PlayerBrain-pass-target-aware throw
+      logic was added on top of, but never merged with, the intended
+      timer-based guarantee) rather than a novel design gap.
+    resolution: >
+      Rewrote ThrowInState.process()'s CPU branch to charge and release
+      unconditionally on the existing timing (advances _cpu_timer and
+      _held_time every tick regardless of current_action; releases once
+      _cpu_timer >= CPU_THROW_DELAY (0.1s) AND charge_ratio >= 0.5, i.e.
+      _held_time >= 0.3s — identical timing to the old current_action ==
+      &"Pass" success path, so a real open teammate is still found and
+      thrown to just as before). _release_throw() itself was already safe to
+      call with no pass target — it reads PlayerBrain._cached_pass_target
+      directly (set as a side effect of _build_context() regardless of which
+      action won, so a real target found earlier in the tick is still used
+      even though current_action resolved to &"FindSpace") and falls back to
+      player.facing_direction only if that is also null. Did not touch
+      _build_context()'s _find_best_pass_target(_ctx.pressure) call (default
+      allow_backward_pass=false) even though it is a plausible contributor to
+      why open_teammate_exists reads false at some throw-ins — unlike
+      kickoff, throw-in receivers are not structurally confined behind the
+      taker by any IFAB-derived rule, so this is a real tactical case some of
+      the time rather than a guaranteed-every-time starve, and widening it
+      is a pass-quality tuning question, not required to prevent the freeze.
+    affected_files:
+      - entities/player/states/ThrowInState.gd
 ```

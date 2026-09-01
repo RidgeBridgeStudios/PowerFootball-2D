@@ -1021,6 +1021,11 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D] = []) -> StringNam
 		if max_offensive <= 0.05:
 			best_action = &"PanicClear"
 
+	# Opt-in crowding/space-creation diagnostics — see MatchWorldModel.
+	# debug_spacing_diagnostics. No-op (single bool check) when disabled.
+	if player != null and MatchWorldModel.instance != null and MatchWorldModel.instance.debug_spacing_diagnostics:
+		MatchWorldModel.instance.record_decision(player.team, role, best_action, ctx.is_possessor, ctx.open_teammate_exists)
+
 	if debug_log_action_scores or _trace_next_decision:
 		# Steering-layer fields (velocity/movement_intent/foot-range) alongside
 		# the decision-layer scores, so a single line answers both "what did
