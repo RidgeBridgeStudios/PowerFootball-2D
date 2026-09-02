@@ -1961,3 +1961,88 @@ error_log:
       - entities/player/PlayerBrain.gd
       - entities/player/states/ThrowInState.gd
 ```
+
+## Session State: 2026-09-02 (Manager Career Mode, Phase 4)
+
+TASK: Build Manager Career mode — career data layer, day loop, save/load, and
+the FM-style UI shell, wired into the existing match engine.
+
+FILES MODIFIED: 18 new resources in `shared/career/`, 2 new autoloads
+(`CareerManager`, `WorldEventLog`), 16 files in `ui/manager_mode/`, plus
+`PlayerFactory`, `PitchScene`, `TrustSystem`, `RefereeLoader`, `DataLoader`,
+`GameEvents`, `MainMenu`, `project.godot`, `tools/gdcheck.py`,
+`tools/verify_gate.py`, and a new `tools/lint_xref.py`.
+
+GDCHECK: pass (139 scripts, 0 errors). verify_gate --full: 16/16 pass.
+
+INVARIANTS CONSULTED: `godot-47-core.md`, `ai-architect.md`,
+`soccer-physics.md`, `gdscript-antipatterns.md`, `context-hygiene.md`,
+`docs/CORE_INVARIANTS.md`.
+
+NEW RULES: promoted to `.claude/rules/career-mode.md`.
+
+### Three latent runtime crashes found by static cross-referencing
+
+None of these were caught by gdcheck, and two were shipped code:
+
+1. `PitchScene.gd` read `GameManager.score_team_a` / `score_team_b` and
+   `MatchStatsTracker.fouls_a` / `yellow_cards_a` / `red_cards_a`. None exist —
+   both are `Array[int]` (`score[TEAM_A]`, `fouls[TEAM_A]`). The whole
+   play-a-match career-progression path was dead on the first goal.
+
+2. `RefereeLoader.get_or_assign_referee()` was called by `KickOffMenu`,
+   `PreGameScreen` and the old `ManagerModeHub` but was never written.
+   `RefereeLoader` only had `get_referee(index)` and `get_random_referee()`.
+   Now implemented and deterministic per matchup, so every screen names the
+   same official for the same fixture.
+
+3. `TrustSystem.trust_multiplier()` clamped its stored-space input (0.5-1.5,
+   neutral 1.0) with `clampf(t, 0.0, 1.0)`, mapping neutral onto the MAXIMUM
+   1.15x and flattening 1.0-1.5 onto that ceiling. Trust losses bit; trust
+   gains did nothing. The comment at `PlayerBrain.gd` claiming neutral was "a
+   1.0x no-op" only became true after the fix.
+
+**Rule:** an autoload or class member reference is invisible to gdcheck. Run
+`tools/lint_xref.py` (now in `verify_gate`) before believing a cross-file call
+exists.
+
+### Calibration is not optional, and the first guess was wrong twice
+
+Two models were plainly wrong on their first numbers and only surfaced by
+plotting them:
+
+- **Player decline** multiplied a per-year rate by years-past-peak, compounding
+  into an 11% single-season pace loss by 33 and driving every player to the
+  `top_speed` floor by 34 — a cliff, not a curve. Reworked to a small base with
+  a gentle ramp: ~23% loss across ages 30-38, and traits now spread that from
+  156 (fragile, unprofessional) to 197 (IronMan professional) on a 220 base.
+
+- **Morale -> MoodSystem seeding** used a symmetric slope that dropped a merely
+  "Restless" player (morale 0.45) into SLUMP — a heavy penalty tier. Made
+  asymmetric (0.56 down / 0.70 up) so SLUMP needs genuine unhappiness. Verified
+  anchors: authored default (0.70/6.5) lands exactly on 0.500 NORMAL.
+
+**Rule:** port any new curve to Python and print it across its real input range
+before committing it. Both bugs were invisible in code review and obvious in
+one table of numbers.
+
+### The season calendar cannot be a fixed weekly rhythm
+
+A hard 7-day matchday spacing gave the shipped 8-club league a 14-matchday
+season ending in early November. Spacing is now derived from the round count
+and the target last-matchday date, so 8 clubs space to 21 days and 20 clubs
+compress to 7. The rollover guard was likewise a bare `today.month < 6`, which
+fired instantly for a November finish and blocked an April one; it is now an
+explicit season-end date.
+
+### Non-ASCII identifiers parse here but not in Godot
+
+A Cyrillic local variable slipped into `LeaguePanel.gd` and passed gdcheck.
+Godot requires ASCII identifiers. Added a repo-wide scan to catch it; worth
+keeping in mind when generating code with mixed-script content nearby.
+
+NEXT: nothing in the career layer has been EXECUTED — this container has no
+Godot binary. The next session with an engine should boot Manager Mode, start a
+career, and click through all 13 sections before trusting any of it. Highest
+risk is scene/layout rendering and signal dispatch, neither of which any static
+tool here can check.

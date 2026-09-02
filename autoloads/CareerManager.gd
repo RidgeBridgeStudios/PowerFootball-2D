@@ -40,8 +40,17 @@ const SEASON_START_MONTH: int = 7
 const SEASON_START_DAY: int = 1
 const FIRST_MATCHDAY_MONTH: int = 8
 const FIRST_MATCHDAY_DAY: int = 8
-## League fixtures land one week apart.
-const MATCHDAY_SPACING_DAYS: int = 7
+## Target date for the FINAL league matchday. Fixture spacing is derived from
+## this rather than fixed, so a season fills a real football calendar at any
+## league size. A hard 7-day spacing gave the shipped 8-club league a season
+## that ended in early November.
+const LAST_MATCHDAY_MONTH: int = 5
+const LAST_MATCHDAY_DAY: int = 17
+## Floor, so a very large league still cannot schedule two rounds in two days.
+const MIN_MATCHDAY_SPACING_DAYS: int = 3
+## The season rolls over on or after this date, once the league is complete.
+const SEASON_END_MONTH: int = 6
+const SEASON_END_DAY: int = 1
 ## Summer window: 1 July - 31 August. Winter window: 1 - 31 January.
 const SUMMER_WINDOW_MONTHS: Array[int] = [7, 8]
 const WINTER_WINDOW_MONTH: int = 1
@@ -300,7 +309,7 @@ func _build_competitions() -> void:
 	var first_matchday: CareerDate = CareerDate.make(
 		career.today.year, FIRST_MATCHDAY_MONTH, FIRST_MATCHDAY_DAY
 	)
-	league.generate_league_fixtures(first_matchday, MATCHDAY_SPACING_DAYS)
+	league.generate_league_fixtures(first_matchday, _matchday_spacing(indices.size()))
 	career.competitions.append(league)
 
 	# Domestic cup: a straight knockout among everyone, drawn round by round.
@@ -309,6 +318,23 @@ func _build_competitions() -> void:
 	career.competitions.append(cup)
 
 	_tag_user_fixtures()
+
+
+## Days between league matchdays, chosen so the last round lands near
+## LAST_MATCHDAY_* whatever the league size: 8 clubs (14 rounds) space out to
+## ~21 days, 20 clubs (38 rounds) compress to the usual weekly rhythm.
+func _matchday_spacing(team_count: int) -> int:
+	var rounds: int = maxi((team_count - 1) * 2, 1)
+	if rounds <= 1:
+		return MIN_MATCHDAY_SPACING_DAYS
+	var first: CareerDate = CareerDate.make(
+		career.today.year, FIRST_MATCHDAY_MONTH, FIRST_MATCHDAY_DAY
+	)
+	var last: CareerDate = CareerDate.make(
+		career.today.year + 1, LAST_MATCHDAY_MONTH, LAST_MATCHDAY_DAY
+	)
+	var window: int = first.days_until(last)
+	return maxi(window / (rounds - 1), MIN_MATCHDAY_SPACING_DAYS)
 
 
 func _tag_user_fixtures() -> void:
@@ -329,6 +355,7 @@ func advance_day() -> HaltReason:
 	var today: CareerDate = career.today
 
 	_update_transfer_window()
+	_update_season_phase()
 	_process_recovery_and_training()
 	_process_scouting()
 	_process_transfer_negotiations()
@@ -397,6 +424,25 @@ func _halt(reason: HaltReason, message: String) -> HaltReason:
 
 
 ## --- Daily subsystems ----------------------------------------------------------------
+
+## Pre-season runs from the July restart to the first competitive fixture;
+## the off-season is the gap between the last one and the rollover. Without
+## this the phase set at _start_new_season() would read "Pre-Season" all year.
+func _update_season_phase() -> void:
+	var league: CompetitionData = career.league_competition()
+	if league == null:
+		return
+	if league.is_complete():
+		career.phase = CareerSaveData.Phase.OFF_SEASON
+		return
+	var played_any: bool = false
+	for f: FixtureData in league.fixtures:
+		if f.played:
+			played_any = true
+			break
+	career.phase = CareerSaveData.Phase.REGULAR_SEASON if played_any \
+		else CareerSaveData.Phase.PRE_SEASON
+
 
 func _update_transfer_window() -> void:
 	var month: int = career.today.month
@@ -1174,12 +1220,24 @@ func _check_season_rollover() -> bool:
 	var league: CompetitionData = career.league_competition()
 	if league == null or not league.is_complete():
 		return false
-	# Roll over only once we are past the last fixture, not the instant it is
-	# played, so the final table can be read on the day.
-	if career.today.month < 6:
+	# Roll over on a real season-end DATE, not a bare month comparison. The
+	# earlier `month < 6` guard was incoherent across league sizes: an 8-club
+	# league finishing in November read month 11 and rolled over on the spot,
+	# while a 20-club league finishing in April read month 4 and blocked. An
+	# explicit date is the same rule for every league.
+	var season_end: CareerDate = CareerDate.make(
+		_season_end_year(), SEASON_END_MONTH, SEASON_END_DAY
+	)
+	if career.today.is_before(season_end):
 		return false
 	_run_season_end()
 	return true
+
+
+## The calendar year the CURRENT season ends in. A season starting in July of
+## year N ends in June of N+1.
+func _season_end_year() -> int:
+	return career.season_start_year + 1
 
 
 func _run_season_end() -> void:

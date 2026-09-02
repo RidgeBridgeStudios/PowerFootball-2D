@@ -26,7 +26,7 @@ Make players feel like individuals with relationships and hidden depth.
 - [ ] Trait effects wired into existing systems
 - [ ] overall_rating and reputation derived fields
 - [ ] Star-marking utility scorer
-- [ ] Relationship trust graph
+- [x] Relationship trust graph (`RelationshipData`, seeded into TrustSystem at kickoff)
 - [x] Trust multiplier on pass utility
 - [x] Trust decay/gain events
 
@@ -34,23 +34,31 @@ Make players feel like individuals with relationships and hidden depth.
 
 Bridge between match events and player life between matches.
 
-- [ ] WorldEvent struct and WorldEventLog autoload
+- [x] WorldEvent struct and WorldEventLog autoload
 - [ ] Substitution reaction events
 - [ ] Training incidents and dressing-room confrontations
 - [ ] Street football / nightlife / media events
-- [ ] PressOffice consumption of WorldEvent log
+- [x] PressOffice consumption of WorldEvent log (`WorldEventLog.generate_press_reaction()`)
 - [ ] Manager response system
 
 ## PHASE 4 — Career Mode
 
 Multi-match progression with persistence, transfers, and season structure.
 
-- [ ] Career calendar and scheduling
-- [ ] League table persistence
-- [ ] Transfer window system
-- [ ] Season progression and contracts
-- [ ] Staff system
-- [ ] Manager Career mode unlock
+- [x] Career calendar and scheduling (`CareerDate`, `CareerManager.advance_day()`, adaptive matchday spacing)
+- [x] League table persistence (`CompetitionData`, `LeagueTableRow`, saved per slot)
+- [x] Transfer window system (`TransferMarket`, `TransferOffer`, summer/winter locks)
+- [x] Season progression and contracts (`ContractData`, ageing, rollover, youth intake)
+- [x] Staff system (staff-driven coaching, physio, scouting quality)
+- [x] Manager Career mode unlock (`ui/manager_mode/`, reachable from the main menu)
+- [x] Save/load with slots and versioned migration (`CareerSerializer`, 3 slots)
+- [x] Board expectations, confidence, requests and sacking (`BoardState`)
+- [x] Inbox, press conferences and player interactions (`InboxEngine`)
+- [x] Scouting network with uncertainty-based reports (`ScoutingNetwork`, `ScoutReport`)
+- [x] Finances: budgets, ledger, amortisation, gate receipts (`ClubFinances`)
+- [x] Training schedules, individual focus, injuries (`TrainingSchedule`)
+- [ ] Continental competition beyond the simplified knockout placeholder
+- [ ] Promotion/relegation across multiple divisions (needs a multi-tier league)
 
 ## PHASE 5 — Polish
 
