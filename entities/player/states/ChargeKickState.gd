@@ -106,7 +106,8 @@ func _release_kick(player: HeavyPlayerController) -> void:
 	var aim: Vector2 = _get_resolved_aim(player)
 
 	var is_tap: bool = _held_time < TAP_THRESHOLD
-	# CPU set-piece tuning: Goal kicks and corner kicks are delivered as lofted kicks
+	var cpu_brain: PlayerBrain = player.brain as PlayerBrain if not player.is_user_controlled else null
+	# CPU set-piece tuning: Goal kicks, corner kicks, and free kicks
 	if not player.is_user_controlled and GameManager.is_set_piece_active():
 		if GameManager.current_phase == GameManager.MatchPhase.GOAL_KICK:
 			is_tap = false
@@ -116,6 +117,11 @@ func _release_kick(player: HeavyPlayerController) -> void:
 			is_tap = false
 			charge_ratio = 0.70
 			_is_lob = true
+		elif GameManager.current_phase == GameManager.MatchPhase.FREE_KICK:
+			if cpu_brain != null and cpu_brain.has_free_kick_intent():
+				is_tap = cpu_brain.free_kick_is_tap
+				charge_ratio = cpu_brain.free_kick_charge_ratio
+				_is_lob = cpu_brain.free_kick_is_lob
 
 	var speed: float = PASS_SPEED if is_tap else lerpf(PASS_SPEED, SHOT_SPEED, charge_ratio)
 	var height: float = 0.0
@@ -144,17 +150,35 @@ func _release_kick(player: HeavyPlayerController) -> void:
 		GameEvents.powerful_shot_landed.emit(player, speed, charge_ratio)
 
 	var action_label: String
-	if is_tap:
+	if not player.is_user_controlled and GameManager.is_set_piece_active():
+		if GameManager.current_phase == GameManager.MatchPhase.FREE_KICK and cpu_brain != null and cpu_brain.has_free_kick_intent():
+			action_label = cpu_brain.free_kick_action_label
+		elif GameManager.current_phase == GameManager.MatchPhase.GOAL_KICK:
+			action_label = "GOAL KICK"
+		elif GameManager.current_phase == GameManager.MatchPhase.CORNER_KICK:
+			action_label = "CROSS"
+		elif is_tap:
+			action_label = "PASS"
+		elif _is_lob:
+			action_label = "LOB SHOT"
+		else:
+			action_label = "SHOT"
+	elif is_tap:
 		action_label = "PASS"
 	elif _is_lob:
 		action_label = "LOB SHOT"
-	else:
-		action_label = "SHOT"
-	player.show_action_text(action_label)
+	var label_color: Color = Color.WHITE
+	if action_label == "SHOT" or action_label == "LOB SHOT":
+		label_color = Color(1.0, 0.92, 0.35)
+	elif action_label == "CROSS":
+		label_color = Color(0.40, 0.85, 1.0)
+	elif action_label == "PASS":
+		label_color = Color(0.85, 0.95, 1.0)
+	player.show_action_text(action_label, label_color)
 
 	GameEvents.ball_struck.emit(player, speed, charge_ratio, not is_tap)
 
-	if is_tap:
+	if is_tap or action_label == "PASS":
 		MatchStatsTracker.record_pass_attempt(player, MatchStatsTracker.is_pass_toward_teammate(player, aim))
 
 	if player.is_user_controlled:

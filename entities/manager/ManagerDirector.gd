@@ -143,13 +143,36 @@ func bind(data: ManagerData, team: int, players_node: Node2D, boundary: PitchBou
 		_atk_formation = data.attacking_formation
 		_def_formation = data.defensive_formation
 
-	_active_formation = data.preferred_formation
+	var match_team: TeamData = DataLoader.get_match_team(team)
+	if match_team != null and match_team.formation_override != "":
+		_active_formation = match_team.formation_override
+	else:
+		_active_formation = data.preferred_formation
 
 	if not GameEvents.goal_scored.is_connected(_on_goal_scored):
 		GameEvents.goal_scored.connect(_on_goal_scored)
 	if not GameEvents.kickoff_confirmed.is_connected(_on_kickoff_confirmed):
 		GameEvents.kickoff_confirmed.connect(_on_kickoff_confirmed)
+	if not GameEvents.formation_changed.is_connected(_on_user_formation_changed):
+		GameEvents.formation_changed.connect(_on_user_formation_changed)
+	if not GameEvents.lineup_changed.is_connected(_on_lineup_changed):
+		GameEvents.lineup_changed.connect(_on_lineup_changed)
 
+	_apply_formation(_active_formation)
+	_apply_brain_overrides()
+
+
+func _on_user_formation_changed(team_id: int, new_formation: String) -> void:
+	if team_id != _team:
+		return
+	_active_formation = new_formation
+	_apply_formation(new_formation)
+	_apply_brain_overrides()
+
+
+func _on_lineup_changed(team_id: int) -> void:
+	if team_id != _team:
+		return
 	_apply_formation(_active_formation)
 	_apply_brain_overrides()
 
@@ -166,23 +189,38 @@ func _apply_formation(formation_name: String) -> void:
 		var p := node as HeavyPlayerController
 		if p != null and p.team == _team:
 			team_players.append(p)
-	var by_squad_index := func(a: HeavyPlayerController, b: HeavyPlayerController) -> bool:
-		return a.squad_index < b.squad_index
-	team_players.sort_custom(by_squad_index)
+
+	var match_team: TeamData = DataLoader.get_match_team(_team)
+	var ordered_players: Array[HeavyPlayerController] = []
+	if match_team != null and match_team.lineup_indices.size() == 11:
+		for target_squad_idx: int in match_team.lineup_indices:
+			for p: HeavyPlayerController in team_players:
+				if p.squad_index == target_squad_idx:
+					ordered_players.append(p)
+					break
+
+	if ordered_players.size() != team_players.size():
+		var by_squad_index := func(a: HeavyPlayerController, b: HeavyPlayerController) -> bool:
+			return a.squad_index < b.squad_index
+		team_players.sort_custom(by_squad_index)
+		ordered_players = team_players
 
 	# Collected alongside the direct writes below and published on
 	# GameEvents.formation_anchors_changed, so a brain can react to the new
 	# shape immediately instead of waiting out its decision stagger.
 	var new_anchors: Dictionary = {}
 
-	for i: int in range(team_players.size()):
-		var player: HeavyPlayerController = team_players[i]
+	for i: int in range(ordered_players.size()):
+		var player: HeavyPlayerController = ordered_players[i]
 		if player.brain == null:
 			continue
 
 		var slot_index: int = clampi(i, 0, layout.size() - 1)
 		var slot: Dictionary = layout[slot_index]
 		var role_str: String = slot["role"]
+		if match_team != null and match_team.role_overrides.has(slot_index):
+			role_str = str(match_team.role_overrides[slot_index])
+
 		var offset: Vector2 = slot["anchor_offset"]
 
 		var defends_left: bool = (_team == GameManager.TEAM_A) if not _boundary.sides_flipped else (_team != GameManager.TEAM_A)
@@ -191,7 +229,7 @@ func _apply_formation(formation_name: String) -> void:
 		player.brain.role = _ROLE_ENUM_MAP.get(role_str, PlayerBrain.Role.OUTFIELD_MIDFIELDER)
 		player.brain.is_goalkeeper = (role_str == "GK")
 		if _ROLE_CONFIGS.has(role_str):
-			player.role_config = _ROLE_CONFIGS[role_str]
+			player.role_config = (_ROLE_CONFIGS[role_str] as PlayerRoleConfig).duplicate()
 		new_anchors[player.brain.player_index] = anchor
 
 		# Convenience tag for career mode UI only — does not affect physics.

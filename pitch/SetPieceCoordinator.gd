@@ -117,6 +117,10 @@ func handle_out_of_bounds(side: String, exit_pos: Vector2, last_toucher: HeavyPl
 		push_warning("[SetPiece] handle_out_of_bounds side=%s ABORTED — unbound (_boundary=%s _ball=%s _players=%s)" % [
 			side, _boundary != null, _ball != null, _players != null])
 		return
+	if _awaiting_confirmation or GameManager.is_set_piece_active() or GameManager.current_phase == GameManager.MatchPhase.KICKOFF:
+		print("[SetPiece] handle_out_of_bounds side=%s IGNORED — restart already active (awaiting_confirmation=%s phase=%d)" % [
+			side, _awaiting_confirmation, GameManager.current_phase])
+		return
 	print("[SetPiece] handle_out_of_bounds side=%s exit_pos=%s last_toucher=%s (awaiting_confirmation=%s current_taker=%s)" % [
 		side, exit_pos, last_toucher.name if last_toucher != null else "null",
 		_awaiting_confirmation, _current_taker.name if _current_taker != null else "null"])
@@ -268,6 +272,8 @@ func _setup_taking_side(phase: int, team: int, position: Vector2, designated_tak
 	_position_defending_players(phase)
 	if phase == GameManager.MatchPhase.CORNER_KICK:
 		_position_attacking_players_for_corner(team, position)
+	elif phase == GameManager.MatchPhase.FREE_KICK:
+		_position_attacking_players_for_free_kick(team, position)
 	_await_taker_confirmation()
 
 
@@ -474,6 +480,72 @@ func _position_attacking_players_for_corner(attacking_team: int, corner_spot: Ve
 		attackers[i].velocity = Vector2.ZERO
 
 
+## Sends the attacking side's non-taker outfield players into realistic
+## attacking or distribution positions for a free kick. If in the attacking
+## third or crossing range, 4-5 attackers flood dangerous box zones (penalty spot,
+## near/far post, 6-yard box, edge of box) to contest headers/volleys. If deep in
+## defensive territory, attackers push upfield to offer long-ball outlets.
+func _position_attacking_players_for_free_kick(attacking_team: int, fk_spot: Vector2) -> void:
+	if _boundary == null or _players == null:
+		return
+
+	var defending_team: int = 1 - attacking_team
+	var goal_centre: Vector2 = _boundary.get_goal_centre(defending_team)
+	var into_pitch: float = 1.0 if defending_team == 0 else -1.0
+	var dist_to_goal: float = fk_spot.distance_to(goal_centre)
+	var fk_side: float = signf(fk_spot.y - _boundary.get_centre_spot().y)
+	if is_zero_approx(fk_side):
+		fk_side = 1.0
+	var pitch_rect: Rect2 = _boundary.get_pitch_rect().grow(-20.0)
+
+	var attackers: Array[HeavyPlayerController] = []
+	for node: Node in _players.get_children():
+		var p := node as HeavyPlayerController
+		if p == null or p.team != attacking_team or p == _current_taker:
+			continue
+		var brain := p.get_node_or_null("PlayerBrain") as PlayerBrain
+		if brain != null and brain.is_goalkeeper:
+			continue
+		attackers.append(p)
+
+	var chosen_targets: Array[Vector2] = []
+	if dist_to_goal <= 700.0:
+		# Attacking third / crossing range: flood the box
+		chosen_targets = [
+			goal_centre + Vector2(into_pitch * 160.0, 0.0),                  # central / penalty spot
+			goal_centre + Vector2(into_pitch * 80.0, fk_side * -60.0),       # near post / 6-yard box
+			goal_centre + Vector2(into_pitch * 110.0, fk_side * 80.0),       # far post
+			goal_centre + Vector2(into_pitch * 250.0, fk_side * 30.0),       # edge of box cutback/rebound
+			goal_centre + Vector2(into_pitch * 130.0, fk_side * -20.0),      # secondary runner
+		]
+
+		attackers.sort_custom(func(a: HeavyPlayerController, b: HeavyPlayerController) -> bool:
+			return a.global_position.distance_squared_to(goal_centre) < b.global_position.distance_squared_to(goal_centre)
+		)
+	else:
+		# Defensive half / deep restart: push forward lines upfield for long balls
+		var centre_spot: Vector2 = _boundary.get_centre_spot()
+		var attack_dir: float = -into_pitch
+		chosen_targets = [
+			centre_spot + Vector2(attack_dir * 220.0, 0.0),          # striker central
+			centre_spot + Vector2(attack_dir * 180.0, -180.0),       # left winger
+			centre_spot + Vector2(attack_dir * 180.0, 180.0),        # right winger
+			centre_spot + Vector2(attack_dir * 90.0, 0.0),           # attacking midfielder
+		]
+
+		attackers.sort_custom(func(a: HeavyPlayerController, b: HeavyPlayerController) -> bool:
+			return a.global_position.x * attack_dir > b.global_position.x * attack_dir
+		)
+
+	var count: int = mini(attackers.size(), chosen_targets.size())
+	for i: int in range(count):
+		var target: Vector2 = chosen_targets[i]
+		target.x = clampf(target.x, pitch_rect.position.x, pitch_rect.end.x)
+		target.y = clampf(target.y, pitch_rect.position.y, pitch_rect.end.y)
+		attackers[i].global_position = target
+		attackers[i].velocity = Vector2.ZERO
+
+
 ## KICKOFF: constrains every outfield player to their own half of the pitch.
 ## Handles half-time end swapping dynamically by deriving half from goal centre X.
 ## The taker is left on the centre spot, and the defending side honours the standard
@@ -563,11 +635,16 @@ func _activate_set_piece() -> void:
 	# stale direction and can gift the ball straight to an opponent.
 	if not _current_taker.is_user_controlled:
 		var opp_goal: Vector2 = _boundary.get_goal_centre(1 - _current_taker.team) if _boundary != null else Vector2.ZERO
+		var taker_brain: PlayerBrain = _current_taker.get_node_or_null("PlayerBrain") as PlayerBrain
 		if (GameManager.current_phase == GameManager.MatchPhase.PENALTY_KICK \
 				or GameManager.current_phase == GameManager.MatchPhase.GOAL_KICK) and _boundary != null:
 			_current_taker.facing_direction = _current_taker.global_position.direction_to(opp_goal)
+		elif GameManager.current_phase == GameManager.MatchPhase.FREE_KICK:
+			if taker_brain != null:
+				_current_taker.facing_direction = taker_brain.evaluate_free_kick_intent(GameManager.set_piece_position, GameManager.free_kick_is_direct)
+			elif _boundary != null:
+				_current_taker.facing_direction = _current_taker.global_position.direction_to(opp_goal)
 		else:
-			var taker_brain: PlayerBrain = _current_taker.get_node_or_null("PlayerBrain") as PlayerBrain
 			var pass_target: HeavyPlayerController = taker_brain.find_pass_target_for_set_piece() if taker_brain != null else null
 			if pass_target != null:
 				_current_taker.facing_direction = _current_taker.global_position.direction_to(pass_target.global_position)
@@ -597,6 +674,10 @@ func _on_taker_state_changed(from_state: StringName, _to_state: StringName) -> v
 	print("[SetPiece] _on_taker_state_changed: from=%s to=%s taker=%s — calling restart_play()" % [
 		from_state, _to_state, _current_taker.name if _current_taker != null else "null(!)"])
 	_current_taker.state_factory.state_changed.disconnect(_on_taker_state_changed)
+	if _current_taker != null:
+		var brain := _current_taker.get_node_or_null("PlayerBrain") as PlayerBrain
+		if brain != null:
+			brain.clear_free_kick_intent()
 	GameEvents.set_piece_taken.emit(_current_taker)
 	GameManager.restart_play()
 

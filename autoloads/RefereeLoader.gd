@@ -65,6 +65,7 @@ func save_referees() -> void:
 			"unprofessionalism": ref.unprofessionalism,
 			"incoherence": ref.incoherence,
 			"reputation": ref.reputation,
+			"respect_rating": ref.respect_rating,
 			"matches_officiated": ref.matches_officiated,
 			"fouls_awarded": ref.fouls_awarded,
 			"penalties_awarded": ref.penalties_awarded,
@@ -129,6 +130,7 @@ func _referee_from_dict(referee_dict: Dictionary) -> RefereeData:
 	data.unprofessionalism = float(referee_dict.get("unprofessionalism", data.unprofessionalism))
 	data.incoherence = float(referee_dict.get("incoherence", data.incoherence))
 	data.reputation = float(referee_dict.get("reputation", data.reputation))
+	data.respect_rating = float(referee_dict.get("respect_rating", data.respect_rating))
 
 	data.matches_officiated = int(referee_dict.get("matches_officiated", data.matches_officiated))
 	data.fouls_awarded = int(referee_dict.get("fouls_awarded", data.fouls_awarded))
@@ -146,14 +148,14 @@ func _referee_from_dict(referee_dict: Dictionary) -> RefereeData:
 
 func _build_default_referees() -> void:
 	referee_pool = [
-		_referee("Domagoj Vrban", "Dalmatian", 34, 0.72, 0.85, 0.88, 0.04, 0.08, 0.90),
-		_referee("Ingrid Vaarmo", "Nordlandic", 42, 0.88, 0.94, 0.96, 0.01, 0.03, 0.98),
-		_referee("Kjetil Ørnseth", "Nordlandic", 12, 0.32, 0.42, 0.35, 0.18, 0.65, 0.40),
-		_referee("Tomás Errecarte", "Platense", 24, 0.65, 0.58, 0.48, 0.42, 0.35, 0.62),
-		_referee("Arjun Dharmaraj", "Subcontinental", 20, 0.50, 0.68, 0.78, 0.10, 0.30, 0.68),
-		_referee("Petru Bálint", "Carpathian", 11, 0.82, 0.35, 0.42, 0.30, 0.55, 0.45),
-		_referee("Jean-Luc Vaneck", "Gallic", 38, 0.24, 0.78, 0.82, 0.08, 0.15, 0.82),
-		_referee("Kenzo Takahashi", "Far Eastern", 29, 0.78, 0.90, 0.86, 0.02, 0.06, 0.85)
+		_referee("Domagoj Vrban", "Dalmatian", 34, 0.72, 0.85, 0.88, 0.04, 0.08, 0.90, 0.92),
+		_referee("Ingrid Vaarmo", "Nordlandic", 42, 0.88, 0.94, 0.96, 0.01, 0.03, 0.98, 0.96),
+		_referee("Kjetil Ørnseth", "Nordlandic", 12, 0.32, 0.42, 0.35, 0.18, 0.65, 0.40, 0.38),
+		_referee("Tomás Errecarte", "Platense", 24, 0.65, 0.58, 0.48, 0.42, 0.35, 0.62, 0.55),
+		_referee("Arjun Dharmaraj", "Subcontinental", 20, 0.50, 0.68, 0.78, 0.10, 0.30, 0.68, 0.70),
+		_referee("Petru Bálint", "Carpathian", 11, 0.82, 0.35, 0.42, 0.30, 0.55, 0.45, 0.42),
+		_referee("Jean-Luc Vaneck", "Gallic", 38, 0.24, 0.78, 0.82, 0.08, 0.15, 0.82, 0.85),
+		_referee("Kenzo Takahashi", "Far Eastern", 29, 0.78, 0.90, 0.86, 0.02, 0.06, 0.85, 0.88)
 	]
 
 
@@ -161,7 +163,8 @@ func _build_default_referees() -> void:
 func _referee(
 	referee_name: String, nationality: String, experience: int,
 	strictness: float, consistency: float, composure: float,
-	unprofessionalism: float, incoherence: float, reputation: float
+	unprofessionalism: float, incoherence: float, reputation: float,
+	respect_rating: float = 0.50
 ) -> RefereeData:
 	var data := RefereeData.make_default(referee_name, nationality)
 	data.experience = experience
@@ -171,4 +174,5 @@ func _referee(
 	data.unprofessionalism = unprofessionalism
 	data.incoherence = incoherence
 	data.reputation = reputation
+	data.respect_rating = respect_rating
 	return data

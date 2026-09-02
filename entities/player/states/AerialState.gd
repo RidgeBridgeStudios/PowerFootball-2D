@@ -105,7 +105,15 @@ func _attempt_contact(player: HeavyPlayerController, ball: Pseudo3DBall) -> void
 		launch_z = HEADER_DOWNWARD_Z
 		action_name = "HEADER"
 
-	player.show_action_text(action_name)
+	var text_color: Color = Color.WHITE
+	if action_name == "BICYCLE KICK":
+		text_color = Color(1.0, 0.85, 0.20)
+	elif action_name == "VOLLEY":
+		text_color = Color(1.0, 0.95, 0.40)
+	else:
+		text_color = Color(0.60, 0.85, 1.0)
+
+	player.show_action_text(action_name, text_color)
 
 	var aim: Vector2 = Vector2.ZERO
 	if player.is_user_controlled:

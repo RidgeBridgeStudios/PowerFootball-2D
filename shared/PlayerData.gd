@@ -19,6 +19,7 @@ extends Resource
 @export var shirt_number: int = 0
 ## "GK", "CB", "LB", "RB", "DM", "CM", "AM", "LW", "RW", "ST"
 @export var position_role: String = ""
+@export var is_captain: bool = false
 
 ## --- Physical identity — maps 1:1 onto HeavyPlayerController exports ---------
 
@@ -53,6 +54,47 @@ extends Resource
 ## more often when facing a shot.
 @export_range(0.0, 1.0) var reflexes: float = 0.6
 
+## --- Football Manager Mental Attributes & Personality -------------------------
+
+@export_range(0.0, 1.0) var determination: float = 0.65
+@export_range(0.0, 1.0) var work_rate: float = 0.65
+@export_range(0.0, 1.0) var leadership: float = 0.50
+@export_range(0.0, 1.0) var temperament: float = 0.60
+@export_range(0.0, 1.0) var professionalism: float = 0.65
+@export_range(0.0, 1.0) var ambition: float = 0.60
+@export_range(0.0, 1.0) var loyalty: float = 0.60
+@export_range(0.0, 1.0) var adaptability: float = 0.55
+
+## Player trait bitmask
+@export_flags(
+	"DeepRunner:1",
+	"WallSplitter:2",
+	"PressureImmune:4",
+	"HotHeadedTackler:8",
+	"Talisman:16",
+	"LockerRoomCancer:32",
+	"CaptainMaterial:64",
+	"StreetBaller:128",
+	"PrideGlory:256",
+	"VeteranLeader:512",
+	"DeadBallSpecialist:1024",
+	"NightOwl:2048",
+	"IronMan:4096"
+) var traits: int = 0
+
+## Player fame / reputation (0.0 = unknown rookie, 1.0 = world superstar).
+@export_range(0.0, 1.0) var player_reputation: float = 0.50
+
+## --- Career Contract & Economics ---------------------------------------------
+
+@export var wage_weekly: int = 15000
+@export var contract_years: int = 3
+@export var release_clause: int = 0
+## "Star Player", "Important", "Regular Starter", "Rotation", "Squad Player", "Prospect"
+@export var squad_status: String = "Regular Starter"
+@export_range(0.0, 1.0) var morale: float = 0.70
+@export var market_value: int = 2500000
+
 ## --- Live form and career stats — read by the pre-game screen and pause menu ---
 
 ## Per-match rolling form (0.0 - 10.0). Persists across matches; decays
@@ -62,6 +104,19 @@ extends Resource
 ## Career goals and assists — incremented by PitchScene after each match.
 @export var career_goals: int = 0
 @export var career_assists: int = 0
+
+## Career Moneyball & advanced analytics metrics
+@export var career_xg: float = 0.0
+@export var career_xa: float = 0.0
+@export var career_xt_delta: float = 0.0
+@export var career_progressive_passes: int = 0
+@export var career_progressive_carries: int = 0
+@export var career_packing_count: int = 0
+@export var career_vaep: float = 0.0
+@export var career_tackles_won: int = 0
+@export var career_interceptions: int = 0
+@export var career_clean_sheets: int = 0
+@export var career_psxg_prevented: float = 0.0
 
 ## Match rating assigned at end of the last match (0.0 - 10.0). 0.0 = did not play.
 @export var last_match_rating: float = 0.0
@@ -75,6 +130,25 @@ extends Resource
 ## RefereeData.red_cards_issued is the career stat.
 var yellow_cards_this_match: int = 0
 var red_cards_this_match: int = 0
+
+
+## Accumulates end-of-match stats from PlayerMatchEvents into career totals.
+func accumulate_match_stats(events: PlayerRatingCalculator.PlayerMatchEvents) -> void:
+	career_goals += events.goals
+	career_assists += events.assists
+	career_xg += events.xg
+	career_xa += events.xa
+	career_xt_delta += events.xt_delta
+	career_progressive_passes += events.progressive_passes
+	career_progressive_carries += events.progressive_carries
+	career_packing_count += events.packing_count
+	career_vaep += events.vaep
+	career_tackles_won += events.tackles_won
+	career_interceptions += events.interceptions
+	career_psxg_prevented += events.goals_prevented
+	if events.kept_clean_sheet:
+		career_clean_sheets += 1
+
 
 
 static func make_default(player_name: String, shirt_number: int, position_role: String) -> PlayerData:
@@ -101,3 +175,78 @@ func apply_role_defaults(role: String) -> void:
 			# Central mids / strikers / fullbacks / default: balanced baseline compromise (0.22s accel, 0.35 turning penalty).
 			acceleration_time = 0.22
 			turning_penalty = 0.35
+
+
+func has_trait(bit: int) -> bool:
+	return (traits & bit) != 0
+
+
+## Calculates composite overall rating (1..99) weighted by positional archetype.
+func calculate_overall_rating() -> int:
+	var physical_score: float = (
+		(top_speed - 170.0) / 90.0 * 0.35 +
+		(0.38 - acceleration_time) / 0.26 * 0.35 +
+		(stamina_max - 75.0) / 50.0 * 0.30
+	)
+	var mental_score: float = (
+		determination * 0.25 +
+		composure * 0.25 +
+		vision * 0.20 +
+		work_rate * 0.15 +
+		temperament * 0.15
+	)
+	var technical_score: float = close_control
+
+	var raw_rating: float = 50.0
+	match position_role.to_upper():
+		"GK":
+			raw_rating = reflexes * 50.0 + composure * 25.0 + vision * 15.0 + physical_score * 10.0
+		"CB":
+			raw_rating = physical_score * 35.0 + aggression * 25.0 + determination * 20.0 + composure * 20.0
+		"LB", "RB":
+			raw_rating = physical_score * 40.0 + work_rate * 25.0 + technical_score * 20.0 + vision * 15.0
+		"DM", "CDM":
+			raw_rating = work_rate * 30.0 + physical_score * 25.0 + composure * 25.0 + vision * 20.0
+		"CM":
+			raw_rating = vision * 30.0 + technical_score * 25.0 + work_rate * 25.0 + composure * 20.0
+		"AM", "CAM", "LM", "RM", "LW", "RW":
+			raw_rating = technical_score * 35.0 + vision * 25.0 + physical_score * 25.0 + composure * 15.0
+		"ST":
+			raw_rating = technical_score * 35.0 + physical_score * 30.0 + composure * 20.0 + determination * 15.0
+		_:
+			raw_rating = physical_score * 30.0 + mental_score * 40.0 + technical_score * 30.0
+
+	var ovr: int = int(round(clampf(45.0 + raw_rating * 0.52, 45.0, 99.0)))
+	return ovr
+
+
+## Evaluates mental attributes into Football Manager personality archetypes.
+func get_personality_archetype() -> String:
+	if professionalism >= 0.80 and determination >= 0.75:
+		return "Model Professional"
+	elif leadership >= 0.80 and determination >= 0.70:
+		return "Born Leader"
+	elif determination >= 0.80 and ambition >= 0.70:
+		return "Resolute"
+	elif ambition >= 0.80 and loyalty <= 0.35:
+		return "Mercenary"
+	elif temperament <= 0.35 and aggression >= 0.75:
+		return "Temperamental"
+	elif work_rate >= 0.80 and determination >= 0.70:
+		return "Spirited"
+	elif professionalism >= 0.75 and temperament >= 0.75:
+		return "Fair Play Advocate"
+	elif ambition >= 0.80:
+		return "Ambitious"
+	elif ambition <= 0.35 and loyalty >= 0.75:
+		return "Loyal Servant"
+	return "Balanced"
+
+
+## Estimates market value based on overall rating, reputation, and contract length.
+func calculate_market_value() -> int:
+	var ovr: int = calculate_overall_rating()
+	var base_val: float = 200000.0 * pow(1.08, float(ovr - 50))
+	var rep_mult: float = lerp(0.6, 2.5, player_reputation)
+	var contract_mult: float = 0.5 + float(contract_years) * 0.25
+	return int(round(base_val * rep_mult * contract_mult))

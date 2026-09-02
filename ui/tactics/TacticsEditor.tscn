@@ -1,0 +1,329 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="Script" path="res://ui/tactics/TacticsEditor.gd" id="1_editor"]
+[ext_resource type="Script" path="res://ui/tactics/TacticsPitchView.gd" id="2_pitch_view"]
+
+[node name="TacticsEditor" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_editor")
+
+[node name="MainLayout" type="VBoxContainer" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 12.0
+offset_top = 10.0
+offset_right = -12.0
+offset_bottom = -10.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 10
+
+[node name="HeaderBar" type="HBoxContainer" parent="MainLayout"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="TeamNameLabel" type="Label" parent="MainLayout/HeaderBar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "Team Name"
+
+[node name="VSeparator1" type="VSeparator" parent="MainLayout/HeaderBar"]
+layout_mode = 2
+
+[node name="FormationLabel" type="Label" parent="MainLayout/HeaderBar"]
+layout_mode = 2
+text = "Formation:"
+
+[node name="FormationPicker" type="OptionButton" parent="MainLayout/HeaderBar"]
+custom_minimum_size = Vector2(140, 0)
+layout_mode = 2
+
+[node name="VSeparator2" type="VSeparator" parent="MainLayout/HeaderBar"]
+layout_mode = 2
+
+[node name="MentalityLabel" type="Label" parent="MainLayout/HeaderBar"]
+layout_mode = 2
+text = "Mentality:"
+
+[node name="MentalityPicker" type="OptionButton" parent="MainLayout/HeaderBar"]
+custom_minimum_size = Vector2(130, 0)
+layout_mode = 2
+
+[node name="Spacer" type="Control" parent="MainLayout/HeaderBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="SubsLabel" type="Label" parent="MainLayout/HeaderBar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 15
+text = "Subs remaining: 3 / 3"
+
+[node name="ContentSplit" type="HBoxContainer" parent="MainLayout"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 12
+
+[node name="LeftSection" type="VBoxContainer" parent="MainLayout/ContentSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.6
+theme_override_constants/separation = 6
+
+[node name="PitchContainer" type="PanelContainer" parent="MainLayout/ContentSplit/LeftSection"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="PitchView" type="Control" parent="MainLayout/ContentSplit/LeftSection/PitchContainer"]
+custom_minimum_size = Vector2(460, 320)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+script = ExtResource("2_pitch_view")
+
+[node name="HintLabel" type="Label" parent="MainLayout/ContentSplit/LeftSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.8, 0.75, 0.9)
+theme_override_font_sizes/font_size = 12
+text = "💡 Click a player to inspect/edit tactics. Click another starter to swap positions."
+horizontal_alignment = 1
+
+[node name="RightSection" type="VBoxContainer" parent="MainLayout/ContentSplit"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.4
+
+[node name="Tabs" type="TabContainer" parent="MainLayout/ContentSplit/RightSection"]
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="PlayerTactics" type="VBoxContainer" parent="MainLayout/ContentSplit/RightSection/Tabs"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="NoPlayerSelectedLabel" type="Label" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics"]
+layout_mode = 2
+size_flags_vertical = 6
+theme_override_colors/font_color = Color(0.65, 0.7, 0.65, 0.8)
+text = "Select a player on the pitch
+or in the roster to adjust
+their individual role & instructions."
+horizontal_alignment = 1
+
+[node name="InspectorContent" type="VBoxContainer" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+
+[node name="PlayerHeader" type="HBoxContainer" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="NumberLabel" type="Label" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/PlayerHeader"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+text = "#10"
+
+[node name="NameLabel" type="Label" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/PlayerHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
+text = "Player Name"
+
+[node name="PosBadge" type="Label" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/PlayerHeader"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.85, 1, 1)
+theme_override_font_sizes/font_size = 16
+text = "[ ST ]"
+
+[node name="PlayerStatsLabel" type="Label" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Pace: 210 | Vision: 75% | Comp: 65% | Agg: 70%
+Form: 7.0 ★ | Goals: 12 | Assists: 8"
+
+[node name="StaminaContainer" type="HBoxContainer" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="StaminaText" type="Label" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/StaminaContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Stamina:"
+
+[node name="StaminaBar" type="ProgressBar" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/StaminaContainer"]
+custom_minimum_size = Vector2(0, 14)
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 4
+value = 100.0
+show_percentage = false
+
+[node name="StaminaLabel" type="Label" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/StaminaContainer"]
+custom_minimum_size = Vector2(40, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "100%"
+horizontal_alignment = 2
+
+[node name="HSeparator1" type="HSeparator" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent"]
+layout_mode = 2
+
+[node name="RoleSection" type="HBoxContainer" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="RoleLabel" type="Label" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/RoleSection"]
+layout_mode = 2
+text = "Tactical Role:"
+
+[node name="RolePicker" type="OptionButton" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/RoleSection"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="HSeparator2" type="HSeparator" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent"]
+layout_mode = 2
+
+[node name="Sliders" type="VBoxContainer" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="AnchorHeader" type="HBoxContainer" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders"]
+layout_mode = 2
+
+[node name="AnchorLabel" type="Label" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders/AnchorHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "Anchor Discipline (Roam ↔ Hold):"
+
+[node name="AnchorValLabel" type="Label" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders/AnchorHeader"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "0.55"
+
+[node name="AnchorSlider" type="HSlider" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders"]
+layout_mode = 2
+max_value = 1.0
+step = 0.05
+value = 0.55
+
+[node name="PressHeader" type="HBoxContainer" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders"]
+layout_mode = 2
+
+[node name="PressLabel" type="Label" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders/PressHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "Press Radius (Hold Zone ↔ Press):"
+
+[node name="PressValLabel" type="Label" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders/PressHeader"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "300 px"
+
+[node name="PressSlider" type="HSlider" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders"]
+layout_mode = 2
+min_value = 150.0
+max_value = 450.0
+step = 10.0
+value = 300.0
+
+[node name="AdvHeader" type="HBoxContainer" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders"]
+layout_mode = 2
+
+[node name="AdvLabel" type="Label" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders/AdvHeader"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "Forward Runs Bias (Support ↔ Attack):"
+
+[node name="AdvValLabel" type="Label" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders/AdvHeader"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "0.25"
+
+[node name="AdvSlider" type="HSlider" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders"]
+layout_mode = 2
+min_value = 0.05
+max_value = 0.6
+step = 0.05
+value = 0.25
+
+[node name="Actions" type="HBoxContainer" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="ResetRoleBtn" type="Button" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Reset Defaults"
+
+[node name="MakeCaptainBtn" type="Button" parent="MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Actions"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Make Captain"
+
+[node name="BenchReserves" type="VBoxContainer" parent="MainLayout/ContentSplit/RightSection/Tabs"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="FilterBar" type="HBoxContainer" parent="MainLayout/ContentSplit/RightSection/Tabs/BenchReserves"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="FilterALL" type="Button" parent="MainLayout/ContentSplit/RightSection/Tabs/BenchReserves/FilterBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "ALL"
+
+[node name="FilterGK" type="Button" parent="MainLayout/ContentSplit/RightSection/Tabs/BenchReserves/FilterBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "GK"
+
+[node name="FilterDEF" type="Button" parent="MainLayout/ContentSplit/RightSection/Tabs/BenchReserves/FilterBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "DEF"
+
+[node name="FilterMID" type="Button" parent="MainLayout/ContentSplit/RightSection/Tabs/BenchReserves/FilterBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "MID"
+
+[node name="FilterATT" type="Button" parent="MainLayout/ContentSplit/RightSection/Tabs/BenchReserves/FilterBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "ATT"
+
+[node name="BenchListScroll" type="ScrollContainer" parent="MainLayout/ContentSplit/RightSection/Tabs/BenchReserves"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="BenchList" type="VBoxContainer" parent="MainLayout/ContentSplit/RightSection/Tabs/BenchReserves/BenchListScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="StartingXI" type="VBoxContainer" parent="MainLayout/ContentSplit/RightSection/Tabs"]
+visible = false
+layout_mode = 2
+
+[node name="StartersListScroll" type="ScrollContainer" parent="MainLayout/ContentSplit/RightSection/Tabs/StartingXI"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="StartersList" type="VBoxContainer" parent="MainLayout/ContentSplit/RightSection/Tabs/StartingXI/StartersListScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4

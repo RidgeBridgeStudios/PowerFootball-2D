@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://ui/pause/PauseMenu.gd" id="1_pause"]
-[ext_resource type="Script" path="res://ui/FormationDiagram.gd" id="2_diagram"]
+[ext_resource type="PackedScene" path="res://ui/tactics/TacticsEditor.tscn" id="2_editor"]
 
 [node name="PauseMenu" type="CanvasLayer"]
 layer = 20
@@ -22,7 +22,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.6)
+color = Color(0, 0, 0, 0.72)
 
 [node name="Window" type="PanelContainer" parent="Root"]
 layout_mode = 1
@@ -31,101 +31,58 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -320.0
-offset_top = -240.0
-offset_right = 320.0
-offset_bottom = 240.0
+offset_left = -580.0
+offset_top = -325.0
+offset_right = 580.0
+offset_bottom = 325.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="Layout" type="VBoxContainer" parent="Root/Window"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 8
 
 [node name="Header" type="HBoxContainer" parent="Root/Window/Layout"]
 layout_mode = 2
 theme_override_constants/separation = 16
 
 [node name="ClockLabel" type="Label" parent="Root/Window/Layout/Header"]
+custom_minimum_size = Vector2(80, 0)
 layout_mode = 2
-size_flags_horizontal = 3
-text = "0:00"
+theme_override_font_sizes/font_size = 18
+text = "00:00"
 
 [node name="ScoreLabel" type="Label" parent="Root/Window/Layout/Header"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 18
 horizontal_alignment = 1
 text = "0 - 0"
 
-[node name="ResumeButton" type="Button" parent="Root/Window/Layout/Header"]
+[node name="TeamTabs" type="HBoxContainer" parent="Root/Window/Layout/Header"]
 layout_mode = 2
-text = "Resume"
+theme_override_constants/separation = 8
 
-[node name="Tabs" type="TabContainer" parent="Root/Window/Layout"]
-custom_minimum_size = Vector2(560, 380)
+[node name="TeamABtn" type="Button" parent="Root/Window/Layout/Header/TeamTabs"]
+custom_minimum_size = Vector2(130, 32)
 layout_mode = 2
-size_flags_vertical = 3
-
-[node name="Substitutions" type="VBoxContainer" parent="Root/Window/Layout/Tabs"]
-layout_mode = 2
-
-[node name="SubsRemainingLabel" type="Label" parent="Root/Window/Layout/Tabs/Substitutions"]
-layout_mode = 2
-text = "Substitutions remaining: 3 / 3"
-
-[node name="TeamTabs" type="HBoxContainer" parent="Root/Window/Layout/Tabs/Substitutions"]
-layout_mode = 2
-
-[node name="TeamASubBtn" type="Button" parent="Root/Window/Layout/Tabs/Substitutions/TeamTabs"]
-layout_mode = 2
-size_flags_horizontal = 3
+toggle_mode = true
+button_pressed = true
 text = "Team A"
 
-[node name="TeamBSubBtn" type="Button" parent="Root/Window/Layout/Tabs/Substitutions/TeamTabs"]
+[node name="TeamBBtn" type="Button" parent="Root/Window/Layout/Header/TeamTabs"]
+custom_minimum_size = Vector2(130, 32)
 layout_mode = 2
-size_flags_horizontal = 3
+toggle_mode = true
 text = "Team B"
 
-[node name="SubLists" type="HBoxContainer" parent="Root/Window/Layout/Tabs/Substitutions"]
+[node name="ResumeButton" type="Button" parent="Root/Window/Layout/Header"]
+custom_minimum_size = Vector2(140, 32)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.3, 0.9, 0.45, 1)
+theme_override_font_sizes/font_size = 15
+text = "Resume Match ▶"
+
+[node name="TacticsEditor" parent="Root/Window/Layout" instance=ExtResource("2_editor")]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 12
-
-[node name="StartersScroll" type="ScrollContainer" parent="Root/Window/Layout/Tabs/Substitutions/SubLists"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="StartersList" type="VBoxContainer" parent="Root/Window/Layout/Tabs/Substitutions/SubLists/StartersScroll"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="BenchScroll" type="ScrollContainer" parent="Root/Window/Layout/Tabs/Substitutions/SubLists"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_vertical = 3
-
-[node name="BenchList" type="VBoxContainer" parent="Root/Window/Layout/Tabs/Substitutions/SubLists/BenchScroll"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="Formation" type="VBoxContainer" parent="Root/Window/Layout/Tabs"]
-visible = false
-layout_mode = 2
-
-[node name="FormationPicker" type="OptionButton" parent="Root/Window/Layout/Tabs/Formation"]
-layout_mode = 2
-
-[node name="FormationDiagram" type="Control" parent="Root/Window/Layout/Tabs/Formation"]
-custom_minimum_size = Vector2(0, 260)
-layout_mode = 2
-size_flags_vertical = 3
-script = ExtResource("2_diagram")
-
-[node name="TeamSheet" type="ScrollContainer" parent="Root/Window/Layout/Tabs"]
-visible = false
-layout_mode = 2
-
-[node name="SquadList" type="VBoxContainer" parent="Root/Window/Layout/Tabs/TeamSheet"]
-layout_mode = 2
-size_flags_horizontal = 3

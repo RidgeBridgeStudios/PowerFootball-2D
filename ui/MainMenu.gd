@@ -69,7 +69,7 @@ func _on_practice_pressed() -> void:
 
 
 func _on_manager_pressed() -> void:
-	_show_coming_soon(btn_manager, "Manager Mode — Coming Soon")
+	get_tree().change_scene_to_file("res://ui/manager/ManagerModeHub.tscn")
 
 
 func _on_career_pressed() -> void:
@@ -134,7 +134,6 @@ func _style_menu_buttons() -> void:
 		button.add_theme_stylebox_override("pressed", _make_stylebox(Color(0.24, 0.86, 0.41, 0.1), 4))
 		button.add_theme_stylebox_override("focus", _make_stylebox(Color(0.24, 0.86, 0.41, 0.06), 4))
 
-	btn_manager.modulate.a = 0.4
 	btn_career.modulate.a = 0.4
 
 

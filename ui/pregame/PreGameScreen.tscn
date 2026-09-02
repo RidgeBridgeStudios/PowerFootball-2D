@@ -1,7 +1,7 @@
 [gd_scene load_steps=3 format=3]
 
 [ext_resource type="Script" path="res://ui/pregame/PreGameScreen.gd" id="1_pregame"]
-[ext_resource type="Script" path="res://ui/FormationDiagram.gd" id="2_diagram"]
+[ext_resource type="PackedScene" path="res://ui/tactics/TacticsEditor.tscn" id="2_editor"]
 
 [node name="PreGameScreen" type="CanvasLayer"]
 layer = 10
@@ -22,220 +22,188 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0.03, 0.05, 0.03, 0.92)
+color = Color(0.04, 0.07, 0.05, 0.96)
 
-[node name="MainLayout" type="HBoxContainer" parent="Root"]
+[node name="Layout" type="VBoxContainer" parent="Root"]
 layout_mode = 1
 anchors_preset = 15
 anchor_right = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = 16.0
+offset_top = 10.0
 offset_right = -16.0
-offset_bottom = -16.0
+offset_bottom = -10.0
 grow_horizontal = 2
 grow_vertical = 2
+theme_override_constants/separation = 8
+
+[node name="TopBar" type="HBoxContainer" parent="Root/Layout"]
+layout_mode = 2
 theme_override_constants/separation = 16
 
-[node name="TeamAPanel" type="VBoxContainer" parent="Root/MainLayout"]
-layout_mode = 2
-size_flags_horizontal = 3
-size_flags_stretch_ratio = 2.0
-
-[node name="TeamAName" type="Label" parent="Root/MainLayout/TeamAPanel"]
+[node name="TitleLabel" type="Label" parent="Root/Layout/TopBar"]
 layout_mode = 2
 theme_override_font_sizes/font_size = 22
-text = "Team A"
+text = "MATCHDAY TACTICS"
 
-[node name="ManagerALabel" type="Label" parent="Root/MainLayout/TeamAPanel"]
+[node name="VsLabel" type="Label" parent="Root/Layout/TopBar"]
 layout_mode = 2
-text = "Manager"
-
-[node name="ManagerACard" type="Panel" parent="Root/MainLayout/TeamAPanel"]
-layout_mode = 2
-
-[node name="VBoxContainer" type="VBoxContainer" parent="Root/MainLayout/TeamAPanel/ManagerACard"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -8.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="ManagerAName" type="Label" parent="Root/MainLayout/TeamAPanel/ManagerACard/VBoxContainer"]
-layout_mode = 2
-text = "Manager Name"
-
-[node name="ManagerATactics" type="Label" parent="Root/MainLayout/TeamAPanel/ManagerACard/VBoxContainer"]
-layout_mode = 2
-text = "Preferred: -- | Playstyle: -- | Prized: --"
-autowrap_mode = 2
-
-[node name="ManagerAPersonality" type="Label" parent="Root/MainLayout/TeamAPanel/ManagerACard/VBoxContainer"]
-layout_mode = 2
-text = "Traits: --"
-autowrap_mode = 2
-
-[node name="ManagerAStats" type="HBoxContainer" parent="Root/MainLayout/TeamAPanel/ManagerACard/VBoxContainer"]
-layout_mode = 2
-theme_override_constants/separation = 12
-
-[node name="DefLabel" type="Label" parent="Root/MainLayout/TeamAPanel/ManagerACard/VBoxContainer/ManagerAStats"]
-layout_mode = 2
-text = "DEF --%"
-
-[node name="TempoLabel" type="Label" parent="Root/MainLayout/TeamAPanel/ManagerACard/VBoxContainer/ManagerAStats"]
-layout_mode = 2
-text = "TMP --%"
-
-[node name="WidthLabel" type="Label" parent="Root/MainLayout/TeamAPanel/ManagerACard/VBoxContainer/ManagerAStats"]
-layout_mode = 2
-text = "WID --%"
-
-[node name="PressLabel" type="Label" parent="Root/MainLayout/TeamAPanel/ManagerACard/VBoxContainer/ManagerAStats"]
-layout_mode = 2
-text = "PRS --%"
-
-[node name="FormationPickerA" type="OptionButton" parent="Root/MainLayout/TeamAPanel"]
-layout_mode = 2
-
-[node name="FormationDiagramA" type="Control" parent="Root/MainLayout/TeamAPanel"]
-custom_minimum_size = Vector2(0, 140)
-layout_mode = 2
-script = ExtResource("2_diagram")
-
-[node name="LineupScrollA" type="ScrollContainer" parent="Root/MainLayout/TeamAPanel"]
-custom_minimum_size = Vector2(0, 200)
-layout_mode = 2
-size_flags_vertical = 3
-
-[node name="LineupListA" type="VBoxContainer" parent="Root/MainLayout/TeamAPanel/LineupScrollA"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="BenchScrollA" type="ScrollContainer" parent="Root/MainLayout/TeamAPanel"]
-custom_minimum_size = Vector2(0, 140)
-layout_mode = 2
-
-[node name="BenchListA" type="VBoxContainer" parent="Root/MainLayout/TeamAPanel/BenchScrollA"]
-layout_mode = 2
-size_flags_horizontal = 3
-
-[node name="CentrePanel" type="VBoxContainer" parent="Root/MainLayout"]
-layout_mode = 2
-size_flags_horizontal = 3
-alignment = 1
-
-[node name="TitleLabel" type="Label" parent="Root/MainLayout/CentrePanel"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 32
-horizontal_alignment = 1
-text = "KICK OFF"
-
-[node name="VsLabel" type="Label" parent="Root/MainLayout/CentrePanel"]
-layout_mode = 2
-horizontal_alignment = 1
+theme_override_colors/font_color = Color(0.8, 0.85, 0.8, 0.9)
+theme_override_font_sizes/font_size = 15
 text = "Team A vs Team B"
 
-[node name="SimulationToggle" type="CheckButton" parent="Root/MainLayout/CentrePanel"]
-layout_mode = 2
-text = "Watch Match (Simulate)"
-
-[node name="KickOffButton" type="Button" parent="Root/MainLayout/CentrePanel"]
-layout_mode = 2
-theme_override_font_sizes/font_size = 20
-text = "Kick Off"
-
-[node name="TeamBPanel" type="VBoxContainer" parent="Root/MainLayout"]
+[node name="Spacer" type="Control" parent="Root/Layout/TopBar"]
 layout_mode = 2
 size_flags_horizontal = 3
-size_flags_stretch_ratio = 2.0
 
-[node name="TeamBName" type="Label" parent="Root/MainLayout/TeamBPanel"]
+[node name="SimulationToggle" type="CheckButton" parent="Root/Layout/TopBar"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
-horizontal_alignment = 2
-text = "Team B"
+text = "Watch Match"
 
-[node name="ManagerBLabel" type="Label" parent="Root/MainLayout/TeamBPanel"]
+[node name="QuickSimButton" type="Button" parent="Root/Layout/TopBar"]
+custom_minimum_size = Vector2(120, 0)
 layout_mode = 2
-horizontal_alignment = 2
-text = "Manager"
+theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+theme_override_font_sizes/font_size = 15
+text = "Quick Sim ⚡"
 
-[node name="ManagerBCard" type="Panel" parent="Root/MainLayout/TeamBPanel"]
+[node name="KickOffButton" type="Button" parent="Root/Layout/TopBar"]
+custom_minimum_size = Vector2(140, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 1, 1, 1)
+theme_override_font_sizes/font_size = 17
+text = "Kick Off ⚽"
+
+[node name="TeamTabs" type="TabContainer" parent="Root/Layout"]
+layout_mode = 2
+size_flags_vertical = 3
+current_tab = 0
+
+[node name="TeamAPanel" type="VBoxContainer" parent="Root/Layout/TeamTabs"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ManagerACard" type="PanelContainer" parent="Root/Layout/TeamTabs/TeamAPanel"]
 layout_mode = 2
 
-[node name="VBoxContainer" type="VBoxContainer" parent="Root/MainLayout/TeamBPanel/ManagerBCard"]
-layout_mode = 1
-anchors_preset = 15
-anchor_right = 1.0
-anchor_bottom = 1.0
-offset_left = 8.0
-offset_top = 8.0
-offset_right = -8.0
-offset_bottom = -8.0
-grow_horizontal = 2
-grow_vertical = 2
-
-[node name="ManagerBName" type="Label" parent="Root/MainLayout/TeamBPanel/ManagerBCard/VBoxContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="Root/Layout/TeamTabs/TeamAPanel/ManagerACard"]
 layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="HBox" type="HBoxContainer" parent="Root/Layout/TeamTabs/TeamAPanel/ManagerACard/VBoxContainer"]
+layout_mode = 2
+
+[node name="ManagerAName" type="Label" parent="Root/Layout/TeamTabs/TeamAPanel/ManagerACard/VBoxContainer/HBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
 text = "Manager Name"
 
-[node name="ManagerBTactics" type="Label" parent="Root/MainLayout/TeamBPanel/ManagerBCard/VBoxContainer"]
+[node name="ManagerAStats" type="HBoxContainer" parent="Root/Layout/TeamTabs/TeamAPanel/ManagerACard/VBoxContainer/HBox"]
 layout_mode = 2
-text = "Preferred: -- | Playstyle: -- | Prized: --"
-autowrap_mode = 2
+theme_override_constants/separation = 10
 
-[node name="ManagerBPersonality" type="Label" parent="Root/MainLayout/TeamBPanel/ManagerBCard/VBoxContainer"]
+[node name="DefLabel" type="Label" parent="Root/Layout/TeamTabs/TeamAPanel/ManagerACard/VBoxContainer/HBox/ManagerAStats"]
 layout_mode = 2
-text = "Traits: --"
-autowrap_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "DEF 50%"
 
-[node name="ManagerBStats" type="HBoxContainer" parent="Root/MainLayout/TeamBPanel/ManagerBCard/VBoxContainer"]
+[node name="TempoLabel" type="Label" parent="Root/Layout/TeamTabs/TeamAPanel/ManagerACard/VBoxContainer/HBox/ManagerAStats"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_font_sizes/font_size = 12
+text = "TMP 50%"
 
-[node name="DefLabel" type="Label" parent="Root/MainLayout/TeamBPanel/ManagerBCard/VBoxContainer/ManagerBStats"]
+[node name="WidthLabel" type="Label" parent="Root/Layout/TeamTabs/TeamAPanel/ManagerACard/VBoxContainer/HBox/ManagerAStats"]
 layout_mode = 2
-text = "DEF --%"
+theme_override_font_sizes/font_size = 12
+text = "WID 50%"
 
-[node name="TempoLabel" type="Label" parent="Root/MainLayout/TeamBPanel/ManagerBCard/VBoxContainer/ManagerBStats"]
+[node name="PressLabel" type="Label" parent="Root/Layout/TeamTabs/TeamAPanel/ManagerACard/VBoxContainer/HBox/ManagerAStats"]
 layout_mode = 2
-text = "TMP --%"
+theme_override_font_sizes/font_size = 12
+text = "PRS 50%"
 
-[node name="WidthLabel" type="Label" parent="Root/MainLayout/TeamBPanel/ManagerBCard/VBoxContainer/ManagerBStats"]
-layout_mode = 2
-text = "WID --%"
-
-[node name="PressLabel" type="Label" parent="Root/MainLayout/TeamBPanel/ManagerBCard/VBoxContainer/ManagerBStats"]
-layout_mode = 2
-text = "PRS --%"
-
-[node name="FormationPickerB" type="OptionButton" parent="Root/MainLayout/TeamBPanel"]
+[node name="HBox2" type="HBoxContainer" parent="Root/Layout/TeamTabs/TeamAPanel/ManagerACard/VBoxContainer"]
 layout_mode = 2
 
-[node name="FormationDiagramB" type="Control" parent="Root/MainLayout/TeamBPanel"]
-custom_minimum_size = Vector2(0, 140)
+[node name="ManagerATactics" type="Label" parent="Root/Layout/TeamTabs/TeamAPanel/ManagerACard/VBoxContainer/HBox2"]
 layout_mode = 2
-script = ExtResource("2_diagram")
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.75, 0.8, 0.75, 0.9)
+theme_override_font_sizes/font_size = 11
+text = "Preferred: 4-4-2 | Playstyle: Balanced | Prized: Pace"
 
-[node name="LineupScrollB" type="ScrollContainer" parent="Root/MainLayout/TeamBPanel"]
-custom_minimum_size = Vector2(0, 200)
+[node name="ManagerAPersonality" type="Label" parent="Root/Layout/TeamTabs/TeamAPanel/ManagerACard/VBoxContainer/HBox2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.8, 0.75, 0.9)
+theme_override_font_sizes/font_size = 11
+text = "Traits: None"
+
+[node name="TacticsEditorA" parent="Root/Layout/TeamTabs/TeamAPanel" instance=ExtResource("2_editor")]
 layout_mode = 2
 size_flags_vertical = 3
 
-[node name="LineupListB" type="VBoxContainer" parent="Root/MainLayout/TeamBPanel/LineupScrollB"]
+[node name="TeamBPanel" type="VBoxContainer" parent="Root/Layout/TeamTabs"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="ManagerBCard" type="PanelContainer" parent="Root/Layout/TeamTabs/TeamBPanel"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Root/Layout/TeamTabs/TeamBPanel/ManagerBCard"]
+layout_mode = 2
+theme_override_constants/separation = 2
+
+[node name="HBox" type="HBoxContainer" parent="Root/Layout/TeamTabs/TeamBPanel/ManagerBCard/VBoxContainer"]
+layout_mode = 2
+
+[node name="ManagerBName" type="Label" parent="Root/Layout/TeamTabs/TeamBPanel/ManagerBCard/VBoxContainer/HBox"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
+text = "Manager Name"
 
-[node name="BenchScrollB" type="ScrollContainer" parent="Root/MainLayout/TeamBPanel"]
-custom_minimum_size = Vector2(0, 140)
+[node name="ManagerBStats" type="HBoxContainer" parent="Root/Layout/TeamTabs/TeamBPanel/ManagerBCard/VBoxContainer/HBox"]
+layout_mode = 2
+theme_override_constants/separation = 10
+
+[node name="DefLabel" type="Label" parent="Root/Layout/TeamTabs/TeamBPanel/ManagerBCard/VBoxContainer/HBox/ManagerBStats"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "DEF 50%"
+
+[node name="TempoLabel" type="Label" parent="Root/Layout/TeamTabs/TeamBPanel/ManagerBCard/VBoxContainer/HBox/ManagerBStats"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "TMP 50%"
+
+[node name="WidthLabel" type="Label" parent="Root/Layout/TeamTabs/TeamBPanel/ManagerBCard/VBoxContainer/HBox/ManagerBStats"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "WID 50%"
+
+[node name="PressLabel" type="Label" parent="Root/Layout/TeamTabs/TeamBPanel/ManagerBCard/VBoxContainer/HBox/ManagerBStats"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "PRS 50%"
+
+[node name="HBox2" type="HBoxContainer" parent="Root/Layout/TeamTabs/TeamBPanel/ManagerBCard/VBoxContainer"]
 layout_mode = 2
 
-[node name="BenchListB" type="VBoxContainer" parent="Root/MainLayout/TeamBPanel/BenchScrollB"]
+[node name="ManagerBTactics" type="Label" parent="Root/Layout/TeamTabs/TeamBPanel/ManagerBCard/VBoxContainer/HBox2"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.75, 0.8, 0.75, 0.9)
+theme_override_font_sizes/font_size = 11
+text = "Preferred: 4-4-2 | Playstyle: Balanced | Prized: Pace"
+
+[node name="ManagerBPersonality" type="Label" parent="Root/Layout/TeamTabs/TeamBPanel/ManagerBCard/VBoxContainer/HBox2"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.75, 0.8, 0.75, 0.9)
+theme_override_font_sizes/font_size = 11
+text = "Traits: None"
+
+[node name="TacticsEditorB" parent="Root/Layout/TeamTabs/TeamBPanel" instance=ExtResource("2_editor")]
+layout_mode = 2
+size_flags_vertical = 3

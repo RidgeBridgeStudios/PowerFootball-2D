@@ -112,6 +112,9 @@ class AnalyticalSimulationHarness:
         self.passes_completed = 0
         self.shots_on_target = 0
         self.goals = [0, 0]
+        self.xg = [0.0, 0.0]
+        self.field_tilt_touches = [0, 0]
+        self.packing_total = [0, 0]
 
     def _check_nan_inf(self, val: float) -> bool:
         if math.isnan(val) or math.isinf(val):
@@ -120,6 +123,13 @@ class AnalyticalSimulationHarness:
         return False
 
     def step(self, tick: int) -> None:
+        # Track territorial presence for Field Tilt
+        if abs(self.ball_pos[0]) > (self.pitch_w / 6.0):
+            if self.ball_pos[0] > 0:
+                self.field_tilt_touches[0] += 1
+            else:
+                self.field_tilt_touches[1] += 1
+
         # 1. AI Decision evaluation (15-frame stagger)
         for i in range(22):
             if (i + tick) % 15 == 0:
@@ -230,6 +240,12 @@ class AnalyticalSimulationHarness:
                         self.ball_vel[0] = (kx / k_mag) * kick_speed
                         self.ball_vel[1] = (ky / k_mag) * kick_speed
                         self.passes_completed += 1
+                        self.packing_total[team] += 2
+                        # Model xG contribution for shots near opponent goal
+                        d_goal = math.hypot(target_goal_x - self.ball_pos[0], self.ball_pos[1])
+                        if d_goal < 300.0:
+                            shot_xg = 1.0 / (1.0 + math.exp(-max(-40.0, min(40.0, 1.85 - 0.0085 * d_goal))))
+                            self.xg[team] += shot_xg
                     break
 
         # Boundary checks
@@ -264,6 +280,9 @@ class AnalyticalSimulationHarness:
             and self.ai_cadence_violations == 0
         )
 
+        total_tilt = self.field_tilt_touches[0] + self.field_tilt_touches[1]
+        tilt_a = (float(self.field_tilt_touches[0]) / float(total_tilt) * 100.0) if total_tilt > 0 else 50.0
+
         return {
             "status": "pass" if is_clean else "fail",
             "simulation_mode": "analytical_harness",
@@ -275,6 +294,11 @@ class AnalyticalSimulationHarness:
             "anchor_variance": round(anchor_var, 4),
             "passes_completed": self.passes_completed,
             "score": self.goals,
+            "advanced_metrics": {
+                "xg": [round(self.xg[0], 2), round(self.xg[1], 2)],
+                "field_tilt_pct": [round(tilt_a, 1), round(100.0 - tilt_a, 1)],
+                "packing_total": self.packing_total,
+            },
             "match_phase": 2  # IN_PLAY
         }
 

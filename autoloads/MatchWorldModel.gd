@@ -1130,6 +1130,11 @@ func _resize_arrays() -> void:
 ## what stops the system from re-reading a fast-changing situation every frame
 ## and flipping between contradictory trigger types.
 func _update_press_trigger(delta: float) -> void:
+	if press_trigger_active and press_trigger_carrier != null and is_instance_valid(press_trigger_carrier) and press_trigger_carrier.is_holding_ball():
+		_clear_press_trigger()
+		_press_trigger_timer = 0.0
+		return
+
 	if _press_trigger_timer > 0.0:
 		_press_trigger_timer = maxf(_press_trigger_timer - delta, 0.0)
 		if _press_trigger_timer <= 0.0:
@@ -1191,6 +1196,9 @@ func _update_stall_watchdog(delta: float) -> void:
 	print("[StallWatchdog] Ball stalled %.1fs at %s (velocity=%.1f px/s). Closest player: %s (team %d, %.1fpx away). Forcing one [ActionScorer] trace on that player's next decision tick." % [
 		_stall_timer, ball_position, ball_node.velocity.length(),
 		closest_node.name, player_teams[closest_idx], sqrt(closest_dist_sq)])
+
+	if MatchTelemetryLogger.instance != null:
+		MatchTelemetryLogger.instance.report_health_anomaly("stall", "Ball stalled %.1fs at (%.0f, %.0f) near %s" % [_stall_timer, ball_position.x, ball_position.y, closest_node.name])
 
 	var brain := closest_node.get_node_or_null("PlayerBrain") as PlayerBrain
 	if brain != null:
@@ -1479,6 +1487,8 @@ func _print_spacing_summary() -> void:
 
 
 func _arm_press_trigger(trigger: PressTrigger, carrier: HeavyPlayerController, position: Vector2, hold_seconds: float) -> void:
+	if carrier != null and is_instance_valid(carrier) and carrier.is_holding_ball():
+		return
 	press_trigger_active = true
 	press_trigger_type = trigger
 	press_trigger_carrier = carrier
@@ -1548,7 +1558,7 @@ func _check_facing_own_goal_trigger() -> bool:
 	if possessor_index == NO_INDEX:
 		return false
 	var carrier: HeavyPlayerController = player_nodes[possessor_index]
-	if not is_instance_valid(carrier):
+	if not is_instance_valid(carrier) or carrier.is_holding_ball():
 		return false
 
 	var attack_sign: float = 1.0 if player_teams[possessor_index] == 0 else -1.0
@@ -1567,7 +1577,7 @@ func _check_touchline_isolation_trigger() -> bool:
 	if possessor_index == NO_INDEX or _boundary == null or not is_instance_valid(_boundary):
 		return false
 	var carrier: HeavyPlayerController = player_nodes[possessor_index]
-	if not is_instance_valid(carrier):
+	if not is_instance_valid(carrier) or carrier.is_holding_ball():
 		return false
 
 	var pos: Vector2 = player_positions[possessor_index]
@@ -1594,7 +1604,7 @@ func _check_heavy_touch_trigger() -> bool:
 	if possessor_index != NO_INDEX or ball_node == null or not is_instance_valid(ball_node):
 		return false
 	var toucher: HeavyPlayerController = ball_node.last_touched_by
-	if not is_instance_valid(toucher):
+	if not is_instance_valid(toucher) or toucher.is_holding_ball():
 		return false
 
 	var toucher_index: int = NO_INDEX
@@ -1629,7 +1639,7 @@ func _check_prolonged_possession_trigger() -> bool:
 	if _possession_hold_timer < PROLONGED_POSSESSION_SECONDS:
 		return false
 	var carrier: HeavyPlayerController = player_nodes[possessor_index]
-	if not is_instance_valid(carrier):
+	if not is_instance_valid(carrier) or carrier.is_holding_ball():
 		return false
 
 	_arm_press_trigger(PressTrigger.PROLONGED_POSSESSION, carrier, carrier.global_position, PRESS_TRIGGER_HOLD_SECONDS)

@@ -99,6 +99,15 @@ extends Node
 
 enum Role { OUTFIELD_ATTACKER, OUTFIELD_MIDFIELDER, OUTFIELD_DEFENDER, GOALKEEPER }
 
+enum FreeKickActionType { SHORT_PASS, DIRECT_SHOT, CROSS, LONG_BALL }
+
+var free_kick_action_type: FreeKickActionType = FreeKickActionType.SHORT_PASS
+var free_kick_charge_ratio: float = 0.0
+var free_kick_is_lob: bool = false
+var free_kick_is_tap: bool = true
+var free_kick_action_label: String = "PASS"
+var free_kick_intent_active: bool = false
+
 ## Pressing-duty assignment for OUTFIELD_DEFENDER while MatchWorldModel's
 ## pressing trigger is active — see _resolve_defensive_duty(). Deliberately
 ## small: one defender presses, nearby cover blocks a lane, everyone else
@@ -270,7 +279,7 @@ const PITCH_ENDLINE_SAFETY_MARGIN: float = 45.0
 ## while waiting to be released, and needs a nearby player to still be able
 ## to close it down once it lands loose in that zone. See AGENTS_ERRATA.md
 ## (throw-in-ball-outside-chase-legality-rect).
-const CHASE_OUT_OF_BOUNDS_TOLERANCE: float = 45.0
+const CHASE_OUT_OF_BOUNDS_TOLERANCE: float = 75.0
 
 ## "La Pausa" standstill-breaker: a possessor who has held the ball this long
 ## with no open teammate and would otherwise settle on MaintainFormation gets
@@ -532,6 +541,10 @@ func _physics_process(delta: float) -> void:
 	var is_throw_in_taker: bool = false
 	if player.state_factory != null and player.state_factory.current_state_name == &"ThrowIn":
 		is_throw_in_taker = true
+
+	if GameManager.current_phase == GameManager.MatchPhase.GOAL_SCORED:
+		_steer_celebration(delta)
+		return
 
 	if not GameManager.is_in_play() and not is_throw_in_taker:
 		player.movement_intent = Vector2.ZERO
@@ -810,7 +823,7 @@ func _press_trigger_chase_bonus(ctx: UtilityContext) -> float:
 	if world == null or not world.press_trigger_active:
 		return 0.0
 	var carrier: HeavyPlayerController = world.press_trigger_carrier
-	if not is_instance_valid(carrier) or carrier.team == player.team:
+	if not is_instance_valid(carrier) or carrier.team == player.team or carrier.is_holding_ball():
 		return 0.0
 	return PRESS_TRIGGER_CHASE_BONUS
 
@@ -1193,6 +1206,192 @@ var _trace_this_tick: bool = false
 func trace_next_decision() -> void:
 	_trace_next_decision = true
 
+func has_free_kick_intent() -> bool:
+	return free_kick_intent_active
+
+
+func clear_free_kick_intent() -> void:
+	free_kick_intent_active = false
+	free_kick_action_type = FreeKickActionType.SHORT_PASS
+	free_kick_charge_ratio = 0.0
+	free_kick_is_lob = false
+	free_kick_is_tap = true
+	free_kick_action_label = "PASS"
+
+
+## Evaluates tactical intent for a free kick (direct shot, cross into box,
+## long ball, or short pass) based on pitch geography, direct vs indirect status,
+## player attributes, and teammate positioning. Configures intent properties for
+## ChargeKickState and returns the resolved aiming facing_direction.
+func evaluate_free_kick_intent(fk_pos: Vector2, is_direct: bool) -> Vector2:
+	free_kick_intent_active = true
+	_rng.seed = (player.get_instance_id() if player != null else 1) + GameManager.get_match_tick()
+
+	var opp_goal: Vector2 = pitch_boundary.get_goal_centre(1 - player.team) if pitch_boundary != null else Vector2(800.0 if player.team == 0 else -800.0, 0.0)
+	var dist_to_goal: float = fk_pos.distance_to(opp_goal)
+	var attack_dir_x: float = signf(opp_goal.x - fk_pos.x)
+	if is_zero_approx(attack_dir_x):
+		attack_dir_x = 1.0 if player.team == 0 else -1.0
+
+	var mood_node: MoodSystem = player.get_mood() if player != null else null
+	var eff_composure: float = clampf(composure_attribute + (mood_node.get_composure_delta() if mood_node != null else 0.0), 0.0, 1.0)
+	var eff_aggression: float = clampf(aggression_attribute + (mood_node.get_aggression_delta() if mood_node != null else 0.0), 0.0, 1.0)
+
+	# 1. Determine weights for each potential action
+	var w_shot: float = 0.0
+	var w_cross: float = 0.0
+	var w_long: float = 0.0
+	var w_pass: float = 0.35
+
+	# DIRECT SHOT: Direct FK only, within shooting range (~480px) and feasible lateral angle
+	var lat_dist_to_goal: float = absf(fk_pos.y - opp_goal.y)
+	if is_direct and dist_to_goal <= 480.0 and lat_dist_to_goal <= 260.0:
+		var dist_factor: float = clampf(1.0 - (dist_to_goal - 180.0) / 300.0, 0.0, 1.0)
+		var angle_factor: float = clampf(1.0 - lat_dist_to_goal / 260.0, 0.0, 1.0)
+		w_shot = 0.40 + dist_factor * 0.40 + angle_factor * 0.30
+		if role == Role.OUTFIELD_ATTACKER:
+			w_shot += 0.20
+		elif role == Role.OUTFIELD_DEFENDER:
+			w_shot -= 0.25
+		w_shot += (eff_aggression - 0.5) * 0.20 + (eff_composure - 0.5) * 0.15
+		w_shot = clampf(w_shot, 0.10, 1.50)
+
+	# CROSS: In attacking half / crossing range (~200px to ~720px from goal)
+	if dist_to_goal >= 200.0 and dist_to_goal <= 720.0:
+		var wide_factor: float = clampf(lat_dist_to_goal / 200.0, 0.0, 1.0)
+		w_cross = 0.35 + wide_factor * 0.45
+		if dist_to_goal > 320.0 and dist_to_goal <= 600.0:
+			w_cross += 0.30
+		if not is_direct:
+			w_cross += 0.50
+		w_cross = clampf(w_cross, 0.10, 1.30)
+
+	# LONG BALL: In defensive half / deep territory
+	if dist_to_goal > 620.0:
+		var deep_factor: float = clampf((dist_to_goal - 620.0) / 400.0, 0.0, 1.0)
+		w_long = 0.40 + deep_factor * 0.50
+		if role == Role.OUTFIELD_DEFENDER:
+			w_long += 0.20
+		w_long = clampf(w_long, 0.10, 1.20)
+
+	# 2. Weighted sampling
+	var total_weight: float = w_shot + w_cross + w_long + w_pass
+	var roll: float = _rng.randf() * total_weight
+	var chosen_action: FreeKickActionType = FreeKickActionType.SHORT_PASS
+
+	if roll < w_shot:
+		chosen_action = FreeKickActionType.DIRECT_SHOT
+	elif roll < w_shot + w_cross:
+		chosen_action = FreeKickActionType.CROSS
+	elif roll < w_shot + w_cross + w_long:
+		chosen_action = FreeKickActionType.LONG_BALL
+	else:
+		chosen_action = FreeKickActionType.SHORT_PASS
+
+	# 3. Resolve execution parameters and aim direction
+	var aim_dir: Vector2 = Vector2.ZERO
+	free_kick_action_type = chosen_action
+
+	match chosen_action:
+		FreeKickActionType.DIRECT_SHOT:
+			free_kick_action_label = "DIRECT FK"
+			free_kick_is_tap = false
+			var corner_y: float = -65.0 if _rng.randf() < 0.5 else 65.0
+			var target_point: Vector2 = opp_goal + Vector2(0.0, corner_y + _rng.randf_range(-15.0, 15.0))
+			aim_dir = (target_point - fk_pos).normalized()
+			free_kick_charge_ratio = clampf(lerpf(0.70, 0.95, dist_to_goal / 480.0), 0.65, 0.98)
+			free_kick_is_lob = dist_to_goal > 280.0 or _rng.randf() < 0.60
+
+		FreeKickActionType.CROSS:
+			free_kick_action_label = "CROSS"
+			free_kick_is_tap = false
+			free_kick_is_lob = true
+			var box_target: Vector2 = opp_goal + Vector2(-attack_dir_x * 150.0, _rng.randf_range(-40.0, 40.0))
+			var best_teammate: HeavyPlayerController = _find_best_box_target(opp_goal, attack_dir_x)
+			if best_teammate != null:
+				box_target = best_teammate.global_position + Vector2(attack_dir_x * 20.0, 0.0)
+			aim_dir = (box_target - fk_pos).normalized()
+			var target_dist: float = fk_pos.distance_to(box_target)
+			free_kick_charge_ratio = clampf(target_dist / 480.0, 0.65, 0.85)
+
+		FreeKickActionType.LONG_BALL:
+			free_kick_action_label = "LONG BALL"
+			free_kick_is_tap = false
+			free_kick_is_lob = true
+			var advanced_target: Vector2 = (pitch_boundary.get_centre_spot() if pitch_boundary != null else Vector2.ZERO) + Vector2(attack_dir_x * 240.0, _rng.randf_range(-120.0, 120.0))
+			var best_fwd: HeavyPlayerController = _find_most_advanced_teammate(attack_dir_x)
+			if best_fwd != null:
+				advanced_target = best_fwd.global_position + Vector2(attack_dir_x * 30.0, 0.0)
+			aim_dir = (advanced_target - fk_pos).normalized()
+			var long_dist: float = fk_pos.distance_to(advanced_target)
+			free_kick_charge_ratio = clampf(long_dist / 550.0, 0.75, 0.92)
+
+		FreeKickActionType.SHORT_PASS:
+			free_kick_action_label = "PASS"
+			free_kick_is_tap = true
+			free_kick_is_lob = false
+			free_kick_charge_ratio = 0.0
+			var pass_target: HeavyPlayerController = find_pass_target_for_set_piece()
+			if pass_target != null:
+				aim_dir = (pass_target.global_position - fk_pos).normalized()
+			elif pitch_boundary != null:
+				aim_dir = (opp_goal - fk_pos).normalized()
+			else:
+				aim_dir = Vector2(attack_dir_x, 0.0)
+
+	if is_zero_approx(aim_dir.length_squared()):
+		aim_dir = Vector2(attack_dir_x, 0.0)
+
+	return aim_dir
+
+
+func _find_best_box_target(opp_goal: Vector2, attack_dir_x: float) -> HeavyPlayerController:
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null or player == null:
+		return null
+	var best: HeavyPlayerController = null
+	var best_dist_sq: float = 99999999.0
+	for i: int in range(world.player_nodes.size()):
+		if world.player_teams[i] != player.team:
+			continue
+		var other: HeavyPlayerController = world.player_nodes[i]
+		if other == null or other == player:
+			continue
+		var other_brain := other.get_node_or_null("PlayerBrain") as PlayerBrain
+		if other_brain != null and other_brain.is_goalkeeper:
+			continue
+		var p_pos: Vector2 = other.global_position
+		var depth_to_goal: float = (opp_goal.x - p_pos.x) * attack_dir_x
+		if depth_to_goal > 0.0 and depth_to_goal < 320.0 and absf(p_pos.y - opp_goal.y) < 280.0:
+			var d_sq: float = p_pos.distance_squared_to(opp_goal)
+			if d_sq < best_dist_sq:
+				best_dist_sq = d_sq
+				best = other
+	return best
+
+
+func _find_most_advanced_teammate(attack_dir_x: float) -> HeavyPlayerController:
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null or player == null:
+		return null
+	var best: HeavyPlayerController = null
+	var best_advancement: float = -999999.0
+	for i: int in range(world.player_nodes.size()):
+		if world.player_teams[i] != player.team:
+			continue
+		var other: HeavyPlayerController = world.player_nodes[i]
+		if other == null or other == player:
+			continue
+		var other_brain := other.get_node_or_null("PlayerBrain") as PlayerBrain
+		if other_brain != null and other_brain.is_goalkeeper:
+			continue
+		var adv: float = other.global_position.x * attack_dir_x
+		if adv > best_advancement:
+			best_advancement = adv
+			best = other
+	return best
+
+
 ## Public wrapper for set pieces: a CPU-controlled taker has no run-up during
 ## which the brain can steer facing_direction toward a real target the way
 ## open play does, so SetPieceCoordinator resolves one directly through this
@@ -1563,10 +1762,13 @@ func _predict_intercept_position() -> Vector2:
 	)
 
 
-## Returns true if a teammate (or this player) last touched the ball.
+## Returns true if a teammate (or this player) controls or last touched the ball.
 func _team_has_ball() -> bool:
 	if ball == null:
 		return false
+	if ball.possessor != null and ball.possessor is HeavyPlayerController:
+		var carrier := ball.possessor as HeavyPlayerController
+		return carrier.team == player.team
 	var toucher: HeavyPlayerController = ball.last_touched_by
 	if toucher == null:
 		return false
@@ -1804,6 +2006,35 @@ func _find_open_space_target() -> Vector2:
 
 	var ball_pos: Vector2 = ball.global_position
 	var has_ball: bool = _team_has_ball()
+
+	var carrier := ball.possessor as HeavyPlayerController if (ball.possessor != null and ball.possessor is HeavyPlayerController) else null
+	if carrier != null and carrier.is_holding_ball():
+		if carrier.team != player.team:
+			# Opposing goalkeeper is holding the ball: fall back to defensive formation shape and keep outside the penalty box
+			var fallback_anchor: Vector2 = formation_anchor
+			if pitch_boundary != null:
+				var opp_goal_x: float = pitch_boundary.get_goal_centre(1 - player.team).x
+				var min_x_from_goal: float = PitchBoundary.PENALTY_AREA_DEPTH + 40.0
+				if opp_goal_x < 0.0:
+					fallback_anchor.x = maxf(fallback_anchor.x, opp_goal_x + min_x_from_goal)
+				else:
+					fallback_anchor.x = minf(fallback_anchor.x, opp_goal_x - min_x_from_goal)
+			return clamp_to_playable_area(fallback_anchor)
+		else:
+			# Own goalkeeper is holding the ball: fan out and push forward into open distribution lanes
+			var fwd_dir: float = _get_attack_sign()
+			match role:
+				Role.OUTFIELD_DEFENDER:
+					var wide_anchor: Vector2 = formation_anchor
+					if absf(formation_anchor.y) < 80.0:
+						wide_anchor.y += 120.0 if player_index % 2 == 0 else -120.0
+					return clamp_to_playable_area(wide_anchor)
+				Role.OUTFIELD_MIDFIELDER:
+					var mid_target: Vector2 = formation_anchor + Vector2(fwd_dir * 40.0, 0.0)
+					return clamp_to_playable_area(mid_target)
+				Role.OUTFIELD_ATTACKER:
+					var att_target: Vector2 = formation_anchor + Vector2(fwd_dir * 80.0, 0.0)
+					return clamp_to_playable_area(att_target)
 
 	var dynamic_anchor: Vector2 = formation_anchor.lerp(ball_pos, formation_ball_weight)
 	if pitch_boundary != null:
@@ -2137,7 +2368,7 @@ func _resolve_defensive_duty() -> DefensiveDuty:
 	if _team_has_ball():
 		return DefensiveDuty.NONE
 	var carrier: HeavyPlayerController = world.press_trigger_carrier
-	if not is_instance_valid(carrier) or carrier.team == player.team:
+	if not is_instance_valid(carrier) or carrier.team == player.team or carrier.is_holding_ball():
 		return DefensiveDuty.NONE
 
 	var my_dist_sq: float = player.global_position.distance_squared_to(carrier.global_position)
@@ -2370,6 +2601,12 @@ func _steer_for_action(delta: float) -> Vector2:
 	player.wants_tackle = _should_attempt_tackle()
 	if player.wants_tackle:
 		_tackle_cooldown = TACKLE_ATTEMPT_COOLDOWN
+	elif not _team_has_ball() and player != null:
+		var carrier: HeavyPlayerController = _get_ball_carrier()
+		if carrier != null and is_instance_valid(carrier):
+			var dist_to_carrier: float = player.global_position.distance_to(carrier.global_position)
+			if dist_to_carrier < 110.0:
+				player.show_action_text("JOCKEY", Color(0.35, 0.75, 1.0))
 
 	# --- Pass execution ---
 	var is_throw_in_taker: bool = player != null and player.state_factory != null and player.state_factory.current_state_name == &"ThrowIn"
@@ -2839,3 +3076,88 @@ func _find_nearby_opponents() -> Array[Node2D]:
 	var nearby: Array[Node2D] = world.get_nearby_opponent_nodes(player.global_position, PRESSURE_RADIUS, player.team)
 	_opponents_buffer.append_array(nearby)
 	return _opponents_buffer
+
+
+func _steer_celebration(_delta: float) -> void:
+	if player == null:
+		return
+
+	var scoring_team: int = GameManager.last_scoring_team
+	var is_scoring_team: bool = (player.team == scoring_team)
+
+	if is_scoring_team:
+		if is_goalkeeper:
+			var gk_target: Vector2 = formation_anchor
+			var dist_sq: float = player.global_position.distance_squared_to(gk_target)
+			if dist_sq > 400.0:
+				player.movement_intent = (gk_target - player.global_position).normalized() * 0.4
+			else:
+				player.movement_intent = Vector2.ZERO
+			player.wants_sprint = false
+			return
+
+		var world: MatchWorldModel = MatchWorldModel.instance
+		var user_lead: HeavyPlayerController = null
+		var scorer_lead: HeavyPlayerController = null
+
+		if world != null:
+			for p: HeavyPlayerController in world.player_nodes:
+				if p != null and is_instance_valid(p) and p.team == scoring_team:
+					if p.is_user_controlled:
+						user_lead = p
+						break
+					elif scorer_lead == null and p.brain != null and not p.brain.is_goalkeeper:
+						scorer_lead = p
+
+		if user_lead != null:
+			var angle: float = float(player_index) * 0.62831853
+			var radius: float = 32.0 + float(player_index % 3) * 14.0
+			var slot_target: Vector2 = user_lead.global_position + Vector2(cos(angle), sin(angle)) * radius
+			var dist_sq: float = player.global_position.distance_squared_to(slot_target)
+			if dist_sq > 625.0:
+				player.movement_intent = (slot_target - player.global_position).normalized()
+				player.wants_sprint = true
+			else:
+				player.movement_intent = Vector2.ZERO
+				player.wants_sprint = false
+				player.facing_direction = (user_lead.global_position - player.global_position).normalized()
+		else:
+			var half: Vector2 = (pitch_boundary.pitch_size * 0.5) if pitch_boundary != null else Vector2(800.0, 450.0)
+			var centre: Vector2 = pitch_boundary.get_centre_spot() if pitch_boundary != null else Vector2.ZERO
+			var defends_left: bool = (scoring_team == 0) if (pitch_boundary == null or not pitch_boundary.sides_flipped) else (scoring_team != 0)
+			var attack_dir: float = 1.0 if defends_left else -1.0
+			var y_sign: float = 1.0 if (scorer_lead != null and scorer_lead.global_position.y >= centre.y) else -1.0
+			var corner_target: Vector2 = centre + Vector2(attack_dir * (half.x - 48.0), y_sign * (half.y - 48.0))
+
+			var is_scorer: bool = (scorer_lead == player) or (ball != null and ball.last_touched_by == player)
+			if is_scorer:
+				var dist_sq: float = player.global_position.distance_squared_to(corner_target)
+				if dist_sq > 1225.0:
+					player.movement_intent = (corner_target - player.global_position).normalized()
+					player.wants_sprint = true
+				else:
+					player.movement_intent = Vector2.ZERO
+					player.wants_sprint = false
+					player.facing_direction = Vector2(-attack_dir, -y_sign).normalized()
+			else:
+				var huddle_centre: Vector2 = scorer_lead.global_position if (scorer_lead != null and is_instance_valid(scorer_lead)) else corner_target
+				var angle: float = float(player_index) * 0.62831853
+				var radius: float = 30.0 + float(player_index % 3) * 12.0
+				var slot_target: Vector2 = huddle_centre + Vector2(cos(angle), sin(angle)) * radius
+				var dist_sq: float = player.global_position.distance_squared_to(slot_target)
+				if dist_sq > 625.0:
+					player.movement_intent = (slot_target - player.global_position).normalized()
+					player.wants_sprint = true
+				else:
+					player.movement_intent = Vector2.ZERO
+					player.wants_sprint = false
+					player.facing_direction = (huddle_centre - player.global_position).normalized()
+	else:
+		var retreat_target: Vector2 = formation_anchor
+		var dist_sq: float = player.global_position.distance_squared_to(retreat_target)
+		if dist_sq > 900.0:
+			player.movement_intent = (retreat_target - player.global_position).normalized() * 0.35
+		else:
+			player.movement_intent = Vector2.ZERO
+		player.wants_sprint = false
+

@@ -9,6 +9,7 @@
 ## Exposes:
 ##   - start_match(), register_goal(team), set_phase(phase), restart_play()
 ##   - start_set_piece(phase, team, position), start_free_kick(), start_penalty()
+##   - set_simulation_speed(speed), get_simulation_speed(), simulation_speed
 ##   - current_phase, score, match_time, match_duration
 ##   - set_piece_team, set_piece_position, free_kick_is_direct, is_set_piece_active()
 ##   - get_clock_string(), get_score_string(), get_match_tick()
@@ -52,6 +53,18 @@ enum MatchStage { SIZING_UP = 0, EQUILIBRIUM = 1, TRANSITIONS = 2, GAME_CRUNCH =
 const STAGE_1_FRACTION: float = 15.0 / 90.0
 const STAGE_2_FRACTION: float = 60.0 / 90.0
 const STAGE_3_FRACTION: float = 75.0 / 90.0
+
+const MIN_SIMULATION_SPEED: float = 1.0
+const MAX_SIMULATION_SPEED: float = 16.0
+
+## Playback/simulation speed scale (1.0 = normal real-time gameplay).
+## In CPU vs CPU matches, this can be accelerated up to 16.0x like Football Manager.
+var simulation_speed: float = 1.0
+
+## Whether goal replays are shown when a goal is scored (Football Manager style).
+## Toggleable in real time via the simulation speed panel or pregame setup.
+var goal_replays_enabled: bool = true
+
 
 var current_phase: MatchPhase = MatchPhase.PREGAME
 ## Last MatchStage broadcast via GameEvents.match_stage_changed — tracked here
@@ -132,9 +145,30 @@ func _on_foul_stoppage(_fouler: Node, _victim: Node, _pos: Vector2) -> void:
 
 ## Hit-stop: briefly slow the clock on a high-charge shot so the strike reads.
 func _on_powerful_shot(_shooter: HeavyPlayerController, _speed: float, _ratio: float) -> void:
-	Engine.time_scale = 0.15
+	Engine.time_scale = 0.15 * simulation_speed
 	await get_tree().create_timer(0.055 * Engine.time_scale).timeout
-	Engine.time_scale = 1.0
+	Engine.time_scale = simulation_speed
+
+
+func set_simulation_speed(speed: float) -> void:
+	simulation_speed = clampf(speed, MIN_SIMULATION_SPEED, MAX_SIMULATION_SPEED)
+	Engine.time_scale = simulation_speed
+	GameEvents.simulation_speed_changed.emit(simulation_speed)
+
+
+func get_simulation_speed() -> float:
+	return simulation_speed
+
+
+func set_goal_replays_enabled(enabled: bool) -> void:
+	goal_replays_enabled = enabled
+	GameEvents.goal_replays_toggled.emit(enabled)
+
+
+func is_goal_replays_enabled() -> bool:
+	return goal_replays_enabled
+
+
 
 
 ## Calculates the time dilation factor mapping real elapsed seconds to in-game seconds.
@@ -226,6 +260,8 @@ func start_match() -> void:
 	last_scoring_team = -1
 	_half_time_fired = false
 	shootout_active = false
+	simulation_speed = 1.0
+	Engine.time_scale = 1.0
 	match_opening_kickoff_team = TEAM_A
 	_accumulated_stoppage_sec = 60.0
 	stoppage_minutes_half_1 = 0
@@ -362,6 +398,8 @@ func get_leading_team() -> int:
 
 
 func _end_match() -> void:
+	simulation_speed = 1.0
+	Engine.time_scale = 1.0
 	set_phase(MatchPhase.FULL_TIME)
 	GameEvents.match_ended.emit(get_leading_team())
 
@@ -382,5 +420,7 @@ func start_shootout() -> void:
 ## the match — winner here is always TEAM_A/TEAM_B, never a draw.
 func end_shootout(winner: int) -> void:
 	shootout_active = false
+	simulation_speed = 1.0
+	Engine.time_scale = 1.0
 	set_phase(MatchPhase.FULL_TIME)
 	GameEvents.match_ended.emit(winner)

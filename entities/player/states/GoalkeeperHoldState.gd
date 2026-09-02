@@ -24,6 +24,9 @@ const MAX_USER_HOLD_TIME: float = 6.0
 ## Speed multiplier for repositioning while holding the ball (slow walk).
 const SLOW_WALK_SPEED_RATIO: float = 0.25
 
+## Lockout applied to goalkeeper after releasing the ball to prevent instant re-catch.
+const DISTRIBUTE_LOCKOUT: float = 0.60
+
 ## Set by caller (GoalkeeperDiveState or shot handler) before transition.
 var was_diving_save: bool = false
 var was_shot: bool = false
@@ -52,6 +55,7 @@ func enter(player: HeavyPlayerController) -> void:
 		_held_ball.velocity_z = 0.0
 		_held_ball.position_z = 10.0
 		_held_ball.set_possessor(player)
+		_held_ball.last_touched_by = player
 
 	# Modulate hold duration based on match urgency and score state
 	_hold_duration = randf_range(BASE_HOLD_DURATION_MIN, BASE_HOLD_DURATION_MAX)
@@ -161,6 +165,8 @@ func _distribute_to_teammate(player: HeavyPlayerController, teammate: HeavyPlaye
 	var lead_pos: Vector2 = teammate.global_position + teammate.velocity * 0.25
 	var throw_dir: Vector2 = (lead_pos - player.global_position).normalized()
 	var throw_speed: float = 300.0
+	player.ball_control_lockout = DISTRIBUTE_LOCKOUT
+	_held_ball.global_position = player.global_position + throw_dir * 18.0
 	_held_ball.position_z = 0.0
 	_held_ball.apply_kick(throw_dir * throw_speed, 15.0, player)
 	player.show_action_text("THROW")
@@ -177,6 +183,8 @@ func _distribute_throw(player: HeavyPlayerController) -> void:
 
 	var throw_dir: Vector2 = player.facing_direction
 	var throw_speed: float = 320.0
+	player.ball_control_lockout = DISTRIBUTE_LOCKOUT
+	_held_ball.global_position = player.global_position + throw_dir * 18.0
 	_held_ball.position_z = 0.0
 	_held_ball.apply_kick(throw_dir * throw_speed, 10.0, player)
 	player.show_action_text("THROW")
@@ -201,6 +209,8 @@ func _distribute_punt(player: HeavyPlayerController) -> void:
 		punt_dir = InputHelper.get_movement_vector().normalized()
 
 	var punt_speed: float = 520.0
+	player.ball_control_lockout = DISTRIBUTE_LOCKOUT
+	_held_ball.global_position = player.global_position + punt_dir * 18.0
 	_held_ball.position_z = 0.0
 	_held_ball.apply_kick(punt_dir * punt_speed, 150.0, player)
 	player.show_action_text("PUNT")

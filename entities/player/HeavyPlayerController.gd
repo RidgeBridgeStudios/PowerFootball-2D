@@ -204,9 +204,15 @@ const GOALKEEPER_CATCH_MAX_HEIGHT: float = 65.0
 var ball_control_lockout: float = 0.0
 
 var _action_text_cooldown: float = 0.0
+var _sprint_text_cooldown: float = 0.0
+var _jostle_text_cooldown: float = 0.0
+var _jockey_text_cooldown: float = 0.0
+var _fatigue_text_cooldown: float = 0.0
+var _was_sprinting: bool = false
 
-@onready var sprite: Sprite2D = $Sprite2D
-@onready var shadow: Sprite2D = $ShadowSprite2D
+@onready var visual: PlayerVisual = $PlayerVisual if has_node("PlayerVisual") else null
+@onready var sprite: Sprite2D = $Sprite2D if has_node("Sprite2D") else ($PlayerVisual/DotSprite if has_node("PlayerVisual/DotSprite") else null)
+@onready var shadow: Sprite2D = $ShadowSprite2D if has_node("ShadowSprite2D") else ($PlayerVisual/ShadowSprite if has_node("PlayerVisual/ShadowSprite") else null)
 @onready var body_collider: CollisionShape2D = $CollisionShape2D
 @onready var foot_sensor: Area2D = $FootSensor
 @onready var aerial_hitbox: Area2D = $AerialHitbox
@@ -224,9 +230,16 @@ func _ready() -> void:
 	_register_with_world_model()
 	_recalculate_movement_curve()
 	_apply_collision_matrix()
+	_setup_stamina_bar()
 	stamina = stamina_max
 	stamina_state_changed.emit(1.0)
 	GameEvents.player_mood_changed.connect(_on_player_mood_changed)
+
+	if visual != null:
+		var team_data: TeamData = DataLoader.get_match_team(team) if DataLoader.league != null else null
+		var p_data: PlayerData = get_meta(&"player_data", null) as PlayerData
+		var is_gk: bool = brain != null and brain.is_goalkeeper
+		visual.apply_data(p_data, team_data, is_gk)
 
 
 ## Claims the next MatchWorldModel slot and tells this player's brain which
@@ -265,6 +278,14 @@ func _physics_process(delta: float) -> void:
 	_update_visual_anchors()
 	if _action_text_cooldown > 0.0:
 		_action_text_cooldown = maxf(0.0, _action_text_cooldown - delta)
+	if _sprint_text_cooldown > 0.0:
+		_sprint_text_cooldown = maxf(0.0, _sprint_text_cooldown - delta)
+	if _jostle_text_cooldown > 0.0:
+		_jostle_text_cooldown = maxf(0.0, _jostle_text_cooldown - delta)
+	if _jockey_text_cooldown > 0.0:
+		_jockey_text_cooldown = maxf(0.0, _jockey_text_cooldown - delta)
+	if _fatigue_text_cooldown > 0.0:
+		_fatigue_text_cooldown = maxf(0.0, _fatigue_text_cooldown - delta)
 	if ball_control_lockout > 0.0:
 		ball_control_lockout = maxf(0.0, ball_control_lockout - delta)
 
@@ -341,6 +362,11 @@ func apply_player_data(p: PlayerData, reset_stamina: bool = true) -> void:
 
 	if brain != null:
 		brain.apply_player_data(p)
+
+	if visual != null:
+		var team_data: TeamData = DataLoader.get_match_team(team) if DataLoader.league != null else null
+		var is_gk: bool = brain != null and brain.is_goalkeeper
+		visual.apply_data(p, team_data, is_gk)
 
 
 func _apply_collision_matrix() -> void:
@@ -443,6 +469,9 @@ func _resolve_sprint_jostle(delta: float) -> void:
 		var push: Vector2 = collision.get_normal() * JOSTLE_IMPULSE_PER_SECOND * delta
 		apply_external_impulse(push)
 		other.apply_external_impulse(-push)
+
+		show_action_text("SHOULDER", Color(1.0, 0.84, 0.25))
+		other.show_action_text("SHOULDER", Color(1.0, 0.84, 0.25))
 
 
 ## Halts all momentum immediately (used during dead-ball / set-piece freezes).
@@ -584,16 +613,95 @@ func get_ball_in_catch_range() -> Pseudo3DBall:
 
 ## Spawns floating action text in world space above this player.
 ## Added to the parent (not self) so the text does not rotate with the player.
-func show_action_text(message: String) -> void:
-	if message.is_empty() or _action_text_cooldown > 0.0:
+func show_action_text(message: String, color: Color = Color.WHITE) -> void:
+	if message.is_empty():
 		return
+	if message == "SPRINT" or message == "RUN":
+		if _sprint_text_cooldown > 0.0:
+			return
+		_sprint_text_cooldown = 2.0
+	elif message == "SHOULDER" or message == "DUEL":
+		if _jostle_text_cooldown > 0.0:
+			return
+		_jostle_text_cooldown = 1.2
+	elif message == "JOCKEY" or message == "CONTAIN":
+		if _jockey_text_cooldown > 0.0:
+			return
+		_jockey_text_cooldown = 1.8
+	elif message == "TIRED" or message == "EXHAUSTED!":
+		if _fatigue_text_cooldown > 0.0:
+			return
+		_fatigue_text_cooldown = 4.0
+	else:
+		if _action_text_cooldown > 0.0:
+			return
+		_action_text_cooldown = ACTION_TEXT_COOLDOWN
+
 	var fx: ActionText = ACTION_TEXT_SCENE.instantiate() as ActionText
 	if fx == null:
 		return
 	get_parent().add_child(fx)
 	fx.global_position = global_position + Vector2(0.0, -28.0)
-	fx.show_text(message)
-	_action_text_cooldown = ACTION_TEXT_COOLDOWN
+	fx.show_text(message, color)
+
+
+func _setup_stamina_bar() -> void:
+	if stamina_bar == null:
+		return
+	stamina_bar.offset_left = -13.0
+	stamina_bar.offset_right = 13.0
+	stamina_bar.offset_top = 13.0
+	stamina_bar.offset_bottom = 16.5
+	stamina_bar.max_value = 1.0
+	stamina_bar.step = 0.005
+	stamina_bar.value = 1.0
+	stamina_bar.show_percentage = false
+	stamina_bar.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	var bg_style := StyleBoxFlat.new()
+	bg_style.bg_color = Color(0.04, 0.04, 0.06, 0.70)
+	bg_style.corner_radius_top_left = 2
+	bg_style.corner_radius_top_right = 2
+	bg_style.corner_radius_bottom_left = 2
+	bg_style.corner_radius_bottom_right = 2
+	bg_style.border_width_left = 1
+	bg_style.border_width_top = 1
+	bg_style.border_width_right = 1
+	bg_style.border_width_bottom = 1
+	bg_style.border_color = Color(0.15, 0.15, 0.20, 0.6)
+	stamina_bar.add_theme_stylebox_override("background", bg_style)
+
+	var fill_style := StyleBoxFlat.new()
+	fill_style.bg_color = Color(1.0, 1.0, 1.0, 1.0)
+	fill_style.corner_radius_top_left = 2
+	fill_style.corner_radius_top_right = 2
+	fill_style.corner_radius_bottom_left = 2
+	fill_style.corner_radius_bottom_right = 2
+	stamina_bar.add_theme_stylebox_override("fill", fill_style)
+
+
+func _update_stamina_bar_display(ratio: float) -> void:
+	if stamina_bar == null:
+		return
+	stamina_bar.value = ratio
+
+	var tier: FatigueTier = get_fatigue_tier()
+	var bar_color: Color
+	if sprint_locked or tier == FatigueTier.EXHAUSTED:
+		bar_color = Color(0.95, 0.25, 0.25)
+	elif tier == FatigueTier.TIRED:
+		bar_color = Color(1.0, 0.75, 0.15)
+	else:
+		bar_color = Color(0.24, 0.86, 0.41)
+
+	stamina_bar.modulate = bar_color
+
+	var is_sim: bool = GameManager.get_meta(&"simulate_match", false)
+	var show_all: bool = GameManager.get_meta(&"stamina_bars_always_visible", false)
+	if is_user_controlled or is_sim or show_all:
+		stamina_bar.visible = true
+	else:
+		stamina_bar.visible = ratio < 0.98 or sprint_locked or is_sprinting
 
 
 ## The ball currently inside the foot sensor, or null. Returns the candidate
@@ -647,8 +755,14 @@ func _update_sprint(delta: float) -> void:
 		wants_sprint = Input.is_action_pressed(&"action_sprint")
 
 	var is_moving: bool = movement_intent.length() > 0.0
+	var was_sprinting: bool = is_sprinting
 	is_sprinting = wants_sprint and is_moving and not sprint_locked
 
+	if not was_sprinting and is_sprinting and velocity.length() > 110.0:
+		show_action_text("SPRINT", Color(0.33, 0.95, 0.55))
+	_was_sprinting = is_sprinting
+
+	var previous_tier: FatigueTier = get_fatigue_tier()
 	var previous_ratio: float = get_stamina_ratio()
 	var time_dilation_scale: float = GameManager.get_time_scale() / (GameManager.SIMULATED_HALF_DURATION / GameManager.BASE_HALF_DURATION_REAL_SEC)
 
@@ -658,14 +772,24 @@ func _update_sprint(delta: float) -> void:
 			sprint_locked = true
 			is_sprinting = false
 			GameEvents.stamina_depleted.emit(self)
+			show_action_text("EXHAUSTED!", Color(1.0, 0.25, 0.25))
 	else:
 		stamina = minf(stamina + stamina_recover_rate * time_dilation_scale * delta, stamina_max)
 		if sprint_locked and stamina >= stamina_sprint_unlock:
 			sprint_locked = false
 
+	var current_tier: FatigueTier = get_fatigue_tier()
+	if current_tier != previous_tier:
+		if current_tier == FatigueTier.TIRED and previous_tier == FatigueTier.FRESH:
+			show_action_text("TIRED", Color(1.0, 0.72, 0.20))
+		elif current_tier == FatigueTier.EXHAUSTED and previous_tier != FatigueTier.EXHAUSTED:
+			show_action_text("EXHAUSTED!", Color(1.0, 0.25, 0.25))
+
 	var ratio: float = get_stamina_ratio()
 	if not is_equal_approx(ratio, previous_ratio):
 		stamina_state_changed.emit(ratio)
+
+	_update_stamina_bar_display(ratio)
 
 
 func _update_facing() -> void:
@@ -716,10 +840,13 @@ func _update_facing() -> void:
 
 
 func _update_visual_anchors() -> void:
-	# Height reads as a vertical offset on the sprite; the shadow stays pinned to
-	# the ground truth position. Same convention as Pseudo3DBall.
-	sprite.position.y = -current_z
-	sprite.rotation = facing_direction.angle()
-	if rotate_shadow:
-		shadow.rotation = facing_direction.angle()
-	shadow.position = Vector2.ZERO
+	var in_possession: bool = brain != null and brain.ball != null and brain.ball.possessor == self
+	if visual != null:
+		visual.sync_physics(facing_direction, current_z, is_user_controlled, in_possession)
+	elif sprite != null:
+		sprite.position.y = -current_z
+		sprite.rotation = facing_direction.angle()
+		if shadow != null:
+			if rotate_shadow:
+				shadow.rotation = facing_direction.angle()
+			shadow.position = Vector2.ZERO

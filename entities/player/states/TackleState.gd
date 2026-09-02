@@ -55,6 +55,7 @@ func enter(player: HeavyPlayerController) -> void:
 	# once you have dived in, you are going where you were pointed.
 	player.apply_external_impulse(player.facing_direction * LUNGE_SPEED)
 	player.is_sprinting = false
+	player.show_action_text("TACKLE", Color(1.0, 0.45, 0.4))
 
 
 func process(player: HeavyPlayerController, delta: float) -> StringName:
@@ -117,6 +118,7 @@ func _try_win_ball(player: HeavyPlayerController) -> bool:
 
 	if loser != null and loser != player:
 		GameEvents.tackle_won.emit(player, loser)
+		player.show_action_text("WON BALL", Color(0.33, 0.95, 0.55))
 
 	if player.is_user_controlled:
 		InputHelper.rumble(0.4, 0.7, 0.15)
@@ -138,6 +140,7 @@ func _check_mistimed_foul(
 
 	# A fully back-facing challenge is always a foul — no attribute saves it.
 	if effective_facing < BACK_TACKLE_FOUL_DOT:
+		player.show_action_text("FOUL!", Color(1.0, 0.25, 0.25))
 		GameEvents.foul_committed.emit(player, victim, victim.global_position)
 		return
 
@@ -151,6 +154,7 @@ func _check_mistimed_foul(
 		if dist_sq < 24.0 * 24.0:
 			var foul_prob: float = 0.25 * (1.0 - aggression * 0.4)
 			if _rng.randf() < foul_prob:
+				player.show_action_text("FOUL!", Color(1.0, 0.25, 0.25))
 				GameEvents.foul_committed.emit(player, victim, victim.global_position)
 		return
 
@@ -159,6 +163,7 @@ func _check_mistimed_foul(
 	var foul_probability: float = side_factor * 0.60 * (1.0 - aggression * 0.3)
 
 	if _rng.randf() < foul_probability:
+		player.show_action_text("FOUL!", Color(1.0, 0.25, 0.25))
 		GameEvents.foul_committed.emit(player, victim, victim.global_position)
 
 

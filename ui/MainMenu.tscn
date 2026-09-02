@@ -68,7 +68,7 @@ text = "🏟 Practice Arena"
 layout_mode = 2
 custom_minimum_size = Vector2(0, 44)
 alignment = 0
-text = "🏆 Manager Mode  🔒"
+text = "🏆 Manager Mode"
 
 [node name="CareerButton" type="Button" parent="MenuList"]
 layout_mode = 2

@@ -29,6 +29,17 @@ extends Resource
 ## Empty string means the manager is available for hire.
 @export var current_team: String = ""
 
+## --- Reputation, Security & Contract -----------------------------------------
+
+## 0.0 = rookie coach, 1.0 = legendary tactician
+@export_range(0.0, 1.0) var reputation: float = 0.50
+## 0.0 = on brink of sacking, 1.0 = untouchable idol
+@export_range(0.0, 1.0) var board_confidence: float = 0.65
+@export var contract_years: int = 2
+@export var salary_weekly: int = 25000
+## Respect/temperament towards match officials (0.0 = combative critic, 1.0 = respectful diplomat)
+@export_range(0.0, 1.0) var referee_respect: float = 0.60
+
 ## --- Tactical philosophy ---------------------------------------------------
 
 ## 0 = deep compact block, 1 = aggressive high line.
@@ -139,3 +150,11 @@ static func make_default(p_name: String, p_nationality: String) -> ManagerData:
 	m.manager_name = p_name
 	m.nationality = p_nationality
 	return m
+
+
+func update_board_confidence(delta: float) -> void:
+	board_confidence = clampf(board_confidence + delta, 0.0, 1.0)
+
+
+func update_reputation(delta: float) -> void:
+	reputation = clampf(reputation + delta, 0.05, 0.99)

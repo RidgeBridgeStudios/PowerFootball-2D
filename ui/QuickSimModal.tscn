@@ -1,0 +1,229 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/QuickSimModal.gd" id="1_quicksim"]
+
+[node name="QuickSimModal" type="CanvasLayer"]
+layer = 15
+script = ExtResource("1_quicksim")
+
+[node name="Root" type="Control" parent="."]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0, 0, 0, 0.88)
+
+[node name="Panel" type="PanelContainer" parent="Root"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -420.0
+offset_top = -310.0
+offset_right = 420.0
+offset_bottom = 310.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="Root/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="Header" type="VBoxContainer" parent="Root/Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="TitleLabel" type="Label" parent="Root/Panel/VBoxContainer/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+text = "QUICK MATCH SIMULATION"
+horizontal_alignment = 1
+
+[node name="MatchTitleLabel" type="Label" parent="Root/Panel/VBoxContainer/Header"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+text = "Team A vs Team B"
+horizontal_alignment = 1
+
+[node name="PreSimBox" type="VBoxContainer" parent="Root/Panel/VBoxContainer"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="ProbRow" type="HBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="HomeWinLabel" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/ProbRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "Home Win
+45.0%"
+horizontal_alignment = 1
+
+[node name="DrawLabel" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/ProbRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "Draw
+28.0%"
+horizontal_alignment = 1
+
+[node name="AwayWinLabel" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/ProbRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 16
+text = "Away Win
+27.0%"
+horizontal_alignment = 1
+
+[node name="MetricsGrid" type="HBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="XGValueLabel" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/MetricsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "xG: 1.45 - 0.98"
+horizontal_alignment = 1
+
+[node name="CSValueLabel" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/MetricsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Clean Sheet: 38% - 24%"
+horizontal_alignment = 1
+
+[node name="OverBTTSValueLabel" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/MetricsGrid"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "Over 2.5: 48%  |  BTTS: 52%"
+horizontal_alignment = 1
+
+[node name="Columns" type="HBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 16
+
+[node name="ScorelinesColumn" type="VBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox/Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ScorelinesTitle" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/Columns/ScorelinesColumn"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.7, 0.8, 0.7, 1)
+text = "Most Likely Scorelines"
+
+[node name="ScorelinesList" type="VBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox/Columns/ScorelinesColumn"]
+layout_mode = 2
+
+[node name="UnitsColumn" type="VBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox/Columns"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="UnitsTitle" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/Columns/UnitsColumn"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.7, 0.8, 0.7, 1)
+text = "Unit Strength Comparison"
+
+[node name="UnitsList" type="VBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox/Columns/UnitsColumn"]
+layout_mode = 2
+
+[node name="InsightsBox" type="VBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="InsightsTitle" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/InsightsBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.7, 0.8, 0.7, 1)
+text = "Tactical & Personnel Matchup Insights"
+
+[node name="InsightsList" type="VBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox/InsightsBox"]
+layout_mode = 2
+
+[node name="ButtonRow" type="HBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="CancelButton" type="Button" parent="Root/Panel/VBoxContainer/PreSimBox/ButtonRow"]
+custom_minimum_size = Vector2(130, 36)
+layout_mode = 2
+text = "Cancel"
+
+[node name="SimulateButton" type="Button" parent="Root/Panel/VBoxContainer/PreSimBox/ButtonRow"]
+custom_minimum_size = Vector2(200, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+text = "Simulate Match →"
+
+[node name="PostSimBox" type="VBoxContainer" parent="Root/Panel/VBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 14
+
+[node name="ScoreBanner" type="VBoxContainer" parent="Root/Panel/VBoxContainer/PostSimBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="FullTimeTitle" type="Label" parent="Root/Panel/VBoxContainer/PostSimBox/ScoreBanner"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+text = "FULL TIME RESULT"
+horizontal_alignment = 1
+
+[node name="FinalScoreLabel" type="Label" parent="Root/Panel/VBoxContainer/PostSimBox/ScoreBanner"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "FC Nordvik  2 - 1  CD Solano"
+horizontal_alignment = 1
+
+[node name="HeadlineLabel" type="Label" parent="Root/Panel/VBoxContainer/PostSimBox/ScoreBanner"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+text = "FC Nordvik claim victory at full time!"
+horizontal_alignment = 1
+
+[node name="EventsScroll" type="ScrollContainer" parent="Root/Panel/VBoxContainer/PostSimBox"]
+custom_minimum_size = Vector2(0, 200)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="EventsList" type="VBoxContainer" parent="Root/Panel/VBoxContainer/PostSimBox/EventsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+
+[node name="ButtonRow" type="HBoxContainer" parent="Root/Panel/VBoxContainer/PostSimBox"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="ViewStatsButton" type="Button" parent="Root/Panel/VBoxContainer/PostSimBox/ButtonRow"]
+custom_minimum_size = Vector2(220, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+text = "View Full Match Stats & Ratings"
+
+[node name="DoneButton" type="Button" parent="Root/Panel/VBoxContainer/PostSimBox/ButtonRow"]
+custom_minimum_size = Vector2(130, 36)
+layout_mode = 2
+text = "Done"

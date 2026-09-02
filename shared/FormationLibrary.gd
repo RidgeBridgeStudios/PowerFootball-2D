@@ -29,6 +29,10 @@ static func get_formation(name: String) -> Array[Dictionary]:
 			return _352()
 		"4-2-3-1":
 			return _4231()
+		"4-4-2 Diamond":
+			return _442_diamond()
+		"4-1-4-1":
+			return _4141()
 		"5-3-2":
 			return _532()
 		_:
@@ -124,3 +128,36 @@ static func _532() -> Array[Dictionary]:
 		_slot("ST", Vector2(550.0, -80.0)),
 		_slot("ST", Vector2(550.0, 80.0)),
 	]
+
+
+static func _442_diamond() -> Array[Dictionary]:
+	return [
+		_slot("GK", Vector2(-750.0, 0.0)),
+		_slot("CB", Vector2(-550.0, -120.0)),
+		_slot("CB", Vector2(-550.0, 120.0)),
+		_slot("LB", Vector2(-520.0, -320.0)),
+		_slot("RB", Vector2(-520.0, 320.0)),
+		_slot("DM", Vector2(-250.0, 0.0)),
+		_slot("LM", Vector2(-50.0, -280.0)),
+		_slot("RM", Vector2(-50.0, 280.0)),
+		_slot("AM", Vector2(220.0, 0.0)),
+		_slot("ST", Vector2(550.0, -80.0)),
+		_slot("ST", Vector2(550.0, 80.0)),
+	]
+
+
+static func _4141() -> Array[Dictionary]:
+	return [
+		_slot("GK", Vector2(-750.0, 0.0)),
+		_slot("CB", Vector2(-550.0, -120.0)),
+		_slot("CB", Vector2(-550.0, 120.0)),
+		_slot("LB", Vector2(-520.0, -320.0)),
+		_slot("RB", Vector2(-520.0, 320.0)),
+		_slot("DM", Vector2(-300.0, 0.0)),
+		_slot("LM", Vector2(0.0, -340.0)),
+		_slot("CM", Vector2(-50.0, -110.0)),
+		_slot("CM", Vector2(-50.0, 110.0)),
+		_slot("RM", Vector2(0.0, 340.0)),
+		_slot("ST", Vector2(600.0, 0.0)),
+	]
+

@@ -1,11 +1,11 @@
 {
-  "total_nodes": 76,
+  "total_nodes": 94,
   "layer_summary": {
-    "Layer 1 - Physics & Kinematics": 28,
-    "Layer 2 - Match AI & Spatial Navigation": 17,
+    "Layer 1 - Physics & Kinematics": 37,
+    "Layer 2 - Match AI & Spatial Navigation": 19,
     "Layer 3 - Match Social & Dynamic Psychology": 4,
     "Layer 4 - Club World & Persistent Entities": 10,
-    "Layer 5 - Narrative, Presentation & UI": 17
+    "Layer 5 - Narrative, Presentation & UI": 24
   },
   "nodes": {
     "autoloads/DataLoader.gd": {
@@ -23,15 +23,19 @@
       ],
       "direct_dependents": [
         "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchTelemetryLogger.gd",
+        "entities/manager/ManagerDirector.gd",
         "entities/player/HeavyPlayerController.gd",
         "entities/referee/FourthOfficialVisual.gd",
         "pitch/PitchScene.gd",
         "shared/LeagueData.gd",
         "shared/PlayerFactory.gd",
+        "shared/QuickSimEngine.gd",
         "shared/TeamData.gd",
         "ui/HUD.gd",
         "ui/KickOffMenu.gd",
         "ui/MatchStatsUI.gd",
+        "ui/manager/ManagerModeHub.gd",
         "ui/pregame/PreGameScreen.gd"
       ],
       "signals_declared": [],
@@ -70,14 +74,17 @@
       "direct_dependents": [
         "autoloads/GameManager.gd",
         "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchTelemetryLogger.gd",
         "autoloads/MatchWorldModel.gd",
         "entities/ball/Pseudo3DBall.gd",
         "entities/manager/ManagerDirector.gd",
+        "entities/manager/ManagerVisual.gd",
         "entities/player/HeavyPlayerController.gd",
         "entities/player/MoodSystem.gd",
         "entities/player/PlayerBrain.gd",
         "entities/player/states/AerialState.gd",
         "entities/player/states/ChargeKickState.gd",
+        "entities/player/states/GoalkeeperHoldState.gd",
         "entities/player/states/PenaltyKickState.gd",
         "entities/player/states/ShotLockState.gd",
         "entities/player/states/TackleState.gd",
@@ -85,16 +92,24 @@
         "entities/referee/MatchOfficialCrew.gd",
         "entities/referee/MatchReferee.gd",
         "entities/referee/OffsideDetector.gd",
+        "pitch/GoalCelebrationCoordinator.gd",
+        "pitch/GoalReplayCoordinator.gd",
         "pitch/GoalZone.gd",
+        "pitch/MatchIntroDirector.gd",
         "pitch/PenaltyShootoutCoordinator.gd",
         "pitch/PitchBoundary.gd",
         "pitch/PitchScene.gd",
         "pitch/SetPieceCoordinator.gd",
         "ui/HUD.gd",
+        "ui/MatchIntroUI.gd",
         "ui/pause/PauseMenu.gd",
-        "ui/pregame/PreGameScreen.gd"
+        "ui/pregame/PreGameScreen.gd",
+        "ui/tactics/TacticsEditor.gd"
       ],
       "signals_declared": [
+        "match_intro_started",
+        "match_intro_finished",
+        "match_intro_skipped",
         "kickoff_started",
         "kickoff_confirmed",
         "goal_scored",
@@ -122,6 +137,10 @@
         "aerial_contested",
         "powerful_shot_landed",
         "anticipatory_turnover_predicted",
+        "pass_completed",
+        "shot_taken",
+        "defensive_action_logged",
+        "carry_completed",
         "referee_awarded_foul",
         "referee_played_on",
         "yellow_card_shown",
@@ -141,7 +160,13 @@
         "team_urgency_updated",
         "team_momentum_updated",
         "match_stage_changed",
-        "emergency_tactics_triggered"
+        "emergency_tactics_triggered",
+        "simulation_speed_changed",
+        "goal_replays_toggled",
+        "replay_started",
+        "replay_ended",
+        "celebration_started",
+        "celebration_ended"
       ],
       "signals_emitted": [],
       "signals_connected": []
@@ -165,27 +190,38 @@
         "autoloads/DataLoader.gd",
         "autoloads/GameEvents.gd",
         "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchTelemetryLogger.gd",
         "autoloads/MatchWorldModel.gd",
         "entities/manager/ManagerDirector.gd",
         "entities/player/HeavyPlayerController.gd",
         "entities/player/MoodSystem.gd",
         "entities/player/PlayerBrain.gd",
+        "entities/player/states/CelebrateState.gd",
         "entities/player/states/ChargeKickState.gd",
         "entities/player/states/GoalkeeperDiveState.gd",
+        "entities/player/states/GoalkeeperHoldState.gd",
         "entities/player/states/PenaltyKickState.gd",
         "entities/player/states/SetPieceFreezeState.gd",
         "entities/player/states/ThrowInState.gd",
         "entities/referee/MatchReferee.gd",
         "entities/referee/OffsideDetector.gd",
+        "pitch/GoalCelebrationCoordinator.gd",
+        "pitch/GoalReplayCoordinator.gd",
         "pitch/GoalZone.gd",
+        "pitch/MatchIntroDirector.gd",
         "pitch/PenaltyShootoutCoordinator.gd",
+        "pitch/PitchBoundary.gd",
         "pitch/PitchScene.gd",
         "pitch/SetPieceCoordinator.gd",
+        "shared/QuickSimEngine.gd",
         "ui/HUD.gd",
         "ui/KickOffMenu.gd",
         "ui/MainMenu.gd",
         "ui/MatchStatsUI.gd",
         "ui/OptionsMenu.gd",
+        "ui/QuickSimModal.gd",
+        "ui/SplashScreen.gd",
+        "ui/manager/ManagerModeHub.gd",
         "ui/pause/PauseMenu.gd",
         "ui/pregame/PreGameScreen.gd"
       ],
@@ -194,6 +230,7 @@
         "corner_kick_started",
         "free_kick_started",
         "goal_kick_started",
+        "goal_replays_toggled",
         "goal_scored",
         "half_time_ended",
         "half_time_reached",
@@ -203,6 +240,7 @@
         "match_phase_changed",
         "match_stage_changed",
         "penalty_started",
+        "simulation_speed_changed",
         "stoppage_time_announced",
         "throw_in_started"
       ],
@@ -225,6 +263,7 @@
         "entities/player/HeavyPlayerController.gd",
         "entities/player/states/AerialState.gd",
         "entities/player/states/ChargeKickState.gd",
+        "entities/player/states/GoalkeeperHoldState.gd",
         "entities/player/states/PenaltyKickState.gd",
         "entities/player/states/ShotLockState.gd",
         "entities/player/states/TackleState.gd",
@@ -254,6 +293,8 @@
         "pitch/PitchScene.gd",
         "shared/ManagerData.gd",
         "shared/PlayerFactory.gd",
+        "ui/KickOffMenu.gd",
+        "ui/manager/ManagerModeHub.gd",
         "ui/pregame/PreGameScreen.gd"
       ],
       "signals_declared": [],
@@ -270,44 +311,111 @@
         "autoloads/GameEvents.gd",
         "autoloads/GameManager.gd",
         "autoloads/MatchWorldModel.gd",
-        "entities/ball/Pseudo3DBall.gd",
         "entities/manager/ManagerDirector.gd",
         "entities/player/HeavyPlayerController.gd",
         "entities/player/MoodSystem.gd",
-        "entities/player/states/ChargeKickState.gd",
-        "entities/player/states/ThrowInState.gd",
-        "pitch/GoalZone.gd",
         "pitch/PitchScene.gd",
-        "shared/FormationAnchorMath.gd",
         "shared/PlayerData.gd",
-        "shared/PlayerRatingCalculator.gd"
+        "shared/PlayerRatingCalculator.gd",
+        "shared/UtilityMath.gd"
       ],
       "direct_dependents": [
         "autoloads/GameEvents.gd",
+        "autoloads/MatchTelemetryLogger.gd",
         "autoloads/MatchWorldModel.gd",
         "entities/player/MoodSystem.gd",
         "entities/player/PlayerBrain.gd",
         "entities/player/TrustSystem.gd",
         "entities/player/states/ChargeKickState.gd",
+        "entities/player/states/DribbleState.gd",
+        "entities/player/states/GoalkeeperHoldState.gd",
         "entities/player/states/ThrowInState.gd",
         "pitch/PitchScene.gd",
         "shared/PlayerRatingCalculator.gd",
-        "ui/MatchStatsUI.gd"
+        "shared/QuickSimEngine.gd",
+        "ui/MatchStatsUI.gd",
+        "ui/QuickSimModal.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [
+        "carry_completed",
+        "defensive_action_logged",
+        "pass_completed",
+        "shot_taken",
         "team_momentum_updated"
       ],
       "signals_connected": [
         "anticipatory_turnover_predicted",
         "ball_struck",
+        "carry_completed",
         "corner_kick_started",
+        "defensive_action_logged",
         "foul_committed",
         "goal_scored",
         "offside_called",
+        "pass_completed",
         "red_card_shown",
         "substitution_made",
         "tackle_won",
+        "yellow_card_shown"
+      ]
+    },
+    "autoloads/MatchTelemetryLogger.gd": {
+      "class_name": null,
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "shared/PlayerData.gd",
+        "shared/PlayerRatingCalculator.gd",
+        "shared/TeamData.gd"
+      ],
+      "direct_dependents": [],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "anticipatory_turnover_predicted",
+        "carry_completed",
+        "corner_kick_started",
+        "defensive_action_logged",
+        "emergency_tactics_triggered",
+        "foul_committed",
+        "free_kick_started",
+        "goal_kick_started",
+        "goal_scored",
+        "half_time_ended",
+        "half_time_started",
+        "kickoff_confirmed",
+        "kickoff_started",
+        "manager_formation_changed",
+        "match_ended",
+        "match_phase_changed",
+        "match_stage_changed",
+        "offside_called",
+        "pass_completed",
+        "penalty_started",
+        "player_mood_changed",
+        "powerful_shot_landed",
+        "press_trigger_changed",
+        "red_card_shown",
+        "referee_awarded_foul",
+        "referee_played_on",
+        "shootout_kick_result",
+        "shot_taken",
+        "simulation_speed_changed",
+        "stamina_depleted",
+        "stoppage_time_announced",
+        "substitution_made",
+        "tackle_won",
+        "team_momentum_updated",
+        "team_urgency_updated",
+        "throw_in_started",
         "yellow_card_shown"
       ]
     },
@@ -339,19 +447,26 @@
         "autoloads/GameEvents.gd",
         "autoloads/GameManager.gd",
         "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchTelemetryLogger.gd",
         "entities/manager/ManagerDirector.gd",
+        "entities/manager/ManagerVisual.gd",
         "entities/player/HeavyPlayerController.gd",
         "entities/player/PlayerBrain.gd",
         "entities/player/states/DribbleState.gd",
+        "entities/player/states/GoalkeeperDiveState.gd",
+        "entities/player/states/GoalkeeperHoldState.gd",
         "entities/player/states/TackleState.gd",
+        "entities/player/states/ThrowInState.gd",
         "entities/referee/AssistantRefereeVisual.gd",
         "entities/referee/CenterRefereeVisual.gd",
         "entities/referee/MatchOfficialCrew.gd",
         "entities/referee/MatchReferee.gd",
         "entities/referee/OffsideDetector.gd",
+        "pitch/PitchBoundary.gd",
         "pitch/PitchScene.gd",
         "shared/FormationAnchorMath.gd",
-        "shared/PassUtilityScorer.gd"
+        "shared/PassUtilityScorer.gd",
+        "ui/pause/PauseMenu.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [
@@ -377,7 +492,10 @@
       ],
       "direct_dependents": [
         "entities/referee/MatchReferee.gd",
-        "pitch/PitchScene.gd"
+        "pitch/PitchScene.gd",
+        "ui/KickOffMenu.gd",
+        "ui/manager/ManagerModeHub.gd",
+        "ui/pregame/PreGameScreen.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -443,7 +561,6 @@
       ],
       "direct_dependents": [
         "autoloads/GameEvents.gd",
-        "autoloads/MatchStatsTracker.gd",
         "autoloads/MatchWorldModel.gd",
         "entities/ball/BallState.gd",
         "entities/ball/BallStateFactory.gd",
@@ -459,14 +576,18 @@
         "entities/player/states/ChargeKickState.gd",
         "entities/player/states/DribbleState.gd",
         "entities/player/states/GoalkeeperDiveState.gd",
+        "entities/player/states/GoalkeeperHoldState.gd",
         "entities/player/states/IdleState.gd",
         "entities/player/states/MoveState.gd",
         "entities/player/states/PenaltyKickState.gd",
         "entities/player/states/ShotLockState.gd",
         "entities/player/states/TackleState.gd",
         "entities/player/states/ThrowInState.gd",
+        "pitch/GoalNet.gd",
+        "pitch/GoalReplayCoordinator.gd",
         "pitch/GoalZone.gd",
         "pitch/MatchCamera.gd",
+        "pitch/MatchIntroDirector.gd",
         "pitch/PenaltyShootoutCoordinator.gd",
         "pitch/PitchBoundary.gd",
         "pitch/PitchScene.gd",
@@ -575,6 +696,7 @@
       "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "Node",
       "direct_dependencies": [
+        "autoloads/DataLoader.gd",
         "autoloads/GameEvents.gd",
         "autoloads/GameManager.gd",
         "autoloads/MatchWorldModel.gd",
@@ -585,7 +707,9 @@
         "shared/FormationLibrary.gd",
         "shared/ManagerData.gd",
         "shared/PassUtilityScorer.gd",
-        "shared/PlayerData.gd"
+        "shared/PlayerData.gd",
+        "shared/PlayerRoleConfig.gd",
+        "shared/TeamData.gd"
       ],
       "direct_dependents": [
         "autoloads/GameEvents.gd",
@@ -606,8 +730,37 @@
         "team_urgency_updated"
       ],
       "signals_connected": [
+        "formation_changed",
         "goal_scored",
-        "kickoff_confirmed"
+        "kickoff_confirmed",
+        "lineup_changed"
+      ]
+    },
+    "entities/manager/ManagerVisual.gd": {
+      "class_name": "ManagerVisual",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "Node2D",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "pitch/PitchBoundary.gd",
+        "shared/ManagerData.gd",
+        "shared/TeamData.gd"
+      ],
+      "direct_dependents": [
+        "pitch/StadiumGraphics.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "emergency_tactics_triggered",
+        "goal_scored",
+        "manager_formation_changed",
+        "red_card_shown",
+        "referee_awarded_foul",
+        "yellow_card_shown"
       ]
     },
     "entities/manager/PressOffice.gd": {
@@ -664,15 +817,19 @@
         "entities/player/PlayerBrain.gd",
         "entities/player/PlayerState.gd",
         "entities/player/PlayerStateFactory.gd",
+        "entities/player/PlayerVisual.gd",
         "entities/player/TrustSystem.gd",
         "entities/player/states/DribbleState.gd",
+        "entities/player/states/GoalkeeperHoldState.gd",
         "entities/player/states/MoveState.gd",
         "entities/player/states/TackleState.gd",
+        "pitch/PitchBoundary.gd",
         "pitch/PitchScene.gd",
         "shared/CollisionLayers.gd",
         "shared/PlayerData.gd",
         "shared/PlayerFactory.gd",
         "shared/PlayerRoleConfig.gd",
+        "shared/TeamData.gd",
         "ui/ActionText.gd",
         "ui/HUD.gd"
       ],
@@ -680,20 +837,25 @@
         "autoloads/GameEvents.gd",
         "autoloads/GameManager.gd",
         "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchTelemetryLogger.gd",
         "autoloads/MatchWorldModel.gd",
         "entities/ball/Pseudo3DBall.gd",
         "entities/goalkeeper/GoalkeeperDiveBrain.gd",
         "entities/manager/ManagerDirector.gd",
+        "entities/manager/ManagerVisual.gd",
         "entities/player/FacingArrow.gd",
         "entities/player/MoodSystem.gd",
         "entities/player/PlayerBrain.gd",
         "entities/player/PlayerState.gd",
         "entities/player/PlayerStateFactory.gd",
+        "entities/player/PlayerVisual.gd",
         "entities/player/TrustSystem.gd",
         "entities/player/states/AerialState.gd",
+        "entities/player/states/CelebrateState.gd",
         "entities/player/states/ChargeKickState.gd",
         "entities/player/states/DribbleState.gd",
         "entities/player/states/GoalkeeperDiveState.gd",
+        "entities/player/states/GoalkeeperHoldState.gd",
         "entities/player/states/IdleState.gd",
         "entities/player/states/MoveState.gd",
         "entities/player/states/PenaltyKickState.gd",
@@ -703,8 +865,11 @@
         "entities/player/states/ThrowInState.gd",
         "entities/referee/MatchReferee.gd",
         "entities/referee/OffsideDetector.gd",
+        "pitch/GoalCelebrationCoordinator.gd",
+        "pitch/GoalReplayCoordinator.gd",
         "pitch/GoalZone.gd",
         "pitch/MatchCamera.gd",
+        "pitch/MatchIntroDirector.gd",
         "pitch/Minimap.gd",
         "pitch/PenaltyShootoutCoordinator.gd",
         "pitch/PitchBoundary.gd",
@@ -716,7 +881,10 @@
         "shared/PlayerFactory.gd",
         "shared/PlayerRoleConfig.gd",
         "ui/ActionText.gd",
-        "ui/HUD.gd"
+        "ui/HUD.gd",
+        "ui/pause/PauseMenu.gd",
+        "ui/tactics/TacticsEditor.gd",
+        "ui/tactics/TacticsPitchView.gd"
       ],
       "signals_declared": [
         "stamina_state_changed",
@@ -788,6 +956,7 @@
         "entities/player/MoodSystem.gd",
         "entities/player/PlayerState.gd",
         "entities/player/TrustSystem.gd",
+        "entities/player/states/ChargeKickState.gd",
         "entities/player/states/DribbleState.gd",
         "entities/player/states/TackleState.gd",
         "pitch/PitchBoundary.gd",
@@ -808,6 +977,8 @@
         "entities/player/PlayerState.gd",
         "entities/player/TrustSystem.gd",
         "entities/player/states/AerialState.gd",
+        "entities/player/states/CelebrateState.gd",
+        "entities/player/states/ChargeKickState.gd",
         "entities/player/states/DribbleState.gd",
         "entities/player/states/TackleState.gd",
         "entities/player/states/ThrowInState.gd",
@@ -849,9 +1020,11 @@
         "entities/player/PlayerBrain.gd",
         "entities/player/PlayerStateFactory.gd",
         "entities/player/states/AerialState.gd",
+        "entities/player/states/CelebrateState.gd",
         "entities/player/states/ChargeKickState.gd",
         "entities/player/states/DribbleState.gd",
         "entities/player/states/GoalkeeperDiveState.gd",
+        "entities/player/states/GoalkeeperHoldState.gd",
         "entities/player/states/IdleState.gd",
         "entities/player/states/MoveState.gd",
         "entities/player/states/PenaltyKickState.gd",
@@ -859,6 +1032,8 @@
         "entities/player/states/ShotLockState.gd",
         "entities/player/states/TackleState.gd",
         "entities/player/states/ThrowInState.gd",
+        "pitch/GoalCelebrationCoordinator.gd",
+        "pitch/MatchIntroDirector.gd",
         "pitch/PenaltyShootoutCoordinator.gd",
         "pitch/PitchScene.gd",
         "pitch/SetPieceCoordinator.gd"
@@ -876,9 +1051,11 @@
         "entities/player/HeavyPlayerController.gd",
         "entities/player/PlayerState.gd",
         "entities/player/states/AerialState.gd",
+        "entities/player/states/CelebrateState.gd",
         "entities/player/states/ChargeKickState.gd",
         "entities/player/states/DribbleState.gd",
         "entities/player/states/GoalkeeperDiveState.gd",
+        "entities/player/states/GoalkeeperHoldState.gd",
         "entities/player/states/IdleState.gd",
         "entities/player/states/MoveState.gd",
         "entities/player/states/PenaltyKickState.gd",
@@ -902,6 +1079,24 @@
       "signals_emitted": [
         "state_changed"
       ],
+      "signals_connected": []
+    },
+    "entities/player/PlayerVisual.gd": {
+      "class_name": "PlayerVisual",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "Node2D",
+      "direct_dependencies": [
+        "entities/player/HeavyPlayerController.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd"
+      ],
+      "direct_dependents": [
+        "entities/player/HeavyPlayerController.gd",
+        "pitch/GoalReplayCoordinator.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
       "signals_connected": []
     },
     "entities/player/TrustSystem.gd": {
@@ -951,6 +1146,24 @@
       ],
       "signals_connected": []
     },
+    "entities/player/states/CelebrateState.gd": {
+      "class_name": "CelebrateState",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "PlayerState",
+      "direct_dependencies": [
+        "autoloads/GameManager.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
+        "entities/player/PlayerState.gd"
+      ],
+      "direct_dependents": [
+        "entities/player/PlayerStateFactory.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
     "entities/player/states/ChargeKickState.gd": {
       "class_name": "ChargeKickState",
       "layer": 1,
@@ -964,13 +1177,14 @@
         "entities/ball/Pseudo3DBall.gd",
         "entities/player/HeavyPlayerController.gd",
         "entities/player/MoodSystem.gd",
+        "entities/player/PlayerBrain.gd",
         "entities/player/PlayerState.gd",
         "ui/HUD.gd"
       ],
       "direct_dependents": [
         "autoloads/GameEvents.gd",
-        "autoloads/MatchStatsTracker.gd",
         "autoloads/MatchWorldModel.gd",
+        "entities/player/PlayerBrain.gd",
         "entities/player/PlayerStateFactory.gd",
         "entities/player/states/PenaltyKickState.gd",
         "entities/player/states/ShotLockState.gd",
@@ -990,6 +1204,7 @@
       "layer_name": "Layer 1 - Physics & Kinematics",
       "extends": "PlayerState",
       "direct_dependencies": [
+        "autoloads/MatchStatsTracker.gd",
         "autoloads/MatchWorldModel.gd",
         "entities/ball/Pseudo3DBall.gd",
         "entities/player/HeavyPlayerController.gd",
@@ -1021,17 +1236,48 @@
       "extends": "PlayerState",
       "direct_dependencies": [
         "autoloads/GameManager.gd",
+        "autoloads/MatchWorldModel.gd",
         "entities/ball/Pseudo3DBall.gd",
         "entities/player/HeavyPlayerController.gd",
-        "entities/player/PlayerState.gd"
+        "entities/player/PlayerState.gd",
+        "entities/player/states/GoalkeeperHoldState.gd"
       ],
       "direct_dependents": [
         "entities/goalkeeper/GoalkeeperDiveBrain.gd",
         "entities/player/PlayerStateFactory.gd",
+        "entities/player/states/GoalkeeperHoldState.gd",
         "pitch/PitchScene.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
+      "signals_connected": []
+    },
+    "entities/player/states/GoalkeeperHoldState.gd": {
+      "class_name": "GoalkeeperHoldState",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "PlayerState",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/InputHelper.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerState.gd",
+        "entities/player/states/GoalkeeperDiveState.gd"
+      ],
+      "direct_dependents": [
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerStateFactory.gd",
+        "entities/player/states/GoalkeeperDiveState.gd",
+        "pitch/PitchScene.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "ball_struck"
+      ],
       "signals_connected": []
     },
     "entities/player/states/IdleState.gd": {
@@ -1179,6 +1425,7 @@
         "autoloads/GameManager.gd",
         "autoloads/InputHelper.gd",
         "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchWorldModel.gd",
         "entities/ball/Pseudo3DBall.gd",
         "entities/player/HeavyPlayerController.gd",
         "entities/player/PlayerBrain.gd",
@@ -1192,7 +1439,6 @@
       ],
       "direct_dependents": [
         "autoloads/GameEvents.gd",
-        "autoloads/MatchStatsTracker.gd",
         "autoloads/MatchWorldModel.gd",
         "entities/player/PlayerStateFactory.gd"
       ],
@@ -1213,6 +1459,7 @@
       ],
       "direct_dependents": [
         "entities/referee/MatchOfficialCrew.gd",
+        "pitch/MatchIntroDirector.gd",
         "pitch/Minimap.gd"
       ],
       "signals_declared": [],
@@ -1231,6 +1478,7 @@
       ],
       "direct_dependents": [
         "entities/referee/MatchOfficialCrew.gd",
+        "pitch/MatchIntroDirector.gd",
         "pitch/Minimap.gd"
       ],
       "signals_declared": [],
@@ -1249,6 +1497,7 @@
       ],
       "direct_dependents": [
         "entities/referee/MatchOfficialCrew.gd",
+        "pitch/MatchIntroDirector.gd",
         "pitch/Minimap.gd"
       ],
       "signals_declared": [],
@@ -1272,6 +1521,7 @@
         "shared/RefereeData.gd"
       ],
       "direct_dependents": [
+        "pitch/MatchIntroDirector.gd",
         "pitch/Minimap.gd",
         "pitch/PitchScene.gd"
       ],
@@ -1313,6 +1563,7 @@
       ],
       "direct_dependents": [
         "autoloads/MatchWorldModel.gd",
+        "pitch/MatchIntroDirector.gd",
         "pitch/PitchScene.gd",
         "shared/PlayerData.gd",
         "shared/RefereeData.gd",
@@ -1365,10 +1616,85 @@
       "extends": "Node2D",
       "direct_dependencies": [],
       "direct_dependents": [
-        "entities/referee/MatchOfficialCrew.gd"
+        "entities/referee/MatchOfficialCrew.gd",
+        "pitch/MatchIntroDirector.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
+      "signals_connected": []
+    },
+    "pitch/GoalCelebrationCoordinator.gd": {
+      "class_name": "GoalCelebrationCoordinator",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerState.gd",
+        "pitch/MatchCamera.gd",
+        "pitch/PitchBoundary.gd"
+      ],
+      "direct_dependents": [
+        "pitch/PitchScene.gd"
+      ],
+      "signals_declared": [
+        "celebration_started",
+        "celebration_finished"
+      ],
+      "signals_emitted": [
+        "celebration_ended",
+        "celebration_finished",
+        "celebration_started"
+      ],
+      "signals_connected": []
+    },
+    "pitch/GoalNet.gd": {
+      "class_name": "GoalNet",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "Node2D",
+      "direct_dependencies": [
+        "entities/ball/Pseudo3DBall.gd",
+        "shared/CollisionLayers.gd"
+      ],
+      "direct_dependents": [
+        "pitch/PitchScene.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "draw"
+      ]
+    },
+    "pitch/GoalReplayCoordinator.gd": {
+      "class_name": "GoalReplayCoordinator",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerVisual.gd",
+        "pitch/MatchCamera.gd",
+        "pitch/PitchBoundary.gd"
+      ],
+      "direct_dependents": [
+        "pitch/PitchScene.gd",
+        "ui/HUD.gd"
+      ],
+      "signals_declared": [
+        "replay_started",
+        "replay_finished"
+      ],
+      "signals_emitted": [
+        "replay_ended",
+        "replay_finished",
+        "replay_started"
+      ],
       "signals_connected": []
     },
     "pitch/GoalZone.gd": {
@@ -1385,7 +1711,6 @@
         "ui/HUD.gd"
       ],
       "direct_dependents": [
-        "autoloads/MatchStatsTracker.gd",
         "pitch/PitchBoundary.gd",
         "pitch/PitchScene.gd"
       ],
@@ -1410,6 +1735,9 @@
         "ui/HUD.gd"
       ],
       "direct_dependents": [
+        "pitch/GoalCelebrationCoordinator.gd",
+        "pitch/GoalReplayCoordinator.gd",
+        "pitch/MatchIntroDirector.gd",
         "pitch/PitchScene.gd",
         "ui/HUD.gd"
       ],
@@ -1420,6 +1748,46 @@
         "camera_mode_changed"
       ],
       "signals_connected": []
+    },
+    "pitch/MatchIntroDirector.gd": {
+      "class_name": "MatchIntroDirector",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "entities/ball/Pseudo3DBall.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerState.gd",
+        "entities/referee/AssistantRefereeVisual.gd",
+        "entities/referee/CenterRefereeVisual.gd",
+        "entities/referee/FourthOfficialVisual.gd",
+        "entities/referee/MatchOfficialCrew.gd",
+        "entities/referee/MatchReferee.gd",
+        "entities/referee/WhistleSynthesizer.gd",
+        "pitch/MatchCamera.gd",
+        "pitch/PitchBoundary.gd",
+        "shared/ManagerData.gd",
+        "shared/RefereeData.gd",
+        "shared/TeamData.gd",
+        "ui/MatchIntroUI.gd"
+      ],
+      "direct_dependents": [
+        "pitch/PitchScene.gd"
+      ],
+      "signals_declared": [
+        "intro_completed"
+      ],
+      "signals_emitted": [
+        "intro_completed",
+        "match_intro_finished",
+        "match_intro_skipped",
+        "match_intro_started"
+      ],
+      "signals_connected": [
+        "skip_requested"
+      ]
     },
     "pitch/Minimap.gd": {
       "class_name": "Minimap",
@@ -1486,6 +1854,8 @@
       "extends": "StaticBody2D",
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/MatchWorldModel.gd",
         "entities/ball/Pseudo3DBall.gd",
         "entities/player/HeavyPlayerController.gd",
         "pitch/GoalZone.gd",
@@ -1496,18 +1866,24 @@
         "autoloads/MatchWorldModel.gd",
         "entities/ball/Pseudo3DBall.gd",
         "entities/manager/ManagerDirector.gd",
+        "entities/manager/ManagerVisual.gd",
+        "entities/player/HeavyPlayerController.gd",
         "entities/player/PlayerBrain.gd",
         "entities/referee/AssistantRefereeVisual.gd",
         "entities/referee/CenterRefereeVisual.gd",
         "entities/referee/FourthOfficialVisual.gd",
         "entities/referee/MatchOfficialCrew.gd",
         "entities/referee/OffsideDetector.gd",
+        "pitch/GoalCelebrationCoordinator.gd",
+        "pitch/GoalReplayCoordinator.gd",
         "pitch/MatchCamera.gd",
+        "pitch/MatchIntroDirector.gd",
         "pitch/Minimap.gd",
         "pitch/PenaltyShootoutCoordinator.gd",
         "pitch/PitchMarkings.gd",
         "pitch/PitchScene.gd",
         "pitch/SetPieceCoordinator.gd",
+        "pitch/StadiumGraphics.gd",
         "shared/FormationAnchorMath.gd",
         "shared/UtilityMath.gd"
       ],
@@ -1557,16 +1933,23 @@
         "entities/player/PlayerBrain.gd",
         "entities/player/PlayerState.gd",
         "entities/player/states/GoalkeeperDiveState.gd",
+        "entities/player/states/GoalkeeperHoldState.gd",
         "entities/player/states/SetPieceFreezeState.gd",
         "entities/referee/MatchOfficialCrew.gd",
         "entities/referee/MatchReferee.gd",
         "entities/referee/OffsideDetector.gd",
+        "pitch/GoalCelebrationCoordinator.gd",
+        "pitch/GoalNet.gd",
+        "pitch/GoalReplayCoordinator.gd",
         "pitch/GoalZone.gd",
         "pitch/MatchCamera.gd",
+        "pitch/MatchIntroDirector.gd",
         "pitch/Minimap.gd",
         "pitch/PenaltyShootoutCoordinator.gd",
         "pitch/PitchBoundary.gd",
         "pitch/SetPieceCoordinator.gd",
+        "pitch/StadiumGraphics.gd",
+        "shared/CareerProgressionEngine.gd",
         "shared/CollisionLayers.gd",
         "shared/ManagerData.gd",
         "shared/PlayerData.gd",
@@ -1575,6 +1958,7 @@
         "shared/TeamData.gd",
         "shared/TeamManagementData.gd",
         "ui/HUD.gd",
+        "ui/MatchIntroUI.gd",
         "ui/MatchStatsUI.gd",
         "ui/TouchlineBubble.gd",
         "ui/pause/PauseMenu.gd",
@@ -1601,8 +1985,8 @@
         "ui/HUD.gd",
         "ui/KickOffMenu.gd",
         "ui/MainMenu.gd",
-        "ui/MatchStatsUI.gd",
         "ui/TouchlineBubble.gd",
+        "ui/manager/ManagerModeHub.gd",
         "ui/pregame/PreGameScreen.gd"
       ],
       "signals_declared": [],
@@ -1621,6 +2005,7 @@
         "emergency_tactics_triggered",
         "goal_scored",
         "half_time_reached",
+        "intro_completed",
         "manager_formation_changed",
         "match_ended",
         "pause_closed",
@@ -1673,6 +2058,44 @@
         "timeout"
       ]
     },
+    "pitch/StadiumGraphics.gd": {
+      "class_name": "StadiumGraphics",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "Node2D",
+      "direct_dependencies": [
+        "entities/manager/ManagerVisual.gd",
+        "pitch/PitchBoundary.gd",
+        "shared/ManagerData.gd",
+        "shared/TeamData.gd"
+      ],
+      "direct_dependents": [
+        "pitch/PitchScene.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/CareerProgressionEngine.gd": {
+      "class_name": "CareerProgressionEngine",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "shared/ManagerData.gd",
+        "shared/PlayerData.gd",
+        "shared/PlayerRatingCalculator.gd",
+        "shared/RefereeData.gd",
+        "shared/TeamData.gd"
+      ],
+      "direct_dependents": [
+        "pitch/PitchScene.gd",
+        "ui/manager/ManagerModeHub.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
     "shared/CollisionLayers.gd": {
       "class_name": "CollisionLayers",
       "layer": 1,
@@ -1684,6 +2107,7 @@
       "direct_dependents": [
         "entities/ball/Pseudo3DBall.gd",
         "entities/player/HeavyPlayerController.gd",
+        "pitch/GoalNet.gd",
         "pitch/GoalZone.gd",
         "pitch/PitchBoundary.gd",
         "pitch/PitchScene.gd"
@@ -1706,7 +2130,6 @@
       ],
       "direct_dependents": [
         "autoloads/GameEvents.gd",
-        "autoloads/MatchStatsTracker.gd",
         "autoloads/MatchWorldModel.gd",
         "entities/manager/ManagerDirector.gd",
         "entities/player/PlayerBrain.gd",
@@ -1727,7 +2150,9 @@
       "direct_dependents": [
         "entities/manager/ManagerDirector.gd",
         "shared/FormationAnchorMath.gd",
-        "shared/FormationRegistry.gd"
+        "shared/FormationRegistry.gd",
+        "shared/TeamManagementData.gd",
+        "ui/tactics/TacticsEditor.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -1744,8 +2169,8 @@
       ],
       "direct_dependents": [
         "ui/FormationDiagram.gd",
-        "ui/pause/PauseMenu.gd",
-        "ui/pregame/PreGameScreen.gd"
+        "ui/tactics/TacticsEditor.gd",
+        "ui/tactics/TacticsPitchView.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -1785,10 +2210,19 @@
         "autoloads/GameEvents.gd",
         "autoloads/ManagerLoader.gd",
         "entities/manager/ManagerDirector.gd",
+        "entities/manager/ManagerVisual.gd",
         "entities/manager/PressOffice.gd",
+        "pitch/MatchIntroDirector.gd",
         "pitch/PitchScene.gd",
+        "pitch/StadiumGraphics.gd",
+        "shared/CareerProgressionEngine.gd",
         "shared/PlayerFactory.gd",
+        "shared/QuickSimEngine.gd",
         "shared/TeamManagementData.gd",
+        "ui/KickOffMenu.gd",
+        "ui/MatchIntroUI.gd",
+        "ui/QuickSimModal.gd",
+        "ui/manager/ManagerModeHub.gd",
         "ui/pregame/PreGameScreen.gd"
       ],
       "signals_declared": [],
@@ -1828,32 +2262,41 @@
         "entities/referee/MatchReferee.gd",
         "pitch/PitchScene.gd",
         "shared/PlayerFactory.gd",
+        "shared/PlayerRatingCalculator.gd",
         "shared/RefereeData.gd"
       ],
       "direct_dependents": [
         "autoloads/DataLoader.gd",
         "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchTelemetryLogger.gd",
         "entities/goalkeeper/GoalkeeperDiveBrain.gd",
         "entities/manager/ManagerDirector.gd",
         "entities/player/HeavyPlayerController.gd",
         "entities/player/MoodSystem.gd",
         "entities/player/PlayerBrain.gd",
+        "entities/player/PlayerVisual.gd",
         "entities/player/TrustSystem.gd",
         "entities/referee/FourthOfficialVisual.gd",
         "entities/referee/MatchReferee.gd",
         "pitch/Minimap.gd",
         "pitch/PitchScene.gd",
+        "shared/CareerProgressionEngine.gd",
         "shared/ManagerData.gd",
         "shared/PlayerFactory.gd",
         "shared/PlayerRatingCalculator.gd",
+        "shared/QuickSimEngine.gd",
         "shared/RefereeData.gd",
         "shared/TeamData.gd",
         "shared/TeamManagementData.gd",
         "ui/FormationDiagram.gd",
         "ui/HUD.gd",
+        "ui/KickOffMenu.gd",
+        "ui/MatchIntroUI.gd",
         "ui/MatchStatsUI.gd",
-        "ui/pause/PauseMenu.gd",
-        "ui/pregame/PreGameScreen.gd"
+        "ui/manager/ManagerModeHub.gd",
+        "ui/pregame/PreGameScreen.gd",
+        "ui/tactics/TacticsEditor.gd",
+        "ui/tactics/TacticsPitchView.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -1900,7 +2343,12 @@
         "shared/PlayerData.gd"
       ],
       "direct_dependents": [
-        "autoloads/MatchStatsTracker.gd"
+        "autoloads/MatchStatsTracker.gd",
+        "autoloads/MatchTelemetryLogger.gd",
+        "shared/CareerProgressionEngine.gd",
+        "shared/PlayerData.gd",
+        "shared/QuickSimEngine.gd",
+        "ui/MatchStatsUI.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -1917,7 +2365,34 @@
         "shared/PassUtilityScorer.gd"
       ],
       "direct_dependents": [
-        "entities/player/HeavyPlayerController.gd"
+        "entities/manager/ManagerDirector.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "shared/TeamManagementData.gd",
+        "ui/tactics/TacticsEditor.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/QuickSimEngine.gd": {
+      "class_name": "QuickSimEngine",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "shared/ManagerData.gd",
+        "shared/PlayerData.gd",
+        "shared/PlayerRatingCalculator.gd",
+        "shared/RefereeData.gd",
+        "shared/TeamData.gd"
+      ],
+      "direct_dependents": [
+        "ui/KickOffMenu.gd",
+        "ui/QuickSimModal.gd",
+        "ui/manager/ManagerModeHub.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -1937,8 +2412,16 @@
         "entities/referee/CenterRefereeVisual.gd",
         "entities/referee/MatchOfficialCrew.gd",
         "entities/referee/MatchReferee.gd",
+        "pitch/MatchIntroDirector.gd",
         "pitch/PitchScene.gd",
-        "shared/PlayerData.gd"
+        "shared/CareerProgressionEngine.gd",
+        "shared/PlayerData.gd",
+        "shared/QuickSimEngine.gd",
+        "ui/KickOffMenu.gd",
+        "ui/MatchIntroUI.gd",
+        "ui/QuickSimModal.gd",
+        "ui/manager/ManagerModeHub.gd",
+        "ui/pregame/PreGameScreen.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -1958,12 +2441,24 @@
       ],
       "direct_dependents": [
         "autoloads/DataLoader.gd",
+        "autoloads/MatchTelemetryLogger.gd",
+        "entities/manager/ManagerDirector.gd",
+        "entities/manager/ManagerVisual.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerVisual.gd",
+        "pitch/MatchIntroDirector.gd",
         "pitch/PitchScene.gd",
+        "pitch/StadiumGraphics.gd",
+        "shared/CareerProgressionEngine.gd",
         "shared/LeagueData.gd",
         "shared/ManagerData.gd",
         "shared/PlayerFactory.gd",
+        "shared/QuickSimEngine.gd",
         "shared/TeamManagementData.gd",
         "ui/KickOffMenu.gd",
+        "ui/MatchIntroUI.gd",
+        "ui/QuickSimModal.gd",
+        "ui/manager/ManagerModeHub.gd",
         "ui/pregame/PreGameScreen.gd"
       ],
       "signals_declared": [],
@@ -1977,8 +2472,10 @@
       "extends": "RefCounted",
       "direct_dependencies": [
         "pitch/PitchScene.gd",
+        "shared/FormationLibrary.gd",
         "shared/ManagerData.gd",
         "shared/PlayerData.gd",
+        "shared/PlayerRoleConfig.gd",
         "shared/TeamData.gd"
       ],
       "direct_dependents": [
@@ -1986,7 +2483,9 @@
         "shared/TeamData.gd",
         "ui/FormationDiagram.gd",
         "ui/pause/PauseMenu.gd",
-        "ui/pregame/PreGameScreen.gd"
+        "ui/pregame/PreGameScreen.gd",
+        "ui/tactics/TacticsEditor.gd",
+        "ui/tactics/TacticsPitchView.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -2004,6 +2503,7 @@
         "shared/FormationAnchorMath.gd"
       ],
       "direct_dependents": [
+        "autoloads/MatchStatsTracker.gd",
         "autoloads/MatchWorldModel.gd",
         "entities/player/PlayerBrain.gd",
         "shared/PassUtilityScorer.gd"
@@ -2042,8 +2542,7 @@
         "ui/pregame/PreGameScreen.gd"
       ],
       "direct_dependents": [
-        "shared/FormationRegistry.gd",
-        "ui/pause/PauseMenu.gd"
+        "shared/FormationRegistry.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -2062,6 +2561,7 @@
         "entities/player/MoodSystem.gd",
         "entities/player/PlayerStateFactory.gd",
         "entities/referee/MatchReferee.gd",
+        "pitch/GoalReplayCoordinator.gd",
         "pitch/MatchCamera.gd",
         "pitch/PenaltyShootoutCoordinator.gd",
         "pitch/PitchScene.gd",
@@ -2080,7 +2580,6 @@
         "pitch/MatchCamera.gd",
         "pitch/PitchScene.gd",
         "pitch/SetPieceCoordinator.gd",
-        "ui/MatchStatsUI.gd",
         "ui/OptionsMenu.gd"
       ],
       "signals_declared": [],
@@ -2090,6 +2589,7 @@
         "defensive_wall_requested",
         "free_kick_started",
         "goal_kick_started",
+        "goal_replays_toggled",
         "goal_scored",
         "half_time_ended",
         "half_time_started",
@@ -2100,11 +2600,16 @@
         "penalty_started",
         "player_mood_changed",
         "player_switched",
+        "pressed",
         "red_card_shown",
+        "replay_ended",
+        "replay_started",
         "shootout_kick_result",
+        "simulation_speed_changed",
         "stoppage_time_announced",
         "substitution_made",
         "throw_in_started",
+        "value_changed",
         "yellow_card_shown"
       ]
     },
@@ -2116,8 +2621,15 @@
       "direct_dependencies": [
         "autoloads/DataLoader.gd",
         "autoloads/GameManager.gd",
+        "autoloads/ManagerLoader.gd",
+        "autoloads/RefereeLoader.gd",
         "pitch/PitchScene.gd",
-        "shared/TeamData.gd"
+        "shared/ManagerData.gd",
+        "shared/PlayerData.gd",
+        "shared/QuickSimEngine.gd",
+        "shared/RefereeData.gd",
+        "shared/TeamData.gd",
+        "ui/QuickSimModal.gd"
       ],
       "direct_dependents": [],
       "signals_declared": [
@@ -2128,6 +2640,7 @@
       ],
       "signals_connected": [
         "item_selected",
+        "modal_closed",
         "pressed",
         "toggled"
       ]
@@ -2139,7 +2652,8 @@
       "extends": "Control",
       "direct_dependencies": [
         "autoloads/GameManager.gd",
-        "pitch/PitchScene.gd"
+        "pitch/PitchScene.gd",
+        "ui/manager/ManagerModeHub.gd"
       ],
       "direct_dependents": [],
       "signals_declared": [],
@@ -2151,6 +2665,32 @@
         "visibility_changed"
       ]
     },
+    "ui/MatchIntroUI.gd": {
+      "class_name": "MatchIntroUI",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "CanvasLayer",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "shared/ManagerData.gd",
+        "shared/PlayerData.gd",
+        "shared/RefereeData.gd",
+        "shared/TeamData.gd"
+      ],
+      "direct_dependents": [
+        "pitch/MatchIntroDirector.gd",
+        "pitch/PitchScene.gd"
+      ],
+      "signals_declared": [
+        "skip_requested"
+      ],
+      "signals_emitted": [
+        "skip_requested"
+      ],
+      "signals_connected": [
+        "pressed"
+      ]
+    },
     "ui/MatchStatsUI.gd": {
       "class_name": "MatchStatsUI",
       "layer": 5,
@@ -2160,12 +2700,13 @@
         "autoloads/DataLoader.gd",
         "autoloads/GameManager.gd",
         "autoloads/MatchStatsTracker.gd",
-        "pitch/PitchScene.gd",
         "shared/PlayerData.gd",
-        "ui/HUD.gd"
+        "shared/PlayerRatingCalculator.gd"
       ],
       "direct_dependents": [
-        "pitch/PitchScene.gd"
+        "pitch/PitchScene.gd",
+        "ui/QuickSimModal.gd",
+        "ui/manager/ManagerModeHub.gd"
       ],
       "signals_declared": [
         "stats_dismissed"
@@ -2200,6 +2741,51 @@
         "value_changed"
       ]
     },
+    "ui/QuickSimModal.gd": {
+      "class_name": "QuickSimModal",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "CanvasLayer",
+      "direct_dependencies": [
+        "autoloads/GameManager.gd",
+        "autoloads/MatchStatsTracker.gd",
+        "shared/ManagerData.gd",
+        "shared/QuickSimEngine.gd",
+        "shared/RefereeData.gd",
+        "shared/TeamData.gd",
+        "ui/MatchStatsUI.gd"
+      ],
+      "direct_dependents": [
+        "ui/KickOffMenu.gd",
+        "ui/manager/ManagerModeHub.gd",
+        "ui/pregame/PreGameScreen.gd"
+      ],
+      "signals_declared": [
+        "match_completed",
+        "modal_closed"
+      ],
+      "signals_emitted": [
+        "match_completed",
+        "modal_closed"
+      ],
+      "signals_connected": [
+        "pressed",
+        "stats_dismissed"
+      ]
+    },
+    "ui/SplashScreen.gd": {
+      "class_name": "SplashScreen",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "Control",
+      "direct_dependencies": [
+        "autoloads/GameManager.gd"
+      ],
+      "direct_dependents": [],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
     "ui/TouchlineBubble.gd": {
       "class_name": "TouchlineBubble",
       "layer": 5,
@@ -2215,6 +2801,38 @@
       "signals_emitted": [],
       "signals_connected": []
     },
+    "ui/manager/ManagerModeHub.gd": {
+      "class_name": "ManagerModeHub",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "Control",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/ManagerLoader.gd",
+        "autoloads/RefereeLoader.gd",
+        "pitch/PitchScene.gd",
+        "shared/CareerProgressionEngine.gd",
+        "shared/ManagerData.gd",
+        "shared/PlayerData.gd",
+        "shared/QuickSimEngine.gd",
+        "shared/RefereeData.gd",
+        "shared/TeamData.gd",
+        "ui/MatchStatsUI.gd",
+        "ui/QuickSimModal.gd"
+      ],
+      "direct_dependents": [
+        "ui/MainMenu.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "item_selected",
+        "match_completed",
+        "modal_closed",
+        "pressed"
+      ]
+    },
     "ui/pause/PauseMenu.gd": {
       "class_name": "PauseMenu",
       "layer": 5,
@@ -2223,10 +2841,10 @@
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
         "autoloads/GameManager.gd",
-        "shared/FormationRegistry.gd",
-        "shared/PlayerData.gd",
+        "autoloads/MatchWorldModel.gd",
+        "entities/player/HeavyPlayerController.gd",
         "shared/TeamManagementData.gd",
-        "ui/FormationDiagram.gd"
+        "ui/tactics/TacticsEditor.gd"
       ],
       "direct_dependents": [
         "autoloads/GameEvents.gd",
@@ -2236,14 +2854,10 @@
       ],
       "signals_declared": [],
       "signals_emitted": [
-        "formation_changed",
-        "lineup_changed",
         "pause_closed",
-        "pause_opened",
-        "substitution_made"
+        "pause_opened"
       ],
       "signals_connected": [
-        "item_selected",
         "pressed"
       ]
     },
@@ -2257,12 +2871,15 @@
         "autoloads/GameEvents.gd",
         "autoloads/GameManager.gd",
         "autoloads/ManagerLoader.gd",
+        "autoloads/RefereeLoader.gd",
         "pitch/PitchScene.gd",
-        "shared/FormationRegistry.gd",
         "shared/ManagerData.gd",
         "shared/PlayerData.gd",
+        "shared/RefereeData.gd",
         "shared/TeamData.gd",
-        "shared/TeamManagementData.gd"
+        "shared/TeamManagementData.gd",
+        "ui/QuickSimModal.gd",
+        "ui/tactics/TacticsEditor.gd"
       ],
       "direct_dependents": [
         "autoloads/GameEvents.gd",
@@ -2271,15 +2888,74 @@
       ],
       "signals_declared": [],
       "signals_emitted": [
+        "pregame_confirmed"
+      ],
+      "signals_connected": [
+        "modal_closed",
+        "pressed"
+      ]
+    },
+    "ui/tactics/TacticsEditor.gd": {
+      "class_name": "TacticsEditor",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "Control",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "shared/FormationLibrary.gd",
+        "shared/FormationRegistry.gd",
+        "shared/PlayerData.gd",
+        "shared/PlayerRoleConfig.gd",
+        "shared/TeamManagementData.gd",
+        "ui/tactics/TacticsPitchView.gd"
+      ],
+      "direct_dependents": [
+        "ui/pause/PauseMenu.gd",
+        "ui/pregame/PreGameScreen.gd"
+      ],
+      "signals_declared": [
         "formation_changed",
         "lineup_changed",
-        "pregame_confirmed",
+        "substitution_made",
+        "close_requested"
+      ],
+      "signals_emitted": [
+        "formation_changed",
+        "lineup_changed",
         "substitution_made"
       ],
       "signals_connected": [
         "item_selected",
-        "pressed"
+        "pressed",
+        "slot_selected",
+        "slots_swapped",
+        "value_changed"
       ]
+    },
+    "ui/tactics/TacticsPitchView.gd": {
+      "class_name": "TacticsPitchView",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "Control",
+      "direct_dependencies": [
+        "entities/player/HeavyPlayerController.gd",
+        "shared/FormationRegistry.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamManagementData.gd"
+      ],
+      "direct_dependents": [
+        "ui/tactics/TacticsEditor.gd"
+      ],
+      "signals_declared": [
+        "slot_selected",
+        "slots_swapped"
+      ],
+      "signals_emitted": [
+        "slot_selected",
+        "slots_swapped"
+      ],
+      "signals_connected": []
     }
   }
 }

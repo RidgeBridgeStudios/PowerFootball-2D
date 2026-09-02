@@ -111,8 +111,8 @@ anchors_preset = 2
 anchor_top = 1.0
 anchor_bottom = 1.0
 offset_left = 16.0
-offset_top = -40.0
-offset_right = 184.0
+offset_top = -42.0
+offset_right = 340.0
 offset_bottom = -8.0
 grow_vertical = 0
 visible = false
@@ -123,13 +123,28 @@ theme_override_constants/separation = 8
 
 [node name="NumberLabel" type="Label" parent="Root/NameplatePanel/NameplateBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 20
+theme_override_font_sizes/font_size = 18
 text = "0"
 
 [node name="NameLabel" type="Label" parent="Root/NameplatePanel/NameplateBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 16
+theme_override_font_sizes/font_size = 15
 text = ""
+
+[node name="HudStaminaBar" type="ProgressBar" parent="Root/NameplatePanel/NameplateBox"]
+custom_minimum_size = Vector2(70, 8)
+layout_mode = 2
+size_flags_vertical = 4
+max_value = 1.0
+step = 0.01
+value = 1.0
+show_percentage = false
+
+[node name="FatigueLabel" type="Label" parent="Root/NameplatePanel/NameplateBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+theme_override_font_sizes/font_size = 12
+text = "100% FRESH"
 
 [node name="PowerMeter" type="ProgressBar" parent="Root"]
 layout_mode = 1
@@ -188,3 +203,144 @@ text = "[D→ / Y]  Penalty kick"
 layout_mode = 2
 theme_override_font_sizes/font_size = 12
 text = "[X / Q]  GK: ACTIVE"
+
+[node name="SimSpeedPanel" type="PanelContainer" parent="Root"]
+layout_mode = 1
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 296.0
+offset_bottom = 126.0
+visible = false
+
+[node name="VBox" type="VBoxContainer" parent="Root/SimSpeedPanel"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="HeaderBox" type="HBoxContainer" parent="Root/SimSpeedPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 6
+
+[node name="TitleLabel" type="Label" parent="Root/SimSpeedPanel/VBox/HeaderBox"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "MATCH SPEED"
+
+[node name="ReplayToggleBtn" type="Button" parent="Root/SimSpeedPanel/VBox/HeaderBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "REPLAY: ON"
+
+[node name="StaminaToggleBtn" type="Button" parent="Root/SimSpeedPanel/VBox/HeaderBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 10
+text = "STAMINA: ON"
+
+[node name="SpeedValueLabel" type="Label" parent="Root/SimSpeedPanel/VBox/HeaderBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+theme_override_font_sizes/font_size = 12
+text = "1.0x"
+horizontal_alignment = 2
+
+[node name="PresetRow" type="HBoxContainer" parent="Root/SimSpeedPanel/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="Speed1xBtn" type="Button" parent="Root/SimSpeedPanel/VBox/PresetRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+text = "1x"
+
+[node name="Speed2xBtn" type="Button" parent="Root/SimSpeedPanel/VBox/PresetRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+text = "2x"
+
+[node name="Speed4xBtn" type="Button" parent="Root/SimSpeedPanel/VBox/PresetRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+text = "4x"
+
+[node name="Speed8xBtn" type="Button" parent="Root/SimSpeedPanel/VBox/PresetRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+text = "8x"
+
+[node name="Speed16xBtn" type="Button" parent="Root/SimSpeedPanel/VBox/PresetRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 11
+text = "16x"
+
+[node name="SpeedSlider" type="HSlider" parent="Root/SimSpeedPanel/VBox"]
+layout_mode = 2
+min_value = 1.0
+max_value = 16.0
+step = 0.5
+value = 1.0
+
+[node name="HotkeysLabel" type="Label" parent="Root/SimSpeedPanel/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 0.75)
+theme_override_font_sizes/font_size = 10
+text = "Keys: [1-5] | [ [ ] ] | [ + - ] | [R] Replay | [S] Stamina"
+
+[node name="ReplayOverlay" type="Control" parent="Root"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+mouse_filter = 2
+visible = false
+
+[node name="ReplayBadgePanel" type="PanelContainer" parent="Root/ReplayOverlay"]
+layout_mode = 1
+anchors_preset = 1
+anchor_left = 1.0
+anchor_right = 1.0
+offset_left = -170.0
+offset_top = 16.0
+offset_right = -16.0
+offset_bottom = 54.0
+grow_horizontal = 0
+
+[node name="HBox" type="HBoxContainer" parent="Root/ReplayOverlay/ReplayBadgePanel"]
+layout_mode = 2
+theme_override_constants/separation = 6
+alignment = 1
+
+[node name="RecDot" type="Label" parent="Root/ReplayOverlay/ReplayBadgePanel/HBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(1, 0.25, 0.25, 1)
+theme_override_font_sizes/font_size = 16
+text = "●"
+
+[node name="BadgeLabel" type="Label" parent="Root/ReplayOverlay/ReplayBadgePanel/HBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "GOAL REPLAY"
+
+[node name="SkipButton" type="Button" parent="Root/ReplayOverlay"]
+layout_mode = 1
+anchors_preset = 3
+anchor_left = 1.0
+anchor_top = 1.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = -210.0
+offset_top = -48.0
+offset_right = -16.0
+offset_bottom = -16.0
+grow_horizontal = 0
+grow_vertical = 0
+theme_override_font_sizes/font_size = 12
+text = "Skip Replay [Space / Click]"
+
+

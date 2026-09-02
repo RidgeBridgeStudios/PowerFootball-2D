@@ -123,3 +123,4 @@ func _register_states() -> void:
 	_states[PlayerState.PENALTY_KICK] = PenaltyKickState.new()
 	_states[PlayerState.GOALKEEPER_DIVE] = GoalkeeperDiveState.new()
 	_states[PlayerState.GOALKEEPER_HOLD] = GoalkeeperHoldState.new()
+	_states[PlayerState.CELEBRATE] = CelebrateState.new()

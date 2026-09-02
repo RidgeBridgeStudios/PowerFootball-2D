@@ -80,6 +80,9 @@ var _boundary: Node = null            ## PitchBoundary
 var _pitch_rect: Rect2 = Rect2()
 var _target_zoom: float = 1.0
 var _target_position: Vector2 = Vector2.ZERO
+var _is_cinematic_override: bool = false
+var _cinematic_target_pos: Vector2 = Vector2.ZERO
+var _cinematic_target_zoom: float = 1.0
 
 
 func _ready() -> void:
@@ -87,6 +90,16 @@ func _ready() -> void:
 	position_smoothing_enabled = false  ## we handle smoothing manually
 	_target_zoom = _zoom_for_mode(_mode)
 	zoom = Vector2(_target_zoom, _target_zoom)
+
+
+func set_cinematic_override(target_pos: Vector2, target_zoom: float) -> void:
+	_is_cinematic_override = true
+	_cinematic_target_pos = target_pos
+	_cinematic_target_zoom = target_zoom
+
+
+func clear_cinematic_override() -> void:
+	_is_cinematic_override = false
 
 
 ## ── Bind API (called by PitchScene) ─────────────────────────────────────────
@@ -135,6 +148,13 @@ func get_mode_name() -> String:
 ## ── Core update loop ─────────────────────────────────────────────────────────
 
 func _physics_process(delta: float) -> void:
+	if _is_cinematic_override:
+		var clamped_cinematic: Vector2 = _clamp_to_pitch(_cinematic_target_pos)
+		global_position = global_position.lerp(clamped_cinematic, clampf(position_lerp_speed * delta, 0.0, 1.0))
+		var new_cinematic_zoom: float = lerpf(zoom.x, _cinematic_target_zoom, clampf(zoom_lerp_speed * delta, 0.0, 1.0))
+		zoom = Vector2(new_cinematic_zoom, new_cinematic_zoom)
+		return
+
 	if _ball == null:
 		return
 

@@ -111,6 +111,34 @@ def is_lane_blocked_fast(
     return (dx * dx + dy * dy) < (min_clearance * min_clearance)
 
 
+def calculate_xg_fast(
+    px: float, py: float,
+    gx: float, gy: float,
+    lx: float, ly: float,
+    rx: float, ry: float,
+) -> float:
+    dx = px - gx
+    dy = py - gy
+    d = math.sqrt(dx * dx + dy * dy)
+    vlx = lx - px
+    vly = ly - py
+    vrx = rx - px
+    vry = ry - py
+    ll = math.sqrt(vlx * vlx + vly * vly)
+    lr = math.sqrt(vrx * vrx + vry * vry)
+    theta = 0.0
+    if ll > 0.0001 and lr > 0.0001:
+        cos_val = clampf((vlx * vrx + vly * vry) / (ll * lr), -1.0, 1.0)
+        theta = math.acos(cos_val)
+    z = 1.85 - (0.0085 * d) + (1.42 * theta)
+    return 1.0 / (1.0 + math.exp(-clampf(z, -40.0, 40.0)))
+
+
+def calculate_psxg_fast(base_z: float, shot_speed: float, gk_dist: float) -> float:
+    z_ps = base_z + (0.003 * shot_speed) - (1.20 * (gk_dist / 100.0))
+    return 1.0 / (1.0 + math.exp(-clampf(z_ps, -40.0, 40.0)))
+
+
 def run_benchmarks(iterations: int = 100_000) -> None:
     print(f"=== PowerFootball-2D Mathematical Solvers Benchmark ===", flush=True)
     print(f"Iterations per benchmark: {iterations:,}\n", flush=True)
@@ -151,6 +179,24 @@ def run_benchmarks(iterations: int = 100_000) -> None:
     ops_lane = iterations / max(t1 - t0, 1e-9)
     print(f"[4] is_lane_blocked:          {dt_lane:6.2f} ms ({ops_lane:,.0f} ops/sec)", flush=True)
 
+    # 5. Benchmark calculate_xg
+    t0 = time.perf_counter()
+    for _ in range(iterations):
+        calculate_xg_fast(400.0, 50.0, 800.0, 0.0, 800.0, -100.0, 800.0, 100.0)
+    t1 = time.perf_counter()
+    dt_xg = (t1 - t0) * 1000.0
+    ops_xg = iterations / max(t1 - t0, 1e-9)
+    print(f"[5] calculate_xg:              {dt_xg:6.2f} ms ({ops_xg:,.0f} ops/sec)", flush=True)
+
+    # 6. Benchmark calculate_psxg
+    t0 = time.perf_counter()
+    for _ in range(iterations):
+        calculate_psxg_fast(0.45, 520.0, 30.0)
+    t1 = time.perf_counter()
+    dt_psxg = (t1 - t0) * 1000.0
+    ops_psxg = iterations / max(t1 - t0, 1e-9)
+    print(f"[6] calculate_psxg:            {dt_psxg:6.2f} ms ({ops_psxg:,.0f} ops/sec)", flush=True)
+
     print(f"\n=== All Mathematical Solver Benchmarks Completed Successfully ===", flush=True)
 
 
@@ -165,3 +211,4 @@ def main() -> int:
 
 if __name__ == "__main__":
     sys.exit(main())
+

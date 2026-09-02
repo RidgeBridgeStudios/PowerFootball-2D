@@ -193,6 +193,148 @@ def ballistic_trajectory_z(z0: float, vz0: float, g: float, t: float) -> float:
     return max(0.0, z0 + vz0 * t - 0.5 * g * t * t)
 
 
+def calculate_xg_logit(
+    shooter_pos: Vector2,
+    goal_centre: Vector2,
+    post_left: Vector2,
+    post_right: Vector2,
+    defender_positions: list[Vector2],
+    is_header: bool = False,
+) -> float:
+    d = shooter_pos.distance_to(goal_centre)
+    v_l = post_left - shooter_pos
+    v_r = post_right - shooter_pos
+    l_l = v_l.length()
+    l_r = v_r.length()
+    theta = 0.0
+    if l_l > 0.0001 and l_r > 0.0001:
+        cos_val = clampf(v_l.dot(v_r) / (l_l * l_r), -1.0, 1.0)
+        theta = math.acos(cos_val)
+
+    n_block = 0
+    for d_pos in defender_positions:
+        if is_point_in_triangle(d_pos, shooter_pos, post_left, post_right):
+            n_block += 1
+
+    header_val = 1.0 if is_header else 0.0
+    return 1.85 - (0.0085 * d) + (1.42 * theta) - (0.45 * float(n_block)) - (0.35 * header_val)
+
+
+def is_point_in_triangle(pt: Vector2, v1: Vector2, v2: Vector2, v3: Vector2) -> bool:
+    d1 = (pt.x - v2.x) * (v1.y - v2.y) - (v1.x - v2.x) * (pt.y - v2.y)
+    d2 = (pt.x - v3.x) * (v2.y - v3.y) - (v2.x - v3.x) * (pt.y - v3.y)
+    d3 = (pt.x - v1.x) * (v3.y - v1.y) - (v3.x - v1.x) * (pt.y - v1.y)
+    has_neg = (d1 < 0.0) or (d2 < 0.0) or (d3 < 0.0)
+    has_pos = (d1 > 0.0) or (d2 > 0.0) or (d3 > 0.0)
+    return not (has_neg and has_pos)
+
+
+def calculate_xg(
+    shooter_pos: Vector2,
+    goal_centre: Vector2,
+    post_left: Vector2,
+    post_right: Vector2,
+    defender_positions: list[Vector2],
+    is_header: bool = False,
+) -> float:
+    z = calculate_xg_logit(shooter_pos, goal_centre, post_left, post_right, defender_positions, is_header)
+    z_clamped = clampf(z, -40.0, 40.0)
+    return 1.0 / (1.0 + math.exp(-z_clamped))
+
+
+def calculate_psxg(
+    base_xg_logit: float,
+    shot_speed: float,
+    gk_pos: Vector2,
+    goal_centre: Vector2,
+    is_on_target: bool,
+) -> float:
+    if not is_on_target:
+        return 0.0
+    d_gk = gk_pos.distance_to(goal_centre)
+    z_ps = base_xg_logit + (0.003 * shot_speed) - (1.20 * (d_gk / 100.0))
+    z_clamped = clampf(z_ps, -40.0, 40.0)
+    return 1.0 / (1.0 + math.exp(-z_clamped))
+
+
+def calculate_packing(
+    orig_pos: Vector2,
+    dest_pos: Vector2,
+    defender_positions: list[Vector2],
+    attack_sign: float,
+    opp_defensive_line_x: float,
+) -> dict:
+    packing_count = 0
+    impect_count = 0
+    x_orig = orig_pos.x * attack_sign
+    x_dest = dest_pos.x * attack_sign
+    min_x = min(x_orig, x_dest)
+    max_x = max(x_orig, x_dest)
+    y_orig = orig_pos.y
+    y_dest = dest_pos.y
+    corridor_half_width = 160.0
+
+    for d_pos in defender_positions:
+        d_x = d_pos.x * attack_sign
+        if d_x > min_x and d_x < max_x:
+            t = (d_x - min_x) / (max_x - min_x) if (max_x - min_x) > 0.0001 else 0.0
+            corridor_y = y_orig + (y_dest - y_orig) * t
+            if abs(d_pos.y - corridor_y) <= corridor_half_width:
+                packing_count += 1
+                if (d_pos.x * attack_sign) >= (opp_defensive_line_x * attack_sign - 50.0):
+                    impect_count += 1
+
+    return {"packing": packing_count, "impect": impect_count}
+
+
+def is_progressive_action(
+    start_pos: Vector2,
+    end_pos: Vector2,
+    opp_goal_centre: Vector2,
+    in_penalty_start: bool = False,
+    in_penalty_end: bool = False,
+) -> bool:
+    if not in_penalty_start and in_penalty_end:
+        return True
+    d_start = start_pos.distance_to(opp_goal_centre)
+    d_end = end_pos.distance_to(opp_goal_centre)
+    if d_start <= 0.0001:
+        return False
+    return (d_start - d_end) / d_start >= 0.25
+
+
+def calculate_vaep_value(
+    action_type: str,
+    orig_xt: float,
+    dest_xt: float,
+    success: bool,
+    is_progressive: bool = False,
+    shot_xg: float = 0.0,
+    shot_psxg: float = 0.0,
+) -> float:
+    if action_type == "shot":
+        if success:
+            return 0.15 + (0.85 * shot_psxg)
+        return -0.05 + (0.40 * shot_xg)
+    elif action_type == "pass":
+        if success:
+            delta_xt = dest_xt - orig_xt
+            base_val = max(delta_xt, -0.02)
+            return (base_val + 0.05) if is_progressive else base_val
+        return -(orig_xt * 0.5) - 0.03
+    elif action_type == "carry":
+        delta_xt = dest_xt - orig_xt
+        base_val = max(delta_xt, -0.01)
+        return (base_val + 0.04) if is_progressive else base_val
+    elif action_type == "tackle":
+        return 0.08 + (orig_xt * 0.3)
+    elif action_type == "interception":
+        return 0.07 + (orig_xt * 0.35)
+    elif action_type == "foul":
+        return -0.06 - (orig_xt * 0.4)
+    return 0.0
+
+
 # ---------------------------------------------------------------------------
 # Fuzz Suite
 # ---------------------------------------------------------------------------
@@ -302,6 +444,54 @@ def run_fuzz_tests(num_iterations: int = 100000, seed: int = 42) -> bool:
         if math.isnan(z_t) or z_t < 0.0:
             nan_inf_violations += 1
             print(f"[FAIL] ballistic_trajectory_z invalid: {z_t}")
+            break
+
+        # 8. Fuzz xG and PSxG Solvers
+        g_centre = Vector2(800.0, 0.0)
+        p_left = Vector2(800.0, -100.0)
+        p_right = Vector2(800.0, 100.0)
+        defenders = [Vector2(random.uniform(-800.0, 800.0), random.uniform(-450.0, 450.0)) for _ in range(random.randint(0, 5))]
+        is_hdr = random.choice([True, False])
+        xg_val = calculate_xg(p_pos, g_centre, p_left, p_right, defenders, is_hdr)
+        if math.isnan(xg_val) or not (0.0 <= xg_val <= 1.0):
+            nan_inf_violations += 1
+            print(f"[FAIL] calculate_xg out of bounds: {xg_val}")
+            break
+
+        z_logit = calculate_xg_logit(p_pos, g_centre, p_left, p_right, defenders, is_hdr)
+        gk_pos = Vector2(random.uniform(700.0, 850.0), random.uniform(-100.0, 100.0))
+        is_on_tgt = random.choice([True, False])
+        psxg_val = calculate_psxg(z_logit, b_speed, gk_pos, g_centre, is_on_tgt)
+        if math.isnan(psxg_val) or not (0.0 <= psxg_val <= 1.0):
+            nan_inf_violations += 1
+            print(f"[FAIL] calculate_psxg out of bounds: {psxg_val}")
+            break
+
+        # 9. Fuzz Packing and Impect Solvers
+        att_sign = random.choice([1.0, -1.0])
+        def_line = random.uniform(-600.0, 600.0)
+        pack_res = calculate_packing(s_start, s_end, defenders, att_sign, def_line)
+        p_cnt = pack_res["packing"]
+        i_cnt = pack_res["impect"]
+        if p_cnt < 0 or i_cnt < 0 or i_cnt > p_cnt:
+            boundary_violations += 1
+            print(f"[FAIL] calculate_packing invariant violation: pack={p_cnt}, imp={i_cnt}")
+            break
+
+        # 10. Fuzz Progressive Action Solver
+        is_prog = is_progressive_action(s_start, s_end, g_centre, random.choice([True, False]), random.choice([True, False]))
+        if not isinstance(is_prog, bool):
+            nan_inf_violations += 1
+            break
+
+        # 11. Fuzz VAEP Solver
+        act_type = random.choice(["shot", "pass", "carry", "tackle", "interception", "foul"])
+        o_xt = random.uniform(0.0, 1.0)
+        d_xt = random.uniform(0.0, 1.0)
+        vaep_val = calculate_vaep_value(act_type, o_xt, d_xt, True, is_prog, xg_val, psxg_val)
+        if math.isnan(vaep_val) or math.isinf(vaep_val):
+            nan_inf_violations += 1
+            print(f"[FAIL] calculate_vaep_value returned NaN/Inf: {vaep_val}")
             break
 
         if i % 25000 == 0:

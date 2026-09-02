@@ -1,24 +1,40 @@
-[gd_scene load_steps=3 format=3]
+[gd_scene load_steps=4 format=3]
 
 [ext_resource type="Script" path="res://ui/KickOffMenu.gd" id="1_kickoff"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_mode"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_panel"]
-bg_color = Color(0.0509804, 0.0588235, 0.0509804, 0.92)
+bg_color = Color(0.0509804, 0.0588235, 0.0509804, 0.94)
 border_width_left = 1
 border_width_top = 1
 border_width_right = 1
 border_width_bottom = 1
-border_color = Color(0.24, 0.86, 0.41, 0.2)
+border_color = Color(0.24, 0.86, 0.41, 0.25)
 corner_radius_top_left = 8
 corner_radius_top_right = 8
 corner_radius_bottom_right = 8
 corner_radius_bottom_left = 8
-content_margin_left = 32.0
-content_margin_top = 24.0
-content_margin_right = 32.0
-content_margin_bottom = 24.0
+content_margin_left = 28.0
+content_margin_top = 18.0
+content_margin_right = 28.0
+content_margin_bottom = 18.0
+
+[sub_resource type="StyleBoxFlat" id="StyleBoxFlat_card"]
+bg_color = Color(0.08, 0.09, 0.08, 0.88)
+border_width_left = 1
+border_width_top = 1
+border_width_right = 1
+border_width_bottom = 1
+border_color = Color(0.24, 0.86, 0.41, 0.18)
+corner_radius_top_left = 6
+corner_radius_top_right = 6
+corner_radius_bottom_right = 6
+corner_radius_bottom_left = 6
+content_margin_left = 14.0
+content_margin_top = 10.0
+content_margin_right = 14.0
+content_margin_bottom = 10.0
 
 [node name="KickOffMenu" type="Control"]
 layout_mode = 3
@@ -37,86 +53,257 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -420.0
-offset_top = -260.0
-offset_right = 420.0
-offset_bottom = 260.0
+offset_left = -560.0
+offset_top = -320.0
+offset_right = 560.0
+offset_bottom = 320.0
 grow_horizontal = 2
 grow_vertical = 2
 theme_override_styles/panel = SubResource("StyleBoxFlat_panel")
 
 [node name="Layout" type="VBoxContainer" parent="Panel"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 10
 
 [node name="TitleLabel" type="Label" parent="Panel/Layout"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 28
+theme_override_font_sizes/font_size = 24
 horizontal_alignment = 1
-text = "SELECT TEAMS"
+text = "KICK OFF"
 
 [node name="ModeRow" type="HBoxContainer" parent="Panel/Layout"]
 layout_mode = 2
 alignment = 1
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
 [node name="VsCpuButton" type="Button" parent="Panel/Layout/ModeRow"]
 layout_mode = 2
 toggle_mode = true
 button_pressed = true
 button_group = SubResource("ButtonGroup_mode")
-text = "vs CPU"
+text = "1P vs CPU"
 
 [node name="VsPlayerButton" type="Button" parent="Panel/Layout/ModeRow"]
 layout_mode = 2
 toggle_mode = true
 button_group = SubResource("ButtonGroup_mode")
-text = "vs Player 2"
+text = "1P vs 2P"
+
+[node name="VsSpectatorButton" type="Button" parent="Panel/Layout/ModeRow"]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_mode")
+text = "Watch CPU vs CPU"
+
+[node name="QuickSimModeButton" type="Button" parent="Panel/Layout/ModeRow"]
+layout_mode = 2
+toggle_mode = true
+button_group = SubResource("ButtonGroup_mode")
+text = "Quick Simulation"
+
+[node name="ModeDescLabel" type="Label" parent="Panel/Layout"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.78, 0.72, 1)
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+text = "1P vs CPU — Take control of the Home team against the CPU."
 
 [node name="TeamRow" type="HBoxContainer" parent="Panel/Layout"]
 layout_mode = 2
-theme_override_constants/separation = 24
 size_flags_vertical = 3
+theme_override_constants/separation = 16
 
 [node name="HomePanel" type="VBoxContainer" parent="Panel/Layout/TeamRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_constants/separation = 6
 
 [node name="HomeLabel" type="Label" parent="Panel/Layout/TeamRow/HomePanel"]
 layout_mode = 2
 horizontal_alignment = 1
-text = "HOME"
+text = "HOME TEAM"
 
 [node name="HomeList" type="ItemList" parent="Panel/Layout/TeamRow/HomePanel"]
+custom_minimum_size = Vector2(0, 140)
 layout_mode = 2
 size_flags_vertical = 3
-custom_minimum_size = Vector2(0, 220)
 
-[node name="HomeSelectedLabel" type="Label" parent="Panel/Layout/TeamRow/HomePanel"]
+[node name="HomeCard" type="PanelContainer" parent="Panel/Layout/TeamRow/HomePanel"]
 layout_mode = 2
-horizontal_alignment = 1
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Layout/TeamRow/HomePanel/HomeCard"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="NameRow" type="HBoxContainer" parent="Panel/Layout/TeamRow/HomePanel/HomeCard/VBox"]
+layout_mode = 2
+
+[node name="HomeNameLabel" type="Label" parent="Panel/Layout/TeamRow/HomePanel/HomeCard/VBox/NameRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 17
+text = "Select Home Team"
+
+[node name="HomeOvrBadge" type="Label" parent="Panel/Layout/TeamRow/HomePanel/HomeCard/VBox/NameRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "OVR --"
+
+[node name="HomeStarLabel" type="Label" parent="Panel/Layout/TeamRow/HomePanel/HomeCard/VBox/NameRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.8, 0.25, 1)
+text = "★★★★★"
+
+[node name="RatingsRow" type="HBoxContainer" parent="Panel/Layout/TeamRow/HomePanel/HomeCard/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="HomeAttLabel" type="Label" parent="Panel/Layout/TeamRow/HomePanel/HomeCard/VBox/RatingsRow"]
+layout_mode = 2
+text = "ATT: --"
+
+[node name="HomeMidLabel" type="Label" parent="Panel/Layout/TeamRow/HomePanel/HomeCard/VBox/RatingsRow"]
+layout_mode = 2
+text = "MID: --"
+
+[node name="HomeDefLabel" type="Label" parent="Panel/Layout/TeamRow/HomePanel/HomeCard/VBox/RatingsRow"]
+layout_mode = 2
+text = "DEF: --"
+
+[node name="HomeGkLabel" type="Label" parent="Panel/Layout/TeamRow/HomePanel/HomeCard/VBox/RatingsRow"]
+layout_mode = 2
+text = "GK: --"
+
+[node name="InfoRow" type="HBoxContainer" parent="Panel/Layout/TeamRow/HomePanel/HomeCard/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="HomeFormationLabel" type="Label" parent="Panel/Layout/TeamRow/HomePanel/HomeCard/VBox/InfoRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Formation: --"
+
+[node name="HomeManagerLabel" type="Label" parent="Panel/Layout/TeamRow/HomePanel/HomeCard/VBox/InfoRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Manager: --"
+
+[node name="HomeCaptainLabel" type="Label" parent="Panel/Layout/TeamRow/HomePanel/HomeCard/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.72, 0.68, 1)
+theme_override_font_sizes/font_size = 12
+text = "Captain: --"
+
+[node name="MatchupPanel" type="VBoxContainer" parent="Panel/Layout/TeamRow"]
+custom_minimum_size = Vector2(90, 0)
+layout_mode = 2
+alignment = 1
+theme_override_constants/separation = 6
+
+[node name="VsLabel" type="Label" parent="Panel/Layout/TeamRow/MatchupPanel"]
+layout_mode = 2
 theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+theme_override_font_sizes/font_size = 24
+horizontal_alignment = 1
+text = "VS"
+
+[node name="MatchupDiffLabel" type="Label" parent="Panel/Layout/TeamRow/MatchupPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="MatchupNoteLabel" type="Label" parent="Panel/Layout/TeamRow/MatchupPanel"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.7, 0.65, 1)
+theme_override_font_sizes/font_size = 11
+horizontal_alignment = 1
+autowrap_mode = 2
 
 [node name="AwayPanel" type="VBoxContainer" parent="Panel/Layout/TeamRow"]
 layout_mode = 2
 size_flags_horizontal = 3
 size_flags_vertical = 3
+theme_override_constants/separation = 6
 
 [node name="AwayLabel" type="Label" parent="Panel/Layout/TeamRow/AwayPanel"]
 layout_mode = 2
 horizontal_alignment = 1
-text = "AWAY"
+text = "AWAY TEAM"
 
 [node name="AwayList" type="ItemList" parent="Panel/Layout/TeamRow/AwayPanel"]
+custom_minimum_size = Vector2(0, 140)
 layout_mode = 2
 size_flags_vertical = 3
-custom_minimum_size = Vector2(0, 220)
 
-[node name="AwaySelectedLabel" type="Label" parent="Panel/Layout/TeamRow/AwayPanel"]
+[node name="AwayCard" type="PanelContainer" parent="Panel/Layout/TeamRow/AwayPanel"]
 layout_mode = 2
-horizontal_alignment = 1
-theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+theme_override_styles/panel = SubResource("StyleBoxFlat_card")
+
+[node name="VBox" type="VBoxContainer" parent="Panel/Layout/TeamRow/AwayPanel/AwayCard"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="NameRow" type="HBoxContainer" parent="Panel/Layout/TeamRow/AwayPanel/AwayCard/VBox"]
+layout_mode = 2
+
+[node name="AwayNameLabel" type="Label" parent="Panel/Layout/TeamRow/AwayPanel/AwayCard/VBox/NameRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 17
+text = "Select Away Team"
+
+[node name="AwayOvrBadge" type="Label" parent="Panel/Layout/TeamRow/AwayPanel/AwayCard/VBox/NameRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+text = "OVR --"
+
+[node name="AwayStarLabel" type="Label" parent="Panel/Layout/TeamRow/AwayPanel/AwayCard/VBox/NameRow"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.95, 0.8, 0.25, 1)
+text = "★★★★★"
+
+[node name="RatingsRow" type="HBoxContainer" parent="Panel/Layout/TeamRow/AwayPanel/AwayCard/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="AwayAttLabel" type="Label" parent="Panel/Layout/TeamRow/AwayPanel/AwayCard/VBox/RatingsRow"]
+layout_mode = 2
+text = "ATT: --"
+
+[node name="AwayMidLabel" type="Label" parent="Panel/Layout/TeamRow/AwayPanel/AwayCard/VBox/RatingsRow"]
+layout_mode = 2
+text = "MID: --"
+
+[node name="AwayDefLabel" type="Label" parent="Panel/Layout/TeamRow/AwayPanel/AwayCard/VBox/RatingsRow"]
+layout_mode = 2
+text = "DEF: --"
+
+[node name="AwayGkLabel" type="Label" parent="Panel/Layout/TeamRow/AwayPanel/AwayCard/VBox/RatingsRow"]
+layout_mode = 2
+text = "GK: --"
+
+[node name="InfoRow" type="HBoxContainer" parent="Panel/Layout/TeamRow/AwayPanel/AwayCard/VBox"]
+layout_mode = 2
+theme_override_constants/separation = 14
+
+[node name="AwayFormationLabel" type="Label" parent="Panel/Layout/TeamRow/AwayPanel/AwayCard/VBox/InfoRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Formation: --"
+
+[node name="AwayManagerLabel" type="Label" parent="Panel/Layout/TeamRow/AwayPanel/AwayCard/VBox/InfoRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Manager: --"
+
+[node name="AwayCaptainLabel" type="Label" parent="Panel/Layout/TeamRow/AwayPanel/AwayCard/VBox"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.65, 0.72, 0.68, 1)
+theme_override_font_sizes/font_size = 12
+text = "Captain: --"
 
 [node name="DurationRow" type="HBoxContainer" parent="Panel/Layout"]
 layout_mode = 2
@@ -129,6 +316,12 @@ text = "Half Length:"
 
 [node name="DurationOption" type="OptionButton" parent="Panel/Layout/DurationRow"]
 layout_mode = 2
+
+[node name="QuickSimNotice" type="Label" parent="Panel/Layout/DurationRow"]
+visible = false
+layout_mode = 2
+theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+text = "Instant analytical simulation (Poisson / Dixon-Coles model)"
 
 [node name="HintLabel" type="Label" parent="Panel/Layout"]
 layout_mode = 2
@@ -143,6 +336,11 @@ theme_override_constants/separation = 24
 [node name="BackButton" type="Button" parent="Panel/Layout/ButtonRow"]
 layout_mode = 2
 text = "← Back"
+
+[node name="QuickSimButton" type="Button" parent="Panel/Layout/ButtonRow"]
+layout_mode = 2
+disabled = true
+text = "Quick Sim ⚡"
 
 [node name="ConfirmButton" type="Button" parent="Panel/Layout/ButtonRow"]
 layout_mode = 2

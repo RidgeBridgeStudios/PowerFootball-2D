@@ -36,6 +36,13 @@ extends Resource
 @export_range(0.0, 1.0) var incoherence: float = 0.0
 ## 0 = unknown, 1 = highly respected; affects how much teams "expect" favouritism from them.
 @export_range(0.0, 1.0) var reputation: float = 0.5
+## League-wide respect rating (0.0 = widely distrusted, 1.0 = universally revered authority).
+## Degrades after matches with high controversy, erratic penalties, or poor consistency;
+## increases with clean, composed, consistent displays.
+@export_range(0.0, 1.0) var respect_rating: float = 0.50
+
+## Rolling match officiating ratings (0.0 - 10.0).
+var recent_match_ratings: Array[float] = []
 
 ## --- Career stats (persisted across matches) ------------------------------------
 
@@ -82,3 +89,28 @@ static func make_default(referee_name: String, nationality: String) -> RefereeDa
 	r.referee_name = referee_name
 	r.nationality = nationality
 	return r
+
+
+## Evaluates officiating performance from match events and returns a match rating (0.0 - 10.0).
+func evaluate_match_performance(fouls: int, yellows: int, reds: int, penalties: int, controversy_score: float = 0.0) -> float:
+	var base_score: float = 7.0
+	# Deviations from normal match baseline
+	var foul_penalty: float = maxf(0.0, float(fouls - 22)) * 0.08
+	var card_penalty: float = maxf(0.0, float(yellows + reds * 2 - 4)) * 0.15
+	var penalty_penalty: float = maxf(0.0, float(penalties - 1)) * 0.40
+	# Incoherence & unprofessionalism magnify controversy impact
+	var personality_flaw: float = (incoherence * 0.6 + unprofessionalism * 0.4)
+	var scaled_controversy: float = controversy_score * (1.0 + personality_flaw)
+	var score: float = base_score - foul_penalty - card_penalty - penalty_penalty - scaled_controversy + (consistency * 0.8) + (composure * 0.6)
+	return clampf(score, 1.0, 10.0)
+
+
+## Applies match rating and updates respect_rating and reputation.
+func apply_match_evaluation(perf_score: float) -> void:
+	recent_match_ratings.append(perf_score)
+	if recent_match_ratings.size() > 10:
+		recent_match_ratings.pop_front()
+	# Performance delta relative to standard baseline 6.5
+	var delta: float = (perf_score - 6.5) * 0.02
+	respect_rating = clampf(respect_rating + delta, 0.05, 0.99)
+	reputation = clampf(reputation + delta * 0.5, 0.05, 0.99)

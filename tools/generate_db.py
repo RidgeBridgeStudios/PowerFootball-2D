@@ -30,7 +30,23 @@ def build_player(
     ball_weight: float = 0.35,
     career_goals: int = 0,
     career_assists: int = 0,
-    is_unavailable: bool = False
+    is_unavailable: bool = False,
+    determination: float = None,
+    work_rate: float = None,
+    leadership: float = None,
+    temperament: float = None,
+    professionalism: float = None,
+    ambition: float = None,
+    loyalty: float = None,
+    adaptability: float = None,
+    traits: int = 0,
+    player_reputation: float = None,
+    wage_weekly: int = None,
+    contract_years: int = None,
+    release_clause: int = 0,
+    squad_status: str = None,
+    morale: float = 0.75,
+    market_value: int = None
 ) -> dict:
     # Strict validation of invariant bounds
     assert 60.0 <= mass <= 95.0, f"mass out of bounds for {name}: {mass}"
@@ -43,6 +59,56 @@ def build_player(
     assert 0.0 <= aggression <= 1.0, f"aggression out of bounds for {name}: {aggression}"
     assert 0.0 <= close_control <= 1.0, f"close_control out of bounds for {name}: {close_control}"
     assert 0.0 <= reflexes <= 1.0, f"reflexes out of bounds for {name}: {reflexes}"
+
+    is_starter = shirt_number <= 11
+    if determination is None:
+        determination = round(min(1.0, max(0.2, (composure + aggression) * 0.5 + (0.1 if is_starter else 0.0))), 2)
+    if work_rate is None:
+        work_rate = round(min(1.0, max(0.25, (stamina_max - 75.0) / 50.0 * 0.6 + composure * 0.4)), 2)
+    if leadership is None:
+        leadership = round(min(1.0, max(0.15, composure * 0.7 + (0.25 if shirt_number in (4, 5, 8, 10, 1) else 0.0))), 2)
+    if temperament is None:
+        temperament = round(min(1.0, max(0.2, 1.0 - aggression * 0.5 + composure * 0.3)), 2)
+    if professionalism is None:
+        professionalism = round(min(1.0, max(0.3, composure * 0.6 + determination * 0.4)), 2)
+    if ambition is None:
+        ambition = round(min(1.0, max(0.25, vision * 0.4 + close_control * 0.4 + (0.15 if is_starter else 0.05))), 2)
+    if loyalty is None:
+        loyalty = round(min(1.0, max(0.2, 1.0 - ambition * 0.4 + 0.1)), 2)
+    if adaptability is None:
+        adaptability = round(min(1.0, max(0.3, vision * 0.5 + composure * 0.5)), 2)
+    if player_reputation is None:
+        base_rep = (vision + composure + close_control + reflexes) * 0.2
+        player_reputation = round(min(0.95, max(0.15, base_rep + (0.2 if is_starter else 0.05) + career_goals * 0.02)), 2)
+    if squad_status is None:
+        if is_starter and player_reputation >= 0.70:
+            squad_status = "Star Player"
+        elif is_starter:
+            squad_status = "Regular Starter"
+        elif shirt_number in (12, 13, 14, 15, 16):
+            squad_status = "Rotation"
+        else:
+            squad_status = "Prospect" if shirt_number >= 18 else "Squad Player"
+    if wage_weekly is None:
+        base_wage = 5000 if not is_starter else 15000
+        wage_weekly = int(round(base_wage * (0.5 + player_reputation * 1.8) / 500.0) * 500)
+    if contract_years is None:
+        contract_years = 3 if is_starter else 2
+    if market_value is None:
+        market_value = int(round(wage_weekly * 52 * (contract_years * 0.8 + 1.2)))
+
+    assert 0.0 <= determination <= 1.0, f"determination out of bounds: {determination}"
+    assert 0.0 <= work_rate <= 1.0, f"work_rate out of bounds: {work_rate}"
+    assert 0.0 <= leadership <= 1.0, f"leadership out of bounds: {leadership}"
+    assert 0.0 <= temperament <= 1.0, f"temperament out of bounds: {temperament}"
+    assert 0.0 <= professionalism <= 1.0, f"professionalism out of bounds: {professionalism}"
+    assert 0.0 <= ambition <= 1.0, f"ambition out of bounds: {ambition}"
+    assert 0.0 <= loyalty <= 1.0, f"loyalty out of bounds: {loyalty}"
+    assert 0.0 <= adaptability <= 1.0, f"adaptability out of bounds: {adaptability}"
+    assert 0.0 <= player_reputation <= 1.0, f"player_reputation out of bounds: {player_reputation}"
+    assert wage_weekly > 0, f"wage_weekly must be positive: {wage_weekly}"
+    assert 1 <= contract_years <= 5, f"contract_years out of bounds: {contract_years}"
+    assert 0.0 <= morale <= 1.0, f"morale out of bounds: {morale}"
 
     return {
         "player_name": name,
@@ -63,6 +129,22 @@ def build_player(
         "formation_ball_weight": round(ball_weight, 2),
         "close_control": round(close_control, 2),
         "reflexes": round(reflexes, 2),
+        "determination": round(determination, 2),
+        "work_rate": round(work_rate, 2),
+        "leadership": round(leadership, 2),
+        "temperament": round(temperament, 2),
+        "professionalism": round(professionalism, 2),
+        "ambition": round(ambition, 2),
+        "loyalty": round(loyalty, 2),
+        "adaptability": round(adaptability, 2),
+        "traits": traits,
+        "player_reputation": round(player_reputation, 2),
+        "wage_weekly": wage_weekly,
+        "contract_years": contract_years,
+        "release_clause": release_clause,
+        "squad_status": squad_status,
+        "morale": round(morale, 2),
+        "market_value": market_value,
         "form": round(form, 1),
         "career_goals": career_goals,
         "career_assists": career_assists,
@@ -103,6 +185,10 @@ def generate_league() -> dict:
         "secondary_color": "#4A90E2",
         "formation_override": "4-4-2",
         "lineup_indices": list(range(11)),
+        "reputation": 0.88,
+        "stature": "Continental Giant",
+        "transfer_budget": 35000000,
+        "wage_budget_weekly": 550000,
         "squad": nordvik_squad
     })
 
@@ -136,6 +222,10 @@ def generate_league() -> dict:
         "secondary_color": "#E5A93C",
         "formation_override": "4-3-3",
         "lineup_indices": list(range(11)),
+        "reputation": 0.85,
+        "stature": "Continental Giant",
+        "transfer_budget": 30000000,
+        "wage_budget_weekly": 500000,
         "squad": solano_squad
     })
 
@@ -169,6 +259,10 @@ def generate_league() -> dict:
         "secondary_color": "#D4AF37",
         "formation_override": "4-2-3-1",
         "lineup_indices": list(range(11)),
+        "reputation": 0.78,
+        "stature": "Top Flight Heavyweight",
+        "transfer_budget": 22000000,
+        "wage_budget_weekly": 380000,
         "squad": valence_squad
     })
 
@@ -176,15 +270,15 @@ def generate_league() -> dict:
     maritimo_squad = [
         # Starting XI (0..10): GK, LCB, CB, RCB, LWB, DM, RWB, CM, CAM, ST, ST
         build_player(1, "Tiago Valente", "GK", 81.0, 184.0, 0.30, 0.12, 0.48, 1.32, 94.0, 0.82, 0.80, 0.30, 0.60, 0.84, 6.9),
-        build_player(3, "Bernardo Paiva", "CB", 85.0, 198.0, 0.29, 0.12, 0.45, 1.34, 98.0, 0.68, 0.72, 0.72, 0.62, 0.35, 6.7),
-        build_player(4, "Goncalo Couto", "CB", 89.0, 192.0, 0.32, 0.12, 0.50, 1.28, 96.0, 0.62, 0.78, 0.80, 0.54, 0.35, 6.8),
-        build_player(5, "Diogo Pinho", "CB", 84.0, 200.0, 0.29, 0.12, 0.45, 1.35, 98.0, 0.66, 0.70, 0.70, 0.60, 0.35, 6.6),
-        build_player(11, "Hugo Sampaio", "LB", 71.0, 234.0, 0.16, 0.12, 0.25, 1.52, 110.0, 0.78, 0.68, 0.60, 0.82, 0.45, 7.2, career_goals=2, career_assists=6),
-        build_player(6, "Tomas Brandao", "DM", 79.0, 206.0, 0.26, 0.12, 0.40, 1.40, 114.0, 0.88, 0.84, 0.68, 0.80, 0.40, 7.3, career_goals=1, career_assists=5),
-        build_player(2, "Nuno Matos", "RB", 72.0, 232.0, 0.16, 0.12, 0.25, 1.50, 108.0, 0.76, 0.66, 0.62, 0.80, 0.45, 7.0, career_goals=1, career_assists=4),
-        build_player(8, "Fabio Gouveia", "CM", 73.0, 212.0, 0.20, 0.12, 0.32, 1.44, 112.0, 0.84, 0.76, 0.64, 0.80, 0.45, 7.1, career_goals=3, career_assists=5),
-        build_player(10, "Rodrigo Lessa", "AM", 68.0, 222.0, 0.15, 0.12, 0.24, 1.50, 102.0, 0.92, 0.80, 0.50, 0.88, 0.45, 7.4, career_goals=4, career_assists=8),
-        build_player(9, "Ricardo Trindade", "ST", 82.0, 228.0, 0.19, 0.12, 0.30, 1.54, 104.0, 0.74, 0.76, 0.82, 0.80, 0.45, 7.7, career_goals=10, career_assists=3),
+        build_player(3, "Ruben Couto", "CB", 85.0, 196.0, 0.30, 0.12, 0.46, 1.34, 100.0, 0.72, 0.76, 0.74, 0.66, 0.35, 6.8),
+        build_player(4, "Goncalo Pais", "CB", 87.0, 192.0, 0.31, 0.12, 0.48, 1.30, 98.0, 0.70, 0.78, 0.76, 0.64, 0.35, 6.9),
+        build_player(5, "Diogo Antunes", "CB", 84.0, 194.0, 0.30, 0.12, 0.46, 1.32, 98.0, 0.68, 0.74, 0.72, 0.62, 0.35, 6.7),
+        build_player(2, "Helder Basto", "LB", 72.0, 226.0, 0.17, 0.12, 0.28, 1.50, 108.0, 0.78, 0.68, 0.60, 0.78, 0.45, 7.1),
+        build_player(6, "Martim Sequeira", "DM", 79.0, 204.0, 0.28, 0.12, 0.45, 1.36, 114.0, 0.86, 0.84, 0.78, 0.76, 0.40, 7.2, career_goals=1, career_assists=2),
+        build_player(8, "Bernardo Pires", "RB", 73.0, 224.0, 0.18, 0.12, 0.28, 1.48, 106.0, 0.76, 0.66, 0.58, 0.76, 0.45, 7.0),
+        build_player(10, "Tomas Alencastre", "CM", 71.0, 216.0, 0.18, 0.12, 0.30, 1.46, 112.0, 0.90, 0.82, 0.54, 0.88, 0.45, 7.5, career_goals=4, career_assists=8),
+        build_player(11, "Simao Castelo", "AM", 68.0, 222.0, 0.15, 0.12, 0.24, 1.52, 102.0, 0.92, 0.80, 0.50, 0.90, 0.45, 7.4, career_goals=5, career_assists=6),
+        build_player(9, "Rodrigo Matos", "ST", 82.0, 220.0, 0.21, 0.12, 0.34, 1.50, 102.0, 0.74, 0.72, 0.82, 0.78, 0.45, 7.4, career_goals=8, career_assists=3),
         build_player(7, "Vasco Lourenco", "ST", 76.0, 232.0, 0.17, 0.12, 0.28, 1.55, 102.0, 0.78, 0.72, 0.70, 0.82, 0.45, 7.3, career_goals=6, career_assists=5),
         # Substitutes (11..17)
         build_player(12, "Afonso Vilar", "GK", 80.0, 180.0, 0.32, 0.12, 0.50, 1.28, 90.0, 0.70, 0.72, 0.30, 0.52, 0.76, 6.2),
@@ -202,6 +296,10 @@ def generate_league() -> dict:
         "secondary_color": "#FF6B6B",
         "formation_override": "3-5-2",
         "lineup_indices": list(range(11)),
+        "reputation": 0.74,
+        "stature": "Top Flight Heavyweight",
+        "transfer_budget": 18000000,
+        "wage_budget_weekly": 320000,
         "squad": maritimo_squad
     })
 
@@ -235,6 +333,10 @@ def generate_league() -> dict:
         "secondary_color": "#ADB5BD",
         "formation_override": "5-3-2",
         "lineup_indices": list(range(11)),
+        "reputation": 0.65,
+        "stature": "Mid-Table Regular",
+        "transfer_budget": 14000000,
+        "wage_budget_weekly": 250000,
         "squad": eisenwald_squad
     })
 
@@ -268,6 +370,10 @@ def generate_league() -> dict:
         "secondary_color": "#FF5722",
         "formation_override": "4-3-3",
         "lineup_indices": list(range(11)),
+        "reputation": 0.58,
+        "stature": "Mid-Table Regular",
+        "transfer_budget": 10000000,
+        "wage_budget_weekly": 180000,
         "squad": aurora_squad
     })
 
@@ -301,6 +407,10 @@ def generate_league() -> dict:
         "secondary_color": "#F8F9FA",
         "formation_override": "4-4-2",
         "lineup_indices": list(range(11)),
+        "reputation": 0.44,
+        "stature": "Relegation Battler",
+        "transfer_budget": 5000000,
+        "wage_budget_weekly": 110000,
         "squad": highland_squad
     })
 
@@ -334,6 +444,10 @@ def generate_league() -> dict:
         "secondary_color": "#FFD700",
         "formation_override": "4-2-3-1",
         "lineup_indices": list(range(11)),
+        "reputation": 0.32,
+        "stature": "Lower League Underdog",
+        "transfer_budget": 2500000,
+        "wage_budget_weekly": 70000,
         "squad": portosol_squad
     })
 
@@ -350,6 +464,11 @@ def generate_managers() -> dict:
             "nationality": "Dalmatian",
             "experience": 28,
             "current_team": "FC Nordvik",
+            "reputation": 0.84,
+            "board_confidence": 0.75,
+            "contract_years": 3,
+            "salary_weekly": 45000,
+            "referee_respect": 0.65,
             "defensive_line": 0.35,
             "tempo": 0.40,
             "width": 0.42,
@@ -382,6 +501,11 @@ def generate_managers() -> dict:
             "nationality": "Platense",
             "experience": 41,
             "current_team": "CD Solano",
+            "reputation": 0.86,
+            "board_confidence": 0.72,
+            "contract_years": 2,
+            "salary_weekly": 50000,
+            "referee_respect": 0.40,
             "defensive_line": 0.72,
             "tempo": 0.78,
             "width": 0.82,
@@ -414,6 +538,11 @@ def generate_managers() -> dict:
             "nationality": "Hanseatic",
             "experience": 19,
             "current_team": "Valence Athletic",
+            "reputation": 0.76,
+            "board_confidence": 0.68,
+            "contract_years": 2,
+            "salary_weekly": 35000,
+            "referee_respect": 0.70,
             "defensive_line": 0.55,
             "tempo": 0.58,
             "width": 0.50,
@@ -446,6 +575,11 @@ def generate_managers() -> dict:
             "nationality": "Far Eastern",
             "experience": 35,
             "current_team": "Real Maritimo",
+            "reputation": 0.74,
+            "board_confidence": 0.65,
+            "contract_years": 3,
+            "salary_weekly": 32000,
+            "referee_respect": 0.85,
             "defensive_line": 0.60,
             "tempo": 0.55,
             "width": 0.70,
@@ -478,6 +612,11 @@ def generate_managers() -> dict:
             "nationality": "Germanic",
             "experience": 32,
             "current_team": "Borussia Eisenwald",
+            "reputation": 0.66,
+            "board_confidence": 0.60,
+            "contract_years": 2,
+            "salary_weekly": 25000,
+            "referee_respect": 0.55,
             "defensive_line": 0.28,
             "tempo": 0.45,
             "width": 0.38,
@@ -510,6 +649,11 @@ def generate_managers() -> dict:
             "nationality": "Ligurian",
             "experience": 38,
             "current_team": "Aurora Calcio",
+            "reputation": 0.60,
+            "board_confidence": 0.58,
+            "contract_years": 1,
+            "salary_weekly": 20000,
+            "referee_respect": 0.50,
             "defensive_line": 0.68,
             "tempo": 0.65,
             "width": 0.75,
@@ -542,6 +686,11 @@ def generate_managers() -> dict:
             "nationality": "Caledonian",
             "experience": 26,
             "current_team": "Highland Thistle FC",
+            "reputation": 0.48,
+            "board_confidence": 0.55,
+            "contract_years": 2,
+            "salary_weekly": 15000,
+            "referee_respect": 0.60,
             "defensive_line": 0.48,
             "tempo": 0.75,
             "width": 0.55,
@@ -574,6 +723,11 @@ def generate_managers() -> dict:
             "nationality": "Sulista",
             "experience": 29,
             "current_team": "Porto Sol Stella",
+            "reputation": 0.38,
+            "board_confidence": 0.52,
+            "contract_years": 1,
+            "salary_weekly": 10000,
+            "referee_respect": 0.50,
             "defensive_line": 0.62,
             "tempo": 0.70,
             "width": 0.78,
@@ -606,6 +760,11 @@ def generate_managers() -> dict:
             "nationality": "Albion",
             "experience": 45,
             "current_team": "",
+            "reputation": 0.68,
+            "board_confidence": 0.50,
+            "contract_years": 0,
+            "salary_weekly": 0,
+            "referee_respect": 0.75,
             "defensive_line": 0.42,
             "tempo": 0.50,
             "width": 0.48,
@@ -638,6 +797,11 @@ def generate_managers() -> dict:
             "nationality": "Sarmatian",
             "experience": 22,
             "current_team": "",
+            "reputation": 0.58,
+            "board_confidence": 0.50,
+            "contract_years": 0,
+            "salary_weekly": 0,
+            "referee_respect": 0.45,
             "defensive_line": 0.65,
             "tempo": 0.80,
             "width": 0.60,
@@ -680,6 +844,7 @@ def generate_referees() -> dict:
             "unprofessionalism": 0.04,
             "incoherence": 0.08,
             "reputation": 0.90,
+            "respect_rating": 0.92,
             "matches_officiated": 185,
             "fouls_awarded": 420,
             "penalties_awarded": 32,
@@ -697,6 +862,7 @@ def generate_referees() -> dict:
             "unprofessionalism": 0.01,
             "incoherence": 0.03,
             "reputation": 0.98,
+            "respect_rating": 0.96,
             "matches_officiated": 240,
             "fouls_awarded": 560,
             "penalties_awarded": 48,
@@ -714,6 +880,7 @@ def generate_referees() -> dict:
             "unprofessionalism": 0.18,
             "incoherence": 0.65,
             "reputation": 0.40,
+            "respect_rating": 0.38,
             "matches_officiated": 52,
             "fouls_awarded": 88,
             "penalties_awarded": 6,
@@ -731,6 +898,7 @@ def generate_referees() -> dict:
             "unprofessionalism": 0.42,
             "incoherence": 0.35,
             "reputation": 0.62,
+            "respect_rating": 0.55,
             "matches_officiated": 118,
             "fouls_awarded": 310,
             "penalties_awarded": 26,
@@ -748,6 +916,7 @@ def generate_referees() -> dict:
             "unprofessionalism": 0.10,
             "incoherence": 0.30,
             "reputation": 0.68,
+            "respect_rating": 0.70,
             "matches_officiated": 95,
             "fouls_awarded": 210,
             "penalties_awarded": 16,
@@ -765,6 +934,7 @@ def generate_referees() -> dict:
             "unprofessionalism": 0.30,
             "incoherence": 0.55,
             "reputation": 0.45,
+            "respect_rating": 0.42,
             "matches_officiated": 46,
             "fouls_awarded": 140,
             "penalties_awarded": 15,
@@ -782,6 +952,7 @@ def generate_referees() -> dict:
             "unprofessionalism": 0.08,
             "incoherence": 0.15,
             "reputation": 0.82,
+            "respect_rating": 0.85,
             "matches_officiated": 210,
             "fouls_awarded": 340,
             "penalties_awarded": 18,
@@ -799,6 +970,7 @@ def generate_referees() -> dict:
             "unprofessionalism": 0.02,
             "incoherence": 0.06,
             "reputation": 0.85,
+            "respect_rating": 0.88,
             "matches_officiated": 155,
             "fouls_awarded": 390,
             "penalties_awarded": 28,
@@ -821,6 +993,17 @@ def main():
     with open(league_path, "w", encoding="utf-8") as f:
         json.dump(league, f, indent=2, ensure_ascii=False)
     print(f"Generated {league_path}: {len(league['teams'])} teams, {sum(len(t['squad']) for t in league['teams'])} players total.")
+
+    players_flat = []
+    for t in league["teams"]:
+        for p in t["squad"]:
+            p_flat = dict(p)
+            p_flat["team_name"] = t["team_name"]
+            players_flat.append(p_flat)
+    players_path = os.path.join(data_dir, "players.json")
+    with open(players_path, "w", encoding="utf-8") as f:
+        json.dump({"players": players_flat}, f, indent=2, ensure_ascii=False)
+    print(f"Generated {players_path}: {len(players_flat)} players.")
 
     managers_path = os.path.join(data_dir, "managers.json")
     with open(managers_path, "w", encoding="utf-8") as f:

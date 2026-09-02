@@ -28,10 +28,12 @@ extends StaticBody2D
 			build_boundaries()
 ## Height of the goal mouth opening in each end line.
 @export var goal_mouth_height: float = 200.0
-## Thickness of the hard goalpost stubs.
+## Depth of the goal net behind the goal line in pixels.
+@export var goal_depth: float = 64.0
+## Thickness of the hard goalpost stubs and enclosure walls.
 @export var wall_thickness: float = 32.0
 ## Thickness of the touchline/end-line out-of-bounds sensors.
-@export var sensor_thickness: float = 32.0
+@export var sensor_thickness: float = 400.0
 
 ## Canonical penalty area dimensions in pixels.
 const PENALTY_AREA_DEPTH: float = 200.0
@@ -62,6 +64,7 @@ func build_boundaries() -> void:
 	var side_length: float = half.y - half_mouth
 
 	_build_goalpost_stubs(half, half_mouth)
+	_build_goal_net_enclosures(half, half_mouth)
 	_build_touchline_sensors(half)
 	_build_endline_sensors(half, half_mouth, side_length)
 
@@ -103,13 +106,29 @@ func get_penalty_area_rect(defending_team: int) -> Rect2:
 		return Rect2(goal_centre.x - PENALTY_AREA_DEPTH, goal_centre.y - half_height, PENALTY_AREA_DEPTH, PENALTY_AREA_HEIGHT)
 
 
-## Short hard stubs right at the goal mouth edges — the posts — so a shot that
-## clips the frame rebounds instead of sliding past it into the open end line.
+## Hard post stubs sitting right on the goal line edges, so a shot that
+## clips the frame rebounds crisply off the post.
 func _build_goalpost_stubs(half: Vector2, half_mouth: float) -> void:
+	var post_size: Vector2 = Vector2(14.0, 14.0)
 	for direction: float in [-1.0, 1.0]:
-		var x: float = direction * (half.x + wall_thickness * 0.5)
+		var x: float = direction * half.x
 		for mouth_side: float in [-1.0, 1.0]:
-			_add_wall(Vector2(x, mouth_side * half_mouth), Vector2(wall_thickness, wall_thickness))
+			_add_wall(Vector2(x, mouth_side * half_mouth), post_size)
+
+
+## Physical enclosure walls for the rear and sides of the goal net to prevent
+## the ball from escaping past the net depth.
+func _build_goal_net_enclosures(half: Vector2, half_mouth: float) -> void:
+	for direction: float in [-1.0, 1.0]:
+		var back_x: float = direction * (half.x + goal_depth + wall_thickness * 0.5)
+		# Back net wall
+		_add_wall(Vector2(back_x, 0.0), Vector2(wall_thickness, goal_mouth_height))
+
+		# Top and bottom side walls behind the goal line
+		var side_x: float = direction * (half.x + goal_depth * 0.5)
+		var side_offset_y: float = half_mouth + wall_thickness * 0.5
+		_add_wall(Vector2(side_x, -side_offset_y), Vector2(goal_depth, wall_thickness))
+		_add_wall(Vector2(side_x, side_offset_y), Vector2(goal_depth, wall_thickness))
 
 
 func _build_touchline_sensors(half: Vector2) -> void:
@@ -123,9 +142,8 @@ func _build_touchline_sensors(half: Vector2) -> void:
 	add_child(bottom)
 
 
-## Each end line sensor covers the full pitch height minus the goal mouth gap —
-## two shapes (above and below the mouth) under one Area2D per side, positioned
-## just beyond the goalpost stubs.
+## Each end line sensor covers the pitch height outside the goal mouth —
+## positioned directly along the goal line outside the playing area.
 func _build_endline_sensors(half: Vector2, half_mouth: float, side_length: float) -> void:
 	var segment_size: Vector2 = Vector2(sensor_thickness, side_length)
 	var offset_y: float = half_mouth + side_length * 0.5
@@ -133,7 +151,7 @@ func _build_endline_sensors(half: Vector2, half_mouth: float, side_length: float
 	for direction: float in [-1.0, 1.0]:
 		var sensor_name: String = "EndlineSensorLeft" if direction < 0.0 else "EndlineSensorRight"
 		var side: String = "end_line_left" if direction < 0.0 else "end_line_right"
-		var x: float = direction * (half.x + wall_thickness + sensor_thickness * 0.5)
+		var x: float = direction * (half.x + sensor_thickness * 0.5)
 		var sensor: Area2D = _make_sensor(sensor_name, side)
 		_add_sensor_shape(sensor, Vector2(x, -offset_y), segment_size)
 		_add_sensor_shape(sensor, Vector2(x, offset_y), segment_size)
@@ -170,10 +188,52 @@ func _add_wall(offset: Vector2, size: Vector2) -> void:
 	add_child(collider)
 
 
+func _physics_process(_delta: float) -> void:
+	if not GameManager.is_in_play():
+		return
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null or world.ball_node == null:
+		return
+	var ball_node: Pseudo3DBall = world.ball_node
+	var half: Vector2 = pitch_size * 0.5
+	var pos: Vector2 = ball_node.global_position
+	var mouth_half: float = goal_mouth_height * 0.5
+	# Safety containment: if ball ever tunnels or escapes deep outside pitch during live play
+	if pos.y < -half.y - 60.0 and ball_node.velocity.y <= 0.0:
+		_on_ball_crossed_boundary(ball_node, "touchline_top")
+	elif pos.y > half.y + 60.0 and ball_node.velocity.y >= 0.0:
+		_on_ball_crossed_boundary(ball_node, "touchline_bottom")
+	elif pos.x < -half.x - 60.0 and ball_node.velocity.x <= 0.0:
+		if absf(pos.y) > mouth_half:
+			_on_ball_crossed_boundary(ball_node, "end_line_left")
+	elif pos.x > half.x + 60.0 and ball_node.velocity.x >= 0.0:
+		if absf(pos.y) > mouth_half:
+			_on_ball_crossed_boundary(ball_node, "end_line_right")
+
+
 func _on_sensor_body_entered(body: Node2D, side: String) -> void:
 	var ball := body as Pseudo3DBall
 	if ball == null:
 		return
+	if not GameManager.is_in_play():
+		return
+
+	# Only trigger out-of-bounds if the ball is moving outward past the boundary,
+	# preventing throw-ins or set piece kicks entering the pitch from re-triggering the sensor.
+	match side:
+		"touchline_top":
+			if ball.velocity.y > 5.0:
+				return  # Ball is entering the pitch (moving downward)
+		"touchline_bottom":
+			if ball.velocity.y < -5.0:
+				return  # Ball is entering the pitch (moving upward)
+		"end_line_left":
+			if ball.velocity.x > 5.0:
+				return  # Ball is entering the pitch (moving right)
+		"end_line_right":
+			if ball.velocity.x < -5.0:
+				return  # Ball is entering the pitch (moving left)
+
 	_on_ball_crossed_boundary(ball, side)
 
 

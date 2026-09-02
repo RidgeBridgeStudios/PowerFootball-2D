@@ -18,6 +18,9 @@ extends Node
 
 ## --- Match flow ------------------------------------------------------------
 
+signal match_intro_started
+signal match_intro_finished
+signal match_intro_skipped
 signal kickoff_started
 signal kickoff_confirmed(team: int)
 ## scorer is whoever last touched the ball before it crossed the line
@@ -80,6 +83,13 @@ signal powerful_shot_landed(shooter: HeavyPlayerController, speed: float, ratio:
 
 ## Fired 0.3s before a predicted interception
 signal anticipatory_turnover_predicted(team: int)
+
+## --- Telemetry & advanced analytics ------------------------------------------
+
+signal pass_completed(passer: Node, receiver: Node, orig_pos: Vector2, dest_pos: Vector2, packed_count: int, xt_delta: float)
+signal shot_taken(shooter: Node, orig_pos: Vector2, xg_val: float, psxg_val: float, is_on_target: bool)
+signal defensive_action_logged(player: Node, action_type: StringName, pos: Vector2)
+signal carry_completed(player: Node, start_pos: Vector2, end_pos: Vector2, is_progressive: bool, xt_delta: float)
 
 ## --- Referee events ---------------------------------------------------------
 
@@ -177,3 +187,18 @@ signal match_stage_changed(stage: int)
 ## as a StringName rather than a bool so a second emergency tactic can be
 ## added later without a new signal.
 signal emergency_tactics_triggered(team: int, tactic_type: StringName)
+
+## Fired by GameManager when the simulation / playback speed scale is updated
+## (e.g. during CPU vs CPU matches via speed slider / preset buttons / hotkeys).
+signal simulation_speed_changed(speed: float)
+
+## --- Goal replay system (Football Manager-style match highlights) -----------
+signal goal_replays_toggled(enabled: bool)
+signal replay_started(team: int, scorer: Node)
+signal replay_ended
+
+## --- Goal celebration system -----------------------------------------------
+signal celebration_started(team: int, scorer: Node)
+signal celebration_ended
+
+

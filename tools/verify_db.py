@@ -27,12 +27,27 @@ def verify_all():
     assert "league_name" in league, "Missing league_name"
     assert "teams" in league and len(league["teams"]) >= 8, f"Expected at least 8 teams, got {len(league.get('teams', []))}"
 
+    VALID_STATURES = {
+        "Continental Giant",
+        "Top Flight Heavyweight",
+        "Mid-Table Regular",
+        "Relegation Battler",
+        "Lower League Underdog"
+    }
+
     team_names = set()
     total_players = 0
     for team_idx, team in enumerate(league["teams"]):
         tname = team.get("team_name", "")
         assert tname and tname not in team_names, f"Duplicate or empty team name: {tname}"
         team_names.add(tname)
+
+        # Team reputation and stature invariants
+        assert 0.0 <= team.get("reputation", 0.0) <= 1.0, f"Team {tname} reputation out of bounds: {team.get('reputation')}"
+        stature = team.get("stature", "")
+        assert stature in VALID_STATURES, f"Team {tname} invalid stature: {stature}"
+        assert team.get("transfer_budget", 0) >= 0, f"Team {tname} negative transfer budget: {team.get('transfer_budget')}"
+        assert team.get("wage_budget_weekly", 0) > 0, f"Team {tname} invalid wage budget: {team.get('wage_budget_weekly')}"
 
         squad = team.get("squad", [])
         assert 16 <= len(squad) <= 22, f"Team {tname} squad size {len(squad)} not in [16, 22]"
@@ -71,6 +86,23 @@ def verify_all():
             assert 0.0 <= p["reflexes"] <= 1.0, f"Player {pname} reflexes out of bounds: {p['reflexes']}"
             assert 0.0 <= p["form"] <= 10.0, f"Player {pname} form out of bounds: {p['form']}"
 
+            # FM mental attributes bounds
+            assert 0.0 <= p.get("determination", 0.0) <= 1.0, f"Player {pname} determination out of bounds"
+            assert 0.0 <= p.get("work_rate", 0.0) <= 1.0, f"Player {pname} work_rate out of bounds"
+            assert 0.0 <= p.get("leadership", 0.0) <= 1.0, f"Player {pname} leadership out of bounds"
+            assert 0.0 <= p.get("temperament", 0.0) <= 1.0, f"Player {pname} temperament out of bounds"
+            assert 0.0 <= p.get("professionalism", 0.0) <= 1.0, f"Player {pname} professionalism out of bounds"
+            assert 0.0 <= p.get("ambition", 0.0) <= 1.0, f"Player {pname} ambition out of bounds"
+            assert 0.0 <= p.get("loyalty", 0.0) <= 1.0, f"Player {pname} loyalty out of bounds"
+            assert 0.0 <= p.get("adaptability", 0.0) <= 1.0, f"Player {pname} adaptability out of bounds"
+
+            # Contract and career bounds
+            assert 0.0 <= p.get("player_reputation", 0.0) <= 1.0, f"Player {pname} reputation out of bounds"
+            assert p.get("wage_weekly", 0) > 0, f"Player {pname} wage must be positive"
+            assert 1 <= p.get("contract_years", 0) <= 5, f"Player {pname} contract years out of bounds"
+            assert 0.0 <= p.get("morale", 0.0) <= 1.0, f"Player {pname} morale out of bounds"
+            assert p.get("market_value", 0) >= 0, f"Player {pname} market value negative"
+
         # Simulate TeamManagementData lineup + bench logic
         bench = [i for i in range(len(squad)) if i not in lineup]
         assert len(bench) == len(squad) - 11, f"Team {tname} bench size mismatch"
@@ -86,6 +118,15 @@ def verify_all():
         assert len(set(test_bench)) == len(bench), "Swap produced duplicate bench entries"
 
     print(f"[OK] League verified: {len(league['teams'])} teams, {total_players} players total across squads.")
+
+    # 1b. Flat players database verification
+    players_path = os.path.join(data_dir, "players.json")
+    assert os.path.exists(players_path), f"Missing {players_path}"
+    with open(players_path, "r", encoding="utf-8") as f:
+        p_db = json.load(f)
+    assert "players" in p_db, "Missing 'players' key in players.json"
+    assert len(p_db["players"]) == total_players, f"players.json count ({len(p_db['players'])}) does not match league count ({total_players})"
+    print(f"[OK] Flat players database verified: {len(p_db['players'])} records in parity with league.json.")
 
     # 2. Managers verification
     managers_path = os.path.join(data_dir, "managers.json")
@@ -112,8 +153,13 @@ def verify_all():
             assert team in team_names, f"Manager {mname} assigned to unknown team: {team}"
             assert team not in assigned_teams, f"Multiple managers assigned to same team: {team}"
             assigned_teams.add(team)
+            assert m.get("contract_years", 0) > 0, f"Employed manager {mname} must have contract years"
+            assert m.get("salary_weekly", 0) > 0, f"Employed manager {mname} must have positive salary"
 
         assert 1 <= m.get("experience", 0) <= 100, f"Manager {mname} experience out of bounds: {m.get('experience')}"
+        assert 0.0 <= m.get("reputation", 0.0) <= 1.0, f"Manager {mname} reputation out of bounds"
+        assert 0.0 <= m.get("board_confidence", 0.0) <= 1.0, f"Manager {mname} board_confidence out of bounds"
+        assert 0.0 <= m.get("referee_respect", 0.0) <= 1.0, f"Manager {mname} referee_respect out of bounds"
         assert 0.0 <= m.get("defensive_line", 0.0) <= 1.0, f"Manager {mname} defensive_line out of bounds"
         assert 0.0 <= m.get("tempo", 0.0) <= 1.0, f"Manager {mname} tempo out of bounds"
         assert 0.0 <= m.get("width", 0.0) <= 1.0, f"Manager {mname} width out of bounds"
@@ -156,6 +202,7 @@ def verify_all():
         assert 0.0 <= r.get("unprofessionalism", 0.0) <= 1.0, f"Referee {rname} unprofessionalism out of bounds"
         assert 0.0 <= r.get("incoherence", 0.0) <= 1.0, f"Referee {rname} incoherence out of bounds"
         assert 0.0 <= r.get("reputation", 0.0) <= 1.0, f"Referee {rname} reputation out of bounds"
+        assert 0.0 <= r.get("respect_rating", 0.0) <= 1.0, f"Referee {rname} respect_rating out of bounds"
         assert "matches_officiated" in r and "fouls_awarded" in r and "penalties_awarded" in r
 
     print(f"[OK] Referees verified: {len(referees)} referees with personality spectrums and career stats.")

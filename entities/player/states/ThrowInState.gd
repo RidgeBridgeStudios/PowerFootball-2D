@@ -115,6 +115,10 @@ func process(player: HeavyPlayerController, delta: float) -> StringName:
 
 
 func physics_process(player: HeavyPlayerController, delta: float) -> void:
+	if not player.is_user_controlled:
+		player.movement_intent = Vector2.ZERO
+		player.apply_kinematic_weight(Vector2.ZERO, delta)
+		return
 	# Project the movement vector so the player can ONLY move parallel to the touchline.
 	var intent: Vector2 = player.movement_intent
 	intent.y = 0.0
@@ -127,16 +131,22 @@ func _release_throw(player: HeavyPlayerController) -> void:
 
 	var ball: Pseudo3DBall = player.get_ball_in_foot_range()
 	if ball == null:
-		ball = _find_nearby_ball(player, NEARBY_BALL_RADIUS)
+		ball = _find_nearby_ball(player, 120.0)
 
 	if ball == null:
-		# Nothing to throw — the phase may have already moved on elsewhere.
-		var nearby: Array[Node] = player.get_tree().get_nodes_in_group(&"ball")
-		var nearest_ball_pos: Vector2 = nearby[0].global_position if nearby.size() > 0 else Vector2.INF
-		print("[SetPiece] _release_throw: %s found NO BALL (taker_pos=%s nearest_ball_pos=%s dist=%.1f charge=%.2f)" % [
-			player.name, player.global_position, nearest_ball_pos,
-			player.global_position.distance_to(nearest_ball_pos), charge_ratio])
+		var world: MatchWorldModel = MatchWorldModel.instance
+		if world != null and world.ball_node != null:
+			ball = world.ball_node
+		else:
+			var nearby: Array[Node] = player.get_tree().get_nodes_in_group(&"ball")
+			if nearby.size() > 0:
+				ball = nearby[0] as Pseudo3DBall
+
+	if ball == null:
+		# Defensive fallback: if absolutely no ball exists, restart play to avoid deadlock
+		print("[SetPiece] _release_throw: %s found NO BALL anywhere — recovering play" % player.name)
 		_released = true
+		GameManager.restart_play()
 		return
 
 	# Someone else grabbed the ball before the throw fired; do nothing.
@@ -144,6 +154,7 @@ func _release_throw(player: HeavyPlayerController) -> void:
 		print("[SetPiece] _release_throw: %s ball already possessed by %s — skipping throw" % [
 			player.name, ball.possessor.name])
 		_released = true
+		GameManager.restart_play()
 		return
 
 	print("[SetPiece] _release_throw: %s throwing — taker_pos=%s ball_pos=%s charge=%.2f" % [
@@ -159,18 +170,15 @@ func _release_throw(player: HeavyPlayerController) -> void:
 
 	if player.is_user_controlled:
 		aim = InputHelper.get_aim_vector()
-	if aim == Vector2.ZERO:
-		# facing_direction is leftover from whatever the taker was doing before
-		# the whistle (see AGENTS_ERRATA.md's note on this under
-		# throw-in-cpu-taker-never-releases-without-pass-target) and can point
-		# along the touchline rather than into the pitch. Thrown that way, the
-		# ball never advances past the touchline row it was released from and
-		# just rolls along it — see AGENTS_ERRATA.md
-		# (throw-in-ball-outside-chase-legality-rect). A real throw-in always
-		# has a real inward component, so force one here, keeping whatever
-		# left/right lean facing_direction had.
-		var inward_y: float = -signf(player.global_position.y) if not is_zero_approx(player.global_position.y) else 1.0
-		aim = Vector2(player.facing_direction.x, inward_y)
+	var inward_y: float = -signf(player.global_position.y) if not is_zero_approx(player.global_position.y) else 1.0
+	if aim == Vector2.ZERO or aim.is_zero_approx():
+		var forward_x: float = player.facing_direction.x if absf(player.facing_direction.x) > 0.1 else 0.0
+		aim = Vector2(forward_x, inward_y * 1.5).normalized()
+	else:
+		# Guarantee a solid inward component into the pitch so throw never skids along the touchline
+		if aim.y * inward_y <= 0.15:
+			aim.y = inward_y * 0.75
+			aim = aim.normalized()
 
 	var speed: float = lerpf(MIN_SPEED, MAX_SPEED, charge_ratio)
 	# Apply 3D impulse so the ball is lobbed into play. Pseudo3DBall.
@@ -182,6 +190,7 @@ func _release_throw(player: HeavyPlayerController) -> void:
 	# rather than left at its old range (150.0-350.0) while only the
 	# horizontal speed was fixed.
 	var z_impulse: float = lerpf(60.0, 150.0, charge_ratio)
+	ball.unfreeze()
 	ball.apply_kick(aim.normalized() * speed, z_impulse, player)
 
 	if not player.is_user_controlled and pass_target != null:
@@ -206,7 +215,7 @@ func _find_nearby_ball(player: HeavyPlayerController, radius: float) -> Pseudo3D
 	var balls: Array[Node] = player.get_tree().get_nodes_in_group(&"ball")
 	for node: Node in balls:
 		var b := node as Pseudo3DBall
-		if b == null or b.is_frozen:
+		if b == null:
 			continue
 		if player.global_position.distance_to(b.global_position) <= radius:
 			return b

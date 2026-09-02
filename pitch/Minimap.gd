@@ -99,9 +99,29 @@ func _draw_officials() -> void:
 func _draw_player_dot(player: HeavyPlayerController) -> void:
 	var dot_pos: Vector2 = _world_to_map(player.global_position)
 	var team_idx: int = clampi(player.team, 0, TEAM_COLORS.size() - 1)
-	draw_circle(dot_pos, DOT_RADIUS, TEAM_COLORS[team_idx])
-
 	var data: PlayerData = player.get_meta(&"player_data", null) as PlayerData
+	var is_gk: bool = (player.brain != null and player.brain.is_goalkeeper) or (data != null and data.position_role == "GK")
+	var is_cap: bool = data != null and data.is_captain
+
+	var base_col: Color = TEAM_COLORS[team_idx]
+	if player.visual != null:
+		base_col = player.visual.gk_color if is_gk else player.visual.team_color
+	elif is_gk:
+		base_col = Color(0.15, 0.88, 0.45, 1.0)
+
+	# Selection halo
+	if player.is_user_controlled:
+		draw_circle(dot_pos, DOT_RADIUS + 2.5, Color(1.0, 1.0, 1.0, 0.75))
+
+	# Outer border / Captain golden ring
+	if is_cap:
+		draw_circle(dot_pos, DOT_RADIUS + 1.2, Color(1.0, 0.82, 0.10, 1.0))
+	else:
+		draw_circle(dot_pos, DOT_RADIUS + 0.8, Color(0.10, 0.10, 0.12, 0.90))
+
+	# Dot body
+	draw_circle(dot_pos, DOT_RADIUS, base_col)
+
 	if data == null:
 		return
 
@@ -110,9 +130,17 @@ func _draw_player_dot(player: HeavyPlayerController) -> void:
 	var text_size: Vector2 = font.get_string_size(
 		number_text, HORIZONTAL_ALIGNMENT_CENTER, -1, NUMBER_FONT_SIZE)
 	var baseline: Vector2 = dot_pos + Vector2(-text_size.x * 0.5, text_size.y * 0.35)
+
+	var lum: float = base_col.r * 0.299 + base_col.g * 0.587 + base_col.b * 0.114
+	var num_col: Color = Color.WHITE if lum < 0.65 else Color(0.10, 0.10, 0.12, 1.0)
+	var out_col: Color = Color(0.08, 0.08, 0.10, 0.95) if lum < 0.65 else Color(1.0, 1.0, 1.0, 0.95)
+
+	draw_string_outline(
+		font, baseline, number_text, HORIZONTAL_ALIGNMENT_CENTER, -1,
+		NUMBER_FONT_SIZE, 1, out_col)
 	draw_string(
 		font, baseline, number_text, HORIZONTAL_ALIGNMENT_CENTER, -1,
-		NUMBER_FONT_SIZE, NUMBER_COLOR)
+		NUMBER_FONT_SIZE, num_col)
 
 
 ## Pitch is centred on the world origin, so shift by half the pitch size

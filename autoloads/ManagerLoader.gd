@@ -151,6 +151,12 @@ func _from_dict(d: Dictionary) -> ManagerData:
 
 	m.traits = int(d.get("traits", d.get("trait_bits", m.traits)))
 
+	m.reputation = float(d.get("reputation", m.reputation))
+	m.board_confidence = float(d.get("board_confidence", m.board_confidence))
+	m.contract_years = int(d.get("contract_years", m.contract_years))
+	m.salary_weekly = int(d.get("salary_weekly", m.salary_weekly))
+	m.referee_respect = float(d.get("referee_respect", m.referee_respect))
+
 	m.matches_managed = int(d.get("matches_managed", m.matches_managed))
 	m.wins = int(d.get("wins", m.wins))
 	m.draws = int(d.get("draws", m.draws))
@@ -166,6 +172,11 @@ func _to_dict(m: ManagerData) -> Dictionary:
 		"nationality": m.nationality,
 		"experience": m.experience,
 		"current_team": m.current_team,
+		"reputation": m.reputation,
+		"board_confidence": m.board_confidence,
+		"contract_years": m.contract_years,
+		"salary_weekly": m.salary_weekly,
+		"referee_respect": m.referee_respect,
 		"defensive_line": m.defensive_line,
 		"tempo": m.tempo,
 		"width": m.width,

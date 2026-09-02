@@ -1,44 +1,26 @@
 ##
 ## MatchStatsTracker (Autoload singleton)
 ##
-## Per-match counting stats for the full-time stats screen: possession, shots,
-## passes, fouls, cards, corners and offsides. The original stats here are all
-## TEAM aggregates (index 0 = TEAM_A, index 1 = TEAM_B) — plain fixed-size
-## Arrays. End-of-match player ratings additionally need per-player
-## granularity, tracked alongside in a Dictionary[int, PlayerMatchEvents].
+## Per-match counting and advanced Moneyball analytics for full-time review
+## and career mode persistence: possession, shots, passes, fouls, cards,
+## corners, offsides, Expected Goals (xG), Post-Shot xG (PSxG), Expected Threat (xT),
+## Expected Assists (xA), Passes Per Defensive Action (PPDA), Field Tilt %,
+## Packing Rate, Impect, Progressive Actions (Passes & Carries), VAEP, and
+## Goalkeeper Goals Prevented.
 ##
-## PlayerData has no player_id field, so the per-player key is synthesized as
-## `team * 1000 + squad_index`. squad_index (HeavyPlayerController.squad_index)
-## is stable per real player and correctly follows a substitution — PitchScene
-## reassigns it to the incoming player's squad index before reapplying data —
-## so a starter and the substitute who replaces them in the same pitch slot
-## never share a bucket. The key decodes back to (team, squad_index), which
-## DataLoader.get_player() resolves to a PlayerData at any time, including
-## after a red card sending has cleared the player's MatchWorldModel slot.
-##
-## Shots and cards are wired from existing GameEvents signals. Pass attempts
-## are recorded directly from the state machines that resolve a pass
-## (ChargeKickState's tap branch, ThrowInState) via record_pass_attempt() —
-## there is no "pass" signal to listen for, since ball_struck fires for shots
-## and passes alike. Possession is sampled every 30 physics ticks straight off
-## MatchWorldModel's cached possessor index — no scene tree access, no
-## allocation in the sampling path.
-##
-## Also owns the macro anti-snowball Team Momentum accumulator: continuous
-## exponential decay plus discrete event impulses (shot on target, tackle
-## won, goal conceded, anticipatory turnover, a 5-pass sequence in the
-## opponent's half), quadratically self-dampened and published via
-## GameEvents.team_momentum_updated. See "Macro momentum accumulator" below.
+## End-of-match player ratings and career accumulations track per-player
+## granularity in a Dictionary[int, PlayerMatchEvents].
 ##
 ## Depends on: GameEvents, GameManager, MatchWorldModel, DataLoader,
-##             HeavyPlayerController, PlayerRatingCalculator.
-## Exposes: record_shot(), record_pass_attempt(), record_foul(),
+##             HeavyPlayerController, PlayerRatingCalculator, UtilityMath,
+##             PlayerData.
+## Exposes: record_shot(), record_pass_attempt(), record_pass_completed(),
+##          record_carry_completed(), record_defensive_action(), record_foul(),
 ##          record_corner(), record_offside(), record_goal(), record_assist(),
 ##          record_own_goal(), get_player_events(), compute_all_ratings(),
-##          get_stats(), reset(), init_players(),
+##          get_stats(), get_advanced_stats(), reset(), init_players(),
 ##          is_pass_toward_teammate(), stop_possession_sampling(),
-##          team_momentum — see GameEvents.team_momentum_updated instead of
-##          reading this directly.
+##          team_momentum.
 ##
 
 extends Node
@@ -81,6 +63,7 @@ const MOMENTUM_TURNOVER_ERROR: float = -0.20
 ## register a PASS_SEQUENCE momentum tick — see _record_pass_sequence().
 const PASS_SEQUENCE_LENGTH: int = 5
 
+## --- Traditional Team Stats --------------------------------------------------
 var shots_total: Array[int] = [0, 0]
 var shots_on_target: Array[int] = [0, 0]
 var passes_attempted: Array[int] = [0, 0]
@@ -90,6 +73,22 @@ var yellow_cards: Array[int] = [0, 0]
 var red_cards: Array[int] = [0, 0]
 var corners: Array[int] = [0, 0]
 var offsides: Array[int] = [0, 0]
+
+## --- Advanced / Moneyball Team Stats -----------------------------------------
+var xg: Array[float] = [0.0, 0.0]
+var psxg: Array[float] = [0.0, 0.0]
+var goals_prevented: Array[float] = [0.0, 0.0]
+var xt_delta: Array[float] = [0.0, 0.0]
+var packing_total: Array[int] = [0, 0]
+var impect_total: Array[int] = [0, 0]
+var progressive_passes: Array[int] = [0, 0]
+var progressive_carries: Array[int] = [0, 0]
+var vaep_total: Array[float] = [0.0, 0.0]
+
+## Zone & touch counters
+var final_third_touches: Array[int] = [0, 0]
+var defensive_actions_opp_half: Array[int] = [0, 0]
+var opp_passes_def_half: Array[int] = [0, 0]
 
 var _possession_samples: Array[int] = [0, 0]
 var _total_possession_samples: int = 0
@@ -129,6 +128,9 @@ func _ready() -> void:
 	GameEvents.substitution_made.connect(_on_substitution_made)
 	GameEvents.tackle_won.connect(_on_tackle_won)
 	GameEvents.anticipatory_turnover_predicted.connect(_on_turnover_predicted)
+	GameEvents.pass_completed.connect(_on_pass_completed)
+	GameEvents.carry_completed.connect(_on_carry_completed)
+	GameEvents.defensive_action_logged.connect(_on_defensive_action_logged)
 
 
 func _physics_process(delta: float) -> void:
@@ -158,17 +160,117 @@ func _physics_process(delta: float) -> void:
 	_possession_samples[team] += 1
 	_total_possession_samples += 1
 
+	# Sample final-third territorial presence for Field Tilt
+	var p_pos: Vector2 = world.player_positions[possessor_index]
+	if _is_in_opponent_final_third(team, p_pos):
+		final_third_touches[team] += 1
 
-func record_shot(player: HeavyPlayerController, on_target: bool) -> void:
+
+
+func _get_attack_sign(team: int) -> float:
+	return 1.0 if team == 0 else -1.0
+
+
+func _get_opp_goal_centre(team: int) -> Vector2:
+	var world: MatchWorldModel = MatchWorldModel.instance
+	var half_pitch_x: float = 800.0
+	if world != null:
+		half_pitch_x = world.get_pitch_size().x * 0.5
+	var sign_val: float = _get_attack_sign(team)
+	return Vector2(sign_val * half_pitch_x, 0.0)
+
+
+func _get_opp_goal_posts(team: int) -> Array[Vector2]:
+	var centre: Vector2 = _get_opp_goal_centre(team)
+	var half_mouth: float = 100.0
+	return [Vector2(centre.x, centre.y - half_mouth), Vector2(centre.x, centre.y + half_mouth)]
+
+
+func _is_in_opponent_final_third(team: int, pos: Vector2) -> bool:
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return false
+	var pitch_size: Vector2 = world.get_pitch_size()
+	var attack_sign: float = _get_attack_sign(team)
+	return (pos.x * attack_sign) > (pitch_size.x / 6.0)
+
+
+func _is_in_attacking_60_zone(team: int, pos: Vector2) -> bool:
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return false
+	var pitch_size: Vector2 = world.get_pitch_size()
+	var attack_sign: float = _get_attack_sign(team)
+	return (pos.x * attack_sign) > (-0.1 * pitch_size.x)
+
+
+func _is_in_defensive_60_zone(team: int, pos: Vector2) -> bool:
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return false
+	var pitch_size: Vector2 = world.get_pitch_size()
+	var attack_sign: float = _get_attack_sign(team)
+	return (pos.x * attack_sign) < (0.1 * pitch_size.x)
+
+
+func _is_in_penalty_area_zone(pos: Vector2, defending_team: int) -> bool:
+	var goal_centre: Vector2 = _get_opp_goal_centre(1 - defending_team)
+	var local: Vector2 = pos - goal_centre
+	var inward_dir: float = -1.0 if (defending_team == 1) else 1.0
+	var depth: float = local.x * inward_dir
+	return depth >= 0.0 and depth <= 200.0 and absf(local.y) <= 190.0
+
+
+func record_shot(player: HeavyPlayerController, on_target: bool, speed: float = 520.0, is_header: bool = false) -> void:
 	var team: int = player.team
 	if team != GameManager.TEAM_A and team != GameManager.TEAM_B:
 		return
 	shots_total[team] += 1
+	var events: PlayerRatingCalculator.PlayerMatchEvents = _get_or_create_events(player)
+
+	var world: MatchWorldModel = MatchWorldModel.instance
+	var goal_centre: Vector2 = _get_opp_goal_centre(team)
+	var posts: Array[Vector2] = _get_opp_goal_posts(team)
+
+	var opp_positions: PackedVector2Array = PackedVector2Array()
+	var gk_pos: Vector2 = goal_centre
+	var opp_team: int = 1 - team
+
+	if world != null:
+		for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+			if world.player_teams[i] == opp_team and world.is_slot_live(i):
+				opp_positions.append(world.player_positions[i])
+				var opp_node: HeavyPlayerController = world.player_nodes[i]
+				if opp_node != null and is_instance_valid(opp_node) and opp_node.is_in_group(&"goalkeepers"):
+					gk_pos = world.player_positions[i]
+
+	var base_z: float = UtilityMath.calculate_xg_logit(
+		player.global_position, goal_centre, posts[0], posts[1], opp_positions, is_header
+	)
+	var xg_val: float = 1.0 / (1.0 + exp(-clampf(base_z, -40.0, 40.0)))
+	var psxg_val: float = UtilityMath.calculate_psxg(base_z, speed, gk_pos, goal_centre, on_target)
+
+	xg[team] += xg_val
+	events.xg += xg_val
+
 	if on_target:
 		shots_on_target[team] += 1
-		_get_or_create_events(player).shots_on_target += 1
+		events.shots_on_target += 1
+		psxg[team] += psxg_val
+		events.psxg += psxg_val
 	else:
-		_get_or_create_events(player).shots_off_target += 1
+		events.shots_off_target += 1
+
+	# Attribute xA to previous passer on this team if within active sequence
+	var assist_player: HeavyPlayerController = _last_passer_by_team[team]
+	if assist_player != null and is_instance_valid(assist_player) and assist_player != player:
+		_get_or_create_events(assist_player).xa += xg_val
+
+	var vaep_val: float = UtilityMath.calculate_vaep_value(&"shot", 0.0, 0.0, on_target, false, xg_val, psxg_val)
+	events.vaep += vaep_val
+	vaep_total[team] += vaep_val
+
+	GameEvents.shot_taken.emit(player, player.global_position, xg_val, psxg_val, on_target)
 
 
 func record_pass_attempt(player: HeavyPlayerController, completed: bool) -> void:
@@ -176,23 +278,157 @@ func record_pass_attempt(player: HeavyPlayerController, completed: bool) -> void
 	if team != GameManager.TEAM_A and team != GameManager.TEAM_B:
 		return
 	passes_attempted[team] += 1
+	var events: PlayerRatingCalculator.PlayerMatchEvents = _get_or_create_events(player)
+
 	if completed:
 		passes_completed[team] += 1
 		_last_passer_by_team[team] = player
-		_get_or_create_events(player).passes_completed += 1
+		events.passes_completed += 1
 		_record_pass_sequence(team, player)
 	else:
-		_get_or_create_events(player).passes_failed += 1
+		events.passes_failed += 1
 		_consecutive_passes[team] = 0
+		var world: MatchWorldModel = MatchWorldModel.instance
+		var pitch_size: Vector2 = Vector2(1600.0, 900.0)
+		if world != null:
+			pitch_size = world.get_pitch_size()
+		var attack_sign: float = _get_attack_sign(team)
+		var orig_xt: float = UtilityMath.get_xt_value(player.global_position, pitch_size, attack_sign)
+		var vaep_val: float = UtilityMath.calculate_vaep_value(&"pass", orig_xt, 0.0, false, false)
+		events.vaep += vaep_val
+		vaep_total[team] += vaep_val
+
+
+func record_pass_completed(passer: HeavyPlayerController, receiver: Node, orig_pos: Vector2, dest_pos: Vector2) -> void:
+	var team: int = passer.team
+	if team != GameManager.TEAM_A and team != GameManager.TEAM_B:
+		return
+
+	var world: MatchWorldModel = MatchWorldModel.instance
+	var pitch_size: Vector2 = Vector2(1600.0, 900.0)
+	var opp_team: int = 1 - team
+	var opp_def_line: float = 0.0
+	var opp_positions: PackedVector2Array = PackedVector2Array()
+
+	if world != null:
+		pitch_size = world.get_pitch_size()
+		opp_def_line = world.defensive_line_x[opp_team]
+		for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+			if world.player_teams[i] == opp_team and world.is_slot_live(i):
+				opp_positions.append(world.player_positions[i])
+
+	var attack_sign: float = _get_attack_sign(team)
+	var orig_xt: float = UtilityMath.get_xt_value(orig_pos, pitch_size, attack_sign)
+	var dest_xt: float = UtilityMath.get_xt_value(dest_pos, pitch_size, attack_sign)
+	var delta_xt: float = dest_xt - orig_xt
+
+	var pack_dict: Dictionary = UtilityMath.calculate_packing(orig_pos, dest_pos, opp_positions, attack_sign, opp_def_line)
+	var packed_cnt: int = pack_dict["packing"]
+	var impect_cnt: int = pack_dict["impect"]
+
+	var opp_goal_centre: Vector2 = _get_opp_goal_centre(team)
+	var in_pen_start: bool = _is_in_penalty_area_zone(orig_pos, opp_team)
+	var in_pen_end: bool = _is_in_penalty_area_zone(dest_pos, opp_team)
+	var is_prog: bool = UtilityMath.is_progressive_action(orig_pos, dest_pos, opp_goal_centre, in_pen_start, in_pen_end)
+
+	var p_events: PlayerRatingCalculator.PlayerMatchEvents = _get_or_create_events(passer)
+	p_events.xt_delta += delta_xt
+	p_events.packing_count += packed_cnt
+	p_events.impect_count += impect_cnt
+	if is_prog:
+		p_events.progressive_passes += 1
+		progressive_passes[team] += 1
+
+	xt_delta[team] += delta_xt
+	packing_total[team] += packed_cnt
+	impect_total[team] += impect_cnt
+
+	var vaep_val: float = UtilityMath.calculate_vaep_value(&"pass", orig_xt, dest_xt, true, is_prog)
+	p_events.vaep += vaep_val
+	vaep_total[team] += vaep_val
+
+	# Zone tracking for PPDA: pass inside passer's defensive 60% counts toward opponent's PPDA numerator
+	if _is_in_defensive_60_zone(team, orig_pos):
+		opp_passes_def_half[opp_team] += 1
+
+	# Zone tracking for Field Tilt
+	if _is_in_opponent_final_third(team, dest_pos):
+		final_third_touches[team] += 1
+
+	GameEvents.pass_completed.emit(passer, receiver, orig_pos, dest_pos, packed_cnt, delta_xt)
+
+
+func record_carry_completed(player: HeavyPlayerController, start_pos: Vector2, end_pos: Vector2) -> void:
+	var team: int = player.team
+	if team != GameManager.TEAM_A and team != GameManager.TEAM_B:
+		return
+
+	var world: MatchWorldModel = MatchWorldModel.instance
+	var pitch_size: Vector2 = Vector2(1600.0, 900.0)
+	if world != null:
+		pitch_size = world.get_pitch_size()
+
+	var attack_sign: float = _get_attack_sign(team)
+	var orig_xt: float = UtilityMath.get_xt_value(start_pos, pitch_size, attack_sign)
+	var dest_xt: float = UtilityMath.get_xt_value(end_pos, pitch_size, attack_sign)
+	var delta_xt: float = dest_xt - orig_xt
+
+	var opp_team: int = 1 - team
+	var opp_goal_centre: Vector2 = _get_opp_goal_centre(team)
+	var in_pen_start: bool = _is_in_penalty_area_zone(start_pos, opp_team)
+	var in_pen_end: bool = _is_in_penalty_area_zone(end_pos, opp_team)
+	var is_prog: bool = UtilityMath.is_progressive_action(start_pos, end_pos, opp_goal_centre, in_pen_start, in_pen_end)
+
+	var p_events: PlayerRatingCalculator.PlayerMatchEvents = _get_or_create_events(player)
+	p_events.xt_delta += delta_xt
+	if is_prog:
+		p_events.progressive_carries += 1
+		progressive_carries[team] += 1
+
+	xt_delta[team] += delta_xt
+
+	var vaep_val: float = UtilityMath.calculate_vaep_value(&"carry", orig_xt, dest_xt, true, is_prog)
+	p_events.vaep += vaep_val
+	vaep_total[team] += vaep_val
+
+	if _is_in_opponent_final_third(team, end_pos):
+		final_third_touches[team] += 1
+
+	GameEvents.carry_completed.emit(player, start_pos, end_pos, is_prog, delta_xt)
+
+
+func record_defensive_action(player: HeavyPlayerController, action_type: StringName, pos: Vector2) -> void:
+	var team: int = player.team
+	if team != GameManager.TEAM_A and team != GameManager.TEAM_B:
+		return
+
+	var p_events: PlayerRatingCalculator.PlayerMatchEvents = _get_or_create_events(player)
+
+	if _is_in_attacking_60_zone(team, pos):
+		defensive_actions_opp_half[team] += 1
+
+	match action_type:
+		&"tackle":
+			p_events.tackles_won += 1
+		&"interception":
+			p_events.interceptions += 1
+
+	var world: MatchWorldModel = MatchWorldModel.instance
+	var pitch_size: Vector2 = Vector2(1600.0, 900.0)
+	if world != null:
+		pitch_size = world.get_pitch_size()
+
+	var attack_sign: float = _get_attack_sign(team)
+	var act_xt: float = UtilityMath.get_xt_value(pos, pitch_size, attack_sign)
+	var vaep_val: float = UtilityMath.calculate_vaep_value(action_type, act_xt, act_xt, true, false)
+	p_events.vaep += vaep_val
+	vaep_total[team] += vaep_val
+
+	GameEvents.defensive_action_logged.emit(player, action_type, pos)
 
 
 ## --- Macro momentum accumulator ----------------------------------------------
 
-## Continuous exponential decay toward equilibrium, run every physics frame so
-## the half-life math stays accurate regardless of the 30-tick possession
-## sampling cadence below. Only publishes once decay has moved a team's value
-## past MOMENTUM_PUBLISH_EPSILON since the last broadcast, so this does not
-## spam GameEvents at 60Hz.
 func _update_momentum_decay(delta: float) -> void:
 	if not GameManager.is_in_play():
 		return
@@ -203,11 +439,6 @@ func _update_momentum_decay(delta: float) -> void:
 		_maybe_publish_momentum(t)
 
 
-## Shared impulse application for every discrete momentum event — quadratic
-## anti-snowball dampening (gamma(M) = 1 - M^2) means marginal impulse gains
-## shrink to zero as momentum approaches +/-1, so no event chain can produce
-## an unbounded runaway (see POWERFOOTBALL_MASTER_VISION.md / architecture
-## plan "Anti-Snowball Momentum Accumulator").
 func _apply_momentum_impulse(team: int, raw_impulse: float) -> void:
 	if team != GameManager.TEAM_A and team != GameManager.TEAM_B:
 		return
@@ -217,9 +448,6 @@ func _apply_momentum_impulse(team: int, raw_impulse: float) -> void:
 	_maybe_publish_momentum(team, true)
 
 
-## force always publishes — a discrete event is always worth broadcasting
-## even if its dampened effective impulse was tiny; decay ticks (force=false)
-## only publish once they've drifted past MOMENTUM_PUBLISH_EPSILON.
 func _maybe_publish_momentum(team: int, force: bool = false) -> void:
 	if force or absf(team_momentum[team] - _last_published_momentum[team]) > MOMENTUM_PUBLISH_EPSILON:
 		_last_published_momentum[team] = team_momentum[team]
@@ -230,19 +458,25 @@ func _on_tackle_won(winner: Node, _loser: Node) -> void:
 	var w := winner as HeavyPlayerController
 	if w != null and is_instance_valid(w):
 		_apply_momentum_impulse(w.team, MOMENTUM_TACKLE_WON)
+		record_defensive_action(w, &"tackle", w.global_position)
 
 
-## GameEvents.anticipatory_turnover_predicted fires with the INTERCEPTING
-## team (see MatchWorldModel._physics_process) — the turnover penalty belongs
-## to whoever is about to lose the ball, i.e. the other team.
 func _on_turnover_predicted(intercepting_team: int) -> void:
 	_apply_momentum_impulse(1 - intercepting_team, MOMENTUM_TURNOVER_ERROR)
 
 
-## Territorial control and rhythm: PASS_SEQUENCE_LENGTH consecutive completed
-## passes by the same team while the ball stays in the opponent's attacking
-## half. Resets on any incomplete pass (record_pass_attempt()) or once it
-## fires, so it re-arms rather than firing every pass past the threshold.
+func _on_pass_completed(_passer: Node, _receiver: Node, _orig: Vector2, _dest: Vector2, _packed: int, _xt: float) -> void:
+	pass
+
+
+func _on_carry_completed(_player: Node, _start: Vector2, _end: Vector2, _prog: bool, _xt: float) -> void:
+	pass
+
+
+func _on_defensive_action_logged(_player: Node, _action: StringName, _pos: Vector2) -> void:
+	pass
+
+
 func _record_pass_sequence(team: int, player: HeavyPlayerController) -> void:
 	if not _is_in_opponent_half(team, player.global_position):
 		_consecutive_passes[team] = 0
@@ -253,9 +487,6 @@ func _record_pass_sequence(team: int, player: HeavyPlayerController) -> void:
 		_apply_momentum_impulse(team, MOMENTUM_PASS_SEQUENCE)
 
 
-## Team 0 attacks +X, team 1 attacks -X (FormationAnchorMath / soccer-physics.md
-## convention) — "opponent half" is x > pitch centre for team 0, x < centre
-## for team 1.
 func _is_in_opponent_half(team: int, pos: Vector2) -> bool:
 	var world: MatchWorldModel = MatchWorldModel.instance
 	if world == null:
@@ -270,12 +501,9 @@ func record_foul(player: HeavyPlayerController) -> void:
 		return
 	fouls[team] += 1
 	_get_or_create_events(player).fouls += 1
+	record_defensive_action(player, &"foul", player.global_position)
 
 
-## +1.2 rating event for the scorer. The strike that produced this goal was
-## already counted as a "shot on target" by _on_ball_struck (is_shot fires
-## before the ball reaches the net) — decrement it back out so a goal isn't
-## double-credited as both a goal and a separate shot-on-target bonus.
 func record_goal(player: HeavyPlayerController) -> void:
 	if player == null or not is_instance_valid(player):
 		return
@@ -297,19 +525,16 @@ func record_own_goal(player: HeavyPlayerController) -> void:
 	_get_or_create_events(player).own_goals += 1
 
 
-## Returns this player's event counters, creating an empty (all-zero) entry
-## if this is the first time they have been referenced.
 func get_player_events(player_id: int) -> PlayerRatingCalculator.PlayerMatchEvents:
 	if not _player_events.has(player_id):
 		_player_events[player_id] = PlayerRatingCalculator.PlayerMatchEvents.new()
 	return _player_events[player_id]
 
 
-## Runs PlayerRatingCalculator over every tracked player and returns
-## player_id (team * 1000 + squad_index) -> rating. Also resolves clean sheet
-## for each tracked goalkeeper and writes the result onto PlayerData for
-## career persistence (PlayerData.last_match_rating is reserved for exactly
-## this).
+func get_all_player_events() -> Dictionary[int, PlayerRatingCalculator.PlayerMatchEvents]:
+	return _player_events
+
+
 func compute_all_ratings() -> Dictionary[int, float]:
 	var ratings: Dictionary[int, float] = {}
 
@@ -331,22 +556,23 @@ func compute_all_ratings() -> Dictionary[int, float]:
 		var events: PlayerRatingCalculator.PlayerMatchEvents = _player_events[key]
 		events.kept_clean_sheet = _resolve_clean_sheet(player_data, team, key, live_keys)
 
+		if player_data.position_role == "GK":
+			var opponent_team: int = 1 - team
+			var conceded: int = GameManager.score[opponent_team]
+			events.goals_prevented = events.psxg - float(conceded)
+
 		var rating: float = PlayerRatingCalculator.calculate(player_data, events)
 		ratings[key] = rating
 		player_data.last_match_rating = rating
+		player_data.accumulate_match_stats(events)
 
 	return ratings
 
 
-## True when this tracked player is a goalkeeper who is still on the live
-## roster (i.e. not sent off — is_slot_live() would false-negative here since
-## a red-carded player's own slot is cleared, so membership in live_keys,
-## gathered once up front, is what actually distinguishes "still out there"
-## from "removed mid-match") and their team's opponents are scoreless.
 func _resolve_clean_sheet(player_data: PlayerData, team: int, key: int, live_keys: Dictionary[int, bool]) -> bool:
 	if player_data.position_role != "GK":
 		return false
-	if not live_keys.has(key):
+	if not live_keys.is_empty() and not live_keys.has(key):
 		return false
 	var opponent_team: int = 1 - team
 	return GameManager.score[opponent_team] == 0
@@ -363,12 +589,6 @@ func _player_key(player: HeavyPlayerController) -> int:
 	return player.team * 1000 + player.squad_index
 
 
-## Called once by PitchScene right after _bind_players(), before
-## GameManager.start_match() — pre-allocates a PlayerMatchEvents for every
-## player currently on the pitch (the starting XI on both squads) so anyone
-## who appears but generates zero events still shows up on the ratings page
-## at the 6.0 baseline. Reserves who come on later are added lazily by
-## _on_substitution_made().
 func init_players() -> void:
 	_player_events.clear()
 	_last_passer_by_team = [null, null]
@@ -394,10 +614,6 @@ func record_offside(team_index: int) -> void:
 	offsides[team_index] += 1
 
 
-## Best-effort "did this pass find a teammate" proxy: no target/arrival concept
-## exists on the ball, so this checks whether any teammate sits within a
-## forward cone of the strike's aim direction, inside PASS_MAX_RANGE. Reads
-## MatchWorldModel only — never the scene tree.
 func is_pass_toward_teammate(player: HeavyPlayerController, aim: Vector2) -> bool:
 	var world: MatchWorldModel = MatchWorldModel.instance
 	if world == null or player.world_index < 0:
@@ -442,14 +658,41 @@ func get_stats(team_index: int) -> Dictionary:
 	}
 
 
-## Called by PitchScene once the full-time whistle blows — possession has no
-## more meaningful frames to sample once the match is over.
+func get_advanced_stats(team_index: int) -> Dictionary:
+	var total_ft_touches: int = final_third_touches[0] + final_third_touches[1]
+	var field_tilt: float = 50.0
+	if total_ft_touches > 0:
+		field_tilt = float(final_third_touches[team_index]) / float(total_ft_touches) * 100.0
+
+	var opp_passes_in_def_zone: int = opp_passes_def_half[team_index]
+	var def_actions_in_att_zone: int = defensive_actions_opp_half[team_index]
+	var ppda_val: float = 0.0
+	if def_actions_in_att_zone > 0:
+		ppda_val = float(opp_passes_in_def_zone) / float(def_actions_in_att_zone)
+
+	var opp_team: int = 1 - team_index
+	var goals_conceded: int = GameManager.score[opp_team]
+	var gk_prevented: float = psxg[opp_team] - float(goals_conceded)
+
+	return {
+		"xg": xg[team_index],
+		"psxg": psxg[team_index],
+		"goals_prevented": gk_prevented,
+		"xt_delta": xt_delta[team_index],
+		"field_tilt_pct": field_tilt,
+		"ppda": ppda_val,
+		"packing_total": packing_total[team_index],
+		"impect_total": impect_total[team_index],
+		"progressive_passes": progressive_passes[team_index],
+		"progressive_carries": progressive_carries[team_index],
+		"vaep_total": vaep_total[team_index],
+	}
+
+
 func stop_possession_sampling() -> void:
 	_sampling_active = false
 
 
-## Called by PitchScene once the stats screen is dismissed, so the next match
-## starts from a clean slate.
 func reset() -> void:
 	shots_total = [0, 0]
 	shots_on_target = [0, 0]
@@ -460,6 +703,18 @@ func reset() -> void:
 	red_cards = [0, 0]
 	corners = [0, 0]
 	offsides = [0, 0]
+	xg = [0.0, 0.0]
+	psxg = [0.0, 0.0]
+	goals_prevented = [0.0, 0.0]
+	xt_delta = [0.0, 0.0]
+	packing_total = [0, 0]
+	impect_total = [0, 0]
+	progressive_passes = [0, 0]
+	progressive_carries = [0, 0]
+	vaep_total = [0.0, 0.0]
+	final_third_touches = [0, 0]
+	defensive_actions_opp_half = [0, 0]
+	opp_passes_def_half = [0, 0]
 	_possession_samples = [0, 0]
 	_total_possession_samples = 0
 	_physics_tick_count = 0
@@ -471,14 +726,14 @@ func reset() -> void:
 	_consecutive_passes = [0, 0]
 
 
-func _on_ball_struck(player: Node, _speed: float, charge_ratio: float, is_shot: bool) -> void:
+func _on_ball_struck(player: Node, speed: float, charge_ratio: float, is_shot: bool) -> void:
 	if not is_shot:
 		return
 	var shooter := player as HeavyPlayerController
 	if shooter == null:
 		return
 	var on_target: bool = charge_ratio > SHOT_ON_TARGET_THRESHOLD
-	record_shot(shooter, on_target)
+	record_shot(shooter, on_target, speed)
 	if on_target:
 		_apply_momentum_impulse(shooter.team, MOMENTUM_SHOT_ON_TARGET)
 
@@ -513,15 +768,9 @@ func _on_red_card_shown(player: Node, team: int, _is_second_yellow: bool) -> voi
 		_get_or_create_events(carded_player).red_cards += 1
 
 
-## Attributes a goal to whoever last touched the ball (GoalZone passes
-## Pseudo3DBall.last_touched_by through as scorer). scorer.team != team means
-## the touch was on the defending side — an own goal, not a goal for them.
-## The assist proxy is simply the last completed pass on the scoring team,
-## which is the best signal available: the ball has no target/arrival concept
-## to trace a specific pass through to a specific shot.
 func _on_goal_scored(team: int, scorer: Node) -> void:
 	if GameManager.shootout_active:
-		return  # Shootout kicks are not run-of-play performances.
+		return
 
 	_apply_momentum_impulse(1 - team, MOMENTUM_GOAL_CONCEDED)
 
@@ -538,9 +787,6 @@ func _on_goal_scored(team: int, scorer: Node) -> void:
 		record_own_goal(scoring_player)
 
 
-## Ensures a substitute has a rating entry even if they never touch the ball
-## again before full time — otherwise "appeared but generated zero events"
-## would silently drop them off the ratings page.
 func _on_substitution_made(team: int, _player_out_idx: int, player_in_idx: int) -> void:
 	if team != GameManager.TEAM_A and team != GameManager.TEAM_B:
 		return

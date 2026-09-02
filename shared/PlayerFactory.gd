@@ -45,6 +45,13 @@ static func apply(player: HeavyPlayerController, data: PlayerData, anchor: Vecto
 
 	player.set_meta(&"player_data", data)
 
+	var team_data: TeamData = DataLoader.get_match_team(player.team) if DataLoader.league != null else null
+
+	# Update visual presentation (kit colors, shirt number, captain badge, GK accents)
+	if player.visual != null:
+		var is_gk: bool = player.brain != null and player.brain.is_goalkeeper
+		player.visual.apply_data(data, team_data, is_gk)
+
 	# Attach or reset the mood system. One MoodSystem child per controller — if
 	# one already exists from a previous match, reset it rather than duplicating.
 	var mood: MoodSystem = player.get_node_or_null("MoodSystem") as MoodSystem
@@ -68,11 +75,7 @@ static func apply(player: HeavyPlayerController, data: PlayerData, anchor: Vecto
 	# Manager coaching bonus — prized_attribute gives a small lift to every
 	# player on the squad. +0.05, clamped to 1.0. This is intentionally small:
 	# a coaching edge, not a talent rewrite.
-	var team_name: String = ""
-	if DataLoader.league != null:
-		var team_data: TeamData = DataLoader.get_match_team(player.team)
-		if team_data != null:
-			team_name = team_data.team_name
+	var team_name: String = team_data.team_name if team_data != null else ""
 	var manager: ManagerData = ManagerLoader.get_manager_for_team(team_name)
 	if manager != null and player.brain != null:
 		match manager.prized_attribute:

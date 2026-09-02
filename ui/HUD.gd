@@ -18,7 +18,7 @@
 ##
 ## Depends on: GameManager, GameEvents, HeavyPlayerController, MoodSystem,
 ##             MatchReferee, PenaltyShootoutCoordinator.
-## Exposes: bind_active_player(player), set_team_names(a, b)
+## Exposes: bind_active_player(player), set_team_names(a, b), set_sim_speed_panel_visible(is_visible)
 ##
 
 class_name HUD
@@ -74,8 +74,25 @@ var _shootout_overlay_was_active: bool = false
 @onready var nameplate_panel: PanelContainer = $Root/NameplatePanel
 @onready var nameplate_number_label: Label = $Root/NameplatePanel/NameplateBox/NumberLabel
 @onready var nameplate_name_label: Label = $Root/NameplatePanel/NameplateBox/NameLabel
+@onready var nameplate_stamina_bar: ProgressBar = $Root/NameplatePanel/NameplateBox/HudStaminaBar
+@onready var nameplate_fatigue_label: Label = $Root/NameplatePanel/NameplateBox/FatigueLabel
 @onready var practice_hints_panel: PanelContainer = $Root/PracticeHintsPanel
 @onready var _practice_gk_label: Label = $Root/PracticeHintsPanel/VBox/GKLabel
+
+@onready var sim_speed_panel: PanelContainer = $Root/SimSpeedPanel
+@onready var sim_speed_value_label: Label = $Root/SimSpeedPanel/VBox/HeaderBox/SpeedValueLabel
+@onready var sim_speed_slider: HSlider = $Root/SimSpeedPanel/VBox/SpeedSlider
+@onready var replay_toggle_btn: Button = $Root/SimSpeedPanel/VBox/HeaderBox/ReplayToggleBtn
+@onready var stamina_toggle_btn: Button = $Root/SimSpeedPanel/VBox/HeaderBox/StaminaToggleBtn
+@onready var speed_1x_btn: Button = $Root/SimSpeedPanel/VBox/PresetRow/Speed1xBtn
+@onready var speed_2x_btn: Button = $Root/SimSpeedPanel/VBox/PresetRow/Speed2xBtn
+@onready var speed_4x_btn: Button = $Root/SimSpeedPanel/VBox/PresetRow/Speed4xBtn
+@onready var speed_8x_btn: Button = $Root/SimSpeedPanel/VBox/PresetRow/Speed8xBtn
+@onready var speed_16x_btn: Button = $Root/SimSpeedPanel/VBox/PresetRow/Speed16xBtn
+
+@onready var replay_overlay: Control = $Root/ReplayOverlay
+@onready var replay_badge_panel: PanelContainer = $Root/ReplayOverlay/ReplayBadgePanel
+@onready var replay_skip_btn: Button = $Root/ReplayOverlay/SkipButton
 
 
 func _ready() -> void:
@@ -101,6 +118,11 @@ func _ready() -> void:
 	GameEvents.half_time_started.connect(_on_half_time_started)
 	GameEvents.half_time_ended.connect(_on_half_time_ended)
 	GameEvents.stoppage_time_announced.connect(_on_stoppage_time_announced)
+	GameEvents.simulation_speed_changed.connect(_on_simulation_speed_changed)
+	GameEvents.goal_replays_toggled.connect(_on_goal_replays_toggled)
+	GameEvents.replay_started.connect(_on_replay_started)
+	GameEvents.replay_ended.connect(_on_replay_ended)
+
 
 	power_meter.min_value = 0.0
 	power_meter.max_value = 1.0
@@ -114,6 +136,22 @@ func _ready() -> void:
 	mood_label.text = ""
 	mood_label.visible = false
 	nameplate_panel.visible = false
+
+	var hud_bar_bg := StyleBoxFlat.new()
+	hud_bar_bg.bg_color = Color(0.06, 0.06, 0.09, 0.8)
+	hud_bar_bg.corner_radius_top_left = 3
+	hud_bar_bg.corner_radius_top_right = 3
+	hud_bar_bg.corner_radius_bottom_left = 3
+	hud_bar_bg.corner_radius_bottom_right = 3
+	nameplate_stamina_bar.add_theme_stylebox_override("background", hud_bar_bg)
+
+	var hud_bar_fill := StyleBoxFlat.new()
+	hud_bar_fill.bg_color = Color(1.0, 1.0, 1.0, 1.0)
+	hud_bar_fill.corner_radius_top_left = 3
+	hud_bar_fill.corner_radius_top_right = 3
+	hud_bar_fill.corner_radius_bottom_left = 3
+	hud_bar_fill.corner_radius_bottom_right = 3
+	nameplate_stamina_bar.add_theme_stylebox_override("fill", hud_bar_fill)
 
 	_sub_banner_label = Label.new()
 	_sub_banner_label.name = "SubBannerLabel"
@@ -133,6 +171,7 @@ func _ready() -> void:
 	$Root.add_child(_sub_banner_label)
 
 	_build_shootout_overlay()
+	_setup_sim_speed_panel()
 
 
 func _process(_delta: float) -> void:
@@ -220,6 +259,7 @@ func _refresh_nameplate() -> void:
 	nameplate_number_label.text = str(data.shirt_number)
 	nameplate_name_label.text = data.player_name
 	nameplate_panel.visible = true
+	_update_hud_stamina_readout()
 
 
 func _update_power_meter() -> void:
@@ -236,14 +276,43 @@ func _update_stamina_bar() -> void:
 	if active_player == null or not is_instance_valid(active_player):
 		return
 
-	var bar: ProgressBar = active_player.stamina_bar
-	bar.value = active_player.get_stamina_ratio()
-	# Red once sprint is locked out, so exhaustion reads at a glance.
-	bar.modulate = Color(0.9, 0.3, 0.25) if active_player.sprint_locked else Color(0.95, 0.95, 0.95)
+	_update_hud_stamina_readout()
 
 
-func _on_goal_scored(team: int, _scorer: Node = null) -> void:
-	status_label.text = "GOAL — TEAM %s" % ("A" if team == GameManager.TEAM_A else "B")
+func _update_hud_stamina_readout() -> void:
+	if active_player == null or not is_instance_valid(active_player):
+		return
+
+	var ratio: float = active_player.get_stamina_ratio()
+	var tier: HeavyPlayerController.FatigueTier = active_player.get_fatigue_tier()
+
+	nameplate_stamina_bar.value = ratio
+
+	var tier_color: Color
+	var tier_name: String
+	if active_player.sprint_locked or tier == HeavyPlayerController.FatigueTier.EXHAUSTED:
+		tier_color = Color(0.95, 0.25, 0.25)
+		tier_name = "EXHAUSTED"
+	elif tier == HeavyPlayerController.FatigueTier.TIRED:
+		tier_color = Color(1.0, 0.75, 0.15)
+		tier_name = "TIRED"
+	else:
+		tier_color = Color(0.24, 0.86, 0.41)
+		tier_name = "FRESH"
+
+	nameplate_stamina_bar.modulate = tier_color
+	nameplate_fatigue_label.text = "%d%% %s" % [int(ratio * 100.0), tier_name]
+	nameplate_fatigue_label.add_theme_color_override("font_color", tier_color)
+
+
+func _on_goal_scored(team: int, scorer: Node = null) -> void:
+	var team_name: String = team_a_label.text if team == GameManager.TEAM_A else team_b_label.text
+	var scorer_player := scorer as HeavyPlayerController
+	var p_data: PlayerData = scorer_player.get_meta(&"player_data", null) as PlayerData if (scorer_player != null and scorer_player.has_meta(&"player_data")) else null
+	if p_data != null and p_data.player_name != "":
+		status_label.text = "GOAL! %s (%s)" % [p_data.player_name, team_name]
+	else:
+		status_label.text = "GOAL — %s" % team_name
 
 
 func _on_kickoff_started() -> void:
@@ -543,3 +612,207 @@ func _show_wall_hint() -> void:
 	_wall_hint_tween.tween_interval(BANNER_HOLD_TIME)
 	_wall_hint_tween.tween_property(wall_hint_label, "modulate:a", 0.0, BANNER_FADE_TIME)
 	_wall_hint_tween.tween_callback(func() -> void: wall_hint_label.visible = false)
+
+
+## --- Match Simulation Speed Panel (CPU vs CPU) --------------------------------
+
+func _setup_sim_speed_panel() -> void:
+	var panel_style := StyleBoxFlat.new()
+	panel_style.bg_color = Color(0.05, 0.05, 0.05, 0.88)
+	panel_style.border_width_left = 1
+	panel_style.border_width_top = 1
+	panel_style.border_width_right = 1
+	panel_style.border_width_bottom = 1
+	panel_style.border_color = Color(0.24, 0.86, 0.41, 0.3)
+	panel_style.corner_radius_top_left = 6
+	panel_style.corner_radius_top_right = 6
+	panel_style.corner_radius_bottom_left = 6
+	panel_style.corner_radius_bottom_right = 6
+	panel_style.content_margin_left = 8.0
+	panel_style.content_margin_right = 8.0
+	panel_style.content_margin_top = 6.0
+	panel_style.content_margin_bottom = 6.0
+	sim_speed_panel.add_theme_stylebox_override("panel", panel_style)
+
+	var badge_style := StyleBoxFlat.new()
+	badge_style.bg_color = Color(0.05, 0.05, 0.05, 0.85)
+	badge_style.border_width_left = 1
+	badge_style.border_width_top = 1
+	badge_style.border_width_right = 1
+	badge_style.border_width_bottom = 1
+	badge_style.border_color = Color(1.0, 0.25, 0.25, 0.6)
+	badge_style.corner_radius_top_left = 6
+	badge_style.corner_radius_top_right = 6
+	badge_style.corner_radius_bottom_left = 6
+	badge_style.corner_radius_bottom_right = 6
+	badge_style.content_margin_left = 10.0
+	badge_style.content_margin_right = 10.0
+	badge_style.content_margin_top = 4.0
+	badge_style.content_margin_bottom = 4.0
+	replay_badge_panel.add_theme_stylebox_override("panel", badge_style)
+
+	speed_1x_btn.pressed.connect(func() -> void: GameManager.set_simulation_speed(1.0))
+	speed_2x_btn.pressed.connect(func() -> void: GameManager.set_simulation_speed(2.0))
+	speed_4x_btn.pressed.connect(func() -> void: GameManager.set_simulation_speed(4.0))
+	speed_8x_btn.pressed.connect(func() -> void: GameManager.set_simulation_speed(8.0))
+	speed_16x_btn.pressed.connect(func() -> void: GameManager.set_simulation_speed(16.0))
+
+	replay_toggle_btn.pressed.connect(_on_replay_toggle_btn_pressed)
+	stamina_toggle_btn.pressed.connect(_on_stamina_toggle_btn_pressed)
+	replay_skip_btn.pressed.connect(_on_replay_skip_btn_pressed)
+
+	sim_speed_slider.value_changed.connect(_on_speed_slider_value_changed)
+
+	var is_sim: bool = GameManager.get_meta(&"simulate_match", false)
+	set_sim_speed_panel_visible(is_sim)
+	_refresh_replay_toggle_display()
+	_refresh_stamina_toggle_display()
+
+
+func set_sim_speed_panel_visible(is_visible: bool) -> void:
+	sim_speed_panel.visible = is_visible
+	if is_visible:
+		_refresh_speed_display(GameManager.get_simulation_speed())
+		_refresh_replay_toggle_display()
+		_refresh_stamina_toggle_display()
+
+
+func _on_speed_slider_value_changed(val: float) -> void:
+	GameManager.set_simulation_speed(val)
+
+
+func _on_simulation_speed_changed(speed: float) -> void:
+	_refresh_speed_display(speed)
+
+
+func _on_goal_replays_toggled(_enabled: bool) -> void:
+	_refresh_replay_toggle_display()
+
+
+func _on_replay_toggle_btn_pressed() -> void:
+	GameManager.set_goal_replays_enabled(not GameManager.is_goal_replays_enabled())
+
+
+func _on_stamina_toggle_btn_pressed() -> void:
+	var current: bool = GameManager.get_meta(&"stamina_bars_always_visible", true)
+	GameManager.set_meta(&"stamina_bars_always_visible", not current)
+	_refresh_stamina_toggle_display()
+
+
+func _refresh_replay_toggle_display() -> void:
+	var enabled: bool = GameManager.is_goal_replays_enabled()
+	replay_toggle_btn.text = "REPLAY: ON" if enabled else "REPLAY: OFF"
+	replay_toggle_btn.modulate = Color(0.24, 0.86, 0.41) if enabled else Color(0.6, 0.6, 0.6)
+
+
+func _refresh_stamina_toggle_display() -> void:
+	var always_on: bool = GameManager.get_meta(&"stamina_bars_always_visible", true)
+	stamina_toggle_btn.text = "STAMINA: ON" if always_on else "STAMINA: AUTO"
+	stamina_toggle_btn.modulate = Color(0.24, 0.86, 0.41) if always_on else Color(0.6, 0.6, 0.6)
+
+
+func _on_replay_started(_team: int, _scorer: Node = null) -> void:
+	replay_overlay.visible = true
+
+
+func _on_replay_ended() -> void:
+	replay_overlay.visible = false
+
+
+func _on_replay_skip_btn_pressed() -> void:
+	var coordinator: GoalReplayCoordinator = _find_goal_replay_coordinator()
+	if coordinator != null:
+		coordinator.skip_replay()
+
+
+func _find_goal_replay_coordinator() -> GoalReplayCoordinator:
+	var scene: Node = get_parent()
+	if scene == null:
+		return null
+	return scene.get_node_or_null("GoalReplayCoordinator") as GoalReplayCoordinator
+
+
+func _refresh_speed_display(speed: float) -> void:
+	if is_equal_approx(speed, roundf(speed)):
+		sim_speed_value_label.text = "%dx" % int(speed)
+	else:
+		sim_speed_value_label.text = "%.1fx" % speed
+
+	sim_speed_slider.set_value_no_signal(speed)
+
+	var active_color := Color(0.24, 0.86, 0.41)
+	var inactive_color := Color(0.85, 0.85, 0.85)
+	speed_1x_btn.modulate = active_color if is_equal_approx(speed, 1.0) else inactive_color
+	speed_2x_btn.modulate = active_color if is_equal_approx(speed, 2.0) else inactive_color
+	speed_4x_btn.modulate = active_color if is_equal_approx(speed, 4.0) else inactive_color
+	speed_8x_btn.modulate = active_color if is_equal_approx(speed, 8.0) else inactive_color
+	speed_16x_btn.modulate = active_color if is_equal_approx(speed, 16.0) else inactive_color
+
+
+func _unhandled_input(event: InputEvent) -> void:
+	if replay_overlay.visible:
+		if event.is_pressed() and not event.is_echo():
+			var is_skip_key: bool = (event is InputEventKey) and ((event as InputEventKey).keycode == KEY_SPACE or (event as InputEventKey).keycode == KEY_ENTER or (event as InputEventKey).keycode == KEY_ESCAPE)
+			var is_skip_act: bool = event.is_action_pressed(&"action_ui_accept") or event.is_action_pressed(&"action_cancel")
+			if is_skip_key or is_skip_act:
+				_on_replay_skip_btn_pressed()
+				get_viewport().set_input_as_handled()
+				return
+
+
+	if not sim_speed_panel.visible:
+		return
+	if not (event is InputEventKey) or not event.is_pressed() or event.is_echo():
+		return
+
+	var key_event := event as InputEventKey
+	match key_event.keycode:
+		KEY_1:
+			GameManager.set_simulation_speed(1.0)
+			get_viewport().set_input_as_handled()
+		KEY_2:
+			GameManager.set_simulation_speed(2.0)
+			get_viewport().set_input_as_handled()
+		KEY_3:
+			GameManager.set_simulation_speed(4.0)
+			get_viewport().set_input_as_handled()
+		KEY_4:
+			GameManager.set_simulation_speed(8.0)
+			get_viewport().set_input_as_handled()
+		KEY_5:
+			GameManager.set_simulation_speed(16.0)
+			get_viewport().set_input_as_handled()
+		KEY_R:
+			_on_replay_toggle_btn_pressed()
+			get_viewport().set_input_as_handled()
+		KEY_S:
+			_on_stamina_toggle_btn_pressed()
+			get_viewport().set_input_as_handled()
+		KEY_BRACKETLEFT, KEY_MINUS, KEY_KP_SUBTRACT:
+			var current: float = GameManager.get_simulation_speed()
+			var new_spd: float = 1.0
+			if current > 8.0:
+				new_spd = 8.0
+			elif current > 4.0:
+				new_spd = 4.0
+			elif current > 2.0:
+				new_spd = 2.0
+			elif current > 1.0:
+				new_spd = 1.0
+			GameManager.set_simulation_speed(new_spd)
+			get_viewport().set_input_as_handled()
+		KEY_BRACKETRIGHT, KEY_EQUAL, KEY_PLUS, KEY_KP_ADD:
+			var cur: float = GameManager.get_simulation_speed()
+			var nxt_spd: float = 16.0
+			if cur < 2.0:
+				nxt_spd = 2.0
+			elif cur < 4.0:
+				nxt_spd = 4.0
+			elif cur < 8.0:
+				nxt_spd = 8.0
+			elif cur < 16.0:
+				nxt_spd = 16.0
+			GameManager.set_simulation_speed(nxt_spd)
+			get_viewport().set_input_as_handled()
+
+

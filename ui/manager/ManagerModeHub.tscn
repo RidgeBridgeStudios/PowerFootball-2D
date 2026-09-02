@@ -1,0 +1,251 @@
+[gd_scene load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://ui/manager/ManagerModeHub.gd" id="1_manager_hub"]
+
+[node name="ManagerModeHub" type="Control"]
+layout_mode = 3
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+script = ExtResource("1_manager_hub")
+
+[node name="ClubSelectView" type="Control" parent="."]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="ClubSelectView"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.04, 0.06, 0.04, 0.95)
+
+[node name="Panel" type="PanelContainer" parent="ClubSelectView"]
+layout_mode = 1
+anchors_preset = 8
+anchor_left = 0.5
+anchor_top = 0.5
+anchor_right = 0.5
+anchor_bottom = 0.5
+offset_left = -340.0
+offset_top = -240.0
+offset_right = 340.0
+offset_bottom = 240.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ClubSelectView/Panel"]
+layout_mode = 2
+theme_override_constants/separation = 16
+
+[node name="TitleLabel" type="Label" parent="ClubSelectView/Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 22
+theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+text = "MANAGER CAREER — CHOOSE YOUR CLUB"
+horizontal_alignment = 1
+
+[node name="ClubList" type="ItemList" parent="ClubSelectView/Panel/VBoxContainer"]
+custom_minimum_size = Vector2(0, 260)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="ButtonRow" type="HBoxContainer" parent="ClubSelectView/Panel/VBoxContainer"]
+layout_mode = 2
+theme_override_constants/separation = 16
+alignment = 1
+
+[node name="BackButton" type="Button" parent="ClubSelectView/Panel/VBoxContainer/ButtonRow"]
+custom_minimum_size = Vector2(140, 36)
+layout_mode = 2
+text = "← Main Menu"
+
+[node name="StartCareerButton" type="Button" parent="ClubSelectView/Panel/VBoxContainer/ButtonRow"]
+custom_minimum_size = Vector2(200, 36)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+disabled = true
+text = "Take Command →"
+
+[node name="HubView" type="Control" parent="."]
+visible = false
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="Background" type="ColorRect" parent="HubView"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+color = Color(0.03, 0.04, 0.03, 0.98)
+
+[node name="TopBar" type="HBoxContainer" parent="HubView"]
+layout_mode = 1
+anchors_preset = 10
+anchor_right = 1.0
+offset_left = 24.0
+offset_top = 16.0
+offset_right = -24.0
+offset_bottom = 56.0
+grow_horizontal = 2
+theme_override_constants/separation = 24
+
+[node name="ClubNameLabel" type="Label" parent="HubView/TopBar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 24
+theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+text = "FC Nordvik"
+
+[node name="ManagerInfoLabel" type="Label" parent="HubView/TopBar"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+text = "Manager: Branimir Skok"
+
+[node name="MatchdayLabel" type="Label" parent="HubView/TopBar"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.9, 0.9, 0.9, 1)
+text = "Matchday 1 / 10"
+
+[node name="MainLayout" type="HBoxContainer" parent="HubView"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 24.0
+offset_top = 70.0
+offset_right = -24.0
+offset_bottom = -24.0
+grow_horizontal = 2
+grow_vertical = 2
+theme_override_constants/separation = 24
+
+[node name="StandingsPanel" type="VBoxContainer" parent="HubView/MainLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+size_flags_stretch_ratio = 1.4
+theme_override_constants/separation = 8
+
+[node name="StandingsTitle" type="Label" parent="HubView/MainLayout/StandingsPanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+text = "LEAGUE STANDINGS"
+
+[node name="StandingsScroll" type="ScrollContainer" parent="HubView/MainLayout/StandingsPanel"]
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="StandingsList" type="VBoxContainer" parent="HubView/MainLayout/StandingsPanel/StandingsScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6
+
+[node name="FixturePanel" type="VBoxContainer" parent="HubView/MainLayout"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 12
+
+[node name="FixtureTitle" type="Label" parent="HubView/MainLayout/FixturePanel"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 18
+theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+text = "NEXT MATCH"
+
+[node name="FixtureCard" type="PanelContainer" parent="HubView/MainLayout/FixturePanel"]
+layout_mode = 2
+
+[node name="VBoxContainer" type="VBoxContainer" parent="HubView/MainLayout/FixturePanel/FixtureCard"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="OpponentTitleLabel" type="Label" parent="HubView/MainLayout/FixturePanel/FixtureCard/VBoxContainer"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 20
+text = "vs CD Solano"
+
+[node name="VenueLabel" type="Label" parent="HubView/MainLayout/FixturePanel/FixtureCard/VBoxContainer"]
+layout_mode = 2
+text = "Venue: Home Ground (Home Advantage)"
+
+[node name="OpponentManagerLabel" type="Label" parent="HubView/MainLayout/FixturePanel/FixtureCard/VBoxContainer"]
+layout_mode = 2
+text = "Opponent Manager: Sebastián Larrarte"
+
+[node name="RefereeLabel" type="Label" parent="HubView/MainLayout/FixturePanel/FixtureCard/VBoxContainer"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "Match Official: Mark Jansen"
+
+[node name="ActionRow" type="VBoxContainer" parent="HubView/MainLayout/FixturePanel"]
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="PlayButton" type="Button" parent="HubView/MainLayout/FixturePanel/ActionRow"]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+text = "Play Match ⚽"
+
+[node name="QuickSimButton" type="Button" parent="HubView/MainLayout/FixturePanel/ActionRow"]
+custom_minimum_size = Vector2(0, 38)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+text = "Quick Sim Match ⚡"
+
+[node name="SimRoundButton" type="Button" parent="HubView/MainLayout/FixturePanel/ActionRow"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+text = "Simulate Rest of Round ⏩"
+
+[node name="SquadButton" type="Button" parent="HubView/MainLayout/FixturePanel/ActionRow"]
+custom_minimum_size = Vector2(0, 34)
+layout_mode = 2
+text = "Squad Roster & Form"
+
+[node name="NewCareerButton" type="Button" parent="HubView/MainLayout/FixturePanel/ActionRow"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7, 0.7, 0.7, 1)
+text = "New Career / Select Team"
+
+[node name="MainMenuButton" type="Button" parent="HubView/MainLayout/FixturePanel/ActionRow"]
+custom_minimum_size = Vector2(0, 32)
+layout_mode = 2
+text = "Main Menu"
+
+[node name="SquadDialog" type="AcceptDialog" parent="."]
+title = "Squad Roster"
+size = Vector2i(540, 400)
+
+[node name="SquadScroll" type="ScrollContainer" parent="SquadDialog"]
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+offset_left = 8.0
+offset_top = 8.0
+offset_right = -8.0
+offset_bottom = -49.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SquadList" type="VBoxContainer" parent="SquadDialog/SquadScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 6

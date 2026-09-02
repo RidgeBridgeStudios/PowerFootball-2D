@@ -55,7 +55,7 @@ func _draw() -> void:
 		return
 
 	var team_idx: int = clampi(_controller.team, 0, team_colors.size() - 1)
-	var base_color: Color = team_colors[team_idx]
+	var base_color: Color = _controller.visual.team_color if (_controller.visual != null) else team_colors[team_idx]
 	base_color.a = _current_alpha
 
 	# Filled isoceles triangle pointing along local +X.

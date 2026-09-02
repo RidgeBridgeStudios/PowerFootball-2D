@@ -42,11 +42,8 @@ func _draw() -> void:
 	draw_arc(Vector2.ZERO, CENTRE_CIRCLE_RADIUS, 0.0, TAU, 64, LINE_COLOR, LINE_WIDTH)
 	draw_circle(Vector2.ZERO, CENTRE_SPOT_RADIUS, LINE_COLOR)
 
-	_draw_penalty_area(-800.0, -600.0)
-	_draw_penalty_area(600.0, 800.0)
-
-	_draw_goal_mouth(-824.0, -776.0)
-	_draw_goal_mouth(776.0, 824.0)
+	_draw_penalty_area(-half.x, -half.x + 200.0)
+	_draw_penalty_area(half.x - 200.0, half.x)
 
 	draw_circle(Vector2(-PENALTY_SPOT_X, 0.0), PENALTY_SPOT_RADIUS, LINE_COLOR)
 	draw_circle(Vector2(PENALTY_SPOT_X, 0.0), PENALTY_SPOT_RADIUS, LINE_COLOR)
@@ -55,8 +52,3 @@ func _draw() -> void:
 func _draw_penalty_area(x_from: float, x_to: float) -> void:
 	var rect := Rect2(Vector2(x_from, -PENALTY_AREA_HEIGHT * 0.5), Vector2(x_to - x_from, PENALTY_AREA_HEIGHT))
 	draw_rect(rect, LINE_COLOR, false, LINE_WIDTH)
-
-
-func _draw_goal_mouth(x_from: float, x_to: float) -> void:
-	var rect := Rect2(Vector2(x_from, -GOAL_MOUTH_HEIGHT * 0.5), Vector2(x_to - x_from, GOAL_MOUTH_HEIGHT))
-	draw_rect(rect, GOAL_FILL_COLOR, true)

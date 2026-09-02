@@ -1,4 +1,4 @@
-[gd_scene load_steps=10 format=3]
+[gd_scene load_steps=13 format=3]
 
 [ext_resource type="Script" path="res://entities/player/HeavyPlayerController.gd" id="1_controller"]
 [ext_resource type="Texture2D" path="res://art/player.png" id="2_body"]
@@ -6,6 +6,12 @@
 [ext_resource type="Script" path="res://entities/player/PlayerStateFactory.gd" id="4_fsm"]
 [ext_resource type="Script" path="res://entities/player/PlayerBrain.gd" id="5_brain"]
 [ext_resource type="Script" path="res://entities/player/FacingArrow.gd" id="6_facing_arrow"]
+[ext_resource type="Shader" path="res://entities/player/PlayerDot.gdshader" id="7_shader"]
+[ext_resource type="Script" path="res://entities/player/PlayerVisual.gd" id="8_visual"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_dot"]
+resource_local_to_scene = true
+shader = ExtResource("7_shader")
 
 [sub_resource type="CircleShape2D" id="CircleShape2D_body"]
 radius = 7.0
@@ -20,12 +26,17 @@ radius = 24.0
 motion_mode = 1
 script = ExtResource("1_controller")
 
-[node name="ShadowSprite2D" type="Sprite2D" parent="."]
+[node name="PlayerVisual" type="Node2D" parent="."]
+script = ExtResource("8_visual")
+
+[node name="ShadowSprite" type="Sprite2D" parent="PlayerVisual"]
 modulate = Color(0, 0, 0, 0.45)
 position = Vector2(0, 5)
 texture = ExtResource("3_shadow")
 
-[node name="Sprite2D" type="Sprite2D" parent="."]
+[node name="DotSprite" type="Sprite2D" parent="PlayerVisual"]
+material = SubResource("ShaderMaterial_dot")
+scale = Vector2(1.3, 1.3)
 texture = ExtResource("2_body")
 
 [node name="FacingArrow" type="Node2D" parent="."]

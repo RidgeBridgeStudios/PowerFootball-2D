@@ -34,6 +34,15 @@ var formation: String = ""
 ## Substitutions already committed (max 3 per match; only relevant in pause menu).
 var substitutions_used: int = 0
 
+## Tactical role overrides per starting XI lineup slot (slot 0..10 -> role string, e.g. "CAM", "CDM").
+var role_overrides: Dictionary = {}
+
+## Custom per-slot PlayerRoleConfig instances edited via tactics inspector.
+var custom_role_configs: Dictionary = {}
+
+## Lineup slot index of designated team captain.
+var captain_slot: int = -1
+
 
 static func from_team(t: TeamData, m: ManagerData) -> TeamManagementData:
 	var d := TeamManagementData.new()
@@ -41,6 +50,7 @@ static func from_team(t: TeamData, m: ManagerData) -> TeamManagementData:
 	d.manager = m
 	d.formation = m.preferred_formation if t.formation_override == "" else t.formation_override
 	d.substitutions_used = t.substitutions_made
+	d.role_overrides = t.role_overrides.duplicate()
 
 	if t.lineup_indices.size() == 11:
 		d.lineup = t.lineup_indices.duplicate()
@@ -55,7 +65,20 @@ static func from_team(t: TeamData, m: ManagerData) -> TeamManagementData:
 		if not d.lineup.has(i):
 			d.bench.append(i)
 
+	# Determine captain slot
+	if t.captain_index >= 0 and d.lineup.has(t.captain_index):
+		d.captain_slot = d.lineup.find(t.captain_index)
+	else:
+		for slot in range(d.lineup.size()):
+			var sq_idx: int = d.lineup[slot]
+			if sq_idx >= 0 and sq_idx < t.squad.size() and t.squad[sq_idx].is_captain:
+				d.captain_slot = slot
+				break
+		if d.captain_slot == -1 and not d.lineup.is_empty():
+			d.captain_slot = 0
+
 	return d
+
 
 
 ## Swap a starter (by lineup slot index) with a bench player (by bench slot index).
@@ -90,7 +113,50 @@ func reshuffle(slot_a: int, slot_b: int) -> bool:
 	var tmp: int = lineup[slot_a]
 	lineup[slot_a] = lineup[slot_b]
 	lineup[slot_b] = tmp
+
+	if captain_slot == slot_a:
+		captain_slot = slot_b
+	elif captain_slot == slot_b:
+		captain_slot = slot_a
 	return true
+
+
+## Returns the active tactical role for a lineup slot (role override or formation default).
+func get_slot_role(slot: int) -> String:
+	if role_overrides.has(slot):
+		return str(role_overrides[slot])
+	var layout: Array[Dictionary] = FormationLibrary.get_formation(formation)
+	if slot >= 0 and slot < layout.size():
+		return str(layout[slot].get("role", "CM"))
+	return "CM"
+
+
+## Sets an individual role override for a specific lineup slot.
+func set_slot_role(slot: int, role: String) -> void:
+	if slot >= 0 and slot < lineup.size():
+		role_overrides[slot] = role
+
+
+## Returns custom PlayerRoleConfig assigned to a slot, if any.
+func get_slot_role_config(slot: int) -> PlayerRoleConfig:
+	if custom_role_configs.has(slot):
+		return custom_role_configs[slot] as PlayerRoleConfig
+	return null
+
+
+## Stores a custom PlayerRoleConfig instance for a slot.
+func set_slot_role_config(slot: int, config: PlayerRoleConfig) -> void:
+	if slot >= 0 and slot < lineup.size():
+		custom_role_configs[slot] = config
+
+
+## Designates a starting lineup slot as team captain.
+func set_captain(slot: int) -> void:
+	if slot >= 0 and slot < lineup.size():
+		captain_slot = slot
+		var cap_squad_idx: int = lineup[slot]
+		for i in range(team.squad.size()):
+			team.squad[i].is_captain = (i == cap_squad_idx)
 
 
 ## Push the working copy back into the live TeamData.
@@ -98,3 +164,9 @@ func apply_to_team() -> void:
 	team.lineup_indices = lineup.duplicate()
 	team.formation_override = formation
 	team.substitutions_made = substitutions_used
+	team.role_overrides = role_overrides.duplicate()
+	if captain_slot >= 0 and captain_slot < lineup.size():
+		team.captain_index = lineup[captain_slot]
+		for i in range(team.squad.size()):
+			team.squad[i].is_captain = (i == team.captain_index)
+

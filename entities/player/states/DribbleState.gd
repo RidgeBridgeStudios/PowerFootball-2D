@@ -64,6 +64,7 @@ const DRIBBLE_SPEED_PENALTY: float = 0.9
 
 var _touch_cooldown: float = 0.0
 var _grace_timer: float = 0.0
+var _carry_start_pos: Vector2 = Vector2.ZERO
 ## The ball this dribble session is tracking. Cached on enter so the magnet
 ## still has a target even on a tick where the ball is momentarily outside
 ## the foot sensor (grace window).
@@ -73,6 +74,7 @@ var _possessed_ball: Pseudo3DBall = null
 func enter(player: HeavyPlayerController) -> void:
 	_touch_cooldown = 0.0
 	_grace_timer = 0.0
+	_carry_start_pos = player.global_position
 	var ball: Pseudo3DBall = player.get_ball_in_foot_range()
 	if ball != null and player.can_carry_ball() \
 			and (ball.possessor == null or ball.possessor == player):
@@ -87,6 +89,8 @@ func enter(player: HeavyPlayerController) -> void:
 func exit(player: HeavyPlayerController) -> void:
 	if _possessed_ball != null and _possessed_ball.possessor == player:
 		_possessed_ball.release_possession()
+	if _carry_start_pos.distance_squared_to(player.global_position) > 40.0 * 40.0:
+		MatchStatsTracker.record_carry_completed(player, _carry_start_pos, player.global_position)
 	_possessed_ball = null
 	player.possession_lost.emit()
 
@@ -147,10 +151,17 @@ func _notify_trust_of_reception(player: HeavyPlayerController, ball: Pseudo3DBal
 	var previous_toucher: HeavyPlayerController = ball.last_touched_by
 	if previous_toucher == null or previous_toucher == player:
 		return
+	if previous_toucher.team == player.team:
+		MatchStatsTracker.record_pass_completed(previous_toucher, player, previous_toucher.global_position, player.global_position)
+	else:
+		MatchStatsTracker.record_defensive_action(player, &"interception", player.global_position)
+		player.show_action_text("INTERCEPT", Color(0.44, 0.85, 1.0))
+
 	var passer_trust: TrustSystem = previous_toucher.get_trust_system()
 	if passer_trust != null:
 		passer_trust.resolve_possession_change(
 			TrustSystem.player_key(player), previous_toucher.team == player.team)
+
 
 
 func physics_process(player: HeavyPlayerController, delta: float) -> void:
@@ -183,6 +194,7 @@ func physics_process(player: HeavyPlayerController, delta: float) -> void:
 		var to_opp: Vector2 = (nearest_opp - player.global_position).normalized()
 		if player.movement_intent.normalized().dot(to_opp) < -0.3:
 			shield_dir = -to_opp
+			player.show_action_text("SHIELD", Color(1.0, 0.82, 0.30))
 
 	var dynamic_offset: float = lerpf(28.0, 16.0, player.get_close_control())
 	var carry_target: Vector2 = player.global_position + shield_dir * dynamic_offset

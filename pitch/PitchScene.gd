@@ -80,6 +80,8 @@ var _sim_ai_cadence_violations: int = 0
 var _sim_anchor_samples: Array[float] = []
 
 @onready var boundary: PitchBoundary = $PitchBoundary
+@onready var goal_net_a: GoalNet = $GoalNetA
+@onready var goal_net_b: GoalNet = $GoalNetB
 @onready var goal_zone_a: GoalZone = $GoalZoneA
 @onready var goal_zone_b: GoalZone = $GoalZoneB
 @onready var ball: Pseudo3DBall = $Ball
@@ -98,6 +100,12 @@ var _sim_anchor_samples: Array[float] = []
 @onready var minimap: Minimap = $Minimap/MapArea
 @onready var pregame: PreGameScreen = $PreGameScreen
 @onready var pause_menu: PauseMenu = $PauseMenu
+@onready var _match_intro_director: MatchIntroDirector = $MatchIntroDirector if has_node("MatchIntroDirector") else null
+@onready var _match_intro_ui: MatchIntroUI = $MatchIntroUI if has_node("MatchIntroUI") else null
+@onready var _goal_replay_coordinator: GoalReplayCoordinator = $GoalReplayCoordinator if has_node("GoalReplayCoordinator") else null
+@onready var _goal_celebration_coordinator: GoalCelebrationCoordinator = $GoalCelebrationCoordinator if has_node("GoalCelebrationCoordinator") else null
+@onready var _stadium_graphics: StadiumGraphics = $StadiumGraphics if has_node("StadiumGraphics") else null
+
 
 ## Working lineup/formation data for the pause menu. Built once the pre-game
 ## screen confirms; null in practice mode, where neither UI is shown.
@@ -128,6 +136,11 @@ const MOMENTUM_SWING_THRESHOLD: float = 0.35
 func _ready() -> void:
 	randomize()
 	_apply_match_config()
+
+	if goal_net_a != null and ball != null:
+		goal_net_a.bind_ball(ball)
+	if goal_net_b != null and ball != null:
+		goal_net_b.bind_ball(ball)
 
 	if not GameEvents.substitution_made.is_connected(_on_substitution_made):
 		GameEvents.substitution_made.connect(_on_substitution_made)
@@ -182,7 +195,14 @@ func _on_pregame_confirmed() -> void:
 	_offside_detector.bind(boundary, _set_piece_coordinator)
 	_penalty_shootout_coordinator.bind(_set_piece_coordinator, ball, boundary)
 
+	if _goal_replay_coordinator != null:
+		_goal_replay_coordinator.bind(ball, players, camera as MatchCamera, boundary)
+
+	if _goal_celebration_coordinator != null:
+		_goal_celebration_coordinator.bind(boundary, players, camera as MatchCamera)
+
 	_setup_goalkeeper_dive_coordinator()
+
 
 	var team_names: Array[String] = _resolve_team_names()
 	var team_a_name: String = team_names[0]
@@ -201,14 +221,51 @@ func _on_pregame_confirmed() -> void:
 	_mgmt_a = TeamManagementData.from_team(DataLoader.get_match_team(GameManager.TEAM_A), manager_a)
 	_mgmt_b = TeamManagementData.from_team(DataLoader.get_match_team(GameManager.TEAM_B), manager_b)
 
+	if _stadium_graphics != null:
+		var team_a_data: TeamData = DataLoader.get_match_team(GameManager.TEAM_A)
+		var team_b_data: TeamData = DataLoader.get_match_team(GameManager.TEAM_B)
+		_stadium_graphics.bind(boundary, team_a_data, team_b_data, manager_a, manager_b)
+
+	var is_intro_eligible: bool = (
+		_match_intro_director != null
+		and _match_intro_ui != null
+		and not _is_headless_simulation
+		and not _is_practice_mode
+	)
+
+	if is_intro_eligible:
+		_match_intro_director.bind(
+			boundary,
+			ball,
+			players,
+			camera as MatchCamera,
+			match_referee,
+			match_official_crew,
+			_match_intro_ui,
+			match_official_crew.whistle_synth if match_official_crew != null else null
+		)
+		if not _match_intro_director.intro_completed.is_connected(_on_intro_completed):
+			_match_intro_director.intro_completed.connect(_on_intro_completed, CONNECT_ONE_SHOT)
+
+		GameEvents.kickoff_confirmed.emit(GameManager.TEAM_A)
+		_match_intro_director.start_intro(
+			DataLoader.get_match_team(GameManager.TEAM_A),
+			DataLoader.get_match_team(GameManager.TEAM_B),
+			ref_data,
+			manager_a,
+			manager_b
+		)
+	else:
+		_start_kickoff_flow_directly()
+
+
+func _on_intro_completed() -> void:
+	_start_kickoff_flow_directly()
+
+
+func _start_kickoff_flow_directly() -> void:
 	reset_for_kickoff(GameManager.TEAM_A)
 	GameManager.start_match()
-	# Instead of restart_play() in the same breath (which collapsed
-	# KICKOFF → IN_PLAY before any player could freeze), route the very first
-	# kickoff through the same ceremony as every post-goal restart: KICKOFF is
-	# already the phase (start_match() sets it), and the coordinator freezes
-	# everyone, assigns TEAM_A's taker, and only resumes play once the ball is
-	# actually kicked.
 	_set_piece_coordinator.start_kickoff(GameManager.TEAM_A)
 
 
@@ -296,6 +353,13 @@ func _setup_practice_arena() -> void:
 	if match_official_crew != null:
 		match_official_crew.hide()
 		match_official_crew.process_mode = Node.PROCESS_MODE_DISABLED
+
+	if _stadium_graphics != null:
+		var practice_team_a: TeamData = DataLoader.get_match_team(GameManager.TEAM_A)
+		var practice_team_b: TeamData = DataLoader.get_match_team(GameManager.TEAM_B)
+		var dummy_mgr_a: ManagerData = ManagerData.make_default("Coach A", "ENG")
+		var dummy_mgr_b: ManagerData = ManagerData.make_default("Coach B", "ENG")
+		_stadium_graphics.bind(boundary, practice_team_a, practice_team_b, dummy_mgr_a, dummy_mgr_b)
 
 	hud.bind_active_player(_practice_human)
 	hud.enter_practice_mode()
@@ -569,6 +633,7 @@ func _on_practice_restart_timeout() -> void:
 func _apply_match_config() -> void:
 	var cmd_args: PackedStringArray = OS.get_cmdline_args()
 	var user_args: PackedStringArray = OS.get_cmdline_user_args()
+	var half_sec: float = 0.0
 	for arg: String in cmd_args:
 		if arg == "--run-simulation":
 			_is_headless_simulation = true
@@ -576,6 +641,9 @@ func _apply_match_config() -> void:
 			_sim_duration = arg.trim_prefix("--duration=").to_float()
 		elif arg.begins_with("--output-json="):
 			_sim_output_json = arg.trim_prefix("--output-json=")
+		elif arg.begins_with("--half-duration="):
+			half_sec = arg.trim_prefix("--half-duration=").to_float()
+			GameManager.set_half_duration(half_sec)
 	for arg: String in user_args:
 		if arg == "--run-simulation":
 			_is_headless_simulation = true
@@ -583,11 +651,20 @@ func _apply_match_config() -> void:
 			_sim_duration = arg.trim_prefix("--duration=").to_float()
 		elif arg.begins_with("--output-json="):
 			_sim_output_json = arg.trim_prefix("--output-json=")
+		elif arg.begins_with("--half-duration="):
+			half_sec = arg.trim_prefix("--half-duration=").to_float()
+			GameManager.set_half_duration(half_sec)
+
+	if MatchTelemetryLogger.instance != null:
+		MatchTelemetryLogger.instance.json_summary_path = _sim_output_json
 
 	if GameManager.has_meta(&"run_simulation") and bool(GameManager.get_meta(&"run_simulation")):
 		_is_headless_simulation = true
 	if _is_headless_simulation:
 		GameManager.set_meta(&"simulate_match", true)
+		if _stadium_graphics != null:
+			_stadium_graphics.process_mode = Node.PROCESS_MODE_DISABLED
+			_stadium_graphics.hide()
 
 	if GameManager.has_meta(&"home_team_index") and GameManager.has_meta(&"away_team_index"):
 		# TODO: wire these into _bind_players()/PlayerFactory once team
@@ -600,7 +677,7 @@ func _apply_match_config() -> void:
 		_selected_away_team = DataLoader.get_team(away_idx)
 
 	if GameManager.has_meta(&"half_duration_real_sec"):
-		var half_sec: float = float(GameManager.get_meta(&"half_duration_real_sec"))
+		half_sec = float(GameManager.get_meta(&"half_duration_real_sec"))
 		GameManager.set_half_duration(half_sec)
 
 	_is_practice_mode = GameManager.get_meta(&"practice_mode", false)
@@ -627,6 +704,10 @@ func _resolve_team_names() -> Array[String]:
 ## so reset_for_kickoff() never resumes play itself.
 func reset_for_kickoff(kickoff_team: int) -> void:
 	ball.reset_at(boundary.get_centre_spot())
+	if goal_net_a != null:
+		goal_net_a.reset_net()
+	if goal_net_b != null:
+		goal_net_b.reset_net()
 
 	# Emit first: ManagerDirector._on_kickoff_confirmed() re-computes every
 	# brain's formation_anchor from the (already mirrored, for the second half)
@@ -729,6 +810,7 @@ func _bind_players() -> void:
 		player.squad_index = team.lineup_indices[slot] if team.lineup_indices.size() == 11 else slot
 		PlayerFactory.apply(player, DataLoader.get_player(player.team, player.squad_index), anchor)
 
+	hud.set_sim_speed_panel_visible(is_sim)
 	minimap.bind(players, boundary, match_official_crew)
 
 
@@ -848,12 +930,33 @@ func _tick_autoswitch(delta: float) -> void:
 	GameEvents.player_switched.emit(best)
 
 
-func _on_goal_scored(scoring_team: int, _scorer: Node = null) -> void:
+func _on_goal_scored(scoring_team: int, p_scorer: Node = null) -> void:
 	if GameManager.shootout_active:
 		return  # PenaltyShootoutCoordinator owns the reset between kicks.
 	ball.freeze()
 	shake_camera(1.0)
 	InputHelper.rumble(0.5, 0.9, 0.35)
+	_fire_touchline_goal_shout(scoring_team)
+
+	# Goal Celebration Flow
+	if _goal_celebration_coordinator != null and not _is_practice_mode and not _is_headless_simulation:
+		_goal_celebration_coordinator.start_celebration(scoring_team, p_scorer, func(_was_skipped: bool = false) -> void:
+			if _goal_replay_coordinator != null and _goal_replay_coordinator.can_replay() and not _is_practice_mode and not _is_headless_simulation:
+				_goal_replay_coordinator.start_replay(scoring_team, p_scorer, _start_kickoff_flow)
+			else:
+				_start_kickoff_flow()
+		)
+		return
+
+	# Goal Replay System (Football Manager style fallback)
+	if _goal_replay_coordinator != null and _goal_replay_coordinator.can_replay() and not _is_practice_mode and not _is_headless_simulation:
+		# Brief 0.6s celebratory beat, then trigger the goal replay
+		get_tree().create_timer(0.6).timeout.connect(func() -> void:
+			if _goal_replay_coordinator != null and is_instance_valid(_goal_replay_coordinator):
+				_goal_replay_coordinator.start_replay(scoring_team, p_scorer, _start_kickoff_flow)
+		)
+		return
+
 	## FIX: Guards against a null/broken $RestartTimer (silent no-op in release
 	## builds) permanently stalling the match in GOAL_SCORED — the kickoff is
 	## deferred onto a one-shot SceneTreeTimer instead.
@@ -861,7 +964,7 @@ func _on_goal_scored(scoring_team: int, _scorer: Node = null) -> void:
 		get_tree().create_timer(goal_restart_delay).timeout.connect(_on_restart_timer_timeout)
 	else:
 		restart_timer.start(goal_restart_delay)
-	_fire_touchline_goal_shout(scoring_team)
+
 
 
 ## The HOME manager's touchline reaction is always shown — whether their team
@@ -1051,6 +1154,27 @@ func _show_match_stats() -> void:
 
 	var team_names: Array[String] = _resolve_team_names()
 	var stats_ui: MatchStatsUI = MatchStatsScene.instantiate() as MatchStatsUI
+	if GameManager.has_meta(&"stats_return_scene"):
+		stats_ui.custom_return_scene = String(GameManager.get_meta(&"stats_return_scene"))
+		if GameManager.has_meta(&"manager_career_active") and bool(GameManager.get_meta(&"manager_career_active")):
+			GameManager.set_meta(&"manager_last_match_result", {
+				"home_score": GameManager.score_team_a,
+				"away_score": GameManager.score_team_b
+			})
+			var team_a_team: TeamData = DataLoader.get_match_team(GameManager.TEAM_A)
+			var team_b_team: TeamData = DataLoader.get_match_team(GameManager.TEAM_B)
+			var manager_a: ManagerData = ManagerLoader.get_or_assign_manager(team_names[0])
+			var manager_b: ManagerData = ManagerLoader.get_or_assign_manager(team_names[1])
+			var fouls_total: int = MatchStatsTracker.fouls_a + MatchStatsTracker.fouls_b
+			var yellows_total: int = MatchStatsTracker.yellow_cards_a + MatchStatsTracker.yellow_cards_b
+			var reds_total: int = MatchStatsTracker.red_cards_a + MatchStatsTracker.red_cards_b
+			var active_ref: RefereeData = match_referee.current_data if match_referee != null else null
+			CareerProgressionEngine.process_matchday_progression(
+				team_a_team, team_b_team, manager_a, manager_b,
+				active_ref,
+				GameManager.score_team_a, GameManager.score_team_b,
+				fouls_total, yellows_total, reds_total, 0
+			)
 	add_child(stats_ui)
 	stats_ui.populate(team_names[0], team_names[1])
 	stats_ui.stats_dismissed.connect(_on_stats_dismissed)
@@ -1110,8 +1234,8 @@ func _log_manager_stats(winner: int) -> void:
 
 
 func _on_ball_out_of_bounds(side: String) -> void:
-	if GameManager.shootout_active:
-		return  # A miss the shootout coordinator already watches for itself.
+	if GameManager.shootout_active or not GameManager.is_in_play():
+		return  # A miss the shootout coordinator already watches for itself, or dead-ball restart in progress.
 	ball.freeze()
 	_set_piece_coordinator.handle_out_of_bounds(side, ball.global_position, ball.last_touched_by)
 
@@ -1136,8 +1260,12 @@ func _tick_headless_telemetry(delta: float) -> void:
 			var vel: Vector2 = world.player_velocities[i]
 			if is_nan(pos.x) or is_nan(pos.y) or is_inf(pos.x) or is_inf(pos.y):
 				_sim_nan_inf_count += 1
+				if MatchTelemetryLogger.instance != null:
+					MatchTelemetryLogger.instance.report_health_anomaly("nan_inf", "Player %d position has NaN/Inf: %s" % [i, pos])
 			if is_nan(vel.x) or is_nan(vel.y) or is_inf(vel.x) or is_inf(vel.y):
 				_sim_nan_inf_count += 1
+				if MatchTelemetryLogger.instance != null:
+					MatchTelemetryLogger.instance.report_health_anomaly("nan_inf", "Player %d velocity has NaN/Inf: %s" % [i, vel])
 
 			var p: HeavyPlayerController = world.player_nodes[i]
 			if is_instance_valid(p) and p.brain != null:
@@ -1148,8 +1276,12 @@ func _tick_headless_telemetry(delta: float) -> void:
 		var ball_vel: Vector2 = world.ball_velocity
 		if is_nan(ball_pos.x) or is_nan(ball_pos.y) or is_inf(ball_pos.x) or is_inf(ball_pos.y):
 			_sim_nan_inf_count += 1
+			if MatchTelemetryLogger.instance != null:
+				MatchTelemetryLogger.instance.report_health_anomaly("nan_inf", "Ball position has NaN/Inf: %s" % [ball_pos])
 		if is_nan(ball_vel.x) or is_nan(ball_vel.y) or is_inf(ball_vel.x) or is_inf(ball_vel.y):
 			_sim_nan_inf_count += 1
+			if MatchTelemetryLogger.instance != null:
+				MatchTelemetryLogger.instance.report_health_anomaly("nan_inf", "Ball velocity has NaN/Inf: %s" % [ball_vel])
 
 		# Boundary escape detection: ball out of boundary rect without triggering bounds
 		if boundary != null:
@@ -1159,6 +1291,8 @@ func _tick_headless_telemetry(delta: float) -> void:
 			var dy: float = absf(ball_pos.y - centre.y)
 			if dx > half_size.x + 300.0 or dy > half_size.y + 300.0:
 				_sim_boundary_escape_count += 1
+				if MatchTelemetryLogger.instance != null:
+					MatchTelemetryLogger.instance.report_health_anomaly("boundary_escape", "Ball escaped boundary at %s (dx=%.1f, dy=%.1f)" % [ball_pos, dx, dy])
 
 	if _sim_elapsed >= _sim_duration:
 		_finalize_headless_simulation()
@@ -1185,6 +1319,9 @@ func _finalize_headless_simulation() -> void:
 		and _sim_boundary_escape_count == 0
 		and _sim_ai_cadence_violations == 0
 	)
+
+	if MatchTelemetryLogger.instance != null:
+		MatchTelemetryLogger.instance.dump_fulltime_report(GameManager.get_leading_team())
 
 	var report: Dictionary = {
 		"status": "pass" if is_clean else "fail",
