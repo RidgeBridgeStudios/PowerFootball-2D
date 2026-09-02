@@ -77,6 +77,9 @@ const ROLE_PRESET_PATHS: Dictionary = {
 @onready var bench_scroll_list: VBoxContainer = $MainLayout/ContentSplit/RightSection/Tabs/BenchReserves/BenchListScroll/BenchList
 @onready var starters_scroll_list: VBoxContainer = $MainLayout/ContentSplit/RightSection/Tabs/StartingXI/StartersListScroll/StartersList
 
+var _bio_container: HBoxContainer = null
+var _languages_container: HBoxContainer = null
+
 var _mgmt: TeamManagementData = null
 var _team_id: int = 0
 var _is_in_match: bool = false
@@ -89,9 +92,26 @@ var _updating_ui: bool = false
 
 
 func _ready() -> void:
+	_setup_bio_containers()
 	_populate_formation_picker()
 	_populate_mentality_picker()
 	_connect_events()
+
+
+func _setup_bio_containers() -> void:
+	if inspector_panel == null:
+		return
+	_bio_container = HBoxContainer.new()
+	_bio_container.name = "BioContainer"
+	_bio_container.add_theme_constant_override("separation", 8)
+	inspector_panel.add_child(_bio_container)
+	inspector_panel.move_child(_bio_container, 1)
+
+	_languages_container = HBoxContainer.new()
+	_languages_container.name = "LanguagesContainer"
+	_languages_container.add_theme_constant_override("separation", 6)
+	inspector_panel.add_child(_languages_container)
+	inspector_panel.move_child(_languages_container, 2)
 
 
 func _populate_formation_picker() -> void:
@@ -250,6 +270,44 @@ func _update_inspector() -> void:
 	var active_role: String = _mgmt.get_slot_role(_selected_starter_slot)
 	player_pos_badge.text = "[ %s ]" % active_role
 
+	# Update Bio container (flag, nationality, age, DOB)
+	if _bio_container != null:
+		for child: Node in _bio_container.get_children():
+			child.queue_free()
+
+		if p.nationality != "":
+			var nat_badge: HBoxContainer = NationDatabase.create_nationality_badge(p.nationality, true, 13)
+			_bio_container.add_child(nat_badge)
+
+		if p.secondary_nationality != "":
+			var sec_badge: HBoxContainer = NationDatabase.create_nationality_badge(p.secondary_nationality, true, 12)
+			sec_badge.modulate = Color(0.85, 0.85, 0.85, 0.85)
+			_bio_container.add_child(sec_badge)
+
+		var age_lbl := Label.new()
+		age_lbl.add_theme_font_size_override("font_size", 12)
+		age_lbl.add_theme_color_override("font_color", Color(0.75, 0.85, 0.95))
+		age_lbl.text = "• Age: %s" % p.get_age_detail_string()
+		_bio_container.add_child(age_lbl)
+
+	# Update Spoken Languages container (Football Manager pills)
+	if _languages_container != null:
+		for child: Node in _languages_container.get_children():
+			child.queue_free()
+
+		var lang_title := Label.new()
+		lang_title.add_theme_font_size_override("font_size", 11)
+		lang_title.add_theme_color_override("font_color", Color(0.65, 0.70, 0.75))
+		lang_title.text = "Languages:"
+		_languages_container.add_child(lang_title)
+
+		for l_dict: Dictionary in p.spoken_languages:
+			var l_name: String = str(l_dict.get("language", "English"))
+			var l_lvl: String = str(l_dict.get("level", "Fluent"))
+			var l_prof: float = float(l_dict.get("proficiency", 0.8))
+			var pill: PanelContainer = NationDatabase.create_language_badge(l_name, l_lvl, l_prof, 11)
+			_languages_container.add_child(pill)
+
 	player_stats_label.text = "Pace: %.0f  |  Vision: %.0f%%  |  Comp: %.0f%%  |  Agg: %.0f%%\nForm: %.1f ★  |  Goals: %d  |  Assists: %d" % [
 		p.top_speed, p.vision * 100.0, p.composure * 100.0, p.aggression * 100.0,
 		p.form, p.career_goals, p.career_assists
@@ -406,8 +464,9 @@ func _rebuild_bench_list() -> void:
 		var st_ratio: float = _resolve_player_stamina(p)
 		var st_text: String = "Stamina:%d%%" % int(st_ratio * 100.0) if _is_in_match else ""
 
-		btn.text = " #%d  %-16s  [%-3s]  ★%.1f  Spd:%.0f Vis:%.0f  %s%s" % [
-			p.shirt_number, p.player_name, p.position_role, p.form,
+		var nat_emoji: String = NationDatabase.get_flag_emoji(p.nationality)
+		btn.text = " %s #%d  %-14s [%-3s]  ★%.1f  Spd:%.0f Vis:%.0f  %s%s" % [
+			nat_emoji, p.shirt_number, p.player_name, p.position_role, p.form,
 			p.top_speed, p.vision * 100.0, st_text,
 			"  ⚠ UNAVAIL" if p.is_unavailable else ""
 		]
@@ -447,8 +506,9 @@ func _rebuild_starters_list() -> void:
 		var st_ratio: float = _resolve_player_stamina(p)
 		var st_text: String = "Stamina:%d%%" % int(st_ratio * 100.0) if _is_in_match else ""
 
-		btn.text = " #%d  %-16s  [%-3s]  ★%.1f  Spd:%.0f%s  %s" % [
-			p.shirt_number, p.player_name + cap_marker, slot_role, p.form,
+		var nat_emoji: String = NationDatabase.get_flag_emoji(p.nationality)
+		btn.text = " %s #%d  %-14s [%-3s]  ★%.1f  Spd:%.0f%s  %s" % [
+			nat_emoji, p.shirt_number, p.player_name + cap_marker, slot_role, p.form,
 			p.top_speed, cap_marker, st_text
 		]
 

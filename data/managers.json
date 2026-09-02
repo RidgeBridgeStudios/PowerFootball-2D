@@ -2,7 +2,7 @@
   "managers": [
     {
       "name": "Branimir Skok",
-      "nationality": "Dalmatian",
+      "nationality": "Croatian",
       "experience": 28,
       "current_team": "FC Nordvik",
       "reputation": 0.84,
@@ -34,11 +34,30 @@
       "draws": 38,
       "losses": 36,
       "goals_scored": 210,
-      "goals_conceded": 160
+      "goals_conceded": 160,
+      "secondary_nationality": "",
+      "date_of_birth": "1970-08-14",
+      "spoken_languages": [
+        {
+          "language": "Croatian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.6,
+          "level": "Basic"
+        }
+      ]
     },
     {
       "name": "Sebastián Larrarte",
-      "nationality": "Platense",
+      "nationality": "Argentine",
       "experience": 41,
       "current_team": "CD Solano",
       "reputation": 0.86,
@@ -70,11 +89,30 @@
       "draws": 42,
       "losses": 44,
       "goals_scored": 420,
-      "goals_conceded": 215
+      "goals_conceded": 215,
+      "secondary_nationality": "Spanish",
+      "date_of_birth": "1968-03-22",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ]
     },
     {
       "name": "Raivo Peet",
-      "nationality": "Hanseatic",
+      "nationality": "Dutch",
       "experience": 19,
       "current_team": "Valence Athletic",
       "reputation": 0.76,
@@ -106,11 +144,35 @@
       "draws": 26,
       "losses": 21,
       "goals_scored": 145,
-      "goals_conceded": 98
+      "goals_conceded": 98,
+      "secondary_nationality": "",
+      "date_of_birth": "1978-11-05",
+      "spoken_languages": [
+        {
+          "language": "Dutch",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "French",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.9,
+          "level": "Fluent"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
     },
     {
       "name": "Yuki Tsurumoto",
-      "nationality": "Far Eastern",
+      "nationality": "Japanese",
       "experience": 35,
       "current_team": "Real Maritimo",
       "reputation": 0.74,
@@ -142,11 +204,30 @@
       "draws": 44,
       "losses": 42,
       "goals_scored": 305,
-      "goals_conceded": 195
+      "goals_conceded": 195,
+      "secondary_nationality": "",
+      "date_of_birth": "1973-06-18",
+      "spoken_languages": [
+        {
+          "language": "Japanese",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ]
     },
     {
       "name": "Dietrich Klausner",
-      "nationality": "Germanic",
+      "nationality": "German",
       "experience": 32,
       "current_team": "Borussia Eisenwald",
       "reputation": 0.66,
@@ -178,11 +259,25 @@
       "draws": 52,
       "losses": 36,
       "goals_scored": 198,
-      "goals_conceded": 132
+      "goals_conceded": 132,
+      "secondary_nationality": "",
+      "date_of_birth": "1974-09-30",
+      "spoken_languages": [
+        {
+          "language": "German",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        }
+      ]
     },
     {
       "name": "Giancarlo Bellini",
-      "nationality": "Ligurian",
+      "nationality": "Italian",
       "experience": 38,
       "current_team": "Aurora Calcio",
       "reputation": 0.6,
@@ -214,11 +309,30 @@
       "draws": 46,
       "losses": 41,
       "goals_scored": 350,
-      "goals_conceded": 190
+      "goals_conceded": 190,
+      "secondary_nationality": "",
+      "date_of_birth": "1971-04-12",
+      "spoken_languages": [
+        {
+          "language": "Italian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.6,
+          "level": "Basic"
+        }
+      ]
     },
     {
       "name": "Alistair MacCallum",
-      "nationality": "Caledonian",
+      "nationality": "Scottish",
       "experience": 26,
       "current_team": "Highland Thistle FC",
       "reputation": 0.48,
@@ -250,11 +364,20 @@
       "draws": 34,
       "losses": 38,
       "goals_scored": 182,
-      "goals_conceded": 156
+      "goals_conceded": 156,
+      "secondary_nationality": "",
+      "date_of_birth": "1975-01-25",
+      "spoken_languages": [
+        {
+          "language": "English",
+          "proficiency": 1.0,
+          "level": "Native"
+        }
+      ]
     },
     {
       "name": "Valdemar Cruz",
-      "nationality": "Sulista",
+      "nationality": "Portuguese",
       "experience": 29,
       "current_team": "Porto Sol Stella",
       "reputation": 0.38,
@@ -286,11 +409,30 @@
       "draws": 32,
       "losses": 34,
       "goals_scored": 274,
-      "goals_conceded": 178
+      "goals_conceded": 178,
+      "secondary_nationality": "Spanish",
+      "date_of_birth": "1976-10-09",
+      "spoken_languages": [
+        {
+          "language": "Portuguese",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ]
     },
     {
       "name": "Arthur Pendelton",
-      "nationality": "Albion",
+      "nationality": "English",
       "experience": 45,
       "current_team": "",
       "reputation": 0.68,
@@ -322,11 +464,25 @@
       "draws": 88,
       "losses": 80,
       "goals_scored": 420,
-      "goals_conceded": 330
+      "goals_conceded": 330,
+      "secondary_nationality": "",
+      "date_of_birth": "1963-12-04",
+      "spoken_languages": [
+        {
+          "language": "English",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "French",
+          "proficiency": 0.5,
+          "level": "Basic"
+        }
+      ]
     },
     {
       "name": "Mateusz Wilczek",
-      "nationality": "Sarmatian",
+      "nationality": "Polish",
       "experience": 22,
       "current_team": "",
       "reputation": 0.58,
@@ -358,7 +514,26 @@
       "draws": 16,
       "losses": 22,
       "goals_scored": 150,
-      "goals_conceded": 105
+      "goals_conceded": 105,
+      "secondary_nationality": "",
+      "date_of_birth": "1983-05-17",
+      "spoken_languages": [
+        {
+          "language": "Polish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ]
     }
   ]
 }

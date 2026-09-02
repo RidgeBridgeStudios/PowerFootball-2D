@@ -163,6 +163,23 @@ func _from_dict(d: Dictionary) -> ManagerData:
 	m.losses = int(d.get("losses", m.losses))
 	m.goals_scored = int(d.get("goals_scored", m.goals_scored))
 	m.goals_conceded = int(d.get("goals_conceded", m.goals_conceded))
+	m.secondary_nationality = str(d.get("secondary_nationality", m.secondary_nationality))
+	m.date_of_birth = str(d.get("date_of_birth", m.date_of_birth))
+
+	var raw_langs: Variant = d.get("spoken_languages", [])
+	var parsed_langs: Array[Dictionary] = []
+	if typeof(raw_langs) == TYPE_ARRAY:
+		for l_item: Variant in (raw_langs as Array):
+			if typeof(l_item) == TYPE_DICTIONARY:
+				parsed_langs.append(l_item as Dictionary)
+	if not parsed_langs.is_empty():
+		m.spoken_languages = parsed_langs
+	else:
+		var prim_lang: String = NationDatabase.get_primary_language_for_nation(m.nationality)
+		m.spoken_languages = [
+			{"language": prim_lang, "proficiency": 1.0, "level": "Native"},
+			{"language": "English", "proficiency": 0.85, "level": "Fluent"}
+		]
 	return m
 
 
@@ -170,6 +187,9 @@ func _to_dict(m: ManagerData) -> Dictionary:
 	return {
 		"name": m.manager_name,
 		"nationality": m.nationality,
+		"secondary_nationality": m.secondary_nationality,
+		"date_of_birth": m.date_of_birth,
+		"spoken_languages": m.spoken_languages,
 		"experience": m.experience,
 		"current_team": m.current_team,
 		"reputation": m.reputation,
@@ -223,7 +243,7 @@ func _build_default_managers() -> void:
 
 
 func _skok() -> ManagerData:
-	var m := ManagerData.make_default("Branimir Skok", "Dalmatian")
+	var m := ManagerData.make_default("Branimir Skok", "Croatian")
 	m.experience = 28
 	m.current_team = "FC Nordvik"
 	m.defensive_line = 0.35
@@ -249,7 +269,7 @@ func _skok() -> ManagerData:
 
 
 func _larrarte() -> ManagerData:
-	var m := ManagerData.make_default("Sebastián Larrarte", "Platense")
+	var m := ManagerData.make_default("Sebastián Larrarte", "Argentine")
 	m.experience = 41
 	m.current_team = "CD Solano"
 	m.defensive_line = 0.72
@@ -275,7 +295,7 @@ func _larrarte() -> ManagerData:
 
 
 func _peet() -> ManagerData:
-	var m := ManagerData.make_default("Raivo Peet", "Hanseatic")
+	var m := ManagerData.make_default("Raivo Peet", "Dutch")
 	m.experience = 19
 	m.current_team = "Valence Athletic"
 	m.defensive_line = 0.55
@@ -301,7 +321,7 @@ func _peet() -> ManagerData:
 
 
 func _tsurumoto() -> ManagerData:
-	var m := ManagerData.make_default("Yuki Tsurumoto", "Far Eastern")
+	var m := ManagerData.make_default("Yuki Tsurumoto", "Japanese")
 	m.experience = 35
 	m.current_team = "Real Maritimo"
 	m.defensive_line = 0.60
@@ -327,7 +347,7 @@ func _tsurumoto() -> ManagerData:
 
 
 func _klausner() -> ManagerData:
-	var m := ManagerData.make_default("Dietrich Klausner", "Germanic")
+	var m := ManagerData.make_default("Dietrich Klausner", "German")
 	m.experience = 32
 	m.current_team = "Borussia Eisenwald"
 	m.defensive_line = 0.28
@@ -353,7 +373,7 @@ func _klausner() -> ManagerData:
 
 
 func _bellini() -> ManagerData:
-	var m := ManagerData.make_default("Giancarlo Bellini", "Ligurian")
+	var m := ManagerData.make_default("Giancarlo Bellini", "Italian")
 	m.experience = 38
 	m.current_team = "Aurora Calcio"
 	m.defensive_line = 0.68
@@ -379,7 +399,7 @@ func _bellini() -> ManagerData:
 
 
 func _maccallum() -> ManagerData:
-	var m := ManagerData.make_default("Alistair MacCallum", "Caledonian")
+	var m := ManagerData.make_default("Alistair MacCallum", "Scottish")
 	m.experience = 26
 	m.current_team = "Highland Thistle FC"
 	m.defensive_line = 0.48
@@ -405,7 +425,7 @@ func _maccallum() -> ManagerData:
 
 
 func _cruz() -> ManagerData:
-	var m := ManagerData.make_default("Valdemar Cruz", "Sulista")
+	var m := ManagerData.make_default("Valdemar Cruz", "Portuguese")
 	m.experience = 29
 	m.current_team = "Porto Sol Stella"
 	m.defensive_line = 0.62
@@ -431,7 +451,7 @@ func _cruz() -> ManagerData:
 
 
 func _pendelton() -> ManagerData:
-	var m := ManagerData.make_default("Arthur Pendelton", "Albion")
+	var m := ManagerData.make_default("Arthur Pendelton", "English")
 	m.experience = 45
 	m.current_team = ""
 	m.defensive_line = 0.42
@@ -457,7 +477,7 @@ func _pendelton() -> ManagerData:
 
 
 func _wilczek() -> ManagerData:
-	var m := ManagerData.make_default("Mateusz Wilczek", "Sarmatian")
+	var m := ManagerData.make_default("Mateusz Wilczek", "Polish")
 	m.experience = 22
 	m.current_team = ""
 	m.defensive_line = 0.65

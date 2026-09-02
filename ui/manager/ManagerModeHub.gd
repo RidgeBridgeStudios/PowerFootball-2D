@@ -494,13 +494,59 @@ func _on_squad_pressed() -> void:
 
 	for slot in range(user_team.squad.size()):
 		var p: PlayerData = user_team.squad[slot]
+		var item := HBoxContainer.new()
+		item.add_theme_constant_override("separation", 8)
+
+		var nat_badge: HBoxContainer = NationDatabase.create_nationality_badge(p.nationality, false, 12)
+		item.add_child(nat_badge)
+
 		var card := Label.new()
 		var archetype: String = p.get_personality_archetype()
-		card.text = "#%d  %s  [%s]  OVR: %d  Archetype: %s  Wage: £%d/wk  Years: %d  Status: %s  Morale: %.0f%%  Form: %.1f" % [
-			p.shirt_number, p.player_name, p.position_role, p.calculate_overall_rating(),
-			archetype, p.wage_weekly, p.contract_years, p.squad_status, p.morale * 100.0, p.form
+		var lang_summary: String = ""
+		if not p.spoken_languages.is_empty():
+			var l_names: Array[String] = []
+			for l: Dictionary in p.spoken_languages:
+				var l_emoji: String = NationDatabase.get_flag_emoji(str(l.get("language", "")))
+				l_names.append("%s %s" % [l_emoji, l.get("language", "")])
+			lang_summary = "  |  " + (", ".join(l_names))
+
+		card.text = "#%d  %s  [%s]  Age: %s  OVR: %d  Archetype: %s%s  Wage: £%d/wk  Years: %d  Morale: %.0f%%  Form: %.1f" % [
+			p.shirt_number, p.player_name, p.position_role, p.get_age_detail_string(), p.calculate_overall_rating(),
+			archetype, lang_summary, p.wage_weekly, p.contract_years, p.morale * 100.0, p.form
 		]
-		squad_scroll_list.add_child(card)
+		item.add_child(card)
+		squad_scroll_list.add_child(item)
+
+	# Backroom Staff section
+	if not user_team.staff.is_empty():
+		var staff_sep := HSeparator.new()
+		squad_scroll_list.add_child(staff_sep)
+
+		var staff_hdr := Label.new()
+		staff_hdr.text = "=== BACKROOM STAFF ==="
+		staff_hdr.add_theme_font_size_override("font_size", 14)
+		staff_hdr.add_theme_color_override("font_color", Color(0.95, 0.82, 0.45))
+		squad_scroll_list.add_child(staff_hdr)
+
+		for s: StaffData in user_team.staff:
+			var s_item := HBoxContainer.new()
+			s_item.add_theme_constant_override("separation", 8)
+			var s_flag: HBoxContainer = NationDatabase.create_nationality_badge(s.nationality, false, 12)
+			s_item.add_child(s_flag)
+
+			var s_card := Label.new()
+			var s_langs: Array[String] = []
+			for l: Dictionary in s.spoken_languages:
+				var s_emoji: String = NationDatabase.get_flag_emoji(str(l.get("language", "")))
+				s_langs.append("%s %s" % [s_emoji, l.get("language", "")])
+			var s_lang_str: String = "  |  " + (", ".join(s_langs)) if not s_langs.is_empty() else ""
+
+			s_card.text = "%s: %s  •  Age: %s  •  %s%s  •  Salary: £%d/wk" % [
+				s.role, s.staff_name, s.get_age_detail_string(), s.get_specialty_summary(),
+				s_lang_str, s.salary_weekly
+			]
+			s_item.add_child(s_card)
+			squad_scroll_list.add_child(s_item)
 
 	squad_dialog.popup_centered()
 

@@ -981,39 +981,8 @@ def generate_referees() -> dict:
     return {"referees": referees}
 
 def main():
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    data_dir = os.path.join(base_dir, "data")
-    os.makedirs(data_dir, exist_ok=True)
-
-    league = generate_league()
-    managers = generate_managers()
-    referees = generate_referees()
-
-    league_path = os.path.join(data_dir, "league.json")
-    with open(league_path, "w", encoding="utf-8") as f:
-        json.dump(league, f, indent=2, ensure_ascii=False)
-    print(f"Generated {league_path}: {len(league['teams'])} teams, {sum(len(t['squad']) for t in league['teams'])} players total.")
-
-    players_flat = []
-    for t in league["teams"]:
-        for p in t["squad"]:
-            p_flat = dict(p)
-            p_flat["team_name"] = t["team_name"]
-            players_flat.append(p_flat)
-    players_path = os.path.join(data_dir, "players.json")
-    with open(players_path, "w", encoding="utf-8") as f:
-        json.dump({"players": players_flat}, f, indent=2, ensure_ascii=False)
-    print(f"Generated {players_path}: {len(players_flat)} players.")
-
-    managers_path = os.path.join(data_dir, "managers.json")
-    with open(managers_path, "w", encoding="utf-8") as f:
-        json.dump(managers, f, indent=2, ensure_ascii=False)
-    print(f"Generated {managers_path}: {len(managers['managers'])} managers.")
-
-    referees_path = os.path.join(data_dir, "referees.json")
-    with open(referees_path, "w", encoding="utf-8") as f:
-        json.dump(referees, f, indent=2, ensure_ascii=False)
-    print(f"Generated {referees_path}: {len(referees['referees'])} referees.")
+    from update_db_all import run_update
+    run_update()
 
 if __name__ == "__main__":
     main()

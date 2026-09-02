@@ -18,6 +18,7 @@ extends Resource
 @export var secondary_color: Color = Color.WHITE
 @export var gk_color: Color = Color(0.12, 0.78, 0.42, 1.0)
 @export var squad: Array[PlayerData] = []
+@export var staff: Array[StaffData] = []
 
 ## Active formation string for this match, chosen via the pre-game screen or
 ## the pause menu. Empty string = use the manager's preferred_formation.
@@ -71,5 +72,14 @@ func get_stature_from_reputation() -> String:
 func update_reputation(delta: float) -> void:
 	reputation = clampf(reputation + delta, 0.05, 0.99)
 	stature = get_stature_from_reputation()
+
+
+## Finds the first staff member matching the specified role (e.g. "Assistant Manager", "Head Physio").
+func get_staff_by_role(role_name: String) -> StaffData:
+	for s: StaffData in staff:
+		if s.role.nocasecmp_to(role_name) == 0:
+			return s
+	return null
+
 
 

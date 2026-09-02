@@ -29,6 +29,7 @@ MatchTelemetryLogger="*res://autoloads/MatchTelemetryLogger.gd"
 DataLoader="*res://autoloads/DataLoader.gd"
 RefereeLoader="*res://autoloads/RefereeLoader.gd"
 ManagerLoader="*res://autoloads/ManagerLoader.gd"
+StaffLoader="*res://autoloads/StaffLoader.gd"
 InputHelper="*res://autoloads/InputHelper.gd"
 
 [display]

@@ -103,6 +103,29 @@ def verify_all():
             assert 0.0 <= p.get("morale", 0.0) <= 1.0, f"Player {pname} morale out of bounds"
             assert p.get("market_value", 0) >= 0, f"Player {pname} market value negative"
 
+            # Nationality, DOB, and Spoken Languages checks
+            assert p.get("nationality", ""), f"Player {pname} missing nationality"
+            dob = p.get("date_of_birth", "")
+            assert dob and len(dob.split("-")) == 3, f"Player {pname} invalid date_of_birth: {dob}"
+            langs = p.get("spoken_languages", [])
+            assert len(langs) >= 1, f"Player {pname} missing spoken_languages"
+            for lang in langs:
+                assert "language" in lang and "proficiency" in lang and "level" in lang, f"Player {pname} invalid language record: {lang}"
+                assert 0.0 <= lang["proficiency"] <= 1.0, f"Player {pname} language proficiency out of bounds: {lang}"
+                assert lang["level"] in {"Native", "Fluent", "Basic", "Rudimentary"}, f"Player {pname} invalid language level: {lang}"
+
+        # Verify team staff
+        staff = team.get("staff", [])
+        assert len(staff) == 5, f"Team {tname} expected 5 staff members, got {len(staff)}"
+        for s in staff:
+            assert s.get("staff_name", ""), f"Team {tname} staff member missing name"
+            assert s.get("role", "") in {"Assistant Manager", "Head Physio", "Tactical Analyst", "Fitness Coach", "Chief Scout"}
+            assert s.get("nationality", ""), f"Team {tname} staff member missing nationality"
+            sdob = s.get("date_of_birth", "")
+            assert sdob and len(sdob.split("-")) == 3, f"Team {tname} staff member invalid date_of_birth"
+            slangs = s.get("spoken_languages", [])
+            assert len(slangs) >= 1, f"Team {tname} staff member missing spoken_languages"
+
         # Simulate TeamManagementData lineup + bench logic
         bench = [i for i in range(len(squad)) if i not in lineup]
         assert len(bench) == len(squad) - 11, f"Team {tname} bench size mismatch"
@@ -178,6 +201,16 @@ def verify_all():
         style = m.get("preferred_playstyle", "")
         assert style in VALID_PLAYSTYLES, f"Manager {mname} invalid preferred_playstyle: {style}"
 
+        # Bio and spoken languages checks
+        assert m.get("nationality", ""), f"Manager {mname} missing nationality"
+        mdob = m.get("date_of_birth", "")
+        assert mdob and len(mdob.split("-")) == 3, f"Manager {mname} invalid date_of_birth: {mdob}"
+        mlangs = m.get("spoken_languages", [])
+        assert len(mlangs) >= 1, f"Manager {mname} missing spoken_languages"
+        for lang in mlangs:
+            assert 0.0 <= lang["proficiency"] <= 1.0
+            assert lang["level"] in {"Native", "Fluent", "Basic", "Rudimentary"}
+
     print(f"[OK] Managers verified: {len(managers)} managers ({len(assigned_teams)} club-assigned, {len(managers)-len(assigned_teams)} free agents).")
 
     # 3. Referees verification
@@ -205,7 +238,41 @@ def verify_all():
         assert 0.0 <= r.get("respect_rating", 0.0) <= 1.0, f"Referee {rname} respect_rating out of bounds"
         assert "matches_officiated" in r and "fouls_awarded" in r and "penalties_awarded" in r
 
-    print(f"[OK] Referees verified: {len(referees)} referees with personality spectrums and career stats.")
+        # Bio and spoken languages checks
+        assert r.get("nationality", ""), f"Referee {rname} missing nationality"
+        rdob = r.get("date_of_birth", "")
+        assert rdob and len(rdob.split("-")) == 3, f"Referee {rname} invalid date_of_birth: {rdob}"
+        rlangs = r.get("spoken_languages", [])
+        assert len(rlangs) >= 1, f"Referee {rname} missing spoken_languages"
+        for lang in rlangs:
+            assert 0.0 <= lang["proficiency"] <= 1.0
+            assert lang["level"] in {"Native", "Fluent", "Basic", "Rudimentary"}
+
+    print(f"[OK] Referees verified: {len(referees)} referees with personality spectrums, bios, and career stats.")
+
+    # 4. Staff verification
+    staff_path = os.path.join(data_dir, "staff.json")
+    assert os.path.exists(staff_path), f"Missing {staff_path}"
+    with open(staff_path, "r", encoding="utf-8") as f:
+        staff_data = json.load(f)
+
+    staff_members = staff_data.get("staff", [])
+    assert len(staff_members) >= 40, f"Expected at least 40 staff members, got {len(staff_members)}"
+    VALID_STAFF_ROLES = {"Assistant Manager", "Head Physio", "Tactical Analyst", "Fitness Coach", "Chief Scout"}
+    for s in staff_members:
+        sname = s.get("staff_name", "")
+        assert sname, "Staff member missing name"
+        assert s.get("role", "") in VALID_STAFF_ROLES, f"Staff {sname} invalid role: {s.get('role')}"
+        assert s.get("nationality", ""), f"Staff {sname} missing nationality"
+        assert len(s.get("date_of_birth", "").split("-")) == 3, f"Staff {sname} invalid date_of_birth"
+        assert len(s.get("spoken_languages", [])) >= 1, f"Staff {sname} missing spoken_languages"
+        assert 1 <= s.get("experience", 0) <= 50, f"Staff {sname} experience out of bounds"
+        assert 0.0 <= s.get("coaching", 0.0) <= 1.0, f"Staff {sname} coaching out of bounds"
+        assert 0.0 <= s.get("physiotherapy", 0.0) <= 1.0, f"Staff {sname} physiotherapy out of bounds"
+        assert 0.0 <= s.get("judging_ability", 0.0) <= 1.0, f"Staff {sname} judging_ability out of bounds"
+        assert 0.0 <= s.get("tactical_knowledge", 0.0) <= 1.0, f"Staff {sname} tactical_knowledge out of bounds"
+
+    print(f"[OK] Staff database verified: {len(staff_members)} staff members across clubs and free agents.")
     print("=== All Verification Checks Passed (0 errors, 0 warnings) ===")
 
 if __name__ == "__main__":

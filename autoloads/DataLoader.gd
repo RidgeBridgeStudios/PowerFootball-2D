@@ -108,6 +108,12 @@ func _make_fallback_player(index: int, role: String = "CM") -> PlayerData:
 	data.close_control = 0.65
 	data.reflexes = 0.60
 	data.form = 6.5
+	data.nationality = "Norwegian"
+	data.date_of_birth = "2001-05-15"
+	data.spoken_languages = [
+		{"language": "Norwegian", "proficiency": 1.0, "level": "Native"},
+		{"language": "English", "proficiency": 0.75, "level": "Fluent"}
+	]
 	return data
 
 
@@ -227,6 +233,12 @@ func _team_from_dict(team_dict: Dictionary) -> TeamData:
 
 	team.squad = squad
 
+	var staff_list: Array[StaffData] = []
+	for staff_dict: Variant in team_dict.get("staff", []):
+		if typeof(staff_dict) == TYPE_DICTIONARY:
+			staff_list.append(StaffLoader._staff_from_dict(staff_dict as Dictionary))
+	team.staff = staff_list
+
 	var lineup: Array[int] = []
 	if team_dict.has("lineup_indices"):
 		var raw_lineup: Variant = team_dict["lineup_indices"]
@@ -313,6 +325,23 @@ func _player_from_dict(player_dict: Dictionary) -> PlayerData:
 	data.last_match_rating = float(player_dict.get("last_match_rating", data.last_match_rating))
 	data.is_unavailable = bool(player_dict.get("is_unavailable", data.is_unavailable))
 
+	data.nationality = str(player_dict.get("nationality", data.nationality))
+	data.secondary_nationality = str(player_dict.get("secondary_nationality", data.secondary_nationality))
+	data.date_of_birth = str(player_dict.get("date_of_birth", data.date_of_birth))
+
+	var raw_langs: Variant = player_dict.get("spoken_languages", [])
+	var parsed_langs: Array[Dictionary] = []
+	if typeof(raw_langs) == TYPE_ARRAY:
+		for l_item: Variant in (raw_langs as Array):
+			if typeof(l_item) == TYPE_DICTIONARY:
+				parsed_langs.append(l_item as Dictionary)
+	if parsed_langs.is_empty():
+		var prim_lang: String = NationDatabase.get_primary_language_for_nation(data.nationality)
+		parsed_langs.append({"language": prim_lang, "proficiency": 1.0, "level": "Native"})
+		if prim_lang != "English":
+			parsed_langs.append({"language": "English", "proficiency": 0.75, "level": "Fluent"})
+	data.spoken_languages = parsed_langs
+
 	return data
 
 
@@ -358,7 +387,11 @@ func _player_to_dict(p: PlayerData) -> Dictionary:
 		"career_goals": p.career_goals,
 		"career_assists": p.career_assists,
 		"last_match_rating": p.last_match_rating,
-		"is_unavailable": p.is_unavailable
+		"is_unavailable": p.is_unavailable,
+		"nationality": p.nationality,
+		"secondary_nationality": p.secondary_nationality,
+		"date_of_birth": p.date_of_birth,
+		"spoken_languages": p.spoken_languages
 	}
 
 
@@ -367,6 +400,10 @@ func _team_to_dict(t: TeamData) -> Dictionary:
 	var squad_list: Array = []
 	for p: PlayerData in t.squad:
 		squad_list.append(_player_to_dict(p))
+
+	var staff_list: Array = []
+	for s: StaffData in t.staff:
+		staff_list.append(StaffLoader._staff_to_dict(s))
 
 	return {
 		"team_name": t.team_name,
@@ -380,7 +417,8 @@ func _team_to_dict(t: TeamData) -> Dictionary:
 		"stature": t.stature,
 		"transfer_budget": t.transfer_budget,
 		"wage_budget_weekly": t.wage_budget_weekly,
-		"squad": squad_list
+		"squad": squad_list,
+		"staff": staff_list
 	}
 
 

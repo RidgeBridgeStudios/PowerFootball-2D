@@ -2,7 +2,7 @@
   "referees": [
     {
       "name": "Domagoj Vrban",
-      "nationality": "Dalmatian",
+      "nationality": "Croatian",
       "experience": 34,
       "strictness": 0.72,
       "consistency": 0.85,
@@ -15,11 +15,30 @@
       "fouls_awarded": 420,
       "penalties_awarded": 32,
       "red_cards_issued": 14,
-      "matchup_history": {}
+      "matchup_history": {},
+      "secondary_nationality": "",
+      "date_of_birth": "1978-04-12",
+      "spoken_languages": [
+        {
+          "language": "Croatian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.6,
+          "level": "Basic"
+        }
+      ]
     },
     {
       "name": "Ingrid Vaarmo",
-      "nationality": "Nordlandic",
+      "nationality": "Norwegian",
       "experience": 42,
       "strictness": 0.88,
       "consistency": 0.94,
@@ -32,11 +51,30 @@
       "fouls_awarded": 560,
       "penalties_awarded": 48,
       "red_cards_issued": 22,
-      "matchup_history": {}
+      "matchup_history": {},
+      "secondary_nationality": "",
+      "date_of_birth": "1975-09-24",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.9,
+          "level": "Fluent"
+        },
+        {
+          "language": "French",
+          "proficiency": 0.6,
+          "level": "Basic"
+        }
+      ]
     },
     {
       "name": "Kjetil Ornseth",
-      "nationality": "Nordlandic",
+      "nationality": "Norwegian",
       "experience": 12,
       "strictness": 0.32,
       "consistency": 0.42,
@@ -49,11 +87,25 @@
       "fouls_awarded": 88,
       "penalties_awarded": 6,
       "red_cards_issued": 2,
-      "matchup_history": {}
+      "matchup_history": {},
+      "secondary_nationality": "",
+      "date_of_birth": "1988-02-19",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ]
     },
     {
       "name": "Tomas Errecarte",
-      "nationality": "Platense",
+      "nationality": "Argentine",
       "experience": 24,
       "strictness": 0.65,
       "consistency": 0.58,
@@ -66,11 +118,30 @@
       "fouls_awarded": 310,
       "penalties_awarded": 26,
       "red_cards_issued": 18,
-      "matchup_history": {}
+      "matchup_history": {},
+      "secondary_nationality": "",
+      "date_of_birth": "1984-11-08",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.6,
+          "level": "Basic"
+        }
+      ]
     },
     {
       "name": "Arjun Dharmaraj",
-      "nationality": "Subcontinental",
+      "nationality": "English",
       "experience": 20,
       "strictness": 0.5,
       "consistency": 0.68,
@@ -83,11 +154,25 @@
       "fouls_awarded": 210,
       "penalties_awarded": 16,
       "red_cards_issued": 7,
-      "matchup_history": {}
+      "matchup_history": {},
+      "secondary_nationality": "",
+      "date_of_birth": "1983-07-30",
+      "spoken_languages": [
+        {
+          "language": "English",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "French",
+          "proficiency": 0.5,
+          "level": "Basic"
+        }
+      ]
     },
     {
       "name": "Petru Balint",
-      "nationality": "Carpathian",
+      "nationality": "Romanian",
       "experience": 11,
       "strictness": 0.82,
       "consistency": 0.35,
@@ -100,11 +185,30 @@
       "fouls_awarded": 140,
       "penalties_awarded": 15,
       "red_cards_issued": 9,
-      "matchup_history": {}
+      "matchup_history": {},
+      "secondary_nationality": "",
+      "date_of_birth": "1989-10-15",
+      "spoken_languages": [
+        {
+          "language": "Romanian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.6,
+          "level": "Basic"
+        }
+      ]
     },
     {
       "name": "Jean-Luc Vaneck",
-      "nationality": "Gallic",
+      "nationality": "French",
       "experience": 38,
       "strictness": 0.24,
       "consistency": 0.78,
@@ -117,11 +221,30 @@
       "fouls_awarded": 340,
       "penalties_awarded": 18,
       "red_cards_issued": 6,
-      "matchup_history": {}
+      "matchup_history": {},
+      "secondary_nationality": "",
+      "date_of_birth": "1977-03-05",
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
     },
     {
       "name": "Kenzo Takahashi",
-      "nationality": "Far Eastern",
+      "nationality": "Japanese",
       "experience": 29,
       "strictness": 0.78,
       "consistency": 0.9,
@@ -134,7 +257,21 @@
       "fouls_awarded": 390,
       "penalties_awarded": 28,
       "red_cards_issued": 11,
-      "matchup_history": {}
+      "matchup_history": {},
+      "secondary_nationality": "",
+      "date_of_birth": "1981-12-14",
+      "spoken_languages": [
+        {
+          "language": "Japanese",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        }
+      ]
     }
   ]
 }

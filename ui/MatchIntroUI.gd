@@ -189,18 +189,18 @@ func _populate_officials_card() -> void:
 	var ref_name: String = _referee_data.referee_name if _referee_data != null else "Match Referee"
 	var ref_nat: String = _referee_data.nationality if _referee_data != null else "Neutral"
 	var ref_exp: int = _referee_data.experience if _referee_data != null else 50
+	var ref_age: String = _referee_data.get_age_detail_string() if _referee_data != null else ""
 
 	var header_box := HBoxContainer.new()
 	header_box.add_theme_constant_override("separation", 12)
 	officials_card.add_child(header_box)
 
-	var icon_badge := Label.new()
-	icon_badge.text = "⚖️"
-	icon_badge.add_theme_font_size_override("font_size", 22)
-	header_box.add_child(icon_badge)
+	var flag_rect: TextureRect = NationDatabase.create_flag_rect(ref_nat, Vector2(32, 22))
+	flag_rect.custom_minimum_size = Vector2(32, 22)
+	header_box.add_child(flag_rect)
 
 	var title_vbox := VBoxContainer.new()
-	title_vbox.add_theme_constant_override("separation", 2)
+	title_vbox.add_theme_constant_override("separation", 3)
 	header_box.add_child(title_vbox)
 
 	var name_lbl := Label.new()
@@ -210,10 +210,27 @@ func _populate_officials_card() -> void:
 	title_vbox.add_child(name_lbl)
 
 	var sub_lbl := Label.new()
-	sub_lbl.text = "Head Referee • %s • %d Matches Experience" % [ref_nat, ref_exp]
+	sub_lbl.text = "Head Referee • %s • Age: %s • %d Matches Experience" % [ref_nat, ref_age, ref_exp]
 	sub_lbl.add_theme_font_size_override("font_size", 12)
 	sub_lbl.add_theme_color_override("font_color", Color(0.8, 0.8, 0.8))
 	title_vbox.add_child(sub_lbl)
+
+	if _referee_data != null and not _referee_data.spoken_languages.is_empty():
+		var langs_box := HBoxContainer.new()
+		langs_box.add_theme_constant_override("separation", 6)
+		var langs_title := Label.new()
+		langs_title.text = "Languages:"
+		langs_title.add_theme_font_size_override("font_size", 11)
+		langs_title.add_theme_color_override("font_color", Color(0.65, 0.70, 0.75))
+		langs_box.add_child(langs_title)
+
+		for l_dict: Dictionary in _referee_data.spoken_languages:
+			var l_name: String = str(l_dict.get("language", "English"))
+			var l_lvl: String = str(l_dict.get("level", "Fluent"))
+			var l_prof: float = float(l_dict.get("proficiency", 0.8))
+			var pill: PanelContainer = NationDatabase.create_language_badge(l_name, l_lvl, l_prof, 10)
+			langs_box.add_child(pill)
+		title_vbox.add_child(langs_box)
 
 	var sep := HSeparator.new()
 	officials_card.add_child(sep)

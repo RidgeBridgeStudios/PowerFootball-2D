@@ -73,7 +73,10 @@ func _fill_manager_card(team: int, m: ManagerData) -> void:
 
 	var name_lbl := card.get_node_or_null("VBoxContainer/Manager%sName" % suffix) as Label
 	if name_lbl != null:
-		name_lbl.text = "Manager: %s (%s, %d yrs exp.)" % [m.manager_name, m.nationality, m.experience]
+		var nat_emoji: String = NationDatabase.get_flag_emoji(m.nationality)
+		name_lbl.text = "%s Manager: %s (%s, Age: %s, %d yrs exp.)" % [
+			nat_emoji, m.manager_name, m.nationality, m.get_age_detail_string(), m.experience
+		]
 
 	var tactics_lbl := card.get_node_or_null("VBoxContainer/Manager%sTactics" % suffix) as Label
 	if tactics_lbl != null:
@@ -83,7 +86,12 @@ func _fill_manager_card(team: int, m: ManagerData) -> void:
 
 	var person_lbl := card.get_node_or_null("VBoxContainer/Manager%sPersonality" % suffix) as Label
 	if person_lbl != null:
-		person_lbl.text = "Traits: " + _trait_names(m.traits)
+		var lang_strings: Array[String] = []
+		for l: Dictionary in m.spoken_languages:
+			var l_emoji: String = NationDatabase.get_flag_emoji(str(l.get("language", "")))
+			lang_strings.append("%s %s (%s)" % [l_emoji, l.get("language", ""), l.get("level", "")])
+		var lang_summary: String = "  |  Langs: " + (", ".join(lang_strings)) if not lang_strings.is_empty() else ""
+		person_lbl.text = "Traits: " + _trait_names(m.traits) + lang_summary
 
 	var stats: Node = card.get_node_or_null("VBoxContainer/Manager%sStats" % suffix)
 	if stats != null:

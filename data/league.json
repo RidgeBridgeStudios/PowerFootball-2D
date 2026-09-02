@@ -68,7 +68,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Erik Lund",
@@ -109,7 +124,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2000-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Halvard Brann",
@@ -150,7 +180,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Sigurd Voss",
@@ -191,7 +236,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2000-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Torben Hauge",
@@ -232,7 +292,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2003-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Jonas Elv",
@@ -273,7 +348,27 @@
           "career_goals": 3,
           "career_assists": 5,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Swedish",
+          "secondary_nationality": "",
+          "date_of_birth": "2003-04-08",
+          "spoken_languages": [
+            {
+              "language": "Swedish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Norwegian",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Olav Strand",
@@ -314,7 +409,22 @@
           "career_goals": 2,
           "career_assists": 4,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1995-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Niklas Borg",
@@ -355,7 +465,22 @@
           "career_goals": 1,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Rune Kval",
@@ -396,7 +521,22 @@
           "career_goals": 4,
           "career_assists": 3,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1996-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Henrik Ask",
@@ -437,7 +577,22 @@
           "career_goals": 8,
           "career_assists": 2,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1996-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Petter Naess",
@@ -478,7 +633,22 @@
           "career_goals": 5,
           "career_assists": 6,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2001-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Emil Lind",
@@ -519,7 +689,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Danish",
+          "secondary_nationality": "",
+          "date_of_birth": "2003-07-15",
+          "spoken_languages": [
+            {
+              "language": "Danish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Norwegian",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Rasmus Holst",
@@ -560,7 +750,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Danish",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-10-22",
+          "spoken_languages": [
+            {
+              "language": "Danish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Norwegian",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Joakim Berg",
@@ -601,7 +811,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Swedish",
+          "secondary_nationality": "",
+          "date_of_birth": "2004-07-15",
+          "spoken_languages": [
+            {
+              "language": "Swedish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Norwegian",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Stian Mork",
@@ -642,7 +872,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2004-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Magnus Rygg",
@@ -683,7 +928,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2006-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Vidar Krog",
@@ -724,7 +984,22 @@
           "career_goals": 1,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2008-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Andreas Solberg",
@@ -765,7 +1040,164 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2008-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
+        }
+      ],
+      "staff": [
+        {
+          "staff_name": "Knut Eide",
+          "role": "Assistant Manager",
+          "team_name": "FC Nordvik",
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1974-05-12",
+          "experience": 28,
+          "coaching": 0.84,
+          "judging_ability": 0.78,
+          "physiotherapy": 0.6,
+          "tactical_knowledge": 0.82,
+          "salary_weekly": 7500,
+          "contract_years": 3,
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Dr. Thomas Holm",
+          "role": "Head Physio",
+          "team_name": "FC Nordvik",
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1979-09-22",
+          "experience": 22,
+          "coaching": 0.5,
+          "judging_ability": 0.6,
+          "physiotherapy": 0.94,
+          "tactical_knowledge": 0.55,
+          "salary_weekly": 6200,
+          "contract_years": 3,
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Simen Aas",
+          "role": "Tactical Analyst",
+          "team_name": "FC Nordvik",
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1990-03-14",
+          "experience": 14,
+          "coaching": 0.72,
+          "judging_ability": 0.85,
+          "physiotherapy": 0.5,
+          "tactical_knowledge": 0.9,
+          "salary_weekly": 5500,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Lars Bakke",
+          "role": "Fitness Coach",
+          "team_name": "FC Nordvik",
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1984-11-04",
+          "experience": 18,
+          "coaching": 0.82,
+          "judging_ability": 0.65,
+          "physiotherapy": 0.78,
+          "tactical_knowledge": 0.6,
+          "salary_weekly": 4800,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Geir Hansen",
+          "role": "Chief Scout",
+          "team_name": "FC Nordvik",
+          "nationality": "Norwegian",
+          "secondary_nationality": "Swedish",
+          "date_of_birth": "1968-07-19",
+          "experience": 32,
+          "coaching": 0.65,
+          "judging_ability": 0.92,
+          "physiotherapy": 0.5,
+          "tactical_knowledge": 0.8,
+          "salary_weekly": 6000,
+          "contract_years": 3,
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Swedish",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         }
       ]
     },
@@ -836,7 +1268,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "2001-01-01",
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Luis Ferrer",
@@ -877,7 +1324,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "1995-07-15",
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Mateo Ruiz",
@@ -918,7 +1380,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Argentine",
+          "secondary_nationality": "Spanish",
+          "date_of_birth": "1997-04-08",
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Diego Pons",
@@ -959,7 +1436,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "1999-01-01",
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Andres Mora",
@@ -1000,7 +1492,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "1998-07-15",
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Pablo Cano",
@@ -1041,7 +1548,22 @@
           "career_goals": 1,
           "career_assists": 2,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "2003-04-08",
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Rafael Soto",
@@ -1082,7 +1604,22 @@
           "career_goals": 3,
           "career_assists": 7,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "1999-01-01",
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Marco Reyes",
@@ -1123,7 +1660,22 @@
           "career_goals": 6,
           "career_assists": 8,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-01-01",
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Javier Tur",
@@ -1164,7 +1716,22 @@
           "career_goals": 7,
           "career_assists": 4,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "1999-10-22",
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Bruno Tena",
@@ -1205,7 +1772,22 @@
           "career_goals": 9,
           "career_assists": 3,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "2001-10-22",
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Ivan Blasco",
@@ -1246,7 +1828,22 @@
           "career_goals": 5,
           "career_assists": 5,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-04-08",
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Joaquin Giner",
@@ -1287,7 +1884,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "2001-04-08",
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Felix Navarro",
@@ -1328,7 +1940,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "2003-10-22",
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Santi Cordero",
@@ -1369,7 +1996,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "2001-01-01",
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Alejandro Blesa",
@@ -1410,7 +2052,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "2003-10-22",
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Dani Osorio",
@@ -1451,7 +2108,27 @@
           "career_goals": 1,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Portuguese",
+          "secondary_nationality": "Spanish",
+          "date_of_birth": "2005-01-01",
+          "spoken_languages": [
+            {
+              "language": "Portuguese",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Alvaro Ribera",
@@ -1492,7 +2169,22 @@
           "career_goals": 2,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "2005-01-01",
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Mario Gil",
@@ -1533,7 +2225,159 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "2008-10-22",
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
+        }
+      ],
+      "staff": [
+        {
+          "staff_name": "Eduardo Barba",
+          "role": "Assistant Manager",
+          "team_name": "CD Solano",
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "1975-02-18",
+          "experience": 25,
+          "coaching": 0.85,
+          "judging_ability": 0.8,
+          "physiotherapy": 0.55,
+          "tactical_knowledge": 0.86,
+          "salary_weekly": 8000,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Dr. Marcos Rey",
+          "role": "Head Physio",
+          "team_name": "CD Solano",
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "1981-06-11",
+          "experience": 20,
+          "coaching": 0.5,
+          "judging_ability": 0.55,
+          "physiotherapy": 0.92,
+          "tactical_knowledge": 0.5,
+          "salary_weekly": 6000,
+          "contract_years": 3,
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Alvaro Saez",
+          "role": "Tactical Analyst",
+          "team_name": "CD Solano",
+          "nationality": "Spanish",
+          "secondary_nationality": "Argentine",
+          "date_of_birth": "1988-10-29",
+          "experience": 16,
+          "coaching": 0.75,
+          "judging_ability": 0.86,
+          "physiotherapy": 0.45,
+          "tactical_knowledge": 0.88,
+          "salary_weekly": 5800,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Pau Soler",
+          "role": "Fitness Coach",
+          "team_name": "CD Solano",
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "1985-04-03",
+          "experience": 17,
+          "coaching": 0.8,
+          "judging_ability": 0.6,
+          "physiotherapy": 0.8,
+          "tactical_knowledge": 0.6,
+          "salary_weekly": 5000,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Vicente Mallo",
+          "role": "Chief Scout",
+          "team_name": "CD Solano",
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "1970-12-08",
+          "experience": 30,
+          "coaching": 0.6,
+          "judging_ability": 0.9,
+          "physiotherapy": 0.45,
+          "tactical_knowledge": 0.82,
+          "salary_weekly": 6500,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         }
       ]
     },
@@ -1604,7 +2448,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Belgian",
+          "secondary_nationality": "French",
+          "date_of_birth": "1997-04-08",
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Clement Bastien",
@@ -1645,7 +2504,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "French",
+          "secondary_nationality": "",
+          "date_of_birth": "2003-04-08",
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Henri Dupont",
@@ -1686,7 +2560,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "French",
+          "secondary_nationality": "",
+          "date_of_birth": "1997-01-01",
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Maxime Laurent",
@@ -1727,7 +2616,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "French",
+          "secondary_nationality": "",
+          "date_of_birth": "1995-04-08",
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Julien Mercier",
@@ -1768,7 +2672,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "French",
+          "secondary_nationality": "",
+          "date_of_birth": "1996-01-01",
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Romain Vasseur",
@@ -1809,7 +2728,22 @@
           "career_goals": 1,
           "career_assists": 3,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "French",
+          "secondary_nationality": "",
+          "date_of_birth": "1997-04-08",
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Theo Fontaine",
@@ -1850,7 +2784,22 @@
           "career_goals": 2,
           "career_assists": 4,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "French",
+          "secondary_nationality": "",
+          "date_of_birth": "1995-01-01",
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Gabriel Moreau",
@@ -1891,7 +2840,22 @@
           "career_goals": 5,
           "career_assists": 7,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "French",
+          "secondary_nationality": "",
+          "date_of_birth": "1998-04-08",
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Antoine Giraud",
@@ -1932,7 +2896,27 @@
           "career_goals": 4,
           "career_assists": 5,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "French",
+          "secondary_nationality": "Spanish",
+          "date_of_birth": "2001-04-08",
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Sebastien Fabre",
@@ -1973,7 +2957,22 @@
           "career_goals": 3,
           "career_assists": 4,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "French",
+          "secondary_nationality": "",
+          "date_of_birth": "2000-04-08",
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Alexandre Roche",
@@ -2014,7 +3013,22 @@
           "career_goals": 7,
           "career_assists": 2,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "French",
+          "secondary_nationality": "",
+          "date_of_birth": "2000-07-15",
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Nicolas Perrin",
@@ -2055,7 +3069,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "French",
+          "secondary_nationality": "",
+          "date_of_birth": "2001-04-08",
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Florian Blanc",
@@ -2096,7 +3125,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "French",
+          "secondary_nationality": "",
+          "date_of_birth": "2000-04-08",
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Mathieu Clement",
@@ -2137,7 +3181,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "French",
+          "secondary_nationality": "",
+          "date_of_birth": "2001-01-01",
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Adrien Caron",
@@ -2178,7 +3237,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "French",
+          "secondary_nationality": "",
+          "date_of_birth": "2008-10-22",
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Pierre Lefevre",
@@ -2219,7 +3293,27 @@
           "career_goals": 1,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2007-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "French",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Tristan Bonnet",
@@ -2260,7 +3354,27 @@
           "career_goals": 2,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2007-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "French",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Lucas Guerin",
@@ -2301,7 +3415,164 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2007-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "French",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
+        }
+      ],
+      "staff": [
+        {
+          "staff_name": "Christophe Bernard",
+          "role": "Assistant Manager",
+          "team_name": "Valence Athletic",
+          "nationality": "French",
+          "secondary_nationality": "",
+          "date_of_birth": "1976-08-30",
+          "experience": 24,
+          "coaching": 0.82,
+          "judging_ability": 0.78,
+          "physiotherapy": 0.5,
+          "tactical_knowledge": 0.84,
+          "salary_weekly": 7200,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Dr. Jean Marchal",
+          "role": "Head Physio",
+          "team_name": "Valence Athletic",
+          "nationality": "French",
+          "secondary_nationality": "",
+          "date_of_birth": "1978-01-19",
+          "experience": 23,
+          "coaching": 0.45,
+          "judging_ability": 0.5,
+          "physiotherapy": 0.95,
+          "tactical_knowledge": 0.5,
+          "salary_weekly": 6400,
+          "contract_years": 3,
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Fabrice Roux",
+          "role": "Tactical Analyst",
+          "team_name": "Valence Athletic",
+          "nationality": "French",
+          "secondary_nationality": "",
+          "date_of_birth": "1992-05-24",
+          "experience": 12,
+          "coaching": 0.7,
+          "judging_ability": 0.82,
+          "physiotherapy": 0.45,
+          "tactical_knowledge": 0.89,
+          "salary_weekly": 5200,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Guillaume Denis",
+          "role": "Fitness Coach",
+          "team_name": "Valence Athletic",
+          "nationality": "French",
+          "secondary_nationality": "",
+          "date_of_birth": "1986-09-15",
+          "experience": 16,
+          "coaching": 0.84,
+          "judging_ability": 0.55,
+          "physiotherapy": 0.82,
+          "tactical_knowledge": 0.58,
+          "salary_weekly": 4900,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Thierry Blanc",
+          "role": "Chief Scout",
+          "team_name": "Valence Athletic",
+          "nationality": "French",
+          "secondary_nationality": "Belgian",
+          "date_of_birth": "1971-03-07",
+          "experience": 29,
+          "coaching": 0.6,
+          "judging_ability": 0.91,
+          "physiotherapy": 0.45,
+          "tactical_knowledge": 0.78,
+          "salary_weekly": 6200,
+          "contract_years": 3,
+          "spoken_languages": [
+            {
+              "language": "French",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         }
       ]
     },
@@ -2372,7 +3643,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1996-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Ruben Couto",
@@ -2413,7 +3704,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1998-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Goncalo Pais",
@@ -2454,7 +3765,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2001-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Diogo Antunes",
@@ -2495,7 +3826,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1995-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Helder Basto",
@@ -2536,7 +3887,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1996-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Martim Sequeira",
@@ -2577,7 +3948,27 @@
           "career_goals": 1,
           "career_assists": 2,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1997-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Bernardo Pires",
@@ -2618,7 +4009,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1995-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Tomas Alencastre",
@@ -2659,7 +4070,27 @@
           "career_goals": 4,
           "career_assists": 8,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1995-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Simao Castelo",
@@ -2700,7 +4131,27 @@
           "career_goals": 5,
           "career_assists": 6,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1998-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Rodrigo Matos",
@@ -2741,7 +4192,27 @@
           "career_goals": 8,
           "career_assists": 3,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2000-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Vasco Lourenco",
@@ -2782,7 +4253,27 @@
           "career_goals": 6,
           "career_assists": 5,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1995-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Afonso Vilar",
@@ -2823,7 +4314,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2000-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Miguel Ramalho",
@@ -2864,7 +4375,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Joao Faria",
@@ -2905,7 +4436,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2001-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Leandro Neves",
@@ -2946,7 +4497,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2004-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Pedro Quaresma",
@@ -2987,7 +4558,27 @@
           "career_goals": 1,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2001-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Bruno Peixoto",
@@ -3028,7 +4619,27 @@
           "career_goals": 2,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2008-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Andre Caires",
@@ -3069,7 +4680,179 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2008-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
+        }
+      ],
+      "staff": [
+        {
+          "staff_name": "Esteban Carro",
+          "role": "Assistant Manager",
+          "team_name": "Real Maritimo",
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "1973-11-20",
+          "experience": 27,
+          "coaching": 0.83,
+          "judging_ability": 0.82,
+          "physiotherapy": 0.5,
+          "tactical_knowledge": 0.85,
+          "salary_weekly": 7000,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Dr. Gonzalo Varela",
+          "role": "Head Physio",
+          "team_name": "Real Maritimo",
+          "nationality": "Portuguese",
+          "secondary_nationality": "Spanish",
+          "date_of_birth": "1980-07-04",
+          "experience": 21,
+          "coaching": 0.45,
+          "judging_ability": 0.5,
+          "physiotherapy": 0.93,
+          "tactical_knowledge": 0.52,
+          "salary_weekly": 6100,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "Portuguese",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Joao Cabral",
+          "role": "Tactical Analyst",
+          "team_name": "Real Maritimo",
+          "nationality": "Portuguese",
+          "secondary_nationality": "",
+          "date_of_birth": "1989-12-16",
+          "experience": 15,
+          "coaching": 0.72,
+          "judging_ability": 0.84,
+          "physiotherapy": 0.45,
+          "tactical_knowledge": 0.87,
+          "salary_weekly": 5400,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "Portuguese",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Enrique Lomba",
+          "role": "Fitness Coach",
+          "team_name": "Real Maritimo",
+          "nationality": "Spanish",
+          "secondary_nationality": "",
+          "date_of_birth": "1987-03-22",
+          "experience": 15,
+          "coaching": 0.81,
+          "judging_ability": 0.58,
+          "physiotherapy": 0.79,
+          "tactical_knowledge": 0.6,
+          "salary_weekly": 4700,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "Spanish",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Rodrigo Valente",
+          "role": "Chief Scout",
+          "team_name": "Real Maritimo",
+          "nationality": "Brazilian",
+          "secondary_nationality": "Portuguese",
+          "date_of_birth": "1972-04-15",
+          "experience": 28,
+          "coaching": 0.62,
+          "judging_ability": 0.93,
+          "physiotherapy": 0.45,
+          "tactical_knowledge": 0.8,
+          "salary_weekly": 6600,
+          "contract_years": 3,
+          "spoken_languages": [
+            {
+              "language": "Portuguese",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Spanish",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         }
       ]
     },
@@ -3140,7 +4923,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2003-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Florian Richter",
@@ -3181,7 +4984,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1999-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Markus Brandt",
@@ -3222,7 +5045,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2001-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Torsten Becker",
@@ -3263,7 +5106,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2003-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Hanno Schultheiss",
@@ -3304,7 +5167,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1999-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Dirk Lindemann",
@@ -3345,7 +5228,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2000-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Lars Krumm",
@@ -3386,7 +5289,27 @@
           "career_goals": 1,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1998-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Volker Hahn",
@@ -3427,7 +5350,27 @@
           "career_goals": 2,
           "career_assists": 4,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2003-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Jupp Sauer",
@@ -3468,7 +5411,27 @@
           "career_goals": 3,
           "career_assists": 3,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1998-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Gunnar Holtz",
@@ -3509,7 +5472,27 @@
           "career_goals": 8,
           "career_assists": 2,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1996-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Max Brecht",
@@ -3550,7 +5533,27 @@
           "career_goals": 6,
           "career_assists": 4,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1996-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Jens Eberlein",
@@ -3591,7 +5594,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Moritz Reuter",
@@ -3632,7 +5655,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2004-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Janosch Pfeifer",
@@ -3673,7 +5716,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2000-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Timo Eckert",
@@ -3714,7 +5777,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Christoph Kroll",
@@ -3755,7 +5838,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2003-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Kilian Graf",
@@ -3796,7 +5899,27 @@
           "career_goals": 1,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2006-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Sascha Wendt",
@@ -3837,7 +5960,164 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2008-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "German",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
+        }
+      ],
+      "staff": [
+        {
+          "staff_name": "Torsten Reuter",
+          "role": "Assistant Manager",
+          "team_name": "Borussia Eisenwald",
+          "nationality": "German",
+          "secondary_nationality": "",
+          "date_of_birth": "1972-02-14",
+          "experience": 29,
+          "coaching": 0.86,
+          "judging_ability": 0.82,
+          "physiotherapy": 0.55,
+          "tactical_knowledge": 0.87,
+          "salary_weekly": 8200,
+          "contract_years": 3,
+          "spoken_languages": [
+            {
+              "language": "German",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Dr. Hans-Peter Koch",
+          "role": "Head Physio",
+          "team_name": "Borussia Eisenwald",
+          "nationality": "German",
+          "secondary_nationality": "",
+          "date_of_birth": "1975-10-08",
+          "experience": 26,
+          "coaching": 0.5,
+          "judging_ability": 0.55,
+          "physiotherapy": 0.96,
+          "tactical_knowledge": 0.5,
+          "salary_weekly": 6700,
+          "contract_years": 3,
+          "spoken_languages": [
+            {
+              "language": "German",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Sven Lindemann",
+          "role": "Tactical Analyst",
+          "team_name": "Borussia Eisenwald",
+          "nationality": "German",
+          "secondary_nationality": "Austrian",
+          "date_of_birth": "1991-07-27",
+          "experience": 13,
+          "coaching": 0.74,
+          "judging_ability": 0.86,
+          "physiotherapy": 0.48,
+          "tactical_knowledge": 0.91,
+          "salary_weekly": 5700,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "German",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Matthias Beck",
+          "role": "Fitness Coach",
+          "team_name": "Borussia Eisenwald",
+          "nationality": "German",
+          "secondary_nationality": "",
+          "date_of_birth": "1983-06-19",
+          "experience": 19,
+          "coaching": 0.85,
+          "judging_ability": 0.6,
+          "physiotherapy": 0.82,
+          "tactical_knowledge": 0.62,
+          "salary_weekly": 5200,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "German",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Juergen Voigt",
+          "role": "Chief Scout",
+          "team_name": "Borussia Eisenwald",
+          "nationality": "German",
+          "secondary_nationality": "",
+          "date_of_birth": "1967-01-23",
+          "experience": 33,
+          "coaching": 0.62,
+          "judging_ability": 0.93,
+          "physiotherapy": 0.45,
+          "tactical_knowledge": 0.82,
+          "salary_weekly": 6800,
+          "contract_years": 3,
+          "spoken_languages": [
+            {
+              "language": "German",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         }
       ]
     },
@@ -3908,7 +6188,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Matteo De Rosa",
@@ -3949,7 +6249,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2003-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Alessandro Moretti",
@@ -3990,7 +6310,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1998-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Claudio Vieri",
@@ -4031,7 +6371,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1997-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Daniele Conti",
@@ -4072,7 +6432,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1995-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Pietro Donati",
@@ -4113,7 +6493,27 @@
           "career_goals": 1,
           "career_assists": 4,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1998-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Giorgio Barbieri",
@@ -4154,7 +6554,27 @@
           "career_goals": 4,
           "career_assists": 7,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1998-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Leonardo Rinaldi",
@@ -4195,7 +6615,27 @@
           "career_goals": 7,
           "career_assists": 9,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1998-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Filippo Monti",
@@ -4236,7 +6676,27 @@
           "career_goals": 6,
           "career_assists": 5,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Stefano Leone",
@@ -4277,7 +6737,27 @@
           "career_goals": 11,
           "career_assists": 3,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1995-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Niccolo Bardi",
@@ -4318,7 +6798,27 @@
           "career_goals": 5,
           "career_assists": 6,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2003-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Federico Greco",
@@ -4359,7 +6859,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2003-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Vincenzo Silvestri",
@@ -4400,7 +6920,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Jacopo Costa",
@@ -4441,7 +6981,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2000-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Edoardo Marini",
@@ -4482,7 +7042,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Alessio Santoro",
@@ -4523,7 +7103,27 @@
           "career_goals": 1,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2001-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Marco Ferri",
@@ -4564,7 +7164,27 @@
           "career_goals": 2,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2008-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Giulio Lombardi",
@@ -4605,7 +7225,169 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2006-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Italian",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
+        }
+      ],
+      "staff": [
+        {
+          "staff_name": "Massimo Ferrara",
+          "role": "Assistant Manager",
+          "team_name": "Aurora Calcio",
+          "nationality": "Italian",
+          "secondary_nationality": "",
+          "date_of_birth": "1974-06-17",
+          "experience": 27,
+          "coaching": 0.84,
+          "judging_ability": 0.81,
+          "physiotherapy": 0.5,
+          "tactical_knowledge": 0.86,
+          "salary_weekly": 7800,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "Italian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Dr. Claudio Marchetti",
+          "role": "Head Physio",
+          "team_name": "Aurora Calcio",
+          "nationality": "Italian",
+          "secondary_nationality": "",
+          "date_of_birth": "1977-12-05",
+          "experience": 24,
+          "coaching": 0.45,
+          "judging_ability": 0.5,
+          "physiotherapy": 0.94,
+          "tactical_knowledge": 0.5,
+          "salary_weekly": 6300,
+          "contract_years": 3,
+          "spoken_languages": [
+            {
+              "language": "Italian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Daniele Raggi",
+          "role": "Tactical Analyst",
+          "team_name": "Aurora Calcio",
+          "nationality": "Italian",
+          "secondary_nationality": "",
+          "date_of_birth": "1990-09-02",
+          "experience": 14,
+          "coaching": 0.73,
+          "judging_ability": 0.84,
+          "physiotherapy": 0.46,
+          "tactical_knowledge": 0.89,
+          "salary_weekly": 5500,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "Italian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Valerio De Santis",
+          "role": "Fitness Coach",
+          "team_name": "Aurora Calcio",
+          "nationality": "Italian",
+          "secondary_nationality": "",
+          "date_of_birth": "1984-08-21",
+          "experience": 18,
+          "coaching": 0.82,
+          "judging_ability": 0.58,
+          "physiotherapy": 0.8,
+          "tactical_knowledge": 0.6,
+          "salary_weekly": 5100,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "Italian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Pietro Barone",
+          "role": "Chief Scout",
+          "team_name": "Aurora Calcio",
+          "nationality": "Italian",
+          "secondary_nationality": "Croatian",
+          "date_of_birth": "1969-04-18",
+          "experience": 31,
+          "coaching": 0.6,
+          "judging_ability": 0.92,
+          "physiotherapy": 0.45,
+          "tactical_knowledge": 0.81,
+          "salary_weekly": 6500,
+          "contract_years": 3,
+          "spoken_languages": [
+            {
+              "language": "Italian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Croatian",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         }
       ]
     },
@@ -4676,7 +7458,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2000-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Ewan Sinclair",
@@ -4717,7 +7514,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1995-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Duncan Brogan",
@@ -4758,7 +7570,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2000-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Callum MacLeod",
@@ -4799,7 +7626,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2003-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Archie Crawford",
@@ -4840,7 +7682,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2001-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Ross Finlay",
@@ -4881,7 +7738,22 @@
           "career_goals": 3,
           "career_assists": 6,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2001-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Hamish Boyd",
@@ -4922,7 +7794,22 @@
           "career_goals": 3,
           "career_assists": 4,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2000-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Fraser Gillespie",
@@ -4963,7 +7850,22 @@
           "career_goals": 2,
           "career_assists": 3,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1995-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Brodie Sutherland",
@@ -5004,7 +7906,22 @@
           "career_goals": 2,
           "career_assists": 5,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1998-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Colin Menzies",
@@ -5045,7 +7962,22 @@
           "career_goals": 9,
           "career_assists": 2,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1999-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Jamie Lorimer",
@@ -5086,7 +8018,22 @@
           "career_goals": 7,
           "career_assists": 5,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Stewart Nairn",
@@ -5127,7 +8074,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2001-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.7,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Blair Urquhart",
@@ -5168,7 +8130,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2003-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.7,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Gregor Mathieson",
@@ -5209,7 +8186,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2000-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.7,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Rory Dunbar",
@@ -5250,7 +8242,22 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2004-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.7,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Murdo Garrow",
@@ -5291,7 +8298,22 @@
           "career_goals": 1,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2004-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.7,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Douglas Renwick",
@@ -5332,7 +8354,22 @@
           "career_goals": 2,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2008-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.7,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Angus MacBeath",
@@ -5373,7 +8410,134 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2006-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.7,
+              "level": "Basic"
+            }
+          ]
+        }
+      ],
+      "staff": [
+        {
+          "staff_name": "Gordon Strachan Jr.",
+          "role": "Assistant Manager",
+          "team_name": "Highland Thistle FC",
+          "nationality": "Scottish",
+          "secondary_nationality": "",
+          "date_of_birth": "1975-03-11",
+          "experience": 26,
+          "coaching": 0.82,
+          "judging_ability": 0.79,
+          "physiotherapy": 0.5,
+          "tactical_knowledge": 0.83,
+          "salary_weekly": 6800,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "English",
+              "proficiency": 1.0,
+              "level": "Native"
+            }
+          ]
+        },
+        {
+          "staff_name": "Dr. Neil Mackay",
+          "role": "Head Physio",
+          "team_name": "Highland Thistle FC",
+          "nationality": "Scottish",
+          "secondary_nationality": "",
+          "date_of_birth": "1980-08-14",
+          "experience": 21,
+          "coaching": 0.45,
+          "judging_ability": 0.5,
+          "physiotherapy": 0.92,
+          "tactical_knowledge": 0.5,
+          "salary_weekly": 5800,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "English",
+              "proficiency": 1.0,
+              "level": "Native"
+            }
+          ]
+        },
+        {
+          "staff_name": "Craig Robertson",
+          "role": "Tactical Analyst",
+          "team_name": "Highland Thistle FC",
+          "nationality": "Scottish",
+          "secondary_nationality": "",
+          "date_of_birth": "1993-01-20",
+          "experience": 11,
+          "coaching": 0.71,
+          "judging_ability": 0.82,
+          "physiotherapy": 0.45,
+          "tactical_knowledge": 0.86,
+          "salary_weekly": 4900,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "English",
+              "proficiency": 1.0,
+              "level": "Native"
+            }
+          ]
+        },
+        {
+          "staff_name": "Finlay Grant",
+          "role": "Fitness Coach",
+          "team_name": "Highland Thistle FC",
+          "nationality": "Scottish",
+          "secondary_nationality": "",
+          "date_of_birth": "1986-10-09",
+          "experience": 16,
+          "coaching": 0.83,
+          "judging_ability": 0.56,
+          "physiotherapy": 0.79,
+          "tactical_knowledge": 0.58,
+          "salary_weekly": 4600,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "English",
+              "proficiency": 1.0,
+              "level": "Native"
+            }
+          ]
+        },
+        {
+          "staff_name": "Archie Macintyre",
+          "role": "Chief Scout",
+          "team_name": "Highland Thistle FC",
+          "nationality": "Scottish",
+          "secondary_nationality": "English",
+          "date_of_birth": "1967-11-28",
+          "experience": 33,
+          "coaching": 0.58,
+          "judging_ability": 0.89,
+          "physiotherapy": 0.45,
+          "tactical_knowledge": 0.78,
+          "salary_weekly": 5900,
+          "contract_years": 3,
+          "spoken_languages": [
+            {
+              "language": "English",
+              "proficiency": 1.0,
+              "level": "Native"
+            }
+          ]
         }
       ]
     },
@@ -5444,7 +8608,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1997-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Paulo Serpa",
@@ -5485,7 +8669,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1997-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Tiago Guimaraes",
@@ -5526,7 +8730,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1999-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Everton Morais",
@@ -5567,7 +8791,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1995-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Caio Belmonte",
@@ -5608,7 +8852,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1998-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Nilton Arantes",
@@ -5649,7 +8913,27 @@
           "career_goals": 1,
           "career_assists": 3,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Danilo Fogaca",
@@ -5690,7 +8974,27 @@
           "career_goals": 4,
           "career_assists": 6,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1996-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Zico Valadares",
@@ -5731,7 +9035,27 @@
           "career_goals": 8,
           "career_assists": 10,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1998-07-15",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Renan Junqueira",
@@ -5772,7 +9096,27 @@
           "career_goals": 7,
           "career_assists": 5,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2001-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Giba Santana",
@@ -5813,7 +9157,27 @@
           "career_goals": 6,
           "career_assists": 6,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1999-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Robson Barreto",
@@ -5854,7 +9218,27 @@
           "career_goals": 10,
           "career_assists": 4,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "1996-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.85,
+              "level": "Fluent"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         },
         {
           "player_name": "Edilson Prates",
@@ -5895,7 +9279,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Wanderson Lima",
@@ -5936,7 +9340,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2000-04-08",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Henrique Pato",
@@ -5977,7 +9401,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-10-22",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Clodoaldo Brito",
@@ -6018,7 +9462,27 @@
           "career_goals": 0,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2002-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Tarcisio Lins",
@@ -6059,7 +9523,27 @@
           "career_goals": 1,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2000-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Beto Fagundes",
@@ -6100,7 +9584,27 @@
           "career_goals": 1,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2005-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
         },
         {
           "player_name": "Wagner Carioca",
@@ -6141,7 +9645,164 @@
           "career_goals": 2,
           "career_assists": 0,
           "last_match_rating": 0.0,
-          "is_unavailable": false
+          "is_unavailable": false,
+          "nationality": "Norwegian",
+          "secondary_nationality": "",
+          "date_of_birth": "2005-01-01",
+          "spoken_languages": [
+            {
+              "language": "Norwegian",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "Portuguese",
+              "proficiency": 0.7,
+              "level": "Basic"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.65,
+              "level": "Basic"
+            }
+          ]
+        }
+      ],
+      "staff": [
+        {
+          "staff_name": "Manuel Coentrao",
+          "role": "Assistant Manager",
+          "team_name": "Porto Sol Stella",
+          "nationality": "Portuguese",
+          "secondary_nationality": "",
+          "date_of_birth": "1977-05-09",
+          "experience": 24,
+          "coaching": 0.83,
+          "judging_ability": 0.8,
+          "physiotherapy": 0.52,
+          "tactical_knowledge": 0.84,
+          "salary_weekly": 7100,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "Portuguese",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Dr. Bernardo Teles",
+          "role": "Head Physio",
+          "team_name": "Porto Sol Stella",
+          "nationality": "Portuguese",
+          "secondary_nationality": "",
+          "date_of_birth": "1979-02-23",
+          "experience": 22,
+          "coaching": 0.45,
+          "judging_ability": 0.52,
+          "physiotherapy": 0.93,
+          "tactical_knowledge": 0.5,
+          "salary_weekly": 6100,
+          "contract_years": 3,
+          "spoken_languages": [
+            {
+              "language": "Portuguese",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Gilberto Faria",
+          "role": "Tactical Analyst",
+          "team_name": "Porto Sol Stella",
+          "nationality": "Portuguese",
+          "secondary_nationality": "Brazilian",
+          "date_of_birth": "1991-08-12",
+          "experience": 13,
+          "coaching": 0.72,
+          "judging_ability": 0.83,
+          "physiotherapy": 0.45,
+          "tactical_knowledge": 0.88,
+          "salary_weekly": 5300,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "Portuguese",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Nelson Sobral",
+          "role": "Fitness Coach",
+          "team_name": "Porto Sol Stella",
+          "nationality": "Portuguese",
+          "secondary_nationality": "",
+          "date_of_birth": "1985-06-30",
+          "experience": 17,
+          "coaching": 0.82,
+          "judging_ability": 0.56,
+          "physiotherapy": 0.8,
+          "tactical_knowledge": 0.6,
+          "salary_weekly": 4800,
+          "contract_years": 2,
+          "spoken_languages": [
+            {
+              "language": "Portuguese",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
+        },
+        {
+          "staff_name": "Cristiano Simoes",
+          "role": "Chief Scout",
+          "team_name": "Porto Sol Stella",
+          "nationality": "Portuguese",
+          "secondary_nationality": "",
+          "date_of_birth": "1971-10-03",
+          "experience": 30,
+          "coaching": 0.6,
+          "judging_ability": 0.91,
+          "physiotherapy": 0.45,
+          "tactical_knowledge": 0.8,
+          "salary_weekly": 6300,
+          "contract_years": 3,
+          "spoken_languages": [
+            {
+              "language": "Portuguese",
+              "proficiency": 1.0,
+              "level": "Native"
+            },
+            {
+              "language": "English",
+              "proficiency": 0.8,
+              "level": "Fluent"
+            }
+          ]
         }
       ]
     }

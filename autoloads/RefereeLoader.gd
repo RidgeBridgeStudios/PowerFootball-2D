@@ -58,6 +58,9 @@ func save_referees() -> void:
 		referees.append({
 			"name": ref.referee_name,
 			"nationality": ref.nationality,
+			"secondary_nationality": ref.secondary_nationality,
+			"date_of_birth": ref.date_of_birth,
+			"spoken_languages": ref.spoken_languages,
 			"experience": ref.experience,
 			"strictness": ref.strictness,
 			"consistency": ref.consistency,
@@ -136,6 +139,23 @@ func _referee_from_dict(referee_dict: Dictionary) -> RefereeData:
 	data.fouls_awarded = int(referee_dict.get("fouls_awarded", data.fouls_awarded))
 	data.penalties_awarded = int(referee_dict.get("penalties_awarded", data.penalties_awarded))
 	data.red_cards_issued = int(referee_dict.get("red_cards_issued", data.red_cards_issued))
+	data.secondary_nationality = str(referee_dict.get("secondary_nationality", data.secondary_nationality))
+	data.date_of_birth = str(referee_dict.get("date_of_birth", data.date_of_birth))
+
+	var raw_langs: Variant = referee_dict.get("spoken_languages", [])
+	var parsed_langs: Array[Dictionary] = []
+	if typeof(raw_langs) == TYPE_ARRAY:
+		for l_item: Variant in (raw_langs as Array):
+			if typeof(l_item) == TYPE_DICTIONARY:
+				parsed_langs.append(l_item as Dictionary)
+	if not parsed_langs.is_empty():
+		data.spoken_languages = parsed_langs
+	else:
+		var prim_lang: String = NationDatabase.get_primary_language_for_nation(data.nationality)
+		data.spoken_languages = [
+			{"language": prim_lang, "proficiency": 1.0, "level": "Native"},
+			{"language": "English", "proficiency": 0.85, "level": "Fluent"}
+		]
 
 	var raw_history: Variant = referee_dict.get("matchup_history", {})
 	if typeof(raw_history) == TYPE_DICTIONARY:
@@ -148,14 +168,14 @@ func _referee_from_dict(referee_dict: Dictionary) -> RefereeData:
 
 func _build_default_referees() -> void:
 	referee_pool = [
-		_referee("Domagoj Vrban", "Dalmatian", 34, 0.72, 0.85, 0.88, 0.04, 0.08, 0.90, 0.92),
-		_referee("Ingrid Vaarmo", "Nordlandic", 42, 0.88, 0.94, 0.96, 0.01, 0.03, 0.98, 0.96),
-		_referee("Kjetil Ørnseth", "Nordlandic", 12, 0.32, 0.42, 0.35, 0.18, 0.65, 0.40, 0.38),
-		_referee("Tomás Errecarte", "Platense", 24, 0.65, 0.58, 0.48, 0.42, 0.35, 0.62, 0.55),
-		_referee("Arjun Dharmaraj", "Subcontinental", 20, 0.50, 0.68, 0.78, 0.10, 0.30, 0.68, 0.70),
-		_referee("Petru Bálint", "Carpathian", 11, 0.82, 0.35, 0.42, 0.30, 0.55, 0.45, 0.42),
-		_referee("Jean-Luc Vaneck", "Gallic", 38, 0.24, 0.78, 0.82, 0.08, 0.15, 0.82, 0.85),
-		_referee("Kenzo Takahashi", "Far Eastern", 29, 0.78, 0.90, 0.86, 0.02, 0.06, 0.85, 0.88)
+		_referee("Domagoj Vrban", "Croatian", 34, 0.72, 0.85, 0.88, 0.04, 0.08, 0.90, 0.92),
+		_referee("Ingrid Vaarmo", "Norwegian", 42, 0.88, 0.94, 0.96, 0.01, 0.03, 0.98, 0.96),
+		_referee("Kjetil Ørnseth", "Norwegian", 12, 0.32, 0.42, 0.35, 0.18, 0.65, 0.40, 0.38),
+		_referee("Tomás Errecarte", "Argentine", 24, 0.65, 0.58, 0.48, 0.42, 0.35, 0.62, 0.55),
+		_referee("Arjun Dharmaraj", "English", 20, 0.50, 0.68, 0.78, 0.10, 0.30, 0.68, 0.70),
+		_referee("Petru Bálint", "Romanian", 11, 0.82, 0.35, 0.42, 0.30, 0.55, 0.45, 0.42),
+		_referee("Jean-Luc Vaneck", "French", 38, 0.24, 0.78, 0.82, 0.08, 0.15, 0.82, 0.85),
+		_referee("Kenzo Takahashi", "Japanese", 29, 0.78, 0.90, 0.86, 0.02, 0.06, 0.85, 0.88)
 	]
 
 

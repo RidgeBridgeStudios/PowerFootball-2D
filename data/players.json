@@ -40,6 +40,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -82,6 +97,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2000-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -124,6 +154,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -166,6 +211,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2000-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -208,6 +268,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2003-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -250,6 +325,26 @@
       "career_assists": 5,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Swedish",
+      "secondary_nationality": "",
+      "date_of_birth": "2003-04-08",
+      "spoken_languages": [
+        {
+          "language": "Swedish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Norwegian",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -292,6 +387,21 @@
       "career_assists": 4,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1995-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -334,6 +444,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -376,6 +501,21 @@
       "career_assists": 3,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1996-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -418,6 +558,21 @@
       "career_assists": 2,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1996-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -460,6 +615,21 @@
       "career_assists": 6,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2001-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -502,6 +672,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Danish",
+      "secondary_nationality": "",
+      "date_of_birth": "2003-07-15",
+      "spoken_languages": [
+        {
+          "language": "Danish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Norwegian",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -544,6 +734,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Danish",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-10-22",
+      "spoken_languages": [
+        {
+          "language": "Danish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Norwegian",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -586,6 +796,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Swedish",
+      "secondary_nationality": "",
+      "date_of_birth": "2004-07-15",
+      "spoken_languages": [
+        {
+          "language": "Swedish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Norwegian",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -628,6 +858,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2004-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -670,6 +915,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2006-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -712,6 +972,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2008-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -754,6 +1029,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2008-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "FC Nordvik"
     },
     {
@@ -796,6 +1086,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "2001-01-01",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -838,6 +1143,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "1995-07-15",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -880,6 +1200,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Argentine",
+      "secondary_nationality": "Spanish",
+      "date_of_birth": "1997-04-08",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -922,6 +1257,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "1999-01-01",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -964,6 +1314,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "1998-07-15",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -1006,6 +1371,21 @@
       "career_assists": 2,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "2003-04-08",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -1048,6 +1428,21 @@
       "career_assists": 7,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "1999-01-01",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -1090,6 +1485,21 @@
       "career_assists": 8,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-01-01",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -1132,6 +1542,21 @@
       "career_assists": 4,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "1999-10-22",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -1174,6 +1599,21 @@
       "career_assists": 3,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "2001-10-22",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -1216,6 +1656,21 @@
       "career_assists": 5,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-04-08",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -1258,6 +1713,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "2001-04-08",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -1300,6 +1770,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "2003-10-22",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -1342,6 +1827,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "2001-01-01",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -1384,6 +1884,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "2003-10-22",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -1426,6 +1941,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Portuguese",
+      "secondary_nationality": "Spanish",
+      "date_of_birth": "2005-01-01",
+      "spoken_languages": [
+        {
+          "language": "Portuguese",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -1468,6 +2003,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "2005-01-01",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -1510,6 +2060,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "2008-10-22",
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "CD Solano"
     },
     {
@@ -1552,6 +2117,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Belgian",
+      "secondary_nationality": "French",
+      "date_of_birth": "1997-04-08",
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -1594,6 +2174,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "2003-04-08",
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -1636,6 +2231,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "1997-01-01",
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -1678,6 +2288,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "1995-04-08",
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -1720,6 +2345,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "1996-01-01",
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -1762,6 +2402,21 @@
       "career_assists": 3,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "1997-04-08",
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -1804,6 +2459,21 @@
       "career_assists": 4,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "1995-01-01",
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -1846,6 +2516,21 @@
       "career_assists": 7,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "1998-04-08",
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -1888,6 +2573,26 @@
       "career_assists": 5,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "French",
+      "secondary_nationality": "Spanish",
+      "date_of_birth": "2001-04-08",
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -1930,6 +2635,21 @@
       "career_assists": 4,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "2000-04-08",
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -1972,6 +2692,21 @@
       "career_assists": 2,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "2000-07-15",
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -2014,6 +2749,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "2001-04-08",
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -2056,6 +2806,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "2000-04-08",
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -2098,6 +2863,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "2001-01-01",
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -2140,6 +2920,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "2008-10-22",
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -2182,6 +2977,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2007-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "French",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -2224,6 +3039,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2007-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "French",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -2266,6 +3101,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2007-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "French",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Valence Athletic"
     },
     {
@@ -2308,6 +3163,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1996-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -2350,6 +3225,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1998-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -2392,6 +3287,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2001-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -2434,6 +3349,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1995-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -2476,6 +3411,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1996-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -2518,6 +3473,26 @@
       "career_assists": 2,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1997-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -2560,6 +3535,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1995-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -2602,6 +3597,26 @@
       "career_assists": 8,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1995-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -2644,6 +3659,26 @@
       "career_assists": 6,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1998-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -2686,6 +3721,26 @@
       "career_assists": 3,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2000-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -2728,6 +3783,26 @@
       "career_assists": 5,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1995-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -2770,6 +3845,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2000-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -2812,6 +3907,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -2854,6 +3969,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2001-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -2896,6 +4031,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2004-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -2938,6 +4093,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2001-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -2980,6 +4155,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2008-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -3022,6 +4217,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2008-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Spanish",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Real Maritimo"
     },
     {
@@ -3064,6 +4279,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2003-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3106,6 +4341,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1999-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3148,6 +4403,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2001-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3190,6 +4465,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2003-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3232,6 +4527,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1999-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3274,6 +4589,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2000-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3316,6 +4651,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1998-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3358,6 +4713,26 @@
       "career_assists": 4,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2003-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3400,6 +4775,26 @@
       "career_assists": 3,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1998-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3442,6 +4837,26 @@
       "career_assists": 2,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1996-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3484,6 +4899,26 @@
       "career_assists": 4,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1996-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3526,6 +4961,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3568,6 +5023,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2004-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3610,6 +5085,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2000-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3652,6 +5147,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3694,6 +5209,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2003-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3736,6 +5271,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2006-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3778,6 +5333,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2008-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "German",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Borussia Eisenwald"
     },
     {
@@ -3820,6 +5395,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -3862,6 +5457,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2003-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -3904,6 +5519,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1998-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -3946,6 +5581,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1997-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -3988,6 +5643,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1995-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -4030,6 +5705,26 @@
       "career_assists": 4,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1998-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -4072,6 +5767,26 @@
       "career_assists": 7,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1998-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -4114,6 +5829,26 @@
       "career_assists": 9,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1998-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -4156,6 +5891,26 @@
       "career_assists": 5,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -4198,6 +5953,26 @@
       "career_assists": 3,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1995-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -4240,6 +6015,26 @@
       "career_assists": 6,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2003-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -4282,6 +6077,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2003-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -4324,6 +6139,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -4366,6 +6201,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2000-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -4408,6 +6263,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -4450,6 +6325,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2001-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -4492,6 +6387,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2008-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -4534,6 +6449,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2006-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Italian",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Aurora Calcio"
     },
     {
@@ -4576,6 +6511,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2000-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -4618,6 +6568,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1995-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -4660,6 +6625,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2000-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -4702,6 +6682,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2003-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -4744,6 +6739,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2001-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -4786,6 +6796,21 @@
       "career_assists": 6,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2001-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -4828,6 +6853,21 @@
       "career_assists": 4,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2000-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -4870,6 +6910,21 @@
       "career_assists": 3,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1995-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -4912,6 +6967,21 @@
       "career_assists": 5,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1998-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -4954,6 +7024,21 @@
       "career_assists": 2,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1999-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -4996,6 +7081,21 @@
       "career_assists": 5,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -5038,6 +7138,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2001-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.7,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -5080,6 +7195,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2003-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.7,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -5122,6 +7252,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2000-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.7,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -5164,6 +7309,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2004-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.7,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -5206,6 +7366,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2004-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.7,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -5248,6 +7423,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2008-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.7,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -5290,6 +7480,21 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2006-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.7,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Highland Thistle FC"
     },
     {
@@ -5332,6 +7537,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1997-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     },
     {
@@ -5374,6 +7599,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1997-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     },
     {
@@ -5416,6 +7661,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1999-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     },
     {
@@ -5458,6 +7723,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1995-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     },
     {
@@ -5500,6 +7785,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1998-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     },
     {
@@ -5542,6 +7847,26 @@
       "career_assists": 3,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     },
     {
@@ -5584,6 +7909,26 @@
       "career_assists": 6,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1996-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     },
     {
@@ -5626,6 +7971,26 @@
       "career_assists": 10,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1998-07-15",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     },
     {
@@ -5668,6 +8033,26 @@
       "career_assists": 5,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2001-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     },
     {
@@ -5710,6 +8095,26 @@
       "career_assists": 6,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1999-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     },
     {
@@ -5752,6 +8157,26 @@
       "career_assists": 4,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "1996-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.85,
+          "level": "Fluent"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.8,
+          "level": "Fluent"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     },
     {
@@ -5794,6 +8219,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     },
     {
@@ -5836,6 +8281,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2000-04-08",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     },
     {
@@ -5878,6 +8343,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-10-22",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     },
     {
@@ -5920,6 +8405,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2002-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     },
     {
@@ -5962,6 +8467,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2000-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     },
     {
@@ -6004,6 +8529,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2005-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     },
     {
@@ -6046,6 +8591,26 @@
       "career_assists": 0,
       "last_match_rating": 0.0,
       "is_unavailable": false,
+      "nationality": "Norwegian",
+      "secondary_nationality": "",
+      "date_of_birth": "2005-01-01",
+      "spoken_languages": [
+        {
+          "language": "Norwegian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "Portuguese",
+          "proficiency": 0.7,
+          "level": "Basic"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.65,
+          "level": "Basic"
+        }
+      ],
       "team_name": "Porto Sol Stella"
     }
   ]
