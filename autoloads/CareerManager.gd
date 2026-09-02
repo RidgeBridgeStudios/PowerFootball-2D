@@ -297,23 +297,61 @@ func _build_competitions() -> void:
 	if DataLoader.league == null:
 		return
 
-	var indices: Array[int] = []
-	var names: Array[String] = []
-	for i: int in range(DataLoader.league.teams.size()):
-		indices.append(i)
-		names.append(DataLoader.league.teams[i].team_name)
+	var total_teams: int = DataLoader.league.teams.size()
 
-	var league: CompetitionData = CompetitionData.build_league(
-		DataLoader.league.league_name, indices, names
-	)
+	# Initialize tiers if not set
+	if career.tier_1_indices.is_empty() or career.tier_2_indices.is_empty():
+		career.tier_1_indices.clear()
+		career.tier_2_indices.clear()
+		for i: int in range(total_teams):
+			if i < 8:
+				career.tier_1_indices.append(i)
+			else:
+				career.tier_2_indices.append(i)
+
+	if career.continental_indices.is_empty():
+		career.continental_indices.clear()
+		for i_c: int in range(mini(4, career.tier_1_indices.size())):
+			career.continental_indices.append(career.tier_1_indices[i_c])
+
 	var first_matchday: CareerDate = CareerDate.make(
 		career.today.year, FIRST_MATCHDAY_MONTH, FIRST_MATCHDAY_DAY
 	)
-	league.generate_league_fixtures(first_matchday, _matchday_spacing(indices.size()))
-	career.competitions.append(league)
 
-	# Domestic cup: a straight knockout among everyone, drawn round by round.
-	var cup: CompetitionData = CompetitionData.build_cup("Domestic Cup", indices, false)
+	# 1. Tier 1: Premier Championship
+	var t1_names: Array[String] = []
+	for idx: int in career.tier_1_indices:
+		t1_names.append(DataLoader.league.teams[idx].team_name)
+	var t1_league: CompetitionData = CompetitionData.build_league(
+		"Premier Championship", career.tier_1_indices, t1_names, 1
+	)
+	t1_league.generate_league_fixtures(first_matchday, _matchday_spacing(career.tier_1_indices.size(), 2), 2)
+	career.competitions.append(t1_league)
+
+	# 2. Tier 2: Championship Division One (if teams exist)
+	if not career.tier_2_indices.is_empty():
+		var t2_names: Array[String] = []
+		for idx2: int in career.tier_2_indices:
+			t2_names.append(DataLoader.league.teams[idx2].team_name)
+		var t2_league: CompetitionData = CompetitionData.build_league(
+			"Championship Division One", career.tier_2_indices, t2_names, 2
+		)
+		t2_league.generate_league_fixtures(first_matchday, _matchday_spacing(career.tier_2_indices.size(), 2), 2)
+		career.competitions.append(t2_league)
+
+	# 3. European Champions Cup (Tier 1 qualifiers)
+	if not career.continental_indices.is_empty():
+		var continental: CompetitionData = CompetitionData.build_continental(
+			"European Champions Cup", career.continental_indices, true
+		)
+		continental.draw_cup_round(first_matchday.advanced_by(18), _rng)
+		career.competitions.append(continental)
+
+	# 4. Domestic Cup: Knockout among all teams
+	var all_indices: Array[int] = []
+	for i_all: int in range(total_teams):
+		all_indices.append(i_all)
+	var cup: CompetitionData = CompetitionData.build_cup("Domestic Cup", all_indices, false)
 	cup.draw_cup_round(first_matchday.advanced_by(24), _rng)
 	career.competitions.append(cup)
 
@@ -321,10 +359,9 @@ func _build_competitions() -> void:
 
 
 ## Days between league matchdays, chosen so the last round lands near
-## LAST_MATCHDAY_* whatever the league size: 8 clubs (14 rounds) space out to
-## ~21 days, 20 clubs (38 rounds) compress to the usual weekly rhythm.
-func _matchday_spacing(team_count: int) -> int:
-	var rounds: int = maxi((team_count - 1) * 2, 1)
+## LAST_MATCHDAY_* whatever the league size.
+func _matchday_spacing(team_count: int, repeat_cycles: int = 1) -> int:
+	var rounds: int = maxi((team_count - 1) * 2 * repeat_cycles, 1)
 	if rounds <= 1:
 		return MIN_MATCHDAY_SPACING_DAYS
 	var first: CareerDate = CareerDate.make(
@@ -356,15 +393,19 @@ func advance_day() -> HaltReason:
 
 	_update_transfer_window()
 	_update_season_phase()
+	_process_takeover_tick()
+	_process_international_duty()
 	_process_recovery_and_training()
 	_process_scouting()
 	_process_transfer_negotiations()
 	_process_ai_transfer_activity()
+	_process_loan_expiries()
 	_review_promises()
 
-	# Monday is the club's accounting day.
+	# Monday is accounting and U23 development day.
 	if today.day_of_week() == 0:
 		_run_weekly_cycle()
+		_simulate_u23_fixtures()
 
 	# Expiring an ignored decision is itself an event worth stopping for.
 	var expired: Array[WorldEvent] = InboxEngine.expire_overdue(career, user_team(), today)
@@ -610,9 +651,14 @@ func _process_transfer_negotiations() -> void:
 		var state: PlayerCareerState = career.state_for(offer.player_key())
 
 		if offer.club_response_due(career.today):
-			TransferMarket.evaluate_club_response(
-				offer, data, state, target_team, career.today, _rng
-			)
+			if offer.is_loan():
+				TransferMarket.evaluate_loan_response(
+					offer, data, state, target_team, career.today, _rng
+				)
+			else:
+				TransferMarket.evaluate_club_response(
+					offer, data, state, target_team, career.today, _rng
+				)
 			_push_inbox(InboxEngine.build_transfer_response(offer, career.today))
 		elif offer.player_response_due(career.today):
 			TransferMarket.evaluate_player_terms(
@@ -807,6 +853,28 @@ func _execute_transfer(offer: TransferOffer) -> void:
 	var club: TeamData = user_team()
 	if club == null:
 		return
+
+	if offer.is_loan():
+		var parent_club_name: String = DataLoader.get_team(offer.player_team_index).team_name
+		_move_player(offer.player_team_index, offer.player_squad_index, career.user_team_index)
+		var new_loan_index: int = club.squad.size() - 1
+		var loan_state: PlayerCareerState = career.state_for_squad(career.user_team_index, new_loan_index)
+		if loan_state != null and loan_state.contract != null:
+			loan_state.contract.is_on_loan = true
+			loan_state.contract.loan_parent_club = parent_club_name
+			loan_state.contract.loan_expires = CareerDate.make(career.today.year + 1, 6, 30)
+			loan_state.contract.loan_wage_subsidy = offer.loan_wage_share
+		if new_loan_index < club.squad.size():
+			club.squad[new_loan_index].wage_weekly = int(round(club.squad[new_loan_index].wage_weekly * offer.loan_wage_share))
+		WorldEventLog.record(
+			&"loan_completed", WorldEvent.Category.TRANSFER,
+			"%s joined %s on loan from %s." % [
+				offer.player_name, club.team_name, parent_club_name
+			],
+			0.4, 0.6
+		)
+		return
+
 	var fin: ClubFinances = career.user_finances()
 	if fin != null:
 		fin.commit_fee(offer.fee_offered, offer.instalment_years, offer.player_name, career.season_start_year)
@@ -836,6 +904,57 @@ func _execute_transfer(offer: TransferOffer) -> void:
 		],
 		0.5, 0.7
 	)
+
+
+func _process_loan_expiries() -> void:
+	if DataLoader.league == null:
+		return
+	for t_idx: int in range(DataLoader.league.teams.size()):
+		var team: TeamData = DataLoader.league.teams[t_idx]
+		for s_idx: int in range(team.squad.size() - 1, -1, -1):
+			var data: PlayerData = team.squad[s_idx]
+			var state: PlayerCareerState = career.state_for_squad(t_idx, s_idx)
+			if state != null and state.contract != null and state.contract.is_on_loan:
+				if state.contract.loan_expires != null and not career.today.is_before(state.contract.loan_expires):
+					_return_loan_player(t_idx, s_idx, data, state)
+
+
+func _return_loan_player(current_team_index: int, squad_index: int, data: PlayerData, state: PlayerCareerState) -> void:
+	var parent_club_name: String = state.contract.loan_parent_club if state.contract != null else ""
+	var parent_team_idx: int = -1
+	for t_i: int in range(DataLoader.league.teams.size()):
+		if DataLoader.league.teams[t_i].team_name == parent_club_name:
+			parent_team_idx = t_i
+			break
+
+	state.contract.is_on_loan = false
+	state.contract.loan_parent_club = ""
+	state.contract.loan_expires = null
+	state.contract.loan_wage_subsidy = 0.0
+
+	if parent_team_idx >= 0:
+		_move_player(current_team_index, squad_index, parent_team_idx)
+	else:
+		var cur_team: TeamData = DataLoader.get_team(current_team_index)
+		if cur_team != null and squad_index < cur_team.squad.size():
+			cur_team.squad.remove_at(squad_index)
+			_repair_lineup_after_removal(cur_team, squad_index)
+			_rekey_states_after_removal(current_team_index, squad_index)
+			career.player_states.erase(current_team_index * 1000 + squad_index)
+
+	WorldEventLog.record(
+		&"loan_expired", WorldEvent.Category.TRANSFER,
+		"%s has completed their loan spell and returned to their parent club." % data.player_name,
+		0.3, 0.5
+	)
+	if current_team_index == career.user_team_index:
+		_push_inbox(InboxEngine.build_simple(
+			"Loan Spell Concluded",
+			"%s has finished their loan spell and returned to %s." % [
+				data.player_name, parent_club_name
+			],
+			InboxItem.Category.TRANSFER, 0.75, career.today
+		))
 
 
 ## A playing-time promise that was never honoured costs more than refusing it.
@@ -1290,6 +1409,75 @@ func _run_season_end() -> void:
 		"position": position,
 		"club": club.team_name if club != null else "",
 	})
+
+	# Promotion, Relegation & Continental Qualification across tiers
+	var t1_comp: CompetitionData = null
+	var t2_comp: CompetitionData = null
+	for c: CompetitionData in career.competitions:
+		if c.kind == CompetitionData.Kind.LEAGUE:
+			if c.tier == 1:
+				t1_comp = c
+			elif c.tier == 2:
+				t2_comp = c
+
+	if t1_comp != null and t2_comp != null:
+		var t1_table: Array[LeagueTableRow] = t1_comp.sorted_table()
+		var t2_table: Array[LeagueTableRow] = t2_comp.sorted_table()
+
+		var relegated_indices: Array[int] = []
+		if t1_table.size() >= 2:
+			relegated_indices.append(t1_table[t1_table.size() - 1].team_index)
+			relegated_indices.append(t1_table[t1_table.size() - 2].team_index)
+
+		var promoted_indices: Array[int] = []
+		if t2_table.size() >= 2:
+			promoted_indices.append(t2_table[0].team_index)
+			promoted_indices.append(t2_table[1].team_index)
+
+		if promoted_indices.has(career.user_team_index):
+			if career.profile != null:
+				career.profile.promotions += 1
+				career.profile.reputation = clampf(career.profile.reputation + 0.10, 0.05, 0.99)
+			_push_inbox(InboxEngine.build_simple(
+				"PROMOTION CELEBRATIONS!",
+				"Congratulations! You have led %s to promotion into the Premier Championship!" % club.team_name,
+				InboxItem.Category.BOARD, 1.0, career.today
+			))
+		elif relegated_indices.has(career.user_team_index):
+			if career.profile != null:
+				career.profile.relegations += 1
+				career.profile.reputation = clampf(career.profile.reputation - 0.12, 0.05, 0.99)
+			_push_inbox(InboxEngine.build_simple(
+				"RELEGATION HEARTBREAK",
+				"%s have suffered relegation from the top flight. The board expect an immediate return next season." % club.team_name,
+				InboxItem.Category.BOARD, 1.0, career.today
+			))
+
+		var new_t1: Array[int] = []
+		for r_t1: LeagueTableRow in t1_table:
+			if not relegated_indices.has(r_t1.team_index):
+				new_t1.append(r_t1.team_index)
+		new_t1.append_array(promoted_indices)
+		career.tier_1_indices = new_t1
+
+		var new_t2: Array[int] = []
+		for r_t2: LeagueTableRow in t2_table:
+			if not promoted_indices.has(r_t2.team_index):
+				new_t2.append(r_t2.team_index)
+		new_t2.append_array(relegated_indices)
+		career.tier_2_indices = new_t2
+
+		var new_cont: Array[int] = []
+		for i_q: int in range(mini(4, t1_table.size())):
+			new_cont.append(t1_table[i_q].team_index)
+		career.continental_indices = new_cont
+
+		if new_cont.has(career.user_team_index):
+			_push_inbox(InboxEngine.build_simple(
+				"European Champions Cup Qualification",
+				"Your league finish secures European football for %s next season!" % club.team_name,
+				InboxItem.Category.BOARD, 0.95, career.today
+			))
 
 	GameEvents.career_season_ended.emit(career.season_start_year, position)
 	_start_new_season()
@@ -1798,3 +1986,251 @@ func _ordinal(n: int) -> String:
 			_:
 				suffix = "th"
 	return "%d%s" % [n, suffix]
+
+
+## --- Active Takeover Subsystem ---------------------------------------------------
+
+func _process_takeover_tick() -> void:
+	if career == null or career.board == null:
+		return
+	var b: BoardState = career.board
+	if b.is_takeover_active():
+		b.takeover_days_remaining -= 1
+		if b.takeover_stage == BoardState.TakeoverStage.RUMOURED and b.takeover_days_remaining <= 0:
+			b.advance_takeover_to_due_diligence(21, 15000000)
+			_push_inbox(InboxEngine.build_simple(
+				"TAKEOVER UPDATE: Due Diligence Begins",
+				"The %s consortium has entered formal due diligence to acquire %s. A temporary transfer embargo is in effect during the audit." % [
+					b.takeover_consortium_name, b.club_name
+				],
+				InboxItem.Category.BOARD, 0.95, career.today
+			))
+		elif b.takeover_stage == BoardState.TakeoverStage.IN_PROGRESS and b.takeover_days_remaining <= 0:
+			if _rng.randf() < 0.75:
+				var cash: int = b.takeover_cash_injection
+				b.complete_takeover(b.takeover_consortium_name)
+				var fin: ClubFinances = career.user_finances()
+				if fin != null:
+					fin.transfer_budget += cash
+					fin.record_income(ClubFinances.Line.INVESTOR_INJECTION, cash)
+				_push_inbox(InboxEngine.build_simple(
+					"TAKEOVER COMPLETED!",
+					"The takeover by %s has completed! The transfer embargo has been lifted, and a £%s war chest has been injected." % [
+						b.owner_name, TransferMarket.format_fee(cash)
+					],
+					InboxItem.Category.BOARD, 1.0, career.today
+				))
+			else:
+				b.collapse_takeover()
+				_push_inbox(InboxEngine.build_simple(
+					"Takeover Talks Collapse",
+					"Talks between the board and %s have broken down. The existing ownership remains and the transfer embargo is lifted." % b.takeover_consortium_name,
+					InboxItem.Category.BOARD, 0.85, career.today
+				))
+	elif _rng.randf() < 0.002:
+		var consortiums: Array[String] = [
+			"Nordic Capital Partners", "Apex Sports Consortium", "Redstone Global Holdings", "Monaco Atlantic Group"
+		]
+		var c_name: String = consortiums[_rng.randi_range(0, consortiums.size() - 1)]
+		b.start_takeover_process(c_name)
+		_push_inbox(InboxEngine.build_simple(
+			"Takeover Speculation",
+			"Financial media report that %s is preparing a buyout offer for %s." % [
+				c_name, b.club_name
+			],
+			InboxItem.Category.BOARD, 0.75, career.today
+		))
+
+
+## --- International Breaks Subsystem ----------------------------------------------
+
+func is_international_break(date: CareerDate) -> bool:
+	if date == null:
+		return false
+	var m: int = date.month
+	var d: int = date.day
+	if m == 9 and d >= 5 and d <= 15:
+		return true
+	if m == 10 and d >= 8 and d <= 18:
+		return true
+	if m == 11 and d >= 10 and d <= 20:
+		return true
+	if m == 3 and d >= 18 and d <= 28:
+		return true
+	return false
+
+
+func _process_international_duty() -> void:
+	var today: CareerDate = career.today
+	var m: int = today.month
+	var d: int = today.day
+
+	var is_start: bool = (m == 9 and d == 5) or (m == 10 and d == 8) or (m == 11 and d == 10) or (m == 3 and d == 18)
+	var is_end: bool = (m == 9 and d == 15) or (m == 10 and d == 18) or (m == 11 and d == 20) or (m == 3 and d == 28)
+
+	var club: TeamData = user_team()
+	if club == null:
+		return
+
+	if is_start:
+		var callups: Array[String] = []
+		for s_idx: int in range(club.squad.size()):
+			var p: PlayerData = club.squad[s_idx]
+			if p.calculate_overall_rating() >= 68 or p.is_captain or p.player_reputation >= 0.60:
+				callups.append(p.player_name)
+		if not callups.is_empty():
+			var names_str: String = ", ".join(callups.slice(0, 4))
+			if callups.size() > 4:
+				names_str += " and %d others" % (callups.size() - 4)
+			_push_inbox(InboxEngine.build_simple(
+				"International Call-ups",
+				"%s have departed for international duty during this FIFA international break." % names_str,
+				InboxItem.Category.MATCH, 0.70, today
+			))
+	elif is_end:
+		var count: int = 0
+		for s_idx2: int in range(club.squad.size()):
+			var p2: PlayerData = club.squad[s_idx2]
+			var st: PlayerCareerState = career.state_for_squad(career.user_team_index, s_idx2)
+			if st != null and (p2.calculate_overall_rating() >= 68 or p2.is_captain or p2.player_reputation >= 0.60):
+				count += 1
+				st.condition = clampf(st.condition - 0.05, 0.20, 1.0)
+				st.sharpness = clampf(st.sharpness + 0.08, 0.0, 1.0)
+		if count > 0:
+			_push_inbox(InboxEngine.build_simple(
+				"International Return",
+				"Your international players have rejoined the squad with match sharpness improved." % [],
+				InboxItem.Category.TRAINING, 0.65, today
+			))
+
+
+## --- U23 Squad & Development Fixtures --------------------------------------------
+
+func _simulate_u23_fixtures() -> void:
+	var club: TeamData = user_team()
+	if club == null:
+		return
+	for s_idx: int in range(club.squad.size()):
+		var st: PlayerCareerState = career.state_for_squad(career.user_team_index, s_idx)
+		var p: PlayerData = club.squad[s_idx]
+		var age: int = p.get_age(career.today.year, career.today.month, career.today.day)
+		if st != null and (st.in_u23_squad or age <= 21 or st.is_youth_player):
+			st.sharpness = clampf(st.sharpness + 0.08, 0.0, 1.0)
+			st.development_xp += 18.0
+			if _rng.randf() < 0.12:
+				st.goals_this_season += 1
+
+
+func move_player_to_u23(player_key: int) -> void:
+	var st: PlayerCareerState = career.state_for(player_key)
+	if st != null:
+		st.in_u23_squad = true
+
+
+func move_player_to_senior(player_key: int) -> void:
+	var st: PlayerCareerState = career.state_for(player_key)
+	if st != null:
+		st.in_u23_squad = false
+
+
+## --- Loans & Free Agent Market API -----------------------------------------------
+
+func submit_loan_bid(player_key: int, wage_share: float) -> TransferOffer:
+	var team_index: int = player_key / 1000
+	var squad_index: int = player_key % 1000
+	var target_team: TeamData = DataLoader.get_team(team_index)
+	if target_team == null or squad_index >= target_team.squad.size():
+		return null
+	var data: PlayerData = target_team.squad[squad_index]
+	var buyer: TeamData = user_team()
+
+	var offer := TransferOffer.make_loan(
+		buyer.team_name, career.user_team_index,
+		target_team.team_name, team_index, squad_index,
+		data.player_name, wage_share, career.today
+	)
+	career.active_offers.append(offer)
+	return offer
+
+
+func sign_free_agent(player: PlayerData, contract: ContractData) -> bool:
+	var club: TeamData = user_team()
+	if club == null or player == null or contract == null:
+		return false
+	if career.board != null and career.board.transfer_embargo:
+		return false
+
+	club.squad.append(player)
+	var new_squad_idx: int = club.squad.size() - 1
+	var st := PlayerCareerState.make_for(
+		player, career.user_team_index, new_squad_idx,
+		player.calculate_overall_rating() + 5, career.today
+	)
+	st.contract = contract
+	career.player_states[st.player_key] = st
+
+	var fin: ClubFinances = career.user_finances()
+	if fin != null:
+		fin.record_expense(ClubFinances.Line.SIGNING_BONUSES, contract.signing_bonus)
+
+	WorldEventLog.record(
+		&"free_agent_signed", WorldEvent.Category.TRANSFER,
+		"%s signed for %s on a free transfer." % [player.player_name, club.team_name],
+		0.5, 0.8
+	)
+	_push_inbox(InboxEngine.build_simple(
+		"Free Agent Signed: %s" % player.player_name,
+		"Free agent %s has joined %s on %s/wk." % [
+			player.player_name, club.team_name, TransferMarket.format_fee(contract.wage_weekly)
+		],
+		InboxItem.Category.TRANSFER, 0.85, career.today
+	))
+	return true
+
+
+## --- Staff Hiring & Dismissal ----------------------------------------------------
+
+func hire_staff_member(staff: StaffData, weekly_salary: int, years: int) -> bool:
+	var club: TeamData = user_team()
+	if club == null or staff == null:
+		return false
+	return StaffLoader.hire_staff(staff, club.team_name, weekly_salary, years)
+
+
+func sack_staff_member(staff: StaffData) -> void:
+	StaffLoader.terminate_staff(staff)
+
+
+## --- Regional Scouting API -------------------------------------------------------
+
+func assign_scout_to_region(scout_name: String, region: String) -> void:
+	ScoutingNetwork.assign_scout_to_region(career, scout_name, region)
+
+
+func get_scout_region(scout_name: String) -> String:
+	return ScoutingNetwork.scout_region(career, scout_name)
+
+
+## --- Tactical Presets API --------------------------------------------------------
+
+func get_tactical_preset(slot_index: int) -> Dictionary:
+	if career == null or career.profile == null:
+		return {}
+	return career.profile.get_preset(slot_index)
+
+
+func save_tactical_preset(
+	slot_index: int,
+	preset_name: String,
+	formation: String,
+	tempo: float,
+	pressing: float,
+	def_line: float,
+	width: float,
+	phys: float
+) -> void:
+	if career == null or career.profile == null:
+		return
+	career.profile.save_preset(
+		slot_index, preset_name, formation, tempo, pressing, def_line, width, phys
+	)

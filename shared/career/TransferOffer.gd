@@ -45,6 +45,7 @@ const CLUB_RESPONSE_DAYS: int = 2
 const PLAYER_RESPONSE_DAYS: int = 2
 
 @export var buying_club: String = ""
+@export var buyer_team_index: int = -1
 @export var selling_club: String = ""
 @export var player_name: String = ""
 @export var player_team_index: int = -1
@@ -98,6 +99,24 @@ static func make(
 	o.kind = p_kind
 	o.submitted_on = today.copy() if today != null else null
 	o.last_state_change = today.copy() if today != null else null
+	return o
+
+
+static func make_loan(
+	p_buying: String,
+	p_buyer_index: int,
+	p_selling: String,
+	p_team_index: int,
+	p_squad_index: int,
+	p_player_name: String,
+	p_wage_share: float,
+	today: CareerDate
+) -> TransferOffer:
+	var o := make(p_buying, p_selling, p_player_name, p_team_index, p_squad_index, Kind.LOAN, today)
+	o.buyer_team_index = p_buyer_index
+	o.loan_wage_share = p_wage_share
+	o.initiated_by_user = true
+	o.state = State.BID_SUBMITTED
 	return o
 
 

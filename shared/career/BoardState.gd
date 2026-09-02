@@ -85,8 +85,51 @@ const CONFIDENCE_GAIN_SCALE: float = 0.65
 @export var request_history: Array[Dictionary] = []
 ## Board refuses a second request of the same kind inside this many days.
 @export var request_cooldown_days: int = 60
+
+enum TakeoverStage { NONE = 0, RUMOURED = 1, IN_PROGRESS = 2, COMPLETED = 3, COLLAPSED = 4 }
+const TAKEOVER_STAGE_NAMES: Array[String] = ["None", "Rumoured", "In Progress", "Completed", "Collapsed"]
+
 @export var takeover_pending: bool = false
+@export var takeover_stage: TakeoverStage = TakeoverStage.NONE
+@export var takeover_consortium_name: String = ""
+@export var takeover_days_remaining: int = 0
+@export var takeover_cash_injection: int = 0
+@export var transfer_embargo: bool = false
 @export var owner_name: String = "The Board"
+
+
+func is_takeover_active() -> bool:
+	return takeover_stage == TakeoverStage.RUMOURED or takeover_stage == TakeoverStage.IN_PROGRESS
+
+
+func start_takeover_process(consortium_name: String) -> void:
+	takeover_stage = TakeoverStage.RUMOURED
+	takeover_consortium_name = consortium_name
+	takeover_pending = true
+	takeover_days_remaining = 14
+	transfer_embargo = false
+
+
+func advance_takeover_to_due_diligence(days: int = 21, cash_target: int = 10000000) -> void:
+	takeover_stage = TakeoverStage.IN_PROGRESS
+	takeover_days_remaining = days
+	takeover_cash_injection = cash_target
+	takeover_pending = true
+	transfer_embargo = true
+
+
+func complete_takeover(new_owner: String) -> void:
+	takeover_stage = TakeoverStage.COMPLETED
+	owner_name = new_owner
+	takeover_pending = false
+	transfer_embargo = false
+	confidence = clampf(maxf(confidence, 0.70), 0.0, 1.0)
+
+
+func collapse_takeover() -> void:
+	takeover_stage = TakeoverStage.COLLAPSED
+	takeover_pending = false
+	transfer_embargo = false
 
 
 static func make_for_club(club: TeamData, capacity: int) -> BoardState:

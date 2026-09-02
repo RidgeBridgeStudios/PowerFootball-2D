@@ -200,6 +200,55 @@ static func evaluate_club_response(
 	return offer
 
 
+## Decides whether the parent club will accept a loan proposal.
+static func evaluate_loan_response(
+	offer: TransferOffer,
+	data: PlayerData,
+	state: PlayerCareerState,
+	selling_club: TeamData,
+	today: CareerDate,
+	rng: RandomNumberGenerator
+) -> TransferOffer:
+	if offer == null or data == null or selling_club == null:
+		return offer
+	var age: int = data.get_age(today.year, today.month, today.day) if today != null else 25
+
+	# Key star players are not loaned out under any circumstances.
+	if state != null and state.contract != null and state.contract.promised_status == ContractData.Status.STAR_PLAYER:
+		offer.advance_to(
+			TransferOffer.State.CLUB_REJECTED, today,
+			"%s is essential to %s's first team and cannot be loaned out." % [offer.player_name, selling_club.team_name]
+		)
+		return offer
+
+	var wants_loan: bool = (state != null and state.loan_listed) or (age <= 22 and data.calculate_overall_rating() < 75)
+	var wage_ratio: float = offer.loan_wage_share
+
+	if wants_loan:
+		if wage_ratio >= 0.30 or rng.randf() < 0.65:
+			offer.advance_to(
+				TransferOffer.State.CLUB_ACCEPTED, today,
+				"%s have agreed to the loan move for %s." % [selling_club.team_name, offer.player_name]
+			)
+		else:
+			offer.advance_to(
+				TransferOffer.State.CLUB_COUNTERED, today,
+				"%s will only loan %s if you cover at least 50%% of his wages." % [selling_club.team_name, offer.player_name]
+			)
+	else:
+		if wage_ratio >= 0.80 and rng.randf() < 0.60:
+			offer.advance_to(
+				TransferOffer.State.CLUB_ACCEPTED, today,
+				"%s have agreed to loan %s with your generous wage contribution." % [selling_club.team_name, offer.player_name]
+			)
+		else:
+			offer.advance_to(
+				TransferOffer.State.CLUB_REJECTED, today,
+				"%s do not wish to loan out %s at this time." % [selling_club.team_name, offer.player_name]
+			)
+	return offer
+
+
 ## What wage a player expects, given their ability, reputation and the size of
 ## the club courting them.
 static func wage_demand(
@@ -289,6 +338,78 @@ static func evaluate_player_terms(
 			"%s is not interested in a move to %s." % [offer.player_name, offer.buying_club]
 		)
 	return offer
+
+
+## Realistic interactive contract haggle evaluation.
+static func evaluate_contract_proposal(
+	data: PlayerData,
+	state: PlayerCareerState,
+	club: TeamData,
+	wage_offered: int,
+	years_offered: int,
+	status_offered: ContractData.Status,
+	signing_bonus_offered: int,
+	release_clause_offered: int,
+	today: CareerDate,
+	attempts_made: int = 1
+) -> Dictionary:
+	var demand_wage: int = wage_demand(data, state, club, today)
+	var min_acceptable_wage: int = int(round(float(demand_wage) * 0.88))
+	var patience_max: int = 4
+	var patience_left: int = maxi(patience_max - attempts_made, 0)
+
+	# Lowball (< 60% of demand) insults the agent
+	if wage_offered < int(round(float(demand_wage) * 0.60)):
+		return {
+			"outcome": "walkout",
+			"message": "The agent was insulted by this derisory wage offer and stormed out of talks.",
+			"demanded_wage": demand_wage,
+			"demanded_years": 3,
+			"demanded_bonus": int(round(float(demand_wage) * 4.0)),
+			"demanded_status": ContractData.Status.REGULAR_STARTER,
+			"patience_remaining": 0
+		}
+
+	if attempts_made >= patience_max and wage_offered < min_acceptable_wage:
+		return {
+			"outcome": "walkout",
+			"message": "Talks have broken down after repeated counter-proposals. The player will consider other options.",
+			"demanded_wage": demand_wage,
+			"demanded_years": 3,
+			"demanded_bonus": int(round(float(demand_wage) * 4.0)),
+			"demanded_status": ContractData.Status.REGULAR_STARTER,
+			"patience_remaining": 0
+		}
+
+	var wage_ratio: float = float(wage_offered) / maxf(float(demand_wage), 1.0)
+	var meets_terms: bool = wage_ratio >= 0.98 or (wage_ratio >= 0.90 and signing_bonus_offered >= demand_wage * 3)
+
+	if meets_terms:
+		return {
+			"outcome": "accepted",
+			"message": "The player and his representative are delighted to accept these terms!",
+			"demanded_wage": wage_offered,
+			"demanded_years": years_offered,
+			"demanded_bonus": signing_bonus_offered,
+			"demanded_status": status_offered,
+			"patience_remaining": patience_left
+		}
+
+	var counter_wage: int = int(round((demand_wage + wage_offered) / 2.0 / 100.0)) * 100
+	counter_wage = maxi(counter_wage, min_acceptable_wage)
+	var needed_bonus: int = maxi(int(round(float(demand_wage) * 2.5)), 5000)
+
+	return {
+		"outcome": "counter",
+		"message": "The player is keen on the move but desires %s/wk and a %s signing bonus." % [
+			format_fee(counter_wage), format_fee(needed_bonus)
+		],
+		"demanded_wage": counter_wage,
+		"demanded_years": maxi(years_offered, 3),
+		"demanded_bonus": needed_bonus,
+		"demanded_status": ContractData.Status.REGULAR_STARTER,
+		"patience_remaining": patience_left
+	}
 
 
 ## --- AI club recruitment ---------------------------------------------------------

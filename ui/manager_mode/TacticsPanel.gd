@@ -42,10 +42,78 @@ func build(host: VBoxContainer, career: CareerSaveData) -> void:
 	# injury between visits must not leave a stale working copy behind).
 	_management = TeamManagementData.from_team(team, profile.tactical)
 
+	host.add_child(CareerTheme.card_root(_presets_card(profile, p)))
 	host.add_child(CareerTheme.card_root(_formation_card(career, team, profile, p)))
 	host.add_child(CareerTheme.card_root(_instructions_card(profile, p)))
 	host.add_child(CareerTheme.card_root(_lineup_card(career, team, p)))
 	host.add_child(CareerTheme.card_root(_set_pieces_card(career, team, p)))
+
+
+func _presets_card(profile: ManagerCareerProfile, p: CareerThemePalette) -> VBoxContainer:
+	var body: VBoxContainer = CareerTheme.card("Tactical Presets")
+	body.add_child(CareerTheme.muted("Quickly switch between up to 5 complete tactical presets."))
+
+	profile.ensure_default_presets()
+
+	var row: HBoxContainer = CareerTheme.row()
+	body.add_child(row)
+
+	for slot_idx: int in range(5):
+		var preset: Dictionary = profile.get_preset(slot_idx)
+		var preset_name: String = str(preset.get("name", "Preset %d" % (slot_idx + 1)))
+		var is_active: bool = (preset.get("formation", "") == _management.formation)
+		var btn: Button = CareerTheme.button(preset_name, is_active)
+		btn.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+		btn.pressed.connect(func() -> void:
+			_load_preset(profile, slot_idx)
+			refresh()
+		)
+		row.add_child(btn)
+
+	var save_row: HBoxContainer = CareerTheme.row()
+	save_row.add_child(CareerTheme.label("Save current shape & tactics to slot:"))
+	for slot_idx2: int in range(5):
+		var s_btn: Button = CareerTheme.button("Save Slot %d" % (slot_idx2 + 1))
+		s_btn.pressed.connect(func() -> void:
+			_save_current_to_preset(profile, slot_idx2)
+			refresh()
+		)
+		save_row.add_child(s_btn)
+	body.add_child(save_row)
+	return body
+
+
+func _load_preset(profile: ManagerCareerProfile, slot_index: int) -> void:
+	var preset: Dictionary = profile.get_preset(slot_index)
+	if preset.is_empty():
+		return
+	var formation: String = str(preset.get("formation", "4-4-2"))
+	_management.formation = formation
+	profile.preferred_formation = formation
+	if profile.tactical != null:
+		profile.tactical.tempo = float(preset.get("tempo", 0.5))
+		profile.tactical.pressing_intensity = float(preset.get("pressing_intensity", 0.5))
+		profile.tactical.defensive_line = float(preset.get("defensive_line", 0.5))
+		profile.tactical.width = float(preset.get("width", 0.5))
+		profile.tactical.physicality = float(preset.get("physicality", 0.5))
+		profile.sync_to_tactical()
+	_management.apply_to_team()
+	GameEvents.formation_changed.emit(GameManager.TEAM_A, formation)
+	CareerManager.save_career()
+
+
+func _save_current_to_preset(profile: ManagerCareerProfile, slot_index: int) -> void:
+	var tac: ManagerData = profile.tactical
+	var formation: String = _management.formation
+	var default_name: String = "%s Setup" % formation
+	var tempo: float = tac.tempo if tac != null else 0.5
+	var pressing: float = tac.pressing_intensity if tac != null else 0.5
+	var def_line: float = tac.defensive_line if tac != null else 0.5
+	var width: float = tac.width if tac != null else 0.5
+	var phys: float = tac.physicality if tac != null else 0.5
+
+	profile.save_preset(slot_index, default_name, formation, tempo, pressing, def_line, width, phys)
+	CareerManager.save_career()
 
 
 func _formation_card(

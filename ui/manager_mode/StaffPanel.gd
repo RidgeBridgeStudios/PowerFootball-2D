@@ -11,6 +11,10 @@ class_name StaffPanel
 extends CareerPanel
 
 
+enum View { CURRENT = 0, RECRUIT = 1 }
+var _view: View = View.CURRENT
+
+
 func title() -> String:
 	return "Staff"
 
@@ -22,9 +26,29 @@ func build(host: VBoxContainer, career: CareerSaveData) -> void:
 		empty_state(host, "No club loaded.")
 		return
 
-	host.add_child(CareerTheme.card_root(_manager_card(career, p)))
-	host.add_child(CareerTheme.card_root(_staff_card(team, p)))
-	host.add_child(CareerTheme.card_root(_coverage_card(team, p)))
+	var tabs: HBoxContainer = CareerTheme.row(4)
+	host.add_child(tabs)
+
+	var btn_current: Button = CareerTheme.button("Backroom Staff", _view == View.CURRENT)
+	btn_current.pressed.connect(func() -> void:
+		_view = View.CURRENT
+		refresh()
+	)
+	tabs.add_child(btn_current)
+
+	var btn_recruit: Button = CareerTheme.button("Recruitment Market", _view == View.RECRUIT)
+	btn_recruit.pressed.connect(func() -> void:
+		_view = View.RECRUIT
+		refresh()
+	)
+	tabs.add_child(btn_recruit)
+
+	if _view == View.CURRENT:
+		host.add_child(CareerTheme.card_root(_manager_card(career, p)))
+		host.add_child(CareerTheme.card_root(_staff_card(team, p)))
+		host.add_child(CareerTheme.card_root(_coverage_card(team, p)))
+	else:
+		host.add_child(CareerTheme.card_root(_recruitment_card(team, p)))
 
 
 func _manager_card(career: CareerSaveData, p: CareerThemePalette) -> VBoxContainer:
@@ -91,6 +115,7 @@ func _staff_card(team: TeamData, p: CareerThemePalette) -> VBoxContainer:
 	header.add_child(CareerTheme.cell("Physio", 70, p.text_muted, HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small))
 	header.add_child(CareerTheme.cell("Tactical", 70, p.text_muted, HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small))
 	header.add_child(CareerTheme.cell("Wage", 70, p.text_muted, HORIZONTAL_ALIGNMENT_RIGHT, p.font_size_small))
+	header.add_child(CareerTheme.cell("Action", 80, p.text_muted, HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small))
 
 	for i: int in range(team.staff.size()):
 		var s: StaffData = team.staff[i]
@@ -105,6 +130,58 @@ func _staff_card(team: TeamData, p: CareerThemePalette) -> VBoxContainer:
 		line.add_child(CareerTheme.cell(
 			"%s/wk" % CareerTheme.money(s.salary_weekly), 70, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT
 		))
+		var term_btn: Button = CareerTheme.button("Sack")
+		term_btn.pressed.connect(func() -> void:
+			CareerManager.sack_staff_member(s)
+			refresh()
+		)
+		line.add_child(term_btn)
+		body.add_child(CareerTheme.data_row_root(line))
+	return body
+
+
+func _recruitment_card(team: TeamData, p: CareerThemePalette) -> VBoxContainer:
+	var body: VBoxContainer = CareerTheme.card("Staff Recruitment Market")
+	body.add_child(CareerTheme.muted(
+		"Available backroom personnel seeking positions. Coaches improve player growth, physios accelerate recovery, scouts uncover talent."
+	))
+
+	var available: Array[StaffData] = StaffLoader.all_available_staff()
+	if available.is_empty():
+		body.add_child(CareerTheme.muted("No staff members currently on the market."))
+		return body
+
+	var header: HBoxContainer = CareerTheme.header_row()
+	body.add_child(CareerTheme.data_row_root(header))
+	header.add_child(CareerTheme.cell("Name", 160, p.text_muted, HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small))
+	header.add_child(CareerTheme.cell("Role", 130, p.text_muted, HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small))
+	header.add_child(CareerTheme.cell("Age", 40, p.text_muted, HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small))
+	header.add_child(CareerTheme.cell("Coach", 66, p.text_muted, HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small))
+	header.add_child(CareerTheme.cell("Judging", 66, p.text_muted, HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small))
+	header.add_child(CareerTheme.cell("Physio", 66, p.text_muted, HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small))
+	header.add_child(CareerTheme.cell("Tactical", 66, p.text_muted, HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small))
+	header.add_child(CareerTheme.cell("Demanded", 80, p.text_muted, HORIZONTAL_ALIGNMENT_RIGHT, p.font_size_small))
+	header.add_child(CareerTheme.cell("Action", 90, p.text_muted, HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small))
+
+	for i: int in range(available.size()):
+		var s: StaffData = available[i]
+		var line: HBoxContainer = CareerTheme.data_row(i)
+		line.add_child(CareerTheme.cell(s.staff_name, 160, p.text_primary))
+		line.add_child(CareerTheme.cell(s.role, 130, p.text_secondary))
+		line.add_child(CareerTheme.cell(str(s.get_age()), 40, p.text_secondary))
+		line.add_child(CareerTheme.bar(s.coaching, 66))
+		line.add_child(CareerTheme.bar(s.judging_ability, 66))
+		line.add_child(CareerTheme.bar(s.physiotherapy, 66))
+		line.add_child(CareerTheme.bar(s.tactical_knowledge, 66))
+		line.add_child(CareerTheme.cell(
+			"%s/wk" % CareerTheme.money(s.salary_weekly), 80, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT
+		))
+		var hire_btn: Button = CareerTheme.button("Hire", true)
+		hire_btn.pressed.connect(func() -> void:
+			CareerManager.hire_staff_member(s, s.salary_weekly, 3)
+			refresh()
+		)
+		line.add_child(hire_btn)
 		body.add_child(CareerTheme.data_row_root(line))
 	return body
 

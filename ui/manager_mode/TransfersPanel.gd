@@ -14,9 +14,9 @@
 class_name TransfersPanel
 extends CareerPanel
 
-enum View { SEARCH = 0, SHORTLIST = 1, NEGOTIATIONS = 2 }
+enum View { SEARCH = 0, SHORTLIST = 1, NEGOTIATIONS = 2, FREE_AGENTS = 3 }
 
-const VIEW_LABELS: Array[String] = ["Search", "Shortlist", "Negotiations"]
+const VIEW_LABELS: Array[String] = ["Search", "Shortlist", "Negotiations", "Free Agents"]
 const POSITION_FILTERS: Array[String] = ["All", "GK", "DEF", "MID", "ATT"]
 
 var _view: View = View.SEARCH
@@ -67,6 +67,8 @@ func build(host: VBoxContainer, career: CareerSaveData) -> void:
 			_build_search(host, career, team, finances, p)
 		View.SHORTLIST:
 			_build_shortlist(host, career, p)
+		View.FREE_AGENTS:
+			_build_free_agents(host, career, team, finances, p)
 		_:
 			_build_negotiations(host, career, p)
 
@@ -251,6 +253,15 @@ func _target_actions(
 	)
 	actions.add_child(bid_button)
 
+	var loan_button: Button = CareerTheme.button("Loan Offer (50% wage)")
+	loan_button.disabled = not career.transfer_window_open
+	loan_button.pressed.connect(func() -> void:
+		CareerManager.submit_loan_bid(key, 0.50)
+		_view = View.NEGOTIATIONS
+		refresh()
+	)
+	actions.add_child(loan_button)
+
 	if not career.transfer_window_open:
 		body.add_child(CareerTheme.label("The transfer window is closed.", p.warning))
 	return body
@@ -338,22 +349,20 @@ func _build_negotiations(host: VBoxContainer, career: CareerSaveData, p: CareerT
 				refresh()
 			)
 			actions.add_child(accept)
-		elif offer.state == TransferOffer.State.CLUB_ACCEPTED:
-			var terms: Button = CareerTheme.button("Open personal terms", true)
+		elif offer.state == TransferOffer.State.CLUB_ACCEPTED or offer.state == TransferOffer.State.TERMS_COUNTERED:
+			var terms: Button = CareerTheme.button("Negotiate Personal Terms", true)
 			terms.pressed.connect(func() -> void:
-				CareerManager.offer_personal_terms(offer)
-				refresh()
+				var t_team: TeamData = DataLoader.get_team(offer.player_team_index)
+				var p_d: PlayerData = t_team.squad[offer.player_squad_index] if t_team != null and offer.player_squad_index < t_team.squad.size() else null
+				var p_s: PlayerCareerState = career.state_for(offer.player_key())
+				var modal: ContractNegotiationModal = ContractNegotiationModal.open_modal(
+					self, p_d, p_s, t_team, false, offer
+				)
+				modal.negotiation_finished.connect(func(_succ: bool, _c: ContractData) -> void:
+					refresh()
+				)
 			)
 			actions.add_child(terms)
-		elif offer.state == TransferOffer.State.TERMS_COUNTERED:
-			var meet: Button = CareerTheme.button(
-				"Meet his demands (%s/wk)" % CareerTheme.money(offer.wage_demanded), true
-			)
-			meet.pressed.connect(func() -> void:
-				CareerManager.offer_personal_terms(offer, offer.wage_demanded)
-				refresh()
-			)
-			actions.add_child(meet)
 
 		if not offer.is_terminal():
 			var withdraw: Button = CareerTheme.button("Withdraw")
@@ -367,3 +376,111 @@ func _build_negotiations(host: VBoxContainer, career: CareerSaveData, p: CareerT
 
 		body.add_child(line)
 		body.add_child(CareerTheme.divider())
+
+
+func _build_free_agents(
+	host: VBoxContainer,
+	career: CareerSaveData,
+	team: TeamData,
+	finances: ClubFinances,
+	p: CareerThemePalette
+) -> void:
+	var body: VBoxContainer = CareerTheme.card("Free Agent Market")
+	host.add_child(CareerTheme.card_root(body))
+	body.add_child(CareerTheme.muted(
+		"Unattached players available for immediate contract negotiation with no transfer fee."
+	))
+
+	var agents: Array[PlayerData] = _get_free_agents_pool()
+	if agents.is_empty():
+		body.add_child(CareerTheme.muted("No free agents currently seeking contracts."))
+		return
+
+	var header: HBoxContainer = CareerTheme.header_row()
+	body.add_child(CareerTheme.data_row_root(header))
+	header.add_child(CareerTheme.cell("Name", 160, p.text_muted))
+	header.add_child(CareerTheme.cell("Pos", 50, p.text_muted))
+	header.add_child(CareerTheme.cell("Age", 40, p.text_muted))
+	header.add_child(CareerTheme.cell("OVR", 44, p.text_muted))
+	header.add_child(CareerTheme.cell("Est. Wage", 84, p.text_muted, HORIZONTAL_ALIGNMENT_RIGHT))
+	header.add_child(CareerTheme.cell("Action", 130, p.text_muted))
+
+	for i: int in range(agents.size()):
+		var fa: PlayerData = agents[i]
+		var line: HBoxContainer = CareerTheme.data_row(i, false)
+		var age: int = fa.get_age(career.today.year, career.today.month, career.today.day)
+		var ovr: int = fa.calculate_overall_rating()
+		var wage_est: int = TransferMarket.wage_demand(fa, null, team, career.today)
+
+		line.add_child(CareerTheme.cell(fa.player_name, 160, p.text_primary))
+		line.add_child(CareerTheme.cell(fa.position_role, 50, p.text_secondary))
+		line.add_child(CareerTheme.cell(str(age), 40, p.text_secondary))
+		line.add_child(CareerTheme.cell(str(ovr), 44, p.accent))
+		line.add_child(CareerTheme.cell("%s/wk" % CareerTheme.money(wage_est), 84, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT))
+
+		var sign_btn: Button = CareerTheme.button("Approach to Sign", true)
+		sign_btn.pressed.connect(func() -> void:
+			var modal: ContractNegotiationModal = ContractNegotiationModal.open_modal(
+				self, fa, null, null, true
+			)
+			modal.negotiation_finished.connect(func(success: bool, _c: ContractData) -> void:
+				if success:
+					agents.erase(fa)
+				refresh()
+			)
+		)
+		line.add_child(sign_btn)
+		body.add_child(CareerTheme.data_row_root(line))
+
+
+var _cached_free_agents: Array[PlayerData] = []
+
+func _get_free_agents_pool() -> Array[PlayerData]:
+	if not _cached_free_agents.is_empty():
+		return _cached_free_agents
+
+	var fa_specs: Array[Dictionary] = [
+		{"name": "Mateo Silva-Cruz", "pos": "CM", "nat": "Spanish", "ovr_bias": 72, "age": 29},
+		{"name": "Liam Gallagher", "pos": "ST", "nat": "English", "ovr_bias": 68, "age": 23},
+		{"name": "Stefan Lindqvist", "pos": "CB", "nat": "Danish", "ovr_bias": 69, "age": 27},
+		{"name": "Alejandro Velez", "pos": "LB", "nat": "Spanish", "ovr_bias": 66, "age": 22},
+		{"name": "Niels Van Der Sar", "pos": "GK", "nat": "Dutch", "ovr_bias": 71, "age": 31},
+		{"name": "Karim Ben-Ali", "pos": "RM", "nat": "French", "ovr_bias": 67, "age": 25},
+		{"name": "Joao Pedro Matos", "pos": "DM", "nat": "Portuguese", "ovr_bias": 70, "age": 26},
+		{"name": "Florian Berger", "pos": "RB", "nat": "Austrian", "ovr_bias": 64, "age": 20},
+	]
+
+	for spec: Dictionary in fa_specs:
+		var p := PlayerData.new()
+		p.player_name = str(spec["name"])
+		p.position_role = str(spec["pos"])
+		p.nationality = str(spec["nat"])
+		p.squad_status = "Squad Player"
+		var target_ovr: int = int(spec["ovr_bias"])
+		var age: int = int(spec["age"])
+		var y: int = 2026 - age
+		p.date_of_birth = "%d-05-12" % y
+		p.top_speed = 210.0 + float(target_ovr - 65) * 1.5
+		p.acceleration_time = 0.24
+		p.friction_time = 0.12
+		p.stamina_max = 95.0
+		p.stamina_drain = 18.0
+		p.stamina_recover = 9.0
+		p.close_control = clampf(float(target_ovr) / 100.0, 0.45, 0.85)
+		p.vision = clampf(float(target_ovr) / 100.0, 0.45, 0.85)
+		p.composure = 0.65
+		p.aggression = 0.55
+		p.reflexes = 0.72 if p.position_role == "GK" else 0.50
+		p.mass = 80.0 if p.position_role == "GK" else 74.0
+		p.determination = 0.65
+		p.work_rate = 0.65
+		p.professionalism = 0.70
+		p.ambition = 0.60
+		p.loyalty = 0.60
+		p.adaptability = 0.70
+		p.player_reputation = clampf(float(target_ovr) / 100.0, 0.4, 0.8)
+		p.wage_weekly = int(round(1500.0 * pow(1.08, float(target_ovr - 50)) / 100.0) * 100)
+		p.morale = 0.60
+		_cached_free_agents.append(p)
+
+	return _cached_free_agents

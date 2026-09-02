@@ -24,8 +24,65 @@ func build(host: VBoxContainer, career: CareerSaveData) -> void:
 		return
 
 	host.add_child(CareerTheme.card_root(_confidence_card(board, career, p)))
+	host.add_child(CareerTheme.card_root(_takeover_card(board, p)))
 	host.add_child(CareerTheme.card_root(_facilities_card(board, p)))
 	host.add_child(CareerTheme.card_root(_requests_card(board, career, p)))
+
+
+func _takeover_card(board: BoardState, p: CareerThemePalette) -> VBoxContainer:
+	var body: VBoxContainer = CareerTheme.card("Ownership & Takeover")
+	body.add_child(CareerTheme.label("Owner: %s" % board.owner_name, p.text_primary, p.font_size_heading))
+
+	if board.is_takeover_active():
+		var stage_text: String = "Rumoured Interest"
+		var stage_tint: Color = p.warning
+		if board.takeover_stage == BoardState.TakeoverStage.IN_PROGRESS:
+			stage_text = "Formal Due Diligence & Audit"
+			stage_tint = p.danger
+
+		var banner: PanelContainer = PanelContainer.new()
+		var b_style: StyleBoxFlat = StyleBoxFlat.new()
+		b_style.bg_color = p.background_panel
+		b_style.border_color = stage_tint
+		b_style.set_border_width_all(1)
+		b_style.set_corner_radius_all(6)
+		banner.add_theme_stylebox_override("panel", b_style)
+
+		var b_margin := MarginContainer.new()
+		b_margin.add_theme_constant_override("margin_left", 12)
+		b_margin.add_theme_constant_override("margin_top", 10)
+		b_margin.add_theme_constant_override("margin_right", 12)
+		b_margin.add_theme_constant_override("margin_bottom", 10)
+		banner.add_child(b_margin)
+
+		var b_col := VBoxContainer.new()
+		b_col.add_theme_constant_override("separation", 4)
+		b_margin.add_child(b_col)
+
+		b_col.add_child(CareerTheme.label(
+			"TAKEOVER IN PROGRESS: %s" % board.takeover_consortium_name, stage_tint, p.font_size_heading
+		))
+		b_col.add_child(CareerTheme.secondary(
+			"Stage: %s — Approximately %d day%s remaining." % [
+				stage_text, board.takeover_days_remaining, "s" if board.takeover_days_remaining != 1 else ""
+			]
+		))
+
+		if board.transfer_embargo:
+			b_col.add_child(CareerTheme.label(
+				"TRANSFER EMBARGO ACTIVE: The board has frozen incoming transfers pending takeover completion.",
+				p.danger
+			))
+		else:
+			b_col.add_child(CareerTheme.muted(
+				"Auditors and prospective buyers are evaluating club valuation."
+			))
+
+		body.add_child(banner)
+	else:
+		body.add_child(CareerTheme.muted("Club ownership is stable. No active takeover bids."))
+
+	return body
 
 
 func _confidence_card(board: BoardState, career: CareerSaveData, p: CareerThemePalette) -> VBoxContainer:

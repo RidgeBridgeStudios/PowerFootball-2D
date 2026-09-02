@@ -14,6 +14,7 @@ class_name SquadPanel
 extends CareerPanel
 
 enum Sort { NUMBER = 0, NAME = 1, POSITION = 2, AGE = 3, OVERALL = 4, MORALE = 5, VALUE = 6, CONTRACT = 7 }
+enum SquadFilter { ALL = 0, SENIOR = 1, U23 = 2 }
 
 const SORT_LABELS: Array[String] = [
 	"#", "Name", "Pos", "Age", "OVR", "Morale", "Value", "Contract"
@@ -23,6 +24,7 @@ var _sort: Sort = Sort.OVERALL
 var _descending: bool = true
 var _selected_squad_index: int = -1
 var _show_unhappy_only: bool = false
+var _squad_filter: SquadFilter = SquadFilter.ALL
 
 
 func title() -> String:
@@ -42,8 +44,30 @@ func build(host: VBoxContainer, career: CareerSaveData) -> void:
 	toolbar.add_child(CareerTheme.secondary("%d players" % team.squad.size()))
 	var payroll: int = team.get_weekly_payroll()
 	toolbar.add_child(CareerTheme.secondary("Payroll %s/wk" % CareerTheme.money(payroll)))
+
+	var filter_all: Button = CareerTheme.button("All", _squad_filter == SquadFilter.ALL)
+	filter_all.pressed.connect(func() -> void:
+		_squad_filter = SquadFilter.ALL
+		refresh()
+	)
+	toolbar.add_child(filter_all)
+
+	var filter_senior: Button = CareerTheme.button("First Team", _squad_filter == SquadFilter.SENIOR)
+	filter_senior.pressed.connect(func() -> void:
+		_squad_filter = SquadFilter.SENIOR
+		refresh()
+	)
+	toolbar.add_child(filter_senior)
+
+	var filter_u23: Button = CareerTheme.button("Under-23s", _squad_filter == SquadFilter.U23)
+	filter_u23.pressed.connect(func() -> void:
+		_squad_filter = SquadFilter.U23
+		refresh()
+	)
+	toolbar.add_child(filter_u23)
+
 	var filter: Button = CareerTheme.button(
-		"Showing: Unhappy only" if _show_unhappy_only else "Showing: All"
+		"Showing: Unhappy only" if _show_unhappy_only else "Unhappy only"
 	)
 	filter.pressed.connect(func() -> void:
 		_show_unhappy_only = not _show_unhappy_only
@@ -75,6 +99,10 @@ func build(host: VBoxContainer, career: CareerSaveData) -> void:
 		var data: PlayerData = team.squad[squad_index]
 		var state: PlayerCareerState = career.state_for_squad(career.user_team_index, squad_index)
 		if _show_unhappy_only and data.morale >= 0.40:
+			continue
+		if _squad_filter == SquadFilter.SENIOR and state != null and state.in_u23_squad:
+			continue
+		if _squad_filter == SquadFilter.U23 and (state == null or not state.in_u23_squad):
 			continue
 		host.add_child(_player_row(data, state, squad_index, shown, career, p, team))
 		shown += 1
@@ -369,6 +397,28 @@ func _player_profile(
 			refresh()
 		)
 		actions.add_child(loan_button)
+
+		var u23_button: Button = CareerTheme.button(
+			"Promote to First Team" if state.in_u23_squad else "Move to Under-23s"
+		)
+		u23_button.pressed.connect(func() -> void:
+			state.in_u23_squad = not state.in_u23_squad
+			CareerManager.save_career()
+			refresh()
+		)
+		actions.add_child(u23_button)
+
+		var contract_button: Button = CareerTheme.button("Offer New Contract", true)
+		contract_button.pressed.connect(func() -> void:
+			var modal: ContractNegotiationModal = ContractNegotiationModal.open_modal(
+				self, data, state, team, false
+			)
+			modal.negotiation_finished.connect(func(_succ: bool, _c: ContractData) -> void:
+				CareerManager.save_career()
+				refresh()
+			)
+		)
+		actions.add_child(contract_button)
 
 	var captain_button: Button = CareerTheme.button("Make captain")
 	captain_button.disabled = data.is_captain

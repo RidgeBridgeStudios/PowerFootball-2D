@@ -132,9 +132,17 @@ func _day_cell(date: CareerDate, career: CareerSaveData, p: CareerThemePalette) 
 	var column := VBoxContainer.new()
 	column.add_theme_constant_override("separation", 1)
 	margin.add_child(column)
-	column.add_child(CareerTheme.label(
+
+	var is_int_break: bool = CareerManager.is_international_break(date)
+	var day_row: HBoxContainer = CareerTheme.row(4)
+	day_row.add_child(CareerTheme.label(
 		str(date.day), p.accent if is_today else p.text_muted, p.font_size_small
 	))
+	if is_int_break:
+		day_row.add_child(CareerTheme.label(
+			"[INT]", p.accent, p.font_size_small
+		))
+	column.add_child(day_row)
 
 	if user_fixture != null:
 		var opponent: TeamData = DataLoader.get_team(user_fixture.opponent_of(career.user_team_index))

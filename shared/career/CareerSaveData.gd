@@ -51,6 +51,10 @@ const PHASE_NAMES: Array[String] = ["Pre-Season", "Regular Season", "Off-Season"
 @export var competitions: Array[CompetitionData] = []
 ## Completed seasons: {year, club, position, points, comp_results, trophies}
 @export var season_archive: Array[Dictionary] = []
+## Division/tier rosters: team indices in Tier 1 (Premier) and Tier 2 (Championship).
+@export var tier_1_indices: Array[int] = []
+@export var tier_2_indices: Array[int] = []
+@export var continental_indices: Array[int] = []
 
 ## --- Per-club career state --------------------------------------------------------
 ## player_key (team*1000+squad_index) -> PlayerCareerState. Covers EVERY club in
@@ -133,7 +137,18 @@ func competition(comp_kind: FixtureData.Competition) -> CompetitionData:
 
 
 func league_competition() -> CompetitionData:
+	for c: CompetitionData in competitions:
+		if c.kind == CompetitionData.Kind.LEAGUE and c.participant_indices.has(user_team_index):
+			return c
 	return competition(FixtureData.Competition.LEAGUE)
+
+
+func continental_competition() -> CompetitionData:
+	return competition(FixtureData.Competition.CONTINENTAL)
+
+
+func cup_competition() -> CompetitionData:
+	return competition(FixtureData.Competition.DOMESTIC_CUP)
 
 
 ## Every fixture across every competition scheduled for one date.

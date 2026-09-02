@@ -38,6 +38,16 @@ func get_team(index: int) -> TeamData:
 	return league.teams[index]
 
 
+## Returns the TeamData matching team_name, or null if not found.
+func get_team_by_name(team_name: String) -> TeamData:
+	if league == null:
+		return null
+	for t: TeamData in league.teams:
+		if t.team_name == team_name:
+			return t
+	return null
+
+
 ## Returns the TeamData assigned to match side TEAM_A or TEAM_B, respecting
 ## any home/away team index selection metadata set on GameManager by KickOffMenu.
 func get_match_team(match_side: int) -> TeamData:

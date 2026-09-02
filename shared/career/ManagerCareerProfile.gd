@@ -104,6 +104,49 @@ const XP_PER_ATTRIBUTE_POINT: float = 100.0
 ## Kept in sync by sync_to_tactical() whenever philosophy or attributes change.
 @export var tactical: ManagerData = null
 
+## 5 named tactical presets: [{name, formation, tempo, pressing_intensity, defensive_line, width, physicality}]
+@export var tactical_presets: Array[Dictionary] = []
+
+
+func get_preset(slot_index: int) -> Dictionary:
+	ensure_default_presets()
+	if slot_index >= 0 and slot_index < tactical_presets.size():
+		return tactical_presets[slot_index]
+	return {}
+
+
+func save_preset(
+	slot_index: int,
+	preset_name: String,
+	formation_str: String,
+	tempo_val: float,
+	pressing_val: float,
+	def_line_val: float,
+	width_val: float,
+	phys_val: float
+) -> void:
+	ensure_default_presets()
+	if slot_index >= 0 and slot_index < tactical_presets.size():
+		tactical_presets[slot_index] = {
+			"name": preset_name,
+			"formation": formation_str,
+			"tempo": tempo_val,
+			"pressing_intensity": pressing_val,
+			"defensive_line": def_line_val,
+			"width": width_val,
+			"physicality": phys_val
+		}
+
+
+func ensure_default_presets() -> void:
+	if tactical_presets.size() < 5:
+		tactical_presets.clear()
+		tactical_presets.append({"name": "Primary (4-4-2)", "formation": "4-4-2", "tempo": 0.5, "pressing_intensity": 0.5, "defensive_line": 0.5, "width": 0.5, "physicality": 0.6})
+		tactical_presets.append({"name": "Attacking (4-3-3)", "formation": "4-3-3", "tempo": 0.7, "pressing_intensity": 0.75, "defensive_line": 0.65, "width": 0.65, "physicality": 0.5})
+		tactical_presets.append({"name": "Defensive (5-3-2)", "formation": "5-3-2", "tempo": 0.35, "pressing_intensity": 0.4, "defensive_line": 0.3, "width": 0.4, "physicality": 0.7})
+		tactical_presets.append({"name": "Control (4-2-3-1)", "formation": "4-2-3-1", "tempo": 0.45, "pressing_intensity": 0.6, "defensive_line": 0.55, "width": 0.55, "physicality": 0.55})
+		tactical_presets.append({"name": "Counter (3-5-2)", "formation": "3-5-2", "tempo": 0.65, "pressing_intensity": 0.55, "defensive_line": 0.4, "width": 0.6, "physicality": 0.65})
+
 
 static func make_new(
 	p_name: String,

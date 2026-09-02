@@ -27,6 +27,33 @@ const DISCOVERY_CHANCE: float = 0.06
 const WONDERKID_MAX_AGE: int = 20
 const WONDERKID_MIN_HEADROOM: int = 18
 
+const REGIONS: Array[String] = [
+	"Domestic & Scandinavia",
+	"Western Europe",
+	"Central Europe",
+	"Southern Europe",
+	"British Isles"
+]
+
+const REGION_TEAMS: Dictionary = {
+	"Domestic & Scandinavia": ["FC Nordvik", "Kjøbenhavn Boldklub"],
+	"Western Europe": ["Valence Athletic", "Olympique Montclair", "Feyenoord Haven"],
+	"Central Europe": ["Borussia Eisenwald", "SV Donau Wien"],
+	"Southern Europe": ["CD Solano", "Real Maritimo", "Aurora Calcio", "Porto Sol Stella", "Athletic Bilbao Nova", "Sporting Lisboa Norte", "AC Bergamo"],
+	"British Isles": ["Highland Thistle FC", "Yorkshire United"]
+}
+
+
+static func assign_scout_to_region(career: CareerSaveData, scout_name: String, region: String) -> void:
+	if career != null and scout_name != "":
+		career.scout_assignments[scout_name] = region
+
+
+static func scout_region(career: CareerSaveData, scout_name: String) -> String:
+	if career == null:
+		return "Domestic & Scandinavia"
+	return str(career.scout_assignments.get(scout_name, "Domestic & Scandinavia"))
+
 
 static func available_scouts(team: TeamData) -> Array[StaffData]:
 	var out: Array[StaffData] = []
@@ -132,13 +159,22 @@ static func discover_targets(
 		if rng.randf() > DISCOVERY_CHANCE * (0.5 + scout.judging_ability):
 			continue
 
-		# Pick a club that is not the user's, then a player from it.
+		# Pick a club from the scout's assigned region (or any other club if none match)
+		var assigned_reg: String = scout_region(career, scout.staff_name)
+		var target_club_names: Array = REGION_TEAMS.get(assigned_reg, [])
+		var matching_team_indices: Array[int] = []
+		for t_i: int in range(teams.size()):
+			if t_i != career.user_team_index and (target_club_names.is_empty() or target_club_names.has(teams[t_i].team_name)):
+				matching_team_indices.append(t_i)
+		if matching_team_indices.is_empty():
+			for t_i2: int in range(teams.size()):
+				if t_i2 != career.user_team_index:
+					matching_team_indices.append(t_i2)
+
 		var attempts: int = 0
-		while attempts < 6:
+		while attempts < 6 and not matching_team_indices.is_empty():
 			attempts += 1
-			var team_index: int = rng.randi_range(0, teams.size() - 1)
-			if team_index == career.user_team_index:
-				continue
+			var team_index: int = matching_team_indices[rng.randi_range(0, matching_team_indices.size() - 1)]
 			var team: TeamData = teams[team_index]
 			if team == null or team.squad.is_empty():
 				continue

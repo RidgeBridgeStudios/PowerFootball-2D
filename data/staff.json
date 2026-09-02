@@ -1187,6 +1187,1061 @@
           "level": "Fluent"
         }
       ]
+    },
+    {
+      "staff_name": "Theo Simon",
+      "role": "Assistant Manager",
+      "team_name": "Olympique Montclair",
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "1975-04-10",
+      "experience": 22,
+      "coaching": 0.72,
+      "judging_ability": 0.68,
+      "physiotherapy": 0.5,
+      "tactical_knowledge": 0.75,
+      "salary_weekly": 4500,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Alexandre Michel",
+      "role": "Head Physio",
+      "team_name": "Olympique Montclair",
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "1976-04-11",
+      "experience": 27,
+      "coaching": 0.45,
+      "judging_ability": 0.55,
+      "physiotherapy": 0.85,
+      "tactical_knowledge": 0.45,
+      "salary_weekly": 3800,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Julien Lefebvre",
+      "role": "Tactical Analyst",
+      "team_name": "Olympique Montclair",
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "1977-04-12",
+      "experience": 25,
+      "coaching": 0.55,
+      "judging_ability": 0.65,
+      "physiotherapy": 0.4,
+      "tactical_knowledge": 0.82,
+      "salary_weekly": 3400,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Clement Leroy",
+      "role": "Fitness Coach",
+      "team_name": "Olympique Montclair",
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "1978-04-13",
+      "experience": 16,
+      "coaching": 0.78,
+      "judging_ability": 0.5,
+      "physiotherapy": 0.65,
+      "tactical_knowledge": 0.5,
+      "salary_weekly": 3200,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Nicolas Roux",
+      "role": "Chief Scout",
+      "team_name": "Olympique Montclair",
+      "nationality": "French",
+      "secondary_nationality": "",
+      "date_of_birth": "1979-04-14",
+      "experience": 18,
+      "coaching": 0.5,
+      "judging_ability": 0.82,
+      "physiotherapy": 0.4,
+      "tactical_knowledge": 0.65,
+      "salary_weekly": 3600,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "French",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Paul Steiner",
+      "role": "Assistant Manager",
+      "team_name": "SV Donau Wien",
+      "nationality": "Austrian",
+      "secondary_nationality": "",
+      "date_of_birth": "1975-04-10",
+      "experience": 17,
+      "coaching": 0.72,
+      "judging_ability": 0.68,
+      "physiotherapy": 0.5,
+      "tactical_knowledge": 0.75,
+      "salary_weekly": 4500,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "German",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Florian Moser",
+      "role": "Head Physio",
+      "team_name": "SV Donau Wien",
+      "nationality": "Austrian",
+      "secondary_nationality": "",
+      "date_of_birth": "1976-04-11",
+      "experience": 18,
+      "coaching": 0.45,
+      "judging_ability": 0.55,
+      "physiotherapy": 0.85,
+      "tactical_knowledge": 0.45,
+      "salary_weekly": 3800,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "German",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Felix Mayer",
+      "role": "Tactical Analyst",
+      "team_name": "SV Donau Wien",
+      "nationality": "Austrian",
+      "secondary_nationality": "",
+      "date_of_birth": "1977-04-12",
+      "experience": 28,
+      "coaching": 0.55,
+      "judging_ability": 0.65,
+      "physiotherapy": 0.4,
+      "tactical_knowledge": 0.82,
+      "salary_weekly": 3400,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "German",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "David Hofer",
+      "role": "Fitness Coach",
+      "team_name": "SV Donau Wien",
+      "nationality": "Austrian",
+      "secondary_nationality": "",
+      "date_of_birth": "1978-04-13",
+      "experience": 25,
+      "coaching": 0.78,
+      "judging_ability": 0.5,
+      "physiotherapy": 0.65,
+      "tactical_knowledge": 0.5,
+      "salary_weekly": 3200,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "German",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Simon Leitner",
+      "role": "Chief Scout",
+      "team_name": "SV Donau Wien",
+      "nationality": "Austrian",
+      "secondary_nationality": "",
+      "date_of_birth": "1979-04-14",
+      "experience": 20,
+      "coaching": 0.5,
+      "judging_ability": 0.82,
+      "physiotherapy": 0.4,
+      "tactical_knowledge": 0.65,
+      "salary_weekly": 3600,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "German",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Alvaro Fernandez",
+      "role": "Assistant Manager",
+      "team_name": "Athletic Bilbao Nova",
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "1975-04-10",
+      "experience": 28,
+      "coaching": 0.72,
+      "judging_ability": 0.68,
+      "physiotherapy": 0.5,
+      "tactical_knowledge": 0.75,
+      "salary_weekly": 4500,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Adrian Lopez",
+      "role": "Head Physio",
+      "team_name": "Athletic Bilbao Nova",
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "1976-04-11",
+      "experience": 22,
+      "coaching": 0.45,
+      "judging_ability": 0.55,
+      "physiotherapy": 0.85,
+      "tactical_knowledge": 0.45,
+      "salary_weekly": 3800,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "David Martinez",
+      "role": "Tactical Analyst",
+      "team_name": "Athletic Bilbao Nova",
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "1977-04-12",
+      "experience": 20,
+      "coaching": 0.55,
+      "judging_ability": 0.65,
+      "physiotherapy": 0.4,
+      "tactical_knowledge": 0.82,
+      "salary_weekly": 3400,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Diego Sanchez",
+      "role": "Fitness Coach",
+      "team_name": "Athletic Bilbao Nova",
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "1978-04-13",
+      "experience": 16,
+      "coaching": 0.78,
+      "judging_ability": 0.5,
+      "physiotherapy": 0.65,
+      "tactical_knowledge": 0.5,
+      "salary_weekly": 3200,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Javier Perez",
+      "role": "Chief Scout",
+      "team_name": "Athletic Bilbao Nova",
+      "nationality": "Spanish",
+      "secondary_nationality": "",
+      "date_of_birth": "1979-04-14",
+      "experience": 22,
+      "coaching": 0.5,
+      "judging_ability": 0.82,
+      "physiotherapy": 0.4,
+      "tactical_knowledge": 0.65,
+      "salary_weekly": 3600,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Spanish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Afonso Pereira",
+      "role": "Assistant Manager",
+      "team_name": "Sporting Lisboa Norte",
+      "nationality": "Portuguese",
+      "secondary_nationality": "",
+      "date_of_birth": "1975-04-10",
+      "experience": 15,
+      "coaching": 0.72,
+      "judging_ability": 0.68,
+      "physiotherapy": 0.5,
+      "tactical_knowledge": 0.75,
+      "salary_weekly": 4500,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Portuguese",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Francisco Oliveira",
+      "role": "Head Physio",
+      "team_name": "Sporting Lisboa Norte",
+      "nationality": "Portuguese",
+      "secondary_nationality": "",
+      "date_of_birth": "1976-04-11",
+      "experience": 25,
+      "coaching": 0.45,
+      "judging_ability": 0.55,
+      "physiotherapy": 0.85,
+      "tactical_knowledge": 0.45,
+      "salary_weekly": 3800,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Portuguese",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Tomas Costa",
+      "role": "Tactical Analyst",
+      "team_name": "Sporting Lisboa Norte",
+      "nationality": "Portuguese",
+      "secondary_nationality": "",
+      "date_of_birth": "1977-04-12",
+      "experience": 20,
+      "coaching": 0.55,
+      "judging_ability": 0.65,
+      "physiotherapy": 0.4,
+      "tactical_knowledge": 0.82,
+      "salary_weekly": 3400,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Portuguese",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Duarte Rodrigues",
+      "role": "Fitness Coach",
+      "team_name": "Sporting Lisboa Norte",
+      "nationality": "Portuguese",
+      "secondary_nationality": "",
+      "date_of_birth": "1978-04-13",
+      "experience": 16,
+      "coaching": 0.78,
+      "judging_ability": 0.5,
+      "physiotherapy": 0.65,
+      "tactical_knowledge": 0.5,
+      "salary_weekly": 3200,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Portuguese",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Miguel Martins",
+      "role": "Chief Scout",
+      "team_name": "Sporting Lisboa Norte",
+      "nationality": "Portuguese",
+      "secondary_nationality": "",
+      "date_of_birth": "1979-04-14",
+      "experience": 17,
+      "coaching": 0.5,
+      "judging_ability": 0.82,
+      "physiotherapy": 0.4,
+      "tactical_knowledge": 0.65,
+      "salary_weekly": 3600,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Portuguese",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Jack Brown",
+      "role": "Assistant Manager",
+      "team_name": "Yorkshire United",
+      "nationality": "English",
+      "secondary_nationality": "",
+      "date_of_birth": "1975-04-10",
+      "experience": 17,
+      "coaching": 0.72,
+      "judging_ability": 0.68,
+      "physiotherapy": 0.5,
+      "tactical_knowledge": 0.75,
+      "salary_weekly": 4500,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "English",
+          "proficiency": 1.0,
+          "level": "Native"
+        }
+      ]
+    },
+    {
+      "staff_name": "Jacob Williams",
+      "role": "Head Physio",
+      "team_name": "Yorkshire United",
+      "nationality": "English",
+      "secondary_nationality": "",
+      "date_of_birth": "1976-04-11",
+      "experience": 18,
+      "coaching": 0.45,
+      "judging_ability": 0.55,
+      "physiotherapy": 0.85,
+      "tactical_knowledge": 0.45,
+      "salary_weekly": 3800,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "English",
+          "proficiency": 1.0,
+          "level": "Native"
+        }
+      ]
+    },
+    {
+      "staff_name": "Noah Wilson",
+      "role": "Tactical Analyst",
+      "team_name": "Yorkshire United",
+      "nationality": "English",
+      "secondary_nationality": "",
+      "date_of_birth": "1977-04-12",
+      "experience": 21,
+      "coaching": 0.55,
+      "judging_ability": 0.65,
+      "physiotherapy": 0.4,
+      "tactical_knowledge": 0.82,
+      "salary_weekly": 3400,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "English",
+          "proficiency": 1.0,
+          "level": "Native"
+        }
+      ]
+    },
+    {
+      "staff_name": "Charlie Johnson",
+      "role": "Fitness Coach",
+      "team_name": "Yorkshire United",
+      "nationality": "English",
+      "secondary_nationality": "",
+      "date_of_birth": "1978-04-13",
+      "experience": 16,
+      "coaching": 0.78,
+      "judging_ability": 0.5,
+      "physiotherapy": 0.65,
+      "tactical_knowledge": 0.5,
+      "salary_weekly": 3200,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "English",
+          "proficiency": 1.0,
+          "level": "Native"
+        }
+      ]
+    },
+    {
+      "staff_name": "Thomas Davies",
+      "role": "Chief Scout",
+      "team_name": "Yorkshire United",
+      "nationality": "English",
+      "secondary_nationality": "",
+      "date_of_birth": "1979-04-14",
+      "experience": 24,
+      "coaching": 0.5,
+      "judging_ability": 0.82,
+      "physiotherapy": 0.4,
+      "tactical_knowledge": 0.65,
+      "salary_weekly": 3600,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "English",
+          "proficiency": 1.0,
+          "level": "Native"
+        }
+      ]
+    },
+    {
+      "staff_name": "Victor Pedersen",
+      "role": "Assistant Manager",
+      "team_name": "Kjøbenhavn Boldklub",
+      "nationality": "Danish",
+      "secondary_nationality": "",
+      "date_of_birth": "1975-04-10",
+      "experience": 18,
+      "coaching": 0.72,
+      "judging_ability": 0.68,
+      "physiotherapy": 0.5,
+      "tactical_knowledge": 0.75,
+      "salary_weekly": 4500,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Danish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Emil Andersen",
+      "role": "Head Physio",
+      "team_name": "Kjøbenhavn Boldklub",
+      "nationality": "Danish",
+      "secondary_nationality": "",
+      "date_of_birth": "1976-04-11",
+      "experience": 26,
+      "coaching": 0.45,
+      "judging_ability": 0.55,
+      "physiotherapy": 0.85,
+      "tactical_knowledge": 0.45,
+      "salary_weekly": 3800,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Danish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Oliver Christensen",
+      "role": "Tactical Analyst",
+      "team_name": "Kjøbenhavn Boldklub",
+      "nationality": "Danish",
+      "secondary_nationality": "",
+      "date_of_birth": "1977-04-12",
+      "experience": 19,
+      "coaching": 0.55,
+      "judging_ability": 0.65,
+      "physiotherapy": 0.4,
+      "tactical_knowledge": 0.82,
+      "salary_weekly": 3400,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Danish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Magnus Larsen",
+      "role": "Fitness Coach",
+      "team_name": "Kjøbenhavn Boldklub",
+      "nationality": "Danish",
+      "secondary_nationality": "",
+      "date_of_birth": "1978-04-13",
+      "experience": 21,
+      "coaching": 0.78,
+      "judging_ability": 0.5,
+      "physiotherapy": 0.65,
+      "tactical_knowledge": 0.5,
+      "salary_weekly": 3200,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Danish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Frederik Sorensen",
+      "role": "Chief Scout",
+      "team_name": "Kjøbenhavn Boldklub",
+      "nationality": "Danish",
+      "secondary_nationality": "",
+      "date_of_birth": "1979-04-14",
+      "experience": 21,
+      "coaching": 0.5,
+      "judging_ability": 0.82,
+      "physiotherapy": 0.4,
+      "tactical_knowledge": 0.65,
+      "salary_weekly": 3600,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Danish",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Milan van den Berg",
+      "role": "Assistant Manager",
+      "team_name": "Feyenoord Haven",
+      "nationality": "Dutch",
+      "secondary_nationality": "",
+      "date_of_birth": "1975-04-10",
+      "experience": 27,
+      "coaching": 0.72,
+      "judging_ability": 0.68,
+      "physiotherapy": 0.5,
+      "tactical_knowledge": 0.75,
+      "salary_weekly": 4500,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Dutch",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Levi van Dijk",
+      "role": "Head Physio",
+      "team_name": "Feyenoord Haven",
+      "nationality": "Dutch",
+      "secondary_nationality": "",
+      "date_of_birth": "1976-04-11",
+      "experience": 21,
+      "coaching": 0.45,
+      "judging_ability": 0.55,
+      "physiotherapy": 0.85,
+      "tactical_knowledge": 0.45,
+      "salary_weekly": 3800,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Dutch",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Finn Bakker",
+      "role": "Tactical Analyst",
+      "team_name": "Feyenoord Haven",
+      "nationality": "Dutch",
+      "secondary_nationality": "",
+      "date_of_birth": "1977-04-12",
+      "experience": 18,
+      "coaching": 0.55,
+      "judging_ability": 0.65,
+      "physiotherapy": 0.4,
+      "tactical_knowledge": 0.82,
+      "salary_weekly": 3400,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Dutch",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Jesse Janssen",
+      "role": "Fitness Coach",
+      "team_name": "Feyenoord Haven",
+      "nationality": "Dutch",
+      "secondary_nationality": "",
+      "date_of_birth": "1978-04-13",
+      "experience": 24,
+      "coaching": 0.78,
+      "judging_ability": 0.5,
+      "physiotherapy": 0.65,
+      "tactical_knowledge": 0.5,
+      "salary_weekly": 3200,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Dutch",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Liam Visser",
+      "role": "Chief Scout",
+      "team_name": "Feyenoord Haven",
+      "nationality": "Dutch",
+      "secondary_nationality": "",
+      "date_of_birth": "1979-04-14",
+      "experience": 21,
+      "coaching": 0.5,
+      "judging_ability": 0.82,
+      "physiotherapy": 0.4,
+      "tactical_knowledge": 0.65,
+      "salary_weekly": 3600,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Dutch",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Lorenzo Esposito",
+      "role": "Assistant Manager",
+      "team_name": "AC Bergamo",
+      "nationality": "Italian",
+      "secondary_nationality": "",
+      "date_of_birth": "1975-04-10",
+      "experience": 15,
+      "coaching": 0.72,
+      "judging_ability": 0.68,
+      "physiotherapy": 0.5,
+      "tactical_knowledge": 0.75,
+      "salary_weekly": 4500,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Italian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Mattia Bianchi",
+      "role": "Head Physio",
+      "team_name": "AC Bergamo",
+      "nationality": "Italian",
+      "secondary_nationality": "",
+      "date_of_birth": "1976-04-11",
+      "experience": 18,
+      "coaching": 0.45,
+      "judging_ability": 0.55,
+      "physiotherapy": 0.85,
+      "tactical_knowledge": 0.45,
+      "salary_weekly": 3800,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Italian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Andrea Romano",
+      "role": "Tactical Analyst",
+      "team_name": "AC Bergamo",
+      "nationality": "Italian",
+      "secondary_nationality": "",
+      "date_of_birth": "1977-04-12",
+      "experience": 23,
+      "coaching": 0.55,
+      "judging_ability": 0.65,
+      "physiotherapy": 0.4,
+      "tactical_knowledge": 0.82,
+      "salary_weekly": 3400,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Italian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Gabriele Colombo",
+      "role": "Fitness Coach",
+      "team_name": "AC Bergamo",
+      "nationality": "Italian",
+      "secondary_nationality": "",
+      "date_of_birth": "1978-04-13",
+      "experience": 22,
+      "coaching": 0.78,
+      "judging_ability": 0.5,
+      "physiotherapy": 0.65,
+      "tactical_knowledge": 0.5,
+      "salary_weekly": 3200,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Italian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
+    },
+    {
+      "staff_name": "Matteo Ricci",
+      "role": "Chief Scout",
+      "team_name": "AC Bergamo",
+      "nationality": "Italian",
+      "secondary_nationality": "",
+      "date_of_birth": "1979-04-14",
+      "experience": 22,
+      "coaching": 0.5,
+      "judging_ability": 0.82,
+      "physiotherapy": 0.4,
+      "tactical_knowledge": 0.65,
+      "salary_weekly": 3600,
+      "contract_years": 3,
+      "spoken_languages": [
+        {
+          "language": "Italian",
+          "proficiency": 1.0,
+          "level": "Native"
+        },
+        {
+          "language": "English",
+          "proficiency": 0.75,
+          "level": "Fluent"
+        }
+      ]
     }
   ]
 }

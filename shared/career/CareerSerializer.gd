@@ -134,6 +134,9 @@ static func to_dict(c: CareerSaveData) -> Dictionary:
 		"rng_seed": c.rng_seed,
 		"competitions": comps,
 		"season_archive": c.season_archive,
+		"tier_1_indices": c.tier_1_indices,
+		"tier_2_indices": c.tier_2_indices,
+		"continental_indices": c.continental_indices,
 		"player_states": states,
 		"club_finances": finances,
 		"board": _board_to_dict(c.board),
@@ -234,6 +237,21 @@ static func from_dict(d: Dictionary) -> CareerSaveData:
 		if typeof(raw2) == TYPE_DICTIONARY:
 			archive.append(raw2)
 	c.season_archive = archive
+
+	var t1: Array[int] = []
+	for raw_t1: Variant in d.get("tier_1_indices", []):
+		t1.append(int(raw_t1))
+	c.tier_1_indices = t1
+
+	var t2: Array[int] = []
+	for raw_t2: Variant in d.get("tier_2_indices", []):
+		t2.append(int(raw_t2))
+	c.tier_2_indices = t2
+
+	var cont: Array[int] = []
+	for raw_cont: Variant in d.get("continental_indices", []):
+		cont.append(int(raw_cont))
+	c.continental_indices = cont
 
 	var states: Dictionary = {}
 	var raw_states: Dictionary = d.get("player_states", {})
@@ -378,6 +396,7 @@ static func _profile_to_dict(p: ManagerCareerProfile) -> Dictionary:
 		"relegations": p.relegations,
 		"job_history": p.job_history,
 		"season_history": p.season_history,
+		"tactical_presets": p.tactical_presets,
 	}
 
 
@@ -416,6 +435,12 @@ static func _profile_from_dict(raw: Variant) -> ManagerCareerProfile:
 		if typeof(s) == TYPE_DICTIONARY:
 			seasons.append(s)
 	p.season_history = seasons
+	var presets: Array[Dictionary] = []
+	for pr: Variant in d.get("tactical_presets", []):
+		if typeof(pr) == TYPE_DICTIONARY:
+			presets.append(pr)
+	p.tactical_presets = presets
+	p.ensure_default_presets()
 	# tactical is DERIVED, never stored — rebuilding it guarantees it can never
 	# drift out of sync with the philosophy/attributes that produce it.
 	p.sync_to_tactical()
@@ -497,6 +522,7 @@ static func _player_state_to_dict(s: PlayerCareerState) -> Dictionary:
 		"potential_ability": s.potential_ability,
 		"development_xp": s.development_xp,
 		"is_youth_player": s.is_youth_player,
+		"in_u23_squad": s.in_u23_squad,
 		"appearances": s.appearances,
 		"minutes_played": s.minutes_played,
 		"goals_this_season": s.goals_this_season,
@@ -536,6 +562,7 @@ static func _player_state_from_dict(raw: Variant) -> PlayerCareerState:
 	s.potential_ability = int(d.get("potential_ability", 65))
 	s.development_xp = float(d.get("development_xp", 0.0))
 	s.is_youth_player = bool(d.get("is_youth_player", false))
+	s.in_u23_squad = bool(d.get("in_u23_squad", false))
 	s.appearances = int(d.get("appearances", 0))
 	s.minutes_played = int(d.get("minutes_played", 0))
 	s.goals_this_season = int(d.get("goals_this_season", 0))
@@ -646,6 +673,11 @@ static func _board_to_dict(b: BoardState) -> Dictionary:
 		"pending_requests": b.pending_requests,
 		"request_history": b.request_history,
 		"takeover_pending": b.takeover_pending,
+		"takeover_stage": int(b.takeover_stage),
+		"takeover_consortium_name": b.takeover_consortium_name,
+		"takeover_days_remaining": b.takeover_days_remaining,
+		"takeover_cash_injection": b.takeover_cash_injection,
+		"transfer_embargo": b.transfer_embargo,
 		"owner_name": b.owner_name,
 	}
 
@@ -679,6 +711,11 @@ static func _board_from_dict(raw: Variant) -> BoardState:
 			hist.append(h)
 	b.request_history = hist
 	b.takeover_pending = bool(d.get("takeover_pending", false))
+	b.takeover_stage = int(d.get("takeover_stage", 0)) as BoardState.TakeoverStage
+	b.takeover_consortium_name = String(d.get("takeover_consortium_name", ""))
+	b.takeover_days_remaining = int(d.get("takeover_days_remaining", 0))
+	b.takeover_cash_injection = int(d.get("takeover_cash_injection", 0))
+	b.transfer_embargo = bool(d.get("transfer_embargo", false))
 	b.owner_name = String(d.get("owner_name", "The Board"))
 	return b
 
@@ -764,6 +801,7 @@ static func _competition_to_dict(c: CompetitionData) -> Dictionary:
 		"winner_index": c.winner_index,
 		"two_legged": c.two_legged,
 		"fixture_tag": int(c.fixture_tag),
+		"tier": c.tier,
 	}
 
 
@@ -778,6 +816,7 @@ static func _competition_from_dict(d: Dictionary) -> CompetitionData:
 	c.winner_index = int(d.get("winner_index", -1))
 	c.two_legged = bool(d.get("two_legged", false))
 	c.fixture_tag = int(d.get("fixture_tag", 0)) as FixtureData.Competition
+	c.tier = int(d.get("tier", 1))
 
 	var fx: Array[FixtureData] = []
 	for raw: Variant in d.get("fixtures", []):
@@ -946,6 +985,7 @@ static func _report_from_dict(d: Dictionary) -> ScoutReport:
 static func _offer_to_dict(o: TransferOffer) -> Dictionary:
 	return {
 		"buying_club": o.buying_club,
+		"buyer_team_index": o.buyer_team_index,
 		"selling_club": o.selling_club,
 		"player_name": o.player_name,
 		"player_team_index": o.player_team_index,
@@ -974,6 +1014,7 @@ static func _offer_to_dict(o: TransferOffer) -> Dictionary:
 static func _offer_from_dict(d: Dictionary) -> TransferOffer:
 	var o := TransferOffer.new()
 	o.buying_club = String(d.get("buying_club", ""))
+	o.buyer_team_index = int(d.get("buyer_team_index", -1))
 	o.selling_club = String(d.get("selling_club", ""))
 	o.player_name = String(d.get("player_name", ""))
 	o.player_team_index = int(d.get("player_team_index", -1))

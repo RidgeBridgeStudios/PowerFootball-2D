@@ -11,6 +11,9 @@ class_name LeaguePanel
 extends CareerPanel
 
 
+var _selected_comp_idx: int = 0
+
+
 func title() -> String:
 	return "League"
 
@@ -21,11 +24,25 @@ func build(host: VBoxContainer, career: CareerSaveData) -> void:
 		empty_state(host, "No competitions in progress.")
 		return
 
-	for comp: CompetitionData in career.competitions:
-		if comp.kind == CompetitionData.Kind.LEAGUE:
-			host.add_child(CareerTheme.card_root(_league_table(comp, career, p)))
-		else:
-			host.add_child(CareerTheme.card_root(_cup_progress(comp, career, p)))
+	var tabs: HBoxContainer = CareerTheme.row(4)
+	host.add_child(tabs)
+	for idx: int in range(career.competitions.size()):
+		var c_data: CompetitionData = career.competitions[idx]
+		var btn: Button = CareerTheme.button(c_data.competition_name, idx == _selected_comp_idx)
+		btn.pressed.connect(func() -> void:
+			_selected_comp_idx = idx
+			refresh()
+		)
+		tabs.add_child(btn)
+
+	if _selected_comp_idx >= career.competitions.size():
+		_selected_comp_idx = 0
+
+	var comp: CompetitionData = career.competitions[_selected_comp_idx]
+	if comp.kind == CompetitionData.Kind.LEAGUE:
+		host.add_child(CareerTheme.card_root(_league_table(comp, career, p)))
+	else:
+		host.add_child(CareerTheme.card_root(_cup_progress(comp, career, p)))
 
 
 func _league_table(comp: CompetitionData, career: CareerSaveData, p: CareerThemePalette) -> VBoxContainer:
@@ -44,9 +61,11 @@ func _league_table(comp: CompetitionData, career: CareerSaveData, p: CareerTheme
 	header.add_child(CareerTheme.cell("Pts", 34, p.text_muted, HORIZONTAL_ALIGNMENT_RIGHT, p.font_size_small))
 	header.add_child(CareerTheme.cell("Form", 90, p.text_muted, HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small))
 
-	# Continental places and the relegation zone, sized off the table itself.
-	var continental_places: int = maxi(int(round(float(ordered.size()) * 0.25)), 1)
-	var relegation_from: int = ordered.size() - maxi(int(round(float(ordered.size()) * 0.15)), 1) + 1
+	var is_tier_1: bool = (comp.tier == 1)
+	var is_tier_2: bool = (comp.tier == 2)
+	var continental_places: int = 4 if is_tier_1 else 0
+	var promo_places: int = 2 if is_tier_2 else 0
+	var relegation_from: int = 7 if is_tier_1 else 999
 
 	for i: int in range(ordered.size()):
 		var r: LeagueTableRow = ordered[i]
@@ -55,9 +74,11 @@ func _league_table(comp: CompetitionData, career: CareerSaveData, p: CareerTheme
 		var line: HBoxContainer = CareerTheme.data_row(i, is_user)
 
 		var position_tint: Color = p.text_muted
-		if position <= continental_places:
+		if is_tier_1 and position <= continental_places:
 			position_tint = p.positive
-		elif position >= relegation_from:
+		elif is_tier_2 and position <= promo_places:
+			position_tint = p.positive
+		elif is_tier_1 and position >= relegation_from:
 			position_tint = p.danger
 		var name_tint: Color = p.accent if is_user else p.text_primary
 
@@ -84,8 +105,11 @@ func _league_table(comp: CompetitionData, career: CareerSaveData, p: CareerTheme
 
 	body.add_child(CareerTheme.spacer(4))
 	var key: HBoxContainer = CareerTheme.row(14)
-	key.add_child(CareerTheme.label("Continental places", p.positive, p.font_size_small))
-	key.add_child(CareerTheme.label("Relegation", p.danger, p.font_size_small))
+	if is_tier_1:
+		key.add_child(CareerTheme.label("Champions Cup (Top 4)", p.positive, p.font_size_small))
+		key.add_child(CareerTheme.label("Relegation (Bottom 2)", p.danger, p.font_size_small))
+	elif is_tier_2:
+		key.add_child(CareerTheme.label("Promotion (Top 2)", p.positive, p.font_size_small))
 	body.add_child(key)
 	return body
 

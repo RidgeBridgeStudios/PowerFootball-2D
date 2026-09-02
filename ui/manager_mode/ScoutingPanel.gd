@@ -55,9 +55,24 @@ func _network_card(career: CareerSaveData, team: TeamData, p: CareerThemePalette
 		line.add_child(CareerTheme.bar(scout.judging_ability, 90))
 		var overloaded: bool = load > ScoutingNetwork.REPORTS_PER_SCOUT
 		line.add_child(CareerTheme.cell(
-			"%d assignment%s" % [load, "" if load == 1 else "s"], 110,
+			"%d target%s" % [load, "" if load == 1 else "s"], 90,
 			p.warning if overloaded else p.text_secondary
 		))
+
+		var current_region: String = CareerManager.get_scout_region(scout.staff_name)
+		var region_opt := OptionButton.new()
+		for r_idx: int in range(ScoutingNetwork.REGIONS.size()):
+			var r_name: String = ScoutingNetwork.REGIONS[r_idx]
+			region_opt.add_item(r_name, r_idx)
+			if r_name == current_region:
+				region_opt.select(r_idx)
+		region_opt.item_selected.connect(func(selected_idx: int) -> void:
+			var reg_chosen: String = ScoutingNetwork.REGIONS[selected_idx]
+			CareerManager.assign_scout_to_region(scout.staff_name, reg_chosen)
+			refresh()
+		)
+		line.add_child(region_opt)
+
 		body.add_child(CareerTheme.data_row_root(line))
 		if overloaded:
 			body.add_child(CareerTheme.muted(

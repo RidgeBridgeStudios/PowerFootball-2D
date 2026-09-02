@@ -66,6 +66,31 @@ func all_available_staff() -> Array[StaffData]:
 	return available
 
 
+## Hires a staff member for a club.
+func hire_staff(staff: StaffData, target_team_name: String, weekly_salary: int, contract_years: int) -> bool:
+	if staff == null or target_team_name == "":
+		return false
+	staff.team_name = target_team_name
+	staff.salary_weekly = weekly_salary
+	staff.contract_years = contract_years
+
+	var team: TeamData = DataLoader.get_team_by_name(target_team_name)
+	if team != null and not team.staff.has(staff):
+		team.staff.append(staff)
+	return true
+
+
+## Terminates / sacks a staff member, returning them to free agency.
+func terminate_staff(staff: StaffData) -> void:
+	if staff == null:
+		return
+	var old_team_name: String = staff.team_name
+	staff.team_name = ""
+	var team: TeamData = DataLoader.get_team_by_name(old_team_name)
+	if team != null:
+		team.staff.erase(staff)
+
+
 func save_staff() -> void:
 	var staff_list: Array[Dictionary] = []
 	for s: StaffData in staff_pool:

@@ -74,6 +74,7 @@ const INJURY_BASE_DAYS: Array[int] = [0, 4, 12, 35, 90, 130]
 @export var grievances: Array[StringName] = []
 @export var transfer_listed: bool = false
 @export var loan_listed: bool = false
+@export var in_u23_squad: bool = false
 @export var wants_new_contract: bool = false
 @export var has_requested_transfer: bool = false
 ## Playing-time promise the manager made, and when it must be honoured by.

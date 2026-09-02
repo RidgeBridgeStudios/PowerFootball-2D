@@ -42,15 +42,18 @@ const ROUND_LABELS: Dictionary = {
 @export var remaining_indices: Array[int] = []
 @export var winner_index: int = -1
 @export var two_legged: bool = false
+## Which division/tier this league belongs to (1 = top flight, 2 = second division, etc.).
+@export var tier: int = 1
 ## Which FixtureData.Competition tag fixtures from this competition carry.
 @export var fixture_tag: FixtureData.Competition = FixtureData.Competition.LEAGUE
 
 
-static func build_league(p_name: String, team_indices: Array[int], team_names: Array[String]) -> CompetitionData:
+static func build_league(p_name: String, team_indices: Array[int], team_names: Array[String], p_tier: int = 1) -> CompetitionData:
 	var c := CompetitionData.new()
 	c.competition_name = p_name
 	c.kind = Kind.LEAGUE
 	c.fixture_tag = FixtureData.Competition.LEAGUE
+	c.tier = p_tier
 	c.participant_indices = team_indices.duplicate()
 	var rows: Array[LeagueTableRow] = []
 	for i: int in range(team_indices.size()):
@@ -72,6 +75,18 @@ static func build_cup(p_name: String, team_indices: Array[int], p_two_legged: bo
 	return c
 
 
+static func build_continental(p_name: String, team_indices: Array[int], p_two_legged: bool = true) -> CompetitionData:
+	var c := CompetitionData.new()
+	c.competition_name = p_name
+	c.kind = Kind.CONTINENTAL
+	c.fixture_tag = FixtureData.Competition.CONTINENTAL
+	c.participant_indices = team_indices.duplicate()
+	c.remaining_indices = team_indices.duplicate()
+	c.two_legged = p_two_legged
+	c.current_round = 1
+	return c
+
+
 ## Double round-robin via the circle method. Round r pairs the fixed club at
 ## slot 0 against the rotating tail; every club appears exactly once per round.
 ## A bye (-1) is inserted for an odd participant count, and pairings against it
@@ -79,41 +94,47 @@ static func build_cup(p_name: String, team_indices: Array[int], p_two_legged: bo
 ##
 ## `first_date` is the first matchday; each subsequent round is `spacing_days`
 ## later, which is what makes league fixtures land on real weekend dates.
-func generate_league_fixtures(first_date: CareerDate, spacing_days: int) -> void:
+## If `repeat_cycles` > 1, the full double round-robin is repeated (e.g. 2 cycles = 4 matches against each team).
+func generate_league_fixtures(first_date: CareerDate, spacing_days: int, repeat_cycles: int = 1) -> void:
 	fixtures.clear()
-	var slots: Array[int] = participant_indices.duplicate()
-	if slots.size() < 2:
+	var slots_base: Array[int] = participant_indices.duplicate()
+	if slots_base.size() < 2:
 		total_rounds = 0
 		return
-	if slots.size() % 2 != 0:
-		slots.append(-1)
+	if slots_base.size() % 2 != 0:
+		slots_base.append(-1)
 
-	var half: int = slots.size() / 2
-	var rounds_per_half: int = slots.size() - 1
-	total_rounds = rounds_per_half * 2
+	var half: int = slots_base.size() / 2
+	var rounds_per_half: int = slots_base.size() - 1
+	var single_cycle_rounds: int = rounds_per_half * 2
+	total_rounds = single_cycle_rounds * maxi(repeat_cycles, 1)
 
-	for r: int in range(rounds_per_half):
-		var match_date: CareerDate = first_date.advanced_by(r * spacing_days)
-		var reverse_date: CareerDate = first_date.advanced_by((r + rounds_per_half) * spacing_days)
-		for i: int in range(half):
-			var a: int = slots[i]
-			var b: int = slots[slots.size() - 1 - i]
-			if a == -1 or b == -1:
-				continue
-			# Alternate which side is home each round so no club plays a long
-			# run of consecutive home or away games.
-			var home: int = a if (r + i) % 2 == 0 else b
-			var away: int = b if (r + i) % 2 == 0 else a
+	var current_round_offset: int = 0
+	for cycle: int in range(maxi(repeat_cycles, 1)):
+		var slots: Array[int] = slots_base.duplicate()
+		for r: int in range(rounds_per_half):
+			var match_date: CareerDate = first_date.advanced_by((current_round_offset + r) * spacing_days)
+			var reverse_date: CareerDate = first_date.advanced_by((current_round_offset + r + rounds_per_half) * spacing_days)
+			for i: int in range(half):
+				var a: int = slots[i]
+				var b: int = slots[slots.size() - 1 - i]
+				if a == -1 or b == -1:
+					continue
+				# Alternate which side is home each round so no club plays a long
+				# run of consecutive home or away games.
+				var home: int = a if (r + i + cycle) % 2 == 0 else b
+				var away: int = b if (r + i + cycle) % 2 == 0 else a
 
-			var first_leg: FixtureData = FixtureData.make(fixture_tag, r + 1, match_date, home, away)
-			fixtures.append(first_leg)
-			# Reverse fixture in the second half of the season.
-			var second_leg: FixtureData = FixtureData.make(fixture_tag, r + 1 + rounds_per_half, reverse_date, away, home)
-			fixtures.append(second_leg)
+				var first_leg: FixtureData = FixtureData.make(fixture_tag, current_round_offset + r + 1, match_date, home, away)
+				fixtures.append(first_leg)
+				# Reverse fixture in the second half of this cycle.
+				var second_leg: FixtureData = FixtureData.make(fixture_tag, current_round_offset + r + 1 + rounds_per_half, reverse_date, away, home)
+				fixtures.append(second_leg)
 
-		# Rotate: slot 0 is fixed, everything else shifts one place.
-		var tail: int = slots.pop_back()
-		slots.insert(1, tail)
+			# Rotate: slot 0 is fixed, everything else shifts one place.
+			var tail: int = slots.pop_back()
+			slots.insert(1, tail)
+		current_round_offset += single_cycle_rounds
 
 
 ## Pairs whoever is still alive into the next knockout round. Called at the
