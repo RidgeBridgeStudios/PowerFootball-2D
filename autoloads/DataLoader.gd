@@ -117,6 +117,21 @@ func _make_fallback_player(index: int, role: String = "CM") -> PlayerData:
 	return data
 
 
+## Loads a league from an explicit path, replacing the live one. Used by
+## CareerSerializer to restore the squads belonging to a career save slot —
+## every career save keeps its own league.json, so two slots can diverge
+## (different transfers, different youth intakes) without contaminating each
+## other or the packaged default.
+##
+## Returns false and leaves the current league untouched if the file is
+## missing or malformed, so a bad slot never leaves the game with no squads.
+func load_league_from(path: String) -> bool:
+	if not FileAccess.file_exists(path):
+		push_warning("DataLoader.load_league_from: %s does not exist." % path)
+		return false
+	return _parse_json_league(path)
+
+
 func _load_league() -> void:
 	if FileAccess.file_exists(CUSTOM_LEAGUE_PATH):
 		if _parse_json_league(CUSTOM_LEAGUE_PATH):

@@ -50,6 +50,54 @@ func get_random_referee() -> RefereeData:
 	return referee_pool[-1]
 
 
+## Returns the official for a specific fixture, assigning one if this matchup
+## has not been seen before.
+##
+## Deterministic by design: the same two clubs always draw the same referee for
+## a given appointment count, because the pick is seeded from the matchup key
+## rather than from a live random stream. Without that, KickOffMenu, the
+## pre-game screen and the career fixture card would each roll a DIFFERENT
+## official for the very same match and disagree about who was refereeing it.
+##
+## Weighted by experience like get_random_referee(), but with a penalty for
+## officials who have already taken this fixture several times, so a league
+## does not end up with one referee permanently attached to one derby.
+##
+## (This was called by KickOffMenu, PreGameScreen and the career layer before
+## it existed — every one of those call sites was a runtime crash.)
+func get_or_assign_referee(home_team_name: String, away_team_name: String) -> RefereeData:
+	if referee_pool.is_empty():
+		return RefereeData.make_default("Unnamed Referee", "Unknown")
+
+	var key: String = RefereeData.make_matchup_key(home_team_name, away_team_name)
+
+	var best: RefereeData = null
+	var best_score: float = -1.0
+	for i: int in range(referee_pool.size()):
+		var ref: RefereeData = referee_pool[i]
+		# Stable per (matchup, referee) pseudo-random component.
+		var mixed: int = absi(hash(key + "|" + ref.referee_name))
+		var jitter: float = float(mixed % 1000) / 1000.0
+
+		var prior: int = 0
+		if ref.matchup_history.has(key):
+			prior = int((ref.matchup_history[key] as Dictionary).get("matches", 0))
+
+		# Experience raises the odds; repeat appointments lower them.
+		var score: float = float(ref.experience) * (0.55 + jitter * 0.9)
+		score /= 1.0 + float(prior) * 0.75
+		if score > best_score:
+			best_score = score
+			best = ref
+
+	if best == null:
+		best = referee_pool[0]
+	# Touching the history here means the NEXT appointment for this fixture is
+	# biased away from the same official, which is what spreads them out.
+	best.get_or_create_matchup(key)
+	return best
+
+
 ## Writes the live referee pool (including career stats) to
 ## user://custom_referees.json so progress survives between sessions.
 func save_referees() -> void:

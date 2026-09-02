@@ -43,6 +43,18 @@ ENGINE_TYPES = {
     "CircleShape2D", "KinematicCollision2D", "InputEvent", "InputEventKey",
     "InputEventJoypadButton", "InputEventJoypadMotion", "InputEventMouseButton",
     "InputEventMouse", "Viewport", "Window",
+    # Control/container types used by the Manager Mode UI. All real Godot 4
+    # classes; this set is a whitelist of what the project happens to name in
+    # annotations, so a missing entry is a checker gap, not a code error.
+    "MarginContainer", "GridContainer", "CenterContainer", "TabContainer",
+    "TabBar", "BoxContainer", "Container", "FlowContainer", "HFlowContainer",
+    "VFlowContainer", "SplitContainer", "HSplitContainer", "VSplitContainer",
+    "HSeparator", "VSeparator", "Separator", "RichTextLabel", "LineEdit",
+    "TextEdit", "TextureRect", "ColorRect", "SpinBox", "CheckBox", "Range",
+    "Slider", "VSlider", "TextureButton", "LinkButton", "BaseButton",
+    "ButtonGroup", "Tree", "TreeItem", "PopupMenu", "Popup", "PopupPanel",
+    "TextServer", "Theme", "StyleBox", "StyleBoxEmpty", "StyleBoxTexture",
+    "ScrollBar", "HScrollBar", "VScrollBar", "VBoxContainer",
     "SceneTree", "Font", "Texture2D", "Image", "Callable", "Signal", "Semaphore",
     "bool", "int", "float", "String", "StringName", "NodePath", "Vector2",
     "Vector2i", "Vector3", "Rect2", "Rect2i", "Color", "Transform2D", "Basis",

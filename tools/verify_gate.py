@@ -14,6 +14,7 @@ Modes:
         5. lint_stringnames.py
         6. lint_shadowing.py
         7. lint_allocations.py
+        7b. lint_xref.py  (qualified member access + res:// path existence)
         8. tscn_linter.py
         9. verify_db.py
 
@@ -85,6 +86,7 @@ def main() -> int:
         ("lint_stringnames", [py, os.path.join(ROOT, "tools", "lint_stringnames.py")]),
         ("lint_shadowing", [py, os.path.join(ROOT, "tools", "lint_shadowing.py")]),
         ("lint_allocations", [py, os.path.join(ROOT, "tools", "lint_allocations.py")]),
+        ("lint_xref", [py, os.path.join(ROOT, "tools", "lint_xref.py")]),
         ("tscn_linter", [py, os.path.join(ROOT, "tools", "tscn_linter.py")]),
         ("verify_db", [py, os.path.join(ROOT, "tools", "verify_db.py")]),
     ]

@@ -142,12 +142,46 @@ func _adjust(target_key: int, delta: float) -> void:
 		_trust[idx] = clampf(current + delta, MIN_TRUST, MAX_TRUST)
 
 
-## Maps a 0.0-1.0 trust value onto a gentle multiplier for pass-utility scores.
-## Neutral trust (0.5) always resolves to exactly 1.0.
+## Maps a STORED trust value (MIN_TRUST..MAX_TRUST, neutral NEUTRAL_TRUST)
+## onto a gentle multiplier for pass-utility scores. NEUTRAL_TRUST resolves to
+## exactly 1.0, MIN_TRUST to TRUST_MULT_MIN, MAX_TRUST to TRUST_MULT_MAX.
+##
+## The normalise step is load-bearing, not decoration: get_trust() returns the
+## stored 0.5-1.5 value, so feeding it straight into a clampf(trust, 0.0, 1.0)
+## lerp (as this did until it was corrected) mapped neutral onto the maximum
+## 1.15x and flattened every value from 1.0 to 1.5 to that same ceiling — the
+## entire trust-GAIN half of the system was inert while losses still bit.
+## Keep the two spaces distinct: stored space is 0.5-1.5, multiplier input is
+## 0.0-1.0, and normalise_trust() is the only bridge between them.
 static func trust_multiplier(trust: float) -> float:
 	if not trust_bias_enabled:
 		return 1.0
-	return lerpf(TRUST_MULT_MIN, TRUST_MULT_MAX, clampf(trust, 0.0, 1.0))
+	return lerpf(TRUST_MULT_MIN, TRUST_MULT_MAX, normalise_trust(trust))
+
+
+## Stored trust (MIN_TRUST..MAX_TRUST) -> 0.0..1.0, with NEUTRAL_TRUST at 0.5.
+## Also the conversion CareerManager uses in reverse when seeding persistent
+## RelationshipData trust into a match.
+static func normalise_trust(trust: float) -> float:
+	var span: float = MAX_TRUST - MIN_TRUST
+	if span <= 0.0:
+		return 0.5
+	return clampf((trust - MIN_TRUST) / span, 0.0, 1.0)
+
+
+## 0.0..1.0 (career/persistent space) -> stored trust (MIN_TRUST..MAX_TRUST).
+static func denormalise_trust(normalised: float) -> float:
+	return lerpf(MIN_TRUST, MAX_TRUST, clampf(normalised, 0.0, 1.0))
+
+
+## Overwrites this player's trust toward one teammate. Used only by
+## CareerManager.seed_match_trust() at bind time, so a match opens with the
+## squad's accumulated between-match history already in place instead of a
+## flat neutral slate. Takes career-space 0.0..1.0.
+func seed_trust(target_key: int, normalised: float) -> void:
+	var idx: int = target_key % 1000
+	if idx >= 0 and idx < 22:
+		_trust[idx] = denormalise_trust(normalised)
 
 
 ## Synthesized per-player id, matching MatchStatsTracker._player_key() and the
