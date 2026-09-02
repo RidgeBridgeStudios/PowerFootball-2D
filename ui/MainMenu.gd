@@ -69,7 +69,10 @@ func _on_practice_pressed() -> void:
 
 
 func _on_manager_pressed() -> void:
-	get_tree().change_scene_to_file("res://ui/manager/ManagerModeHub.tscn")
+	# Entry point is the creation/slot screen, not the hub: it decides whether
+	# to load an existing slot or start a new career, and only then hands off
+	# to ManagerModeRoot with CareerManager already populated.
+	get_tree().change_scene_to_file("res://ui/manager_mode/ManagerCreationScreen.tscn")
 
 
 func _on_career_pressed() -> void:
@@ -134,6 +137,7 @@ func _style_menu_buttons() -> void:
 		button.add_theme_stylebox_override("pressed", _make_stylebox(Color(0.24, 0.86, 0.41, 0.1), 4))
 		button.add_theme_stylebox_override("focus", _make_stylebox(Color(0.24, 0.86, 0.41, 0.06), 4))
 
+	# Player Career remains locked; Manager Mode is now a real destination.
 	btn_career.modulate.a = 0.4
 
 

@@ -1,4 +1,657 @@
 {
+  "CareerManager": {
+    "path": "autoloads/CareerManager.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "HaltReason": {
+        "line": 33,
+        "values": [
+          "NONE",
+          "MATCH_DAY",
+          "INBOX_DECISION",
+          "SEASON_END",
+          "SACKED",
+          "TRANSFER_RESPONSE"
+        ]
+      }
+    },
+    "properties": {
+      "MAX_CONTINUE_DAYS": {
+        "line": 37,
+        "type": "int",
+        "is_const": true
+      },
+      "SEASON_START_MONTH": {
+        "line": 39,
+        "type": "int",
+        "is_const": true
+      },
+      "SEASON_START_DAY": {
+        "line": 40,
+        "type": "int",
+        "is_const": true
+      },
+      "FIRST_MATCHDAY_MONTH": {
+        "line": 41,
+        "type": "int",
+        "is_const": true
+      },
+      "FIRST_MATCHDAY_DAY": {
+        "line": 42,
+        "type": "int",
+        "is_const": true
+      },
+      "LAST_MATCHDAY_MONTH": {
+        "line": 47,
+        "type": "int",
+        "is_const": true
+      },
+      "LAST_MATCHDAY_DAY": {
+        "line": 48,
+        "type": "int",
+        "is_const": true
+      },
+      "MIN_MATCHDAY_SPACING_DAYS": {
+        "line": 50,
+        "type": "int",
+        "is_const": true
+      },
+      "SEASON_END_MONTH": {
+        "line": 52,
+        "type": "int",
+        "is_const": true
+      },
+      "SEASON_END_DAY": {
+        "line": 53,
+        "type": "int",
+        "is_const": true
+      },
+      "SUMMER_WINDOW_MONTHS": {
+        "line": 55,
+        "type": "Array[int]",
+        "is_const": true
+      },
+      "WINTER_WINDOW_MONTH": {
+        "line": 56,
+        "type": "int",
+        "is_const": true
+      },
+      "career": {
+        "line": 60,
+        "type": "CareerSaveData",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_rng": {
+        "line": 69,
+        "type": "RandomNumberGenerator",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_halt_reason": {
+        "line": 71,
+        "type": "HaltReason",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_halt_message": {
+        "line": 72,
+        "type": "String",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "_ready": {
+        "line": 75,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "is_career_active": {
+        "line": 79,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "user_team": {
+        "line": 83,
+        "args": [],
+        "return": "TeamData",
+        "is_static": false
+      },
+      "user_manager_data": {
+        "line": 89,
+        "args": [],
+        "return": "ManagerData",
+        "is_static": false
+      },
+      "halt_reason": {
+        "line": 95,
+        "args": [],
+        "return": "HaltReason",
+        "is_static": false
+      },
+      "halt_message": {
+        "line": 99,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "start_new_career": {
+        "line": 106,
+        "args": [
+          "profile: ManagerCareerProfile",
+          "team_index: int",
+          "slot: int"
+        ],
+        "return": "CareerSaveData",
+        "is_static": false
+      },
+      "load_career": {
+        "line": 152,
+        "args": [
+          "slot: int"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "save_career": {
+        "line": 174,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "close_career": {
+        "line": 183,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_install_user_manager": {
+        "line": 190,
+        "args": [
+          "club: TeamData",
+          "profile: ManagerCareerProfile"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_default_start_year": {
+        "line": 199,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      },
+      "_default_capacity": {
+        "line": 204,
+        "args": [
+          "club: TeamData"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "_starting_manager_wage": {
+        "line": 210,
+        "args": [
+          "club: TeamData",
+          "profile: ManagerCareerProfile"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "_build_player_states": {
+        "line": 221,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_seed_initial_relationships": {
+        "line": 248,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_share_language": {
+        "line": 279,
+        "args": [
+          "a: PlayerData",
+          "b: PlayerData"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "_build_finances": {
+        "line": 286,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_build_competitions": {
+        "line": 295,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_matchday_spacing": {
+        "line": 326,
+        "args": [
+          "team_count: int"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "_tag_user_fixtures": {
+        "line": 340,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "advance_day": {
+        "line": 350,
+        "args": [],
+        "return": "HaltReason",
+        "is_static": false
+      },
+      "continue_until_event": {
+        "line": 405,
+        "args": [],
+        "return": "HaltReason",
+        "is_static": false
+      },
+      "_halt": {
+        "line": 420,
+        "args": [
+          "reason: HaltReason",
+          "message: String"
+        ],
+        "return": "HaltReason",
+        "is_static": false
+      },
+      "_update_season_phase": {
+        "line": 431,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_update_transfer_window": {
+        "line": 447,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_process_recovery_and_training": {
+        "line": 453,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_staff_quality": {
+        "line": 551,
+        "args": [
+          "team: TeamData",
+          "kind: String"
+        ],
+        "return": "float",
+        "is_static": false
+      },
+      "_process_scouting": {
+        "line": 569,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_process_transfer_negotiations": {
+        "line": 599,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_process_ai_transfer_activity": {
+        "line": 628,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_push_bid_received": {
+        "line": 677,
+        "args": [
+          "buyer: TeamData",
+          "target: PlayerData",
+          "state: PlayerCareerState",
+          "bid: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_transfer_between_ai": {
+        "line": 704,
+        "args": [
+          "buyer_index: int",
+          "seller_index: int",
+          "squad_index: int",
+          "fee: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_move_player": {
+        "line": 734,
+        "args": [
+          "from_team: int",
+          "from_squad_index: int",
+          "to_team: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_repair_lineup_after_removal": {
+        "line": 766,
+        "args": [
+          "team: TeamData",
+          "removed_index: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_rekey_states_after_removal": {
+        "line": 785,
+        "args": [
+          "team_index: int",
+          "removed_index: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_execute_transfer": {
+        "line": 806,
+        "args": [
+          "offer: TransferOffer"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_review_promises": {
+        "line": 842,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_run_weekly_cycle": {
+        "line": 887,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_run_weekly_morale_pass": {
+        "line": 915,
+        "args": [
+          "club: TeamData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_median_wage": {
+        "line": 946,
+        "args": [
+          "club: TeamData"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "_check_expiring_contracts": {
+        "line": 956,
+        "args": [
+          "club: TeamData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "play_next_fixture": {
+        "line": 975,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "simulate_next_fixture": {
+        "line": 999,
+        "args": [],
+        "return": "FixtureData",
+        "is_static": false
+      },
+      "record_user_match_result": {
+        "line": 1011,
+        "args": [
+          "home_score: int",
+          "away_score: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_find_pending_fixture": {
+        "line": 1030,
+        "args": [],
+        "return": "FixtureData",
+        "is_static": false
+      },
+      "_simulate_ai_fixture": {
+        "line": 1041,
+        "args": [
+          "fixture: FixtureData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_simulate_fixture": {
+        "line": 1045,
+        "args": [
+          "fixture: FixtureData",
+          "is_user: bool"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_apply_user_result": {
+        "line": 1142,
+        "args": [
+          "fixture: FixtureData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_competition_of": {
+        "line": 1198,
+        "args": [
+          "fixture: FixtureData"
+        ],
+        "return": "CompetitionData",
+        "is_static": false
+      },
+      "_advance_cup_rounds": {
+        "line": 1206,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_check_season_rollover": {
+        "line": 1219,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "_season_end_year": {
+        "line": 1239,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      },
+      "_run_season_end": {
+        "line": 1243,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_start_new_season": {
+        "line": 1298,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_run_youth_intake": {
+        "line": 1342,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_execute_sacking": {
+        "line": 1375,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_push_inbox": {
+        "line": 1400,
+        "args": [
+          "item: InboxItem"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_emit_inbox_changed": {
+        "line": 1409,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "resolve_inbox_item": {
+        "line": 1419,
+        "args": [
+          "item: InboxItem",
+          "option_index: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_handle_structural_inbox_action": {
+        "line": 1431,
+        "args": [
+          "item: InboxItem",
+          "option_index: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_release_player": {
+        "line": 1453,
+        "args": [
+          "state: PlayerCareerState"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_rehydrate_inbox": {
+        "line": 1476,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "toggle_shortlist": {
+        "line": 1519,
+        "args": [
+          "player_key: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "scout_player": {
+        "line": 1531,
+        "args": [
+          "team_index: int",
+          "squad_index: int"
+        ],
+        "return": "ScoutReport",
+        "is_static": false
+      },
+      "submit_transfer_bid": {
+        "line": 1563,
+        "args": [
+          "team_index: int",
+          "squad_index: int",
+          "fee: int"
+        ],
+        "return": "TransferOffer",
+        "is_static": false
+      },
+      "raise_transfer_bid": {
+        "line": 1596,
+        "args": [
+          "offer: TransferOffer",
+          "new_fee: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "offer_personal_terms": {
+        "line": 1615,
+        "args": [
+          "offer: TransferOffer",
+          "wage: int = -1"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "withdraw_offer": {
+        "line": 1650,
+        "args": [
+          "offer: TransferOffer"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "file_board_request": {
+        "line": 1661,
+        "args": [
+          "kind: BoardState.RequestKind"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_request_amount": {
+        "line": 1696,
+        "args": [
+          "kind: BoardState.RequestKind",
+          "finances: ClubFinances"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "_league_index_for_match_side": {
+        "line": 1771,
+        "args": [
+          "match_side: int"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "_fixture_label": {
+        "line": 1779,
+        "args": [
+          "fixture: FixtureData"
+        ],
+        "return": "String",
+        "is_static": false
+      },
+      "_ordinal": {
+        "line": 1788,
+        "args": [
+          "n: int"
+        ],
+        "return": "String",
+        "is_static": false
+      }
+    }
+  },
   "DataLoader": {
     "path": "autoloads/DataLoader.gd",
     "line": 1,
@@ -71,14 +724,22 @@
         "return": "PlayerData",
         "is_static": false
       },
+      "load_league_from": {
+        "line": 128,
+        "args": [
+          "path: String"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
       "_load_league": {
-        "line": 120,
+        "line": 135,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_parse_json_league": {
-        "line": 131,
+        "line": 146,
         "args": [
           "path: String"
         ],
@@ -86,7 +747,7 @@
         "is_static": false
       },
       "_team_from_dict": {
-        "line": 158,
+        "line": 173,
         "args": [
           "team_dict: Dictionary"
         ],
@@ -94,7 +755,7 @@
         "is_static": false
       },
       "_generate_contrasting_gk_color": {
-        "line": 260,
+        "line": 275,
         "args": [
           "team_col: Color"
         ],
@@ -102,7 +763,7 @@
         "is_static": false
       },
       "_player_from_dict": {
-        "line": 271,
+        "line": 286,
         "args": [
           "player_dict: Dictionary"
         ],
@@ -110,7 +771,7 @@
         "is_static": false
       },
       "_player_to_dict": {
-        "line": 349,
+        "line": 364,
         "args": [
           "p: PlayerData"
         ],
@@ -118,7 +779,7 @@
         "is_static": false
       },
       "_team_to_dict": {
-        "line": 399,
+        "line": 414,
         "args": [
           "t: TeamData"
         ],
@@ -126,7 +787,7 @@
         "is_static": false
       },
       "save_league": {
-        "line": 426,
+        "line": 441,
         "args": [
           "path: String = CUSTOM_LEAGUE_PATH"
         ],
@@ -134,19 +795,19 @@
         "is_static": false
       },
       "_build_default_league": {
-        "line": 446,
+        "line": 461,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_build_nordvik": {
-        "line": 455,
+        "line": 470,
         "args": [],
         "return": "TeamData",
         "is_static": false
       },
       "_build_solano": {
-        "line": 489,
+        "line": 504,
         "args": [],
         "return": "TeamData",
         "is_static": false
@@ -551,6 +1212,66 @@
       "celebration_ended": {
         "line": 202,
         "args": []
+      },
+      "career_started": {
+        "line": 212,
+        "args": [
+          "save_name: String",
+          "club_name: String"
+        ]
+      },
+      "career_day_advanced": {
+        "line": 215,
+        "args": [
+          "iso_date: String"
+        ]
+      },
+      "career_advance_halted": {
+        "line": 218,
+        "args": [
+          "reason: String"
+        ]
+      },
+      "career_inbox_changed": {
+        "line": 221,
+        "args": [
+          "unread_count: int",
+          "pending_decisions: int"
+        ]
+      },
+      "career_match_ready": {
+        "line": 223,
+        "args": [
+          "home_team_index: int",
+          "away_team_index: int"
+        ]
+      },
+      "career_result_recorded": {
+        "line": 225,
+        "args": [
+          "home_score: int",
+          "away_score: int"
+        ]
+      },
+      "career_season_ended": {
+        "line": 227,
+        "args": [
+          "season_year: int",
+          "final_position: int"
+        ]
+      },
+      "career_manager_sacked": {
+        "line": 229,
+        "args": [
+          "club_name: String",
+          "reason: String"
+        ]
+      },
+      "world_event_logged": {
+        "line": 232,
+        "args": [
+          "event: WorldEvent"
+        ]
       }
     },
     "enums": {},
@@ -3751,20 +4472,29 @@
         "return": "RefereeData",
         "is_static": false
       },
+      "get_or_assign_referee": {
+        "line": 68,
+        "args": [
+          "home_team_name: String",
+          "away_team_name: String"
+        ],
+        "return": "RefereeData",
+        "is_static": false
+      },
       "save_referees": {
-        "line": 55,
+        "line": 103,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_load_referees": {
-        "line": 86,
+        "line": 134,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_parse_json_referees": {
-        "line": 97,
+        "line": 145,
         "args": [
           "path: String"
         ],
@@ -3772,7 +4502,7 @@
         "is_static": false
       },
       "_referee_from_dict": {
-        "line": 120,
+        "line": 168,
         "args": [
           "referee_dict: Dictionary"
         ],
@@ -3780,7 +4510,7 @@
         "is_static": false
       },
       "_build_default_referees": {
-        "line": 169,
+        "line": 217,
         "args": [],
         "return": "void",
         "is_static": false
@@ -3902,6 +4632,124 @@
       },
       "_build_default_staff": {
         "line": 167,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      }
+    }
+  },
+  "WorldEventLog": {
+    "path": "autoloads/WorldEventLog.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "PRESS_SIGNIFICANCE_THRESHOLD": {
+        "line": 25,
+        "type": "float",
+        "is_const": true
+      },
+      "_career": {
+        "line": 28,
+        "type": "CareerSaveData",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_press": {
+        "line": 31,
+        "type": "PressOffice",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "_ready": {
+        "line": 34,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "bind": {
+        "line": 41,
+        "args": [
+          "career: CareerSaveData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "is_bound": {
+        "line": 45,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "log_event": {
+        "line": 51,
+        "args": [
+          "event: WorldEvent"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "all_events": {
+        "line": 96,
+        "args": [],
+        "return": "Array[WorldEvent]",
+        "is_static": false
+      },
+      "recent": {
+        "line": 104,
+        "args": [
+          "count: int"
+        ],
+        "return": "Array[WorldEvent]",
+        "is_static": false
+      },
+      "for_player": {
+        "line": 115,
+        "args": [
+          "player_key: int",
+          "count: int = 20"
+        ],
+        "return": "Array[WorldEvent]",
+        "is_static": false
+      },
+      "by_category": {
+        "line": 128,
+        "args": [
+          "category: WorldEvent.Category",
+          "count: int = 20"
+        ],
+        "return": "Array[WorldEvent]",
+        "is_static": false
+      },
+      "since": {
+        "line": 141,
+        "args": [
+          "date: CareerDate"
+        ],
+        "return": "Array[WorldEvent]",
+        "is_static": false
+      },
+      "newsworthy": {
+        "line": 153,
+        "args": [
+          "count: int = 8"
+        ],
+        "return": "Array[WorldEvent]",
+        "is_static": false
+      },
+      "generate_press_reaction": {
+        "line": 172,
+        "args": [
+          "event: WorldEvent",
+          "manager: ManagerData"
+        ],
+        "return": "String",
+        "is_static": false
+      },
+      "clear": {
+        "line": 203,
         "args": [],
         "return": "void",
         "is_static": false
@@ -8059,15 +8907,40 @@
         "is_static": false
       },
       "trust_multiplier": {
-        "line": 147,
+        "line": 156,
         "args": [
           "trust: float"
         ],
         "return": "float",
         "is_static": true
       },
+      "normalise_trust": {
+        "line": 165,
+        "args": [
+          "trust: float"
+        ],
+        "return": "float",
+        "is_static": true
+      },
+      "denormalise_trust": {
+        "line": 173,
+        "args": [
+          "normalised: float"
+        ],
+        "return": "float",
+        "is_static": true
+      },
+      "seed_trust": {
+        "line": 181,
+        "args": [
+          "target_key: int",
+          "normalised: float"
+        ],
+        "return": "void",
+        "is_static": false
+      },
       "player_key": {
-        "line": 156,
+        "line": 190,
         "args": [
           "p: HeavyPlayerController"
         ],
@@ -13374,25 +14247,25 @@
         "is_static": false
       },
       "_on_stats_dismissed": {
-        "line": 1184,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_start_penalty_shootout": {
         "line": 1191,
         "args": [],
         "return": "void",
         "is_static": false
       },
+      "_start_penalty_shootout": {
+        "line": 1198,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
       "_exit_tree": {
-        "line": 1210,
+        "line": 1217,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_log_manager_stats": {
-        "line": 1217,
+        "line": 1224,
         "args": [
           "winner: int"
         ],
@@ -13400,7 +14273,7 @@
         "is_static": false
       },
       "_on_ball_out_of_bounds": {
-        "line": 1236,
+        "line": 1243,
         "args": [
           "side: String"
         ],
@@ -13408,7 +14281,7 @@
         "is_static": false
       },
       "_on_ball_bounced": {
-        "line": 1243,
+        "line": 1250,
         "args": [
           "impact_velocity: float"
         ],
@@ -13416,7 +14289,7 @@
         "is_static": false
       },
       "_tick_headless_telemetry": {
-        "line": 1251,
+        "line": 1258,
         "args": [
           "delta: float"
         ],
@@ -13424,7 +14297,7 @@
         "is_static": false
       },
       "_finalize_headless_simulation": {
-        "line": 1301,
+        "line": 1308,
         "args": [],
         "return": "void",
         "is_static": false
@@ -16276,6 +17149,4457 @@
       }
     }
   },
+  "BoardState": {
+    "path": "shared/career/BoardState.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "Expectation": {
+        "line": 22,
+        "values": [
+          "AVOID_RELEGATION",
+          "LOWER_MIDTABLE",
+          "MIDTABLE",
+          "UPPER_MIDTABLE",
+          "QUALIFY_CONTINENTAL",
+          "CHALLENGE_TITLE",
+          "WIN_TITLE"
+        ]
+      },
+      "RequestKind": {
+        "line": 41,
+        "values": [
+          "TRANSFER_BUDGET",
+          "WAGE_BUDGET",
+          "TRAINING_FACILITIES",
+          "YOUTH_FACILITIES",
+          "STADIUM_EXPANSION",
+          "SCOUTING_NETWORK",
+          "NEW_STAFF"
+        ]
+      }
+    },
+    "properties": {
+      "EXPECTATION_NAMES": {
+        "line": 32,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "EXPECTATION_TARGET_FRACTION": {
+        "line": 39,
+        "type": "Array[float]",
+        "is_const": true
+      },
+      "REQUEST_NAMES": {
+        "line": 51,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "SACK_THRESHOLD": {
+        "line": 58,
+        "type": "float",
+        "is_const": true
+      },
+      "SACK_GRACE_MATCHES": {
+        "line": 59,
+        "type": "int",
+        "is_const": true
+      },
+      "CONFIDENCE_GAIN_SCALE": {
+        "line": 61,
+        "type": "float",
+        "is_const": true
+      },
+      "club_name": {
+        "line": 63,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "expectation": {
+        "line": 64,
+        "type": "Expectation",
+        "is_export": true,
+        "is_onready": false
+      },
+      "matches_below_threshold": {
+        "line": 71,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "patience_notes": {
+        "line": 72,
+        "type": "Array[String]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "stadium_capacity": {
+        "line": 79,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "pending_requests": {
+        "line": 83,
+        "type": "Array[Dictionary]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "request_history": {
+        "line": 85,
+        "type": "Array[Dictionary]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "request_cooldown_days": {
+        "line": 87,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "takeover_pending": {
+        "line": 88,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "owner_name": {
+        "line": 89,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "make_for_club": {
+        "line": 92,
+        "args": [
+          "club: TeamData",
+          "capacity: int"
+        ],
+        "return": "BoardState",
+        "is_static": true
+      },
+      "expectation_from_reputation": {
+        "line": 107,
+        "args": [
+          "reputation: float"
+        ],
+        "return": "Expectation",
+        "is_static": true
+      },
+      "expectation_label": {
+        "line": 123,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "target_position": {
+        "line": 127,
+        "args": [
+          "team_count: int"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "apply_result": {
+        "line": 134,
+        "args": [
+          "league_position: int",
+          "team_count: int",
+          "won: bool",
+          "drew: bool",
+          "was_upset: bool"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "should_sack": {
+        "line": 163,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "confidence_label": {
+        "line": 167,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "has_recent_request": {
+        "line": 181,
+        "args": [
+          "kind: RequestKind",
+          "today: CareerDate"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "file_request": {
+        "line": 194,
+        "args": [
+          "kind: RequestKind",
+          "amount: int",
+          "today: CareerDate"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "evaluate_request": {
+        "line": 207,
+        "args": [
+          "request: Dictionary",
+          "affordability: float",
+          "rng: RandomNumberGenerator"
+        ],
+        "return": "Dictionary",
+        "is_static": false
+      },
+      "resolve_request": {
+        "line": 225,
+        "args": [
+          "index: int",
+          "verdict: Dictionary"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "facility_multiplier": {
+        "line": 234,
+        "args": [
+          "level: int"
+        ],
+        "return": "float",
+        "is_static": false
+      }
+    }
+  },
+  "CareerDate": {
+    "path": "shared/career/CareerDate.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "MONTH_NAMES": {
+        "line": 20,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "DAY_NAMES": {
+        "line": 24,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "year": {
+        "line": 28,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "month": {
+        "line": 29,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "day": {
+        "line": 30,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "make": {
+        "line": 33,
+        "args": [
+          "p_year: int",
+          "p_month: int",
+          "p_day: int"
+        ],
+        "return": "CareerDate",
+        "is_static": true
+      },
+      "is_leap_year": {
+        "line": 41,
+        "args": [
+          "p_year: int"
+        ],
+        "return": "bool",
+        "is_static": true
+      },
+      "days_in_month": {
+        "line": 49,
+        "args": [
+          "p_year: int",
+          "p_month: int"
+        ],
+        "return": "int",
+        "is_static": true
+      },
+      "to_ordinal": {
+        "line": 63,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      },
+      "from_ordinal": {
+        "line": 71,
+        "args": [
+          "ordinal: int"
+        ],
+        "return": "CareerDate",
+        "is_static": true
+      },
+      "advanced_by": {
+        "line": 90,
+        "args": [
+          "days: int"
+        ],
+        "return": "CareerDate",
+        "is_static": false
+      },
+      "days_until": {
+        "line": 94,
+        "args": [
+          "other: CareerDate"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "day_of_week": {
+        "line": 101,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      },
+      "day_name": {
+        "line": 105,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "month_name": {
+        "line": 109,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "to_iso": {
+        "line": 113,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "to_display": {
+        "line": 117,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "equals": {
+        "line": 121,
+        "args": [
+          "other: CareerDate"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "is_before": {
+        "line": 127,
+        "args": [
+          "other: CareerDate"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "copy": {
+        "line": 133,
+        "args": [],
+        "return": "CareerDate",
+        "is_static": false
+      },
+      "from_iso": {
+        "line": 137,
+        "args": [
+          "iso: String"
+        ],
+        "return": "CareerDate",
+        "is_static": true
+      }
+    }
+  },
+  "CareerSaveData": {
+    "path": "shared/career/CareerSaveData.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "Phase": {
+        "line": 28,
+        "values": [
+          "PRE_SEASON",
+          "REGULAR_SEASON",
+          "OFF_SEASON"
+        ]
+      }
+    },
+    "properties": {
+      "SAVE_VERSION": {
+        "line": 25,
+        "type": "int",
+        "is_const": true
+      },
+      "PHASE_NAMES": {
+        "line": 30,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "save_version": {
+        "line": 32,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "slot_index": {
+        "line": 33,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "save_name": {
+        "line": 34,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "created_iso": {
+        "line": 35,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "last_played_iso": {
+        "line": 36,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "profile": {
+        "line": 39,
+        "type": "ManagerCareerProfile",
+        "is_export": true,
+        "is_onready": false
+      },
+      "user_team_index": {
+        "line": 40,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "today": {
+        "line": 43,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      },
+      "season_start_year": {
+        "line": 44,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "phase": {
+        "line": 45,
+        "type": "Phase",
+        "is_export": true,
+        "is_onready": false
+      },
+      "rng_seed": {
+        "line": 48,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "competitions": {
+        "line": 51,
+        "type": "Array[CompetitionData]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "season_archive": {
+        "line": 53,
+        "type": "Array[Dictionary]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "player_states": {
+        "line": 58,
+        "type": "Dictionary",
+        "is_export": true,
+        "is_onready": false
+      },
+      "club_finances": {
+        "line": 61,
+        "type": "Dictionary",
+        "is_export": true,
+        "is_onready": false
+      },
+      "board": {
+        "line": 62,
+        "type": "BoardState",
+        "is_export": true,
+        "is_onready": false
+      },
+      "training": {
+        "line": 63,
+        "type": "TrainingSchedule",
+        "is_export": true,
+        "is_onready": false
+      },
+      "inbox": {
+        "line": 66,
+        "type": "Array[InboxItem]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "world_events": {
+        "line": 67,
+        "type": "Array[WorldEvent]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "scout_reports": {
+        "line": 68,
+        "type": "Array[ScoutReport]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "shortlist_keys": {
+        "line": 69,
+        "type": "Array[int]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "active_offers": {
+        "line": 70,
+        "type": "Array[TransferOffer]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "scout_assignments": {
+        "line": 72,
+        "type": "Dictionary",
+        "is_export": true,
+        "is_onready": false
+      },
+      "transfer_window_open": {
+        "line": 75,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "is_sacked": {
+        "line": 76,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "unemployed": {
+        "line": 77,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "awaiting_match_result": {
+        "line": 78,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "pending_fixture_round": {
+        "line": 81,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "pending_fixture_competition": {
+        "line": 82,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "phase_name": {
+        "line": 103,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "season_label": {
+        "line": 108,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "state_for": {
+        "line": 112,
+        "args": [
+          "player_key: int"
+        ],
+        "return": "PlayerCareerState",
+        "is_static": false
+      },
+      "state_for_squad": {
+        "line": 116,
+        "args": [
+          "team_index: int",
+          "squad_index: int"
+        ],
+        "return": "PlayerCareerState",
+        "is_static": false
+      },
+      "finances_for": {
+        "line": 120,
+        "args": [
+          "team_index: int"
+        ],
+        "return": "ClubFinances",
+        "is_static": false
+      },
+      "user_finances": {
+        "line": 124,
+        "args": [],
+        "return": "ClubFinances",
+        "is_static": false
+      },
+      "competition": {
+        "line": 128,
+        "args": [
+          "comp_kind: FixtureData.Competition"
+        ],
+        "return": "CompetitionData",
+        "is_static": false
+      },
+      "league_competition": {
+        "line": 135,
+        "args": [],
+        "return": "CompetitionData",
+        "is_static": false
+      },
+      "fixtures_on": {
+        "line": 140,
+        "args": [
+          "date: CareerDate"
+        ],
+        "return": "Array[FixtureData]",
+        "is_static": false
+      },
+      "next_user_fixture": {
+        "line": 148,
+        "args": [],
+        "return": "FixtureData",
+        "is_static": false
+      },
+      "days_until_next_fixture": {
+        "line": 159,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      },
+      "recent_user_results": {
+        "line": 167,
+        "args": [
+          "count: int"
+        ],
+        "return": "Array[FixtureData]",
+        "is_static": false
+      },
+      "unread_inbox_count": {
+        "line": 183,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      },
+      "pending_decision_count": {
+        "line": 191,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      },
+      "shortlist_contains": {
+        "line": 199,
+        "args": [
+          "player_key: int"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "report_for": {
+        "line": 203,
+        "args": [
+          "player_key: int"
+        ],
+        "return": "ScoutReport",
+        "is_static": false
+      },
+      "squad_morale": {
+        "line": 212,
+        "args": [
+          "team: TeamData"
+        ],
+        "return": "float",
+        "is_static": false
+      },
+      "log_event": {
+        "line": 226,
+        "args": [
+          "event: WorldEvent"
+        ],
+        "return": "void",
+        "is_static": false
+      }
+    }
+  },
+  "CareerSerializer": {
+    "path": "shared/career/CareerSerializer.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "ROOT_DIR": {
+        "line": 30,
+        "type": "String",
+        "is_const": true
+      },
+      "MAX_SLOTS": {
+        "line": 31,
+        "type": "int",
+        "is_const": true
+      },
+      "CAREER_FILE": {
+        "line": 32,
+        "type": "String",
+        "is_const": true
+      },
+      "LEAGUE_FILE": {
+        "line": 33,
+        "type": "String",
+        "is_const": true
+      },
+      "MANAGERS_FILE": {
+        "line": 34,
+        "type": "String",
+        "is_const": true
+      }
+    },
+    "methods": {
+      "slot_dir": {
+        "line": 37,
+        "args": [
+          "slot: int"
+        ],
+        "return": "String",
+        "is_static": true
+      },
+      "career_path": {
+        "line": 41,
+        "args": [
+          "slot: int"
+        ],
+        "return": "String",
+        "is_static": true
+      },
+      "league_path": {
+        "line": 45,
+        "args": [
+          "slot: int"
+        ],
+        "return": "String",
+        "is_static": true
+      },
+      "slot_exists": {
+        "line": 49,
+        "args": [
+          "slot: int"
+        ],
+        "return": "bool",
+        "is_static": true
+      },
+      "_ensure_dir": {
+        "line": 53,
+        "args": [
+          "path: String"
+        ],
+        "return": "bool",
+        "is_static": true
+      },
+      "save_to_slot": {
+        "line": 65,
+        "args": [
+          "career: CareerSaveData",
+          "slot: int"
+        ],
+        "return": "bool",
+        "is_static": true
+      },
+      "to_dict": {
+        "line": 90,
+        "args": [
+          "c: CareerSaveData"
+        ],
+        "return": "Dictionary",
+        "is_static": true
+      },
+      "load_from_slot": {
+        "line": 161,
+        "args": [
+          "slot: int"
+        ],
+        "return": "CareerSaveData",
+        "is_static": true
+      },
+      "migrate": {
+        "line": 194,
+        "args": [
+          "d: Dictionary",
+          "from_version: int"
+        ],
+        "return": "Dictionary",
+        "is_static": true
+      },
+      "from_dict": {
+        "line": 212,
+        "args": [
+          "d: Dictionary"
+        ],
+        "return": "CareerSaveData",
+        "is_static": true
+      },
+      "slot_summary": {
+        "line": 297,
+        "args": [
+          "slot: int"
+        ],
+        "return": "Dictionary",
+        "is_static": true
+      },
+      "list_slots": {
+        "line": 323,
+        "args": [],
+        "return": "Array[Dictionary]",
+        "is_static": true
+      },
+      "delete_slot": {
+        "line": 330,
+        "args": [
+          "slot: int"
+        ],
+        "return": "bool",
+        "is_static": true
+      },
+      "_date_to_str": {
+        "line": 345,
+        "args": [
+          "d: CareerDate"
+        ],
+        "return": "String",
+        "is_static": true
+      },
+      "_date_from_str": {
+        "line": 349,
+        "args": [
+          "s: String"
+        ],
+        "return": "CareerDate",
+        "is_static": true
+      },
+      "_profile_to_dict": {
+        "line": 355,
+        "args": [
+          "p: ManagerCareerProfile"
+        ],
+        "return": "Dictionary",
+        "is_static": true
+      },
+      "_profile_from_dict": {
+        "line": 384,
+        "args": [
+          "raw: Variant"
+        ],
+        "return": "ManagerCareerProfile",
+        "is_static": true
+      },
+      "_contract_to_dict": {
+        "line": 425,
+        "args": [
+          "c: ContractData"
+        ],
+        "return": "Dictionary",
+        "is_static": true
+      },
+      "_contract_from_dict": {
+        "line": 447,
+        "args": [
+          "raw: Variant"
+        ],
+        "return": "ContractData",
+        "is_static": true
+      },
+      "_player_state_to_dict": {
+        "line": 472,
+        "args": [
+          "s: PlayerCareerState"
+        ],
+        "return": "Dictionary",
+        "is_static": true
+      },
+      "_player_state_from_dict": {
+        "line": 521,
+        "args": [
+          "raw: Variant"
+        ],
+        "return": "PlayerCareerState",
+        "is_static": true
+      },
+      "_finances_to_dict": {
+        "line": 579,
+        "args": [
+          "f: ClubFinances"
+        ],
+        "return": "Dictionary",
+        "is_static": true
+      },
+      "_finances_from_dict": {
+        "line": 595,
+        "args": [
+          "raw: Variant"
+        ],
+        "return": "ClubFinances",
+        "is_static": true
+      },
+      "_int_array": {
+        "line": 622,
+        "args": [
+          "raw: Variant",
+          "min_size: int"
+        ],
+        "return": "Array[int]",
+        "is_static": true
+      },
+      "_board_to_dict": {
+        "line": 632,
+        "args": [
+          "b: BoardState"
+        ],
+        "return": "Dictionary",
+        "is_static": true
+      },
+      "_board_from_dict": {
+        "line": 653,
+        "args": [
+          "raw: Variant"
+        ],
+        "return": "BoardState",
+        "is_static": true
+      },
+      "_training_to_dict": {
+        "line": 686,
+        "args": [
+          "t: TrainingSchedule"
+        ],
+        "return": "Dictionary",
+        "is_static": true
+      },
+      "_training_from_dict": {
+        "line": 698,
+        "args": [
+          "raw: Variant"
+        ],
+        "return": "TrainingSchedule",
+        "is_static": true
+      },
+      "_int_keyed": {
+        "line": 713,
+        "args": [
+          "raw: Variant"
+        ],
+        "return": "Dictionary",
+        "is_static": true
+      },
+      "_competition_to_dict": {
+        "line": 722,
+        "args": [
+          "c: CompetitionData"
+        ],
+        "return": "Dictionary",
+        "is_static": true
+      },
+      "_competition_from_dict": {
+        "line": 770,
+        "args": [
+          "d: Dictionary"
+        ],
+        "return": "CompetitionData",
+        "is_static": true
+      },
+      "_inbox_to_dict": {
+        "line": 829,
+        "args": [
+          "i: InboxItem"
+        ],
+        "return": "Dictionary",
+        "is_static": true
+      },
+      "_inbox_from_dict": {
+        "line": 852,
+        "args": [
+          "d: Dictionary"
+        ],
+        "return": "InboxItem",
+        "is_static": true
+      },
+      "_event_to_dict": {
+        "line": 870,
+        "args": [
+          "e: WorldEvent"
+        ],
+        "return": "Dictionary",
+        "is_static": true
+      },
+      "_event_from_dict": {
+        "line": 889,
+        "args": [
+          "d: Dictionary"
+        ],
+        "return": "WorldEvent",
+        "is_static": true
+      },
+      "_report_to_dict": {
+        "line": 908,
+        "args": [
+          "r: ScoutReport"
+        ],
+        "return": "Dictionary",
+        "is_static": true
+      },
+      "_report_from_dict": {
+        "line": 927,
+        "args": [
+          "d: Dictionary"
+        ],
+        "return": "ScoutReport",
+        "is_static": true
+      },
+      "_offer_to_dict": {
+        "line": 946,
+        "args": [
+          "o: TransferOffer"
+        ],
+        "return": "Dictionary",
+        "is_static": true
+      },
+      "_offer_from_dict": {
+        "line": 974,
+        "args": [
+          "d: Dictionary"
+        ],
+        "return": "TransferOffer",
+        "is_static": true
+      }
+    }
+  },
+  "CareerThemePalette": {
+    "path": "shared/career/CareerThemePalette.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "sidebar": {
+        "line": 20,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "surface": {
+        "line": 22,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "panel": {
+        "line": 24,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "header": {
+        "line": 26,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "row_alt": {
+        "line": 28,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "row_hover": {
+        "line": 30,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "divider": {
+        "line": 31,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "text_primary": {
+        "line": 34,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "text_secondary": {
+        "line": 35,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "text_muted": {
+        "line": 36,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "text_on_accent": {
+        "line": 37,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "accent": {
+        "line": 41,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "accent_dim": {
+        "line": 42,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "positive": {
+        "line": 43,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "warning": {
+        "line": 44,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "danger": {
+        "line": 45,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "info": {
+        "line": 46,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "result_win": {
+        "line": 49,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "result_draw": {
+        "line": 50,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "result_loss": {
+        "line": 51,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "attr_low": {
+        "line": 54,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "attr_mid": {
+        "line": 55,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "attr_high": {
+        "line": 56,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "font_size_title": {
+        "line": 59,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "font_size_heading": {
+        "line": 60,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "font_size_body": {
+        "line": 61,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "font_size_small": {
+        "line": 62,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "corner_radius": {
+        "line": 63,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "row_height": {
+        "line": 64,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "sidebar_width": {
+        "line": 65,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "content_margin": {
+        "line": 66,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      }
+    },
+    "methods": {}
+  },
+  "ClubFinances": {
+    "path": "shared/career/ClubFinances.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "Line": {
+        "line": 23,
+        "values": [
+          "MATCHDAY_REVENUE",
+          "SPONSORSHIP",
+          "PRIZE_MONEY",
+          "PLAYER_SALES",
+          "WAGES",
+          "TRANSFER_FEES",
+          "STAFF_WAGES",
+          "FACILITIES",
+          "OTHER"
+        ]
+      }
+    },
+    "properties": {
+      "LINE_NAMES": {
+        "line": 35,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "TICKET_YIELD": {
+        "line": 41,
+        "type": "int",
+        "is_const": true
+      },
+      "BASE_ATTENDANCE_RATE": {
+        "line": 43,
+        "type": "float",
+        "is_const": true
+      },
+      "SPONSORSHIP_MIN_WEEKLY": {
+        "line": 45,
+        "type": "int",
+        "is_const": true
+      },
+      "SPONSORSHIP_MAX_WEEKLY": {
+        "line": 46,
+        "type": "int",
+        "is_const": true
+      },
+      "PRIZE_TOP": {
+        "line": 48,
+        "type": "int",
+        "is_const": true
+      },
+      "PRIZE_STEP": {
+        "line": 49,
+        "type": "int",
+        "is_const": true
+      },
+      "club_name": {
+        "line": 51,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "balance": {
+        "line": 52,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "transfer_budget": {
+        "line": 53,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "wage_budget_weekly": {
+        "line": 54,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "stadium_capacity": {
+        "line": 55,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "season_income": {
+        "line": 57,
+        "type": "Array[int]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "season_expense": {
+        "line": 58,
+        "type": "Array[int]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "payables": {
+        "line": 60,
+        "type": "Array[Dictionary]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "receivables": {
+        "line": 62,
+        "type": "Array[Dictionary]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "last_weekly_cycle": {
+        "line": 63,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      },
+      "spending_frozen": {
+        "line": 65,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "from_team": {
+        "line": 68,
+        "args": [
+          "team: TeamData",
+          "capacity: int"
+        ],
+        "return": "ClubFinances",
+        "is_static": true
+      },
+      "weekly_wage_bill": {
+        "line": 81,
+        "args": [
+          "team: TeamData",
+          "contracts: Dictionary"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "weekly_staff_bill": {
+        "line": 96,
+        "args": [
+          "team: TeamData"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "record_income": {
+        "line": 103,
+        "args": [
+          "line: Line",
+          "amount: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "record_expense": {
+        "line": 110,
+        "args": [
+          "line: Line",
+          "amount: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "total_income": {
+        "line": 117,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      },
+      "total_expense": {
+        "line": 124,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      },
+      "can_afford_fee": {
+        "line": 131,
+        "args": [
+          "fee: int"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "can_afford_wage": {
+        "line": 137,
+        "args": [
+          "new_weekly: int",
+          "current_bill: int"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "commit_fee": {
+        "line": 143,
+        "args": [
+          "fee: int",
+          "instalment_years: int",
+          "note: String",
+          "season_year: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "receive_fee": {
+        "line": 152,
+        "args": [
+          "fee: int",
+          "instalment_years: int",
+          "note: String",
+          "season_year: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "book_matchday": {
+        "line": 163,
+        "args": [
+          "reputation: float",
+          "form_factor: float"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "book_sponsorship": {
+        "line": 171,
+        "args": [
+          "reputation: float"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "prize_money_for_position": {
+        "line": 177,
+        "args": [
+          "position: int",
+          "team_count: int"
+        ],
+        "return": "int",
+        "is_static": true
+      },
+      "post_weekly_cycle": {
+        "line": 183,
+        "args": [
+          "team: TeamData",
+          "contracts: Dictionary",
+          "reputation: float",
+          "today: CareerDate"
+        ],
+        "return": "Dictionary",
+        "is_static": false
+      },
+      "project_end_of_season": {
+        "line": 194,
+        "args": [
+          "team: TeamData",
+          "contracts: Dictionary",
+          "reputation: float",
+          "today: CareerDate"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "book_sponsorship_estimate": {
+        "line": 209,
+        "args": [
+          "reputation: float"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "reallocate": {
+        "line": 215,
+        "args": [
+          "transfer_delta: int"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "settle_due_instalments": {
+        "line": 229,
+        "args": [
+          "season_year: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "reset_season_ledger": {
+        "line": 247,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      }
+    }
+  },
+  "CompetitionData": {
+    "path": "shared/career/CompetitionData.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "Kind": {
+        "line": 22,
+        "values": [
+          "LEAGUE",
+          "KNOCKOUT_CUP",
+          "CONTINENTAL"
+        ]
+      }
+    },
+    "properties": {
+      "ROUND_LABELS": {
+        "line": 25,
+        "type": "Dictionary",
+        "is_const": true
+      },
+      "competition_name": {
+        "line": 33,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "kind": {
+        "line": 34,
+        "type": "Kind",
+        "is_export": true,
+        "is_onready": false
+      },
+      "participant_indices": {
+        "line": 36,
+        "type": "Array[int]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "fixtures": {
+        "line": 37,
+        "type": "Array[FixtureData]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "table": {
+        "line": 38,
+        "type": "Array[LeagueTableRow]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "current_round": {
+        "line": 39,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "total_rounds": {
+        "line": 40,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "remaining_indices": {
+        "line": 42,
+        "type": "Array[int]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "winner_index": {
+        "line": 43,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "two_legged": {
+        "line": 44,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "fixture_tag": {
+        "line": 46,
+        "type": "FixtureData.Competition",
+        "is_export": true,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "build_league": {
+        "line": 49,
+        "args": [
+          "p_name: String",
+          "team_indices: Array[int]",
+          "team_names: Array[String]"
+        ],
+        "return": "CompetitionData",
+        "is_static": true
+      },
+      "build_cup": {
+        "line": 63,
+        "args": [
+          "p_name: String",
+          "team_indices: Array[int]",
+          "p_two_legged: bool"
+        ],
+        "return": "CompetitionData",
+        "is_static": true
+      },
+      "generate_league_fixtures": {
+        "line": 82,
+        "args": [
+          "first_date: CareerDate",
+          "spacing_days: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "draw_cup_round": {
+        "line": 122,
+        "args": [
+          "match_date: CareerDate",
+          "rng: RandomNumberGenerator"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "record_result": {
+        "line": 164,
+        "args": [
+          "fixture: FixtureData",
+          "rng: RandomNumberGenerator"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "_resolve_tie_winner": {
+        "line": 187,
+        "args": [
+          "fixture: FixtureData",
+          "rng: RandomNumberGenerator"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "row_for": {
+        "line": 209,
+        "args": [
+          "team_index: int"
+        ],
+        "return": "LeagueTableRow",
+        "is_static": false
+      },
+      "sorted_table": {
+        "line": 217,
+        "args": [],
+        "return": "Array[LeagueTableRow]",
+        "is_static": false
+      },
+      "position_of": {
+        "line": 225,
+        "args": [
+          "team_index: int"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "fixtures_on": {
+        "line": 233,
+        "args": [
+          "date: CareerDate"
+        ],
+        "return": "Array[FixtureData]",
+        "is_static": false
+      },
+      "next_fixture_for": {
+        "line": 243,
+        "args": [
+          "team_index: int",
+          "from_date: CareerDate"
+        ],
+        "return": "FixtureData",
+        "is_static": false
+      },
+      "unplayed_count": {
+        "line": 255,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      },
+      "is_complete": {
+        "line": 263,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "cup_round_finished": {
+        "line": 271,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      }
+    }
+  },
+  "ContractData": {
+    "path": "shared/career/ContractData.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "Status": {
+        "line": 24,
+        "values": [
+          "STAR_PLAYER",
+          "IMPORTANT",
+          "REGULAR_STARTER",
+          "ROTATION",
+          "SQUAD_PLAYER",
+          "PROSPECT"
+        ]
+      }
+    },
+    "properties": {
+      "STATUS_NAMES": {
+        "line": 26,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "STATUS_MINUTES_EXPECTATION": {
+        "line": 32,
+        "type": "Array[float]",
+        "is_const": true
+      },
+      "club_name": {
+        "line": 34,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "wage_weekly": {
+        "line": 35,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "expiry": {
+        "line": 36,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      },
+      "signed_on": {
+        "line": 37,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      },
+      "release_clause": {
+        "line": 38,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "loyalty_bonus": {
+        "line": 39,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "signing_bonus": {
+        "line": 40,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "goal_bonus": {
+        "line": 42,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "promotion_bonus": {
+        "line": 44,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "promised_status": {
+        "line": 45,
+        "type": "Status",
+        "is_export": true,
+        "is_onready": false
+      },
+      "transfer_fee_paid": {
+        "line": 47,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "is_on_loan": {
+        "line": 49,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "loan_parent_club": {
+        "line": 50,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "loan_expires": {
+        "line": 51,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "make_default": {
+        "line": 56,
+        "args": [
+          "p_club: String",
+          "p_wage: int",
+          "p_years: int",
+          "today: CareerDate"
+        ],
+        "return": "ContractData",
+        "is_static": true
+      },
+      "days_remaining": {
+        "line": 68,
+        "args": [
+          "today: CareerDate"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "years_remaining": {
+        "line": 74,
+        "args": [
+          "today: CareerDate"
+        ],
+        "return": "float",
+        "is_static": false
+      },
+      "is_expired": {
+        "line": 78,
+        "args": [
+          "today: CareerDate"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "is_in_final_six_months": {
+        "line": 86,
+        "args": [
+          "today: CareerDate"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "status_name": {
+        "line": 91,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "expected_minutes_share": {
+        "line": 95,
+        "args": [],
+        "return": "float",
+        "is_static": false
+      },
+      "total_cost_to_expiry": {
+        "line": 101,
+        "args": [
+          "today: CareerDate"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "annual_amortisation": {
+        "line": 108,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      },
+      "copy": {
+        "line": 116,
+        "args": [],
+        "return": "ContractData",
+        "is_static": false
+      },
+      "status_from_name": {
+        "line": 136,
+        "args": [
+          "name_str: String"
+        ],
+        "return": "Status",
+        "is_static": true
+      }
+    }
+  },
+  "FixtureData": {
+    "path": "shared/career/FixtureData.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "Competition": {
+        "line": 16,
+        "values": [
+          "LEAGUE",
+          "DOMESTIC_CUP",
+          "CONTINENTAL",
+          "FRIENDLY"
+        ]
+      }
+    },
+    "properties": {
+      "COMPETITION_NAMES": {
+        "line": 18,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "COMPETITION_SHORT": {
+        "line": 22,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "competition": {
+        "line": 24,
+        "type": "Competition",
+        "is_export": true,
+        "is_onready": false
+      },
+      "round_number": {
+        "line": 26,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "round_label": {
+        "line": 28,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "date": {
+        "line": 29,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      },
+      "home_team_index": {
+        "line": 30,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "away_team_index": {
+        "line": 31,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "played": {
+        "line": 32,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "home_score": {
+        "line": 33,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "away_score": {
+        "line": 34,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "attendance": {
+        "line": 35,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "leg": {
+        "line": 37,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "tie_id": {
+        "line": 39,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "involves_user": {
+        "line": 42,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "decided_winner_index": {
+        "line": 44,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "involves": {
+        "line": 63,
+        "args": [
+          "team_index: int"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "is_home_for": {
+        "line": 67,
+        "args": [
+          "team_index: int"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "opponent_of": {
+        "line": 71,
+        "args": [
+          "team_index: int"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "goals_for": {
+        "line": 79,
+        "args": [
+          "team_index: int"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "goals_against": {
+        "line": 87,
+        "args": [
+          "team_index: int"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "result_char_for": {
+        "line": 96,
+        "args": [
+          "team_index: int"
+        ],
+        "return": "String",
+        "is_static": false
+      },
+      "score_line": {
+        "line": 108,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "competition_name": {
+        "line": 114,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "competition_short": {
+        "line": 118,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "round_display": {
+        "line": 122,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      }
+    }
+  },
+  "InboxEngine": {
+    "path": "shared/career/InboxEngine.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "DEFAULT_DEADLINE_DAYS": {
+        "line": 25,
+        "type": "int",
+        "is_const": true
+      }
+    },
+    "methods": {
+      "build_transfer_response": {
+        "line": 216,
+        "args": [
+          "offer: TransferOffer",
+          "today: CareerDate"
+        ],
+        "return": "InboxItem",
+        "is_static": true
+      },
+      "build_scout_report_ready": {
+        "line": 229,
+        "args": [
+          "report: ScoutReport",
+          "today: CareerDate"
+        ],
+        "return": "InboxItem",
+        "is_static": true
+      },
+      "build_youth_intake": {
+        "line": 245,
+        "args": [
+          "club_name: String",
+          "summary: String",
+          "today: CareerDate"
+        ],
+        "return": "InboxItem",
+        "is_static": true
+      },
+      "sorted_inbox": {
+        "line": 433,
+        "args": [
+          "career: CareerSaveData"
+        ],
+        "return": "Array[InboxItem]",
+        "is_static": true
+      },
+      "_category_to_event_category": {
+        "line": 449,
+        "args": [
+          "c: InboxItem.Category"
+        ],
+        "return": "WorldEvent.Category",
+        "is_static": true
+      },
+      "_ordinal": {
+        "line": 471,
+        "args": [
+          "n: int"
+        ],
+        "return": "String",
+        "is_static": true
+      }
+    }
+  },
+  "InboxItem": {
+    "path": "shared/career/InboxItem.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "Category": {
+        "line": 24,
+        "values": [
+          "BOARD",
+          "MEDIA",
+          "PLAYER",
+          "STAFF",
+          "TRANSFER",
+          "CONTRACT",
+          "FIXTURE",
+          "TRAINING",
+          "SCOUTING",
+          "LEAGUE",
+          "YOUTH",
+          "FINANCE"
+        ]
+      }
+    },
+    "properties": {
+      "CATEGORY_NAMES": {
+        "line": 39,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "CATEGORY_ICONS": {
+        "line": 44,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "subject": {
+        "line": 70,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "body": {
+        "line": 71,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "category": {
+        "line": 72,
+        "type": "Category",
+        "is_export": true,
+        "is_onready": false
+      },
+      "received": {
+        "line": 73,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      },
+      "deadline": {
+        "line": 75,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      },
+      "is_read": {
+        "line": 76,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "is_resolved": {
+        "line": 77,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "chosen_option": {
+        "line": 78,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "subject_player_key": {
+        "line": 80,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "subject_player_name": {
+        "line": 81,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "escalation_option": {
+        "line": 85,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "payload": {
+        "line": 87,
+        "type": "Dictionary",
+        "is_export": true,
+        "is_onready": false
+      },
+      "options": {
+        "line": 92,
+        "type": "Array[Option]",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "make": {
+        "line": 95,
+        "args": [
+          "p_subject: String",
+          "p_body: String",
+          "p_category: Category",
+          "p_received: CareerDate"
+        ],
+        "return": "InboxItem",
+        "is_static": true
+      },
+      "with_subject_player": {
+        "line": 125,
+        "args": [
+          "key: int",
+          "display_name: String"
+        ],
+        "return": "InboxItem",
+        "is_static": false
+      },
+      "with_deadline": {
+        "line": 131,
+        "args": [
+          "d: CareerDate",
+          "escalate_to: int = -1"
+        ],
+        "return": "InboxItem",
+        "is_static": false
+      },
+      "with_priority": {
+        "line": 137,
+        "args": [
+          "p: float"
+        ],
+        "return": "InboxItem",
+        "is_static": false
+      },
+      "option_count": {
+        "line": 142,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      },
+      "get_option": {
+        "line": 146,
+        "args": [
+          "index: int"
+        ],
+        "return": "Option",
+        "is_static": false
+      },
+      "requires_decision": {
+        "line": 152,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "is_expired": {
+        "line": 156,
+        "args": [
+          "today: CareerDate"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "days_left": {
+        "line": 162,
+        "args": [
+          "today: CareerDate"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "category_name": {
+        "line": 168,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "category_icon": {
+        "line": 172,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      }
+    }
+  },
+  "LeagueTableRow": {
+    "path": "shared/career/LeagueTableRow.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "FORM_LENGTH": {
+        "line": 17,
+        "type": "int",
+        "is_const": true
+      },
+      "team_index": {
+        "line": 19,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "team_name": {
+        "line": 20,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "played": {
+        "line": 21,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "won": {
+        "line": 22,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "drawn": {
+        "line": 23,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "lost": {
+        "line": 24,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "goals_for": {
+        "line": 25,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "goals_against": {
+        "line": 26,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "points": {
+        "line": 27,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "form": {
+        "line": 29,
+        "type": "Array[String]",
+        "is_export": true,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "goal_difference": {
+        "line": 32,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      },
+      "record": {
+        "line": 36,
+        "args": [
+          "scored: int",
+          "conceded: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "form_string": {
+        "line": 56,
+        "args": [
+          "length: int = 5"
+        ],
+        "return": "String",
+        "is_static": false
+      },
+      "form_factor": {
+        "line": 67,
+        "args": [],
+        "return": "float",
+        "is_static": false
+      },
+      "sort_before": {
+        "line": 83,
+        "args": [
+          "other: LeagueTableRow"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "make": {
+        "line": 95,
+        "args": [
+          "p_index: int",
+          "p_name: String"
+        ],
+        "return": "LeagueTableRow",
+        "is_static": true
+      }
+    }
+  },
+  "ManagerCareerProfile": {
+    "path": "shared/career/ManagerCareerProfile.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "Tier": {
+        "line": 23,
+        "values": [
+          "NON_LEAGUE",
+          "LOWER_LEAGUE",
+          "ESTABLISHED",
+          "TOP_FLIGHT",
+          "CONTINENTAL"
+        ]
+      },
+      "Background": {
+        "line": 31,
+        "values": [
+          "NONE",
+          "LOWER_LEAGUE_PLAYER",
+          "TOP_FLIGHT_PLAYER",
+          "INTERNATIONAL"
+        ]
+      },
+      "Philosophy": {
+        "line": 37,
+        "values": [
+          "POSSESSION",
+          "DIRECT",
+          "PRESSING",
+          "COUNTER",
+          "BALANCED"
+        ]
+      }
+    },
+    "properties": {
+      "TIER_NAMES": {
+        "line": 25,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "TIER_THRESHOLDS": {
+        "line": 29,
+        "type": "Array[float]",
+        "is_const": true
+      },
+      "BACKGROUND_NAMES": {
+        "line": 33,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "PHILOSOPHY_NAMES": {
+        "line": 39,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "ATTRIBUTE_KEYS": {
+        "line": 45,
+        "type": "Array[StringName]",
+        "is_const": true
+      },
+      "ATTRIBUTE_LABELS": {
+        "line": 51,
+        "type": "Dictionary",
+        "is_const": true
+      },
+      "XP_PER_ATTRIBUTE_POINT": {
+        "line": 65,
+        "type": "float",
+        "is_const": true
+      },
+      "manager_name": {
+        "line": 67,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "nationality": {
+        "line": 68,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "date_of_birth": {
+        "line": 69,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "background": {
+        "line": 70,
+        "type": "Background",
+        "is_export": true,
+        "is_onready": false
+      },
+      "philosophy": {
+        "line": 71,
+        "type": "Philosophy",
+        "is_export": true,
+        "is_onready": false
+      },
+      "preferred_formation": {
+        "line": 72,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "attributes": {
+        "line": 80,
+        "type": "Dictionary",
+        "is_export": true,
+        "is_onready": false
+      },
+      "attribute_xp": {
+        "line": 82,
+        "type": "Dictionary",
+        "is_export": true,
+        "is_onready": false
+      },
+      "current_club": {
+        "line": 84,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "contract": {
+        "line": 85,
+        "type": "ContractData",
+        "is_export": true,
+        "is_onready": false
+      },
+      "unemployed_since": {
+        "line": 86,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      },
+      "matches_managed": {
+        "line": 89,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "wins": {
+        "line": 90,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "draws": {
+        "line": 91,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "losses": {
+        "line": 92,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "trophies_won": {
+        "line": 93,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "times_sacked": {
+        "line": 94,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "promotions": {
+        "line": 95,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "relegations": {
+        "line": 96,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "job_history": {
+        "line": 99,
+        "type": "Array[Dictionary]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "season_history": {
+        "line": 101,
+        "type": "Array[Dictionary]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "tactical": {
+        "line": 105,
+        "type": "ManagerData",
+        "is_export": true,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "attribute": {
+        "line": 169,
+        "args": [
+          "key: StringName"
+        ],
+        "return": "float",
+        "is_static": false
+      },
+      "set_attribute": {
+        "line": 173,
+        "args": [
+          "key: StringName",
+          "value: float"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "train_attribute": {
+        "line": 180,
+        "args": [
+          "key: StringName",
+          "xp: float"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "tier": {
+        "line": 196,
+        "args": [],
+        "return": "Tier",
+        "is_static": false
+      },
+      "tier_name": {
+        "line": 204,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "background_name": {
+        "line": 208,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "philosophy_name": {
+        "line": 212,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "can_apply_to": {
+        "line": 218,
+        "args": [
+          "club_reputation: float"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "win_rate": {
+        "line": 223,
+        "args": [],
+        "return": "float",
+        "is_static": false
+      },
+      "record_result": {
+        "line": 229,
+        "args": [
+          "goals_for: int",
+          "goals_against: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "sync_to_tactical": {
+        "line": 242,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "get_age": {
+        "line": 309,
+        "args": [
+          "ref_year: int = 2026",
+          "ref_month: int = 9",
+          "ref_day: int = 1"
+        ],
+        "return": "int",
+        "is_static": false
+      }
+    }
+  },
+  "MoraleEngine": {
+    "path": "shared/career/MoraleEngine.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "NEUTRAL_MORALE": {
+        "line": 39,
+        "type": "float",
+        "is_const": true
+      },
+      "NEUTRAL_FORM": {
+        "line": 40,
+        "type": "float",
+        "is_const": true
+      },
+      "MORALE_TO_MOOD_DOWN": {
+        "line": 56,
+        "type": "float",
+        "is_const": true
+      },
+      "MORALE_TO_MOOD_UP": {
+        "line": 57,
+        "type": "float",
+        "is_const": true
+      },
+      "FORM_TO_MOOD": {
+        "line": 58,
+        "type": "float",
+        "is_const": true
+      },
+      "SHARPNESS_TO_MOOD": {
+        "line": 60,
+        "type": "float",
+        "is_const": true
+      },
+      "W_PLAYING_TIME": {
+        "line": 63,
+        "type": "float",
+        "is_const": true
+      },
+      "W_RESULTS": {
+        "line": 64,
+        "type": "float",
+        "is_const": true
+      },
+      "W_FORM": {
+        "line": 65,
+        "type": "float",
+        "is_const": true
+      },
+      "W_CONTRACT": {
+        "line": 66,
+        "type": "float",
+        "is_const": true
+      },
+      "W_MANAGER": {
+        "line": 67,
+        "type": "float",
+        "is_const": true
+      },
+      "W_DRESSING_ROOM": {
+        "line": 68,
+        "type": "float",
+        "is_const": true
+      },
+      "MORALE_LERP_RATE": {
+        "line": 72,
+        "type": "float",
+        "is_const": true
+      }
+    },
+    "methods": {
+      "seed_mood_value": {
+        "line": 79,
+        "args": [
+          "morale: float",
+          "form: float",
+          "sharpness: float"
+        ],
+        "return": "float",
+        "is_static": true
+      },
+      "contribution": {
+        "line": 137,
+        "args": [],
+        "return": "float",
+        "is_static": false
+      },
+      "apply_drivers": {
+        "line": 238,
+        "args": [
+          "data: PlayerData",
+          "drivers: Array[Driver]"
+        ],
+        "return": "float",
+        "is_static": true
+      },
+      "apply_result_reaction": {
+        "line": 258,
+        "args": [
+          "data: PlayerData",
+          "played: bool",
+          "goal_diff: int",
+          "rating: float"
+        ],
+        "return": "void",
+        "is_static": true
+      },
+      "daily_drift": {
+        "line": 285,
+        "args": [
+          "data: PlayerData"
+        ],
+        "return": "void",
+        "is_static": true
+      },
+      "_trust_label": {
+        "line": 291,
+        "args": [
+          "t: float"
+        ],
+        "return": "String",
+        "is_static": true
+      },
+      "morale_label": {
+        "line": 303,
+        "args": [
+          "morale: float"
+        ],
+        "return": "String",
+        "is_static": true
+      },
+      "morale_color": {
+        "line": 317,
+        "args": [
+          "morale: float"
+        ],
+        "return": "Color",
+        "is_static": true
+      },
+      "describe_drivers": {
+        "line": 331,
+        "args": [
+          "drivers: Array[Driver]"
+        ],
+        "return": "String",
+        "is_static": true
+      }
+    }
+  },
+  "PlayerCareerState": {
+    "path": "shared/career/PlayerCareerState.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "InjuryKind": {
+        "line": 22,
+        "values": [
+          "NONE",
+          "KNOCK",
+          "STRAIN",
+          "MUSCLE_TEAR",
+          "LIGAMENT",
+          "FRACTURE"
+        ]
+      }
+    },
+    "properties": {
+      "INJURY_NAMES": {
+        "line": 24,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "INJURY_BASE_DAYS": {
+        "line": 28,
+        "type": "Array[int]",
+        "is_const": true
+      },
+      "player_key": {
+        "line": 30,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "display_name": {
+        "line": 31,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "squad_index": {
+        "line": 32,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "team_index": {
+        "line": 33,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "injury": {
+        "line": 41,
+        "type": "InjuryKind",
+        "is_export": true,
+        "is_onready": false
+      },
+      "injury_days_remaining": {
+        "line": 42,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "injury_return_date": {
+        "line": 43,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      },
+      "potential_ability": {
+        "line": 51,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "development_xp": {
+        "line": 53,
+        "type": "float",
+        "is_export": true,
+        "is_onready": false
+      },
+      "is_youth_player": {
+        "line": 54,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "appearances": {
+        "line": 57,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "minutes_played": {
+        "line": 58,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "goals_this_season": {
+        "line": 59,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "assists_this_season": {
+        "line": 60,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "average_rating": {
+        "line": 61,
+        "type": "float",
+        "is_export": true,
+        "is_onready": false
+      },
+      "yellow_cards_season": {
+        "line": 62,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "red_cards_season": {
+        "line": 63,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "suspension_matches": {
+        "line": 65,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "contract": {
+        "line": 68,
+        "type": "ContractData",
+        "is_export": true,
+        "is_onready": false
+      },
+      "relationships": {
+        "line": 72,
+        "type": "Dictionary",
+        "is_export": true,
+        "is_onready": false
+      },
+      "grievances": {
+        "line": 74,
+        "type": "Array[StringName]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "transfer_listed": {
+        "line": 75,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "loan_listed": {
+        "line": 76,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "wants_new_contract": {
+        "line": 77,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "has_requested_transfer": {
+        "line": 78,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "promised_status": {
+        "line": 80,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "promise_review_date": {
+        "line": 81,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "condition_label": {
+        "line": 108,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "injury_name": {
+        "line": 120,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "is_injured": {
+        "line": 124,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "is_suspended": {
+        "line": 128,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "is_available": {
+        "line": 132,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "availability_label": {
+        "line": 136,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "tick_recovery": {
+        "line": 146,
+        "args": [
+          "physio_quality: float",
+          "rest_factor: float"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "apply_training_load": {
+        "line": 169,
+        "args": [
+          "intensity: float"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "begin_injury": {
+        "line": 177,
+        "args": [
+          "kind: InjuryKind",
+          "today: CareerDate",
+          "rng: RandomNumberGenerator"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "record_appearance": {
+        "line": 193,
+        "args": [
+          "minutes: int",
+          "rating: float",
+          "scored: int",
+          "assisted: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "minutes_share": {
+        "line": 207,
+        "args": [
+          "team_matches_played: int"
+        ],
+        "return": "float",
+        "is_static": false
+      },
+      "relationship_with": {
+        "line": 213,
+        "args": [
+          "other_key: int",
+          "ordinal: int"
+        ],
+        "return": "RelationshipData",
+        "is_static": false
+      },
+      "potential_remaining": {
+        "line": 222,
+        "args": [
+          "current_overall: int"
+        ],
+        "return": "int",
+        "is_static": false
+      },
+      "reset_season_record": {
+        "line": 226,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      }
+    }
+  },
+  "PlayerDevelopmentEngine": {
+    "path": "shared/career/PlayerDevelopmentEngine.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "PEAK_AGE_START": {
+        "line": 31,
+        "type": "int",
+        "is_const": true
+      },
+      "PEAK_AGE_END": {
+        "line": 32,
+        "type": "int",
+        "is_const": true
+      },
+      "XP_PER_ABILITY_POINT": {
+        "line": 34,
+        "type": "float",
+        "is_const": true
+      },
+      "BASE_DAILY_XP": {
+        "line": 37,
+        "type": "float",
+        "is_const": true
+      },
+      "DECLINE_BASE": {
+        "line": 49,
+        "type": "float",
+        "is_const": true
+      },
+      "DECLINE_RAMP": {
+        "line": 50,
+        "type": "float",
+        "is_const": true
+      },
+      "MENTAL_GROWTH_UNTIL": {
+        "line": 52,
+        "type": "int",
+        "is_const": true
+      }
+    },
+    "methods": {
+      "growth_multiplier": {
+        "line": 57,
+        "args": [
+          "age: int"
+        ],
+        "return": "float",
+        "is_static": true
+      },
+      "current_ability": {
+        "line": 68,
+        "args": [
+          "data: PlayerData"
+        ],
+        "return": "int",
+        "is_static": true
+      },
+      "roll_potential": {
+        "line": 75,
+        "args": [
+          "data: PlayerData",
+          "age: int",
+          "rng: RandomNumberGenerator"
+        ],
+        "return": "int",
+        "is_static": true
+      },
+      "development_label": {
+        "line": 246,
+        "args": [
+          "data: PlayerData",
+          "state: PlayerCareerState",
+          "age: int"
+        ],
+        "return": "String",
+        "is_static": true
+      }
+    }
+  },
+  "RelationshipData": {
+    "path": "shared/career/RelationshipData.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "history": {
+        "line": 27,
+        "type": "Array[String]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "last_interaction_ordinal": {
+        "line": 30,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "HISTORY_CAP": {
+        "line": 32,
+        "type": "int",
+        "is_const": true
+      },
+      "MONTHLY_DECAY": {
+        "line": 34,
+        "type": "float",
+        "is_const": true
+      },
+      "MATCH_MULT_MIN": {
+        "line": 39,
+        "type": "float",
+        "is_const": true
+      },
+      "MATCH_MULT_MAX": {
+        "line": 40,
+        "type": "float",
+        "is_const": true
+      }
+    },
+    "methods": {
+      "adjust_trust": {
+        "line": 43,
+        "args": [
+          "delta: float",
+          "reason: String",
+          "ordinal: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "adjust_rivalry": {
+        "line": 50,
+        "args": [
+          "delta: float",
+          "reason: String",
+          "ordinal: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "note": {
+        "line": 57,
+        "args": [
+          "entry: String"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "decay_toward_neutral": {
+        "line": 65,
+        "args": [
+          "current_ordinal: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "to_match_multiplier": {
+        "line": 79,
+        "args": [],
+        "return": "float",
+        "is_static": false
+      },
+      "relation_label": {
+        "line": 84,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "neutral": {
+        "line": 100,
+        "args": [
+          "ordinal: int"
+        ],
+        "return": "RelationshipData",
+        "is_static": true
+      }
+    }
+  },
+  "ScoutReport": {
+    "path": "shared/career/ScoutReport.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "Stage": {
+        "line": 23,
+        "values": [
+          "IDENTIFIED",
+          "SCOUTED",
+          "APPROACHED",
+          "BID_MADE",
+          "SIGNED",
+          "REJECTED"
+        ]
+      }
+    },
+    "properties": {
+      "STAGE_NAMES": {
+        "line": 25,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "MAX_UNCERTAINTY": {
+        "line": 30,
+        "type": "float",
+        "is_const": true
+      },
+      "BASE_DAILY_KNOWLEDGE": {
+        "line": 32,
+        "type": "float",
+        "is_const": true
+      },
+      "KNOWLEDGE_CEILING": {
+        "line": 34,
+        "type": "float",
+        "is_const": true
+      },
+      "target_team_index": {
+        "line": 36,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "target_squad_index": {
+        "line": 37,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "target_name": {
+        "line": 38,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "target_club": {
+        "line": 39,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "target_position": {
+        "line": 40,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "stage": {
+        "line": 42,
+        "type": "Stage",
+        "is_export": true,
+        "is_onready": false
+      },
+      "assigned_scout_name": {
+        "line": 43,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "first_seen": {
+        "line": 44,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      },
+      "last_updated": {
+        "line": 45,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      },
+      "true_overall": {
+        "line": 48,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "true_potential": {
+        "line": 49,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "verdict": {
+        "line": 51,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "target_key": {
+        "line": 82,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      },
+      "uncertainty": {
+        "line": 87,
+        "args": [],
+        "return": "float",
+        "is_static": false
+      },
+      "observed_range": {
+        "line": 94,
+        "args": [],
+        "return": "Vector2i",
+        "is_static": false
+      },
+      "potential_range": {
+        "line": 103,
+        "args": [],
+        "return": "Vector2i",
+        "is_static": false
+      },
+      "display_value": {
+        "line": 115,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "display_potential": {
+        "line": 126,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "advance": {
+        "line": 135,
+        "args": [
+          "judging_ability: float",
+          "today: CareerDate"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_refresh_verdict": {
+        "line": 146,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "stage_name": {
+        "line": 172,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "is_bid_ready": {
+        "line": 178,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      }
+    }
+  },
+  "ScoutingNetwork": {
+    "path": "shared/career/ScoutingNetwork.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "REPORTS_PER_SCOUT": {
+        "line": 22,
+        "type": "int",
+        "is_const": true
+      },
+      "DISCOVERY_CHANCE": {
+        "line": 24,
+        "type": "float",
+        "is_const": true
+      },
+      "WONDERKID_MAX_AGE": {
+        "line": 27,
+        "type": "int",
+        "is_const": true
+      },
+      "WONDERKID_MIN_HEADROOM": {
+        "line": 28,
+        "type": "int",
+        "is_const": true
+      }
+    },
+    "methods": {
+      "available_scouts": {
+        "line": 31,
+        "args": [
+          "team: TeamData"
+        ],
+        "return": "Array[StaffData]",
+        "is_static": true
+      },
+      "scout_quality": {
+        "line": 42,
+        "args": [
+          "team: TeamData",
+          "scout_name: String"
+        ],
+        "return": "float",
+        "is_static": true
+      },
+      "caseload": {
+        "line": 52,
+        "args": [
+          "career: CareerSaveData",
+          "scout_name: String"
+        ],
+        "return": "int",
+        "is_static": true
+      },
+      "assign_scout": {
+        "line": 60,
+        "args": [
+          "report: ScoutReport",
+          "scout_name: String"
+        ],
+        "return": "void",
+        "is_static": true
+      },
+      "advance_reports": {
+        "line": 67,
+        "args": [
+          "career: CareerSaveData",
+          "user_team: TeamData",
+          "today: CareerDate"
+        ],
+        "return": "Array[ScoutReport]",
+        "is_static": true
+      },
+      "is_wonderkid": {
+        "line": 165,
+        "args": [
+          "report: ScoutReport",
+          "age: int"
+        ],
+        "return": "bool",
+        "is_static": true
+      }
+    }
+  },
+  "TrainingSchedule": {
+    "path": "shared/career/TrainingSchedule.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "Session": {
+        "line": 20,
+        "values": [
+          "REST",
+          "RECOVERY",
+          "PHYSICAL",
+          "TECHNICAL",
+          "TACTICAL",
+          "SET_PIECES",
+          "MATCH_PREP",
+          "DOUBLE_INTENSITY"
+        ]
+      },
+      "Focus": {
+        "line": 47,
+        "values": [
+          "BALANCED",
+          "PACE",
+          "STAMINA",
+          "FINISHING",
+          "PASSING",
+          "DEFENDING",
+          "COMPOSURE",
+          "LEADERSHIP",
+          "POSITION_RETRAIN"
+        ]
+      }
+    },
+    "properties": {
+      "SESSION_NAMES": {
+        "line": 31,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "SESSION_INTENSITY": {
+        "line": 37,
+        "type": "Array[float]",
+        "is_const": true
+      },
+      "SESSION_FOCUS": {
+        "line": 41,
+        "type": "Array[StringName]",
+        "is_const": true
+      },
+      "FOCUS_NAMES": {
+        "line": 59,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "BASE_DAILY_INJURY_RISK": {
+        "line": 66,
+        "type": "float",
+        "is_const": true
+      },
+      "club_name": {
+        "line": 68,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "week": {
+        "line": 70,
+        "type": "Array[int]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "youth_week": {
+        "line": 75,
+        "type": "Array[int]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "individual_focus": {
+        "line": 80,
+        "type": "Dictionary",
+        "is_export": true,
+        "is_onready": false
+      },
+      "retrain_target": {
+        "line": 82,
+        "type": "Dictionary",
+        "is_export": true,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "make_default": {
+        "line": 85,
+        "args": [
+          "p_club: String"
+        ],
+        "return": "TrainingSchedule",
+        "is_static": true
+      },
+      "session_for_day": {
+        "line": 91,
+        "args": [
+          "day_of_week: int"
+        ],
+        "return": "Session",
+        "is_static": false
+      },
+      "youth_session_for_day": {
+        "line": 98,
+        "args": [
+          "day_of_week: int"
+        ],
+        "return": "Session",
+        "is_static": false
+      },
+      "set_day": {
+        "line": 105,
+        "args": [
+          "day_of_week: int",
+          "session: Session"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "set_youth_day": {
+        "line": 112,
+        "args": [
+          "day_of_week: int",
+          "session: Session"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "session_name": {
+        "line": 119,
+        "args": [
+          "session: Session"
+        ],
+        "return": "String",
+        "is_static": true
+      },
+      "intensity_of": {
+        "line": 123,
+        "args": [
+          "session: Session"
+        ],
+        "return": "float",
+        "is_static": true
+      },
+      "weekly_intensity": {
+        "line": 129,
+        "args": [],
+        "return": "float",
+        "is_static": false
+      },
+      "weekly_intensity_label": {
+        "line": 136,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "focus_for_player": {
+        "line": 149,
+        "args": [
+          "squad_index: int"
+        ],
+        "return": "Focus",
+        "is_static": false
+      },
+      "set_focus": {
+        "line": 153,
+        "args": [
+          "squad_index: int",
+          "focus: Focus"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "focus_name": {
+        "line": 157,
+        "args": [
+          "focus: Focus"
+        ],
+        "return": "String",
+        "is_static": true
+      },
+      "coach_bonus": {
+        "line": 163,
+        "args": [
+          "staff: Array[StaffData]",
+          "family: StringName"
+        ],
+        "return": "float",
+        "is_static": true
+      }
+    }
+  },
+  "TransferMarket": {
+    "path": "shared/career/TransferMarket.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "COUNTER_BAND": {
+        "line": 33,
+        "type": "float",
+        "is_const": true
+      },
+      "INSULT_BAND": {
+        "line": 35,
+        "type": "float",
+        "is_const": true
+      },
+      "EXPIRING_DISCOUNT": {
+        "line": 37,
+        "type": "float",
+        "is_const": true
+      }
+    },
+    "methods": {
+      "squad_need_score": {
+        "line": 298,
+        "args": [
+          "team: TeamData",
+          "position_role: String"
+        ],
+        "return": "float",
+        "is_static": true
+      },
+      "position_family": {
+        "line": 322,
+        "args": [
+          "role: String"
+        ],
+        "return": "String",
+        "is_static": true
+      },
+      "format_fee": {
+        "line": 414,
+        "args": [
+          "amount: int"
+        ],
+        "return": "String",
+        "is_static": true
+      }
+    }
+  },
+  "TransferOffer": {
+    "path": "shared/career/TransferOffer.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "State": {
+        "line": 20,
+        "values": [
+          "DRAFT",
+          "BID_SUBMITTED",
+          "CLUB_REJECTED",
+          "CLUB_COUNTERED",
+          "CLUB_ACCEPTED",
+          "TERMS_OFFERED",
+          "TERMS_REJECTED",
+          "TERMS_COUNTERED",
+          "COMPLETED",
+          "WITHDRAWN"
+        ]
+      },
+      "Kind": {
+        "line": 38,
+        "values": [
+          "PERMANENT",
+          "LOAN",
+          "FREE_AGENT"
+        ]
+      }
+    },
+    "properties": {
+      "STATE_NAMES": {
+        "line": 33,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "KIND_NAMES": {
+        "line": 40,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "CLUB_RESPONSE_DAYS": {
+        "line": 43,
+        "type": "int",
+        "is_const": true
+      },
+      "PLAYER_RESPONSE_DAYS": {
+        "line": 45,
+        "type": "int",
+        "is_const": true
+      },
+      "buying_club": {
+        "line": 47,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "selling_club": {
+        "line": 48,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "player_name": {
+        "line": 49,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "player_team_index": {
+        "line": 50,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "player_squad_index": {
+        "line": 51,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "kind": {
+        "line": 52,
+        "type": "Kind",
+        "is_export": true,
+        "is_onready": false
+      },
+      "state": {
+        "line": 53,
+        "type": "State",
+        "is_export": true,
+        "is_onready": false
+      },
+      "fee_offered": {
+        "line": 56,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "fee_demanded": {
+        "line": 58,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "sell_on_percent": {
+        "line": 59,
+        "type": "float",
+        "is_export": true,
+        "is_onready": false
+      },
+      "instalment_years": {
+        "line": 61,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "wage_offered": {
+        "line": 64,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "wage_demanded": {
+        "line": 65,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "contract_years_offered": {
+        "line": 66,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "signing_bonus_offered": {
+        "line": 67,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "release_clause_offered": {
+        "line": 68,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "promised_status": {
+        "line": 69,
+        "type": "ContractData.Status",
+        "is_export": true,
+        "is_onready": false
+      },
+      "loan_wage_share": {
+        "line": 72,
+        "type": "float",
+        "is_export": true,
+        "is_onready": false
+      },
+      "loan_months": {
+        "line": 73,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "submitted_on": {
+        "line": 75,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      },
+      "last_state_change": {
+        "line": 76,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      },
+      "response_message": {
+        "line": 78,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "initiated_by_user": {
+        "line": 80,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "player_key": {
+        "line": 104,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      },
+      "advance_to": {
+        "line": 108,
+        "args": [
+          "new_state: State",
+          "today: CareerDate",
+          "message: String = \"\""
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "club_response_due": {
+        "line": 116,
+        "args": [
+          "today: CareerDate"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "player_response_due": {
+        "line": 122,
+        "args": [
+          "today: CareerDate"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "is_terminal": {
+        "line": 128,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "is_awaiting_user": {
+        "line": 132,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "state_name": {
+        "line": 136,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "kind_name": {
+        "line": 140,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "total_outlay": {
+        "line": 146,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      },
+      "first_season_cost": {
+        "line": 152,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      }
+    }
+  },
+  "WorldEvent": {
+    "path": "shared/career/WorldEvent.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "Category": {
+        "line": 23,
+        "values": [
+          "MATCH",
+          "TRAINING",
+          "DRESSING_ROOM",
+          "INJURY",
+          "TRANSFER",
+          "CONTRACT",
+          "MEDIA",
+          "BOARD",
+          "YOUTH",
+          "PERSONAL_LIFE",
+          "STAFF"
+        ]
+      }
+    },
+    "properties": {
+      "CATEGORY_NAMES": {
+        "line": 37,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "event_tag": {
+        "line": 44,
+        "type": "StringName",
+        "is_export": true,
+        "is_onready": false
+      },
+      "category": {
+        "line": 45,
+        "type": "Category",
+        "is_export": true,
+        "is_onready": false
+      },
+      "date": {
+        "line": 46,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      },
+      "season_year": {
+        "line": 48,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "primary_player_key": {
+        "line": 50,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "secondary_player_key": {
+        "line": 51,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "primary_player_name": {
+        "line": 52,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "secondary_player_name": {
+        "line": 53,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "club_name": {
+        "line": 54,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "narrative_context": {
+        "line": 56,
+        "type": "String",
+        "is_export": true,
+        "is_onready": false
+      },
+      "resolved": {
+        "line": 63,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "resolution_choice": {
+        "line": 65,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "with_player": {
+        "line": 87,
+        "args": [
+          "key: int",
+          "display_name: String"
+        ],
+        "return": "WorldEvent",
+        "is_static": false
+      },
+      "with_secondary": {
+        "line": 93,
+        "args": [
+          "key: int",
+          "display_name: String"
+        ],
+        "return": "WorldEvent",
+        "is_static": false
+      },
+      "with_club": {
+        "line": 99,
+        "args": [
+          "name_str: String"
+        ],
+        "return": "WorldEvent",
+        "is_static": false
+      },
+      "category_name": {
+        "line": 104,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "involves": {
+        "line": 108,
+        "args": [
+          "player_key: int"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "severity_label": {
+        "line": 112,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "headline": {
+        "line": 120,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      }
+    }
+  },
+  "YouthAcademy": {
+    "path": "shared/career/YouthAcademy.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "MIN_INTAKE": {
+        "line": 25,
+        "type": "int",
+        "is_const": true
+      },
+      "MAX_INTAKE": {
+        "line": 26,
+        "type": "int",
+        "is_const": true
+      },
+      "INTAKE_MIN_AGE": {
+        "line": 28,
+        "type": "int",
+        "is_const": true
+      },
+      "INTAKE_MAX_AGE": {
+        "line": 29,
+        "type": "int",
+        "is_const": true
+      },
+      "FIRST_NAMES": {
+        "line": 31,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "LAST_NAMES": {
+        "line": 39,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "INTAKE_ROLES": {
+        "line": 47,
+        "type": "Array[String]",
+        "is_const": true
+      }
+    },
+    "methods": {
+      "_next_free_number": {
+        "line": 118,
+        "args": [
+          "used: Array[int]",
+          "rng: RandomNumberGenerator"
+        ],
+        "return": "int",
+        "is_static": true
+      },
+      "_apply_youth_baseline": {
+        "line": 132,
+        "args": [
+          "data: PlayerData",
+          "quality_bias: float",
+          "rng: RandomNumberGenerator"
+        ],
+        "return": "void",
+        "is_static": true
+      },
+      "_wonderkid_headroom": {
+        "line": 196,
+        "args": [],
+        "return": "int",
+        "is_static": true
+      }
+    }
+  },
   "ActionText": {
     "path": "ui/ActionText.gd",
     "line": 1,
@@ -17620,37 +22944,37 @@
         "is_static": false
       },
       "_on_career_pressed": {
-        "line": 75,
+        "line": 78,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_options_pressed": {
-        "line": 79,
+        "line": 82,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_quit_pressed": {
-        "line": 85,
+        "line": 88,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_quit_confirmed": {
-        "line": 90,
+        "line": 93,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_quit_visibility_changed": {
-        "line": 94,
+        "line": 97,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_show_coming_soon": {
-        "line": 99,
+        "line": 102,
         "args": [
           "source_button: Button",
           "message: String"
@@ -17659,25 +22983,25 @@
         "is_static": false
       },
       "_on_coming_soon_visibility_changed": {
-        "line": 105,
+        "line": 108,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_return_to_main_menu": {
-        "line": 110,
+        "line": 113,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_style_menu_buttons": {
-        "line": 125,
+        "line": 128,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_make_stylebox": {
-        "line": 140,
+        "line": 144,
         "args": [
           "bg_color: Color",
           "left_border: int"
@@ -18925,362 +24249,1519 @@
       }
     }
   },
-  "ManagerModeHub": {
-    "path": "ui/manager/ManagerModeHub.gd",
+  "BoardPanel": {
+    "path": "ui/manager_mode/BoardPanel.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {},
+    "methods": {
+      "title": {
+        "line": 15,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "build": {
+        "line": 19,
+        "args": [
+          "host: VBoxContainer",
+          "career: CareerSaveData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_confidence_card": {
+        "line": 31,
+        "args": [
+          "board: BoardState",
+          "career: CareerSaveData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_facilities_card": {
+        "line": 76,
+        "args": [
+          "board: BoardState",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_facility_row": {
+        "line": 88,
+        "args": [
+          "caption: String",
+          "level: int",
+          "board: BoardState",
+          "p: CareerThemePalette"
+        ],
+        "return": "HBoxContainer",
+        "is_static": false
+      },
+      "_requests_card": {
+        "line": 98,
+        "args": [
+          "board: BoardState",
+          "career: CareerSaveData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_ordinal": {
+        "line": 151,
+        "args": [
+          "n: int"
+        ],
+        "return": "String",
+        "is_static": false
+      }
+    }
+  },
+  "CalendarPanel": {
+    "path": "ui/manager_mode/CalendarPanel.gd",
     "line": 1,
     "signals": {},
     "enums": {},
     "properties": {
-      "QuickSimModalScene": {
+      "_month_offset": {
+        "line": 15,
+        "type": "int",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "title": {
+        "line": 18,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "build": {
         "line": 22,
-        "type": "PackedScene",
-        "is_const": true
+        "args": [
+          "host: VBoxContainer",
+          "career: CareerSaveData"
+        ],
+        "return": "void",
+        "is_static": false
       },
-      "MatchStatsScene": {
+      "_viewed_month": {
+        "line": 87,
+        "args": [
+          "career: CareerSaveData"
+        ],
+        "return": "CareerDate",
+        "is_static": false
+      },
+      "_empty_cell": {
+        "line": 99,
+        "args": [],
+        "return": "Control",
+        "is_static": false
+      },
+      "_day_cell": {
+        "line": 106,
+        "args": [
+          "date: CareerDate",
+          "career: CareerSaveData",
+          "p: CareerThemePalette"
+        ],
+        "return": "Control",
+        "is_static": false
+      }
+    }
+  },
+  "CareerPanel": {
+    "path": "ui/manager_mode/CareerPanel.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "request_refresh": {
         "line": 23,
-        "type": "PackedScene",
-        "is_const": true
+        "type": "Callable",
+        "is_export": false,
+        "is_onready": false
       },
-      "ACCENT_COLOR": {
+      "request_section": {
         "line": 24,
-        "type": "Color",
+        "type": "Callable",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "title": {
+        "line": 28,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "build": {
+        "line": 34,
+        "args": [
+          "_host: VBoxContainer",
+          "_career: CareerSaveData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "refresh": {
+        "line": 40,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "go_to": {
+        "line": 45,
+        "args": [
+          "section: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "empty_state": {
+        "line": 51,
+        "args": [
+          "host: VBoxContainer",
+          "message: String"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "club": {
+        "line": 59,
+        "args": [
+          "career: CareerSaveData"
+        ],
+        "return": "TeamData",
+        "is_static": false
+      }
+    }
+  },
+  "CareerTheme": {
+    "path": "ui/manager_mode/CareerTheme.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "PALETTE_PATH": {
+        "line": 23,
+        "type": "String",
+        "is_const": true
+      }
+    },
+    "methods": {
+      "palette": {
+        "line": 30,
+        "args": [],
+        "return": "CareerThemePalette",
+        "is_static": true
+      },
+      "heading": {
+        "line": 74,
+        "args": [
+          "text: String"
+        ],
+        "return": "Label",
+        "is_static": true
+      },
+      "title": {
+        "line": 79,
+        "args": [
+          "text: String"
+        ],
+        "return": "Label",
+        "is_static": true
+      },
+      "muted": {
+        "line": 84,
+        "args": [
+          "text: String"
+        ],
+        "return": "Label",
+        "is_static": true
+      },
+      "secondary": {
+        "line": 89,
+        "args": [
+          "text: String"
+        ],
+        "return": "Label",
+        "is_static": true
+      },
+      "paragraph": {
+        "line": 95,
+        "args": [
+          "text: String"
+        ],
+        "return": "Label",
+        "is_static": true
+      },
+      "style_box": {
+        "line": 105,
+        "args": [
+          "bg: Color",
+          "radius: int",
+          "border_color: Color = Color.TRANSPARENT",
+          "border_width: int = 0"
+        ],
+        "return": "StyleBoxFlat",
+        "is_static": true
+      },
+      "card": {
+        "line": 124,
+        "args": [
+          "title_text: String"
+        ],
+        "return": "VBoxContainer",
+        "is_static": true
+      },
+      "card_root": {
+        "line": 148,
+        "args": [
+          "card_body: VBoxContainer"
+        ],
+        "return": "Control",
+        "is_static": true
+      },
+      "divider": {
+        "line": 157,
+        "args": [],
+        "return": "HSeparator",
+        "is_static": true
+      },
+      "spacer": {
+        "line": 168,
+        "args": [
+          "height: int = 8"
+        ],
+        "return": "Control",
+        "is_static": true
+      },
+      "row": {
+        "line": 175,
+        "args": [
+          "separation: int = 8"
+        ],
+        "return": "HBoxContainer",
+        "is_static": true
+      },
+      "data_row": {
+        "line": 184,
+        "args": [
+          "index: int",
+          "highlight: bool = false"
+        ],
+        "return": "HBoxContainer",
+        "is_static": true
+      },
+      "data_row_root": {
+        "line": 207,
+        "args": [
+          "row_body: HBoxContainer"
+        ],
+        "return": "Control",
+        "is_static": true
+      },
+      "header_row": {
+        "line": 216,
+        "args": [],
+        "return": "HBoxContainer",
+        "is_static": true
+      },
+      "button": {
+        "line": 234,
+        "args": [
+          "text: String",
+          "primary: bool = false"
+        ],
+        "return": "Button",
+        "is_static": true
+      },
+      "_button_box": {
+        "line": 262,
+        "args": [
+          "bg: Color",
+          "p: CareerThemePalette"
+        ],
+        "return": "StyleBoxFlat",
+        "is_static": true
+      },
+      "nav_button": {
+        "line": 273,
+        "args": [
+          "text: String",
+          "selected: bool",
+          "badge: int = 0"
+        ],
+        "return": "Button",
+        "is_static": true
+      },
+      "bar": {
+        "line": 313,
+        "args": [
+          "value: float",
+          "width: int = 90",
+          "show_text: bool = false"
+        ],
+        "return": "Control",
+        "is_static": true
+      },
+      "tint_for_rating": {
+        "line": 329,
+        "args": [
+          "value: float"
+        ],
+        "return": "Color",
+        "is_static": true
+      },
+      "result_color": {
+        "line": 337,
+        "args": [
+          "result_char: String"
+        ],
+        "return": "Color",
+        "is_static": true
+      },
+      "form_strip": {
+        "line": 351,
+        "args": [
+          "form: String"
+        ],
+        "return": "HBoxContainer",
+        "is_static": true
+      },
+      "money": {
+        "line": 371,
+        "args": [
+          "amount: int"
+        ],
+        "return": "String",
+        "is_static": true
+      },
+      "scroll_list": {
+        "line": 377,
+        "args": [],
+        "return": "VBoxContainer",
+        "is_static": true
+      },
+      "scroll_root": {
+        "line": 389,
+        "args": [
+          "list_body: VBoxContainer"
+        ],
+        "return": "Control",
+        "is_static": true
+      },
+      "clear": {
+        "line": 396,
+        "args": [
+          "node: Node"
+        ],
+        "return": "void",
+        "is_static": true
+      }
+    }
+  },
+  "FinancesPanel": {
+    "path": "ui/manager_mode/FinancesPanel.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {},
+    "methods": {
+      "title": {
+        "line": 14,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "build": {
+        "line": 18,
+        "args": [
+          "host: VBoxContainer",
+          "career: CareerSaveData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_ledger_card": {
+        "line": 102,
+        "args": [
+          "finances: ClubFinances",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_wages_card": {
+        "line": 130,
+        "args": [
+          "career: CareerSaveData",
+          "team: TeamData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_instalments_card": {
+        "line": 167,
+        "args": [
+          "finances: ClubFinances",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_stat": {
+        "line": 193,
+        "args": [
+          "caption: String",
+          "value: String",
+          "tint: Color",
+          "p: CareerThemePalette"
+        ],
+        "return": "Control",
+        "is_static": false
+      }
+    }
+  },
+  "FixturesPanel": {
+    "path": "ui/manager_mode/FixturesPanel.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {},
+    "methods": {
+      "title": {
+        "line": 13,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "build": {
+        "line": 17,
+        "args": [
+          "host: VBoxContainer",
+          "career: CareerSaveData"
+        ],
+        "return": "void",
+        "is_static": false
+      }
+    }
+  },
+  "InboxPanel": {
+    "path": "ui/manager_mode/InboxPanel.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "_selected_index": {
+        "line": 19,
+        "type": "int",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "title": {
+        "line": 22,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "build": {
+        "line": 26,
+        "args": [
+          "host: VBoxContainer",
+          "career: CareerSaveData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_build_item": {
+        "line": 50,
+        "args": [
+          "item: InboxItem",
+          "index: int",
+          "career: CareerSaveData",
+          "p: CareerThemePalette"
+        ],
+        "return": "Control",
+        "is_static": false
+      }
+    }
+  },
+  "LeaguePanel": {
+    "path": "ui/manager_mode/LeaguePanel.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {},
+    "methods": {
+      "title": {
+        "line": 14,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "build": {
+        "line": 18,
+        "args": [
+          "host: VBoxContainer",
+          "career: CareerSaveData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_league_table": {
+        "line": 31,
+        "args": [
+          "comp: CompetitionData",
+          "career: CareerSaveData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_cup_progress": {
+        "line": 93,
+        "args": [
+          "comp: CompetitionData",
+          "career: CareerSaveData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      }
+    }
+  },
+  "ManagerCreationScreen": {
+    "path": "ui/manager_mode/ManagerCreationScreen.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "Step": {
+        "line": 17,
+        "values": [
+          "SLOT",
+          "IDENTITY",
+          "JOB",
+          "CONTRACT"
+        ]
+      }
+    },
+    "properties": {
+      "HUB_SCENE": {
+        "line": 19,
+        "type": "String",
         "is_const": true
       },
-      "user_team_index": {
-        "line": 46,
+      "MAIN_MENU_SCENE": {
+        "line": 20,
+        "type": "String",
+        "is_const": true
+      },
+      "NATIONALITIES": {
+        "line": 22,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "_step": {
+        "line": 27,
+        "type": "Step",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_slot": {
+        "line": 28,
         "type": "int",
         "is_export": false,
         "is_onready": false
       },
-      "current_matchday": {
-        "line": 47,
+      "_name": {
+        "line": 30,
+        "type": "String",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_nationality_index": {
+        "line": 31,
         "type": "int",
         "is_export": false,
         "is_onready": false
       },
-      "total_matchdays": {
-        "line": 48,
+      "_background": {
+        "line": 32,
+        "type": "ManagerCareerProfile.Background",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_philosophy": {
+        "line": 33,
+        "type": "ManagerCareerProfile.Philosophy",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_formation_index": {
+        "line": 34,
         "type": "int",
         "is_export": false,
         "is_onready": false
       },
-      "_standings": {
-        "line": 50,
-        "type": "Array[LeagueEntry]",
+      "_selected_team": {
+        "line": 35,
+        "type": "int",
         "is_export": false,
         "is_onready": false
       },
-      "_fixtures": {
-        "line": 51,
-        "type": "Array[FixtureRecord]",
+      "_profile": {
+        "line": 37,
+        "type": "ManagerCareerProfile",
         "is_export": false,
         "is_onready": false
       },
-      "club_select_view": {
-        "line": 54,
-        "type": "Control",
-        "is_export": false,
-        "is_onready": true
-      },
-      "hub_view": {
-        "line": 55,
-        "type": "Control",
-        "is_export": false,
-        "is_onready": true
-      },
-      "club_list": {
-        "line": 58,
-        "type": "ItemList",
-        "is_export": false,
-        "is_onready": true
-      },
-      "btn_start_career": {
-        "line": 59,
-        "type": "Button",
-        "is_export": false,
-        "is_onready": true
-      },
-      "btn_select_back": {
-        "line": 60,
-        "type": "Button",
-        "is_export": false,
-        "is_onready": true
-      },
-      "club_name_label": {
-        "line": 63,
-        "type": "Label",
-        "is_export": false,
-        "is_onready": true
-      },
-      "manager_info_label": {
-        "line": 64,
-        "type": "Label",
-        "is_export": false,
-        "is_onready": true
-      },
-      "matchday_label": {
-        "line": 65,
-        "type": "Label",
-        "is_export": false,
-        "is_onready": true
-      },
-      "standings_list": {
-        "line": 66,
+      "_content": {
+        "line": 38,
         "type": "VBoxContainer",
         "is_export": false,
-        "is_onready": true
-      },
-      "opp_title_label": {
-        "line": 68,
-        "type": "Label",
-        "is_export": false,
-        "is_onready": true
-      },
-      "venue_label": {
-        "line": 69,
-        "type": "Label",
-        "is_export": false,
-        "is_onready": true
-      },
-      "opp_manager_label": {
-        "line": 70,
-        "type": "Label",
-        "is_export": false,
-        "is_onready": true
-      },
-      "referee_label": {
-        "line": 71,
-        "type": "Label",
-        "is_export": false,
-        "is_onready": true
-      },
-      "btn_play_match": {
-        "line": 73,
-        "type": "Button",
-        "is_export": false,
-        "is_onready": true
-      },
-      "btn_quick_sim": {
-        "line": 74,
-        "type": "Button",
-        "is_export": false,
-        "is_onready": true
-      },
-      "btn_sim_round": {
-        "line": 75,
-        "type": "Button",
-        "is_export": false,
-        "is_onready": true
-      },
-      "btn_squad": {
-        "line": 76,
-        "type": "Button",
-        "is_export": false,
-        "is_onready": true
-      },
-      "btn_new_career": {
-        "line": 77,
-        "type": "Button",
-        "is_export": false,
-        "is_onready": true
-      },
-      "btn_main_menu": {
-        "line": 78,
-        "type": "Button",
-        "is_export": false,
-        "is_onready": true
-      },
-      "squad_dialog": {
-        "line": 81,
-        "type": "AcceptDialog",
-        "is_export": false,
-        "is_onready": true
-      },
-      "squad_scroll_list": {
-        "line": 82,
-        "type": "VBoxContainer",
-        "is_export": false,
-        "is_onready": true
+        "is_onready": false
       }
     },
     "methods": {
       "_ready": {
-        "line": 85,
+        "line": 41,
         "args": [],
         "return": "void",
         "is_static": false
       },
-      "_check_existing_career": {
-        "line": 100,
+      "_build_shell": {
+        "line": 47,
         "args": [],
         "return": "void",
         "is_static": false
       },
-      "_show_club_select": {
-        "line": 121,
+      "_render": {
+        "line": 77,
         "args": [],
         "return": "void",
         "is_static": false
       },
-      "_show_hub": {
-        "line": 130,
+      "_render_slots": {
+        "line": 92,
         "args": [],
         "return": "void",
         "is_static": false
       },
-      "_populate_club_list": {
-        "line": 136,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_on_club_selected": {
-        "line": 150,
-        "args": [
-          "index: int"
-        ],
-        "return": "void",
-        "is_static": false
-      },
-      "_on_start_career_pressed": {
-        "line": 155,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "start_new_career": {
+      "_render_identity": {
         "line": 159,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_render_jobs": {
+        "line": 254,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_render_contract": {
+        "line": 315,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_term_row": {
+        "line": 363,
         "args": [
-          "team_idx: int"
+          "caption: String",
+          "value: String",
+          "p: CareerThemePalette"
+        ],
+        "return": "HBoxContainer",
+        "is_static": false
+      },
+      "_option_row": {
+        "line": 372,
+        "args": [
+          "caption: String",
+          "choices: Array[String]",
+          "selected: int",
+          "on_pick: Callable"
+        ],
+        "return": "HBoxContainer",
+        "is_static": false
+      }
+    }
+  },
+  "ManagerModeRoot": {
+    "path": "ui/manager_mode/ManagerModeRoot.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "Section": {
+        "line": 24,
+        "values": [
+          "OVERVIEW",
+          "INBOX",
+          "SQUAD",
+          "TACTICS",
+          "TRAINING",
+          "TRANSFERS",
+          "SCOUTING",
+          "STAFF",
+          "FIXTURES",
+          "LEAGUE",
+          "FINANCES",
+          "BOARD",
+          "CALENDAR"
+        ]
+      }
+    },
+    "properties": {
+      "SECTION_LABELS": {
+        "line": 30,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "CREATION_SCENE": {
+        "line": 36,
+        "type": "String",
+        "is_const": true
+      },
+      "MAIN_MENU_SCENE": {
+        "line": 37,
+        "type": "String",
+        "is_const": true
+      },
+      "_current_section": {
+        "line": 39,
+        "type": "Section",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_panels": {
+        "line": 40,
+        "type": "Dictionary",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_nav_list": {
+        "line": 42,
+        "type": "VBoxContainer",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_content_host": {
+        "line": 43,
+        "type": "VBoxContainer",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_topbar_host": {
+        "line": 44,
+        "type": "HBoxContainer",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_status_label": {
+        "line": 45,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "_ready": {
+        "line": 48,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_build_panels": {
+        "line": 74,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_build_shell": {
+        "line": 97,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_build_sidebar": {
+        "line": 146,
+        "args": [
+          "p: CareerThemePalette"
+        ],
+        "return": "Control",
+        "is_static": false
+      },
+      "_build_topbar": {
+        "line": 185,
+        "args": [
+          "p: CareerThemePalette"
+        ],
+        "return": "Control",
+        "is_static": false
+      },
+      "show_section": {
+        "line": 204,
+        "args": [
+          "section: Section"
         ],
         "return": "void",
         "is_static": false
       },
-      "_init_season": {
-        "line": 168,
+      "refresh": {
+        "line": 209,
         "args": [],
         "return": "void",
         "is_static": false
       },
-      "_generate_fixtures": {
-        "line": 189,
+      "_rebuild_nav": {
+        "line": 217,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_rebuild_topbar": {
+        "line": 234,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_continue_label": {
+        "line": 289,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "_topbar_stat": {
+        "line": 298,
         "args": [
-          "num_teams: int"
-        ],
-        "return": "void",
-        "is_static": false
-      },
-      "_refresh_dashboard": {
-        "line": 236,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_rebuild_standings_ui": {
-        "line": 255,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_make_label": {
-        "line": 309,
-        "args": [
-          "text: String",
-          "min_width: int",
-          "align: int",
+          "value: String",
+          "caption: String",
           "color: Color"
         ],
-        "return": "Label",
+        "return": "Control",
         "is_static": false
       },
-      "_get_user_next_fixture": {
-        "line": 318,
-        "args": [],
-        "return": "FixtureRecord",
-        "is_static": false
-      },
-      "_update_next_fixture_card": {
-        "line": 326,
+      "_rebuild_content": {
+        "line": 307,
         "args": [],
         "return": "void",
         "is_static": false
       },
-      "_on_play_match_pressed": {
-        "line": 356,
+      "_on_continue_pressed": {
+        "line": 322,
         "args": [],
         "return": "void",
         "is_static": false
       },
-      "_on_quick_sim_pressed": {
-        "line": 372,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_on_sim_round_pressed": {
-        "line": 409,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_record_result_in_standings": {
-        "line": 442,
+      "_on_inbox_changed": {
+        "line": 344,
         "args": [
-          "home_idx: int",
-          "away_idx: int",
-          "h_score: int",
-          "a_score: int"
+          "_unread: int",
+          "_pending: int"
         ],
         "return": "void",
         "is_static": false
       },
-      "_get_entry": {
-        "line": 473,
+      "_on_advance_halted": {
+        "line": 349,
         "args": [
-          "team_idx: int"
+          "reason: String"
         ],
-        "return": "LeagueEntry",
-        "is_static": false
-      },
-      "_advance_matchday_if_ready": {
-        "line": 480,
-        "args": [],
         "return": "void",
         "is_static": false
       },
-      "_on_squad_pressed": {
-        "line": 490,
-        "args": [],
+      "_on_sacked": {
+        "line": 354,
+        "args": [
+          "club_name: String",
+          "reason: String"
+        ],
         "return": "void",
         "is_static": false
       },
-      "_on_new_career_pressed": {
-        "line": 554,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_on_select_back_pressed": {
-        "line": 560,
+      "_on_save_pressed": {
+        "line": 365,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_main_menu_pressed": {
-        "line": 564,
+        "line": 370,
         "args": [],
         "return": "void",
         "is_static": false
-      },
-      "_save_career_state": {
-        "line": 571,
+      }
+    }
+  },
+  "OverviewPanel": {
+    "path": "ui/manager_mode/OverviewPanel.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {},
+    "methods": {
+      "title": {
+        "line": 17,
         "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "build": {
+        "line": 21,
+        "args": [
+          "host: VBoxContainer",
+          "career: CareerSaveData"
+        ],
         "return": "void",
         "is_static": false
       },
-      "_restore_career_state": {
-        "line": 605,
+      "_next_fixture_card": {
+        "line": 41,
+        "args": [
+          "career: CareerSaveData",
+          "team: TeamData"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_form_card": {
+        "line": 90,
+        "args": [
+          "career: CareerSaveData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_league_card": {
+        "line": 125,
+        "args": [
+          "career: CareerSaveData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_squad_health_card": {
+        "line": 163,
+        "args": [
+          "career: CareerSaveData",
+          "team: TeamData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_media_card": {
+        "line": 212,
+        "args": [
+          "career: CareerSaveData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_signed": {
+        "line": 238,
+        "args": [
+          "v: int"
+        ],
+        "return": "String",
+        "is_static": false
+      },
+      "_ordinal": {
+        "line": 242,
+        "args": [
+          "n: int"
+        ],
+        "return": "String",
+        "is_static": false
+      }
+    }
+  },
+  "ScoutingPanel": {
+    "path": "ui/manager_mode/ScoutingPanel.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {},
+    "methods": {
+      "title": {
+        "line": 14,
         "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "build": {
+        "line": 18,
+        "args": [
+          "host: VBoxContainer",
+          "career: CareerSaveData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_network_card": {
+        "line": 29,
+        "args": [
+          "career: CareerSaveData",
+          "team: TeamData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_reports_card": {
+        "line": 69,
+        "args": [
+          "career: CareerSaveData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      }
+    }
+  },
+  "SquadPanel": {
+    "path": "ui/manager_mode/SquadPanel.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "Sort": {
+        "line": 16,
+        "values": [
+          "NUMBER",
+          "NAME",
+          "POSITION",
+          "AGE",
+          "OVERALL",
+          "MORALE",
+          "VALUE",
+          "CONTRACT"
+        ]
+      }
+    },
+    "properties": {
+      "SORT_LABELS": {
+        "line": 18,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "_sort": {
+        "line": 22,
+        "type": "Sort",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_descending": {
+        "line": 23,
+        "type": "bool",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_selected_squad_index": {
+        "line": 24,
+        "type": "int",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_show_unhappy_only": {
+        "line": 25,
+        "type": "bool",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "title": {
+        "line": 28,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "build": {
+        "line": 32,
+        "args": [
+          "host: VBoxContainer",
+          "career: CareerSaveData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_sort_header": {
+        "line": 90,
+        "args": [
+          "header: HBoxContainer",
+          "sort: Sort",
+          "width: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_sorted_indices": {
+        "line": 115,
+        "args": [
+          "team: TeamData",
+          "career: CareerSaveData"
+        ],
+        "return": "Array[int]",
+        "is_static": false
+      },
+      "_kv": {
+        "line": 387,
+        "args": [
+          "key: String",
+          "value: String",
+          "p: CareerThemePalette"
+        ],
+        "return": "HBoxContainer",
+        "is_static": false
+      },
+      "_attr_bar": {
+        "line": 394,
+        "args": [
+          "label_text: String",
+          "value: float",
+          "p: CareerThemePalette"
+        ],
+        "return": "HBoxContainer",
+        "is_static": false
+      }
+    }
+  },
+  "StaffPanel": {
+    "path": "ui/manager_mode/StaffPanel.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {},
+    "methods": {
+      "title": {
+        "line": 14,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "build": {
+        "line": 18,
+        "args": [
+          "host: VBoxContainer",
+          "career: CareerSaveData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_manager_card": {
+        "line": 30,
+        "args": [
+          "career: CareerSaveData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_staff_card": {
+        "line": 78,
+        "args": [
+          "team: TeamData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_coverage_card": {
+        "line": 112,
+        "args": [
+          "team: TeamData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_quality_label": {
+        "line": 145,
+        "args": [
+          "v: float"
+        ],
+        "return": "String",
+        "is_static": false
+      }
+    }
+  },
+  "TacticsPanel": {
+    "path": "ui/manager_mode/TacticsPanel.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "FORMATIONS": {
+        "line": 17,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "ROLE_CHOICES": {
+        "line": 21,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "_management": {
+        "line": 25,
+        "type": "TeamManagementData",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_selected_slot": {
+        "line": 26,
+        "type": "int",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "title": {
+        "line": 29,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "build": {
+        "line": 33,
+        "args": [
+          "host: VBoxContainer",
+          "career: CareerSaveData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_instructions_card": {
+        "line": 85,
+        "args": [
+          "profile: ManagerCareerProfile",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_slider_row": {
+        "line": 113,
+        "args": [
+          "caption: String",
+          "value: float",
+          "p: CareerThemePalette",
+          "setter: Callable"
+        ],
+        "return": "HBoxContainer",
+        "is_static": false
+      },
+      "_lineup_card": {
+        "line": 138,
+        "args": [
+          "career: CareerSaveData",
+          "team: TeamData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_bench_picker": {
+        "line": 210,
+        "args": [
+          "career: CareerSaveData",
+          "team: TeamData",
+          "slot: int",
+          "p: CareerThemePalette"
+        ],
+        "return": "Control",
+        "is_static": false
+      },
+      "_set_pieces_card": {
+        "line": 252,
+        "args": [
+          "career: CareerSaveData",
+          "team: TeamData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_duty_row": {
+        "line": 275,
+        "args": [
+          "caption: String",
+          "suggestion: String",
+          "p: CareerThemePalette"
+        ],
+        "return": "HBoxContainer",
+        "is_static": false
+      },
+      "_best_by": {
+        "line": 282,
+        "args": [
+          "team: TeamData",
+          "career: CareerSaveData",
+          "attribute: StringName"
+        ],
+        "return": "String",
+        "is_static": false
+      }
+    }
+  },
+  "TrainingPanel": {
+    "path": "ui/manager_mode/TrainingPanel.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "DAY_NAMES": {
+        "line": 16,
+        "type": "Array[String]",
+        "is_const": true
+      }
+    },
+    "methods": {
+      "title": {
+        "line": 19,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "build": {
+        "line": 23,
+        "args": [
+          "host: VBoxContainer",
+          "career: CareerSaveData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_workload_card": {
+        "line": 36,
+        "args": [
+          "career: CareerSaveData",
+          "team: TeamData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_week_card": {
+        "line": 91,
+        "args": [
+          "career: CareerSaveData",
+          "p: CareerThemePalette",
+          "youth: bool"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_individual_card": {
+        "line": 126,
+        "args": [
+          "career: CareerSaveData",
+          "team: TeamData",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      }
+    }
+  },
+  "TransfersPanel": {
+    "path": "ui/manager_mode/TransfersPanel.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "View": {
+        "line": 17,
+        "values": [
+          "SEARCH",
+          "SHORTLIST",
+          "NEGOTIATIONS"
+        ]
+      }
+    },
+    "properties": {
+      "VIEW_LABELS": {
+        "line": 19,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "POSITION_FILTERS": {
+        "line": 20,
+        "type": "Array[String]",
+        "is_const": true
+      },
+      "_view": {
+        "line": 22,
+        "type": "View",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_position_filter": {
+        "line": 23,
+        "type": "int",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_max_age": {
+        "line": 24,
+        "type": "int",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_selected_key": {
+        "line": 25,
+        "type": "int",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "title": {
+        "line": 28,
+        "args": [],
+        "return": "String",
+        "is_static": false
+      },
+      "build": {
+        "line": 32,
+        "args": [
+          "host: VBoxContainer",
+          "career: CareerSaveData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_build_shortlist": {
+        "line": 259,
+        "args": [
+          "host: VBoxContainer",
+          "career: CareerSaveData",
+          "p: CareerThemePalette"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_build_negotiations": {
+        "line": 300,
+        "args": [
+          "host: VBoxContainer",
+          "career: CareerSaveData",
+          "p: CareerThemePalette"
+        ],
         "return": "void",
         "is_static": false
       }

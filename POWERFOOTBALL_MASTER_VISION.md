@@ -89,6 +89,39 @@ The repo already moved from a skeleton to a substantial football simulation foun
 | 22 | PR #22 ShotLock | Travel-direction carry target, stronger magnetism, `ShotLockState` |
 | 23 | PR #23 ReGrab Fix | `_released` throw-in guard and set-piece foot-sensor protection |
 | 24 | PR #24 WorldModel | `MatchWorldModel`, `UtilityMath.gd`, 15-frame AI stagger, Claude agent scaffold |
+| 25 | Phase 4 Career | Manager Career mode: `CareerManager` + `WorldEventLog` autoloads, 18 career Resources in `shared/career/`, and the FM-style `ui/manager_mode/` shell (13 sections) |
+
+### Phase 4 — What the career layer added
+
+**Data (`shared/career/`):** `CareerDate` (real calendar arithmetic),
+`CareerSaveData`, `CompetitionData` (circle-method scheduler + cup draws),
+`FixtureData`, `LeagueTableRow`, `ContractData`, `PlayerCareerState`,
+`RelationshipData`, `ClubFinances`, `BoardState`, `TrainingSchedule`,
+`ScoutReport`, `TransferOffer`, `InboxItem`, `WorldEvent`,
+`ManagerCareerProfile`, `CareerThemePalette`.
+
+**Engines:** `MoraleEngine`, `PlayerDevelopmentEngine`, `TransferMarket`,
+`ScoutingNetwork`, `YouthAcademy`, `InboxEngine`, `CareerSerializer`.
+
+**Why it is not a single-layer system.** The career wrapper only earns its place
+because it writes back down the stack, and it does so at one choke point:
+`PlayerFactory.apply()` calls `CareerManager.apply_career_state_to_player()` for
+all 22 players at every match bind.
+
+- **-> Layer 3:** accumulated career morale and form seed `MoodSystem.mood_value`.
+  A player left out for months genuinely starts the match in SLUMP; one riding a
+  contract renewal starts in STREAK. The slope is asymmetric and calibrated so
+  the authored default player still lands exactly on NORMAL.
+- **-> Layer 2:** persistent `RelationshipData` trust seeds `TrustSystem`, so
+  `PassUtilityScorer`'s trust multiplier opens a match already carrying months of
+  dressing-room history instead of a flat neutral slate.
+- **-> Layer 5:** `WorldEventLog.generate_press_reaction()` routes club-world
+  events back through the existing `PressOffice`, so career narrative speaks in
+  the same trait-driven voice as the touchline and post-match lines.
+
+That chain — a training injury or a broken playing-time promise in Layer 4
+changing who a player looks for on the pitch in Layer 2 — is the propagation the
+vision asks every major feature to produce.
 
 ---
 
@@ -240,12 +273,12 @@ PHASE 3 — Club world
   [ ] 24. Manager response system
 
 PHASE 4 — Career mode
-  [ ] 25. Career calendar and scheduling
-  [ ] 26. League table persistence
-  [ ] 27. Transfer window system
-  [ ] 28. Season progression and contracts
-  [ ] 29. Staff system
-  [ ] 30. Manager Career mode unlock
+  [x] 25. Career calendar and scheduling
+  [x] 26. League table persistence
+  [x] 27. Transfer window system
+  [x] 28. Season progression and contracts
+  [x] 29. Staff system
+  [x] 30. Manager Career mode unlock
 
 PHASE 5 — Polish
   [ ] 31. Audio system

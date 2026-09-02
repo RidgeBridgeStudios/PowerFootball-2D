@@ -1157,23 +1157,30 @@ func _show_match_stats() -> void:
 	if GameManager.has_meta(&"stats_return_scene"):
 		stats_ui.custom_return_scene = String(GameManager.get_meta(&"stats_return_scene"))
 		if GameManager.has_meta(&"manager_career_active") and bool(GameManager.get_meta(&"manager_career_active")):
+			var home_goals: int = GameManager.score[GameManager.TEAM_A]
+			var away_goals: int = GameManager.score[GameManager.TEAM_B]
 			GameManager.set_meta(&"manager_last_match_result", {
-				"home_score": GameManager.score_team_a,
-				"away_score": GameManager.score_team_b
+				"home_score": home_goals,
+				"away_score": away_goals
 			})
 			var team_a_team: TeamData = DataLoader.get_match_team(GameManager.TEAM_A)
 			var team_b_team: TeamData = DataLoader.get_match_team(GameManager.TEAM_B)
 			var manager_a: ManagerData = ManagerLoader.get_or_assign_manager(team_names[0])
 			var manager_b: ManagerData = ManagerLoader.get_or_assign_manager(team_names[1])
-			var fouls_total: int = MatchStatsTracker.fouls_a + MatchStatsTracker.fouls_b
-			var yellows_total: int = MatchStatsTracker.yellow_cards_a + MatchStatsTracker.yellow_cards_b
-			var reds_total: int = MatchStatsTracker.red_cards_a + MatchStatsTracker.red_cards_b
+			var fouls_total: int = MatchStatsTracker.fouls[GameManager.TEAM_A] + MatchStatsTracker.fouls[GameManager.TEAM_B]
+			var yellows_total: int = MatchStatsTracker.yellow_cards[GameManager.TEAM_A] + MatchStatsTracker.yellow_cards[GameManager.TEAM_B]
+			var reds_total: int = MatchStatsTracker.red_cards[GameManager.TEAM_A] + MatchStatsTracker.red_cards[GameManager.TEAM_B]
 			var active_ref: RefereeData = match_referee.current_data if match_referee != null else null
+			# Ratings must be computed before progression so form/fame drift reads
+			# the real per-player match, not an empty Dictionary.
+			var match_ratings: Dictionary[int, float] = MatchStatsTracker.compute_all_ratings()
+			var match_events: Dictionary[int, PlayerRatingCalculator.PlayerMatchEvents] = MatchStatsTracker.get_all_player_events()
 			CareerProgressionEngine.process_matchday_progression(
 				team_a_team, team_b_team, manager_a, manager_b,
 				active_ref,
-				GameManager.score_team_a, GameManager.score_team_b,
-				fouls_total, yellows_total, reds_total, 0
+				home_goals, away_goals,
+				fouls_total, yellows_total, reds_total, 0,
+				match_events, match_ratings
 			)
 	add_child(stats_ui)
 	stats_ui.populate(team_names[0], team_names[1])

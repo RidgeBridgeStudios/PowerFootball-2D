@@ -72,6 +72,15 @@ static func apply(player: HeavyPlayerController, data: PlayerData, anchor: Vecto
 	else:
 		trust.reset()
 
+	# Career bridge (Layer 4 -> Layers 3 and 2). Both systems above have just
+	# been reset to a neutral slate, so this is the one safe moment to stamp
+	# accumulated career state onto them: morale/form become the player's
+	# opening MoodSystem tier, and persistent RelationshipData trust becomes
+	# TrustSystem state that PassUtilityScorer reads all match.
+	#
+	# No-ops outside a career, leaving the neutral reset in place.
+	CareerManager.apply_career_state_to_player(player, data, mood, trust)
+
 	# Manager coaching bonus — prized_attribute gives a small lift to every
 	# player on the squad. +0.05, clamped to 1.0. This is intentionally small:
 	# a coaching edge, not a talent rewrite.

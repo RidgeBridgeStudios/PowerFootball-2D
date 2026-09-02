@@ -2,7 +2,9 @@
 
 **Engine:** Godot 4.7-stable · GDScript 2.0 ONLY · Strictly Typed  
 **Core Invariants:** See @./docs/CORE_INVARIANTS.md (Canonical single source of truth)  
-**Verify:** `python3 tools/gdcheck.py` (Static GDScript checker; 0 errors required)  
+**Verify:** `python3 tools/verify_gate.py --fast` (10 checks; 0 errors required)  
+`gdcheck.py` alone is NOT sufficient — it treats autoloads as opaque types and cannot
+see a call to a method that does not exist. `tools/lint_xref.py` in the gate catches that.  
 
 ## READ FIRST
 
@@ -14,6 +16,7 @@ Before implementing any feature:
 5. @.claude/rules/godot-47-core.md — Engine contracts
 6. @.claude/rules/soccer-physics.md — Physics invariants
 7. @.claude/rules/ai-architect.md — AI & spatial invariants
+8. @.claude/rules/career-mode.md — Career layer (Layer 4) contracts
 
 ## Architectural Choke Points
 
@@ -22,10 +25,16 @@ Before implementing any feature:
 - **Spatial Cache:** ALL NPC position reads → `MatchWorldModel.gd`.
 - **Collision:** `CharacterBody2D` MUST NOT mask Layer 3 (Ball).
 - **Brain Contract:** `PlayerBrain` writes ONLY to `player.movement_intent` and `player.wants_sprint`. Never touches velocity or acceleration.
+- **Career State:** `CareerManager` owns the ONLY live `CareerSaveData`; the league itself stays owned by `DataLoader`. See @.claude/rules/career-mode.md.
+- **Career → Match Bridge:** `PlayerFactory.apply()` is the single choke point where career morale seeds `MoodSystem` and career trust seeds `TrustSystem`.
 
 ## Boot Order (project.godot)
 
-MatchWorldModel → GameEvents → GameManager → MatchStatsTracker → DataLoader → RefereeLoader → ManagerLoader → InputHelper
+MatchWorldModel → GameEvents → GameManager → MatchStatsTracker → MatchTelemetryLogger → DataLoader → RefereeLoader → ManagerLoader → StaffLoader → WorldEventLog → CareerManager → InputHelper
+
+`WorldEventLog` and `CareerManager` must stay AFTER the loaders they read
+(`DataLoader`, `ManagerLoader`, `StaffLoader`, `RefereeLoader`), and
+`WorldEventLog` before `CareerManager`, which binds it on career start.
 
 ## Process Priority
 

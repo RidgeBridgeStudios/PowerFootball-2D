@@ -174,3 +174,11 @@ Press office reactions, touchline dialogue, broadcast HUD, floating labels, matc
 - **.antigravity/hooks.json** — Lifecycle verification hooks.
 - **.antigravity/skills/** — Antigravity workflow skills (`eval-sim`, `ast-refactor`, `formation-audit`, `formation-fuzzer`, `perf-benchmark`).
 </tooling>
+- autoloads/CareerManager.gd                   # Career state + day loop (Layer 4)
+- autoloads/WorldEventLog.gd                   # Club-world history -> PressOffice (Layer 5)
+- shared/career/                               # Career data model + engines (18 Resources)
+- shared/career/MoraleEngine.gd                # Career -> MoodSystem/TrustSystem bridge
+- shared/career/CareerSerializer.gd            # JSON save/load, 3 slots, versioned
+- ui/manager_mode/ManagerModeRoot.gd           # FM-style career shell (13 sections)
+- .claude/rules/career-mode.md                 # Career layer contracts
+- tools/lint_xref.py                           # Qualified-member + res:// path checker

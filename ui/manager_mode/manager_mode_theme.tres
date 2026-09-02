@@ -1,0 +1,37 @@
+[gd_resource type="Resource" script_class="CareerThemePalette" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://shared/career/CareerThemePalette.gd" id="1_palette"]
+
+[resource]
+script = ExtResource("1_palette")
+sidebar = Color(0.055, 0.071, 0.094, 1)
+surface = Color(0.086, 0.106, 0.137, 1)
+panel = Color(0.114, 0.141, 0.18, 1)
+header = Color(0.145, 0.18, 0.227, 1)
+row_alt = Color(1, 1, 1, 0.028)
+row_hover = Color(0.24, 0.86, 0.41, 0.1)
+divider = Color(1, 1, 1, 0.085)
+text_primary = Color(0.91, 0.941, 0.914, 1)
+text_secondary = Color(0.639, 0.678, 0.722, 1)
+text_muted = Color(0.427, 0.463, 0.51, 1)
+text_on_accent = Color(0.043, 0.059, 0.078, 1)
+accent = Color(0.24, 0.86, 0.41, 1)
+accent_dim = Color(0.24, 0.86, 0.41, 0.16)
+positive = Color(0.3, 0.82, 0.42, 1)
+warning = Color(0.94, 0.76, 0.3, 1)
+danger = Color(0.9, 0.32, 0.32, 1)
+info = Color(0.36, 0.66, 0.95, 1)
+result_win = Color(0.24, 0.78, 0.42, 1)
+result_draw = Color(0.62, 0.65, 0.68, 1)
+result_loss = Color(0.86, 0.34, 0.34, 1)
+attr_low = Color(0.86, 0.34, 0.34, 1)
+attr_mid = Color(0.94, 0.76, 0.3, 1)
+attr_high = Color(0.3, 0.82, 0.42, 1)
+font_size_title = 22
+font_size_heading = 16
+font_size_body = 13
+font_size_small = 11
+corner_radius = 4
+row_height = 26
+sidebar_width = 186
+content_margin = 14
