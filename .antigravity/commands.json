@@ -104,6 +104,11 @@
       "description": "Classifies task requests, loads layer-scoped context, executes blast radius check, and prepares approval plan",
       "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
       "stream_output": true
+    },
+    "feature-implementation": {
+      "description": "Executes feature request implementation workflow with roadmap alignment, layer context scoping, blast radius analysis, and verification gates",
+      "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+      "stream_output": true
     }
   },
   "/verify-all": {
@@ -208,6 +213,11 @@
   },
   "/task-intake-routing": {
     "description": "Classifies task requests, loads layer-scoped context, executes blast radius check, and prepares approval plan",
+    "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+    "stream_output": true
+  },
+  "/feature-implementation": {
+    "description": "Executes feature request implementation workflow with roadmap alignment, layer context scoping, blast radius analysis, and verification gates",
     "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
     "stream_output": true
   }
