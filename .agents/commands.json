@@ -94,6 +94,11 @@
       "description": "Extracts targeted layer context (rules, choke points, key files) for simulation layers 1-5",
       "command": "python3 tools/layer_context.py || python tools/layer_context.py || py -3 tools/layer_context.py",
       "stream_output": true
+    },
+    "session-bootstrap": {
+      "description": "Initializes session routing table, validates repository health via fast verification gate, and aligns on task context without token dumps",
+      "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+      "stream_output": true
     }
   },
   "/verify-all": {
@@ -189,6 +194,11 @@
   "/layer-ctx": {
     "description": "Extracts targeted layer context (rules, choke points, key files) for simulation layers 1-5",
     "command": "python3 tools/layer_context.py || python tools/layer_context.py || py -3 tools/layer_context.py",
+    "stream_output": true
+  },
+  "/session-bootstrap": {
+    "description": "Initializes session routing table, validates repository health via fast verification gate, and aligns on task context without token dumps",
+    "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
     "stream_output": true
   }
 }
