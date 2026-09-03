@@ -99,6 +99,11 @@
       "description": "Initializes session routing table, validates repository health via fast verification gate, and aligns on task context without token dumps",
       "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
       "stream_output": true
+    },
+    "task-intake-routing": {
+      "description": "Classifies task requests, loads layer-scoped context, executes blast radius check, and prepares approval plan",
+      "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+      "stream_output": true
     }
   },
   "/verify-all": {
@@ -198,6 +203,11 @@
   },
   "/session-bootstrap": {
     "description": "Initializes session routing table, validates repository health via fast verification gate, and aligns on task context without token dumps",
+    "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+    "stream_output": true
+  },
+  "/task-intake-routing": {
+    "description": "Classifies task requests, loads layer-scoped context, executes blast radius check, and prepares approval plan",
     "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
     "stream_output": true
   }
