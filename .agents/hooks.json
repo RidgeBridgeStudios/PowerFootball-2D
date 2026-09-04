@@ -124,5 +124,22 @@
         "timeout": 30
       }
     ]
+  },
+  "data-database": {
+    "enabled": true,
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+        "timeout": 30
+      }
+    ],
+    "data_task": [
+      {
+        "matcher": "*",
+        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+        "timeout": 30
+      }
+    ]
   }
 }

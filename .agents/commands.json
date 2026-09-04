@@ -119,6 +119,11 @@
       "description": "Systematic performance optimization workflow enforcing baseline profiling, zero-allocation invariants, bounded wins, and verification gates",
       "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
       "stream_output": true
+    },
+    "data-database": {
+      "description": "Governs Layer 4 Club World game data, schema evolution, synthetic generation, and database verification gates",
+      "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+      "stream_output": true
     }
   },
   "/verify-all": {
@@ -238,6 +243,11 @@
   },
   "/performance-work": {
     "description": "Systematic performance optimization workflow enforcing baseline profiling, zero-allocation invariants, bounded wins, and verification gates",
+    "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+    "stream_output": true
+  },
+  "/data-database": {
+    "description": "Governs Layer 4 Club World game data, schema evolution, synthetic generation, and database verification gates",
     "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
     "stream_output": true
   }
