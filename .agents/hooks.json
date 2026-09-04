@@ -90,5 +90,22 @@
         "timeout": 30
       }
     ]
+  },
+  "bug-investigation": {
+    "enabled": true,
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+        "timeout": 30
+      }
+    ],
+    "bug_report": [
+      {
+        "matcher": "*",
+        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+        "timeout": 30
+      }
+    ]
   }
 }
