@@ -74,6 +74,8 @@ var _halt_message: String = ""
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
+	if not GameEvents.player_injured.is_connected(_on_match_player_injured):
+		GameEvents.player_injured.connect(_on_match_player_injured)
 
 
 func is_career_active() -> bool:
@@ -1962,6 +1964,73 @@ func _league_index_for_match_side(match_side: int) -> int:
 	if match_side == GameManager.TEAM_B and GameManager.has_meta(&"away_team_index"):
 		return int(GameManager.get_meta(&"away_team_index"))
 	return match_side
+
+
+## Physics severity -> career injury tier, using the exact same bands
+## HeavyPlayerController.apply_injury() gates on (INJURY_MINOR_SEVERITY /
+## INJURY_LIMP_SEVERITY / INJURY_FORCED_SUB_SEVERITY / INJURY_SEVERE_SEVERITY)
+## so a manager reading "Strain — 12 days" in the inbox and a player who just
+## stopped being able to sprint are describing the same knock.
+static func _injury_kind_for_severity(severity: float) -> PlayerCareerState.InjuryKind:
+	if severity >= HeavyPlayerController.INJURY_SEVERE_SEVERITY:
+		return PlayerCareerState.InjuryKind.LIGAMENT
+	if severity >= HeavyPlayerController.INJURY_FORCED_SUB_SEVERITY:
+		return PlayerCareerState.InjuryKind.MUSCLE_TEAR
+	if severity >= HeavyPlayerController.INJURY_LIMP_SEVERITY:
+		return PlayerCareerState.InjuryKind.STRAIN
+	if severity >= HeavyPlayerController.INJURY_MINOR_SEVERITY:
+		return PlayerCareerState.InjuryKind.KNOCK
+	return PlayerCareerState.InjuryKind.NONE
+
+
+## Persists a match-time knock into the career layer. This is deliberately a
+## separate handler from apply_career_state_to_player() rather than a hook
+## inside it: that function is the career -> match seeding path, called once
+## per player per bind (see career-manager.md's Career-to-Match Bridge
+## invariant) — repurposing it for the opposite data direction would run
+## backwards every time it fires outside a fresh bind. This is the match ->
+## career write path instead, and it reuses PlayerCareerState.begin_injury()
+## exactly as training injuries already do in _inflict_injury(), so the
+## recovery-day math (variance, injury_proneness) has one source of truth
+## rather than a second copy diverging over time.
+##
+## Physical condition is already logged by begin_injury() itself
+## (PlayerCareerState.condition) — there is no separate per-player physical
+## log on TrainingSchedule (a stateless static utility: session intensity,
+## coach bonus, daily risk) to write into.
+func _on_match_player_injured(
+	player: HeavyPlayerController, severity: float, injury_tag: StringName
+) -> void:
+	if career == null or player == null:
+		return
+	var kind: PlayerCareerState.InjuryKind = _injury_kind_for_severity(severity)
+	if kind == PlayerCareerState.InjuryKind.NONE:
+		return
+
+	var team_index: int = _league_index_for_match_side(player.team)
+	var team_data: TeamData = DataLoader.get_team(team_index)
+	if team_data == null or player.squad_index < 0 or player.squad_index >= team_data.squad.size():
+		return
+	var data: PlayerData = team_data.squad[player.squad_index]
+	var state: PlayerCareerState = career.state_for_squad(team_index, player.squad_index)
+	if data == null or state == null or state.is_injured():
+		return
+
+	state.begin_injury(kind, career.today, _rng)
+	data.is_unavailable = true
+
+	var is_user_club: bool = team_index == career.user_team_index
+	if is_user_club:
+		_push_inbox(InboxEngine.build_injury_notice(data, state, career.today))
+		WorldEventLog.record_for_player(
+			injury_tag if injury_tag != &"" else &"match_injury", WorldEvent.Category.INJURY,
+			state.player_key, data.player_name,
+			"%s picked up a %s during the match and will be out for around %d days." % [
+				data.player_name, state.injury_name().to_lower(), state.injury_days_remaining
+			],
+			-0.6,
+			clampf(float(state.injury_days_remaining) / 90.0, 0.3, 0.97)
+		)
 
 
 func _fixture_label(fixture: FixtureData) -> String:

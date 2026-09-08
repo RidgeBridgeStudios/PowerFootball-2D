@@ -9,7 +9,7 @@ Core football mechanics that must work before anything else.
 - [x] Substitutions + reserves UI
 - [x] Yellow/red card implementation
 - [x] Offside detection
-- [ ] Injury system
+- [x] Injury system (match-time tackle/exertion knocks with in-match sprint/aerial gating and forced subs, persisted into the existing career recovery system)
 - [x] Match stats screen + full-time scoreboard
 - [x] End-of-match player ratings
 - [x] Goalkeeper dive commitment

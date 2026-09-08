@@ -157,6 +157,8 @@ func bind(data: ManagerData, team: int, players_node: Node2D, boundary: PitchBou
 		GameEvents.formation_changed.connect(_on_user_formation_changed)
 	if not GameEvents.lineup_changed.is_connected(_on_lineup_changed):
 		GameEvents.lineup_changed.connect(_on_lineup_changed)
+	if not GameEvents.player_injured.is_connected(_on_player_injured):
+		GameEvents.player_injured.connect(_on_player_injured)
 
 	_apply_formation(_active_formation)
 	_apply_brain_overrides()
@@ -175,6 +177,90 @@ func _on_lineup_changed(team_id: int) -> void:
 		return
 	_apply_formation(_active_formation)
 	_apply_brain_overrides()
+
+
+## Reacts to a knock severe enough to end this player's involvement (see
+## HeavyPlayerController.INJURY_FORCED_SUB_SEVERITY). Unlike a tactical
+## substitution — which routes through TeamManagementData / PauseMenu and is
+## a human decision — this manager does not wait to be asked, matching a
+## stretcher-off in real football: it searches the bench itself and resolves
+## straight into the same GameEvents.substitution_made that PauseMenu already
+## drives, so PitchScene/MatchStatsTracker/MatchTelemetryLogger/HUD/the
+## referee crew all react through their existing listener with no new code.
+func _on_player_injured(
+	player: HeavyPlayerController, severity: float, _injury_tag: StringName
+) -> void:
+	if player == null or player.team != _team or _players_node == null:
+		return
+	if severity < HeavyPlayerController.INJURY_FORCED_SUB_SEVERITY:
+		return
+	if not GameManager.is_in_play():
+		return
+
+	var team_data: TeamData = DataLoader.get_match_team(_team)
+	if team_data == null or team_data.substitutions_made >= 3:
+		return
+
+	var replacement_idx: int = _find_bench_replacement(player.squad_index)
+	if replacement_idx < 0:
+		# No fit bench cover — the team plays a man light, same as real
+		# football when the bench is already exhausted.
+		return
+
+	GameEvents.forced_substitution_requested.emit(_team, player.squad_index)
+	team_data.substitutions_made += 1
+	GameEvents.substitution_made.emit(_team, player.squad_index, replacement_idx)
+
+
+## Positional bench search: prefers an exact position_role match, falls back
+## to the same broad role category (_ROLE_ENUM_MAP), then any fit outfield
+## body. Not a hot path — fires once per forced substitution, not per frame —
+## so the Array scratch below is fine despite the zero-allocation rule that
+## governs _physics_process/evaluate_tactical_action.
+func _find_bench_replacement(out_squad_index: int) -> int:
+	var team_data: TeamData = DataLoader.get_match_team(_team)
+	if team_data == null:
+		return -1
+	var outgoing: PlayerData = DataLoader.get_player(_team, out_squad_index)
+	var out_role: String = outgoing.position_role.to_upper() if outgoing != null else ""
+	var out_category: PlayerBrain.Role = _ROLE_ENUM_MAP.get(out_role, PlayerBrain.Role.OUTFIELD_MIDFIELDER)
+
+	var fielded: Array[int] = _current_fielded_squad_indices()
+
+	var best_exact: int = -1
+	var best_category: int = -1
+	var best_any: int = -1
+	for i: int in range(team_data.squad.size()):
+		if fielded.has(i):
+			continue
+		var candidate: PlayerData = team_data.squad[i]
+		if candidate == null or candidate.is_unavailable:
+			continue
+		if best_any < 0:
+			best_any = i
+		var cand_role: String = candidate.position_role.to_upper()
+		if best_exact < 0 and cand_role == out_role:
+			best_exact = i
+		elif best_category < 0 and _ROLE_ENUM_MAP.get(cand_role, PlayerBrain.Role.OUTFIELD_MIDFIELDER) == out_category:
+			best_category = i
+
+	if best_exact >= 0:
+		return best_exact
+	if best_category >= 0:
+		return best_category
+	return best_any
+
+
+## Squad indices currently fielded for this team, read straight off the live
+## pitch nodes (not TeamData.lineup_indices, which a prior mid-match
+## substitution may have already diverged from).
+func _current_fielded_squad_indices() -> Array[int]:
+	var out: Array[int] = []
+	for node: Node in _players_node.get_children():
+		var p := node as HeavyPlayerController
+		if p != null and p.team == _team:
+			out.append(p.squad_index)
+	return out
 
 
 func _apply_formation(formation_name: String) -> void:

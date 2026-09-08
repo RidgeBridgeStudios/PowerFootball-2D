@@ -41,8 +41,18 @@
 ##   - get_fatigue_tier() / get_stamina_ratio()
 ##   - stamina, facing_direction, is_sprinting, movement_intent, wants_sprint,
 ##     wants_tackle
+##   - apply_injury(severity, injury_tag)   knock from a tackle or overexertion
+##   - injury_severity                       0.0 clean .. 1.0 stretchered
 ##   - signal stamina_state_changed(ratio)
 ##   - world_index — this player's slot in MatchWorldModel, or -1 if unregistered
+##
+## Injury: apply_injury() is the sole writer of injury_severity (only ever
+## rises within a match — see its doc comment). Above INJURY_LIMP_SEVERITY the
+## player cannot sprint (_update_sprint()) or contest the air
+## (get_ball_in_aerial_range()) — both hard gates live here, not in
+## PlayerBrain, so no caller can bypass them by writing wants_sprint anyway.
+## GameEvents.player_injured is emitted at INJURY_MINOR_SEVERITY and above for
+## ManagerDirector (forced subs) and CareerManager (persistence) to react to.
 ##
 ## Fatigue: get_current_top_speed() scales both sprint and base top speed by
 ## FatigueTier (FRESH/TIRED/EXHAUSTED, from get_stamina_ratio()) so a tiring
@@ -118,6 +128,27 @@ const FATIGUE_BASE_SCALE: Dictionary = {
 	FatigueTier.EXHAUSTED: 0.85,
 }
 
+## --- Injury -----------------------------------------------------------------
+## Severity bands for injury_severity below. Shared as the single source of
+## truth across layers: ManagerDirector reads INJURY_FORCED_SUB_SEVERITY for
+## the mandatory-sub gate, CareerManager buckets these same floats into
+## PlayerCareerState.InjuryKind for persistence.
+## KNOCK tier floor — below this a hard collision is a stumble, not an injury.
+const INJURY_MINOR_SEVERITY: float = 0.1
+## STRAIN tier floor. Above this a player cannot sprint (_update_sprint()) or
+## contest the air (get_ball_in_aerial_range()).
+const INJURY_LIMP_SEVERITY: float = 0.4
+## MUSCLE_TEAR tier floor. ManagerDirector forces an immediate substitution.
+const INJURY_FORCED_SUB_SEVERITY: float = 0.7
+## LIGAMENT tier floor.
+const INJURY_SEVERE_SEVERITY: float = 0.9
+## Fully immobilised — stretchered off.
+const INJURY_STRETCHER_SEVERITY: float = 1.0
+## Absolute stamina below which a contact event's knock vulnerability rises —
+## see apply_kinematic_weight()'s companion knock-risk call sites in
+## TackleState._apply_tackle_injury_risk() and _apply_jostle_strain() below.
+const INJURY_STAMINA_CRITICAL: float = 15.0
+
 ## --- Identity / control ----------------------------------------------------
 
 @export var team: int = 0
@@ -183,6 +214,17 @@ var sprint_locked: bool = false
 ## immediately for one (see is_user_controlled) — so this can never fight a
 ## human's own tackle input.
 var wants_tackle: bool = false
+
+## Current physical knock state: 0.0 (clean) .. 1.0 (stretchered). Persists for
+## the rest of the match once set — there is no in-match healing, only
+## inter-match recovery via the career layer (PlayerCareerState.tick_recovery()).
+## Set exclusively through apply_injury(); never assign directly.
+var injury_severity: float = 0.0
+## Turn severity ([0,1], 90°=0.5/180°=1.0) from this tick's apply_kinematic_weight()
+## call. Read by TackleState's injury-risk calculator as a knock-vulnerability
+## factor — a player caught mid-reversal absorbs a challenge worse than one
+## running straight. Not consumed by PlayerBrain.
+var last_turn_severity: float = 0.0
 
 var facing_direction: Vector2 = Vector2.RIGHT
 var _input_facing: Vector2 = Vector2.RIGHT
@@ -406,6 +448,7 @@ func apply_kinematic_weight(input_dir: Vector2, delta: float) -> void:
 		# Map cosine from [-1.0, 1.0] smoothly to [1.0, 0.0] severity:
 		# 0° (dot=1.0) -> 0.0, 90° (dot=0.0) -> 0.5, 180° (dot=-1.0) -> 1.0
 		turn_severity = clampf((1.0 - dot_heading) * 0.5, 0.0, 1.0)
+	last_turn_severity = turn_severity
 
 	var penalty: float = turning_penalty_factor * turn_severity
 	var effective_acceleration: float = base_acceleration * maxf(1.0 - penalty, MIN_ACCELERATION_RATIO)
@@ -425,6 +468,40 @@ func apply_kinematic_weight(input_dir: Vector2, delta: float) -> void:
 ## that a hit can genuinely knock a player off their line.
 func apply_external_impulse(impulse: Vector2) -> void:
 	velocity += impulse * (NEUTRAL_MASS / maxf(player_mass, 1.0))
+
+
+## Applies a knock. injury_severity only ever rises within a match — a second,
+## lesser knock (e.g. a jostle strain after an already-registered tackle
+## impact) is a no-op, mirroring how a real injury compounds rather than
+## resets. Emits GameEvents.player_injured once per event at
+## INJURY_MINOR_SEVERITY and above so ManagerDirector (forced subs) and
+## CareerManager (persistence) can react; anything below that floor still
+## nudges mood but is treated as a stumble, not a logged injury.
+func apply_injury(severity: float, injury_tag: StringName) -> void:
+	var clamped: float = clampf(severity, 0.0, 1.0)
+	if clamped <= injury_severity:
+		return
+	injury_severity = clamped
+
+	var mood_node: MoodSystem = get_mood()
+	if mood_node != null:
+		# Frustration/fear scales with how bad the knock is — a severe one
+		# alone can tip a NORMAL player straight into SLUMP (threshold 0.33)
+		# and, via MoodSystem's existing tier-based scatter multiplier,
+		# widens kick dispersion the same way any other SLUMP does.
+		mood_node.apply_delta(-clamped * 0.30)
+
+	if clamped < INJURY_MINOR_SEVERITY:
+		return
+
+	if clamped >= INJURY_STRETCHER_SEVERITY:
+		show_action_text("STRETCHERED OFF", Color(1.0, 0.15, 0.15))
+	elif clamped >= INJURY_FORCED_SUB_SEVERITY:
+		show_action_text("INJURED!", Color(1.0, 0.35, 0.20))
+	else:
+		show_action_text("KNOCK", Color(1.0, 0.65, 0.30))
+
+	GameEvents.player_injured.emit(self, injury_severity, injury_tag)
 
 
 ## --- Contact / jostling -----------------------------------------------------
@@ -469,9 +546,26 @@ func _resolve_sprint_jostle(delta: float) -> void:
 		var push: Vector2 = collision.get_normal() * JOSTLE_IMPULSE_PER_SECOND * delta
 		apply_external_impulse(push)
 		other.apply_external_impulse(-push)
+		_apply_jostle_strain()
+		other._apply_jostle_strain()
 
 		show_action_text("SHOULDER", Color(1.0, 0.84, 0.25))
 		other.show_action_text("SHOULDER", Color(1.0, 0.84, 0.25))
+
+
+## Self-inflicted overexertion knock: a shoulder duel taken on empty legs
+## (stamina below INJURY_STAMINA_CRITICAL) can pull something even without a
+## foul. Deliberately capped low (<= 0.22, well under INJURY_LIMP_SEVERITY) —
+## jostle strain is a minor knock, never the source of a forced substitution;
+## only a tackle-impact foul (TackleState._apply_tackle_injury_risk()) can
+## produce a knock severe enough for that.
+func _apply_jostle_strain() -> void:
+	if stamina >= INJURY_STAMINA_CRITICAL:
+		return
+	var fatigue_ratio: float = 1.0 - clampf(stamina / INJURY_STAMINA_CRITICAL, 0.0, 1.0)
+	var severity: float = fatigue_ratio * 0.22
+	if severity >= INJURY_MINOR_SEVERITY:
+		apply_injury(severity, &"exertion_strain")
 
 
 ## Halts all momentum immediately (used during dead-ball / set-piece freezes).
@@ -713,6 +807,11 @@ func get_ball_in_foot_range() -> Pseudo3DBall:
 
 
 func get_ball_in_aerial_range() -> Pseudo3DBall:
+	# Limping gate: a player past INJURY_LIMP_SEVERITY cannot contest the air —
+	# see apply_injury()'s doc comment. AerialState reads this sensor to enter,
+	# so returning null here is a hard block, not just a lower score.
+	if injury_severity > INJURY_LIMP_SEVERITY:
+		return null
 	return _nearest_ball_from(aerial_hitbox.get_overlapping_bodies(), false)
 
 
@@ -756,7 +855,11 @@ func _update_sprint(delta: float) -> void:
 
 	var is_moving: bool = movement_intent.length() > 0.0
 	var was_sprinting: bool = is_sprinting
-	is_sprinting = wants_sprint and is_moving and not sprint_locked
+	# Limping gate: this is the sole authoritative block on sprint for an
+	# injured player, regardless of how many PlayerBrain call sites still
+	# request wants_sprint = true — see apply_injury()'s doc comment.
+	is_sprinting = wants_sprint and is_moving and not sprint_locked \
+		and injury_severity <= INJURY_LIMP_SEVERITY
 
 	if not was_sprinting and is_sprinting and velocity.length() > 110.0:
 		show_action_text("SPRINT", Color(0.33, 0.95, 0.55))

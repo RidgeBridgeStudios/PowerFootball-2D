@@ -138,6 +138,7 @@ class UtilityContext:
 	var open_teammate_exists: bool   ## _find_best_pass_target() != null
 	var chase_is_legal: bool         ## _should_chase_ball() returned true
 	var sprint_locked: bool
+	var injury_severity: float       ## 0-1, HeavyPlayerController.injury_severity
 
 @export var role: Role = Role.OUTFIELD_MIDFIELDER
 
@@ -736,6 +737,7 @@ func _build_context(defenders_nearby: Array[Node2D] = []) -> UtilityContext:
 	_ctx.team_has_ball = _team_has_ball() or is_throw_in_taker
 	_ctx.is_possessor  = (ball != null and ball.possessor == player) or is_throw_in_taker
 	_ctx.sprint_locked = player.sprint_locked
+	_ctx.injury_severity = player.injury_severity
 
 	# Forward direction toward the opponent goal. Team A attacks toward +X.
 	if pitch_boundary != null:
@@ -800,6 +802,13 @@ func _score_chase(ctx: UtilityContext) -> float:
 	# they are more likely to lose a footrace.
 	if ctx.sprint_locked:
 		base *= 0.65
+
+	# A knocked player chases half-heartedly. HeavyPlayerController's sprint
+	# gate (_update_sprint(), injury_severity > INJURY_LIMP_SEVERITY) already
+	# stops them physically outrunning anyone — this just discourages the AI
+	# from committing to the race in the first place.
+	if ctx.injury_severity > 0.0:
+		base *= 1.0 - clampf(ctx.injury_severity, 0.0, 1.0) * 0.5
 
 	# A defender who is not yet turned toward the ball should not immediately
 	# lunge — the tackle will miss and may be a foul.
@@ -1534,6 +1543,13 @@ func _find_best_pass_target(passer_pressure: float = 0.0, allow_backward_pass: b
 		# (no history yet) is a 1.0x no-op — see TrustSystem.trust_multiplier().
 		if trust_sys != null:
 			score *= TrustSystem.trust_multiplier(trust_sys.get_trust(TrustSystem.player_key(candidate)))
+
+		# Injury dampener: a knocked teammate cannot create the separation a
+		# fit one can, so their apparent openness is discounted here rather
+		# than inside PassUtilityScorer itself (see HeavyPlayerController.
+		# injury_severity doc comment).
+		if candidate.injury_severity > 0.0:
+			score *= 1.0 - clampf(candidate.injury_severity, 0.0, 1.0) * 0.5
 
 		# Isolation reward: layered on top of the trust-adjusted score
 		# rather than folded into PassUtilityScorer's own weighted total

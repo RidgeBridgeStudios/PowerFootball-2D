@@ -1,18 +1,13 @@
-# Graph Report - PowerFootball-2D-main  (2026-09-08)
+# Graph Report - PowerFootball-2D-main  (2026-09-04)
 
 ## Corpus Check
-- 151 files · ~321,727 words
+- 145 files · ~318,527 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1546 nodes · 1782 edges · 136 communities (97 shown, 30 thin omitted)
+- 1528 nodes · 1770 edges · 130 communities (97 shown, 24 thin omitted)
 - Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 101 edges (avg confidence: 0.92)
 - Token cost: 0 input · 0 output
-
-## Graph Freshness
-- Built from commit: `d4110981`
-- Run `git rev-parse HEAD` and compare to check if the graph is stale.
-- Run `graphify update .` after code changes (no API cost).
 
 ## Community Hubs (Navigation)
 - Api Surface
@@ -25,7 +20,7 @@
 - Team Flag Textures
 - Update
 - Vector2
-- Claude
+- Career Mode
 - Json Schema
 - gdcheck.py
 - Core Invariants
@@ -136,12 +131,6 @@
 - dump_api.py
 - Workflow: cross-system-feature
 - sync_rules.py
-- Workflow: bug-investigation
-- Workflow: data-database
-- Workflow: feature-implementation
-- Workflow: performance-work
-- Workflow: session-bootstrap
-- Workflow: task-intake-routing
 
 ## God Nodes (most connected - your core abstractions)
 1. `Api Surface` - 151 edges
@@ -162,10 +151,10 @@
   llms.txt → docs/API_SURFACE.md
 - `Readme` --references--> `Api Surface`  [INFERRED]
   tools/README.md → docs/API_SURFACE.md
-- `Agents` --references--> `Roadmap`  [INFERRED]
-  AGENTS.md → ROADMAP.md
-- `Course Implementation Specification` --references--> `Roadmap`  [INFERRED]
-  docs/course_implementation_specification.md → ROADMAP.md
+- `Claude` --references--> `Agents Errata`  [INFERRED]
+  CLAUDE.md → AGENTS_ERRATA.md
+- `Powerfootball Master Vision` --references--> `Claude`  [INFERRED]
+  POWERFOOTBALL_MASTER_VISION.md → CLAUDE.md
 
 ## Import Cycles
 - None detected.
@@ -181,7 +170,7 @@
 - **Api Surface Concepts** — docs_api_surface_powerfootball2d___public_api_surface_map, docs_api_surface_table_of_contents, docs_api_surface_layer_1___physics___kinematics, docs_api_surface_entities_ball_ballstategd, docs_api_surface_entities_ball_ballstatefactorygd [INFERRED 0.85]
 - **Core Invariants Concepts** — docs_core_invariants_coreinvariantsmd___powerfootball2d_archi, docs_core_invariants_1_engine_lock, docs_core_invariants_prohibited___strictly_forbidden_apis, docs_core_invariants_strict_typing_invariant, docs_core_invariants_scene_initialization___serialization [INFERRED 0.85]
 
-## Communities (136 total, 30 thin omitted)
+## Communities (130 total, 24 thin omitted)
 
 ### Community 0 - "Api Surface"
 Cohesion: 0.01
@@ -223,9 +212,9 @@ Nodes (36): Update, are dropped rather than masquerading as deletions; untouched
 Cohesion: 0.13
 Nodes (19): ballistic_trajectory_z(), calculate_intercept_point(), calculate_packing(), calculate_psxg(), calculate_vaep_value(), calculate_xg(), calculate_xg_logit(), clampf() (+11 more)
 
-### Community 10 - "Claude"
-Cohesion: 0.07
-Nodes (31): Claude, Architectural Choke Points, Boot Order projectgodot, CLAUDEmd — Agent Entry Point, Context Budget — Claude Code Sessions, graphify, Process Priority, READ FIRST (+23 more)
+### Community 10 - "Career Mode"
+Cohesion: 0.13
+Nodes (17): Career Mode, Career Mode Layer 4 Invariants, Compounded corrections — verified against the source, gdcheck cannot see through autoloads — use lintxref, Inbox options are deliberately NOT serialised, Match side is NOT the league team index, squadindex IS the identity so removing a player renumbers everyone behind them, The career > match bridge runs through PlayerFactory once per player per bind (+9 more)
 
 ### Community 11 - "Json Schema"
 Cohesion: 0.07
@@ -236,8 +225,8 @@ Cohesion: 0.12
 Nodes (23): Godot 47 Core, Compounded corrections — verified against the source, "Deprecated" export ≠ unused export, entities/manager/ManagerDirectorgd — shiftto, gdcheck resolves autoload singleton names as types — never "fix" this by adding classname, Godot 47 GDScript 20 Invariants, ManagerLoader emits NO formation signal — ManagerDirector does, new is inherited not declared (+15 more)
 
 ### Community 13 - "Core Invariants"
-Cohesion: 0.07
-Nodes (27): Core Invariants, 1 Engine Lock, 2 Simulation Stack, 3 Critical File Contracts Choke Points, 4 Physics & Spatial AI Invariants, 5 Static Verification & Autoload Handling, Autoload Handling Contract, COREINVARIANTSmd — PowerFootball2D Architectural & Engine Invariants (+19 more)
+Cohesion: 0.05
+Nodes (41): Claude, Architectural Choke Points, Boot Order projectgodot, CLAUDEmd — Agent Entry Point, Context Budget — Claude Code Sessions, graphify, Process Priority, READ FIRST (+33 more)
 
 ### Community 14 - "lint_invariants.py"
 Cohesion: 0.15
@@ -572,19 +561,19 @@ Cohesion: 0.52
 Nodes (5): generate_markdown(), get_layer_for_path(), main(), parse_gd_file(), ScriptAPI
 
 ## Knowledge Gaps
-- **718 isolated node(s):** `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `Career Mode (Layer 4) Invariants` (+713 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1130 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **30 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **712 isolated node(s):** `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `Career Mode (Layer 4) Invariants` (+707 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1118 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **24 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Agents` connect `Agents` to `Api Surface`, `sync_rules.py`, `Course Implementation Specification`, `Anti Patterns`, `Agents Errata`, `Powerfootball Master Vision`, `mcp_server.py`, `Vector2`, `Claude`, `Core Invariants`, `lint_invariants.py`, `Math Solvers`, `semantic_search.py`, `Graphify Lifecycle & Agent Navigation Protocol — PowerFootball-2D`, `DeterministicMatchSimulator`, `generate_symbols.py`, `benchmark_math.py`, `eval_simulation.py`, `Roadmap`, `README.md`, `compact_errata.py`, `dump_api.py`?**
-  _High betweenness centrality (0.158) - this node is a cross-community bridge._
+- **Why does `Agents` connect `Agents` to `Api Surface`, `sync_rules.py`, `Course Implementation Specification`, `Anti Patterns`, `Agents Errata`, `Powerfootball Master Vision`, `mcp_server.py`, `Vector2`, `Core Invariants`, `lint_invariants.py`, `Math Solvers`, `semantic_search.py`, `Graphify Lifecycle & Agent Navigation Protocol — PowerFootball-2D`, `DeterministicMatchSimulator`, `generate_symbols.py`, `benchmark_math.py`, `eval_simulation.py`, `Roadmap`, `README.md`, `compact_errata.py`, `dump_api.py`?**
+  _High betweenness centrality (0.139) - this node is a cross-community bridge._
+- **Why does `Agents Errata` connect `Agents Errata` to `Course Implementation Specification`, `Powerfootball Master Vision`, `Career Mode`, `gdcheck.py`, `Core Invariants`, `Readme`, `Agents`, `verify_gate.py`, `Match State, Pacing & Urgency Errata`, `Physics, Ball Dynamics & Kinematics Errata`, `UI, HUD & Signal Bus Errata`, `README.md`, `telemetry-and-stats.md`?**
+  _High betweenness centrality (0.084) - this node is a cross-community bridge._
 - **Why does `Api Surface` connect `Api Surface` to `Readme`, `Agents`, `Core Invariants`, `dump_api.py`?**
-  _High betweenness centrality (0.099) - this node is a cross-community bridge._
-- **Why does `Agents Errata` connect `Agents Errata` to `Course Implementation Specification`, `Powerfootball Master Vision`, `Claude`, `gdcheck.py`, `Core Invariants`, `Readme`, `Agents`, `verify_gate.py`, `Match State, Pacing & Urgency Errata`, `Physics, Ball Dynamics & Kinematics Errata`, `UI, HUD & Signal Bus Errata`, `README.md`, `telemetry-and-stats.md`?**
-  _High betweenness centrality (0.098) - this node is a cross-community bridge._
+  _High betweenness centrality (0.081) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `Api Surface` (e.g. with `Agents` and `dump_api.py`) actually correct?**
   _`Api Surface` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 5 inferred relationships involving `Course Implementation Specification` (e.g. with `Agents` and `Core Invariants`) actually correct?**
@@ -592,4 +581,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Are the 11 inferred relationships involving `Agents Errata` (e.g. with `Agents` and `Core Invariants`) actually correct?**
   _`Agents Errata` has 11 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `python` to the rest of the system?**
-  _718 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _712 weakly-connected nodes found - possible documentation gaps or missing edges._

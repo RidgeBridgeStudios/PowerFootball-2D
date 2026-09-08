@@ -64,6 +64,12 @@ signal player_switched(new_player: Node)
 signal stamina_depleted(player: Node)
 ## Fired when a player's mood tier changes (not on every float nudge).
 signal player_mood_changed(player: Node, tier: int)
+## Fired once per knock event above HeavyPlayerController.INJURY_MINOR_SEVERITY
+## — see HeavyPlayerController.apply_injury(). ManagerDirector listens for
+## forced-substitution severity; CareerManager listens to persist recovery
+## days onto PlayerCareerState. injury_tag identifies the cause
+## (&"tackle_impact", &"exertion_strain") for narrative/telemetry use.
+signal player_injured(player: HeavyPlayerController, severity: float, injury_tag: StringName)
 
 ## --- Contact events (feel, audio and stats hooks) --------------------------
 ## Extensions beyond the core match set: the audio and camera layers need to
@@ -151,6 +157,10 @@ signal pregame_confirmed
 signal pause_opened
 signal pause_closed
 signal substitution_made(team: int, player_out_idx: int, player_in_idx: int)
+## Emitted by ManagerDirector immediately before it resolves a medically forced
+## substitution via substitution_made above — a hook point for UI/telemetry
+## that wants to distinguish a forced sub from a tactical one.
+signal forced_substitution_requested(team_id: int, injured_player_idx: int)
 signal formation_changed(team: int, new_formation: String)
 signal lineup_changed(team: int)
 

@@ -142,6 +142,7 @@ func _check_mistimed_foul(
 	if effective_facing < BACK_TACKLE_FOUL_DOT:
 		player.show_action_text("FOUL!", Color(1.0, 0.25, 0.25))
 		GameEvents.foul_committed.emit(player, victim, victim.global_position)
+		_apply_tackle_injury_risk(player, victim)
 		return
 
 	var brain: PlayerBrain = player.get_node_or_null("PlayerBrain") as PlayerBrain
@@ -156,6 +157,7 @@ func _check_mistimed_foul(
 			if _rng.randf() < foul_prob:
 				player.show_action_text("FOUL!", Color(1.0, 0.25, 0.25))
 				GameEvents.foul_committed.emit(player, victim, victim.global_position)
+				_apply_tackle_injury_risk(player, victim)
 		return
 
 	# Side-on misses (effective_facing < MIN_FACING_DOT)
@@ -165,6 +167,34 @@ func _check_mistimed_foul(
 	if _rng.randf() < foul_probability:
 		player.show_action_text("FOUL!", Color(1.0, 0.25, 0.25))
 		GameEvents.foul_committed.emit(player, victim, victim.global_position)
+		_apply_tackle_injury_risk(player, victim)
+
+
+## Deterministic impact-severity calculator for the victim of a fouled
+## challenge — deliberately no RNG (unlike this state's foul-probability
+## rolls above), so a replay's injury outcomes stay bit-exact given identical
+## input state. Factors: closing velocity (how hard the tackler was actually
+## moving relative to the victim), relative mass, and two knock-vulnerability
+## multipliers — critical stamina depletion (HeavyPlayerController.
+## INJURY_STAMINA_CRITICAL) and mid-turn instability (last_turn_severity, set
+## every apply_kinematic_weight() tick) — matching the course spec's framing
+## that fatigue and sudden direction changes raise vulnerability rather than
+## independently causing a knock.
+func _apply_tackle_injury_risk(tackler: HeavyPlayerController, victim: HeavyPlayerController) -> void:
+	var closing_speed: float = (tackler.velocity - victim.velocity).length()
+	var mass_ratio: float = clampf(tackler.player_mass / maxf(victim.player_mass, 1.0), 0.6, 1.8)
+
+	var vulnerability: float = 1.0
+	if victim.stamina < HeavyPlayerController.INJURY_STAMINA_CRITICAL:
+		vulnerability += 0.5
+	elif victim.get_fatigue_tier() == HeavyPlayerController.FatigueTier.EXHAUSTED:
+		vulnerability += 0.2
+	vulnerability += victim.last_turn_severity * 0.35
+
+	var severity: float = clampf((closing_speed / 240.0) * mass_ratio * vulnerability * 0.45, 0.0, 1.0)
+	if severity < HeavyPlayerController.INJURY_MINOR_SEVERITY:
+		return
+	victim.apply_injury(severity, &"tackle_impact")
 
 
 func _find_nearby_opponent(player: HeavyPlayerController) -> HeavyPlayerController:
