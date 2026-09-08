@@ -1,0 +1,57 @@
+{
+  "permissions": {
+    "autoApprove": [
+      "Bash(grep -r * autoloads/)",
+      "Bash(grep -r * entities/)",
+      "Bash(grep -r * shared/)",
+      "Bash(find . -name .gd -not -path ./.git/)",
+      "Bash(cat ROADMAP.md)",
+      "Bash(cat AGENTS.md)",
+      "Bash(cat AGENTS_ERRATA.md)",
+      "Bash(python3 tools/gdcheck.py)",
+      "Bash(py -3 tools/gdcheck.py)"
+    ]
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 -c \"import json,sys; d=json.load(sys.stdin); p=d.get('tool_input',{}).get('file_path',''); sys.exit(2 if any(x in p for x in ['.env','.git/','addons/gut/']) else 0)\""
+          }
+        ]
+      },
+      {
+        "matcher": "Bash|Grep",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/emanu/.local/bin/graphify.EXE hook-guard search"
+          }
+        ]
+      },
+      {
+        "matcher": "Read|Glob",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "C:/Users/emanu/.local/bin/graphify.EXE hook-guard read"
+          }
+        ]
+      }
+    ],
+    "Stop": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "if command -v godot >/dev/null 2>&1 && [ -f addons/gut/gut_cmdln.gd ]; then godot --headless -s addons/gut/gut_cmdln.gd -gexit > /dev/null 2>&1 || { echo 'GUT SUITE FAILED - fix before stopping.' >&2; exit 2; }; else (python3 tools/gdcheck.py > /dev/null 2>&1 || python tools/gdcheck.py > /dev/null 2>&1 || py -3 tools/gdcheck.py > /dev/null 2>&1) || { echo 'gdcheck FAILED - fix before stopping.' >&2; exit 2; }; fi"
+          }
+        ]
+      }
+    ]
+  }
+}

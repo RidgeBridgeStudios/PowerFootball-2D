@@ -30,11 +30,14 @@ enum Line {
 	STAFF_WAGES = 6,
 	FACILITIES = 7,
 	OTHER = 8,
+	INVESTOR_INJECTION = 9,
+	SIGNING_BONUSES = 10,
 }
 
 const LINE_NAMES: Array[String] = [
 	"Matchday Revenue", "Sponsorship", "Prize Money", "Player Sales",
-	"Player Wages", "Transfer Fees", "Staff Wages", "Facilities", "Other"
+	"Player Wages", "Transfer Fees", "Staff Wages", "Facilities", "Other",
+	"Investor Injection", "Signing Bonuses"
 ]
 
 ## Average ticket yield per attending supporter, per home match.
@@ -54,8 +57,8 @@ const PRIZE_STEP: int = 850000
 @export var wage_budget_weekly: int = 0
 @export var stadium_capacity: int = 24000
 ## Cumulative season totals per Line, index-aligned with LINE_NAMES.
-@export var season_income: Array[int] = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-@export var season_expense: Array[int] = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+@export var season_income: Array[int] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+@export var season_expense: Array[int] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 ## Outstanding transfer instalments still to pay: [{season_year, amount, note}]
 @export var payables: Array[Dictionary] = []
 ## Instalments still owed TO this club from outgoing sales.
@@ -245,5 +248,5 @@ func settle_due_instalments(season_year: int) -> void:
 
 
 func reset_season_ledger() -> void:
-	season_income = [0, 0, 0, 0, 0, 0, 0, 0, 0]
-	season_expense = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+	season_income = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+	season_expense = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]

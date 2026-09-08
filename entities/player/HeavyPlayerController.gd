@@ -237,7 +237,7 @@ func _ready() -> void:
 
 	if visual != null:
 		var team_data: TeamData = DataLoader.get_match_team(team) if DataLoader.league != null else null
-		var p_data: PlayerData = get_meta(&"player_data", null) as PlayerData
+		var p_data: PlayerData = get_meta(&"player_data") as PlayerData if has_meta(&"player_data") else null
 		var is_gk: bool = brain != null and brain.is_goalkeeper
 		visual.apply_data(p_data, team_data, is_gk)
 

@@ -64,11 +64,11 @@ const ROLE_PRESET_PATHS: Dictionary = {
 
 @onready var role_picker: OptionButton = $MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/RoleSection/RolePicker
 @onready var anchor_slider: HSlider = $MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders/AnchorSlider
-@onready var anchor_val_label: Label = $MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders/AnchorValLabel
+@onready var anchor_val_label: Label = $MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders/AnchorHeader/AnchorValLabel
 @onready var press_slider: HSlider = $MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders/PressSlider
-@onready var press_val_label: Label = $MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders/PressValLabel
+@onready var press_val_label: Label = $MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders/PressHeader/PressValLabel
 @onready var adv_slider: HSlider = $MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders/AdvSlider
-@onready var adv_val_label: Label = $MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders/AdvValLabel
+@onready var adv_val_label: Label = $MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Sliders/AdvHeader/AdvValLabel
 
 @onready var reset_role_btn: Button = $MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Actions/ResetRoleBtn
 @onready var make_captain_btn: Button = $MainLayout/ContentSplit/RightSection/Tabs/PlayerTactics/InspectorContent/Actions/MakeCaptainBtn

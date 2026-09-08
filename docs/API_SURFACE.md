@@ -1113,7 +1113,7 @@
 **class_name:** `ClubFinances` · **extends:** `Resource`
 
 **Enums:**
-- `enum Line { MATCHDAY_REVENUE = 0, SPONSORSHIP = 1, PRIZE_MONEY = 2, PLAYER_SALES = 3, WAGES = 4, TRANSFER_FEES = 5, STAFF_WAGES = 6, FACILITIES = 7, OTHER = 8 }`
+- `enum Line { MATCHDAY_REVENUE = 0, SPONSORSHIP = 1, PRIZE_MONEY = 2, PLAYER_SALES = 3, WAGES = 4, TRANSFER_FEES = 5, STAFF_WAGES = 6, FACILITIES = 7, OTHER = 8, INVESTOR_INJECTION = 9, SIGNING_BONUSES = 10 }`
 
 **Constants:**
 - `const LINE_NAMES: Array[String] = [`
@@ -1130,8 +1130,8 @@
 - `@export var transfer_budget: int = 0`
 - `@export var wage_budget_weekly: int = 0`
 - `@export var stadium_capacity: int = 24000`
-- `@export var season_income: Array[int] = [0, 0, 0, 0, 0, 0, 0, 0, 0]`
-- `@export var season_expense: Array[int] = [0, 0, 0, 0, 0, 0, 0, 0, 0]`
+- `@export var season_income: Array[int] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]`
+- `@export var season_expense: Array[int] = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]`
 - `@export var payables: Array[Dictionary] = []`
 - `@export var receivables: Array[Dictionary] = []`
 - `@export var last_weekly_cycle: CareerDate = null`
@@ -1312,7 +1312,7 @@
 **class_name:** `InboxItem` · **extends:** `Resource`
 
 **Enums:**
-- `enum Category { BOARD = 0, MEDIA = 1, PLAYER = 2, STAFF = 3, TRANSFER = 4, CONTRACT = 5, FIXTURE = 6, TRAINING = 7, SCOUTING = 8, LEAGUE = 9, YOUTH = 10, FINANCE = 11 }`
+- `enum Category { BOARD = 0, MEDIA = 1, PLAYER = 2, STAFF = 3, TRANSFER = 4, CONTRACT = 5, FIXTURE = 6, TRAINING = 7, SCOUTING = 8, LEAGUE = 9, YOUTH = 10, FINANCE = 11, MATCH = 12 }`
 
 **Constants:**
 - `const CATEGORY_NAMES: Array[String] = [`
@@ -1975,6 +1975,9 @@
 - `const LA_PAUSA_MIN_DRIBBLE_SCORE: float = 0.05`
 - `const GOALIE_ARC_MIN_DIST: float = 40.0`
 - `const GOALIE_ARC_MAX_DIST: float = 90.0`
+- `const GOALIE_SWEEPER_BALL_DIST: float = 500.0`
+- `const GOALIE_SWEEPER_MAX_DIST: float = 280.0`
+- `const GOALIE_SWEEPER_LINE_MARGIN: float = 60.0`
 - `const UPDATE_INTERVAL: int = 15`
 - `const TACTICAL_SLICE_SECONDS: float = UPDATE_INTERVAL / 60.0`
 - `const PASS_LOCK_DURATION: float = 0.35`

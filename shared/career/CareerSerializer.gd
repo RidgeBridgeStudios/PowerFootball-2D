@@ -629,8 +629,8 @@ static func _finances_from_dict(raw: Variant) -> ClubFinances:
 	f.transfer_budget = int(d.get("transfer_budget", 0))
 	f.wage_budget_weekly = int(d.get("wage_budget_weekly", 0))
 	f.stadium_capacity = int(d.get("stadium_capacity", 24000))
-	f.season_income = _int_array(d.get("season_income", []), 9)
-	f.season_expense = _int_array(d.get("season_expense", []), 9)
+	f.season_income = _int_array(d.get("season_income", []), 11)
+	f.season_expense = _int_array(d.get("season_expense", []), 11)
 	var pay: Array[Dictionary] = []
 	for p: Variant in d.get("payables", []):
 		if typeof(p) == TYPE_DICTIONARY:

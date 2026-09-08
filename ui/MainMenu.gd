@@ -27,6 +27,7 @@ const TEXT_COLOR: Color = Color(0.909804, 0.941176, 0.913725)
 
 @onready var kickoff_menu: Control = $KickOffMenu
 @onready var options_menu: Control = $OptionsMenu
+@onready var menu_music: AudioStreamPlayer = $MenuMusic
 
 @onready var coming_soon_dialog: AcceptDialog = $ComingSoonDialog
 @onready var quit_dialog: ConfirmationDialog = $QuitDialog
@@ -50,6 +51,7 @@ func _ready() -> void:
 	quit_dialog.visibility_changed.connect(_on_quit_visibility_changed)
 
 	_style_menu_buttons()
+	_start_menu_music()
 	btn_kickoff.grab_focus()
 
 
@@ -139,6 +141,16 @@ func _style_menu_buttons() -> void:
 
 	# Player Career remains locked; Manager Mode is now a real destination.
 	btn_career.modulate.a = 0.4
+
+
+## KickOffMenu is an overlay shown/hidden inside this same scene (see class
+## doc above), so this single player already covers both the main menu list
+## and the Kick Off team-select screen with no extra wiring.
+func _start_menu_music() -> void:
+	var stream: AudioStream = menu_music.stream
+	if stream is AudioStreamWAV:
+		(stream as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_FORWARD
+	menu_music.play()
 
 
 func _make_stylebox(bg_color: Color, left_border: int) -> StyleBoxFlat:

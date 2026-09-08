@@ -1,13 +1,75 @@
 {
-  "total_nodes": 94,
+  "total_nodes": 140,
   "layer_summary": {
     "Layer 1 - Physics & Kinematics": 37,
-    "Layer 2 - Match AI & Spatial Navigation": 19,
+    "Layer 2 - Match AI & Spatial Navigation": 45,
     "Layer 3 - Match Social & Dynamic Psychology": 4,
     "Layer 4 - Club World & Persistent Entities": 10,
-    "Layer 5 - Narrative, Presentation & UI": 24
+    "Layer 5 - Narrative, Presentation & UI": 44
   },
   "nodes": {
+    "autoloads/CareerManager.gd": {
+      "class_name": null,
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "autoloads/ManagerLoader.gd",
+        "autoloads/RefereeLoader.gd",
+        "entities/manager/ManagerDirector.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/MoodSystem.gd",
+        "entities/player/TrustSystem.gd",
+        "pitch/PitchScene.gd",
+        "shared/CareerProgressionEngine.gd",
+        "shared/ManagerData.gd",
+        "shared/PlayerData.gd",
+        "shared/PlayerFactory.gd",
+        "shared/QuickSimEngine.gd",
+        "shared/RefereeData.gd",
+        "shared/StaffData.gd",
+        "shared/TeamData.gd",
+        "shared/career/BoardState.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/ClubFinances.gd",
+        "shared/career/CompetitionData.gd",
+        "shared/career/ContractData.gd",
+        "shared/career/FixtureData.gd",
+        "shared/career/InboxEngine.gd",
+        "shared/career/InboxItem.gd",
+        "shared/career/LeagueTableRow.gd",
+        "shared/career/ManagerCareerProfile.gd",
+        "shared/career/MoraleEngine.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/PlayerDevelopmentEngine.gd",
+        "shared/career/RelationshipData.gd",
+        "shared/career/ScoutReport.gd",
+        "shared/career/ScoutingNetwork.gd",
+        "shared/career/TrainingSchedule.gd",
+        "shared/career/TransferMarket.gd",
+        "shared/career/TransferOffer.gd",
+        "shared/career/WorldEvent.gd",
+        "shared/career/YouthAcademy.gd"
+      ],
+      "direct_dependents": [],
+      "signals_declared": [],
+      "signals_emitted": [
+        "career_advance_halted",
+        "career_day_advanced",
+        "career_inbox_changed",
+        "career_manager_sacked",
+        "career_match_ready",
+        "career_result_recorded",
+        "career_season_ended",
+        "career_started"
+      ],
+      "signals_connected": []
+    },
     "autoloads/DataLoader.gd": {
       "class_name": null,
       "layer": 4,
@@ -17,13 +79,18 @@
         "autoloads/GameManager.gd",
         "pitch/PitchScene.gd",
         "shared/LeagueData.gd",
+        "shared/NationDatabase.gd",
         "shared/PlayerData.gd",
         "shared/PlayerFactory.gd",
-        "shared/TeamData.gd"
+        "shared/StaffData.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerSerializer.gd"
       ],
       "direct_dependents": [
+        "autoloads/CareerManager.gd",
         "autoloads/MatchStatsTracker.gd",
         "autoloads/MatchTelemetryLogger.gd",
+        "autoloads/StaffLoader.gd",
         "entities/manager/ManagerDirector.gd",
         "entities/player/HeavyPlayerController.gd",
         "entities/referee/FourthOfficialVisual.gd",
@@ -32,10 +99,19 @@
         "shared/PlayerFactory.gd",
         "shared/QuickSimEngine.gd",
         "shared/TeamData.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerSerializer.gd",
         "ui/HUD.gd",
         "ui/KickOffMenu.gd",
         "ui/MatchStatsUI.gd",
-        "ui/manager/ManagerModeHub.gd",
+        "ui/manager_mode/CalendarPanel.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/FixturesPanel.gd",
+        "ui/manager_mode/LeaguePanel.gd",
+        "ui/manager_mode/ManagerCreationScreen.gd",
+        "ui/manager_mode/ManagerModeRoot.gd",
+        "ui/manager_mode/OverviewPanel.gd",
+        "ui/manager_mode/TransfersPanel.gd",
         "ui/pregame/PreGameScreen.gd"
       ],
       "signals_declared": [],
@@ -53,6 +129,7 @@
         "autoloads/MatchWorldModel.gd",
         "entities/ball/Pseudo3DBall.gd",
         "entities/manager/ManagerDirector.gd",
+        "entities/manager/PressOffice.gd",
         "entities/player/HeavyPlayerController.gd",
         "entities/player/MoodSystem.gd",
         "entities/player/PlayerBrain.gd",
@@ -67,15 +144,19 @@
         "shared/FormationAnchorMath.gd",
         "shared/ManagerData.gd",
         "shared/PassUtilityScorer.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/WorldEvent.gd",
         "ui/HUD.gd",
         "ui/pause/PauseMenu.gd",
         "ui/pregame/PreGameScreen.gd"
       ],
       "direct_dependents": [
+        "autoloads/CareerManager.gd",
         "autoloads/GameManager.gd",
         "autoloads/MatchStatsTracker.gd",
         "autoloads/MatchTelemetryLogger.gd",
         "autoloads/MatchWorldModel.gd",
+        "autoloads/WorldEventLog.gd",
         "entities/ball/Pseudo3DBall.gd",
         "entities/manager/ManagerDirector.gd",
         "entities/manager/ManagerVisual.gd",
@@ -102,6 +183,8 @@
         "pitch/SetPieceCoordinator.gd",
         "ui/HUD.gd",
         "ui/MatchIntroUI.gd",
+        "ui/manager_mode/ManagerModeRoot.gd",
+        "ui/manager_mode/TacticsPanel.gd",
         "ui/pause/PauseMenu.gd",
         "ui/pregame/PreGameScreen.gd",
         "ui/tactics/TacticsEditor.gd"
@@ -166,7 +249,16 @@
         "replay_started",
         "replay_ended",
         "celebration_started",
-        "celebration_ended"
+        "celebration_ended",
+        "career_started",
+        "career_day_advanced",
+        "career_advance_halted",
+        "career_inbox_changed",
+        "career_match_ready",
+        "career_result_recorded",
+        "career_season_ended",
+        "career_manager_sacked",
+        "world_event_logged"
       ],
       "signals_emitted": [],
       "signals_connected": []
@@ -187,6 +279,7 @@
         "pitch/SetPieceCoordinator.gd"
       ],
       "direct_dependents": [
+        "autoloads/CareerManager.gd",
         "autoloads/DataLoader.gd",
         "autoloads/GameEvents.gd",
         "autoloads/MatchStatsTracker.gd",
@@ -221,7 +314,8 @@
         "ui/OptionsMenu.gd",
         "ui/QuickSimModal.gd",
         "ui/SplashScreen.gd",
-        "ui/manager/ManagerModeHub.gd",
+        "ui/manager_mode/ManagerModeRoot.gd",
+        "ui/manager_mode/TacticsPanel.gd",
         "ui/pause/PauseMenu.gd",
         "ui/pregame/PreGameScreen.gd"
       ],
@@ -287,14 +381,17 @@
       "extends": "Node",
       "direct_dependencies": [
         "pitch/PitchScene.gd",
-        "shared/ManagerData.gd"
+        "shared/ManagerData.gd",
+        "shared/NationDatabase.gd"
       ],
       "direct_dependents": [
+        "autoloads/CareerManager.gd",
         "pitch/PitchScene.gd",
         "shared/ManagerData.gd",
         "shared/PlayerFactory.gd",
+        "shared/career/CareerSerializer.gd",
         "ui/KickOffMenu.gd",
-        "ui/manager/ManagerModeHub.gd",
+        "ui/manager_mode/OverviewPanel.gd",
         "ui/pregame/PreGameScreen.gd"
       ],
       "signals_declared": [],
@@ -333,6 +430,8 @@
         "pitch/PitchScene.gd",
         "shared/PlayerRatingCalculator.gd",
         "shared/QuickSimEngine.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/WorldEvent.gd",
         "ui/MatchStatsUI.gd",
         "ui/QuickSimModal.gd"
       ],
@@ -488,17 +587,55 @@
       "extends": "Node",
       "direct_dependencies": [
         "pitch/PitchScene.gd",
-        "shared/RefereeData.gd"
+        "shared/NationDatabase.gd",
+        "shared/RefereeData.gd",
+        "ui/pregame/PreGameScreen.gd"
       ],
       "direct_dependents": [
+        "autoloads/CareerManager.gd",
         "entities/referee/MatchReferee.gd",
         "pitch/PitchScene.gd",
         "ui/KickOffMenu.gd",
-        "ui/manager/ManagerModeHub.gd",
         "ui/pregame/PreGameScreen.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
+      "signals_connected": []
+    },
+    "autoloads/StaffLoader.gd": {
+      "class_name": null,
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "shared/NationDatabase.gd",
+        "shared/StaffData.gd",
+        "shared/TeamData.gd"
+      ],
+      "direct_dependents": [],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "autoloads/WorldEventLog.gd": {
+      "class_name": null,
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "entities/manager/PressOffice.gd",
+        "shared/ManagerData.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/WorldEvent.gd"
+      ],
+      "direct_dependents": [],
+      "signals_declared": [],
+      "signals_emitted": [
+        "world_event_logged"
+      ],
       "signals_connected": []
     },
     "entities/ball/BallState.gd": {
@@ -712,6 +849,7 @@
         "shared/TeamData.gd"
       ],
       "direct_dependents": [
+        "autoloads/CareerManager.gd",
         "autoloads/GameEvents.gd",
         "autoloads/MatchStatsTracker.gd",
         "autoloads/MatchWorldModel.gd",
@@ -720,7 +858,9 @@
         "pitch/PitchScene.gd",
         "shared/FormationAnchorMath.gd",
         "shared/FormationLibrary.gd",
-        "shared/ManagerData.gd"
+        "shared/ManagerData.gd",
+        "shared/career/ManagerCareerProfile.gd",
+        "ui/manager_mode/TacticsPanel.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [
@@ -772,8 +912,13 @@
         "shared/ManagerData.gd"
       ],
       "direct_dependents": [
+        "autoloads/GameEvents.gd",
+        "autoloads/WorldEventLog.gd",
         "pitch/PitchScene.gd",
-        "shared/ManagerData.gd"
+        "shared/ManagerData.gd",
+        "shared/career/InboxEngine.gd",
+        "shared/career/ManagerCareerProfile.gd",
+        "shared/career/WorldEvent.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -834,6 +979,7 @@
         "ui/HUD.gd"
       ],
       "direct_dependents": [
+        "autoloads/CareerManager.gd",
         "autoloads/GameEvents.gd",
         "autoloads/GameManager.gd",
         "autoloads/MatchStatsTracker.gd",
@@ -880,6 +1026,7 @@
         "shared/PlayerData.gd",
         "shared/PlayerFactory.gd",
         "shared/PlayerRoleConfig.gd",
+        "shared/career/MoraleEngine.gd",
         "ui/ActionText.gd",
         "ui/HUD.gd",
         "ui/pause/PauseMenu.gd",
@@ -914,6 +1061,7 @@
         "shared/PlayerFactory.gd"
       ],
       "direct_dependents": [
+        "autoloads/CareerManager.gd",
         "autoloads/GameEvents.gd",
         "autoloads/MatchStatsTracker.gd",
         "entities/player/HeavyPlayerController.gd",
@@ -924,6 +1072,7 @@
         "entities/referee/MatchReferee.gd",
         "pitch/PitchScene.gd",
         "shared/PlayerFactory.gd",
+        "shared/career/MoraleEngine.gd",
         "ui/HUD.gd"
       ],
       "signals_declared": [],
@@ -1111,14 +1260,19 @@
         "entities/player/PlayerBrain.gd",
         "entities/player/states/DribbleState.gd",
         "shared/PlayerData.gd",
-        "shared/PlayerFactory.gd"
+        "shared/PlayerFactory.gd",
+        "shared/career/RelationshipData.gd"
       ],
       "direct_dependents": [
+        "autoloads/CareerManager.gd",
         "entities/player/HeavyPlayerController.gd",
         "entities/player/PlayerBrain.gd",
         "entities/player/states/DribbleState.gd",
         "entities/player/states/ThrowInState.gd",
-        "shared/PlayerFactory.gd"
+        "shared/PlayerFactory.gd",
+        "shared/career/MoraleEngine.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/RelationshipData.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -1954,6 +2108,7 @@
         "shared/ManagerData.gd",
         "shared/PlayerData.gd",
         "shared/PlayerFactory.gd",
+        "shared/PlayerRatingCalculator.gd",
         "shared/RefereeData.gd",
         "shared/TeamData.gd",
         "shared/TeamManagementData.gd",
@@ -1965,6 +2120,7 @@
         "ui/pregame/PreGameScreen.gd"
       ],
       "direct_dependents": [
+        "autoloads/CareerManager.gd",
         "autoloads/DataLoader.gd",
         "autoloads/GameEvents.gd",
         "autoloads/GameManager.gd",
@@ -1982,11 +2138,12 @@
         "shared/ManagerData.gd",
         "shared/PlayerData.gd",
         "shared/TeamManagementData.gd",
+        "shared/career/CareerSaveData.gd",
         "ui/HUD.gd",
         "ui/KickOffMenu.gd",
         "ui/MainMenu.gd",
         "ui/TouchlineBubble.gd",
-        "ui/manager/ManagerModeHub.gd",
+        "ui/manager_mode/ManagerModeRoot.gd",
         "ui/pregame/PreGameScreen.gd"
       ],
       "signals_declared": [],
@@ -2089,8 +2246,8 @@
         "shared/TeamData.gd"
       ],
       "direct_dependents": [
-        "pitch/PitchScene.gd",
-        "ui/manager/ManagerModeHub.gd"
+        "autoloads/CareerManager.gd",
+        "pitch/PitchScene.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -2152,6 +2309,7 @@
         "shared/FormationAnchorMath.gd",
         "shared/FormationRegistry.gd",
         "shared/TeamManagementData.gd",
+        "ui/manager_mode/TacticsPanel.gd",
         "ui/tactics/TacticsEditor.gd"
       ],
       "signals_declared": [],
@@ -2203,12 +2361,15 @@
         "entities/manager/PressOffice.gd",
         "entities/player/PlayerBrain.gd",
         "pitch/PitchScene.gd",
+        "shared/NationDatabase.gd",
         "shared/PlayerData.gd",
         "shared/TeamData.gd"
       ],
       "direct_dependents": [
+        "autoloads/CareerManager.gd",
         "autoloads/GameEvents.gd",
         "autoloads/ManagerLoader.gd",
+        "autoloads/WorldEventLog.gd",
         "entities/manager/ManagerDirector.gd",
         "entities/manager/ManagerVisual.gd",
         "entities/manager/PressOffice.gd",
@@ -2219,11 +2380,39 @@
         "shared/PlayerFactory.gd",
         "shared/QuickSimEngine.gd",
         "shared/TeamManagementData.gd",
+        "shared/career/InboxEngine.gd",
+        "shared/career/ManagerCareerProfile.gd",
+        "shared/career/ScoutingNetwork.gd",
+        "shared/career/TransferMarket.gd",
         "ui/KickOffMenu.gd",
         "ui/MatchIntroUI.gd",
         "ui/QuickSimModal.gd",
-        "ui/manager/ManagerModeHub.gd",
+        "ui/manager_mode/OverviewPanel.gd",
+        "ui/manager_mode/TacticsPanel.gd",
         "ui/pregame/PreGameScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/NationDatabase.gd": {
+      "class_name": "NationDatabase",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "RefCounted",
+      "direct_dependencies": [],
+      "direct_dependents": [
+        "autoloads/DataLoader.gd",
+        "autoloads/ManagerLoader.gd",
+        "autoloads/RefereeLoader.gd",
+        "autoloads/StaffLoader.gd",
+        "shared/ManagerData.gd",
+        "shared/RefereeData.gd",
+        "shared/StaffData.gd",
+        "shared/career/YouthAcademy.gd",
+        "ui/MatchIntroUI.gd",
+        "ui/pregame/PreGameScreen.gd",
+        "ui/tactics/TacticsEditor.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -2245,7 +2434,10 @@
         "autoloads/MatchWorldModel.gd",
         "entities/manager/ManagerDirector.gd",
         "entities/player/PlayerBrain.gd",
-        "shared/PlayerRoleConfig.gd"
+        "shared/PlayerFactory.gd",
+        "shared/PlayerRoleConfig.gd",
+        "shared/career/MoraleEngine.gd",
+        "shared/career/RelationshipData.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -2266,6 +2458,7 @@
         "shared/RefereeData.gd"
       ],
       "direct_dependents": [
+        "autoloads/CareerManager.gd",
         "autoloads/DataLoader.gd",
         "autoloads/MatchStatsTracker.gd",
         "autoloads/MatchTelemetryLogger.gd",
@@ -2288,12 +2481,31 @@
         "shared/RefereeData.gd",
         "shared/TeamData.gd",
         "shared/TeamManagementData.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/ContractData.gd",
+        "shared/career/InboxEngine.gd",
+        "shared/career/MoraleEngine.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/PlayerDevelopmentEngine.gd",
+        "shared/career/ScoutReport.gd",
+        "shared/career/ScoutingNetwork.gd",
+        "shared/career/TrainingSchedule.gd",
+        "shared/career/TransferMarket.gd",
+        "shared/career/WorldEvent.gd",
+        "shared/career/YouthAcademy.gd",
         "ui/FormationDiagram.gd",
         "ui/HUD.gd",
         "ui/KickOffMenu.gd",
         "ui/MatchIntroUI.gd",
         "ui/MatchStatsUI.gd",
-        "ui/manager/ManagerModeHub.gd",
+        "ui/manager_mode/ContractNegotiationModal.gd",
+        "ui/manager_mode/FinancesPanel.gd",
+        "ui/manager_mode/OverviewPanel.gd",
+        "ui/manager_mode/SquadPanel.gd",
+        "ui/manager_mode/TacticsPanel.gd",
+        "ui/manager_mode/TrainingPanel.gd",
+        "ui/manager_mode/TransfersPanel.gd",
         "ui/pregame/PreGameScreen.gd",
         "ui/tactics/TacticsEditor.gd",
         "ui/tactics/TacticsPitchView.gd"
@@ -2315,10 +2527,13 @@
         "entities/player/PlayerBrain.gd",
         "entities/player/TrustSystem.gd",
         "shared/ManagerData.gd",
+        "shared/PassUtilityScorer.gd",
         "shared/PlayerData.gd",
-        "shared/TeamData.gd"
+        "shared/TeamData.gd",
+        "shared/career/RelationshipData.gd"
       ],
       "direct_dependents": [
+        "autoloads/CareerManager.gd",
         "autoloads/DataLoader.gd",
         "entities/player/FacingArrow.gd",
         "entities/player/HeavyPlayerController.gd",
@@ -2327,6 +2542,8 @@
         "pitch/PitchScene.gd",
         "shared/PlayerData.gd",
         "shared/TeamData.gd",
+        "shared/career/MoraleEngine.gd",
+        "shared/career/PlayerDevelopmentEngine.gd",
         "ui/HUD.gd"
       ],
       "signals_declared": [],
@@ -2345,6 +2562,7 @@
       "direct_dependents": [
         "autoloads/MatchStatsTracker.gd",
         "autoloads/MatchTelemetryLogger.gd",
+        "pitch/PitchScene.gd",
         "shared/CareerProgressionEngine.gd",
         "shared/PlayerData.gd",
         "shared/QuickSimEngine.gd",
@@ -2390,9 +2608,9 @@
         "shared/TeamData.gd"
       ],
       "direct_dependents": [
+        "autoloads/CareerManager.gd",
         "ui/KickOffMenu.gd",
-        "ui/QuickSimModal.gd",
-        "ui/manager/ManagerModeHub.gd"
+        "ui/QuickSimModal.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -2405,9 +2623,11 @@
       "extends": "Resource",
       "direct_dependencies": [
         "entities/referee/MatchReferee.gd",
+        "shared/NationDatabase.gd",
         "shared/PlayerData.gd"
       ],
       "direct_dependents": [
+        "autoloads/CareerManager.gd",
         "autoloads/RefereeLoader.gd",
         "entities/referee/CenterRefereeVisual.gd",
         "entities/referee/MatchOfficialCrew.gd",
@@ -2420,8 +2640,34 @@
         "ui/KickOffMenu.gd",
         "ui/MatchIntroUI.gd",
         "ui/QuickSimModal.gd",
-        "ui/manager/ManagerModeHub.gd",
         "ui/pregame/PreGameScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/StaffData.gd": {
+      "class_name": "StaffData",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "shared/NationDatabase.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "autoloads/DataLoader.gd",
+        "autoloads/StaffLoader.gd",
+        "shared/TeamData.gd",
+        "shared/career/ClubFinances.gd",
+        "shared/career/PlayerDevelopmentEngine.gd",
+        "shared/career/ScoutReport.gd",
+        "shared/career/ScoutingNetwork.gd",
+        "shared/career/TrainingSchedule.gd",
+        "ui/manager_mode/FinancesPanel.gd",
+        "ui/manager_mode/OverviewPanel.gd",
+        "ui/manager_mode/ScoutingPanel.gd",
+        "ui/manager_mode/StaffPanel.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -2436,12 +2682,15 @@
         "autoloads/DataLoader.gd",
         "shared/PlayerData.gd",
         "shared/PlayerFactory.gd",
+        "shared/StaffData.gd",
         "shared/TeamManagementData.gd",
         "ui/pause/PauseMenu.gd"
       ],
       "direct_dependents": [
+        "autoloads/CareerManager.gd",
         "autoloads/DataLoader.gd",
         "autoloads/MatchTelemetryLogger.gd",
+        "autoloads/StaffLoader.gd",
         "entities/manager/ManagerDirector.gd",
         "entities/manager/ManagerVisual.gd",
         "entities/player/HeavyPlayerController.gd",
@@ -2455,10 +2704,33 @@
         "shared/PlayerFactory.gd",
         "shared/QuickSimEngine.gd",
         "shared/TeamManagementData.gd",
+        "shared/career/BoardState.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/ClubFinances.gd",
+        "shared/career/CompetitionData.gd",
+        "shared/career/InboxEngine.gd",
+        "shared/career/MoraleEngine.gd",
+        "shared/career/ScoutingNetwork.gd",
+        "shared/career/TransferMarket.gd",
+        "shared/career/YouthAcademy.gd",
         "ui/KickOffMenu.gd",
         "ui/MatchIntroUI.gd",
         "ui/QuickSimModal.gd",
-        "ui/manager/ManagerModeHub.gd",
+        "ui/manager_mode/CalendarPanel.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/ContractNegotiationModal.gd",
+        "ui/manager_mode/FinancesPanel.gd",
+        "ui/manager_mode/FixturesPanel.gd",
+        "ui/manager_mode/LeaguePanel.gd",
+        "ui/manager_mode/ManagerCreationScreen.gd",
+        "ui/manager_mode/ManagerModeRoot.gd",
+        "ui/manager_mode/OverviewPanel.gd",
+        "ui/manager_mode/ScoutingPanel.gd",
+        "ui/manager_mode/SquadPanel.gd",
+        "ui/manager_mode/StaffPanel.gd",
+        "ui/manager_mode/TacticsPanel.gd",
+        "ui/manager_mode/TrainingPanel.gd",
+        "ui/manager_mode/TransfersPanel.gd",
         "ui/pregame/PreGameScreen.gd"
       ],
       "signals_declared": [],
@@ -2482,6 +2754,7 @@
         "pitch/PitchScene.gd",
         "shared/TeamData.gd",
         "ui/FormationDiagram.gd",
+        "ui/manager_mode/TacticsPanel.gd",
         "ui/pause/PauseMenu.gd",
         "ui/pregame/PreGameScreen.gd",
         "ui/tactics/TacticsEditor.gd",
@@ -2507,6 +2780,660 @@
         "autoloads/MatchWorldModel.gd",
         "entities/player/PlayerBrain.gd",
         "shared/PassUtilityScorer.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/BoardState.gd": {
+      "class_name": "BoardState",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "shared/TeamData.gd",
+        "shared/career/CareerDate.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/InboxEngine.gd",
+        "shared/career/TrainingSchedule.gd",
+        "shared/career/YouthAcademy.gd",
+        "ui/manager_mode/BoardPanel.gd",
+        "ui/manager_mode/ManagerCreationScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/CareerDate.gd": {
+      "class_name": "CareerDate",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "autoloads/GameEvents.gd",
+        "autoloads/WorldEventLog.gd",
+        "shared/career/BoardState.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/ClubFinances.gd",
+        "shared/career/CompetitionData.gd",
+        "shared/career/ContractData.gd",
+        "shared/career/FixtureData.gd",
+        "shared/career/InboxEngine.gd",
+        "shared/career/InboxItem.gd",
+        "shared/career/ManagerCareerProfile.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/ScoutReport.gd",
+        "shared/career/ScoutingNetwork.gd",
+        "shared/career/TrainingSchedule.gd",
+        "shared/career/TransferMarket.gd",
+        "shared/career/TransferOffer.gd",
+        "shared/career/WorldEvent.gd",
+        "shared/career/YouthAcademy.gd",
+        "ui/manager_mode/CalendarPanel.gd",
+        "ui/manager_mode/ContractNegotiationModal.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/CareerSaveData.gd": {
+      "class_name": "CareerSaveData",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "pitch/PitchScene.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd",
+        "shared/career/BoardState.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/ClubFinances.gd",
+        "shared/career/CompetitionData.gd",
+        "shared/career/FixtureData.gd",
+        "shared/career/InboxItem.gd",
+        "shared/career/ManagerCareerProfile.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/ScoutReport.gd",
+        "shared/career/TrainingSchedule.gd",
+        "shared/career/TransferOffer.gd",
+        "shared/career/WorldEvent.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "autoloads/WorldEventLog.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/InboxEngine.gd",
+        "shared/career/MoraleEngine.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/ScoutingNetwork.gd",
+        "ui/manager_mode/BoardPanel.gd",
+        "ui/manager_mode/CalendarPanel.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/FinancesPanel.gd",
+        "ui/manager_mode/FixturesPanel.gd",
+        "ui/manager_mode/InboxPanel.gd",
+        "ui/manager_mode/LeaguePanel.gd",
+        "ui/manager_mode/ManagerModeRoot.gd",
+        "ui/manager_mode/OverviewPanel.gd",
+        "ui/manager_mode/ScoutingPanel.gd",
+        "ui/manager_mode/SquadPanel.gd",
+        "ui/manager_mode/StaffPanel.gd",
+        "ui/manager_mode/TacticsPanel.gd",
+        "ui/manager_mode/TrainingPanel.gd",
+        "ui/manager_mode/TransfersPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/CareerSerializer.gd": {
+      "class_name": "CareerSerializer",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/ManagerLoader.gd",
+        "shared/PlayerData.gd",
+        "shared/career/BoardState.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/ClubFinances.gd",
+        "shared/career/CompetitionData.gd",
+        "shared/career/ContractData.gd",
+        "shared/career/FixtureData.gd",
+        "shared/career/InboxItem.gd",
+        "shared/career/LeagueTableRow.gd",
+        "shared/career/ManagerCareerProfile.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/RelationshipData.gd",
+        "shared/career/ScoutReport.gd",
+        "shared/career/TrainingSchedule.gd",
+        "shared/career/TransferOffer.gd",
+        "shared/career/WorldEvent.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "autoloads/DataLoader.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/InboxItem.gd",
+        "ui/manager_mode/ManagerCreationScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/CareerThemePalette.gd": {
+      "class_name": "CareerThemePalette",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "ui/manager_mode/CareerTheme.gd"
+      ],
+      "direct_dependents": [
+        "ui/manager_mode/BoardPanel.gd",
+        "ui/manager_mode/CalendarPanel.gd",
+        "ui/manager_mode/CareerTheme.gd",
+        "ui/manager_mode/ContractNegotiationModal.gd",
+        "ui/manager_mode/FinancesPanel.gd",
+        "ui/manager_mode/FixturesPanel.gd",
+        "ui/manager_mode/InboxPanel.gd",
+        "ui/manager_mode/LeaguePanel.gd",
+        "ui/manager_mode/ManagerCreationScreen.gd",
+        "ui/manager_mode/ManagerModeRoot.gd",
+        "ui/manager_mode/OverviewPanel.gd",
+        "ui/manager_mode/ScoutingPanel.gd",
+        "ui/manager_mode/SquadPanel.gd",
+        "ui/manager_mode/StaffPanel.gd",
+        "ui/manager_mode/TacticsPanel.gd",
+        "ui/manager_mode/TrainingPanel.gd",
+        "ui/manager_mode/TransfersPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/ClubFinances.gd": {
+      "class_name": "ClubFinances",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "shared/StaffData.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/ContractData.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/InboxEngine.gd",
+        "ui/manager_mode/FinancesPanel.gd",
+        "ui/manager_mode/ManagerModeRoot.gd",
+        "ui/manager_mode/TransfersPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/CompetitionData.gd": {
+      "class_name": "CompetitionData",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "shared/TeamData.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/FixtureData.gd",
+        "shared/career/LeagueTableRow.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerSerializer.gd",
+        "ui/manager_mode/BoardPanel.gd",
+        "ui/manager_mode/FixturesPanel.gd",
+        "ui/manager_mode/LeaguePanel.gd",
+        "ui/manager_mode/OverviewPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/ContractData.gd": {
+      "class_name": "ContractData",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "shared/PlayerData.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/MoraleEngine.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/ClubFinances.gd",
+        "shared/career/InboxEngine.gd",
+        "shared/career/ManagerCareerProfile.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/TransferMarket.gd",
+        "shared/career/TransferOffer.gd",
+        "ui/manager_mode/ContractNegotiationModal.gd",
+        "ui/manager_mode/FinancesPanel.gd",
+        "ui/manager_mode/SquadPanel.gd",
+        "ui/manager_mode/TransfersPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/FixtureData.gd": {
+      "class_name": "FixtureData",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "shared/career/CareerDate.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/CompetitionData.gd",
+        "ui/manager_mode/CalendarPanel.gd",
+        "ui/manager_mode/FixturesPanel.gd",
+        "ui/manager_mode/LeaguePanel.gd",
+        "ui/manager_mode/ManagerModeRoot.gd",
+        "ui/manager_mode/OverviewPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/InboxEngine.gd": {
+      "class_name": "InboxEngine",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "entities/manager/PressOffice.gd",
+        "shared/ManagerData.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd",
+        "shared/career/BoardState.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/ClubFinances.gd",
+        "shared/career/ContractData.gd",
+        "shared/career/InboxItem.gd",
+        "shared/career/ManagerCareerProfile.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/ScoutReport.gd",
+        "shared/career/TransferMarket.gd",
+        "shared/career/TransferOffer.gd",
+        "shared/career/WorldEvent.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "shared/career/InboxItem.gd",
+        "ui/manager_mode/InboxPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/InboxItem.gd": {
+      "class_name": "InboxItem",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "shared/career/CareerDate.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/InboxEngine.gd",
+        "shared/career/WorldEvent.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/InboxEngine.gd",
+        "shared/career/WorldEvent.gd",
+        "ui/manager_mode/InboxPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/LeagueTableRow.gd": {
+      "class_name": "LeagueTableRow",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/CompetitionData.gd",
+        "shared/career/ScoutingNetwork.gd",
+        "ui/manager_mode/LeaguePanel.gd",
+        "ui/manager_mode/OverviewPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/ManagerCareerProfile.gd": {
+      "class_name": "ManagerCareerProfile",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "entities/manager/ManagerDirector.gd",
+        "entities/manager/PressOffice.gd",
+        "shared/ManagerData.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/ContractData.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/InboxEngine.gd",
+        "ui/manager_mode/ManagerCreationScreen.gd",
+        "ui/manager_mode/StaffPanel.gd",
+        "ui/manager_mode/TacticsPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/MoraleEngine.gd": {
+      "class_name": "MoraleEngine",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "entities/player/HeavyPlayerController.gd",
+        "entities/player/MoodSystem.gd",
+        "entities/player/TrustSystem.gd",
+        "shared/PassUtilityScorer.gd",
+        "shared/PlayerData.gd",
+        "shared/PlayerFactory.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/RelationshipData.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "shared/career/ContractData.gd",
+        "ui/manager_mode/OverviewPanel.gd",
+        "ui/manager_mode/SquadPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/PlayerCareerState.gd": {
+      "class_name": "PlayerCareerState",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "autoloads/MatchStatsTracker.gd",
+        "entities/player/TrustSystem.gd",
+        "shared/PlayerData.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/ContractData.gd",
+        "shared/career/RelationshipData.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/InboxEngine.gd",
+        "shared/career/MoraleEngine.gd",
+        "shared/career/PlayerDevelopmentEngine.gd",
+        "shared/career/ScoutingNetwork.gd",
+        "shared/career/TransferMarket.gd",
+        "shared/career/YouthAcademy.gd",
+        "ui/manager_mode/ContractNegotiationModal.gd",
+        "ui/manager_mode/FinancesPanel.gd",
+        "ui/manager_mode/OverviewPanel.gd",
+        "ui/manager_mode/SquadPanel.gd",
+        "ui/manager_mode/TacticsPanel.gd",
+        "ui/manager_mode/TrainingPanel.gd",
+        "ui/manager_mode/TransfersPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/PlayerDevelopmentEngine.gd": {
+      "class_name": "PlayerDevelopmentEngine",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "shared/PlayerData.gd",
+        "shared/PlayerFactory.gd",
+        "shared/StaffData.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/TrainingSchedule.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "shared/career/TransferMarket.gd",
+        "shared/career/YouthAcademy.gd",
+        "ui/manager_mode/SquadPanel.gd",
+        "ui/manager_mode/TrainingPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/RelationshipData.gd": {
+      "class_name": "RelationshipData",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "entities/player/TrustSystem.gd",
+        "shared/PassUtilityScorer.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "entities/player/TrustSystem.gd",
+        "shared/PlayerFactory.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/MoraleEngine.gd",
+        "shared/career/PlayerCareerState.gd",
+        "ui/manager_mode/SquadPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/ScoutReport.gd": {
+      "class_name": "ScoutReport",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "shared/PlayerData.gd",
+        "shared/StaffData.gd",
+        "shared/career/CareerDate.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/InboxEngine.gd",
+        "shared/career/ScoutingNetwork.gd",
+        "ui/manager_mode/ScoutingPanel.gd",
+        "ui/manager_mode/TransfersPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/ScoutingNetwork.gd": {
+      "class_name": "ScoutingNetwork",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "shared/ManagerData.gd",
+        "shared/PlayerData.gd",
+        "shared/StaffData.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/LeagueTableRow.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/ScoutReport.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "shared/career/YouthAcademy.gd",
+        "ui/manager_mode/OverviewPanel.gd",
+        "ui/manager_mode/ScoutingPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/TrainingSchedule.gd": {
+      "class_name": "TrainingSchedule",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "shared/PlayerData.gd",
+        "shared/StaffData.gd",
+        "shared/career/BoardState.gd",
+        "shared/career/CareerDate.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/PlayerDevelopmentEngine.gd",
+        "ui/manager_mode/CalendarPanel.gd",
+        "ui/manager_mode/StaffPanel.gd",
+        "ui/manager_mode/TrainingPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/TransferMarket.gd": {
+      "class_name": "TransferMarket",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "shared/ManagerData.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/ContractData.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/PlayerDevelopmentEngine.gd",
+        "shared/career/TransferOffer.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "shared/career/InboxEngine.gd",
+        "ui/manager_mode/CareerTheme.gd",
+        "ui/manager_mode/ContractNegotiationModal.gd",
+        "ui/manager_mode/SquadPanel.gd",
+        "ui/manager_mode/TransfersPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/TransferOffer.gd": {
+      "class_name": "TransferOffer",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "shared/career/CareerDate.gd",
+        "shared/career/ContractData.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/InboxEngine.gd",
+        "shared/career/TransferMarket.gd",
+        "ui/manager_mode/ContractNegotiationModal.gd",
+        "ui/manager_mode/TransfersPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/WorldEvent.gd": {
+      "class_name": "WorldEvent",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "Resource",
+      "direct_dependencies": [
+        "autoloads/MatchStatsTracker.gd",
+        "entities/manager/PressOffice.gd",
+        "shared/PlayerData.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/InboxItem.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "autoloads/GameEvents.gd",
+        "autoloads/WorldEventLog.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/InboxEngine.gd",
+        "shared/career/InboxItem.gd",
+        "ui/manager_mode/OverviewPanel.gd",
+        "ui/manager_mode/SquadPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/YouthAcademy.gd": {
+      "class_name": "YouthAcademy",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "shared/NationDatabase.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd",
+        "shared/career/BoardState.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/PlayerDevelopmentEngine.gd",
+        "shared/career/ScoutingNetwork.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -2652,8 +3579,7 @@
       "extends": "Control",
       "direct_dependencies": [
         "autoloads/GameManager.gd",
-        "pitch/PitchScene.gd",
-        "ui/manager/ManagerModeHub.gd"
+        "pitch/PitchScene.gd"
       ],
       "direct_dependents": [],
       "signals_declared": [],
@@ -2673,6 +3599,7 @@
       "direct_dependencies": [
         "autoloads/GameEvents.gd",
         "shared/ManagerData.gd",
+        "shared/NationDatabase.gd",
         "shared/PlayerData.gd",
         "shared/RefereeData.gd",
         "shared/TeamData.gd"
@@ -2705,8 +3632,7 @@
       ],
       "direct_dependents": [
         "pitch/PitchScene.gd",
-        "ui/QuickSimModal.gd",
-        "ui/manager/ManagerModeHub.gd"
+        "ui/QuickSimModal.gd"
       ],
       "signals_declared": [
         "stats_dismissed"
@@ -2757,7 +3683,6 @@
       ],
       "direct_dependents": [
         "ui/KickOffMenu.gd",
-        "ui/manager/ManagerModeHub.gd",
         "ui/pregame/PreGameScreen.gd"
       ],
       "signals_declared": [
@@ -2801,35 +3726,505 @@
       "signals_emitted": [],
       "signals_connected": []
     },
-    "ui/manager/ManagerModeHub.gd": {
-      "class_name": "ManagerModeHub",
+    "ui/manager_mode/BoardPanel.gd": {
+      "class_name": "BoardPanel",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "CareerPanel",
+      "direct_dependencies": [
+        "shared/career/BoardState.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerThemePalette.gd",
+        "shared/career/CompetitionData.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/CareerTheme.gd"
+      ],
+      "direct_dependents": [
+        "ui/manager_mode/ManagerModeRoot.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "pressed"
+      ]
+    },
+    "ui/manager_mode/CalendarPanel.gd": {
+      "class_name": "CalendarPanel",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "CareerPanel",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerThemePalette.gd",
+        "shared/career/FixtureData.gd",
+        "shared/career/TrainingSchedule.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/CareerTheme.gd"
+      ],
+      "direct_dependents": [
+        "ui/manager_mode/ManagerModeRoot.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "pressed"
+      ]
+    },
+    "ui/manager_mode/CareerPanel.gd": {
+      "class_name": "CareerPanel",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerSaveData.gd",
+        "ui/manager_mode/CareerTheme.gd"
+      ],
+      "direct_dependents": [
+        "ui/manager_mode/BoardPanel.gd",
+        "ui/manager_mode/CalendarPanel.gd",
+        "ui/manager_mode/FinancesPanel.gd",
+        "ui/manager_mode/FixturesPanel.gd",
+        "ui/manager_mode/InboxPanel.gd",
+        "ui/manager_mode/LeaguePanel.gd",
+        "ui/manager_mode/ManagerModeRoot.gd",
+        "ui/manager_mode/OverviewPanel.gd",
+        "ui/manager_mode/ScoutingPanel.gd",
+        "ui/manager_mode/SquadPanel.gd",
+        "ui/manager_mode/StaffPanel.gd",
+        "ui/manager_mode/TacticsPanel.gd",
+        "ui/manager_mode/TrainingPanel.gd",
+        "ui/manager_mode/TransfersPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "ui/manager_mode/CareerTheme.gd": {
+      "class_name": "CareerTheme",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "shared/career/CareerThemePalette.gd",
+        "shared/career/TransferMarket.gd"
+      ],
+      "direct_dependents": [
+        "shared/career/CareerThemePalette.gd",
+        "ui/manager_mode/BoardPanel.gd",
+        "ui/manager_mode/CalendarPanel.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/ContractNegotiationModal.gd",
+        "ui/manager_mode/FinancesPanel.gd",
+        "ui/manager_mode/FixturesPanel.gd",
+        "ui/manager_mode/InboxPanel.gd",
+        "ui/manager_mode/LeaguePanel.gd",
+        "ui/manager_mode/ManagerCreationScreen.gd",
+        "ui/manager_mode/ManagerModeRoot.gd",
+        "ui/manager_mode/OverviewPanel.gd",
+        "ui/manager_mode/ScoutingPanel.gd",
+        "ui/manager_mode/SquadPanel.gd",
+        "ui/manager_mode/StaffPanel.gd",
+        "ui/manager_mode/TacticsPanel.gd",
+        "ui/manager_mode/TrainingPanel.gd",
+        "ui/manager_mode/TransfersPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "ui/manager_mode/ContractNegotiationModal.gd": {
+      "class_name": "ContractNegotiationModal",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "Control",
+      "direct_dependencies": [
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/CareerThemePalette.gd",
+        "shared/career/ContractData.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/TransferMarket.gd",
+        "shared/career/TransferOffer.gd",
+        "ui/manager_mode/CareerTheme.gd"
+      ],
+      "direct_dependents": [
+        "ui/manager_mode/SquadPanel.gd",
+        "ui/manager_mode/TransfersPanel.gd"
+      ],
+      "signals_declared": [
+        "negotiation_finished"
+      ],
+      "signals_emitted": [
+        "negotiation_finished"
+      ],
+      "signals_connected": [
+        "pressed"
+      ]
+    },
+    "ui/manager_mode/FinancesPanel.gd": {
+      "class_name": "FinancesPanel",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "CareerPanel",
+      "direct_dependencies": [
+        "shared/PlayerData.gd",
+        "shared/StaffData.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerThemePalette.gd",
+        "shared/career/ClubFinances.gd",
+        "shared/career/ContractData.gd",
+        "shared/career/PlayerCareerState.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/CareerTheme.gd"
+      ],
+      "direct_dependents": [
+        "ui/manager_mode/ManagerModeRoot.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "pressed"
+      ]
+    },
+    "ui/manager_mode/FixturesPanel.gd": {
+      "class_name": "FixturesPanel",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "CareerPanel",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerThemePalette.gd",
+        "shared/career/CompetitionData.gd",
+        "shared/career/FixtureData.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/CareerTheme.gd"
+      ],
+      "direct_dependents": [
+        "ui/manager_mode/ManagerModeRoot.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "ui/manager_mode/InboxPanel.gd": {
+      "class_name": "InboxPanel",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "CareerPanel",
+      "direct_dependencies": [
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerThemePalette.gd",
+        "shared/career/InboxEngine.gd",
+        "shared/career/InboxItem.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/CareerTheme.gd"
+      ],
+      "direct_dependents": [
+        "ui/manager_mode/ManagerModeRoot.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "pressed"
+      ]
+    },
+    "ui/manager_mode/LeaguePanel.gd": {
+      "class_name": "LeaguePanel",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "CareerPanel",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerThemePalette.gd",
+        "shared/career/CompetitionData.gd",
+        "shared/career/FixtureData.gd",
+        "shared/career/LeagueTableRow.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/CareerTheme.gd"
+      ],
+      "direct_dependents": [
+        "ui/manager_mode/ManagerModeRoot.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "pressed"
+      ]
+    },
+    "ui/manager_mode/ManagerCreationScreen.gd": {
+      "class_name": null,
       "layer": 5,
       "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "Control",
       "direct_dependencies": [
         "autoloads/DataLoader.gd",
+        "shared/TeamData.gd",
+        "shared/career/BoardState.gd",
+        "shared/career/CareerSerializer.gd",
+        "shared/career/CareerThemePalette.gd",
+        "shared/career/ManagerCareerProfile.gd",
+        "ui/manager_mode/CareerTheme.gd",
+        "ui/manager_mode/TacticsPanel.gd"
+      ],
+      "direct_dependents": [],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "pressed",
+        "text_changed"
+      ]
+    },
+    "ui/manager_mode/ManagerModeRoot.gd": {
+      "class_name": null,
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "Control",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/GameEvents.gd",
         "autoloads/GameManager.gd",
-        "autoloads/ManagerLoader.gd",
-        "autoloads/RefereeLoader.gd",
         "pitch/PitchScene.gd",
-        "shared/CareerProgressionEngine.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerThemePalette.gd",
+        "shared/career/ClubFinances.gd",
+        "shared/career/FixtureData.gd",
+        "ui/manager_mode/BoardPanel.gd",
+        "ui/manager_mode/CalendarPanel.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/CareerTheme.gd",
+        "ui/manager_mode/FinancesPanel.gd",
+        "ui/manager_mode/FixturesPanel.gd",
+        "ui/manager_mode/InboxPanel.gd",
+        "ui/manager_mode/LeaguePanel.gd",
+        "ui/manager_mode/OverviewPanel.gd",
+        "ui/manager_mode/ScoutingPanel.gd",
+        "ui/manager_mode/SquadPanel.gd",
+        "ui/manager_mode/StaffPanel.gd",
+        "ui/manager_mode/TacticsPanel.gd",
+        "ui/manager_mode/TrainingPanel.gd",
+        "ui/manager_mode/TransfersPanel.gd"
+      ],
+      "direct_dependents": [],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "career_advance_halted",
+        "career_inbox_changed",
+        "career_manager_sacked",
+        "pressed"
+      ]
+    },
+    "ui/manager_mode/OverviewPanel.gd": {
+      "class_name": "OverviewPanel",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "CareerPanel",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/ManagerLoader.gd",
         "shared/ManagerData.gd",
         "shared/PlayerData.gd",
-        "shared/QuickSimEngine.gd",
-        "shared/RefereeData.gd",
+        "shared/StaffData.gd",
         "shared/TeamData.gd",
-        "ui/MatchStatsUI.gd",
-        "ui/QuickSimModal.gd"
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerThemePalette.gd",
+        "shared/career/CompetitionData.gd",
+        "shared/career/FixtureData.gd",
+        "shared/career/LeagueTableRow.gd",
+        "shared/career/MoraleEngine.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/ScoutingNetwork.gd",
+        "shared/career/WorldEvent.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/CareerTheme.gd"
       ],
       "direct_dependents": [
-        "ui/MainMenu.gd"
+        "ui/manager_mode/ManagerModeRoot.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "ui/manager_mode/ScoutingPanel.gd": {
+      "class_name": "ScoutingPanel",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "CareerPanel",
+      "direct_dependencies": [
+        "shared/StaffData.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerThemePalette.gd",
+        "shared/career/ScoutReport.gd",
+        "shared/career/ScoutingNetwork.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/CareerTheme.gd"
+      ],
+      "direct_dependents": [
+        "ui/manager_mode/ManagerModeRoot.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
       "signals_connected": [
-        "item_selected",
-        "match_completed",
-        "modal_closed",
+        "item_selected"
+      ]
+    },
+    "ui/manager_mode/SquadPanel.gd": {
+      "class_name": "SquadPanel",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "CareerPanel",
+      "direct_dependencies": [
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerThemePalette.gd",
+        "shared/career/ContractData.gd",
+        "shared/career/MoraleEngine.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/PlayerDevelopmentEngine.gd",
+        "shared/career/RelationshipData.gd",
+        "shared/career/TransferMarket.gd",
+        "shared/career/WorldEvent.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/CareerTheme.gd",
+        "ui/manager_mode/ContractNegotiationModal.gd"
+      ],
+      "direct_dependents": [
+        "ui/manager_mode/ManagerModeRoot.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "negotiation_finished",
+        "pressed"
+      ]
+    },
+    "ui/manager_mode/StaffPanel.gd": {
+      "class_name": "StaffPanel",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "CareerPanel",
+      "direct_dependencies": [
+        "shared/StaffData.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerThemePalette.gd",
+        "shared/career/ManagerCareerProfile.gd",
+        "shared/career/TrainingSchedule.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/CareerTheme.gd"
+      ],
+      "direct_dependents": [
+        "ui/manager_mode/ManagerModeRoot.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "pressed"
+      ]
+    },
+    "ui/manager_mode/TacticsPanel.gd": {
+      "class_name": "TacticsPanel",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "CareerPanel",
+      "direct_dependencies": [
+        "autoloads/GameEvents.gd",
+        "autoloads/GameManager.gd",
+        "entities/manager/ManagerDirector.gd",
+        "shared/FormationLibrary.gd",
+        "shared/ManagerData.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd",
+        "shared/TeamManagementData.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerThemePalette.gd",
+        "shared/career/ManagerCareerProfile.gd",
+        "shared/career/PlayerCareerState.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/CareerTheme.gd"
+      ],
+      "direct_dependents": [
+        "ui/manager_mode/ManagerCreationScreen.gd",
+        "ui/manager_mode/ManagerModeRoot.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "formation_changed",
+        "lineup_changed"
+      ],
+      "signals_connected": [
+        "drag_ended",
+        "pressed",
+        "value_changed"
+      ]
+    },
+    "ui/manager_mode/TrainingPanel.gd": {
+      "class_name": "TrainingPanel",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "CareerPanel",
+      "direct_dependencies": [
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerThemePalette.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/PlayerDevelopmentEngine.gd",
+        "shared/career/TrainingSchedule.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/CareerTheme.gd"
+      ],
+      "direct_dependents": [
+        "ui/manager_mode/ManagerModeRoot.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "pressed"
+      ]
+    },
+    "ui/manager_mode/TransfersPanel.gd": {
+      "class_name": "TransfersPanel",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "CareerPanel",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CareerThemePalette.gd",
+        "shared/career/ClubFinances.gd",
+        "shared/career/ContractData.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/ScoutReport.gd",
+        "shared/career/TransferMarket.gd",
+        "shared/career/TransferOffer.gd",
+        "ui/manager_mode/CareerPanel.gd",
+        "ui/manager_mode/CareerTheme.gd",
+        "ui/manager_mode/ContractNegotiationModal.gd"
+      ],
+      "direct_dependents": [
+        "ui/manager_mode/ManagerModeRoot.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": [
+        "negotiation_finished",
         "pressed"
       ]
     },
@@ -2874,6 +4269,7 @@
         "autoloads/RefereeLoader.gd",
         "pitch/PitchScene.gd",
         "shared/ManagerData.gd",
+        "shared/NationDatabase.gd",
         "shared/PlayerData.gd",
         "shared/RefereeData.gd",
         "shared/TeamData.gd",
@@ -2883,6 +4279,7 @@
       ],
       "direct_dependents": [
         "autoloads/GameEvents.gd",
+        "autoloads/RefereeLoader.gd",
         "pitch/PitchScene.gd",
         "ui/FormationDiagram.gd"
       ],
@@ -2905,6 +4302,7 @@
         "entities/player/HeavyPlayerController.gd",
         "shared/FormationLibrary.gd",
         "shared/FormationRegistry.gd",
+        "shared/NationDatabase.gd",
         "shared/PlayerData.gd",
         "shared/PlayerRoleConfig.gd",
         "shared/TeamManagementData.gd",

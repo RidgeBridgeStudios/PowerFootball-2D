@@ -39,5 +39,56 @@
         "timeout": 90
       }
     ]
+  },
+  "session-bootstrap": {
+    "enabled": true,
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+        "timeout": 30
+      }
+    ],
+    "session_start": [
+      {
+        "matcher": "*",
+        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+        "timeout": 30
+      }
+    ]
+  },
+  "task-intake-routing": {
+    "enabled": true,
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+        "timeout": 30
+      }
+    ],
+    "user_request": [
+      {
+        "matcher": "*",
+        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+        "timeout": 30
+      }
+    ]
+  },
+  "feature-implementation": {
+    "enabled": true,
+    "PreInvocation": [
+      {
+        "type": "command",
+        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+        "timeout": 30
+      }
+    ],
+    "feature_request": [
+      {
+        "matcher": "*",
+        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+        "timeout": 30
+      }
+    ]
   }
 }

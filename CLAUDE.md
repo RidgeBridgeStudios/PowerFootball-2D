@@ -1,61 +1,97 @@
-# CLAUDE.md — Agent Entry Point
+# CLAUDE.md — Claude Code Agent Entry Point
 
-**Engine:** Godot 4.7-stable · GDScript 2.0 ONLY · Strictly Typed  
-**Core Invariants:** See @./docs/CORE_INVARIANTS.md (Canonical single source of truth)  
-**Verify:** `python3 tools/verify_gate.py --fast` (10 checks; 0 errors required)  
-`gdcheck.py` alone is NOT sufficient — it treats autoloads as opaque types and cannot
-see a call to a method that does not exist. `tools/lint_xref.py` in the gate catches that.  
+**Canonical Policy Notice:**
+`AGENTS.md` is the canonical shared repository policy and architectural guide for all AI agents.
+Before implementing any feature or modifying code, review and adhere to **[AGENTS.md](AGENTS.md)**.
 
-## READ FIRST
+---
 
-Before implementing any feature:
-1. @./POWERFOOTBALL_MASTER_VISION.md — Vision, roadmap, deep systems, agent protocol
-2. @./docs/CORE_INVARIANTS.md — Canonical engine lock, simulation stack, and critical file contracts
-3. @./docs/course_implementation_specification.md — Course-derived build phases, FSM blueprints, physics formulas, data models, gotchas & agent protocol (READ-ONLY)
-4. @./ROADMAP.md — Tactical `[ ]`/`[x]` checklist
-5. @.claude/rules/godot-47-core.md — Engine contracts
-6. @.claude/rules/soccer-physics.md — Physics invariants
-7. @.claude/rules/ai-architect.md — AI & spatial invariants
-8. @.claude/rules/career-mode.md — Career layer (Layer 4) contracts
+## 1. Primary Reading Order
 
-## Architectural Choke Points
+1. **@AGENTS.md** — Canonical shared policy: engine lock, 5-layer simulation stack, architectural choke points, Graphify-first navigation protocol, change-impact tiers, and conditional documentation policy.
+2. **@docs/GRAPHIFY_LIFECYCLE.md** — Canonical Graphify lifecycle, git hooks, update mechanics, and enforcement matrix.
+3. **@POWERFOOTBALL_MASTER_VISION.md** — Master design vision, 5-layer simulation stack, systems design, and North Star.
+4. **@docs/CORE_INVARIANTS.md** — Canonical engine lock, simulation stack, and critical file contracts.
+5. **@docs/course_implementation_specification.md** — Course-derived reference specification (READ-ONLY): FSMs, formulas, gotchas.
+6. **@ROADMAP.md** — Tactical `[ ]`/`[x]` feature checklist.
+7. **@.claude/rules/** — Path-specific rulebooks automatically evaluated by Claude Code (core contracts, physics, AI architecture, career mode, context hygiene, antipatterns, and Graphify).
 
-- **Canonical Invariants:** All engine, spatial, and simulation laws are consolidated in `docs/CORE_INVARIANTS.md`.
-- **Signal Bus:** ALL inter-system events → `GameEvents.gd` autoload.
-- **Spatial Cache:** ALL NPC position reads → `MatchWorldModel.gd`.
-- **Collision:** `CharacterBody2D` MUST NOT mask Layer 3 (Ball).
-- **Brain Contract:** `PlayerBrain` writes ONLY to `player.movement_intent` and `player.wants_sprint`. Never touches velocity or acceleration.
-- **Career State:** `CareerManager` owns the ONLY live `CareerSaveData`; the league itself stays owned by `DataLoader`. See @.claude/rules/career-mode.md.
-- **Career → Match Bridge:** `PlayerFactory.apply()` is the single choke point where career morale seeds `MoodSystem` and career trust seeds `TrustSystem`.
+---
 
-## Boot Order (project.godot)
+## 2. Graphify-First Navigation Protocol
 
-MatchWorldModel → GameEvents → GameManager → MatchStatsTracker → MatchTelemetryLogger → DataLoader → RefereeLoader → ManagerLoader → StaffLoader → WorldEventLog → CareerManager → InputHelper
+This repository maintains an active Graphify knowledge graph (`graphify-out/graph.json`).
 
-`WorldEventLog` and `CareerManager` must stay AFTER the loaders they read
-(`DataLoader`, `ManagerLoader`, `StaffLoader`, `RefereeLoader`), and
-`WorldEventLog` before `CareerManager`, which binds it on career start.
+### Mandatory Pre-Exploration Query
+- **Before Broad Source Exploration:** Whenever investigating functionality, architectural dependencies, or cross-layer data flows, query Graphify first:
+  - CLI: `graphify query "<question>"`, `graphify path "<A>" "<B>"`, `graphify explain "<concept>"`.
+  - MCP: `query_graph`, `shortest_path`, `get_node`, `get_neighbors`, `god_nodes`.
+- **Prohibited Anti-Patterns:**
+  - **NO Blind Ripgrep/Grep:** Do not run recursive grep across entire directories (`grep -r ...`) without a scoped target path.
+  - **NO Directory Orientation Dumps:** Do not `cat` or read all files in a folder (`autoloads/*.gd`, `shared/*.gd`) to "orient" yourself.
 
-## Process Priority
+### Mandatory Pre-Edit Blast Radius (Tier 2 & Tier 3)
+- **Before Tier 2 (Cross-Module) and Tier 3 (Core Simulation) Edits:**
+  - Run dependency blast radius:
+    ```bash
+    python tools/dump_dep_graph.py --blast-radius <target_file>
+    ```
+  - Query Graphify neighbors/path (`get_neighbors` / `graphify explain "<target>"`) to map dependent modules and affected simulation layers prior to touching code.
 
-MatchWorldModel (-100) → PlayerBrain (0) → HeavyPlayerController (100)
+> [!NOTE]
+> **Scope Clarification:** Graphify is NOT queried for every conversational prompt. Conversational pleasantries, simple code formatting, or localized answers from existing context do not invoke Graphify. It is required for codebase exploration, cross-module relationship discovery, and pre-edit blast radius checks.
 
-## Squad Config
+---
 
-22 players total (11 per team), spawned declaratively as children of `$Players` in `pitch/PitchScene.tscn`.
+## 3. Non-Destructive Validation Checklist
 
-## Shared Agent Memory
+Follow this 5-step checklist before concluding any turn or proposing changes:
 
-- Record runtime discoveries, edge cases, and proposed rules in `AGENTS_ERRATA.md`.
-- `AGENTS_ERRATA.md` takes priority on recent decisions and is promoted to `.claude/rules/` and `docs/CORE_INVARIANTS.md` via `/sync-rules`.
+1. **Format & Static Lint (Fast Gate):**
+   ```bash
+   python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast
+   ```
+   All 10 linters must pass with 0 errors (`gdcheck`, `lint_invariants`, `lint_scope`, `lint_type_comparisons`, `lint_stringnames`, `lint_shadowing`, `lint_allocations`, `lint_xref`, `tscn_linter`, `verify_db`).
+2. **Targeted Subsystem Test / Smoke Check:**
+   Execute the relevant domain check based on touched files:
+   - Kinematics/solvers: `python tools/fuzz_solvers.py --iterations=10000`
+   - Formations/tactics: `python tools/fuzz_formations.py --iterations=5000`
+   - Match simulation: `python tools/eval_simulation.py --duration=10`
+   - Determinism: `python tools/replay_test.py`
+3. **Diff Review & Invariant Audit:**
+   Inspect `git diff` to confirm strict typing on all variables/signatures, zero hot-path allocations, no object-to-string comparisons, and no accidental changes.
+4. **Graphify Refresh:**
+   Synchronize graph topology via `graphify update .` or run the full pre-turn battery:
+   ```bash
+   python tools/verify_gate.py --full || py -3 tools/verify_gate.py --full
+   ```
+   (Step 17 runs `graphify update .` automatically).
+5. **Concise Final Evidence:**
+   Report exact verification results: linters passed, execution duration, and zero invariant violations.
 
-## Context Budget — Claude Code Sessions
+---
+
+## 4. Context Budget & Session Discipline (Claude Code)
 
 | Range | State | Action |
-|-------|-------|--------|
-| 0–50% | OPTIMAL | Full architecture work. Multi-layer features. Reference files inline. |
-| 50–70% | MONITOR | Verify outputs against `docs/CORE_INVARIANTS.md` and `.claude/rules/`. Use grep for spot checks. |
-| 70–85% | DANGER | Run `/compact` to compress prior messages. Do not start new features. |
-| 85%+ | CRITICAL | Run `/compact` or `/clear` before next task. Major subsystem switches only. |
+|---|---|---|
+| **0–50%** | **OPTIMAL** | Full architecture work. Multi-layer features. Reference files inline. |
+| **50–70%** | **MONITOR** | Verify outputs against `docs/CORE_INVARIANTS.md` and `.claude/rules/`. Use targeted slices for spot checks. |
+| **70–85%** | **DANGER** | Run `/compact` to compress prior messages. Do not start new multi-file features. |
+| **85%+** | **CRITICAL** | Run `/compact` or `/clear` before next task. Major subsystem switches only. |
 
-Switch major subsystems (physics ↔ AI, match ↔ career) with `/clear`. CLAUDE.md, CORE_INVARIANTS.md, and `.claude/rules/` survive both compaction and clear.
+### Subsystem Switching
+Switch major subsystems (physics ↔ AI, match ↔ career) with `/clear`.
+`CLAUDE.md`, `AGENTS.md`, `docs/CORE_INVARIANTS.md`, `docs/GRAPHIFY_LIFECYCLE.md`, and `.claude/rules/` survive both compaction and clear.
+
+---
+
+## 5. Claude Code Hooks & Permissions
+
+Configured in `.claude/settings.json`:
+- **`PreToolUse` (Edit|Write):** Automatically blocks writes to sensitive files (`.env`, `.git/`, `addons/gut/`).
+- **`PreToolUse` (Bash|Grep):** Executes `graphify hook-guard search` — nudges the agent to query Graphify instead of running broad ripgrep searches.
+- **`PreToolUse` (Read|Glob):** Executes `graphify hook-guard read` — nudges the agent to use Graphify navigation before reading broad source files.
+- **`Stop` Hook:** Runs GUT headless suite (if available) or static `tools/gdcheck.py` fallback to prevent stopping with broken syntax.
+- **Git Hooks:** Detached background rebuilds via `.git/hooks/post-commit` and `.git/hooks/post-checkout` (bypass via `GRAPHIFY_SKIP_HOOK=1`). Union merge driver in `.git/config` for `graph.json`.
+

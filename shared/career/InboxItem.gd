@@ -34,15 +34,16 @@ enum Category {
 	LEAGUE = 9,
 	YOUTH = 10,
 	FINANCE = 11,
+	MATCH = 12,
 }
 
 const CATEGORY_NAMES: Array[String] = [
 	"Board", "Media", "Player", "Staff", "Transfer", "Contract",
-	"Fixture", "Training", "Scouting", "League", "Youth", "Finance"
+	"Fixture", "Training", "Scouting", "League", "Youth", "Finance", "Match"
 ]
 
 const CATEGORY_ICONS: Array[String] = [
-	"🏛", "🎤", "👤", "🧑‍🏫", "🔁", "📝", "📅", "🏃", "🔍", "🏆", "🌱", "💷"
+	"🏛", "🎤", "👤", "🧑‍🏫", "🔁", "📝", "📅", "🏃", "🔍", "🏆", "🌱", "💷", "⚽"
 ]
 
 
