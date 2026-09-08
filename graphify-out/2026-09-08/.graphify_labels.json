@@ -9,7 +9,7 @@
   "7": "Team Flag Textures",
   "8": "Update",
   "9": "Vector2",
-  "10": "Career Mode",
+  "10": "Claude",
   "11": "Json Schema",
   "12": "gdcheck.py",
   "13": "Core Invariants",
@@ -128,5 +128,11 @@
   "126": "compact_errata.py",
   "127": "dump_api.py",
   "128": "Workflow: cross-system-feature",
-  "129": "sync_rules.py"
+  "129": "sync_rules.py",
+  "130": "Workflow: bug-investigation",
+  "131": "Workflow: data-database",
+  "132": "Workflow: feature-implementation",
+  "133": "Workflow: performance-work",
+  "134": "Workflow: session-bootstrap",
+  "135": "Workflow: task-intake-routing"
 }

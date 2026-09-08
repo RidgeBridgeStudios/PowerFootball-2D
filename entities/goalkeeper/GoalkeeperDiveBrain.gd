@@ -69,7 +69,10 @@ func decide_dive(
 	var player_data: PlayerData = keeper.get_meta(&"player_data", null) as PlayerData
 	if player_data != null:
 		reflexes = player_data.reflexes
-	var error_chance: float = clampf(1.0 - reflexes, 0.05, 0.60)
+	# Calibration: ceiling lowered from 0.60 so an unscreened shot is reliably
+	# held or parried even by a weak-reflex keeper; the floor stays low enough
+	# that an elite shot-stopper still almost never goes the wrong way.
+	var error_chance: float = clampf(1.0 - reflexes, 0.05, 0.50)
 	if _rng.randf() < error_chance:
 		raw_dir.y = -raw_dir.y
 

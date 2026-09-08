@@ -55,10 +55,14 @@ class_name PassUtilityScorer
 extends RefCounted
 
 ## --- Tunable weights — edit these four to retune passing behaviour. ---
+## Calibration: pressure raised / advancement lowered slightly so a marked
+## receiver is penalised harder relative to pure forward progress, biasing
+## the whole team toward retaining possession over forcing risky vertical
+## balls into a congested channel.
 const WEIGHT_DISTANCE: float = 0.20
-const WEIGHT_ANGLE: float = 0.20
-const WEIGHT_PRESSURE: float = 0.35
-const WEIGHT_ADVANCEMENT: float = 0.25
+const WEIGHT_ANGLE: float = 0.18
+const WEIGHT_PRESSURE: float = 0.38
+const WEIGHT_ADVANCEMENT: float = 0.24
 
 ## Passing distance (px) this scorer treats as ideal — short enough to be
 ## reliably on target, long enough to actually progress play. Distance utility
@@ -80,7 +84,10 @@ const RECEIVER_OPEN_RADIUS: float = 160.0
 ## same-amount transfer (see _weighted_total()), so WEIGHT_PRESSURE +
 ## WEIGHT_ADVANCEMENT stays constant regardless of pressure — only the split
 ## between "safe" and "ambitious" moves.
-const PRESSURE_SAFETY_SHIFT: float = 0.6
+## Calibration: raised from 0.6 so a passer under heavy press swings further
+## toward the safe/open outlet, cutting down on forced blind forward balls
+## into a packed channel.
+const PRESSURE_SAFETY_SHIFT: float = 0.75
 
 
 ## Debug-inspectable breakdown of one candidate's score. Only ever built by

@@ -933,19 +933,25 @@ func _score_dribble(ctx: UtilityContext) -> float:
 ## Score for attempting a shot on goal.
 ## Only legal when the player owns the ball and is within shooting range.
 ## Aggression drives the base desire; proximity and pressure add urgency.
+## Calibration: range gate tightened (360 -> 320) and base/proximity/in-box
+## coefficients lowered so shooting is no longer the reflex option any time a
+## player is loosely in range — this was producing runaway scoring (arcade
+## pinball) instead of believable buildup-then-strike football. Shots now have
+## to be genuinely earned by proximity/aggression rather than winning the
+## utility contest by default against a comparable Pass score.
 func _score_shoot(ctx: UtilityContext) -> float:
 	if not ctx.is_possessor:
 		return 0.0
-	if ctx.dist_to_goal > 360.0:
+	if ctx.dist_to_goal > 320.0:
 		return 0.0
-	var base: float = 0.40 + ctx.eff_aggression * 0.45
+	var base: float = 0.28 + ctx.eff_aggression * 0.35
 	# The closer to goal, the harder the shot is to ignore.
-	var prox_bonus: float = clampf(1.0 - ctx.dist_to_goal / 360.0, 0.0, 1.0) * 0.35
+	var prox_bonus: float = clampf(1.0 - ctx.dist_to_goal / 320.0, 0.0, 1.0) * 0.30
 	# Under pressure, get the shot off before being tackled.
 	var pressure_urgency: float = ctx.pressure * ctx.eff_aggression * 0.15
-	# 1-on-1 / In-box finishing bonus: inside 260px with goal in sight
-	if ctx.dist_to_goal < 260.0:
-		base += 0.20
+	# 1-on-1 / In-box finishing bonus: inside 240px with goal in sight
+	if ctx.dist_to_goal < 240.0:
+		base += 0.15
 	return clampf(base + prox_bonus + pressure_urgency, 0.0, 1.0)
 
 
