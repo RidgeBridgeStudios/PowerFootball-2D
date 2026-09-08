@@ -22,10 +22,10 @@ Core football mechanics that must work before anything else.
 
 Make players feel like individuals with relationships and hidden depth.
 
-- [ ] Player trait bitmask on PlayerData
-- [ ] Trait effects wired into existing systems
-- [ ] overall_rating and reputation derived fields
-- [ ] Star-marking utility scorer
+- [x] Player trait bitmask on PlayerData (13 flags, `shared/PlayerData.gd`; data-only — see below)
+- [ ] Trait effects wired into existing systems (bitmask exists but only `PressureImmune` has a live consumer; full lever table in `docs/SOCIAL_SIMULATION_ARCHITECTURE.md` §1)
+- [x] overall_rating and reputation derived fields (`PlayerData.calculate_overall_rating()`, `player_reputation` — already feed transfer value; not yet read by any AI behavior)
+- [ ] Star-marking utility scorer (full spec in `docs/SOCIAL_SIMULATION_ARCHITECTURE.md` §4)
 - [x] Relationship trust graph (`RelationshipData`, seeded into TrustSystem at kickoff)
 - [x] Trust multiplier on pass utility
 - [x] Trust decay/gain events
