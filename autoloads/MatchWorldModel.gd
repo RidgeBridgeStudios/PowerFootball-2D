@@ -142,7 +142,9 @@ const LINE_OFFSET_PRESSED: float = 60.0
 ## How fast the line glides toward its target, world-px/sec. Keeps the back
 ## four moving as a smooth wave rather than snapping every time the ball
 ## twitches.
-const LINE_DEPTH_LERP_SPEED: float = 220.0
+## Calibration: eased from 220 -> 190 so a turnover's line-depth swing damps
+## into a physical jog rather than a frantic snap-back warp.
+const LINE_DEPTH_LERP_SPEED: float = 190.0
 
 ## Per-team [TEAM_A, TEAM_B] defensive line depth, world-space X. Read by
 ## PlayerBrain via MatchWorldModel.instance.defensive_line_x[team].

@@ -23,9 +23,9 @@ Core football mechanics that must work before anything else.
 Make players feel like individuals with relationships and hidden depth.
 
 - [x] Player trait bitmask on PlayerData (64-bit `@export_flags` on `PlayerData.traits`, 13 blue/red traits)
-- [x] Trait effects wired into existing systems (11/13 traits wired across MoraleEngine, PlayerDevelopmentEngine, TrainingSchedule, ScoutingNetwork, MatchReferee, InboxEngine, CareerManager, ManagerDirector, PressOffice; DeepRunner/WallSplitter remain match-AI-only and deliberately deferred — see POWERFOOTBALL_MASTER_VISION.md Part V)
+- [x] Trait effects wired into existing systems (11/13 traits wired across MoraleEngine, PlayerDevelopmentEngine, TrainingSchedule, ScoutingNetwork, MatchReferee, InboxEngine, CareerManager, ManagerDirector, PressOffice; DeepRunner/WallSplitter remain match-AI-only and deliberately deferred — see `docs/SOCIAL_SIMULATION_ARCHITECTURE.md` §1 and POWERFOOTBALL_MASTER_VISION.md Part V)
 - [x] overall_rating and reputation derived fields (`PlayerData.calculate_overall_rating()`; `player_reputation` now drifts from match performance via `MoraleEngine.apply_reputation_drift()`)
-- [ ] Star-marking utility scorer
+- [ ] Star-marking utility scorer (full spec in `docs/SOCIAL_SIMULATION_ARCHITECTURE.md` §4)
 - [x] Relationship trust graph (`RelationshipData`, seeded into TrustSystem at kickoff)
 - [x] Trust multiplier on pass utility
 - [x] Trust decay/gain events

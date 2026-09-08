@@ -71,8 +71,8 @@
 
 **Exported Properties:**
 - `@export var gravity: float = 580.0`
-- `@export var pitch_friction: float = 0.90`
-- `@export var air_resistance: float = 0.08`
+- `@export var pitch_friction: float = 0.94`
+- `@export var air_resistance: float = 0.10`
 - `@export var surface_wetness: float = 0.0`
 - `@export var restitution: float = 0.68`
 - `@export var bounce_threshold: float = 40.0`
@@ -1878,7 +1878,7 @@
 - `const CARRIER_PRESSURE_RADIUS: float = 180.0`
 - `const LINE_OFFSET_DROPPED: float = 150.0`
 - `const LINE_OFFSET_PRESSED: float = 60.0`
-- `const LINE_DEPTH_LERP_SPEED: float = 220.0`
+- `const LINE_DEPTH_LERP_SPEED: float = 190.0`
 - `const CELL_SIZE: float = 160.0`
 - `const INV_CELL_SIZE: float = 1.0 / CELL_SIZE`
 - `const GRID_WIDTH: int = 24`
@@ -2258,13 +2258,13 @@
 
 **Constants:**
 - `const WEIGHT_DISTANCE: float = 0.20`
-- `const WEIGHT_ANGLE: float = 0.20`
-- `const WEIGHT_PRESSURE: float = 0.35`
-- `const WEIGHT_ADVANCEMENT: float = 0.25`
+- `const WEIGHT_ANGLE: float = 0.18`
+- `const WEIGHT_PRESSURE: float = 0.38`
+- `const WEIGHT_ADVANCEMENT: float = 0.24`
 - `const PREFERRED_DISTANCE: float = 220.0`
 - `const MAX_USEFUL_DISTANCE: float = 520.0`
 - `const RECEIVER_OPEN_RADIUS: float = 160.0`
-- `const PRESSURE_SAFETY_SHIFT: float = 0.6`
+- `const PRESSURE_SAFETY_SHIFT: float = 0.75`
 
 **Public Methods:**
 - `static func score_pass( distance: float, passer_facing_dot: float, forward_dot: float, receiver_open_dist: float, passer_pressure: float, w_dist: float = WEIGHT_DISTANCE, w_angle: float = WEIGHT_ANGLE, w_press: float = WEIGHT_PRESSURE, w_adv: float = WEIGHT_ADVANCEMENT, xt_value: float = -1.0 ) -> float`

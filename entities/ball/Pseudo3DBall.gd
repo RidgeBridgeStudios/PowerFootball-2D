@@ -39,9 +39,14 @@ signal possession_changed(new_possessor: Node2D)
 ## Pixels per second squared pulling the ball back to the turf.
 @export var gravity: float = 580.0
 ## Ground drag coefficient, applied per second while rolling.
-@export var pitch_friction: float = 0.90
+## Calibration: raised from 0.90 so a low driven pass sheds pace naturally
+## over turf (206 px/s^2 total decel incl. REST_DRAG_FLAT) instead of gliding
+## on ice, opening a genuine window for a covering midfielder to intercept.
+@export var pitch_friction: float = 0.94
 ## Air drag coefficient, applied per second while airborne.
-@export var air_resistance: float = 0.08
+## Calibration: raised from 0.08 so lofted balls settle into a believable
+## descending arc rather than carrying at near-constant speed.
+@export var air_resistance: float = 0.10
 ## 0 = dry, 1 = soaked. Scales the rolling friction coefficient down.
 @export var surface_wetness: float = 0.0
 ## Bounce elasticity. 0.68 gives a lively but not rubbery ball.

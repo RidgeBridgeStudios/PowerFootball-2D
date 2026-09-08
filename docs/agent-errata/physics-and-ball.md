@@ -13,6 +13,7 @@ This page documents physical interaction bugs, dribble magnet overshoot oscillat
 - [bicycle-kick-dominates-ambiguous-facing](#bicycle-kick-dominates-ambiguous-facing)
 - [dribble-claim-ignores-existing-possessor-dual-driver-jitter](#dribble-claim-ignores-existing-possessor-dual-driver-jitter)
 - [verify-external-agent-prompts-against-source-before-executing](#verify-external-agent-prompts-against-source-before-executing)
+- [eval-simulation-harness-was-decoupled-from-gdscript-tuning](#eval-simulation-harness-was-decoupled-from-gdscript-tuning)
 
 ---
 
@@ -308,6 +309,71 @@ This page documents physical interaction bugs, dribble magnet overshoot oscillat
       file — verify_gate.py --fast (gdcheck + all lints + tscn_linter +
       verify_db) passes clean.
     promotion_target: .claude/rules/ai-architect.md
+    status: pending
+```
+
+## eval-simulation-harness-was-decoupled-from-gdscript-tuning
+
+```yaml
+- id: eval-simulation-harness-was-decoupled-from-gdscript-tuning
+    discovered_date: 2026-09-08
+    discovered_by: Claude
+    category: tooling
+    target_files:
+      - tools/eval_simulation.py
+    invariant: >
+      tools/eval_simulation.py's AnalyticalSimulationHarness (used whenever no
+      godot binary is on PATH — i.e. every session in this container) is a
+      STANDALONE Python model. It does not import or read any .gd file, so
+      retuning Pseudo3DBall/PlayerBrain/PassUtilityScorer/FormationAnchorMath
+      constants has ZERO effect on its telemetry unless the harness's own
+      hand-mirrored REAL_*/BALL_*/PLAYER_* constants (top of the file) are
+      updated in the same change. Before this pass, the harness's kick model
+      also had no shot-range gate, no defender contest, and no goalkeeper
+      save chance at all — EVERY touch by EVERY player, from ANY position on
+      the pitch, was booted directly at the opponent goal, which was the
+      actual source of the "5 goals in 60s" runaway-scoring complaint. The
+      GDScript AI it was meant to approximate was not nearly that reckless —
+      the harness itself was the toy that didn't reflect it.
+      Fixed this pass: _resolve_shot()/_resolve_pass() now gate on a shot-
+      range check (mirrors PlayerBrain._score_shoot, 320 real px), resolve a
+      defender block / off-target / goalkeeper reaction-time save chance
+      before crediting a goal, and a pass resolves against receiver openness
+      (mirrors PassUtilityScorer.RECEIVER_OPEN_RADIUS) with a genuine
+      turnover on failure (ball actually reaches the intercepting opponent —
+      an earlier draft of this fix just reversed the ball's vector, which
+      left one team snowballing possession forever and field tilt pinned at
+      100/0).
+      Two more structural (not tuning) bugs found in the same pass: (1) the
+      initial kickoff velocity was a fixed [120, 45] — pointed at team 1's
+      goal on every single run, an unearned head start for team 0 baked into
+      the harness, not the model. (2) the nearest-player-to-ball scan used
+      `for i in range(22)` with a strict `<` comparison, so an exact tie
+      (e.g. the perfectly mirrored kickoff formation) always resolved to the
+      lower index — i.e. always team 0 (indices 0-10 scan before 11-21).
+      Fixed via a neutral [0, 0] kickoff and a once-shuffled `_scan_order`
+      list (seeded, so still reproducible) used in place of `range(22)`.
+      A single fixed-seed trial is still just one 90-second window and can
+      land on a genuine outlier — real football shows heavy single-window
+      territorial swings too — so run_evaluation() now averages
+      ANALYTICAL_TRIAL_COUNT (12) independently-seeded trials via
+      run_analytical_trials() rather than reporting one seed's fortune;
+      invariant counts (NaN/Inf, boundary escapes, cadence violations) are
+      SUMMED across trials so one bad trial still fails the gate, while
+      goals/completion%/tempo/field-tilt are averaged for an equilibrium
+      read. Also found and fixed: a wide/over-the-bar shot miss that added
+      an unbounded Y-velocity offset with no touchline recovery mechanism
+      anywhere in the harness — the ball would drift out of every player's
+      reach and rack up boundary_escape_count for the rest of the trial
+      (observed: 1075 escapes across 12 trials before the fix). Fixed by
+      rotating the shot vector by a bounded angle instead, plus adding a
+      touchline Y-axis rebound symmetric to the existing goal-line X-axis
+      reset.
+      Lesson for future tuning passes: when eval_simulation.py's report is
+      used as evidence a GDScript retune "worked", verify the harness's
+      mirrored constants were updated in the same diff — otherwise the
+      report is measuring last session's numbers, not this one's.
+    promotion_target: .claude/rules/soccer-physics.md
     status: pending
 ```
 

@@ -150,6 +150,8 @@ The data layer has expanded with `league.json`, `managers.json`, and `referees.j
 
 `PlayerData` should gain a persistent relationship dictionary keyed by player identifier. Each relation stores trust, rivalry, tagged event history, and last meaningful interaction. This turns match behavior into accumulated social memory rather than isolated state.
 
+> **Status:** this section, the Trait Bitmask section below, and the Star System section are now specified in full buildable detail — exact choke points, formulas, and a phased implementation blueprint — in [docs/SOCIAL_SIMULATION_ARCHITECTURE.md](docs/SOCIAL_SIMULATION_ARCHITECTURE.md). That document also records that `RelationshipData`, the trait bitmask, and `overall_rating`/`reputation` already exist in the codebase as of this writing; only their in-match/off-pitch consumers are still missing.
+
 ```gdscript
 class_name RelationshipData
 extends Resource

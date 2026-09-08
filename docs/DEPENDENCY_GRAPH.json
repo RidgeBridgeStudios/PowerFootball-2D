@@ -68,7 +68,9 @@
         "career_season_ended",
         "career_started"
       ],
-      "signals_connected": []
+      "signals_connected": [
+        "player_injured"
+      ]
     },
     "autoloads/DataLoader.gd": {
       "class_name": null,
@@ -145,6 +147,7 @@
         "shared/ManagerData.gd",
         "shared/PassUtilityScorer.gd",
         "shared/career/CareerDate.gd",
+        "shared/career/PlayerCareerState.gd",
         "shared/career/WorldEvent.gd",
         "ui/HUD.gd",
         "ui/pause/PauseMenu.gd",
@@ -215,6 +218,7 @@
         "player_switched",
         "stamina_depleted",
         "player_mood_changed",
+        "player_injured",
         "ball_struck",
         "tackle_won",
         "aerial_contested",
@@ -238,6 +242,7 @@
         "pause_opened",
         "pause_closed",
         "substitution_made",
+        "forced_substitution_requested",
         "formation_changed",
         "lineup_changed",
         "team_urgency_updated",
@@ -420,6 +425,7 @@
         "autoloads/GameEvents.gd",
         "autoloads/MatchTelemetryLogger.gd",
         "autoloads/MatchWorldModel.gd",
+        "entities/manager/ManagerDirector.gd",
         "entities/player/MoodSystem.gd",
         "entities/player/PlayerBrain.gd",
         "entities/player/TrustSystem.gd",
@@ -836,17 +842,22 @@
         "autoloads/DataLoader.gd",
         "autoloads/GameEvents.gd",
         "autoloads/GameManager.gd",
+        "autoloads/MatchStatsTracker.gd",
         "autoloads/MatchWorldModel.gd",
         "entities/player/HeavyPlayerController.gd",
         "entities/player/PlayerBrain.gd",
         "pitch/PitchBoundary.gd",
+        "pitch/PitchScene.gd",
         "shared/FormationAnchorMath.gd",
         "shared/FormationLibrary.gd",
         "shared/ManagerData.gd",
         "shared/PassUtilityScorer.gd",
         "shared/PlayerData.gd",
         "shared/PlayerRoleConfig.gd",
-        "shared/TeamData.gd"
+        "shared/TeamData.gd",
+        "shared/TeamManagementData.gd",
+        "ui/HUD.gd",
+        "ui/pause/PauseMenu.gd"
       ],
       "direct_dependents": [
         "autoloads/CareerManager.gd",
@@ -865,15 +876,18 @@
       "signals_declared": [],
       "signals_emitted": [
         "emergency_tactics_triggered",
+        "forced_substitution_requested",
         "formation_anchors_changed",
         "manager_formation_changed",
+        "substitution_made",
         "team_urgency_updated"
       ],
       "signals_connected": [
         "formation_changed",
         "goal_scored",
         "kickoff_confirmed",
-        "lineup_changed"
+        "lineup_changed",
+        "player_injured"
       ]
     },
     "entities/manager/ManagerVisual.gd": {
@@ -964,6 +978,7 @@
         "entities/player/PlayerStateFactory.gd",
         "entities/player/PlayerVisual.gd",
         "entities/player/TrustSystem.gd",
+        "entities/player/states/AerialState.gd",
         "entities/player/states/DribbleState.gd",
         "entities/player/states/GoalkeeperHoldState.gd",
         "entities/player/states/MoveState.gd",
@@ -975,6 +990,7 @@
         "shared/PlayerFactory.gd",
         "shared/PlayerRoleConfig.gd",
         "shared/TeamData.gd",
+        "shared/career/PlayerCareerState.gd",
         "ui/ActionText.gd",
         "ui/HUD.gd"
       ],
@@ -1039,6 +1055,7 @@
         "possession_lost"
       ],
       "signals_emitted": [
+        "player_injured",
         "stamina_depleted",
         "stamina_state_changed"
       ],
@@ -1292,6 +1309,7 @@
         "entities/player/PlayerState.gd"
       ],
       "direct_dependents": [
+        "entities/player/HeavyPlayerController.gd",
         "entities/player/PlayerStateFactory.gd"
       ],
       "signals_declared": [],
@@ -2128,6 +2146,7 @@
         "autoloads/MatchStatsTracker.gd",
         "autoloads/MatchWorldModel.gd",
         "autoloads/RefereeLoader.gd",
+        "entities/manager/ManagerDirector.gd",
         "entities/player/HeavyPlayerController.gd",
         "entities/player/PlayerBrain.gd",
         "entities/referee/MatchReferee.gd",
@@ -2751,6 +2770,7 @@
         "shared/TeamData.gd"
       ],
       "direct_dependents": [
+        "entities/manager/ManagerDirector.gd",
         "pitch/PitchScene.gd",
         "shared/TeamData.gd",
         "ui/FormationDiagram.gd",
@@ -2792,13 +2812,15 @@
       "extends": "Resource",
       "direct_dependencies": [
         "shared/TeamData.gd",
-        "shared/career/CareerDate.gd"
+        "shared/career/CareerDate.gd",
+        "shared/career/PlayerCareerState.gd"
       ],
       "direct_dependents": [
         "autoloads/CareerManager.gd",
         "shared/career/CareerSaveData.gd",
         "shared/career/CareerSerializer.gd",
         "shared/career/InboxEngine.gd",
+        "shared/career/PlayerCareerState.gd",
         "shared/career/TrainingSchedule.gd",
         "shared/career/YouthAcademy.gd",
         "ui/manager_mode/BoardPanel.gd",
@@ -3180,6 +3202,7 @@
       "direct_dependents": [
         "autoloads/CareerManager.gd",
         "shared/career/ContractData.gd",
+        "shared/career/PlayerCareerState.gd",
         "ui/manager_mode/OverviewPanel.gd",
         "ui/manager_mode/SquadPanel.gd"
       ],
@@ -3196,13 +3219,19 @@
         "autoloads/MatchStatsTracker.gd",
         "entities/player/TrustSystem.gd",
         "shared/PlayerData.gd",
+        "shared/career/BoardState.gd",
         "shared/career/CareerDate.gd",
         "shared/career/CareerSaveData.gd",
         "shared/career/ContractData.gd",
+        "shared/career/MoraleEngine.gd",
+        "shared/career/PlayerDevelopmentEngine.gd",
         "shared/career/RelationshipData.gd"
       ],
       "direct_dependents": [
         "autoloads/CareerManager.gd",
+        "autoloads/GameEvents.gd",
+        "entities/player/HeavyPlayerController.gd",
+        "shared/career/BoardState.gd",
         "shared/career/CareerSaveData.gd",
         "shared/career/CareerSerializer.gd",
         "shared/career/InboxEngine.gd",
@@ -3237,6 +3266,7 @@
       ],
       "direct_dependents": [
         "autoloads/CareerManager.gd",
+        "shared/career/PlayerCareerState.gd",
         "shared/career/TransferMarket.gd",
         "shared/career/YouthAcademy.gd",
         "ui/manager_mode/SquadPanel.gd",
@@ -3497,6 +3527,7 @@
       ],
       "direct_dependents": [
         "autoloads/GameEvents.gd",
+        "entities/manager/ManagerDirector.gd",
         "entities/player/HeavyPlayerController.gd",
         "entities/player/PlayerStateFactory.gd",
         "entities/player/states/ChargeKickState.gd",
@@ -4243,6 +4274,7 @@
       ],
       "direct_dependents": [
         "autoloads/GameEvents.gd",
+        "entities/manager/ManagerDirector.gd",
         "pitch/PitchScene.gd",
         "shared/TeamData.gd",
         "ui/FormationDiagram.gd"

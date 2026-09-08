@@ -53,6 +53,7 @@ All entries originally housed in this file have been migrated to their canonical
 - `stage-3-fraction-is-83-percent-not-90-and-urgency-doesnt-self-saturate` → [docs/agent-errata/match-state.md#stage-3-fraction-is-83-percent-not-90-and-urgency-doesnt-self-saturate](docs/agent-errata/match-state.md#stage-3-fraction-is-83-percent-not-90-and-urgency-doesnt-self-saturate)
 - `dribble-claim-ignores-existing-possessor-dual-driver-jitter` → [docs/agent-errata/physics-and-ball.md#dribble-claim-ignores-existing-possessor-dual-driver-jitter](docs/agent-errata/physics-and-ball.md#dribble-claim-ignores-existing-possessor-dual-driver-jitter)
 - `cpu-players-never-gated-into-tackle-state` → [docs/agent-errata/player-ai.md#cpu-players-never-gated-into-tackle-state](docs/agent-errata/player-ai.md#cpu-players-never-gated-into-tackle-state)
+- `eval-simulation-harness-was-decoupled-from-gdscript-tuning` → [docs/agent-errata/physics-and-ball.md#eval-simulation-harness-was-decoupled-from-gdscript-tuning](docs/agent-errata/physics-and-ball.md#eval-simulation-harness-was-decoupled-from-gdscript-tuning)
 
 ### Error Logs
 - `ERR-20260830-01` → [docs/agent-errata/player-ai.md#err-20260830-01](docs/agent-errata/player-ai.md#err-20260830-01)
