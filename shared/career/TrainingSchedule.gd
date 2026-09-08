@@ -208,6 +208,10 @@ static func daily_injury_risk(
 	# IronMan (4096) players are durable by trait.
 	if player != null and player.has_trait(4096):
 		risk *= 0.45
+	# NightOwl (2048) players carry more fatigue into a session than their
+	# condition number alone shows.
+	if player != null and player.has_trait(2048):
+		risk *= 1.30
 	# A low-professionalism player takes worse care of themselves.
 	if player != null:
 		risk *= lerpf(1.25, 0.85, clampf(player.professionalism, 0.0, 1.0))

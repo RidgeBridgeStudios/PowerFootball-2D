@@ -54,14 +54,49 @@ const MENTAL_GROWTH_UNTIL: int = 34
 
 ## How receptive a player is to development at a given age. 1.0 at 16,
 ## tapering to 0 by the end of the peak band, and never negative.
-static func growth_multiplier(age: int) -> float:
+##
+## `archetype` branches this into the four PES Master League growth shapes.
+## NORMAL (the default) is exactly the original curve, unchanged, so every
+## existing call site that does not pass an archetype keeps its behaviour:
+##
+##   EARLY_PEAK   — explosive 17-21 (front-loaded), flat trickle 22-25.
+##   LATE_BLOOMER — slow 17-23, a genuine second growth spurt 24-29.
+##   EVERGREEN    — flat, moderate growth the whole window; no sharp taper.
+static func growth_multiplier(age: int, archetype: PlayerCareerState.DevelopmentArchetype = PlayerCareerState.DevelopmentArchetype.NORMAL) -> float:
 	if age <= 16:
 		return 1.0
-	if age >= PEAK_AGE_START:
-		# Still a trickle through the peak years, nothing after.
-		return maxf(0.18 - float(age - PEAK_AGE_START) * 0.03, 0.0)
-	# 17..23 tapers smoothly from 1.0 down to ~0.25.
-	return clampf(1.0 - float(age - 16) * 0.107, 0.25, 1.0)
+
+	match archetype:
+		PlayerCareerState.DevelopmentArchetype.EARLY_PEAK:
+			if age <= 21:
+				# Front-loaded: nearly as fast as 16 all the way to 21.
+				return clampf(1.0 - float(age - 16) * 0.04, 0.80, 1.0)
+			if age <= 25:
+				return maxf(0.22 - float(age - 21) * 0.04, 0.0)
+			return maxf(0.10 - float(age - 25) * 0.03, 0.0)
+
+		PlayerCareerState.DevelopmentArchetype.LATE_BLOOMER:
+			if age <= 23:
+				# Slower than NORMAL early on — the talent has not clicked yet.
+				return clampf(0.70 - float(age - 16) * 0.06, 0.20, 0.70)
+			if age <= 29:
+				# The second wind: still gaining meaningfully in what would be
+				# another archetype's peak years.
+				return clampf(0.55 - float(age - 24) * 0.06, 0.22, 0.55)
+			return maxf(0.15 - float(age - 29) * 0.03, 0.0)
+
+		PlayerCareerState.DevelopmentArchetype.EVERGREEN:
+			# Linear and moderate the whole window — no sharp early spike, no
+			# early cutoff. Reaches a lower ceiling by 24 than the other three
+			# archetypes trade for the much shallower decline curve below.
+			if age >= PEAK_AGE_START:
+				return maxf(0.20 - float(age - PEAK_AGE_START) * 0.015, 0.05)
+			return clampf(0.62 - float(age - 16) * 0.045, 0.30, 0.62)
+
+		_: # NORMAL — original curve, unchanged.
+			if age >= PEAK_AGE_START:
+				return maxf(0.18 - float(age - PEAK_AGE_START) * 0.03, 0.0)
+			return clampf(1.0 - float(age - 16) * 0.107, 0.25, 1.0)
 
 
 ## A player's current ability on the same 1-99 scale the scouting layer shows.
@@ -118,7 +153,7 @@ static func apply_daily_training(
 	# Diminishing returns as a player closes on their ceiling.
 	var headroom_factor: float = clampf(float(headroom) / 12.0, 0.08, 1.0)
 	var xp: float = BASE_DAILY_XP * intensity
-	xp *= growth_multiplier(age)
+	xp *= growth_multiplier(age, state.archetype)
 	xp *= headroom_factor
 	xp *= clampf(coach_quality, 0.1, 1.0) * 1.35
 	xp *= clampf(facility_mult, 0.5, 1.5)
@@ -127,6 +162,9 @@ static func apply_daily_training(
 	xp *= lerpf(0.75, 1.25, clampf(data.determination, 0.0, 1.0))
 	# Training on empty legs is wasted training.
 	xp *= lerpf(0.45, 1.0, clampf(state.condition, 0.0, 1.0))
+	# NightOwl players are half-hearted in sessions that follow a late one.
+	if data.has_trait(2048):
+		xp *= 0.85
 
 	state.development_xp += xp
 	while state.development_xp >= XP_PER_ABILITY_POINT:
@@ -215,13 +253,14 @@ static func apply_seasonal_ageing(
 		if age >= 27:
 			data.leadership = clampf(data.leadership + mental_gain * 1.2, 0.05, 0.99)
 
-	if age <= PEAK_AGE_END:
+	var peak_end: int = _peak_age_end_for(state.archetype)
+	if age <= peak_end:
 		return ""
 
 	# Physical decline, accelerating with each year past the peak and with a
 	# career's accumulated injuries.
-	var years_past: int = age - PEAK_AGE_END
-	var rate: float = DECLINE_BASE * (1.0 + float(years_past) * DECLINE_RAMP)
+	var years_past: int = age - peak_end
+	var rate: float = DECLINE_BASE * (1.0 + float(years_past) * DECLINE_RAMP) * _decline_ramp_scale_for(state.archetype)
 	rate *= 1.0 + state.injury_proneness * 0.8
 	# IronMan (4096) ages more gracefully; a low-professionalism player worse.
 	if data.has_trait(4096):
@@ -242,12 +281,41 @@ static func apply_seasonal_ageing(
 	return ""
 
 
+## Age the physical decline curve starts biting for a given archetype.
+## EARLY_PEAK burns out sooner; LATE_BLOOMER's peak runs on for years longer;
+## EVERGREEN and NORMAL keep the original PEAK_AGE_END.
+static func _peak_age_end_for(archetype: PlayerCareerState.DevelopmentArchetype) -> int:
+	match archetype:
+		PlayerCareerState.DevelopmentArchetype.EARLY_PEAK:
+			return 25
+		PlayerCareerState.DevelopmentArchetype.LATE_BLOOMER:
+			return 33
+		_:
+			return PEAK_AGE_END
+
+
+## How steeply decline ramps up per year past peak. EARLY_PEAK falls off a
+## cliff once it starts; EVERGREEN barely declines at all, which is the whole
+## point of the archetype's name.
+static func _decline_ramp_scale_for(archetype: PlayerCareerState.DevelopmentArchetype) -> float:
+	match archetype:
+		PlayerCareerState.DevelopmentArchetype.EARLY_PEAK:
+			return 1.7
+		PlayerCareerState.DevelopmentArchetype.EVERGREEN:
+			return 0.45
+		PlayerCareerState.DevelopmentArchetype.LATE_BLOOMER:
+			return 1.1
+		_:
+			return 1.0
+
+
 ## Human-readable trajectory for the squad screen.
 static func development_label(data: PlayerData, state: PlayerCareerState, age: int) -> String:
 	if state == null:
 		return "Unknown"
 	var headroom: int = state.potential_remaining(current_ability(data))
-	if age > PEAK_AGE_END:
+	var peak_end: int = _peak_age_end_for(state.archetype)
+	if age > peak_end:
 		return "Declining"
 	if age >= PEAK_AGE_START:
 		return "At Peak" if headroom <= 2 else "Peak, some room"

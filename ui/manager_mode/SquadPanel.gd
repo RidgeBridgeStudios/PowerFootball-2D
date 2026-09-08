@@ -226,9 +226,14 @@ func _player_row(
 	if state != null:
 		line.add_child(CareerTheme.bar(state.condition, 50))
 		line.add_child(CareerTheme.bar(state.sharpness, 50))
+		line.add_child(CareerTheme.cell(
+			state.condition_arrow_glyph(), 24, _arrow_tint(state.condition_arrow(), p),
+			HORIZONTAL_ALIGNMENT_CENTER
+		))
 	else:
 		line.add_child(CareerTheme.cell("—", 54, p.text_muted))
 		line.add_child(CareerTheme.cell("—", 54, p.text_muted))
+		line.add_child(CareerTheme.cell("—", 24, p.text_muted, HORIZONTAL_ALIGNMENT_CENTER))
 
 	line.add_child(CareerTheme.cell(
 		MoraleEngine.morale_label(data.morale), 76, MoraleEngine.morale_color(data.morale),
@@ -340,8 +345,17 @@ func _player_profile(
 		right.add_child(CareerTheme.muted("DEVELOPMENT"))
 		var age: int = data.get_age(career.today.year, career.today.month, career.today.day)
 		right.add_child(_kv("Trajectory", PlayerDevelopmentEngine.development_label(data, state, age), p))
+		right.add_child(_kv("Growth type", state.archetype_label(), p))
 		right.add_child(_kv("Condition", state.condition_label(), p))
+		right.add_child(_kv(
+			"Matchday form",
+			"%s %s" % [state.condition_arrow_glyph(), state.condition_arrow_label()],
+			p, _arrow_tint(state.condition_arrow(), p)
+		))
 		right.add_child(_kv("Injury risk", "%d%%" % int(state.injury_proneness * 100.0), p))
+		var traits: String = _trait_badges(data)
+		if traits != "":
+			right.add_child(_kv("Traits", traits, p))
 		right.add_child(CareerTheme.spacer(4))
 		right.add_child(CareerTheme.muted("RELATIONSHIPS"))
 		right.add_child(_kv("Manager trust", "%d%%" % int(state.manager_trust * 100.0), p))
@@ -434,11 +448,54 @@ func _player_profile(
 	return body
 
 
-func _kv(key: String, value: String, p: CareerThemePalette) -> HBoxContainer:
+func _kv(key: String, value: String, p: CareerThemePalette, value_tint: Color = Color(0, 0, 0, 0)) -> HBoxContainer:
 	var line: HBoxContainer = CareerTheme.row(6)
 	line.add_child(CareerTheme.cell(key, 108, p.text_muted, HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small))
-	line.add_child(CareerTheme.label(value, p.text_primary, p.font_size_small))
+	var tint: Color = value_tint if value_tint.a > 0.0 else p.text_primary
+	line.add_child(CareerTheme.label(value, tint, p.font_size_small))
 	return line
+
+
+## Colour for one matchday condition arrow — red-hot reads as a clear
+## positive, ice-cold as a clear warning, the two mild states closer to
+## neutral text, matching the weight MoraleEngine.morale_color() already
+## gives its own five-band scale.
+func _arrow_tint(arrow: PlayerCareerState.ConditionArrow, p: CareerThemePalette) -> Color:
+	match arrow:
+		PlayerCareerState.ConditionArrow.RED_HOT:
+			return p.positive
+		PlayerCareerState.ConditionArrow.RISING:
+			return p.text_primary
+		PlayerCareerState.ConditionArrow.FALLING:
+			return p.warning
+		PlayerCareerState.ConditionArrow.ICE_COLD:
+			return p.danger
+		_:
+			return p.text_secondary
+
+
+## Short comma-joined list of this player's active traits, Pawapuro-badge
+## style — blue (perk) traits first, then red (flaw) traits.
+const _BLUE_TRAIT_LABELS: Dictionary = {
+	1: "Deep Runner", 2: "Wall Splitter", 4: "Pressure Immune", 16: "Talisman",
+	64: "Captain Material", 512: "Veteran Leader", 1024: "Dead Ball Specialist",
+	4096: "Iron Man",
+}
+const _RED_TRAIT_LABELS: Dictionary = {
+	8: "Hot-Headed Tackler", 32: "Locker Room Cancer", 128: "Street Baller",
+	256: "Pride & Glory", 2048: "Night Owl",
+}
+
+
+func _trait_badges(data: PlayerData) -> String:
+	var badges: Array[String] = []
+	for bit: int in _BLUE_TRAIT_LABELS:
+		if data.has_trait(bit):
+			badges.append(String(_BLUE_TRAIT_LABELS[bit]))
+	for bit2: int in _RED_TRAIT_LABELS:
+		if data.has_trait(bit2):
+			badges.append(String(_RED_TRAIT_LABELS[bit2]))
+	return ", ".join(badges)
 
 
 func _attr_bar(label_text: String, value: float, p: CareerThemePalette) -> HBoxContainer:

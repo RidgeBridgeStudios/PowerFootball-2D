@@ -242,6 +242,48 @@ static func build_scout_report_ready(report: ScoutReport, today: CareerDate) -> 
 	return item
 
 
+## A StreetBaller (128) player has been caught out past curfew. One of three
+## FIFA-Manager-style off-pitch dilemmas: come down hard, a proportionate
+## private word, or let it go — each trades subject trust for squad-wide
+## discipline optics differently, same pattern as build_playing_time_complaint.
+static func build_nightlife_incident(
+	data: PlayerData,
+	state: PlayerCareerState,
+	today: CareerDate
+) -> InboxItem:
+	var body: String = "%s was photographed out at a nightclub in the early hours, two days before a matchday.\n\nIt is already doing the rounds on social media. The squad are watching how you handle it." % data.player_name
+	var item: InboxItem = InboxItem.make(
+		"Nightlife incident: %s" % data.player_name,
+		body, InboxItem.Category.PLAYER, today
+	)
+	item.with_subject_player(state.player_key, data.player_name)
+	item.priority = 0.6
+	# Distinguishes this from build_playing_time_complaint on reload — both
+	# use Category.PLAYER, and CareerManager._rehydrate_inbox() needs to tell
+	# them apart to rebuild the right options for an item still awaiting a
+	# decision after a save/load.
+	item.payload = {"kind": "nightlife"}
+	item.add_option(
+		"Fine him and drop him for the next match",
+		"Sends a message to the whole squad. He will not thank you for it.",
+		&"nightlife_fine", 0.015, -0.14, 0.02, 0.01
+	)
+	item.add_option(
+		"A private word, no further action",
+		"Proportionate. He respects that you did not make a show of it.",
+		&"nightlife_private_word", 0.0, 0.02, 0.0, 0.0
+	)
+	item.add_option(
+		"Let it go publicly",
+		"Costs you no relationship — but the dressing room notices there was no consequence.",
+		&"nightlife_ignore", -0.02, 0.05, -0.02, -0.01
+	)
+	# Escalation (index 0) — ignoring a story already in the press is read as
+	# tacit approval and costs the most.
+	item.with_deadline(today.advanced_by(3), 0)
+	return item
+
+
 static func build_youth_intake(club_name: String, summary: String, today: CareerDate) -> InboxItem:
 	var item: InboxItem = InboxItem.make(
 		"Youth intake: %s" % club_name, summary, InboxItem.Category.YOUTH, today

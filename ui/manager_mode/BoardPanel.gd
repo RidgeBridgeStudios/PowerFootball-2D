@@ -135,6 +135,7 @@ func _facilities_card(board: BoardState, p: CareerThemePalette) -> VBoxContainer
 	body.add_child(_facility_row("Training facilities", board.training_facilities, board, p))
 	body.add_child(_facility_row("Youth facilities", board.youth_facilities, board, p))
 	body.add_child(_facility_row("Scouting network", board.scouting_range, board, p))
+	body.add_child(_facility_row("Medical facilities", board.medical_facility, board, p))
 	var stadium: HBoxContainer = CareerTheme.row()
 	stadium.add_child(CareerTheme.cell("Stadium capacity", 150, p.text_muted))
 	stadium.add_child(CareerTheme.label(str(board.stadium_capacity), p.text_primary))

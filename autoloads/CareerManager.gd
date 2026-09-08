@@ -518,8 +518,10 @@ func _process_recovery_and_training() -> void:
 			TrainingSchedule.SESSION_FOCUS[clampi(int(session), 0, TrainingSchedule.SESSION_FOCUS.size() - 1)]
 		)
 		var facility_mult: float = 1.0
+		var medical_mult: float = 1.0
 		if is_user_club and career.board != null:
 			facility_mult = career.board.facility_multiplier(career.board.training_facilities)
+			medical_mult = career.board.facility_multiplier(career.board.medical_facility)
 
 		for squad_index: int in range(team.squad.size()):
 			var data: PlayerData = team.squad[squad_index]
@@ -527,7 +529,7 @@ func _process_recovery_and_training() -> void:
 			if state == null:
 				continue
 
-			var healed: bool = state.tick_recovery(physio, 1.0 - intensity)
+			var healed: bool = state.tick_recovery(physio, 1.0 - intensity, medical_mult)
 			if healed and is_user_club:
 				_push_inbox(InboxEngine.build_simple(
 					"%s is fit again" % data.player_name,
@@ -554,6 +556,12 @@ func _process_recovery_and_training() -> void:
 			)
 			if risk > 0.0 and _rng.randf() < risk:
 				_inflict_injury(team_index, squad_index, data, state, is_user_club)
+
+			# StreetBaller (128) nightlife incident — rare, and only for the
+			# user's own club, where it actually needs a managerial decision.
+			if is_user_club and data.has_trait(128) and _rng.randf() < 0.006 \
+					and not _has_pending_nightlife_incident(state.player_key):
+				_push_inbox(InboxEngine.build_nightlife_incident(data, state, career.today))
 
 			MoraleEngine.daily_drift(data)
 
@@ -589,6 +597,17 @@ func _inflict_injury(
 			-0.5,
 			clampf(float(state.injury_days_remaining) / 90.0, 0.25, 0.95)
 		)
+
+
+## Guards the nightlife-incident roll above against filing a second one for
+## the same player while an earlier one is still unresolved in the inbox.
+func _has_pending_nightlife_incident(player_key: int) -> bool:
+	for item: InboxItem in career.inbox:
+		if item.is_resolved or item.subject_player_key != player_key:
+			continue
+		if String(item.payload.get("kind", "")) == "nightlife":
+			return true
+	return false
 
 
 func _staff_quality(team: TeamData, kind: String) -> float:
@@ -1252,6 +1271,8 @@ func _record_player_match_state(
 		var rating: float = float(player_ratings.get(side * 1000 + squad_index, data.last_match_rating))
 		state.record_appearance(90, rating, 0, 0)
 		MoraleEngine.apply_result_reaction(data, true, goal_diff, rating)
+		var age: int = data.get_age(career.today.year, career.today.month, career.today.day)
+		MoraleEngine.apply_reputation_drift(data, rating, age)
 
 	# Everyone who did not feature still reacts to the result.
 	for squad_index2: int in range(team.squad.size()):
@@ -1675,9 +1696,15 @@ func _rehydrate_inbox() -> void:
 			InboxItem.Category.PLAYER:
 				if state != null and club != null \
 						and state.squad_index >= 0 and state.squad_index < club.squad.size():
-					var rebuilt: InboxItem = InboxEngine.build_playing_time_complaint(
-						club.squad[state.squad_index], state, item.received
-					)
+					var rebuilt: InboxItem
+					if String(item.payload.get("kind", "")) == "nightlife":
+						rebuilt = InboxEngine.build_nightlife_incident(
+							club.squad[state.squad_index], state, item.received
+						)
+					else:
+						rebuilt = InboxEngine.build_playing_time_complaint(
+							club.squad[state.squad_index], state, item.received
+						)
 					item.options = rebuilt.options
 					item.escalation_option = rebuilt.escalation_option
 			InboxItem.Category.CONTRACT:
@@ -1924,6 +1951,9 @@ func _apply_request_verdict(
 		BoardState.RequestKind.SCOUTING_NETWORK:
 			board.scouting_range = clampi(board.scouting_range + 1, 1, 5)
 			return "The scouting network has been expanded to level %d." % board.scouting_range
+		BoardState.RequestKind.MEDICAL_FACILITIES:
+			board.medical_facility = clampi(board.medical_facility + 1, 1, 5)
+			return "The medical centre will be upgraded to level %d." % board.medical_facility
 		BoardState.RequestKind.STADIUM_EXPANSION:
 			var added: int = int(round(float(board.stadium_capacity) * 0.20 * granted))
 			board.stadium_capacity += added

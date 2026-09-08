@@ -46,12 +46,13 @@ enum RequestKind {
 	STADIUM_EXPANSION = 4,
 	SCOUTING_NETWORK = 5,
 	NEW_STAFF = 6,
+	MEDICAL_FACILITIES = 7,
 }
 
 const REQUEST_NAMES: Array[String] = [
 	"Increase Transfer Budget", "Increase Wage Budget", "Upgrade Training Facilities",
 	"Upgrade Youth Facilities", "Expand the Stadium", "Expand the Scouting Network",
-	"Recruit Additional Staff",
+	"Recruit Additional Staff", "Upgrade Medical Facilities",
 ]
 
 ## Confidence below this, sustained for SACK_GRACE_MATCHES, ends the job.
@@ -76,6 +77,9 @@ const CONFIDENCE_GAIN_SCALE: float = 0.65
 @export_range(1, 5) var training_facilities: int = 3
 @export_range(1, 5) var youth_facilities: int = 3
 @export_range(1, 5) var scouting_range: int = 2
+## Medical centre tier. Feeds PlayerCareerState.tick_recovery()'s facility_mult
+## via facility_multiplier() below — the same curve every other facility uses.
+@export_range(1, 5) var medical_facility: int = 3
 @export var stadium_capacity: int = 24000
 
 ## Requests the manager has filed: [{kind, filed_iso, status, response}]
@@ -144,6 +148,7 @@ static func make_for_club(club: TeamData, capacity: int) -> BoardState:
 	b.training_facilities = facility_level
 	b.youth_facilities = clampi(facility_level - 1, 1, 5)
 	b.scouting_range = clampi(facility_level - 1, 1, 5)
+	b.medical_facility = clampi(facility_level - 1, 1, 5)
 	return b
 
 

@@ -123,6 +123,21 @@ static func apply_to_match_player(
 			var effective: float = clampf(rel.trust - rel.rivalry_score * 0.5, 0.0, 1.0)
 			trust.seed_trust(other_key, effective)
 
+	# --- Matchday condition arrow (PES-style short-term momentum) ----------
+	# A separate seed from the mood tier above: this scales the PHYSICAL
+	# numbers PlayerFactory already copied onto the controller, not the
+	# decision-making tier. Mirrors PlayerFactory's own manager-coaching-bonus
+	# pattern of a small post-hoc adjustment after the initial apply.
+	if state != null and player != null:
+		var arrow_mult: float = state.condition_arrow_attribute_multiplier()
+		if not is_equal_approx(arrow_mult, 1.0):
+			player.top_speed = clampf(player.top_speed * arrow_mult, 150.0, 275.0)
+			player.stamina_max = clampf(player.stamina_max * arrow_mult, 60.0, 140.0)
+			# Lower acceleration_time is faster, so a good arrow divides it.
+			player.acceleration_time = clampf(player.acceleration_time / arrow_mult, 0.11, 0.42)
+			player._recalculate_movement_curve()
+			player.stamina = player.stamina_max
+
 
 ## --- Morale drivers -------------------------------------------------------------
 
@@ -227,6 +242,12 @@ static func evaluate_drivers(
 		if rel != null:
 			worst_rivalry = maxf(worst_rivalry, rel.rivalry_score)
 	room.value = clampf((squad_harmony - 0.5) * 1.6 - worst_rivalry * 1.2, -1.0, 1.0)
+	# CaptainMaterial (64), VeteranLeader (512) and Talisman (16) players are
+	# personally more resilient to a rocky dressing room, the same way
+	# PressureImmune (4) blunts the SLUMP tier above — a leader is who a bad
+	# dressing room affects least, not who fixes it for everyone else.
+	if room.value < 0.0 and (data.has_trait(64) or data.has_trait(512) or data.has_trait(16)):
+		room.value *= 0.5
 	room.detail = "Feud in the squad" if worst_rivalry >= 0.5 else "Settled"
 	drivers.append(room)
 
@@ -277,7 +298,41 @@ static func apply_result_reaction(data: PlayerData, played: bool, goal_diff: int
 	if delta < 0.0:
 		delta *= lerpf(1.3, 0.55, clampf(data.determination, 0.0, 1.0))
 
+	# PrideGlory (256) players simply feel results harder, in both directions.
+	if data.has_trait(256):
+		delta *= 1.35
+
 	data.morale = clampf(data.morale + delta, 0.0, 1.0)
+
+
+## --- Reputation ------------------------------------------------------------------
+
+## A standout or poor match rating nudges player_reputation, so fame is
+## actually earned over a career rather than sitting fixed at its authored
+## seed. Deliberately small per match — reputation is meant to move over
+## seasons, not swing on one performance — and damped for older players,
+## whose reputation is already largely settled.
+const REPUTATION_GAIN_EXCELLENT: float = 0.006
+const REPUTATION_GAIN_GOOD: float = 0.0025
+const REPUTATION_LOSS_POOR: float = -0.004
+
+
+static func apply_reputation_drift(data: PlayerData, rating: float, age: int) -> void:
+	if data == null or rating <= 0.0:
+		return
+	var delta: float = 0.0
+	if rating >= 8.0:
+		delta = REPUTATION_GAIN_EXCELLENT
+	elif rating >= 7.0:
+		delta = REPUTATION_GAIN_GOOD
+	elif rating <= 4.5:
+		delta = REPUTATION_LOSS_POOR
+	if delta == 0.0:
+		return
+	# A young player's reputation is still being written; a veteran's rarely
+	# moves much on one match.
+	delta *= lerpf(1.4, 0.7, clampf(float(age - 18) / 15.0, 0.0, 1.0))
+	data.player_reputation = clampf(data.player_reputation + delta, 0.02, 0.99)
 
 
 ## Slow pull back toward the neutral baseline on days when nothing happens, so

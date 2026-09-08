@@ -144,6 +144,16 @@ func _on_foul_committed(fouler: Node, victim: Node, foul_pos: Vector2) -> void:
 	if fouler_mood != null and fouler_mood.current_tier == MoodSystem.Tier.STREAK:
 		severity += 0.08
 
+	# HotHeadedTackler (8) players commit harder when their side is behind —
+	# frustration bites over the same tackle a level head would pull out of.
+	if fouler_player != null:
+		var fouler_data: PlayerData = fouler_player.get_meta(&"player_data", null) as PlayerData
+		if fouler_data != null and fouler_data.has_trait(8):
+			var own_score: int = GameManager.score[fouler_player.team]
+			var opp_score: int = GameManager.score[1 - fouler_player.team]
+			if own_score < opp_score:
+				severity += 0.12
+
 	severity = clampf(severity, 0.0, 1.0)
 
 	var bias: float = 0.0
