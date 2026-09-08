@@ -31,9 +31,12 @@ enum TeamPhase { IN_POSSESSION, OUT_OF_POSSESSION, TRANSITION }
 ## pushes a role's anchor up the pitch (+) or drops it back toward its own
 ## goal (-). Applied ON TOP of the existing ball-proximity lerp below, not
 ## instead of it. TUNE HERE for a higher/lower defensive line per phase.
+## Calibration: OUT_OF_POSSESSION drop deepened slightly (-0.06 -> -0.08) for a
+## tighter, more coordinated defensive squeeze without the line collapsing all
+## the way to a back-five bunker.
 const _PHASE_LINE_PUSH: Dictionary = {
 	TeamPhase.IN_POSSESSION: 0.08,
-	TeamPhase.OUT_OF_POSSESSION: -0.06,
+	TeamPhase.OUT_OF_POSSESSION: -0.08,
 	TeamPhase.TRANSITION: 0.0,
 }
 

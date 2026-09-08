@@ -171,11 +171,11 @@
       "_callable_class": true,
       "_origin": "ast",
       "community": 114,
-      "community_name": "eval_simulation.py",
+      "community_name": "AnalyticalSimulationHarness",
       "file_type": "code",
       "norm_label": "analyticalsimulationharness",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L57"
+      "source_location": "L86"
     },
     {
       "id": "tools_verify_gate_checkresult",
@@ -680,11 +680,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 114,
-      "community_name": "eval_simulation.py",
+      "community_name": "AnalyticalSimulationHarness",
       "file_type": "code",
       "norm_label": "._check_nan_inf()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L119"
+      "source_location": "L187"
     },
     {
       "id": "tools_eval_simulation_analyticalsimulationharness_init",
@@ -692,11 +692,35 @@
       "_callable": true,
       "_origin": "ast",
       "community": 114,
-      "community_name": "eval_simulation.py",
+      "community_name": "AnalyticalSimulationHarness",
       "file_type": "code",
       "norm_label": ".__init__()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L63"
+      "source_location": "L101"
+    },
+    {
+      "id": "tools_eval_simulation_analyticalsimulationharness_resolve_pass",
+      "label": "._resolve_pass()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "code",
+      "norm_label": "._resolve_pass()",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L441"
+    },
+    {
+      "id": "tools_eval_simulation_analyticalsimulationharness_resolve_shot",
+      "label": "._resolve_shot()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "code",
+      "norm_label": "._resolve_shot()",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L376"
     },
     {
       "id": "tools_eval_simulation_analyticalsimulationharness_run",
@@ -704,11 +728,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 114,
-      "community_name": "eval_simulation.py",
+      "community_name": "AnalyticalSimulationHarness",
       "file_type": "code",
       "norm_label": ".run()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L267"
+      "source_location": "L549"
     },
     {
       "id": "tools_eval_simulation_analyticalsimulationharness_step",
@@ -716,11 +740,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 114,
-      "community_name": "eval_simulation.py",
+      "community_name": "AnalyticalSimulationHarness",
       "file_type": "code",
       "norm_label": ".step()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L125"
+      "source_location": "L193"
     },
     {
       "id": "tools_eval_simulation_find_godot_binary",
@@ -728,11 +752,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 114,
-      "community_name": "eval_simulation.py",
+      "community_name": "AnalyticalSimulationHarness",
       "file_type": "code",
       "norm_label": "find_godot_binary()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L42"
+      "source_location": "L43"
     },
     {
       "id": "tools_eval_simulation_main",
@@ -740,11 +764,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 114,
-      "community_name": "eval_simulation.py",
+      "community_name": "AnalyticalSimulationHarness",
       "file_type": "code",
       "norm_label": "main()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L358"
+      "source_location": "L733"
     },
     {
       "id": "tools_eval_simulation_print_summary_table",
@@ -752,11 +776,23 @@
       "_callable": true,
       "_origin": "ast",
       "community": 114,
-      "community_name": "eval_simulation.py",
+      "community_name": "AnalyticalSimulationHarness",
       "file_type": "code",
       "norm_label": "print_summary_table()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L339"
+      "source_location": "L705"
+    },
+    {
+      "id": "tools_eval_simulation_run_analytical_trials",
+      "label": "run_analytical_trials()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "code",
+      "norm_label": "run_analytical_trials()",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L621"
     },
     {
       "id": "tools_eval_simulation_run_evaluation",
@@ -764,11 +800,11 @@
       "_callable": true,
       "_origin": "ast",
       "community": 114,
-      "community_name": "eval_simulation.py",
+      "community_name": "AnalyticalSimulationHarness",
       "file_type": "code",
       "norm_label": "run_evaluation()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L306"
+      "source_location": "L671"
     },
     {
       "id": "tools_verify_gate_checkresult_init",
@@ -4683,11 +4719,22 @@
       "source_location": "L14"
     },
     {
+      "id": "range",
+      "label": "range",
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "code",
+      "norm_label": "range",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
       "id": "tools_eval_simulation",
       "label": "eval_simulation.py",
       "_origin": "ast",
       "community": 114,
-      "community_name": "eval_simulation.py",
+      "community_name": "AnalyticalSimulationHarness",
       "file_type": "code",
       "norm_label": "eval_simulation.py",
       "source_file": "tools/eval_simulation.py",
@@ -4698,22 +4745,22 @@
       "label": "Any",
       "_origin": "ast",
       "community": 114,
-      "community_name": "eval_simulation.py",
+      "community_name": "AnalyticalSimulationHarness",
       "file_type": "code",
       "norm_label": "any",
       "source_file": "",
       "source_location": ""
     },
     {
-      "id": "tools_eval_simulation_rationale_58",
+      "id": "tools_eval_simulation_rationale_87",
       "label": "Deterministic analytical 60Hz match physics & AI decision simulator. Simulates\u2026",
       "_origin": "ast",
       "community": 114,
-      "community_name": "eval_simulation.py",
+      "community_name": "AnalyticalSimulationHarness",
       "file_type": "rationale",
       "norm_label": "deterministic analytical 60hz match physics & ai decision simulator. simulates...",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L58"
+      "source_location": "L87"
     },
     {
       "id": "tools_verify_gate",
@@ -4725,66 +4772,6 @@
       "norm_label": "verify_gate.py",
       "source_file": "tools/verify_gate.py",
       "source_location": "L1"
-    },
-    {
-      "id": "docs_agent_errata_data_and_persistence_calibration_is_not_optional_and_the_first_guess_was_wrong_twice",
-      "label": "Calibration is not optional, and the first guess was wrong twice",
-      "_origin": "ast",
-      "community": 117,
-      "community_name": "Data, Persistence & Career Calibration Errata",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "calibration is not optional, and the first guess was wrong twice",
-      "source_file": "docs/agent-errata/data-and-persistence.md",
-      "source_location": "L17"
-    },
-    {
-      "id": "docs_agent_errata_data_and_persistence_career_calibration_findings",
-      "label": "Career Calibration Findings",
-      "_origin": "ast",
-      "community": 117,
-      "community_name": "Data, Persistence & Career Calibration Errata",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "career calibration findings",
-      "source_file": "docs/agent-errata/data-and-persistence.md",
-      "source_location": "L11"
-    },
-    {
-      "id": "docs_agent_errata_data_and_persistence_data_persistence_career_calibration_errata",
-      "label": "Data, Persistence & Career Calibration Errata",
-      "_origin": "ast",
-      "community": 117,
-      "community_name": "Data, Persistence & Career Calibration Errata",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "data, persistence & career calibration errata",
-      "source_file": "docs/agent-errata/data-and-persistence.md",
-      "source_location": "L1"
-    },
-    {
-      "id": "docs_agent_errata_data_and_persistence_table_of_contents",
-      "label": "Table of Contents",
-      "_origin": "ast",
-      "community": 117,
-      "community_name": "Data, Persistence & Career Calibration Errata",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "table of contents",
-      "source_file": "docs/agent-errata/data-and-persistence.md",
-      "source_location": "L10"
-    },
-    {
-      "id": "docs_agent_errata_data_and_persistence_the_season_calendar_cannot_be_a_fixed_weekly_rhythm",
-      "label": "The season calendar cannot be a fixed weekly rhythm",
-      "_origin": "ast",
-      "community": 117,
-      "community_name": "Data, Persistence & Career Calibration Errata",
-      "file_type": "document",
-      "node_kind": "heading",
-      "norm_label": "the season calendar cannot be a fixed weekly rhythm",
-      "source_file": "docs/agent-errata/data-and-persistence.md",
-      "source_location": "L39"
     },
     {
       "id": "docs_agent_errata_set_pieces_discovered_rules",
@@ -5045,7 +5032,7 @@
       "node_kind": "heading",
       "norm_label": "bicycle-kick-dominates-ambiguous-facing",
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L100"
+      "source_location": "L101"
     },
     {
       "id": "docs_agent_errata_physics_and_ball_discovered_rules",
@@ -5069,7 +5056,7 @@
       "node_kind": "heading",
       "norm_label": "dribble-claim-ignores-existing-possessor-dual-driver-jitter",
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L157"
+      "source_location": "L158"
     },
     {
       "id": "docs_agent_errata_physics_and_ball_dribble_magnet_forward_overshoot_oscillation",
@@ -5081,7 +5068,19 @@
       "node_kind": "heading",
       "norm_label": "dribble-magnet-forward-overshoot-oscillation",
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L19"
+      "source_location": "L20"
+    },
+    {
+      "id": "docs_agent_errata_physics_and_ball_eval_simulation_harness_was_decoupled_from_gdscript_tuning",
+      "label": "eval-simulation-harness-was-decoupled-from-gdscript-tuning",
+      "_origin": "ast",
+      "community": 120,
+      "community_name": "Physics, Ball Dynamics & Kinematics Errata",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "eval-simulation-harness-was-decoupled-from-gdscript-tuning",
+      "source_file": "docs/agent-errata/physics-and-ball.md",
+      "source_location": "L315"
     },
     {
       "id": "docs_agent_errata_physics_and_ball_physics_ball_dynamics_kinematics_errata",
@@ -5117,7 +5116,7 @@
       "node_kind": "heading",
       "norm_label": "verify-external-agent-prompts-against-source-before-executing",
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L247"
+      "source_location": "L248"
     },
     {
       "id": "docs_agent_errata_readme_agent_errata_lessons_learned_index",
@@ -5312,47 +5311,11 @@
       "source_location": "L1"
     },
     {
-      "id": "docs_agent_errata_data_and_persistence",
-      "label": "data-and-persistence.md",
-      "_origin": "ast",
-      "community": 123,
-      "community_name": "README.md",
-      "file_type": "document",
-      "node_kind": "page",
-      "norm_label": "data-and-persistence.md",
-      "source_file": "docs/agent-errata/data-and-persistence.md",
-      "source_location": "L1"
-    },
-    {
-      "id": "docs_agent_errata_player_ai",
-      "label": "player-ai.md",
-      "_origin": "ast",
-      "community": 123,
-      "community_name": "README.md",
-      "file_type": "document",
-      "node_kind": "page",
-      "norm_label": "player-ai.md",
-      "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L1"
-    },
-    {
-      "id": "docs_agent_errata_readme",
-      "label": "README.md",
-      "_origin": "ast",
-      "community": 123,
-      "community_name": "README.md",
-      "file_type": "document",
-      "node_kind": "page",
-      "norm_label": "readme.md",
-      "source_file": "docs/agent-errata/README.md",
-      "source_location": "L1"
-    },
-    {
       "id": "docs_agent_errata_scene_and_node_paths",
       "label": "scene-and-node-paths.md",
       "_origin": "ast",
       "community": 123,
-      "community_name": "README.md",
+      "community_name": "Scene Tree, Node Hierarchy & Cross-Referencing Errata",
       "file_type": "document",
       "node_kind": "page",
       "norm_label": "scene-and-node-paths.md",
@@ -5364,7 +5327,7 @@
       "label": "Cross-Module Architecture Findings",
       "_origin": "ast",
       "community": 123,
-      "community_name": "README.md",
+      "community_name": "Scene Tree, Node Hierarchy & Cross-Referencing Errata",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "cross-module architecture findings",
@@ -5376,7 +5339,7 @@
       "label": "ERR-20260901-01",
       "_origin": "ast",
       "community": 123,
-      "community_name": "README.md",
+      "community_name": "Scene Tree, Node Hierarchy & Cross-Referencing Errata",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "err-20260901-01",
@@ -5388,7 +5351,7 @@
       "label": "Error Logs",
       "_origin": "ast",
       "community": 123,
-      "community_name": "README.md",
+      "community_name": "Scene Tree, Node Hierarchy & Cross-Referencing Errata",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "error logs",
@@ -5400,7 +5363,7 @@
       "label": "Non-ASCII identifiers parse here but not in Godot",
       "_origin": "ast",
       "community": 123,
-      "community_name": "README.md",
+      "community_name": "Scene Tree, Node Hierarchy & Cross-Referencing Errata",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "non-ascii identifiers parse here but not in godot",
@@ -5412,7 +5375,7 @@
       "label": "Scene Tree, Node Hierarchy & Cross-Referencing Errata",
       "_origin": "ast",
       "community": 123,
-      "community_name": "README.md",
+      "community_name": "Scene Tree, Node Hierarchy & Cross-Referencing Errata",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "scene tree, node hierarchy & cross-referencing errata",
@@ -5424,7 +5387,7 @@
       "label": "Table of Contents",
       "_origin": "ast",
       "community": 123,
-      "community_name": "README.md",
+      "community_name": "Scene Tree, Node Hierarchy & Cross-Referencing Errata",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "table of contents",
@@ -5436,7 +5399,7 @@
       "label": "Three latent runtime crashes found by static cross-referencing",
       "_origin": "ast",
       "community": 123,
-      "community_name": "README.md",
+      "community_name": "Scene Tree, Node Hierarchy & Cross-Referencing Errata",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "three latent runtime crashes found by static cross-referencing",
@@ -5444,11 +5407,83 @@
       "source_location": "L65"
     },
     {
+      "id": "docs_agent_errata_data_and_persistence",
+      "label": "data-and-persistence.md",
+      "_origin": "ast",
+      "community": 124,
+      "community_name": "session-history.md",
+      "file_type": "document",
+      "node_kind": "page",
+      "norm_label": "data-and-persistence.md",
+      "source_file": "docs/agent-errata/data-and-persistence.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "docs_agent_errata_data_and_persistence_calibration_is_not_optional_and_the_first_guess_was_wrong_twice",
+      "label": "Calibration is not optional, and the first guess was wrong twice",
+      "_origin": "ast",
+      "community": 124,
+      "community_name": "session-history.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "calibration is not optional, and the first guess was wrong twice",
+      "source_file": "docs/agent-errata/data-and-persistence.md",
+      "source_location": "L17"
+    },
+    {
+      "id": "docs_agent_errata_data_and_persistence_career_calibration_findings",
+      "label": "Career Calibration Findings",
+      "_origin": "ast",
+      "community": 124,
+      "community_name": "session-history.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "career calibration findings",
+      "source_file": "docs/agent-errata/data-and-persistence.md",
+      "source_location": "L11"
+    },
+    {
+      "id": "docs_agent_errata_data_and_persistence_data_persistence_career_calibration_errata",
+      "label": "Data, Persistence & Career Calibration Errata",
+      "_origin": "ast",
+      "community": 124,
+      "community_name": "session-history.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "data, persistence & career calibration errata",
+      "source_file": "docs/agent-errata/data-and-persistence.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "docs_agent_errata_data_and_persistence_table_of_contents",
+      "label": "Table of Contents",
+      "_origin": "ast",
+      "community": 124,
+      "community_name": "session-history.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "table of contents",
+      "source_file": "docs/agent-errata/data-and-persistence.md",
+      "source_location": "L10"
+    },
+    {
+      "id": "docs_agent_errata_data_and_persistence_the_season_calendar_cannot_be_a_fixed_weekly_rhythm",
+      "label": "The season calendar cannot be a fixed weekly rhythm",
+      "_origin": "ast",
+      "community": 124,
+      "community_name": "session-history.md",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "the season calendar cannot be a fixed weekly rhythm",
+      "source_file": "docs/agent-errata/data-and-persistence.md",
+      "source_location": "L39"
+    },
+    {
       "id": "docs_agent_errata_session_history",
       "label": "session-history.md",
       "_origin": "ast",
-      "community": 123,
-      "community_name": "README.md",
+      "community": 124,
+      "community_name": "session-history.md",
       "file_type": "document",
       "node_kind": "page",
       "norm_label": "session-history.md",
@@ -5456,23 +5491,11 @@
       "source_location": "L1"
     },
     {
-      "id": "docs_agent_errata_set_pieces",
-      "label": "set-pieces.md",
-      "_origin": "ast",
-      "community": 123,
-      "community_name": "README.md",
-      "file_type": "document",
-      "node_kind": "page",
-      "norm_label": "set-pieces.md",
-      "source_file": "docs/agent-errata/set-pieces.md",
-      "source_location": "L1"
-    },
-    {
       "id": "docs_agent_errata_session_history_architectural_gotcha_findings_from_this_session",
       "label": "Architectural & Gotcha Findings from this Session",
       "_origin": "ast",
       "community": 124,
-      "community_name": "Errata Session History & Handoff Logs",
+      "community_name": "session-history.md",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "architectural & gotcha findings from this session",
@@ -5484,7 +5507,7 @@
       "label": "Errata Session History & Handoff Logs",
       "_origin": "ast",
       "community": 124,
-      "community_name": "Errata Session History & Handoff Logs",
+      "community_name": "session-history.md",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "errata session history & handoff logs",
@@ -5496,7 +5519,7 @@
       "label": "Next Steps Handoff",
       "_origin": "ast",
       "community": 124,
-      "community_name": "Errata Session History & Handoff Logs",
+      "community_name": "session-history.md",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "next steps handoff",
@@ -5508,7 +5531,7 @@
       "label": "Recent Session State Archive",
       "_origin": "ast",
       "community": 124,
-      "community_name": "Errata Session History & Handoff Logs",
+      "community_name": "session-history.md",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "recent session state archive",
@@ -5520,7 +5543,7 @@
       "label": "Session State: 2026-09-02 (Manager Career Mode, Phase 4)",
       "_origin": "ast",
       "community": 124,
-      "community_name": "Errata Session History & Handoff Logs",
+      "community_name": "session-history.md",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "session state: 2026-09-02 (manager career mode, phase 4)",
@@ -5532,7 +5555,7 @@
       "label": "Table of Contents",
       "_origin": "ast",
       "community": 124,
-      "community_name": "Errata Session History & Handoff Logs",
+      "community_name": "session-history.md",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "table of contents",
@@ -5540,11 +5563,47 @@
       "source_location": "L7"
     },
     {
+      "id": "docs_agent_errata_player_ai",
+      "label": "player-ai.md",
+      "_origin": "ast",
+      "community": 125,
+      "community_name": "README.md",
+      "file_type": "document",
+      "node_kind": "page",
+      "norm_label": "player-ai.md",
+      "source_file": "docs/agent-errata/player-ai.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "docs_agent_errata_readme",
+      "label": "README.md",
+      "_origin": "ast",
+      "community": 125,
+      "community_name": "README.md",
+      "file_type": "document",
+      "node_kind": "page",
+      "norm_label": "readme.md",
+      "source_file": "docs/agent-errata/README.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "docs_agent_errata_set_pieces",
+      "label": "set-pieces.md",
+      "_origin": "ast",
+      "community": 125,
+      "community_name": "README.md",
+      "file_type": "document",
+      "node_kind": "page",
+      "norm_label": "set-pieces.md",
+      "source_file": "docs/agent-errata/set-pieces.md",
+      "source_location": "L1"
+    },
+    {
       "id": "docs_agent_errata_telemetry_and_stats",
       "label": "telemetry-and-stats.md",
       "_origin": "ast",
       "community": 125,
-      "community_name": "telemetry-and-stats.md",
+      "community_name": "README.md",
       "file_type": "document",
       "node_kind": "page",
       "norm_label": "telemetry-and-stats.md",
@@ -5556,7 +5615,7 @@
       "label": "crowding-space-creation-diagnostics",
       "_origin": "ast",
       "community": 125,
-      "community_name": "telemetry-and-stats.md",
+      "community_name": "README.md",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "crowding-space-creation-diagnostics",
@@ -5568,7 +5627,7 @@
       "label": "Discovered Rules",
       "_origin": "ast",
       "community": 125,
-      "community_name": "telemetry-and-stats.md",
+      "community_name": "README.md",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "discovered rules",
@@ -5580,7 +5639,7 @@
       "label": "Table of Contents",
       "_origin": "ast",
       "community": 125,
-      "community_name": "telemetry-and-stats.md",
+      "community_name": "README.md",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "table of contents",
@@ -5592,7 +5651,7 @@
       "label": "Telemetry, Diagnostics & Match Stats Errata",
       "_origin": "ast",
       "community": 125,
-      "community_name": "telemetry-and-stats.md",
+      "community_name": "README.md",
       "file_type": "document",
       "node_kind": "heading",
       "norm_label": "telemetry, diagnostics & match stats errata",
@@ -21882,7 +21941,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L269",
+      "source_location": "L551",
       "weight": 1.0
     },
     {
@@ -21894,7 +21953,31 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L195",
+      "source_location": "L271",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness_step",
+      "target": "tools_eval_simulation_analyticalsimulationharness_resolve_shot",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L330",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness_step",
+      "target": "tools_eval_simulation_analyticalsimulationharness_resolve_pass",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L332",
       "weight": 1.0
     },
     {
@@ -21906,7 +21989,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L365",
+      "source_location": "L740",
       "weight": 1.0
     },
     {
@@ -21918,7 +22001,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L370",
+      "source_location": "L745",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_run_analytical_trials",
+      "target": "tools_eval_simulation_analyticalsimulationharness",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L622",
       "weight": 1.0
     },
     {
@@ -21930,19 +22025,19 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L307",
+      "source_location": "L672",
       "weight": 1.0
     },
     {
       "source": "tools_eval_simulation_run_evaluation",
-      "target": "tools_eval_simulation_analyticalsimulationharness",
+      "target": "tools_eval_simulation_run_analytical_trials",
       "relation": "calls",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L330",
+      "source_location": "L697",
       "weight": 1.0
     },
     {
@@ -24534,7 +24629,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L267",
+      "source_location": "L549",
       "weight": 1.0
     },
     {
@@ -24546,7 +24641,19 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L339",
+      "source_location": "L705",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_run_analytical_trials",
+      "target": "tools_eval_simulation_py_any",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "generic_arg",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L621",
       "weight": 1.0
     },
     {
@@ -24558,7 +24665,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L306",
+      "source_location": "L671",
       "weight": 1.0
     },
     {
@@ -25003,6 +25110,18 @@
       "context": "import",
       "source_file": "tools/mcp_server.py",
       "source_location": "L47",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness_resolve_pass",
+      "target": "range",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "parameter_type",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L441",
       "weight": 1.0
     },
     {
@@ -25937,7 +26056,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L100",
+      "source_location": "L101",
       "weight": 1.0
     },
     {
@@ -25948,7 +26067,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L157",
+      "source_location": "L158",
       "weight": 1.0
     },
     {
@@ -25959,7 +26078,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L19",
+      "source_location": "L20",
       "weight": 1.0
     },
     {
@@ -25970,7 +26089,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L247",
+      "source_location": "L248",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_agent_errata_physics_and_ball_physics_ball_dynamics_kinematics_errata",
+      "target": "docs_agent_errata_physics_and_ball_eval_simulation_harness_was_decoupled_from_gdscript_tuning",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/agent-errata/physics-and-ball.md",
+      "source_location": "L315",
       "weight": 1.0
     },
     {
@@ -28340,13 +28470,35 @@
     },
     {
       "source": "tools_eval_simulation",
+      "target": "tools_eval_simulation_find_godot_binary",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation",
+      "target": "tools_eval_simulation_run_analytical_trials",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L621",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation",
       "target": "tools_eval_simulation_run_evaluation",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L306",
+      "source_location": "L671",
       "weight": 1.0
     },
     {
@@ -28357,7 +28509,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L339",
+      "source_location": "L705",
       "weight": 1.0
     },
     {
@@ -28368,18 +28520,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L358",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation",
-      "target": "tools_eval_simulation_find_godot_binary",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L42",
+      "source_location": "L733",
       "weight": 1.0
     },
     {
@@ -28390,7 +28531,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L57",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -30419,13 +30560,24 @@
     },
     {
       "source": "tools_eval_simulation_analyticalsimulationharness",
+      "target": "tools_eval_simulation_analyticalsimulationharness_init",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L101",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness",
       "target": "tools_eval_simulation_analyticalsimulationharness_check_nan_inf",
       "relation": "method",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L119",
+      "source_location": "L187",
       "weight": 1.0
     },
     {
@@ -30436,7 +30588,29 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L125",
+      "source_location": "L193",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness",
+      "target": "tools_eval_simulation_analyticalsimulationharness_resolve_shot",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L376",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness",
+      "target": "tools_eval_simulation_analyticalsimulationharness_resolve_pass",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L441",
       "weight": 1.0
     },
     {
@@ -30447,18 +30621,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L267",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness",
-      "target": "tools_eval_simulation_analyticalsimulationharness_init",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L63",
+      "source_location": "L549",
       "weight": 1.0
     },
     {
@@ -30913,14 +31076,14 @@
       "weight": 1.0
     },
     {
-      "source": "tools_eval_simulation_rationale_58",
+      "source": "tools_eval_simulation_rationale_87",
       "target": "tools_eval_simulation_analyticalsimulationharness",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L58",
+      "source_location": "L87",
       "weight": 1.0
     },
     {
@@ -41497,5 +41660,5 @@
       "source_file": "docs/CORE_INVARIANTS.md"
     }
   ],
-  "built_at_commit": "d411098167ce82579cd935fd1f37a5a15d1166db"
+  "built_at_commit": "e07e79d26e4f81507c66fb213c380ad6b4035562"
 }

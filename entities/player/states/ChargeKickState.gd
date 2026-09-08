@@ -136,10 +136,14 @@ func _release_kick(player: HeavyPlayerController) -> void:
 	var inherited: Vector2 = aim * (player.velocity.length() * run_dot * 0.30)
 
 	# Accuracy scatter: at full charge, mood determines how much aim jitter applies.
-	# A streaking player is locked in; a slumping one sprays the ball.
+	# A streaking player is locked in; a slumping one sprays the ball. Fatigue
+	# widens it further — legs stop obeying composure before stamina hits zero,
+	# so an EXHAUSTED player's strike is measurably less reliable than a FRESH
+	# one at the same charge and mood.
 	var mood_node: MoodSystem = player.get_mood()
 	var scatter_mult: float = mood_node.get_kick_accuracy_scatter_multiplier() if mood_node != null else 1.0
-	var max_scatter_angle: float = deg_to_rad(12.0) * charge_ratio * scatter_mult
+	var fatigue_scatter_mult: float = lerpf(1.0, 1.4, 1.0 - player.get_stamina_ratio())
+	var max_scatter_angle: float = deg_to_rad(12.0) * charge_ratio * scatter_mult * fatigue_scatter_mult
 	if max_scatter_angle > 0.001:
 		_rng.seed = player.get_instance_id() + GameManager.get_match_tick()
 		var scatter: float = clampf(_gaussian_scatter(max_scatter_angle * 0.4), -max_scatter_angle, max_scatter_angle)
