@@ -306,7 +306,7 @@ func _update_hud_stamina_readout() -> void:
 
 
 func _on_goal_scored(team: int, scorer: Node = null) -> void:
-	var team_name: String = team_a_label.text if team == GameManager.TEAM_A else team_b_label.text
+	var team_name: String = _team_a_name if team == GameManager.TEAM_A else _team_b_name
 	var scorer_player := scorer as HeavyPlayerController
 	var p_data: PlayerData = scorer_player.get_meta(&"player_data", null) as PlayerData if (scorer_player != null and scorer_player.has_meta(&"player_data")) else null
 	if p_data != null and p_data.player_name != "":

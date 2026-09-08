@@ -405,7 +405,10 @@ func _populate_lineup_card(
 	team_title_vbox.add_child(team_lbl)
 
 	var mgr_str: String = "Manager: %s" % (mgr_data.manager_name if mgr_data != null and mgr_data.manager_name != "" else "Head Coach")
-	var form_str: String = "Shape: %s" % (team_data.formation if team_data.formation != "" else "4-3-3")
+	var active_formation: String = team_data.formation_override
+	if active_formation == "":
+		active_formation = mgr_data.preferred_formation if mgr_data != null else "4-3-3"
+	var form_str: String = "Shape: %s" % active_formation
 	var sub_lbl := Label.new()
 	sub_lbl.text = "%s  |  %s" % [mgr_str, form_str]
 	sub_lbl.add_theme_font_size_override("font_size", 12)

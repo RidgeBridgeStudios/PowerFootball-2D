@@ -19,11 +19,11 @@
 class_name MatchOfficialCrew
 extends Node2D
 
-@onready var center_ref: CenterRefereeVisual = $CenterReferee
-@onready var linesman_top: AssistantRefereeVisual = $LinesmanTop
-@onready var linesman_bottom: AssistantRefereeVisual = $LinesmanBottom
-@onready var fourth_official: FourthOfficialVisual = $FourthOfficial
-@onready var whistle_synth: WhistleSynthesizer = $WhistleSynthesizer
+@onready var center_ref: CenterRefereeVisual = get_node_or_null("CenterReferee")
+@onready var linesman_top: AssistantRefereeVisual = get_node_or_null("LinesmanTop")
+@onready var linesman_bottom: AssistantRefereeVisual = get_node_or_null("LinesmanBottom")
+@onready var fourth_official: FourthOfficialVisual = get_node_or_null("FourthOfficial")
+@onready var whistle_synth: WhistleSynthesizer = get_node_or_null("WhistleSynthesizer")
 
 var _boundary: PitchBoundary = null
 var _referee_data: RefereeData = null

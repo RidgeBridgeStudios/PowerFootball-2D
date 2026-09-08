@@ -12,11 +12,10 @@ config_version=5
 
 config/name="PowerFootball 2D"
 run/main_scene="res://ui/SplashScreen.tscn"
-boot_splash/bg_color=Color(0.960784, 0.929412, 0.886275, 1)
-boot_splash/image="res://art/studio_logo.png"
-boot_splash/fullsize=false
-boot_splash/use_filter=true
 config/features=PackedStringArray("4.7", "GL Compatibility")
+boot_splash/bg_color=Color(0.960784, 0.929412, 0.886275, 1)
+boot_splash/stretch_mode=0
+boot_splash/image="res://art/studio_logo.png"
 config/icon="res://art/player.png"
 
 [autoload]
@@ -40,6 +39,10 @@ window/size/viewport_width=1280
 window/size/viewport_height=720
 window/stretch/mode="canvas_items"
 window/stretch/aspect="expand"
+
+[dotnet]
+
+project/assembly_name="PowerFootball 2D"
 
 [input]
 

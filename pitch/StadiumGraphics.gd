@@ -30,8 +30,8 @@ class_name StadiumGraphics
 extends Node2D
 
 ## Node references for the two managers
-@onready var manager_visual_a: ManagerVisual = $ManagerVisualA
-@onready var manager_visual_b: ManagerVisual = $ManagerVisualB
+@onready var manager_visual_a: ManagerVisual = get_node_or_null("ManagerVisualA")
+@onready var manager_visual_b: ManagerVisual = get_node_or_null("ManagerVisualB")
 
 var _boundary: PitchBoundary = null
 var _team_a_data: TeamData = null

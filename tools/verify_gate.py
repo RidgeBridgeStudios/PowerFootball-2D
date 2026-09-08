@@ -27,6 +27,7 @@ Modes:
         13. dump_api.py
         14. generate_symbols.py
         15. compact_errata.py
+        16. graphify update . (AST topology sync)
 
 Usage:
     python tools/verify_gate.py [--fast | --full] [--xml]
@@ -37,6 +38,7 @@ from __future__ import annotations
 import argparse
 import html
 import os
+import shutil
 import subprocess
 import sys
 import time
@@ -99,6 +101,20 @@ def main() -> int:
         ("generate_symbols", [py, os.path.join(ROOT, "tools", "generate_symbols.py")]),
         ("compact_errata", [py, os.path.join(ROOT, "tools", "compact_errata.py")]),
     ]
+
+    graphify_bin = shutil.which("graphify")
+    graphify_py_pin = os.path.join(ROOT, "graphify-out", ".graphify_python")
+    if os.path.exists(os.path.join(ROOT, "graphify-out", "graph.json")):
+        if graphify_bin:
+            full_checks.append(("graphify_update", [graphify_bin, "update", "."]))
+        elif os.path.exists(graphify_py_pin):
+            try:
+                with open(graphify_py_pin, "r", encoding="utf-8") as f:
+                    pinned_py = f.read().strip()
+                if pinned_py and os.path.exists(pinned_py):
+                    full_checks.append(("graphify_update", [pinned_py, "-m", "graphify", "update", "."]))
+            except Exception:
+                pass
 
     checks_to_run = list(fast_checks)
     if mode_full:

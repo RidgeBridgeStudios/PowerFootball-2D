@@ -6,7 +6,7 @@ Static analysis, invariant AST linting, scene graph verification, headless simul
 
 | Command | Action | Description |
 |---|---|---|
-| `/verify-all` | `tools/gdcheck.py && tools/lint_invariants.py && tools/tscn_linter.py && tools/validate_schemas.py` | Complete GDScript, invariant, scene & database verification |
+| `/verify-all` | `tools/verify_gate.py --full` | Complete 17-step verification suite (linters, fuzzers, sim, symbols, graphify) |
 | `/lint-invariants` | `tools/lint_invariants.py` | Run domain AST invariant linter |
 | `/eval-sim` | `tools/eval_simulation.py` | Run 60s headless simulation assertion harness |
 | `/fuzz-solvers` | `tools/fuzz_solvers.py` | Run 100,000 property fuzzing iterations across mathematical solvers |

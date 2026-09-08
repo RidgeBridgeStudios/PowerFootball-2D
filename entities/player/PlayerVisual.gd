@@ -122,7 +122,7 @@ func _draw() -> void:
 		var user_c_size: Vector2 = _font.get_string_size("C", HORIZONTAL_ALIGNMENT_CENTER, -1, 6)
 		var c_baseline: Vector2 = badge_pos + Vector2(-user_c_size.x * 0.5, user_c_size.y * 0.38)
 
-	draw_string(_font, c_baseline, "C", HORIZONTAL_ALIGNMENT_CENTER, -1, 6, Color(0.10, 0.10, 0.12, 1.0))
+		draw_string(_font, c_baseline, "C", HORIZONTAL_ALIGNMENT_CENTER, -1, 6, Color(0.10, 0.10, 0.12, 1.0))
 
 	## 3. Exhaustion / Severe Fatigue Warning Indicator
 	if _controller != null and (_controller.sprint_locked or _controller.get_fatigue_tier() == HeavyPlayerController.FatigueTier.EXHAUSTED) and _font != null:

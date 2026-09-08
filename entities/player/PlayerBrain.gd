@@ -290,9 +290,24 @@ const LA_PAUSA_HOLD_SECONDS: float = 1.0
 ## PanicClear when dribbling is genuinely viable, not just nonzero.
 const LA_PAUSA_MIN_DRIBBLE_SCORE: float = 0.05
 
-## Goalkeeper arc clamping distance off the goal line (in pixels).
+## Goalkeeper arc clamping distance off the goal line (in pixels). This is the
+## close-range "narrow the angle" band used while the ball is inside/near the
+## defending third — see GOALIE_SWEEPER_MAX_DIST for the separate, larger band
+## used to roam the box and sweep behind an advanced back line.
 const GOALIE_ARC_MIN_DIST: float = 40.0
 const GOALIE_ARC_MAX_DIST: float = 90.0
+
+## Sweeper-keeper roaming: when the ball is deep in the attacking half
+## (dist_to_ball > GOALIE_SWEEPER_BALL_DIST) and there is no defensive
+## emergency (that is _should_goalkeeper_rush()'s job), the keeper steps off
+## the goal line to sit as an outlet behind the team's shared defensive line
+## instead of parking in the 6-yard box. GOALIE_SWEEPER_MAX_DIST caps how far
+## that can push — just shy of the 320px penalty-area depth
+## (SetPieceCoordinator.PENALTY_AREA_DEPTH) — and GOALIE_SWEEPER_LINE_MARGIN
+## keeps the keeper trailing behind the last defender rather than level with it.
+const GOALIE_SWEEPER_BALL_DIST: float = 500.0
+const GOALIE_SWEEPER_MAX_DIST: float = 280.0
+const GOALIE_SWEEPER_LINE_MARGIN: float = 60.0
 
 ## Physics frames between decision re-evaluations. Combined with player_index as
 ## a phase offset, this spreads 22 brains over 15 frames — at most two think on
@@ -3015,20 +3030,34 @@ func _goalie_patrol_target() -> Vector2:
 	var bisector_dir: Vector2 = to_ball.normalized()
 	var dist_to_ball: float = to_ball.length()
 
-	# Dynamic arc distance off the goal line: 40px when ball is far (>600px), up to 90px when close (<200px)
+	# Close-range arc: 40px when ball is far (>600px), up to 90px when close
+	# (<200px) — narrows the shooting angle as danger approaches the box.
 	var t_dist: float = clampf((dist_to_ball - 200.0) / 400.0, 0.0, 1.0)
 	var arc_dist: float = clampf(lerpf(GOALIE_ARC_MAX_DIST, GOALIE_ARC_MIN_DIST, t_dist), GOALIE_ARC_MIN_DIST, GOALIE_ARC_MAX_DIST)
+
+	# Sweeper push: with the ball deep in the attacking half, roam out toward
+	# the team's shared defensive line instead of camping the 6-yard box.
+	# Gated on ball distance so a sudden counter (ball distance drops below
+	# GOALIE_SWEEPER_BALL_DIST) immediately hands positioning back to the
+	# close-range arc above, retreating the keeper toward goal.
+	if dist_to_ball > GOALIE_SWEEPER_BALL_DIST:
+		var world: MatchWorldModel = MatchWorldModel.instance
+		if world != null:
+			var line_depth: float = absf(world.defensive_line_x[player.team] - goal_centre.x)
+			var sweep_dist: float = clampf(line_depth - GOALIE_SWEEPER_LINE_MARGIN, GOALIE_ARC_MIN_DIST, GOALIE_SWEEPER_MAX_DIST)
+			arc_dist = maxf(arc_dist, sweep_dist)
 
 	var patrol_pos: Vector2 = goal_centre + bisector_dir * arc_dist
 
 	# Constrain Y within the goal mouth height
 	patrol_pos.y = clampf(patrol_pos.y, goal_centre.y - half_mouth, goal_centre.y + half_mouth)
 
-	# Ensure X stays on the playing field side of the goal line
+	# Ensure X stays on the playing field side of the goal line, up to the
+	# sweeper cap so the roam above isn't immediately clamped back down.
 	if pitch_in_dir > 0.0:
-		patrol_pos.x = clampf(patrol_pos.x, goal_centre.x + 35.0, goal_centre.x + 130.0)
+		patrol_pos.x = clampf(patrol_pos.x, goal_centre.x + 35.0, goal_centre.x + GOALIE_SWEEPER_MAX_DIST)
 	else:
-		patrol_pos.x = clampf(patrol_pos.x, goal_centre.x - 130.0, goal_centre.x - 35.0)
+		patrol_pos.x = clampf(patrol_pos.x, goal_centre.x - GOALIE_SWEEPER_MAX_DIST, goal_centre.x - 35.0)
 
 	return patrol_pos
 

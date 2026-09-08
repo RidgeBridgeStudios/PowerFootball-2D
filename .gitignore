@@ -1,6 +1,8 @@
 .godot/
 *.import
 export_presets.cfg
+exported-binary/
+
 
 # Godot 4.4+ auto-generated UID caches for .gd/.gdshader files.
 # Godot regenerates these on demand; they are not source.

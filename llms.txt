@@ -9,6 +9,7 @@
 
 <core_invariants>
 - **docs/CORE_INVARIANTS.md** — Canonical single source of truth: Engine lock, simulation stack, choke points, and physics/AI laws.
+- **docs/GRAPHIFY_LIFECYCLE.md** — Canonical Graphify lifecycle, git hooks, update mechanics, and enforcement matrix.
 - **docs/API_SURFACE.md** — Auto-generated public API surface map across all 76+ scripts, exports, signals, and methods.
 - **docs/ANTI_PATTERNS.md** — Curated anti-pattern and hallucination corpus for autonomous agent reasoning.
 - **docs/MATH_SOLVERS.md** — Ground-truth mathematical solvers catalog with exact formulas, proofs, and GDScript reference code.
@@ -17,9 +18,10 @@
 - **POWERFOOTBALL_MASTER_VISION.md** — Master design vision, 5-layer simulation stack, systems design, and North Star.
 - **ROADMAP.md** — Tactical `[ ]`/`[x]` feature checklist across 5 development phases.
 - **docs/course_implementation_specification.md** — Course-derived reference specification (READ-ONLY): FSMs, formulas, gotchas.
-- **AGENTS.md** — Agent onboarding & protocol for Google Antigravity and Gemini context caching.
-- **CLAUDE.md** — Agent onboarding & entry point for Claude Code sessions.
-- **AGENTS_ERRATA.md** — Cross-agent shared memory, error logs, and pending rule proposals.
+- **AGENTS.md** — Canonical shared policy & architecture guide for all AI agents across the repository.
+- **AGENTS_ERRATA.md** — Compact migration index & pending rule proposal staging.
+- **docs/agent-errata/README.md** — Topic-specific errata index & reading guide (player-ai, match-state, physics-and-ball, set-pieces, scene-and-node-paths, data-and-persistence, telemetry-and-stats, ui-and-signals, session-history).
+- **docs/architecture/hubs/** — Concise architecture hub maps for central gameplay systems (PlayerBrain, MatchWorldModel, PitchScene, CareerManager, HeavyPlayerController, SetPieceCoordinator).
 </core_invariants>
 
 ---
@@ -170,6 +172,8 @@ Press office reactions, touchline dialogue, broadcast HUD, floating labels, matc
 - **tools/sync_rules.py** — Tool promoting rules from `AGENTS_ERRATA.md` to `.claude/rules/` and `docs/CORE_INVARIANTS.md`.
 - **tools/next_task.py** — Tool querying `ROADMAP.md` for the next unchecked Phase 1 gameplay task and relevant file context.
 - **tools/layer_context.py** — Targeted context injector for simulation layers 1–5.
+- **graphify** — Knowledge graph extractor, query engine, and Louvain clustering CLI (`graphify query`, `graphify path`, `graphify explain`, `graphify update .`).
+- **docs/GRAPHIFY_LIFECYCLE.md** — Canonical specification of Graphify build, update, git hooks, and enforcement matrix.
 - **.antigravity/commands.json** — Custom slash commands (`/verify-all`, `/slice`, `/search`, `/benchmark`, `/fuzz-formations`, `/replay-test`, `/gen-symbols`, `/lint-invariants`, `/eval-sim`, `/fuzz-solvers`, `/formation-audit`, `/blast-radius`, `/dump-dep-graph`, `/sync-rules`, `/compact-errata`, `/rebuild-api`, `/next-task`, `/layer-ctx`).
 - **.antigravity/hooks.json** — Lifecycle verification hooks.
 - **.antigravity/skills/** — Antigravity workflow skills (`eval-sim`, `ast-refactor`, `formation-audit`, `formation-fuzzer`, `perf-benchmark`).

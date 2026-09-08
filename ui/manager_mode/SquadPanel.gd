@@ -411,7 +411,7 @@ func _player_profile(
 		var contract_button: Button = CareerTheme.button("Offer New Contract", true)
 		contract_button.pressed.connect(func() -> void:
 			var modal: ContractNegotiationModal = ContractNegotiationModal.open_modal(
-				self, data, state, team, false
+				body, data, state, team, false
 			)
 			modal.negotiation_finished.connect(func(_succ: bool, _c: ContractData) -> void:
 				CareerManager.save_career()

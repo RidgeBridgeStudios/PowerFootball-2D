@@ -356,7 +356,7 @@ func _build_negotiations(host: VBoxContainer, career: CareerSaveData, p: CareerT
 				var p_d: PlayerData = t_team.squad[offer.player_squad_index] if t_team != null and offer.player_squad_index < t_team.squad.size() else null
 				var p_s: PlayerCareerState = career.state_for(offer.player_key())
 				var modal: ContractNegotiationModal = ContractNegotiationModal.open_modal(
-					self, p_d, p_s, t_team, false, offer
+					host, p_d, p_s, t_team, false, offer
 				)
 				modal.negotiation_finished.connect(func(_succ: bool, _c: ContractData) -> void:
 					refresh()
@@ -421,7 +421,7 @@ func _build_free_agents(
 		var sign_btn: Button = CareerTheme.button("Approach to Sign", true)
 		sign_btn.pressed.connect(func() -> void:
 			var modal: ContractNegotiationModal = ContractNegotiationModal.open_modal(
-				self, fa, null, null, true
+				host, fa, null, null, true
 			)
 			modal.negotiation_finished.connect(func(success: bool, _c: ContractData) -> void:
 				if success:
