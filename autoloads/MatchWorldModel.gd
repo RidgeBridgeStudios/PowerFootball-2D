@@ -68,6 +68,12 @@ const NO_INDEX: int = -1
 ## Default corridor width / clearance threshold (in pixels) for passing lane safety checks.
 const DEFAULT_PASS_LANE_CLEARANCE: float = 45.0
 
+## Half-width (px) of the corridor either side of a pass line inside which an
+## opponent counts as bypassed by that pass — see count_bypassed_opponents().
+## Matches the corridor UtilityMath.calculate_packing()'s telemetry-side model
+## uses, so the AI is rewarded for exactly the packing the match stats report.
+const PACKING_CORRIDOR_HALF_WIDTH: float = 160.0
+
 ## --- Player cache -----------------------------------------------------------
 ## Four parallel arrays rather than an array of structs: the hot loops in
 ## PlayerBrain read positions and teams far more often than they need the node
@@ -139,6 +145,14 @@ const LINE_OFFSET_DROPPED: float = 150.0
 ## World-px when the team is fully pressuring the carrier (numbers already
 ## around the ball — the line can step up and compress the pitch).
 const LINE_OFFSET_PRESSED: float = 60.0
+## World-px the line sits behind the ball while this team is IN possession —
+## the rest-defence band. Deep enough to sweep a loose ball and meet a counter
+## before it is a break (the 200-280px insurance band), shallow enough to keep
+## the whole team inside a 350px vertical envelope of the ball so the pitch
+## stays squeezed rather than stretched between a high press and a deep line.
+## Previously this case fell through to LINE_OFFSET_DROPPED (150px), which put
+## the back line close enough to the ball to be bypassed by a single clearance.
+const LINE_OFFSET_REST_DEFENCE: float = 240.0
 ## How fast the line glides toward its target, world-px/sec. Keeps the back
 ## four moving as a smooth wave rather than snapping every time the ball
 ## twitches.
@@ -243,7 +257,10 @@ const PASS_PRESSURE_LOOKAHEAD_SECONDS: float = 0.35
 
 ## World-px from either touchline inside which the ball carrier counts as
 ## "pinned wide" for the isolation trigger.
-const TOUCHLINE_MARGIN: float = 70.0
+## Calibration: tightened 70 -> 60 so the touchline trap arms only once the
+## carrier is genuinely pinned against the line with nowhere to turn, matching
+## the distance a real pressing trigger fires at.
+const TOUCHLINE_MARGIN: float = 60.0
 ## A carrier pinned near the touchline needs a teammate within this radius to
 ## count as supported; beyond it, they are isolated.
 const ISOLATION_SUPPORT_RADIUS: float = 200.0
@@ -258,7 +275,15 @@ const HEAVY_TOUCH_MAX_DIST: float = 130.0
 
 ## Minimum facing_dot (see HeavyPlayerController.get_facing_dot()) toward a
 ## point deep in the carrier's own half for "facing own goal" to trigger.
-const FACING_OWN_GOAL_DOT_THRESHOLD: float = 0.5
+## Dot of the carrier's facing against a probe deep in their OWN half — so a
+## higher value means "more squarely turned toward their own goal".
+## Calibration: eased 0.5 -> 0.30. Expressed against the opponent goal (the
+## direction the pressing side cares about) that is a facing dot of -0.30: a
+## carrier who has merely turned away from play, not one who has completely
+## about-faced. At 0.5 the trigger only fired on a full turn, by which point
+## the carrier had normally already played the ball and the pressing moment
+## was gone.
+const FACING_OWN_GOAL_DOT_THRESHOLD: float = 0.30
 
 ## Seconds the same possessor may hold the ball uninterrupted, with none of
 ## the other trigger heuristics firing, before PROLONGED_POSSESSION forces a
@@ -659,7 +684,12 @@ func _update_defensive_lines(delta: float) -> void:
 	if ball_node == null or not is_instance_valid(ball_node):
 		return
 
-	var target_x: PackedFloat32Array = PackedFloat32Array([0.0, 0.0])
+	# Two locals rather than a PackedFloat32Array: this runs every physics
+	# frame, and the array literal was a per-frame heap allocation inside the
+	# spatial cache's own update — exactly what ai-architect.md's zero-hot-path-
+	# allocation rule exists to prevent.
+	var target_x_a: float = 0.0
+	var target_x_b: float = 0.0
 	for t: int in range(2):
 		# Team 0 attacks +X, team 1 attacks -X (see soccer-physics.md /
 		# FormationAnchorMath's identical convention) — dropping off means
@@ -667,24 +697,35 @@ func _update_defensive_lines(delta: float) -> void:
 		var attack_sign: float = 1.0 if t == 0 else -1.0
 		if _boundary != null and _boundary.sides_flipped:
 			attack_sign = -attack_sign
-		var pressure: float = 0.0
-		# Only this team's own pressure on an opposing carrier steps their
-		# line up. A loose ball or their own possession leaves pressure at
-		# 0.0, which settles the line to its deepest, safest default rather
-		# than inventing a reading for a phase this cache does not track.
-		if possessor_index != NO_INDEX and player_teams[possessor_index] != t:
-			pressure = _team_pressure_on_ball(t)
-		var offset: float = lerpf(LINE_OFFSET_DROPPED, LINE_OFFSET_PRESSED, pressure)
-		target_x[t] = ball_position.x - attack_sign * offset
+
+		var offset: float
+		if possessor_index != NO_INDEX and player_teams[possessor_index] == t:
+			# This team has the ball: the line's job is counter-attack insurance,
+			# not pressing depth. Hold the rest-defence band behind the ball.
+			offset = LINE_OFFSET_REST_DEFENCE
+		else:
+			# Opponent has it, or it is loose. Only this team's own pressure on
+			# the carrier steps the line up; a loose ball leaves pressure at 0.0,
+			# which settles to the deepest, safest default rather than inventing a
+			# reading for a phase this cache does not track.
+			var pressure: float = 0.0
+			if possessor_index != NO_INDEX:
+				pressure = _team_pressure_on_ball(t)
+			offset = lerpf(LINE_OFFSET_DROPPED, LINE_OFFSET_PRESSED, pressure)
+
+		if t == 0:
+			target_x_a = ball_position.x - attack_sign * offset
+		else:
+			target_x_b = ball_position.x - attack_sign * offset
 
 	if not _defensive_lines_ready:
-		defensive_line_x[0] = target_x[0]
-		defensive_line_x[1] = target_x[1]
+		defensive_line_x[0] = target_x_a
+		defensive_line_x[1] = target_x_b
 		_defensive_lines_ready = true
 		return
 
-	defensive_line_x[0] = move_toward(defensive_line_x[0], target_x[0], LINE_DEPTH_LERP_SPEED * delta)
-	defensive_line_x[1] = move_toward(defensive_line_x[1], target_x[1], LINE_DEPTH_LERP_SPEED * delta)
+	defensive_line_x[0] = move_toward(defensive_line_x[0], target_x_a, LINE_DEPTH_LERP_SPEED * delta)
+	defensive_line_x[1] = move_toward(defensive_line_x[1], target_x_b, LINE_DEPTH_LERP_SPEED * delta)
 
 
 ## 0.0-1.0 crowding score of `team`'s players around the ball — computed
@@ -1092,6 +1133,51 @@ func nearest_opponent_position(pos: Vector2, team: int) -> Vector2:
 			best_dist_sq = d_sq
 			best_pos = player_positions[i]
 	return best_pos
+
+
+## Count of opponents of `team` that a ball travelling from `start_pos` to
+## `end_pos` takes out of the game — the "packing" measure PassUtilityScorer's
+## WEIGHT_PACKING dimension is priced against, and the same definition
+## UtilityMath.calculate_packing() already uses for post-hoc telemetry.
+##
+## An opponent is bypassed when it sits strictly between the two positions
+## along the attacking axis AND within PACKING_CORRIDOR_HALF_WIDTH of the
+## straight line joining them, so a defender standing on the far touchline is
+## not credited to a pass down the opposite flank. Returns 0 for a pass that
+## does not advance along the attacking axis at all.
+##
+## Lives here rather than in the scorer because it is a spatial read, and every
+## spatial read routes through this cache (ai-architect.md). Returns a bare int
+## and allocates nothing, so it is safe once per pass candidate per decision
+## tick. `attack_sign` is +1.0 for a team attacking +X, -1.0 for -X.
+func count_bypassed_opponents(
+		start_pos: Vector2,
+		end_pos: Vector2,
+		team: int,
+		attack_sign: float
+) -> int:
+	var start_axis: float = start_pos.x * attack_sign
+	var end_axis: float = end_pos.x * attack_sign
+	var span: float = end_axis - start_axis
+	if span <= 0.0:
+		return 0
+
+	var bypassed: int = 0
+	for i: int in range(TOTAL_PLAYERS):
+		if player_teams[i] == team:
+			continue
+		if not is_instance_valid(player_nodes[i]):
+			continue
+		var opp_pos: Vector2 = player_positions[i]
+		var opp_axis: float = opp_pos.x * attack_sign
+		if opp_axis <= start_axis or opp_axis > end_axis:
+			continue
+		# Lateral gate: interpolate the pass line at this opponent's depth.
+		var t: float = (opp_axis - start_axis) / span
+		var corridor_y: float = start_pos.y + (end_pos.y - start_pos.y) * t
+		if absf(opp_pos.y - corridor_y) <= PACKING_CORRIDOR_HALF_WIDTH:
+			bypassed += 1
+	return bypassed
 
 
 ## True when `index` addresses a slot holding a live player.

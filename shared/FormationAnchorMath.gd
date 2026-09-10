@@ -64,6 +64,28 @@ const _ROLE_Y_BALL_WEIGHT: Dictionary = {
 	PlayerBrain.Role.OUTFIELD_ATTACKER: 0.30,
 }
 
+## Per-phase lateral (width) multiplier applied to the whole shape. A side in
+## possession spreads to stretch the opposing block and open the half-spaces
+## between its lines; a side without the ball narrows into a compact unit that
+## defends the middle and dares the opponent to go round it. TUNE HERE for how
+## much wider a team plays with the ball than without it.
+const _PHASE_WIDTH_MULT: Dictionary = {
+	TeamPhase.IN_POSSESSION: 1.25,
+	TeamPhase.OUT_OF_POSSESSION: 0.85,
+	TeamPhase.TRANSITION: 1.0,
+}
+
+## Per-phase front-to-back compression, applied about the ball's own depth so
+## an out-of-possession block collapses toward the ball rather than sliding
+## bodily toward its own goal (that is _PHASE_LINE_PUSH's job). 0.75 pulls the
+## distance between the deepest and highest line in by a quarter, which is what
+## turns a flat 4-4-2 spread across the pitch into a genuine defensive block.
+const _PHASE_DEPTH_MULT: Dictionary = {
+	TeamPhase.IN_POSSESSION: 1.0,
+	TeamPhase.OUT_OF_POSSESSION: 0.75,
+	TeamPhase.TRANSITION: 0.9,
+}
+
 ## Macro urgency modulation (POWERFOOTBALL_MASTER_VISION.md / architecture
 ## plan "Dynamic Formation & Compactness Shifts") — applied uniformly across
 ## every role, on top of the existing per-role phase push above, so the whole
@@ -121,12 +143,20 @@ static func get_dynamic_anchor_position(
 		lerpf(base_norm.y, ball_norm.y, y_ball_weight)
 	)
 
+	# Phase depth compression, about the ball's own normalized depth. Applied
+	# before the line push so the block first tightens, then slides as a unit.
+	var depth_mult: float = float(_PHASE_DEPTH_MULT.get(phase, 1.0))
+	pulled_norm.x = ball_norm.x + (pulled_norm.x - ball_norm.x) * depth_mult
+
 	var push: float = float(_PHASE_LINE_PUSH.get(phase, 0.0)) \
 		* float(_ROLE_PHASE_SENSITIVITY.get(role, 1.0)) * attack_sign
 	var urgency_shift_norm: float = (urgency * URGENCY_MAX_DEF_LINE_SHIFT * attack_sign) / half.x
 	pulled_norm.x = clampf(pulled_norm.x + push + urgency_shift_norm, -1.0, 1.0)
 
+	# Width: the phase multiplier sets how far the shape spreads, urgency then
+	# tightens (siege) or loosens (lead protection) it on top.
+	var width_mult: float = float(_PHASE_WIDTH_MULT.get(phase, 1.0))
 	var compactness_mult: float = 1.0 - URGENCY_COMPACTNESS_SCALE * urgency
-	pulled_norm.y = clampf(pulled_norm.y * compactness_mult, -1.0, 1.0)
+	pulled_norm.y = clampf(pulled_norm.y * width_mult * compactness_mult, -1.0, 1.0)
 
 	return pitch_centre + pulled_norm * half

@@ -54,6 +54,9 @@ All entries originally housed in this file have been migrated to their canonical
 - `dribble-claim-ignores-existing-possessor-dual-driver-jitter` → [docs/agent-errata/physics-and-ball.md#dribble-claim-ignores-existing-possessor-dual-driver-jitter](docs/agent-errata/physics-and-ball.md#dribble-claim-ignores-existing-possessor-dual-driver-jitter)
 - `cpu-players-never-gated-into-tackle-state` → [docs/agent-errata/player-ai.md#cpu-players-never-gated-into-tackle-state](docs/agent-errata/player-ai.md#cpu-players-never-gated-into-tackle-state)
 - `eval-simulation-harness-was-decoupled-from-gdscript-tuning` → [docs/agent-errata/physics-and-ball.md#eval-simulation-harness-was-decoupled-from-gdscript-tuning](docs/agent-errata/physics-and-ball.md#eval-simulation-harness-was-decoupled-from-gdscript-tuning)
+- `pass-strike-speed-was-flat-while-pass-selection-was-distance-scored` → [docs/agent-errata/player-ai.md#pass-strike-speed-was-flat-while-pass-selection-was-distance-scored](docs/agent-errata/player-ai.md#pass-strike-speed-was-flat-while-pass-selection-was-distance-scored)
+- `role-config-is-null-in-live-matches-so-role-space-alpha-is-what-runs` → [docs/agent-errata/player-ai.md#role-config-is-null-in-live-matches-so-role-space-alpha-is-what-runs](docs/agent-errata/player-ai.md#role-config-is-null-in-live-matches-so-role-space-alpha-is-what-runs)
+- `eval-harness-index-phase-and-claim-gate-were-structural-artifacts` → [docs/agent-errata/physics-and-ball.md#eval-harness-index-phase-and-claim-gate-were-structural-artifacts](docs/agent-errata/physics-and-ball.md#eval-harness-index-phase-and-claim-gate-were-structural-artifacts)
 
 ### Error Logs
 - `ERR-20260830-01` → [docs/agent-errata/player-ai.md#err-20260830-01](docs/agent-errata/player-ai.md#err-20260830-01)

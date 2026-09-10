@@ -6,9 +6,9 @@
     "semantic_hash": ""
   },
   ".agents/hooks.json": {
-    "mtime": 1788899424.722774,
-    "seen": 1789037774.4662468,
-    "ast_hash": "a7ee680d350522468461b2f1ffbe90b4",
+    "mtime": 1789041519.212764,
+    "seen": 1789042165.742397,
+    "ast_hash": "7fa34da8634a1c27a82c342fb11b9a7e",
     "semantic_hash": ""
   },
   ".agents/mcp.json": {
@@ -72,15 +72,15 @@
     "semantic_hash": ""
   },
   "docs/DEPENDENCY_GRAPH.json": {
-    "mtime": 1789040770.4262185,
-    "seen": 1789040933.9296985,
-    "ast_hash": "9e8182bce76cada1f7f3a7aae1dfc0e2",
+    "mtime": 1789045604.476622,
+    "seen": 1789045716.7975373,
+    "ast_hash": "c019b4d5e2a14342c71a5be9cb7b233e",
     "semantic_hash": ""
   },
   "docs/SYMBOLS.json": {
-    "mtime": 1789040930.4066367,
-    "seen": 1789040933.9297004,
-    "ast_hash": "0899b92c8a89929c16e4604738a1455e",
+    "mtime": 1789045713.0816975,
+    "seen": 1789045716.797539,
+    "ast_hash": "8828e78d97f30fd518264f13ec78f7d1",
     "semantic_hash": ""
   },
   "tools/audit_process_modes.py": {
@@ -126,9 +126,9 @@
     "semantic_hash": ""
   },
   "tools/eval_simulation.py": {
-    "mtime": 1789037417.145355,
-    "seen": 1789037774.466267,
-    "ast_hash": "e642f28b0d9d05fcda4e7221588afd47",
+    "mtime": 1789045515.1047382,
+    "seen": 1789045546.4281766,
+    "ast_hash": "238e14bd3e719dc54070bb1281923c9c",
     "semantic_hash": ""
   },
   "tools/expand_database.py": {
@@ -150,9 +150,9 @@
     "semantic_hash": ""
   },
   "tools/fuzz_formations.py": {
-    "mtime": 1788391030.0,
-    "seen": 1789037774.4662704,
-    "ast_hash": "ff81d274eed003993ddd871c32aee3eb",
+    "mtime": 1789043793.1437204,
+    "seen": 1789045546.4281805,
+    "ast_hash": "757b5e147f5b6be144c0e7b82ace233d",
     "semantic_hash": ""
   },
   "tools/fuzz_solvers.py": {
@@ -612,9 +612,9 @@
     "semantic_hash": ""
   },
   "AGENTS_ERRATA.md": {
-    "mtime": 1789037417.0809135,
-    "seen": 1789037774.4663491,
-    "ast_hash": "70d39005e271ea4db6eeca077fd22e43",
+    "mtime": 1789045674.5213215,
+    "seen": 1789045716.797645,
+    "ast_hash": "b2016922923e83c556c95f0b7c1b6aab",
     "semantic_hash": ""
   },
   "CLAUDE.md": {
@@ -654,15 +654,15 @@
     "semantic_hash": ""
   },
   "docs/API_SURFACE.md": {
-    "mtime": 1789040930.229728,
-    "seen": 1789040933.9298165,
-    "ast_hash": "bd320483d5578d4a956bc9ec5349a2d5",
+    "mtime": 1789045712.916672,
+    "seen": 1789045716.7976534,
+    "ast_hash": "0ad94c4a0f3f2d0b1201d5a9e996736c",
     "semantic_hash": ""
   },
   "docs/CORE_INVARIANTS.md": {
-    "mtime": 1788391030.0,
-    "seen": 1789037774.4663563,
-    "ast_hash": "87e5a80882b52c691d80863f8eabaeff",
+    "mtime": 1789045702.8597896,
+    "seen": 1789045716.7976546,
+    "ast_hash": "989f28612f88acae61c012fedb0df9e9",
     "semantic_hash": ""
   },
   "docs/MATH_SOLVERS.md": {
@@ -1098,15 +1098,15 @@
     "semantic_hash": ""
   },
   "docs/agent-errata/physics-and-ball.md": {
-    "mtime": 1789037417.0932512,
-    "seen": 1789037774.4663634,
-    "ast_hash": "6ee527952729302dd694046fd58dce80",
+    "mtime": 1789045674.5198157,
+    "seen": 1789045716.7976615,
+    "ast_hash": "0b55aaebbe5b711d45d790064e02abb3",
     "semantic_hash": ""
   },
   "docs/agent-errata/player-ai.md": {
-    "mtime": 1788899386.016104,
-    "seen": 1789037774.4663644,
-    "ast_hash": "cb115a6717d72eb5062a885b3b7b5815",
+    "mtime": 1789045674.5198157,
+    "seen": 1789045716.7976625,
+    "ast_hash": "2a608239d38985a6b7086f5e4b0771eb",
     "semantic_hash": ""
   },
   "docs/agent-errata/scene-and-node-paths.md": {
@@ -1209,6 +1209,24 @@
     "mtime": 1789039601.7072334,
     "seen": 1789039964.4743738,
     "ast_hash": "ea7fead32fdbfb3fe17e89ab30ce03a6",
+    "semantic_hash": ""
+  },
+  ".agents/config.json": {
+    "mtime": 1789041521.4283671,
+    "seen": 1789042165.7423942,
+    "ast_hash": "2c480932419dd1fd1d072de63a64bbc4",
+    "semantic_hash": ""
+  },
+  ".agents/rules/godot_gdscript.md": {
+    "mtime": 1789041525.4430132,
+    "seen": 1789042165.7424715,
+    "ast_hash": "f60386b633a51e52705f059a1c91bc88",
+    "semantic_hash": ""
+  },
+  "GEMINI.md": {
+    "mtime": 1789041515.9026573,
+    "seen": 1789042165.7425206,
+    "ast_hash": "c2c241bb9596e8439069f70bcc020d99",
     "semantic_hash": ""
   }
 }

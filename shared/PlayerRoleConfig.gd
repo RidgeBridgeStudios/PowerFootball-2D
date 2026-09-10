@@ -29,10 +29,12 @@ extends Resource
 
 ## Pass utility weights — individual @export floats so each is editable
 ## in the Inspector separately. Do NOT collapse into a Dictionary field.
-@export_range(0.0, 1.0) var w_dist: float = 0.25   # distance weight
-@export_range(0.0, 1.0) var w_angle: float = 0.20  # facing angle weight
-@export_range(0.0, 1.0) var w_press: float = 0.30  # receiver pressure weight
-@export_range(0.0, 1.0) var w_adv: float = 0.25    # forward advancement weight
+## Defaults mirror PassUtilityScorer's class-level weights so an unconfigured
+## preset scores identically to a player with no role_config at all.
+@export_range(0.0, 1.0) var w_dist: float = 0.20   # distance weight
+@export_range(0.0, 1.0) var w_angle: float = 0.18  # facing angle weight
+@export_range(0.0, 1.0) var w_press: float = 0.25  # receiver pressure weight
+@export_range(0.0, 1.0) var w_adv: float = 0.38    # forward advancement weight
 
 
 ## Normalized pitch zone, –0.5..0.5 space (0,0 = centre spot).

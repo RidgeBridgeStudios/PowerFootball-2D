@@ -1,16 +1,16 @@
 # Graph Report - PowerFootball-2D-main  (2026-09-10)
 
 ## Corpus Check
-- 152 files · ~329,901 words
+- 156 files · ~336,121 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1576 nodes · 1817 edges · 140 communities (101 shown, 30 thin omitted)
-- Extraction: 94% EXTRACTED · 6% INFERRED · 0% AMBIGUOUS · INFERRED: 101 edges (avg confidence: 0.92)
+- 1611 nodes · 1872 edges · 137 communities (99 shown, 29 thin omitted)
+- Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 101 edges (avg confidence: 0.92)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `c7856767`
+- Built from commit: `163c6c85`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -25,10 +25,10 @@
 - Team Flag Textures
 - Update
 - Vector2
-- Claude
+- Core Invariants
 - Json Schema
 - gdcheck.py
-- Core Invariants
+- fuzz_formations.py
 - lint_invariants.py
 - Math Solvers
 - Readme
@@ -122,7 +122,7 @@
 - The 10-Step Mandatory Protocol
 - AnalyticalSimulationHarness
 - verify_gate.py
-- Roadmap
+- Engine: Godot 4.7-stable | GDScript 2.0 ONLY | Strict Static Typing
 - SOCIAL_SIMULATION_ARCHITECTURE.md
 - Set Pieces & Restarts Errata
 - Match State, Pacing & Urgency Errata
@@ -130,22 +130,19 @@
 - Complete Item Migration Manifest
 - UI, HUD & Signal Bus Errata
 - Scene Tree, Node Hierarchy & Cross-Referencing Errata
-- session-history.md
 - README.md
-- Llms
-- dump_api.py
+- telemetry-and-stats.md
+- GDScript 2.0 & Godot 4.7 Strict Architecture Rules
+- Career Mode
 - Workflow: cross-system-feature
-- sync_rules.py
 - Workflow: bug-investigation
 - Workflow: data-database
 - Workflow: feature-implementation
 - Workflow: performance-work
 - Workflow: session-bootstrap
 - Workflow: task-intake-routing
-- fuzz_formations.py
-- 1. The Psychological Trait & Archetype Matrix
-- 4. Star Gravity & Tactical Asymmetry
-- 2. The Social Memory & Relationship Graph
+- Errata Session History & Handoff Logs
+- godot_verify.py
 
 ## God Nodes (most connected - your core abstractions)
 1. `Api Surface` - 151 edges
@@ -168,8 +165,8 @@
   tools/README.md → docs/API_SURFACE.md
 - `Claude` --references--> `Agents Errata`  [INFERRED]
   CLAUDE.md → AGENTS_ERRATA.md
-- `Claude` --references--> `Core Invariants`  [INFERRED]
-  CLAUDE.md → docs/CORE_INVARIANTS.md
+- `Powerfootball Master Vision` --references--> `Claude`  [INFERRED]
+  POWERFOOTBALL_MASTER_VISION.md → CLAUDE.md
 
 ## Import Cycles
 - None detected.
@@ -185,7 +182,7 @@
 - **Api Surface Concepts** — docs_api_surface_powerfootball2d___public_api_surface_map, docs_api_surface_table_of_contents, docs_api_surface_layer_1___physics___kinematics, docs_api_surface_entities_ball_ballstategd, docs_api_surface_entities_ball_ballstatefactorygd [INFERRED 0.85]
 - **Core Invariants Concepts** — docs_core_invariants_coreinvariantsmd___powerfootball2d_archi, docs_core_invariants_1_engine_lock, docs_core_invariants_prohibited___strictly_forbidden_apis, docs_core_invariants_strict_typing_invariant, docs_core_invariants_scene_initialization___serialization [INFERRED 0.85]
 
-## Communities (140 total, 30 thin omitted)
+## Communities (137 total, 29 thin omitted)
 
 ### Community 0 - "Api Surface"
 Cohesion: 0.01
@@ -227,9 +224,9 @@ Nodes (36): Update, are dropped rather than masquerading as deletions; untouched
 Cohesion: 0.13
 Nodes (19): ballistic_trajectory_z(), calculate_intercept_point(), calculate_packing(), calculate_psxg(), calculate_vaep_value(), calculate_xg(), calculate_xg_logit(), clampf() (+11 more)
 
-### Community 10 - "Claude"
-Cohesion: 0.07
-Nodes (31): Claude, Architectural Choke Points, Boot Order projectgodot, CLAUDEmd — Agent Entry Point, Context Budget — Claude Code Sessions, graphify, Process Priority, READ FIRST (+23 more)
+### Community 10 - "Core Invariants"
+Cohesion: 0.04
+Nodes (48): Claude, Architectural Choke Points, Boot Order projectgodot, CLAUDEmd — Agent Entry Point, Context Budget — Claude Code Sessions, graphify, Process Priority, READ FIRST (+40 more)
 
 ### Community 11 - "Json Schema"
 Cohesion: 0.07
@@ -239,9 +236,9 @@ Nodes (28): Json Schema, Biography PLANNED, Complete Manager Example, Complete P
 Cohesion: 0.12
 Nodes (23): Godot 47 Core, Compounded corrections — verified against the source, "Deprecated" export ≠ unused export, entities/manager/ManagerDirectorgd — shiftto, gdcheck resolves autoload singleton names as types — never "fix" this by adding classname, Godot 47 GDScript 20 Invariants, ManagerLoader emits NO formation signal — ManagerDirector does, new is inherited not declared (+15 more)
 
-### Community 13 - "Core Invariants"
-Cohesion: 0.12
-Nodes (17): Core Invariants, 1 Engine Lock, 2 Simulation Stack, 3 Critical File Contracts Choke Points, 4 Physics & Spatial AI Invariants, 5 Static Verification & Autoload Handling, Autoload Handling Contract, COREINVARIANTSmd — PowerFootball2D Architectural & Engine Invariants (+9 more)
+### Community 13 - "fuzz_formations.py"
+Cohesion: 0.46
+Nodes (7): clampf(), get_dynamic_anchor_position(), lerpf(), main(), Role, run_formation_fuzzer(), TeamPhase
 
 ### Community 14 - "lint_invariants.py"
 Cohesion: 0.15
@@ -252,11 +249,11 @@ Cohesion: 0.13
 Nodes (15): Math Solvers, 1 Kinematic PointtoSegment Projection & Distance, 1 Quadratic Distance Utility Decay, 2 Angular Cosine Alignment, 2 Kinematic Turning Penalty & Acceleration Curve, 3 Ballistic Pseudo3D Flight & Height Trajectory, 3 Receiver Openness, 4 Bisection RootFinding Ball Intercept Algorithm (+7 more)
 
 ### Community 16 - "Readme"
-Cohesion: 0.11
-Nodes (19): Errata History, Errata History Archive, Readme, 10 layercontextpy, 11 mcpserverpy & lspclientpy, 12 worktreemanagerpy, 13 syncrulespy & compacterratapy, 14 hookgdcheckpy (+11 more)
+Cohesion: 0.08
+Nodes (26): Errata History, Errata History Archive, generate_markdown(), get_layer_for_path(), main(), parse_gd_file(), ScriptAPI, Readme (+18 more)
 
 ### Community 17 - "Agents"
-Cohesion: 0.13
+Cohesion: 0.15
 Nodes (14): Agents, 1 Core Architecture & Invariants, 2 Verification & Static Analysis, 3 Developer Tooling & Slash Commands, 4 Gemini Context Protocol & Antigravity Autonomy, AGENTSmd, Atomic Feature Discipline, Autoload Handling Contract (+6 more)
 
 ### Community 18 - "Readme"
@@ -300,8 +297,8 @@ Cohesion: 0.29
 Nodes (8): build_player(), generate_league(), main(), get_club_staff(), get_free_agent_staff(), make_player_dob(), make_player_languages(), run_update()
 
 ### Community 28 - "lint_scope.py"
-Cohesion: 0.32
-Nodes (9): count_bracket_delta(), format_xml_output(), get_all_gd_files(), get_line_indent(), lint_file_scope(), main(), run_scope_linter(), ScopeViolation (+1 more)
+Cohesion: 0.35
+Nodes (10): count_bracket_delta(), format_xml_output(), get_all_gd_files(), get_line_indent(), lint_file_scope(), lint_lambda_and_callable(), main(), run_scope_linter() (+2 more)
 
 ### Community 29 - "SpatialGrid"
 Cohesion: 0.26
@@ -520,23 +517,23 @@ Cohesion: 0.14
 Nodes (13): Cross-System Gameplay Feature Workflow, Invocation in Antigravity, Step 10: Final Verification Report, Step 1: Restate Requested Outcome and Non-Goals, Step 2: Classify Change-Impact Tier, Step 3: Graphify Impact Query Before Reading Broad Source Files, Step 4: Reading Only Relevant Module READMEs, Hub Maps, and Targeted Files, Step 5: Short Written Implementation Plan (+5 more)
 
 ### Community 114 - "AnalyticalSimulationHarness"
-Cohesion: 0.23
-Nodes (9): range, AnalyticalSimulationHarness, find_godot_binary(), main(), print_summary_table(), Any, Deterministic analytical 60Hz match physics & AI decision simulator. Simulates…, run_analytical_trials() (+1 more)
+Cohesion: 0.13
+Nodes (13): range, AnalyticalSimulationHarness, find_godot_binary(), main(), print_summary_table(), Any, Deterministic analytical 60Hz match physics & AI decision simulator. Simulates…, Team in possession, or -1 while the ball is genuinely loose. (+5 more)
 
 ### Community 115 - "verify_gate.py"
 Cohesion: 0.60
 Nodes (3): CheckResult, main(), run_step()
 
-### Community 116 - "Roadmap"
+### Community 116 - "Engine: Godot 4.7-stable | GDScript 2.0 ONLY | Strict Static Typing"
 Cohesion: 0.29
-Nodes (7): Roadmap, PHASE 1 — Gameplay Completeness, PHASE 2 — Personality and Traits, PHASE 3 — Club World, PHASE 4 — Career Mode, PHASE 5 — Polish, ROADMAPmd
+Nodes (6): Architectural Choke Points, Behavioral Constraints & Token Discipline, Engine: Godot 4.7-stable | GDScript 2.0 ONLY | Strict Static Typing, GEMINI.md - Google Antigravity & Gemini 3.8 Flash Protocol, Graphify-First Tool Routing, Verification Gate
 
 ### Community 117 - "SOCIAL_SIMULATION_ARCHITECTURE.md"
-Cohesion: 0.20
-Nodes (8): 0. Ground Truth — What Already Exists vs. What This Document Adds, 3.1 Worked Cascade (traced against real call sites), 3.2 `WorldEvent` Schema Extension, 3.3 The Between-Match World Event Generator, 3. The Five-Layer Event Propagation Pipeline, 5.1 Choke Points Touched, Summarized, 5. Master Implementation Blueprint, 6. Open Design Questions (deliberately deferred, not resolved here)
+Cohesion: 0.08
+Nodes (23): 0. Ground Truth — What Already Exists vs. What This Document Adds, 1.1 Existing Bitmask (unchanged), 1.2 Mechanical Lever Table, 1.3 `PressureImmune` — Closing the Live-Match Gap, 1.4 The `TraitEffectResolver` Pattern, 1.5 Trait Interaction & Anti-Snowball Guard, 1. The Psychological Trait & Archetype Matrix, 2.1 Existing Schema (unchanged) (+15 more)
 
 ### Community 118 - "Set Pieces & Restarts Errata"
-Cohesion: 0.22
+Cohesion: 0.20
 Nodes (9): Discovered Rules, ERR-20260831-01, ERR-20260831-02, ERR-20260831-03, Error Logs, kickoff-backward-pass-veto-starves-taker, Set Pieces & Restarts Errata, Table of Contents (+1 more)
 
 ### Community 119 - "Match State, Pacing & Urgency Errata"
@@ -556,55 +553,47 @@ Cohesion: 0.25
 Nodes (7): ball-struck-signal-arg-count-mismatch, Discovered Rules, ERR-20260830-02, Error Logs, Table of Contents, touchline-bubble-is-one-shared-instance-home-perspective-only, UI, HUD & Signal Bus Errata
 
 ### Community 123 - "Scene Tree, Node Hierarchy & Cross-Referencing Errata"
-Cohesion: 0.25
-Nodes (7): Cross-Module Architecture Findings, ERR-20260901-01, Error Logs, Non-ASCII identifiers parse here but not in Godot, Scene Tree, Node Hierarchy & Cross-Referencing Errata, Table of Contents, Three latent runtime crashes found by static cross-referencing
+Cohesion: 0.20
+Nodes (10): Cross-Module Architecture Findings, ERR-20260901-01, ERR-20260910-01, Error Logs, Non-ASCII identifiers parse here but not in Godot, Remediation, Scene Tree, Node Hierarchy & Cross-Referencing Errata, Self inside lambda closure parse failures in GDScript 2.0 (+2 more)
 
-### Community 124 - "session-history.md"
-Cohesion: 0.15
-Nodes (11): Calibration is not optional, and the first guess was wrong twice, Career Calibration Findings, Data, Persistence & Career Calibration Errata, Table of Contents, The season calendar cannot be a fixed weekly rhythm, Architectural & Gotcha Findings from this Session, Errata Session History & Handoff Logs, Next Steps Handoff (+3 more)
+### Community 124 - "README.md"
+Cohesion: 0.24
+Nodes (5): Calibration is not optional, and the first guess was wrong twice, Career Calibration Findings, Data, Persistence & Career Calibration Errata, Table of Contents, The season calendar cannot be a fixed weekly rhythm
 
-### Community 125 - "README.md"
-Cohesion: 0.25
+### Community 125 - "telemetry-and-stats.md"
+Cohesion: 0.40
 Nodes (4): crowding-space-creation-diagnostics, Discovered Rules, Table of Contents, Telemetry, Diagnostics & Match Stats Errata
 
-### Community 126 - "Llms"
-Cohesion: 0.20
-Nodes (10): Llms, 1 Vision & Architectural Invariants, 2 FiveLayer Simulation Stack Semantic Routing, 3 Tooling & Automation, Layer 1 — Physics & Kinematics, Layer 2 — Match AI & Spatial Navigation, Layer 3 — Match Social & Dynamic Psychology, Layer 4 — Club World & Persistent Entities (+2 more)
-
-### Community 127 - "dump_api.py"
-Cohesion: 0.52
-Nodes (5): generate_markdown(), get_layer_for_path(), main(), parse_gd_file(), ScriptAPI
-
-### Community 136 - "fuzz_formations.py"
-Cohesion: 0.46
-Nodes (7): clampf(), get_dynamic_anchor_position(), lerpf(), main(), Role, run_formation_fuzzer(), TeamPhase
-
-### Community 137 - "1. The Psychological Trait & Archetype Matrix"
+### Community 126 - "GDScript 2.0 & Godot 4.7 Strict Architecture Rules"
 Cohesion: 0.33
-Nodes (6): 1.1 Existing Bitmask (unchanged), 1.2 Mechanical Lever Table, 1.3 `PressureImmune` — Closing the Live-Match Gap, 1.4 The `TraitEffectResolver` Pattern, 1.5 Trait Interaction & Anti-Snowball Guard, 1. The Psychological Trait & Archetype Matrix
+Nodes (5): 1. Strict Typing Discipline, 2. Forbidden Pythonisms, 3. GDScript 2.0 Language Invariants, 4. Hot-Path Performance Rules, GDScript 2.0 & Godot 4.7 Strict Architecture Rules
 
-### Community 138 - "4. Star Gravity & Tactical Asymmetry"
-Cohesion: 0.40
-Nodes (5): 4.1 Star Tier — Built On, Not Replacing, Existing Fields, 4.2 Star-Marking Utility Scorer — Full Specification, 4.3 Ego / Catering — Pass-Starvation Morale Penalty, 4.4 Aerial Willingness — Cross-Reference, 4. Star Gravity & Tactical Asymmetry
+### Community 127 - "Career Mode"
+Cohesion: 0.13
+Nodes (17): Career Mode, Career Mode Layer 4 Invariants, Compounded corrections — verified against the source, gdcheck cannot see through autoloads — use lintxref, Inbox options are deliberately NOT serialised, Match side is NOT the league team index, squadindex IS the identity so removing a player renumbers everyone behind them, The career > match bridge runs through PlayerFactory once per player per bind (+9 more)
 
-### Community 139 - "2. The Social Memory & Relationship Graph"
-Cohesion: 0.50
-Nodes (4): 2.1 Existing Schema (unchanged), 2.2 New Micro-Event → Memory Token Table, 2.3 Player–Manager Relationship Edge, 2. The Social Memory & Relationship Graph
+### Community 140 - "Errata Session History & Handoff Logs"
+Cohesion: 0.33
+Nodes (6): Architectural & Gotcha Findings from this Session, Errata Session History & Handoff Logs, Next Steps Handoff, Recent Session State Archive, Session State: 2026-09-02 (Manager Career Mode, Phase 4), Table of Contents
+
+### Community 141 - "godot_verify.py"
+Cohesion: 0.83
+Nodes (3): find_godot_binary(), main(), run_godot_verification()
 
 ## Knowledge Gaps
-- **737 isolated node(s):** `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `Career Mode (Layer 4) Invariants` (+732 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1150 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **30 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **748 isolated node(s):** `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `Career Mode (Layer 4) Invariants` (+743 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1165 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **29 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `Agents` connect `Agents` to `Api Surface`, `sync_rules.py`, `Course Implementation Specification`, `Anti Patterns`, `Agents Errata`, `Powerfootball Master Vision`, `mcp_server.py`, `fuzz_formations.py`, `Vector2`, `Claude`, `Core Invariants`, `lint_invariants.py`, `Math Solvers`, `semantic_search.py`, `Graphify Lifecycle & Agent Navigation Protocol — PowerFootball-2D`, `DeterministicMatchSimulator`, `generate_symbols.py`, `benchmark_math.py`, `AnalyticalSimulationHarness`, `Roadmap`, `README.md`, `dump_api.py`?**
-  _High betweenness centrality (0.171) - this node is a cross-community bridge._
-- **Why does `Agents Errata` connect `Agents Errata` to `Course Implementation Specification`, `Powerfootball Master Vision`, `Claude`, `gdcheck.py`, `Core Invariants`, `Readme`, `Agents`, `verify_gate.py`, `Match State, Pacing & Urgency Errata`, `Physics, Ball Dynamics & Kinematics Errata`, `UI, HUD & Signal Bus Errata`, `Scene Tree, Node Hierarchy & Cross-Referencing Errata`, `session-history.md`, `README.md`, `Llms`?**
-  _High betweenness centrality (0.104) - this node is a cross-community bridge._
-- **Why does `Api Surface` connect `Api Surface` to `Readme`, `Agents`, `Llms`, `dump_api.py`?**
-  _High betweenness centrality (0.100) - this node is a cross-community bridge._
+- **Why does `Agents` connect `Agents` to `Api Surface`, `Course Implementation Specification`, `Anti Patterns`, `Agents Errata`, `Powerfootball Master Vision`, `mcp_server.py`, `Vector2`, `Core Invariants`, `fuzz_formations.py`, `lint_invariants.py`, `Math Solvers`, `Readme`, `semantic_search.py`, `Graphify Lifecycle & Agent Navigation Protocol — PowerFootball-2D`, `DeterministicMatchSimulator`, `generate_symbols.py`, `benchmark_math.py`, `AnalyticalSimulationHarness`, `README.md`?**
+  _High betweenness centrality (0.132) - this node is a cross-community bridge._
+- **Why does `Api Surface` connect `Api Surface` to `Readme`, `Agents`, `Core Invariants`?**
+  _High betweenness centrality (0.080) - this node is a cross-community bridge._
+- **Why does `Agents Errata` connect `Agents Errata` to `Course Implementation Specification`, `Powerfootball Master Vision`, `Core Invariants`, `gdcheck.py`, `Readme`, `Agents`, `verify_gate.py`, `Set Pieces & Restarts Errata`, `Match State, Pacing & Urgency Errata`, `Physics, Ball Dynamics & Kinematics Errata`, `UI, HUD & Signal Bus Errata`, `README.md`, `telemetry-and-stats.md`, `Career Mode`?**
+  _High betweenness centrality (0.079) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `Api Surface` (e.g. with `Agents` and `dump_api.py`) actually correct?**
   _`Api Surface` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 5 inferred relationships involving `Course Implementation Specification` (e.g. with `Agents` and `Core Invariants`) actually correct?**
@@ -612,4 +601,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Are the 11 inferred relationships involving `Agents Errata` (e.g. with `Agents` and `Core Invariants`) actually correct?**
   _`Agents Errata` has 11 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `python` to the rest of the system?**
-  _737 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _748 weakly-connected nodes found - possible documentation gaps or missing edges._

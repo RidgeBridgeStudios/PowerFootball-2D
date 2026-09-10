@@ -182,12 +182,53 @@ const FACING_UPDATE_SPEED: float = 15.0
 ## FM2D compromise: raised to 0.18 to prevent prolonged dead-stops on reversals while keeping defenders favored on anticipated cuts.
 const MIN_ACCELERATION_RATIO: float = 0.18
 
+## --- Turn speed retention & recovery ----------------------------------------
+## How much of the target speed a turn bleeds off, per unit of turn severity.
+## Combined with the geometry of move_toward through velocity space (the
+## velocity vector tracks the chord between the old and new headings, whose
+## closest approach to the origin is what sets mid-turn speed), this lands the
+## three reference turns where a weighty football sim wants them:
+##   45 degrees  -> ~91% of pace kept
+##   90 degrees  -> ~68% kept
+##   180 degrees -> TURN_RETENTION_FLOOR (see below)
+## Previously there was no target bleed at all: pace through a turn was pure
+## geometry, so a reversal passed exactly through zero — a dead stop — and then
+## re-accelerated at full rate, which read as a player who could stop and
+## restart instantly rather than one carrying momentum.
+const TURN_TARGET_BLEED: float = 0.14
+## Speed fraction a full 180-degree reversal at pace scrubs down to. Non-zero
+## so a turning player is slow, not stopped.
+const TURN_RETENTION_FLOOR: float = 0.135
+## Turn severity (0 = straight on, 1 = full reversal) at which a turn starts
+## costing recovery time. 0.35 is a ~70-degree change of direction; anything
+## shallower is a run adjustment, not a turn.
+const TURN_HARD_SEVERITY: float = 0.35
+## Seconds a hard turn suppresses top speed for before the player is back at
+## full pace — a right-angle turn and a full reversal respectively. Implemented
+## as a ramping cap on target speed rather than an acceleration penalty, so the
+## recovery duration is exactly these numbers by construction instead of an
+## emergent side effect of the acceleration curve.
+const TURN_RECOVERY_90: float = 1.2
+const TURN_RECOVERY_180: float = 1.8
+## Fraction of current top speed a player must be travelling at for a turn to
+## cost recovery at all. Turning on the spot at walking pace is free; it is
+## carrying real momentum through the turn that costs.
+const TURN_RECOVERY_MIN_SPEED_RATIO: float = 0.45
+
 ## This player's slot in MatchWorldModel, or -1 if registration was refused
 ## (roster already full).
 var world_index: int = -1
 
 var base_acceleration: float = 0.0
 var base_friction: float = 0.0
+
+## Multiplier on base_friction while coasting with no movement intent. 1.0 is
+## normal standing deceleration; TackleState drops it for the duration of a
+## slide so a committed challenge actually skids across the turf instead of
+## stopping dead in a third of a body length. Owned here rather than in the
+## state because kinematic integration is this controller's contract — a state
+## sets the intent, this class alone resolves it into velocity.
+var slide_friction_scale: float = 1.0
 
 var stamina: float = 0.0
 ## Resolved, gated sprint state actually applied to top speed this frame.
@@ -225,6 +266,14 @@ var injury_severity: float = 0.0
 ## factor — a player caught mid-reversal absorbs a challenge worse than one
 ## running straight. Not consumed by PlayerBrain.
 var last_turn_severity: float = 0.0
+## Remaining seconds of the post-turn top-speed ramp, the ramp's full length,
+## and the speed fraction it ramps back up FROM. See TURN_RECOVERY_90/_180.
+var _turn_recovery_timer: float = 0.0
+var _turn_recovery_duration: float = 0.0
+var _turn_recovery_from: float = 1.0
+## Absolute speed (px/s) the body is not allowed to drop below while a hard
+## turn resolves — TURN_RETENTION_FLOOR of the speed carried INTO the turn.
+var _turn_floor_speed: float = 0.0
 
 var facing_direction: Vector2 = Vector2.RIGHT
 var _input_facing: Vector2 = Vector2.RIGHT
@@ -244,6 +293,14 @@ const GOALKEEPER_CATCH_RADIUS: float = 34.0
 const GOALKEEPER_CATCH_MAX_HEIGHT: float = 65.0
 ## Duration of foot-sensor lockout after striking or losing the ball.
 var ball_control_lockout: float = 0.0
+## Seconds still remaining of the settle window opened when this player took
+## the ball under control (see DribbleState.CONTROL_SETTLE_MIN/_MAX). While it
+## runs, PlayerBrain will not release a pass: the carrier takes a touch, turns
+## and shields instead of hitting the ball first-time into whatever is in front
+## of it. Set by DribbleState on reception and ticked down here alongside
+## ball_control_lockout, so the timer keeps running across state churn and the
+## brain can read one plain float rather than reaching into the state machine.
+var ball_settle_timer: float = 0.0
 
 var _action_text_cooldown: float = 0.0
 var _sprint_text_cooldown: float = 0.0
@@ -330,6 +387,8 @@ func _physics_process(delta: float) -> void:
 		_fatigue_text_cooldown = maxf(0.0, _fatigue_text_cooldown - delta)
 	if ball_control_lockout > 0.0:
 		ball_control_lockout = maxf(0.0, ball_control_lockout - delta)
+	if ball_settle_timer > 0.0:
+		ball_settle_timer = maxf(0.0, ball_settle_timer - delta)
 
 
 ## Recomputes the acceleration/friction constants from the exported tuning
@@ -431,12 +490,12 @@ func apply_kinematic_weight(input_dir: Vector2, delta: float) -> void:
 	var deflection: float = clampf(input_dir.length(), 0.0, 1.0)
 
 	if deflection <= 0.0:
-		velocity = velocity.move_toward(Vector2.ZERO, base_friction * delta)
+		velocity = velocity.move_toward(Vector2.ZERO, base_friction * slide_friction_scale * delta)
 		return
 
 	var direction: Vector2 = input_dir / deflection
-	var target_velocity: Vector2 = direction * get_current_top_speed() * deflection
 	var current_speed: float = velocity.length()
+	var top_speed_now: float = get_current_top_speed()
 
 	# How far off the current heading is the requested one? 0.0 = straight
 	# ahead, 1.0 = a full reversal. Below TURN_EVAL_SPEED there is no meaningful
@@ -450,6 +509,43 @@ func apply_kinematic_weight(input_dir: Vector2, delta: float) -> void:
 		turn_severity = clampf((1.0 - dot_heading) * 0.5, 0.0, 1.0)
 	last_turn_severity = turn_severity
 
+	# Pace bled off by the turn itself, floored so a reversal is slow rather
+	# than a dead stop.
+	var retention: float = maxf(1.0 - TURN_TARGET_BLEED * turn_severity, TURN_RETENTION_FLOOR)
+
+	# Arm the recovery ramp on a hard turn taken at real pace. Re-arms only for
+	# a turn harder than whatever is already running, so a sustained reversal
+	# holds the ramp at its peak until the turn is complete rather than
+	# restarting the clock every frame.
+	if turn_severity >= TURN_HARD_SEVERITY \
+			and current_speed > top_speed_now * TURN_RECOVERY_MIN_SPEED_RATIO:
+		var severity_span: float = clampf((turn_severity - 0.5) / 0.5, 0.0, 1.0)
+		var duration: float = lerpf(TURN_RECOVERY_90, TURN_RECOVERY_180, severity_span)
+		if duration >= _turn_recovery_timer:
+			_turn_recovery_duration = duration
+			_turn_recovery_timer = duration
+			_turn_recovery_from = retention
+			# maxf, not assignment: the arm condition re-tests every frame while the
+			# turn resolves, and the body is decelerating throughout, so a plain
+			# assignment would keep rewriting the floor DOWNWARD from an
+			# already-scrubbed speed and the pivot would still bottom out near
+			# zero. Keeping the peak latches the floor against the pace actually
+			# carried into the turn. Cleared when the ramp expires, below.
+			_turn_floor_speed = maxf(_turn_floor_speed, current_speed * TURN_RETENTION_FLOOR)
+
+	# Top speed ramps linearly back from _turn_recovery_from to full over the
+	# armed duration — this, not the acceleration curve, is what makes the
+	# recovery times exact.
+	var speed_cap: float = 1.0
+	if _turn_recovery_timer > 0.0:
+		var progress: float = 1.0 - _turn_recovery_timer / maxf(_turn_recovery_duration, 0.001)
+		speed_cap = lerpf(_turn_recovery_from, 1.0, clampf(progress, 0.0, 1.0))
+		_turn_recovery_timer = maxf(_turn_recovery_timer - delta, 0.0)
+		if _turn_recovery_timer <= 0.0:
+			_turn_floor_speed = 0.0
+
+	var target_velocity: Vector2 = direction * top_speed_now * deflection * minf(retention, speed_cap)
+
 	var penalty: float = turning_penalty_factor * turn_severity
 	var effective_acceleration: float = base_acceleration * maxf(1.0 - penalty, MIN_ACCELERATION_RATIO)
 
@@ -461,7 +557,27 @@ func apply_kinematic_weight(input_dir: Vector2, delta: float) -> void:
 		var brake_friction: float = base_friction * maxf(penalty, 0.5)
 		rate = maxf(effective_acceleration, brake_friction)
 
-	velocity = velocity.move_toward(target_velocity, rate * delta)
+	var new_velocity: Vector2 = velocity.move_toward(target_velocity, rate * delta)
+
+	# Reversal floor. move_toward walks the velocity in a STRAIGHT LINE through
+	# velocity space, so a turn approaching 180 degrees passes through the
+	# origin — a literal dead stop mid-turn, whatever the target speed says.
+	# Holding the magnitude at TURN_RETENTION_FLOOR of the pace carried into the
+	# turn, and letting the heading swing round instead, is what turns that dead
+	# stop into the pivot a heavy player actually makes.
+	#
+	# Deliberately anchored to the LATCHED entry speed, not to the current
+	# target magnitude: floored against the target it would fire on every frame
+	# of every turn and pin the body at constant speed all the way round, which
+	# erases the chord-shaped pace loss that gives a 45/90 degree turn its
+	# weight. Against the entry speed it can only fire on a genuine reversal,
+	# where the chord really does pass near the origin.
+	if _turn_recovery_timer > 0.0 and _turn_floor_speed > 0.0 \
+			and new_velocity.length() < _turn_floor_speed:
+		var heading: Vector2 = new_velocity.normalized() if new_velocity.length_squared() > 1.0 else direction
+		new_velocity = heading * _turn_floor_speed
+
+	velocity = new_velocity
 
 
 ## Momentum transfer from tackles, shoulder contact and stumbles. Added raw so

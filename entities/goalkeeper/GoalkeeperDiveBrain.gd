@@ -18,9 +18,43 @@
 class_name GoalkeeperDiveBrain
 extends RefCounted
 
+## Reaction latency bounds, in seconds — the beat between the ball being
+## struck and the keeper's body actually committing. Lerped by the keeper's
+## reflexes attribute: a sluggish keeper takes REACTION_SLOW, an elite one
+## REACTION_FAST. Before this the dive was dispatched on the same frame as the
+## strike, which made every keeper a perfect reactor and left shot-stopping
+## decided purely by the wrong-way roll below.
+const REACTION_SLOW: float = 0.22
+const REACTION_FAST: float = 0.08
+## Extra latency when the keeper's sight of the ball is screened. Applied when
+## more than SCREEN_BODY_COUNT outfield players stand within SCREEN_RADIUS of
+## the strike.
+const SCREEN_LATENCY: float = 0.12
+const SCREEN_RADIUS: float = 120.0
+const SCREEN_BODY_COUNT: int = 2
+
 ## Seeded once per match via initialise(); lives on the instance so
 ## decide_dive() never allocates a generator on a hot path.
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
+
+
+## Seconds `keeper` takes to react to a shot struck at `shot_pos`. Reads the
+## crowding around the strike straight off the spatial cache — a keeper who
+## cannot see the ball leave the foot is late on it. Returns a bare float and
+## allocates nothing.
+func reaction_delay(keeper: HeavyPlayerController, shot_pos: Vector2) -> float:
+	var reflexes: float = 0.6
+	var player_data: PlayerData = keeper.get_meta(&"player_data", null) as PlayerData
+	if player_data != null:
+		reflexes = player_data.reflexes
+
+	var delay: float = lerpf(REACTION_SLOW, REACTION_FAST, clampf(reflexes, 0.0, 1.0))
+
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world != null:
+		if world.count_nearby_players(shot_pos, SCREEN_RADIUS) > SCREEN_BODY_COUNT:
+			delay += SCREEN_LATENCY
+	return delay
 
 
 func initialise(seed_value: int) -> void:
