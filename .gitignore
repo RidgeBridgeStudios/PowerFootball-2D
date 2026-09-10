@@ -16,4 +16,5 @@ __pycache__/
 *.pyc
 *.pyo
 .worktrees/
+.claude/worktrees/
 match_frames/

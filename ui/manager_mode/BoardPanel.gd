@@ -41,12 +41,7 @@ func _takeover_card(board: BoardState, p: CareerThemePalette) -> VBoxContainer:
 			stage_tint = p.danger
 
 		var banner: PanelContainer = PanelContainer.new()
-		var b_style: StyleBoxFlat = StyleBoxFlat.new()
-		b_style.bg_color = p.background_panel
-		b_style.border_color = stage_tint
-		b_style.set_border_width_all(1)
-		b_style.set_corner_radius_all(6)
-		banner.add_theme_stylebox_override("panel", b_style)
+		banner.add_theme_stylebox_override("panel", CareerTheme.style_box(p.header, 6, stage_tint, 1))
 
 		var b_margin := MarginContainer.new()
 		b_margin.add_theme_constant_override("margin_left", 12)

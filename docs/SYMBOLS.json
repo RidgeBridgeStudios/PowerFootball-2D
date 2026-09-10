@@ -18788,6 +18788,24 @@
         "type": "int",
         "is_export": true,
         "is_onready": false
+      },
+      "background_card": {
+        "line": 69,
+        "type": "Color",
+        "is_export": false,
+        "is_onready": false
+      },
+      "background_panel": {
+        "line": 72,
+        "type": "Color",
+        "is_export": false,
+        "is_onready": false
+      },
+      "border": {
+        "line": 75,
+        "type": "Color",
+        "is_export": false,
+        "is_onready": false
       }
     },
     "methods": {}
@@ -22077,14 +22095,20 @@
         "is_export": true,
         "is_onready": false
       },
+      "narrative": {
+        "line": 58,
+        "type": "String",
+        "is_export": false,
+        "is_onready": false
+      },
       "resolved": {
-        "line": 63,
+        "line": 69,
         "type": "bool",
         "is_export": true,
         "is_onready": false
       },
       "resolution_choice": {
-        "line": 65,
+        "line": 71,
         "type": "int",
         "is_export": true,
         "is_onready": false
@@ -22092,15 +22116,6 @@
     },
     "methods": {
       "with_player": {
-        "line": 87,
-        "args": [
-          "key: int",
-          "display_name: String"
-        ],
-        "return": "WorldEvent",
-        "is_static": false
-      },
-      "with_secondary": {
         "line": 93,
         "args": [
           "key: int",
@@ -22109,8 +22124,17 @@
         "return": "WorldEvent",
         "is_static": false
       },
-      "with_club": {
+      "with_secondary": {
         "line": 99,
+        "args": [
+          "key: int",
+          "display_name: String"
+        ],
+        "return": "WorldEvent",
+        "is_static": false
+      },
+      "with_club": {
+        "line": 105,
         "args": [
           "name_str: String"
         ],
@@ -22118,13 +22142,13 @@
         "is_static": false
       },
       "category_name": {
-        "line": 104,
+        "line": 110,
         "args": [],
         "return": "String",
         "is_static": false
       },
       "involves": {
-        "line": 108,
+        "line": 114,
         "args": [
           "player_key: int"
         ],
@@ -22132,13 +22156,13 @@
         "is_static": false
       },
       "severity_label": {
-        "line": 112,
+        "line": 118,
         "args": [],
         "return": "String",
         "is_static": false
       },
       "headline": {
-        "line": 120,
+        "line": 126,
         "args": [],
         "return": "String",
         "is_static": false
@@ -24908,7 +24932,7 @@
         "is_static": false
       },
       "_confidence_card": {
-        "line": 88,
+        "line": 83,
         "args": [
           "board: BoardState",
           "career: CareerSaveData",
@@ -24918,7 +24942,7 @@
         "is_static": false
       },
       "_facilities_card": {
-        "line": 133,
+        "line": 128,
         "args": [
           "board: BoardState",
           "p: CareerThemePalette"
@@ -24927,7 +24951,7 @@
         "is_static": false
       },
       "_facility_row": {
-        "line": 146,
+        "line": 141,
         "args": [
           "caption: String",
           "level: int",
@@ -24938,7 +24962,7 @@
         "is_static": false
       },
       "_requests_card": {
-        "line": 156,
+        "line": 151,
         "args": [
           "board: BoardState",
           "career: CareerSaveData",
@@ -24948,7 +24972,7 @@
         "is_static": false
       },
       "_ordinal": {
-        "line": 209,
+        "line": 204,
         "args": [
           "n: int"
         ],
@@ -25466,37 +25490,37 @@
         "is_static": false
       },
       "_calc_initial_demands": {
-        "line": 73,
+        "line": 75,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_build_ui": {
-        "line": 86,
+        "line": 88,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_get_patience_text": {
-        "line": 255,
+        "line": 256,
         "args": [],
         "return": "String",
         "is_static": false
       },
       "_on_submit_proposal": {
-        "line": 265,
+        "line": 266,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_finalize_deal": {
-        "line": 328,
+        "line": 329,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_cancel": {
-        "line": 369,
+        "line": 370,
         "args": [],
         "return": "void",
         "is_static": false

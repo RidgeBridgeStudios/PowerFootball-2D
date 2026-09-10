@@ -466,7 +466,7 @@ static func expire_overdue(
 			continue
 		var event: WorldEvent = resolve(career, item, item.escalation_option, club, today)
 		if event != null:
-			event.narrative = "%s — ignored, and it was taken badly." % item.subject
+			event.narrative_context = "%s — ignored, and it was taken badly." % item.subject
 			events.append(event)
 	return events
 

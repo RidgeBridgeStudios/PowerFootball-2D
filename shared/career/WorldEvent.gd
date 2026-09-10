@@ -54,6 +54,12 @@ const CATEGORY_NAMES: Array[String] = [
 @export var club_name: String = ""
 ## Human-readable sentence already resolved for display.
 @export var narrative_context: String = ""
+## Compatibility alias for narrative_context.
+var narrative: String:
+	get:
+		return narrative_context
+	set(val):
+		narrative_context = val
 ## -1.0 = maximally damaging, 0.0 = neutral, 1.0 = maximally positive.
 @export_range(-1.0, 1.0) var sentiment: float = 0.0
 ## 0.0 = trivia, 1.0 = career-defining. Drives inbox prominence and whether

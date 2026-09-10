@@ -64,3 +64,15 @@ extends Resource
 @export var row_height: int = 26
 @export var sidebar_width: int = 186
 @export var content_margin: int = 14
+
+## --- Compatibility Aliases ----------------------------------------------------
+var background_card: Color:
+	get:
+		return panel
+var background_panel: Color:
+	get:
+		return header
+var border: Color:
+	get:
+		return divider
+

@@ -64,6 +64,8 @@ static func open_modal(
 
 
 func _ready() -> void:
+	top_level = true
+	mouse_filter = Control.MOUSE_FILTER_STOP
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	z_index = 100
 	_calc_initial_demands()
@@ -89,6 +91,7 @@ func _build_ui() -> void:
 	# Scrim
 	var scrim := ColorRect.new()
 	scrim.color = Color(0.04, 0.06, 0.10, 0.85)
+	scrim.mouse_filter = Control.MOUSE_FILTER_STOP
 	scrim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(scrim)
 
@@ -99,12 +102,7 @@ func _build_ui() -> void:
 
 	var card_panel: PanelContainer = PanelContainer.new()
 	card_panel.custom_minimum_size = Vector2(620, 540)
-	var style: StyleBoxFlat = StyleBoxFlat.new()
-	style.bg_color = p.background_card
-	style.border_color = p.border
-	style.set_border_width_all(1)
-	style.set_corner_radius_all(8)
-	card_panel.add_theme_stylebox_override("panel", style)
+	card_panel.add_theme_stylebox_override("panel", CareerTheme.style_box(p.panel, 8, p.divider, 1))
 	center.add_child(card_panel)
 
 	var margin := MarginContainer.new()
@@ -124,12 +122,18 @@ func _build_ui() -> void:
 	var pos: String = player_data.position_role if player_data != null else "MF"
 	var club_name: String = "Free Agent" if is_free_agent else (selling_club.team_name if selling_club != null else "Club")
 
+	var p_age: int = 24
+	if player_data != null:
+		if CareerManager.career != null and CareerManager.career.today != null:
+			p_age = player_data.get_age(CareerManager.career.today.year, CareerManager.career.today.month, CareerManager.career.today.day)
+		else:
+			p_age = player_data.get_age()
+
 	var title_col := VBoxContainer.new()
 	title_col.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	title_col.add_child(CareerTheme.heading("Contract Negotiations: %s" % pname))
 	title_col.add_child(CareerTheme.muted("%s | %s | Age %d | Stature: %s" % [
-		club_name, pos,
-		player_data.get_age(CareerManager.career.today.year, CareerManager.career.today.month, CareerManager.career.today.day) if player_data != null and CareerManager.career != null else 24,
+		club_name, pos, p_age,
 		player_data.squad_status if player_data != null else "Regular"
 	]))
 	top.add_child(title_col)
@@ -145,10 +149,7 @@ func _build_ui() -> void:
 
 	# Demands banner
 	var demand_box: PanelContainer = PanelContainer.new()
-	var d_style: StyleBoxFlat = StyleBoxFlat.new()
-	d_style.bg_color = p.background_panel
-	d_style.set_corner_radius_all(4)
-	demand_box.add_theme_stylebox_override("panel", d_style)
+	demand_box.add_theme_stylebox_override("panel", CareerTheme.style_box(p.header, 4))
 	var d_margin := MarginContainer.new()
 	d_margin.add_theme_constant_override("margin_left", 12)
 	d_margin.add_theme_constant_override("margin_top", 8)
@@ -160,7 +161,7 @@ func _build_ui() -> void:
 		"Agent Demand: %s/wk | %d Years | %s | %s Signing Bonus" % [
 			CareerTheme.money(_demanded_wage),
 			_demanded_years,
-			ContractData.STATUS_NAMES[int(_demanded_status)],
+			ContractData.STATUS_NAMES[clampi(int(_demanded_status), 0, ContractData.STATUS_NAMES.size() - 1)],
 			CareerTheme.money(_demanded_bonus)
 		],
 		p.accent
@@ -190,7 +191,7 @@ func _build_ui() -> void:
 	_years_option = OptionButton.new()
 	for y: int in range(1, 6):
 		_years_option.add_item("%d Year%s" % [y, "s" if y > 1 else ""], y)
-	_years_option.select(_demanded_years - 1)
+	_years_option.select(clampi(_demanded_years, 1, 5) - 1)
 	_years_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	form.add_child(_years_option)
 
@@ -199,7 +200,7 @@ func _build_ui() -> void:
 	_status_option = OptionButton.new()
 	for s_idx: int in range(ContractData.STATUS_NAMES.size()):
 		_status_option.add_item(ContractData.STATUS_NAMES[s_idx], s_idx)
-	_status_option.select(int(_demanded_status))
+	_status_option.select(clampi(int(_demanded_status), 0, ContractData.STATUS_NAMES.size() - 1))
 	_status_option.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 	form.add_child(_status_option)
 
@@ -302,7 +303,7 @@ func _on_submit_proposal() -> void:
 		_demanded_wage = int(result.get("demanded_wage", _demanded_wage))
 		_demanded_years = int(result.get("demanded_years", _demanded_years))
 		_demanded_bonus = int(result.get("demanded_bonus", _demanded_bonus))
-		_demanded_status = int(result.get("demanded_status", _demanded_status)) as ContractData.Status
+		_demanded_status = clampi(int(result.get("demanded_status", _demanded_status)), 0, ContractData.STATUS_NAMES.size() - 1) as ContractData.Status
 
 		_demand_label.text = "Counter Demand: %s/wk | %d Years | %s | %s Signing Bonus" % [
 			CareerTheme.money(_demanded_wage),
@@ -316,8 +317,8 @@ func _on_submit_proposal() -> void:
 		# Sync inputs to counter proposal to allow easy acceptance:
 		_wage_spin.value = float(_demanded_wage)
 		_bonus_spin.value = float(_demanded_bonus)
-		_years_option.select(_demanded_years - 1)
-		_status_option.select(int(_demanded_status))
+		_years_option.select(clampi(_demanded_years, 1, 5) - 1)
+		_status_option.select(clampi(int(_demanded_status), 0, ContractData.STATUS_NAMES.size() - 1))
 	else:
 		_is_walkout = true
 		_feedback_label.text = msg
