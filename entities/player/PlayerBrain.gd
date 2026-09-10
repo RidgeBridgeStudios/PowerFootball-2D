@@ -522,7 +522,7 @@ func can_carry_ball() -> bool:
 	if not is_goalkeeper or player == null or pitch_boundary == null or ball == null:
 		return true
 	var goal_x: float = pitch_boundary.get_goal_centre(player.team).x
-	var pitch_in_dir: float = 1.0 if player.team == GameManager.TEAM_A else -1.0
+	var pitch_in_dir: float = _get_attack_sign()
 	var depth_from_line: float = (ball.global_position.x - goal_x) * pitch_in_dir
 	return depth_from_line > -10.0
 
@@ -3043,7 +3043,7 @@ func _goalie_patrol_target() -> Vector2:
 	var half_mouth: float = pitch_boundary.goal_mouth_height * 0.5
 	var ball_pos: Vector2 = ball.global_position
 
-	var pitch_in_dir: float = 1.0 if player.team == GameManager.TEAM_A else -1.0
+	var pitch_in_dir: float = _get_attack_sign()
 	var to_ball: Vector2 = ball_pos - goal_centre
 
 	if to_ball.is_zero_approx() or to_ball.x * pitch_in_dir <= 0.0:

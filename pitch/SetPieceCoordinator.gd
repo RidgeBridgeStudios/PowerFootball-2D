@@ -169,7 +169,8 @@ func _start_goal_kick(exit_pos: Vector2, last_toucher: HeavyPlayerController) ->
 	# The attacker's own team touched it last, so the defending team gets the kick.
 	var defending_team: int = _opposing_team_of(last_toucher)
 	var goal_centre: Vector2 = _boundary.get_goal_centre(defending_team)
-	var inward: float = 1.0 if defending_team == 0 else -1.0
+	var defends_left: bool = (defending_team == 0) if not _boundary.sides_flipped else (defending_team != 0)
+	var inward: float = 1.0 if defends_left else -1.0
 	var side_sign: float = 1.0 if exit_pos.y >= _boundary.get_centre_spot().y else -1.0
 	var position: Vector2 = goal_centre + Vector2(inward * 150.0, side_sign * 80.0)
 
@@ -243,7 +244,8 @@ func start_kickoff(team: int) -> void:
 
 func _start_penalty(attacking_team: int, defending_team: int, designated_taker: HeavyPlayerController = null) -> void:
 	var goal_centre: Vector2 = _boundary.get_goal_centre(defending_team)
-	var attack_direction: float = 1.0 if defending_team == 0 else -1.0
+	var defends_left: bool = (defending_team == 0) if not _boundary.sides_flipped else (defending_team != 0)
+	var attack_direction: float = 1.0 if defends_left else -1.0
 	var position: Vector2 = goal_centre + Vector2(penalty_spot_offset * attack_direction, 0.0)
 
 	GameManager.start_penalty(attacking_team, position)
@@ -441,9 +443,8 @@ func _position_attacking_players_for_corner(attacking_team: int, corner_spot: Ve
 
 	var defending_team: int = 1 - attacking_team
 	var goal_centre: Vector2 = _boundary.get_goal_centre(defending_team)
-	# Same "into the pitch, away from the goal line" sign convention as
-	# _is_in_penalty_area()'s `direction`.
-	var into_pitch: float = 1.0 if defending_team == 0 else -1.0
+	var defends_left: bool = (defending_team == 0) if not _boundary.sides_flipped else (defending_team != 0)
+	var into_pitch: float = 1.0 if defends_left else -1.0
 	var corner_side: float = signf(corner_spot.y - _boundary.get_centre_spot().y)
 	if is_zero_approx(corner_side):
 		corner_side = 1.0
@@ -491,7 +492,8 @@ func _position_attacking_players_for_free_kick(attacking_team: int, fk_spot: Vec
 
 	var defending_team: int = 1 - attacking_team
 	var goal_centre: Vector2 = _boundary.get_goal_centre(defending_team)
-	var into_pitch: float = 1.0 if defending_team == 0 else -1.0
+	var defends_left: bool = (defending_team == 0) if not _boundary.sides_flipped else (defending_team != 0)
+	var into_pitch: float = 1.0 if defends_left else -1.0
 	var dist_to_goal: float = fk_spot.distance_to(goal_centre)
 	var fk_side: float = signf(fk_spot.y - _boundary.get_centre_spot().y)
 	if is_zero_approx(fk_side):
@@ -691,12 +693,9 @@ func _on_taker_state_changed(from_state: StringName, _to_state: StringName) -> v
 ## --- Penalty area & Goalkeeper ------------------------------------------------
 
 func _is_in_penalty_area(pos: Vector2, defending_team: int) -> bool:
-	var goal_centre: Vector2 = _boundary.get_goal_centre(defending_team)
-	var direction: float = 1.0 if defending_team == 0 else -1.0
-	var local: Vector2 = pos - goal_centre
-	var depth: float = local.x * direction
-
-	return depth >= 0.0 and depth <= PENALTY_AREA_DEPTH and absf(local.y) <= PENALTY_AREA_HALF_WIDTH
+	if _boundary != null:
+		return _boundary.is_in_penalty_area(pos, defending_team)
+	return false
 
 
 ## Places the defending goalkeeper strictly on the goal line facing forward (IFAB Law 14).
@@ -704,8 +703,9 @@ func _position_goalkeeper(defending_team: int) -> void:
 	if _players == null or _boundary == null:
 		return
 	var goal_centre: Vector2 = _boundary.get_goal_centre(defending_team)
-	var direction: float = -1.0 if defending_team == 0 else 1.0
-	var spot: Vector2 = goal_centre - Vector2(direction * 48.0, 0.0)
+	var defends_left: bool = (defending_team == 0) if not _boundary.sides_flipped else (defending_team != 0)
+	var inward: float = 1.0 if defends_left else -1.0
+	var spot: Vector2 = goal_centre + Vector2(inward * 48.0, 0.0)
 
 	for node: Node in _players.get_children():
 		var p := node as HeavyPlayerController
@@ -724,7 +724,8 @@ func _position_goalkeeper(defending_team: int) -> void:
 func _clear_penalty_box_and_arc(penalty_spot: Vector2, defending_team: int) -> void:
 	if _players == null or _boundary == null:
 		return
-	var attack_dir: float = 1.0 if defending_team == 0 else -1.0
+	var defends_left: bool = (defending_team == 0) if not _boundary.sides_flipped else (defending_team != 0)
+	var attack_dir: float = 1.0 if defends_left else -1.0
 	var arc_radius: float = wall_distance
 	var pitch_rect: Rect2 = _boundary.get_pitch_rect().grow(-32.0)
 

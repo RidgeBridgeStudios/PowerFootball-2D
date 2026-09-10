@@ -144,8 +144,9 @@ func _position_goalkeeper(defending_team: int) -> void:
 		return
 
 	var goal_centre: Vector2 = _boundary.get_goal_centre(defending_team)
-	var direction: float = -1.0 if defending_team == GameManager.TEAM_A else 1.0
-	var spot: Vector2 = goal_centre - Vector2(direction * PitchScene.PRACTICE_KEEPER_LINE_OFFSET, 0.0)
+	var defends_left: bool = (defending_team == GameManager.TEAM_A) if not _boundary.sides_flipped else (defending_team != GameManager.TEAM_A)
+	var inward: float = 1.0 if defends_left else -1.0
+	var spot: Vector2 = goal_centre + Vector2(inward * PitchScene.PRACTICE_KEEPER_LINE_OFFSET, 0.0)
 
 	keeper.global_position = spot
 	keeper.velocity = Vector2.ZERO

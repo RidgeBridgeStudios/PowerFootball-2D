@@ -497,6 +497,7 @@ func _physics_process(delta: float) -> void:
 		GameEvents.team_momentum_updated.connect(_on_team_momentum_updated)
 		GameEvents.match_stage_changed.connect(_on_match_stage_changed)
 		GameEvents.match_phase_changed.connect(_on_match_phase_changed_for_diagnostics)
+		GameEvents.half_time_ended.connect(_on_half_time_ended)
 		_deferred_events_connected = true
 
 	if ball_node != null and is_instance_valid(ball_node):
@@ -647,6 +648,10 @@ func _on_match_stage_changed(stage: int) -> void:
 	current_match_stage = stage
 
 
+func _on_half_time_ended() -> void:
+	_defensive_lines_ready = false
+
+
 ## Recomputes both teams' shared line depth from the ball's position and
 ## whichever team is currently pressuring the carrier. Called after the
 ## per-player position refresh above so it reads this frame's positions.
@@ -660,6 +665,8 @@ func _update_defensive_lines(delta: float) -> void:
 		# FormationAnchorMath's identical convention) — dropping off means
 		# moving opposite the attack direction, toward this team's own goal.
 		var attack_sign: float = 1.0 if t == 0 else -1.0
+		if _boundary != null and _boundary.sides_flipped:
+			attack_sign = -attack_sign
 		var pressure: float = 0.0
 		# Only this team's own pressure on an opposing carrier steps their
 		# line up. A loose ball or their own possession leaves pressure at

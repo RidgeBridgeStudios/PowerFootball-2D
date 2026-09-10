@@ -72,15 +72,15 @@
     "semantic_hash": ""
   },
   "docs/DEPENDENCY_GRAPH.json": {
-    "mtime": 1789038815.1099002,
-    "seen": 1789038826.098499,
+    "mtime": 1789040770.4262185,
+    "seen": 1789040933.9296985,
     "ast_hash": "9e8182bce76cada1f7f3a7aae1dfc0e2",
     "semantic_hash": ""
   },
   "docs/SYMBOLS.json": {
-    "mtime": 1789039960.82462,
-    "seen": 1789039964.4743547,
-    "ast_hash": "d7e2e0a1b2ae52079b85f2592a019a05",
+    "mtime": 1789040930.4066367,
+    "seen": 1789040933.9297004,
+    "ast_hash": "0899b92c8a89929c16e4604738a1455e",
     "semantic_hash": ""
   },
   "tools/audit_process_modes.py": {
@@ -654,8 +654,8 @@
     "semantic_hash": ""
   },
   "docs/API_SURFACE.md": {
-    "mtime": 1789039960.66124,
-    "seen": 1789039964.4744592,
+    "mtime": 1789040930.229728,
+    "seen": 1789040933.9298165,
     "ast_hash": "bd320483d5578d4a956bc9ec5349a2d5",
     "semantic_hash": ""
   },
