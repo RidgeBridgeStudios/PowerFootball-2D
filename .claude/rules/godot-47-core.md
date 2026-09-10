@@ -88,7 +88,7 @@ checker's autoload parsing, not a missing `class_name` — do not add one.
 ### This container has no engine and no GUT
 Neither a `godot` binary nor `addons/gut/` exists here, so
 `godot --headless -s addons/gut/gut_cmdln.gd -gexit` cannot run and its absence
-must never be reported as a passing test run. Use `python3 tools/gdcheck.py`
+must never be reported as a passing test run. Use `py -3 tools/gdcheck.py`
 and label the result a static check. It catches undeclared members, unknown
 types, unbalanced brackets, mixed indentation, Godot 3 APIs and bad autoload
 entries — it does NOT type-check expressions or execute anything.

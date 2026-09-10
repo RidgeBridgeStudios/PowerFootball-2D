@@ -133,7 +133,7 @@ Navigate with pinpoint accuracy using the localized documentation map:
    - [docs/agent-errata/ui-and-signals.md](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/agent-errata/ui-and-signals.md)
 
 4. **Targeted Code Inspection:**
-   - Use `python3 tools/codebase_slice.py` or targeted line ranges with `view_file` to read specific functions or classes.
+   - Use `py -3 tools/codebase_slice.py` or targeted line ranges with `view_file` to read specific functions or classes.
 
 ---
 

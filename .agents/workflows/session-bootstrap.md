@@ -11,7 +11,7 @@ Initializes agent context at session start. Resolves policy precedence, sets up 
 
 1. **Verify Baseline Readiness:**
    Assert repository health with zero diagnostics before taking action:
-   `python3 tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast`
+   `py -3 tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast`
 
 2. **Policy Precedence Resolution:**
    Resolve any rule conflict in strict descending order:
@@ -20,11 +20,11 @@ Initializes agent context at session start. Resolves policy precedence, sets up 
 3. **Context Hygiene & File-Read Restrictions:**
    - **Forbidden full reads:** `AGENTS_ERRATA.md`, `docs/SYMBOLS.json`, `docs/API_SURFACE.md`, `docs/DEPENDENCY_GRAPH.json`, `data/*.json`, `docs/research/*`.
    - **Targeted Tool Replacements:**
-     - Query symbol signatures: `python3 tools/codebase_slice.py --symbol <name>`
-     - Compute blast radius DAG: `python3 tools/dump_dep_graph.py --blast-radius <target>`
-     - Search rules & docstrings: `python3 tools/semantic_search.py "<query>"`
-     - Fetch layer architecture: `python3 tools/layer_context.py [1-5]`
-     - Fetch next roadmap task: `python3 tools/next_task.py`
+     - Query symbol signatures: `py -3 tools/codebase_slice.py --symbol <name>`
+     - Compute blast radius DAG: `py -3 tools/dump_dep_graph.py --blast-radius <target>`
+     - Search rules & docstrings: `py -3 tools/semantic_search.py "<query>"`
+     - Fetch layer architecture: `py -3 tools/layer_context.py [1-5]`
+     - Fetch next roadmap task: `py -3 tools/next_task.py`
 
 4. **Task-Adaptive Semantic Routing:**
    Map the assigned task to minimal context, skill, and verification tier:
@@ -40,5 +40,5 @@ Initializes agent context at session start. Resolves policy precedence, sets up 
    Report the active routing table in <= 15 lines. Do not read source files or apply edits until the user provides or confirms the specific task.
 
 6. **Post-Task Verification Gate:**
-   - Local leaf edits (Tier 1/2): `python3 tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast`
-   - Core / Cross-module edits (Tier 3): `python3 tools/verify_gate.py --full || py -3 tools/verify_gate.py --full`
+   - Local leaf edits (Tier 1/2): `py -3 tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast`
+   - Core / Cross-module edits (Tier 3): `py -3 tools/verify_gate.py --full || py -3 tools/verify_gate.py --full`
