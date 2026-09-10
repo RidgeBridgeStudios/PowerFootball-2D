@@ -28,12 +28,8 @@ GIT_HOOKS_DIR = os.path.join(ROOT, ".git", "hooks")
 PRE_COMMIT_HOOK_PATH = os.path.join(GIT_HOOKS_DIR, "pre-commit")
 
 CHECKS = [
-    ("GDScript Static Analysis", [sys.executable, os.path.join(ROOT, "tools", "gdcheck.py")]),
-    ("Invariant AST Linter", [sys.executable, os.path.join(ROOT, "tools", "lint_invariants.py")]),
-    ("Scene Graph Linter", [sys.executable, os.path.join(ROOT, "tools", "tscn_linter.py")]),
-    ("StringName Literal Linter", [sys.executable, os.path.join(ROOT, "tools", "lint_stringnames.py")]),
-    ("Parameter Shadowing Linter", [sys.executable, os.path.join(ROOT, "tools", "lint_shadowing.py")]),
-    ("Database Integrity Checker", [sys.executable, os.path.join(ROOT, "tools", "verify_db.py")]),
+    ("Unified Fast Verification Gate", [sys.executable, os.path.join(ROOT, "tools", "verify_gate.py"), "--fast"]),
+    ("Godot Engine Headless Verification", [sys.executable, os.path.join(ROOT, "tools", "godot_verify.py")]),
 ]
 
 

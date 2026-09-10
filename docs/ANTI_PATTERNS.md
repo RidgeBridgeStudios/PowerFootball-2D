@@ -20,6 +20,9 @@ This document catalogues canonical failure modes, false assumptions, Godot 4.7 /
 | **Square Root CPU Overhead** | Calling `distance_to()` in hot sorting loops invokes costly square roots. | Use `distance_squared_to()` for all proximity ranking and target sorting. |
 | **Parse-Time Duplicate `var`** | GDScript performs scope checks at parse time; duplicate `var` in unreachable code below early `return` causes fatal compiler failure. | Delete or refactor all downstream unreachable code within the block. |
 | **Object vs StringName `==`** | Comparing `current_state` (`PlayerState`) to `StringName` fails at parse time in strict typing. | Compare against explicit string name property (`current_state_name`). |
+| **`self` in Lambda Closure** | In GDScript 2.0, `self` cannot be captured in an anonymous lambda closure (`func(): ... self ...`), causing a fatal parse error. | Bind `self` to an outer local variable (`var host: Control = self`) before the lambda, or use `Callable.bind()`. |
+| **Callable Direct Execution** | Invoking a `Callable` variable as `cb()` triggers `Parse Error: Function "cb()" not found in base self`. | Always invoke callables via `.call()` (`cb.call(...)`) or `.call_deferred()`. |
+| **Pythonism Regressions** | Generating Python syntax (`None`, `True`, `False`, `def `, `len()`, `isinstance()`, `import`) triggers instant parse errors. | Enforced by `tools/gdcheck.py` and pre-commit hooks: use `null`, `true`, `false`, `func`, `.size()`, `is`. |
 
 ---
 

@@ -123,8 +123,8 @@
   "121": "Complete Item Migration Manifest",
   "122": "UI, HUD & Signal Bus Errata",
   "123": "Scene Tree, Node Hierarchy & Cross-Referencing Errata",
-  "124": "session-history.md",
-  "125": "README.md",
+  "124": "README.md",
+  "125": "telemetry-and-stats.md",
   "126": "Llms",
   "127": "dump_api.py",
   "128": "Workflow: cross-system-feature",
@@ -135,8 +135,10 @@
   "133": "Workflow: performance-work",
   "134": "Workflow: session-bootstrap",
   "135": "Workflow: task-intake-routing",
-  "136": "fuzz_formations.py",
+  "136": "compact_errata.py",
   "137": "1. The Psychological Trait & Archetype Matrix",
   "138": "4. Star Gravity & Tactical Asymmetry",
-  "139": "2. The Social Memory & Relationship Graph"
+  "139": "2. The Social Memory & Relationship Graph",
+  "140": "Errata Session History & Handoff Logs",
+  "141": "godot_verify.py"
 }

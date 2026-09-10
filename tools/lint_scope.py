@@ -36,6 +36,9 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 STRING_RE = re.compile(r'"(?:[^"\\]|\\.)*"|\'(?:[^\'\\]|\\.)*\'')
 COMMENT_RE = re.compile(r'#.*$')
 VAR_DECL_RE = re.compile(r'^\s*var\s+([A-Za-z0-9_]+)')
+LAMBDA_DECL_RE = re.compile(r'\bfunc\s*\(')
+SELF_RE = re.compile(r'\bself\b')
+CALLABLE_DECL_RE = re.compile(r'\b(?:var\s+([A-Za-z0-9_]+)\s*:\s*Callable|([A-Za-z0-9_]+)\s*:\s*Callable)\b')
 
 
 class ScopeViolation:
@@ -88,6 +91,86 @@ def count_bracket_delta(code: str) -> int:
     return opens - closes
 
 
+def lint_lambda_and_callable(file_path: str, lines: list[str]) -> list[ScopeViolation]:
+    violations: list[ScopeViolation] = []
+    active_lambdas: list[tuple[int, int, int]] = []  # (decl_line, decl_indent, paren_floor)
+    current_paren_depth: int = 0
+    callable_names: set[str] = set()
+
+    for idx, raw_line in enumerate(lines, start=1):
+        code = strip_comments_and_strings(raw_line).rstrip()
+        stripped = code.strip()
+        if not stripped:
+            continue
+
+        indent = get_line_indent(raw_line)
+
+        # Check if line outdented below active lambda(s)
+        while active_lambdas:
+            lam_line, lam_indent, paren_floor = active_lambdas[-1]
+            if indent <= lam_indent and current_paren_depth <= paren_floor:
+                active_lambdas.pop()
+            else:
+                break
+
+        # Register Callable declarations
+        for m_cb in CALLABLE_DECL_RE.finditer(code):
+            cname = m_cb.group(1) or m_cb.group(2)
+            if cname:
+                callable_names.add(cname)
+
+        # Check for direct invocation of known Callable identifiers: cb(...) instead of cb.call(...)
+        for cname in callable_names:
+            pat = re.compile(r'(?<![.\w])' + re.escape(cname) + r'\s*\(')
+            if pat.search(code):
+                violations.append(ScopeViolation(
+                    rule_id="RULE-CALLABLE-DIRECT-CALL",
+                    file_path=file_path,
+                    line_number=idx,
+                    message=f"Direct invocation of Callable variable '{cname}(...)' is a GDScript parse error. Use '{cname}.call(...)' instead.",
+                    severity="ERROR"
+                ))
+
+        # Check for lambda declaration
+        m_lam = LAMBDA_DECL_RE.search(code)
+        if m_lam:
+            colon_idx = code.find(':', m_lam.start())
+            if colon_idx != -1:
+                after_colon = code[colon_idx + 1:]
+                if SELF_RE.search(after_colon):
+                    violations.append(ScopeViolation(
+                        rule_id="RULE-LAMBDA-SELF",
+                        file_path=file_path,
+                        line_number=idx,
+                        message="Cannot reference 'self' inside an anonymous lambda closure in GDScript 2.0. Assign 'self' to an outer local variable before the lambda closure.",
+                        severity="ERROR"
+                    ))
+                line_delta = count_bracket_delta(code)
+                if line_delta == 0 and colon_idx < len(code) - 1 and after_colon.strip():
+                    current_paren_depth += line_delta
+                    continue
+
+            active_lambdas.append((idx, indent, current_paren_depth))
+            current_paren_depth += count_bracket_delta(code)
+            continue
+
+        if active_lambdas and SELF_RE.search(code):
+            lam_line = active_lambdas[-1][0]
+            violations.append(ScopeViolation(
+                rule_id="RULE-LAMBDA-SELF",
+                file_path=file_path,
+                line_number=idx,
+                message=f"Cannot reference 'self' inside an anonymous lambda closure (declared at line {lam_line}) in GDScript 2.0. Assign 'self' to an outer local variable before the lambda closure.",
+                severity="ERROR"
+            ))
+
+        current_paren_depth += count_bracket_delta(code)
+        if current_paren_depth < 0:
+            current_paren_depth = 0
+
+    return violations
+
+
 def lint_file_scope(file_path: str) -> list[ScopeViolation]:
     violations: list[ScopeViolation] = []
     try:
@@ -95,6 +178,8 @@ def lint_file_scope(file_path: str) -> list[ScopeViolation]:
             lines = f.readlines()
     except Exception as e:
         return [ScopeViolation("READ-ERROR", file_path, 1, f"Failed to read file: {e}")]
+
+    violations.extend(lint_lambda_and_callable(file_path, lines))
 
     in_func: bool = False
     func_name: str = ""

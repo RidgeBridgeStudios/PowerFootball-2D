@@ -100,6 +100,14 @@ FORBIDDEN = [
     (re.compile(r"\bOS\s*\.\s*get_ticks_msec\s*\(\s*\)\s*/\s*1000\b"), "prefer Time.get_ticks_msec()"),
     (re.compile(r"(?<!@)\bexport\s*\("), "export(...) is Godot 3 — use @export"),
     (re.compile(r"(?<!@)\bonready\s+var\b"), "onready is Godot 3 — use @onready"),
+    (re.compile(r"\bsetget\b"), "setget is Godot 3 — use GDScript 2.0 'get:' and 'set:' property syntax"),
+    (re.compile(r"\bNone\b"), "Python 'None' is invalid in GDScript — use 'null'"),
+    (re.compile(r"\bTrue\b"), "Python 'True' is invalid in GDScript — use 'true'"),
+    (re.compile(r"\bFalse\b"), "Python 'False' is invalid in GDScript — use 'false'"),
+    (re.compile(r"\bdef\s+[A-Za-z0-9_]+\s*\("), "Python 'def' is invalid in GDScript — use 'func'"),
+    (re.compile(r"\bisinstance\s*\("), "Python 'isinstance()' is invalid in GDScript — use 'is' operator"),
+    (re.compile(r"\blen\s*\("), "Python 'len()' is invalid in GDScript — use '.size()' on arrays/dicts or '.length()' on strings"),
+    (re.compile(r"^\s*(?:from\s+[A-Za-z0-9_.]+\s+import\b|import\s+[A-Za-z0-9_.]+\b)"), "Python 'import' statement is invalid in GDScript — use 'preload()' or global class names"),
 ]
 
 STRING_RE = re.compile(r'"(?:[^"\\]|\\.)*"|\'(?:[^\'\\]|\\.)*\'')

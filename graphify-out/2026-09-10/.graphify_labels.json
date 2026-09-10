@@ -116,6 +116,7 @@
   "114": "AnalyticalSimulationHarness",
   "115": "verify_gate.py",
   "116": "Roadmap",
+  "117": "SOCIAL_SIMULATION_ARCHITECTURE.md",
   "118": "Set Pieces & Restarts Errata",
   "119": "Match State, Pacing & Urgency Errata",
   "120": "Physics, Ball Dynamics & Kinematics Errata",
@@ -124,7 +125,7 @@
   "123": "Scene Tree, Node Hierarchy & Cross-Referencing Errata",
   "124": "session-history.md",
   "125": "README.md",
-  "126": "compact_errata.py",
+  "126": "Llms",
   "127": "dump_api.py",
   "128": "Workflow: cross-system-feature",
   "129": "sync_rules.py",
@@ -133,5 +134,9 @@
   "132": "Workflow: feature-implementation",
   "133": "Workflow: performance-work",
   "134": "Workflow: session-bootstrap",
-  "135": "Workflow: task-intake-routing"
+  "135": "Workflow: task-intake-routing",
+  "136": "fuzz_formations.py",
+  "137": "1. The Psychological Trait & Archetype Matrix",
+  "138": "4. Star Gravity & Tactical Asymmetry",
+  "139": "2. The Social Memory & Relationship Graph"
 }

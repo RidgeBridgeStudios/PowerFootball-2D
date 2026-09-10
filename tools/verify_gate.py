@@ -74,6 +74,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Unified Verification Orchestrator")
     parser.add_argument("--fast", action="store_true", help="Run fast static verification checks (default)")
     parser.add_argument("--full", action="store_true", help="Run full suite including simulations, fuzzers, and indexing")
+    parser.add_argument("--godot", action="store_true", help="Include Godot engine headless compiler verification")
     parser.add_argument("--xml", action="store_true", help="Output failure diagnostics in structured XML")
     args = parser.parse_args()
 
@@ -94,6 +95,7 @@ def main() -> int:
     ]
 
     full_checks = [
+        ("godot_verify", [py, os.path.join(ROOT, "tools", "godot_verify.py")]),
         ("eval_simulation", [py, os.path.join(ROOT, "tools", "eval_simulation.py")]),
         ("fuzz_solvers", [py, os.path.join(ROOT, "tools", "fuzz_solvers.py"), "--iterations=10000"]),
         ("fuzz_formations", [py, os.path.join(ROOT, "tools", "fuzz_formations.py"), "--iterations=5000"]),
@@ -119,6 +121,8 @@ def main() -> int:
     checks_to_run = list(fast_checks)
     if mode_full:
         checks_to_run.extend(full_checks)
+    elif args.godot:
+        checks_to_run.append(("godot_verify", [py, os.path.join(ROOT, "tools", "godot_verify.py")]))
 
     mode_label = "FULL PRE-TURN BATTERY" if mode_full else "FAST POST-WRITE GATE"
     if not args.xml:

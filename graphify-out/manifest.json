@@ -78,8 +78,8 @@
     "semantic_hash": ""
   },
   "docs/SYMBOLS.json": {
-    "mtime": 1789039269.112841,
-    "seen": 1789039272.369116,
+    "mtime": 1789039960.82462,
+    "seen": 1789039964.4743547,
     "ast_hash": "d7e2e0a1b2ae52079b85f2592a019a05",
     "semantic_hash": ""
   },
@@ -168,9 +168,9 @@
     "semantic_hash": ""
   },
   "tools/gdcheck.py": {
-    "mtime": 1788391030.0,
-    "seen": 1789037774.4662733,
-    "ast_hash": "6780e7abed333cd92cb0a2884d450ac6",
+    "mtime": 1789039824.5960746,
+    "seen": 1789039964.4743698,
+    "ast_hash": "7a6b22caa8b22f33082732555ff8e1e9",
     "semantic_hash": ""
   },
   "tools/generate_db.py": {
@@ -186,9 +186,9 @@
     "semantic_hash": ""
   },
   "tools/git_pre_commit.py": {
-    "mtime": 1788391030.0,
-    "seen": 1789037774.4662757,
-    "ast_hash": "9c70e61b5c1ce4e84e547e5b8e50226b",
+    "mtime": 1789039901.65119,
+    "seen": 1789039964.4743726,
+    "ast_hash": "1209b70087aa7e7e010cbb88dd3b9b48",
     "semantic_hash": ""
   },
   "tools/hook_gdcheck.py": {
@@ -216,9 +216,9 @@
     "semantic_hash": ""
   },
   "tools/lint_scope.py": {
-    "mtime": 1788391030.0,
-    "seen": 1789037774.4662797,
-    "ast_hash": "8557cd31a6f2ac15f74e06e27040f1d7",
+    "mtime": 1789039861.4582968,
+    "seen": 1789039964.4743788,
+    "ast_hash": "402ad8fd3750e0707f379fdb2a15a725",
     "semantic_hash": ""
   },
   "tools/lint_shadowing.py": {
@@ -372,9 +372,9 @@
     "semantic_hash": ""
   },
   "tools/verify_gate.py": {
-    "mtime": 1788899386.788442,
-    "seen": 1789037774.4663014,
-    "ast_hash": "5a3fcc503294c1f462bef218e634a7f2",
+    "mtime": 1789039884.0458295,
+    "seen": 1789039964.474403,
+    "ast_hash": "56e23bac4d41c32ae58b616479bac463",
     "semantic_hash": ""
   },
   "tools/worktree_manager.py": {
@@ -606,9 +606,9 @@
     "semantic_hash": ""
   },
   "AGENTS.md": {
-    "mtime": 1788899385.7329378,
-    "seen": 1789037774.466348,
-    "ast_hash": "43c8ed96ef94d3f8fd0cb50c8aab7a18",
+    "mtime": 1789039944.7896724,
+    "seen": 1789039964.4744518,
+    "ast_hash": "7d9cfb58ed75a0bdca3e35115e90c6d4",
     "semantic_hash": ""
   },
   "AGENTS_ERRATA.md": {
@@ -648,14 +648,14 @@
     "semantic_hash": ""
   },
   "docs/ANTI_PATTERNS.md": {
-    "mtime": 1788391030.0,
-    "seen": 1789037774.4663541,
-    "ast_hash": "f9b9f5b262493c524d0e4961b3081c5b",
+    "mtime": 1789039919.0536482,
+    "seen": 1789039964.4744582,
+    "ast_hash": "4e99adf3a78677f96fd13730a6e945f1",
     "semantic_hash": ""
   },
   "docs/API_SURFACE.md": {
-    "mtime": 1789039268.9482775,
-    "seen": 1789039272.3692274,
+    "mtime": 1789039960.66124,
+    "seen": 1789039964.4744592,
     "ast_hash": "bd320483d5578d4a956bc9ec5349a2d5",
     "semantic_hash": ""
   },
@@ -1110,9 +1110,9 @@
     "semantic_hash": ""
   },
   "docs/agent-errata/scene-and-node-paths.md": {
-    "mtime": 1788899386.01713,
-    "seen": 1789037774.466365,
-    "ast_hash": "b4151ccc6ea0ffa44dc7509b29004cb9",
+    "mtime": 1789039933.0583088,
+    "seen": 1789039964.474468,
+    "ast_hash": "8c373cc08c1e47bcc490c0461f62ed40",
     "semantic_hash": ""
   },
   "docs/agent-errata/session-history.md": {
@@ -1203,6 +1203,12 @@
     "mtime": 1789037417.0882096,
     "seen": 1789037774.4663594,
     "ast_hash": "b4e2e1df353477a37d42b92d7e880999",
+    "semantic_hash": ""
+  },
+  "tools/godot_verify.py": {
+    "mtime": 1789039601.7072334,
+    "seen": 1789039964.4743738,
+    "ast_hash": "ea7fead32fdbfb3fe17e89ab30ce03a6",
     "semantic_hash": ""
   }
 }

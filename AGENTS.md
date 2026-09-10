@@ -106,6 +106,9 @@ To prevent documentation decay without generating unnecessary token churn, agent
 
 - **Explicit Typing Required:** Every variable declaration, function parameter, and function return type must be explicitly typed.
 - **No Object-to-String Comparisons:** Never compare an object instance (`current_state`, `player`, `ball`) to a StringName or String literal. Check if the class exposes a distinct string identifier (e.g., `current_state_name`).
+- **No `self` in Lambda Closures:** In GDScript 2.0, `self` is a special keyword and cannot be captured inside an anonymous lambda closure (`func(): ...`). Assign `self` to an outer local variable (`var host: Control = self`) before the lambda, or use `Callable.bind()`.
+- **Callable Invocation Syntax:** Never invoke a `Callable` variable directly (`my_callable(...)`). Always use `my_callable.call(...)` or `.call_deferred(...)`.
+- **No Pythonisms:** Never use Python syntax (`None`, `True`, `False`, `def`, `len()`, `isinstance()`, `import`). Use GDScript 2.0 equivalents (`null`, `true`, `false`, `func`, `.size()`, `is`, `preload`).
 - **Clean Early Returns:** When introducing an early `return`, inspect the remainder of the function and remove all orphaned code to prevent duplicate declaration parse errors.
 - **Root Class Syntax:** If a root class used as a type annotation (e.g., `PlayerBrain`, `HeavyPlayerController`) produces cascade errors, inspect the root file's syntax first.
 - **Fast Distance Calculations:** In candidate ranking or sorting loops, always use `distance_squared_to()` to avoid costly square root instructions.

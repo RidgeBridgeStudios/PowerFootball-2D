@@ -10,10 +10,40 @@ This page records critical runtime crashes and static check blind spots arising 
 ## Table of Contents
 ### Error Logs
 - [ERR-20260901-01](#err-20260901-01)
+- [ERR-20260910-01](#err-20260910-01)
 
 ### Cross-Module Architecture Findings
 - [Three latent runtime crashes found by static cross-referencing](#three-latent-runtime-crashes-found-by-static-cross-referencing)
 - [Non-ASCII identifiers parse here but not in Godot](#non-ascii-identifiers-parse-here-but-not-in-godot)
+- [Self inside lambda closure parse failures in GDScript 2.0](#self-inside-lambda-closure-parse-failures-in-gdscript-20)
+
+---
+
+## ERR-20260910-01
+
+```yaml
+- id: ERR-20260910-01
+  date: 2026-09-10
+  agent: Antigravity / Gemini Flash
+  subsystem: ui/manager_mode
+  symptom: >
+    Failed to load script "res://ui/manager_mode/SquadPanel.gd" with error "Parse error".
+    Failed to load script "res://ui/manager_mode/TransfersPanel.gd" with error "Parse error".
+  root_cause: >
+    In GDScript 2.0 (Godot 4.x), anonymous lambdas are Callable closures that capture local
+    scope variables by reference, but 'self' is a special keyword and cannot be captured.
+    Calling `func(): open_modal(self, ...)` causes an immediate compile-time parse failure.
+  resolution: >
+    Replaced direct `self` keyword with the local outer parent container or bound variable
+    (`body` in SquadPanel, `host` in TransfersPanel). Added `RULE-LAMBDA-SELF` to `tools/lint_scope.py`,
+    headless engine compiler verification to `tools/godot_verify.py`, and wired checks into
+    `tools/verify_gate.py` and git pre-commit hooks.
+  affected_files:
+    - ui/manager_mode/SquadPanel.gd
+    - ui/manager_mode/TransfersPanel.gd
+    - tools/lint_scope.py
+    - tools/godot_verify.py
+```
 
 ---
 
@@ -94,3 +124,23 @@ exists.
 A Cyrillic local variable slipped into `LeaguePanel.gd` and passed gdcheck.
 Godot requires ASCII identifiers. Added a repo-wide scan to catch it; worth
 keeping in mind when generating code with mixed-script content nearby.
+
+---
+
+## Self inside lambda closure parse failures in GDScript 2.0
+
+In GDScript 2.0 (Godot 4.x), anonymous lambdas (`func(): ...`) are treated as closures that capture outer local variables. However, `self` is a special keyword, NOT a local variable. Writing:
+```gdscript
+button.pressed.connect(func(): open_modal(self, data))
+```
+triggers an unrecoverable parse error:
+`Failed to load script "res://path/to/Script.gd" with error "Parse error".`
+
+### Remediation
+Store `self` in a local variable before the lambda:
+```gdscript
+var host_panel: Control = self
+button.pressed.connect(func(): open_modal(host_panel, data))
+```
+or pass parent parameters (`body`, `host`) already present in the method scope.
+Enforced statically in `<10ms` by `tools/lint_scope.py` (`RULE-LAMBDA-SELF`) and during engine verification by `tools/godot_verify.py`.
