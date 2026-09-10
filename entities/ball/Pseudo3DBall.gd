@@ -184,10 +184,22 @@ func simulate_z_axis(delta: float) -> void:
 		_air_spin_speed = 0.0
 
 
+## Total ground deceleration in px/s^2 currently acting on a rolling ball:
+##   pitch_friction * FRICTION_SCALE * (1 - wetness * 0.45) + REST_DRAG_FLAT
+## At the default tuning (0.94 friction, dry pitch) this is 206 px/s^2. Exposed
+## as one accessor because three call sites need it and one of them is outside
+## this file: PlayerBrain solves its pass launch speed from the closed-form
+## v0 = sqrt(2 * d * a) so a pass actually reaches its target, which only stays
+## true if the AI reads the same deceleration the physics applies rather than a
+## hardcoded copy that silently drifts when the pitch is retuned or wet.
+func get_ground_deceleration() -> float:
+	var effective_friction: float = pitch_friction * FRICTION_SCALE * (1.0 - surface_wetness * 0.45)
+	return effective_friction + REST_DRAG_FLAT
+
+
 func simulate_xy_axis(delta: float) -> void:
 	if is_on_ground:
-		var effective_friction: float = pitch_friction * FRICTION_SCALE * (1.0 - surface_wetness * 0.45)
-		var total_deceleration: float = effective_friction + REST_DRAG_FLAT
+		var total_deceleration: float = get_ground_deceleration()
 		velocity = velocity.move_toward(Vector2.ZERO, total_deceleration * delta)
 		if velocity.length() < rest_speed and velocity.length() > 0.5 and not _drift_applied:
 			velocity = velocity.rotated(randf_range(-0.18, 0.18)) * 0.7
@@ -255,8 +267,7 @@ func predict_trajectory(impulse_xy: Vector2, impulse_z: float, steps: int = 25, 
 	var sim_pos_z: float = position_z
 	var sim_vel_z: float = impulse_z
 	var sim_grounded: bool = is_on_ground and is_zero_approx(impulse_z)
-	var effective_friction: float = pitch_friction * FRICTION_SCALE * (1.0 - surface_wetness * 0.45)
-	var total_deceleration: float = effective_friction + REST_DRAG_FLAT
+	var total_deceleration: float = get_ground_deceleration()
 
 	for i: int in range(steps):
 		if sim_grounded:

@@ -474,6 +474,7 @@ func _on_ball_struck_for_dive(_shooter: Node, _speed: float, _charge_ratio: floa
 	if dive_state == null:
 		return
 	dive_state.dive_direction = direction
+	dive_state.reaction_delay = _gk_dive_brain.reaction_delay(keeper, match_ball.global_position)
 	keeper.state_factory.transition_to(PlayerState.GOALKEEPER_DIVE)
 
 

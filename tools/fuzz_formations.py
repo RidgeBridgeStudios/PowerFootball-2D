@@ -42,9 +42,15 @@ class TeamPhase(enum.IntEnum):
     TRANSITION = 2
 
 
+# Every constant below is a hand-mirror of shared/FormationAnchorMath.gd.
+# There is no import path from Python into .gd, so a retune there MUST be
+# copied here in the same change or this fuzzer silently starts proving
+# invariants about a model the game no longer runs. (It had already drifted
+# once: OUT_OF_POSSESSION sat at -0.06 against a source value of -0.08, and
+# the per-role Y ball weight was missing outright.)
 PHASE_LINE_PUSH = {
     TeamPhase.IN_POSSESSION: 0.08,
-    TeamPhase.OUT_OF_POSSESSION: -0.06,
+    TeamPhase.OUT_OF_POSSESSION: -0.08,
     TeamPhase.TRANSITION: 0.0,
 }
 
@@ -53,6 +59,27 @@ ROLE_PHASE_SENSITIVITY = {
     Role.OUTFIELD_DEFENDER: 0.60,
     Role.OUTFIELD_MIDFIELDER: 1.00,
     Role.OUTFIELD_ATTACKER: 1.30,
+}
+
+# Per-role Y (width) ball weight — mirrors _ROLE_Y_BALL_WEIGHT.
+ROLE_Y_BALL_WEIGHT = {
+    Role.GOALKEEPER: 0.15,
+    Role.OUTFIELD_DEFENDER: 0.15,
+    Role.OUTFIELD_MIDFIELDER: 0.20,
+    Role.OUTFIELD_ATTACKER: 0.30,
+}
+
+# Phase compactness modulation — mirrors _PHASE_WIDTH_MULT / _PHASE_DEPTH_MULT.
+PHASE_WIDTH_MULT = {
+    TeamPhase.IN_POSSESSION: 1.25,
+    TeamPhase.OUT_OF_POSSESSION: 0.85,
+    TeamPhase.TRANSITION: 1.0,
+}
+
+PHASE_DEPTH_MULT = {
+    TeamPhase.IN_POSSESSION: 1.0,
+    TeamPhase.OUT_OF_POSSESSION: 0.75,
+    TeamPhase.TRANSITION: 0.9,
 }
 
 # Macro urgency modulation — mirrors shared/FormationAnchorMath.gd's
@@ -95,15 +122,20 @@ def get_dynamic_anchor_position(
     ball_norm_x = clampf((ball_pos_x - pitch_centre_x) / half_x, -1.0, 1.0)
     ball_norm_y = clampf((ball_pos_y - pitch_centre_y) / half_y, -1.0, 1.0)
 
+    y_ball_weight = ROLE_Y_BALL_WEIGHT.get(role, ball_weight)
     pulled_norm_x = lerpf(base_norm_x, ball_norm_x, ball_weight)
-    pulled_norm_y = lerpf(base_norm_y, ball_norm_y, ball_weight)
+    pulled_norm_y = lerpf(base_norm_y, ball_norm_y, y_ball_weight)
+
+    depth_mult = PHASE_DEPTH_MULT.get(phase, 1.0)
+    pulled_norm_x = ball_norm_x + (pulled_norm_x - ball_norm_x) * depth_mult
 
     push = PHASE_LINE_PUSH.get(phase, 0.0) * ROLE_PHASE_SENSITIVITY.get(role, 1.0) * attack_sign
     urgency_shift_norm = (urgency * URGENCY_MAX_DEF_LINE_SHIFT * attack_sign) / half_x
     pulled_norm_x = clampf(pulled_norm_x + push + urgency_shift_norm, -1.0, 1.0)
 
+    width_mult = PHASE_WIDTH_MULT.get(phase, 1.0)
     compactness_mult = 1.0 - URGENCY_COMPACTNESS_SCALE * urgency
-    pulled_norm_y = clampf(pulled_norm_y * compactness_mult, -1.0, 1.0)
+    pulled_norm_y = clampf(pulled_norm_y * width_mult * compactness_mult, -1.0, 1.0)
 
     return (
         pitch_centre_x + pulled_norm_x * half_x,

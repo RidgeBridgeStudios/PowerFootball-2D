@@ -20,10 +20,34 @@ extends PlayerState
 const WINDUP: float = 0.08
 ## Length of the successful-contact window.
 const WINDOW: float = 0.2
-## Seconds of stumble after a miss, during which input is ignored.
-const RECOVERY: float = 0.45
-## Lunge impulse along the facing direction.
-const LUNGE_SPEED: float = 190.0
+## Seconds of stumble after a challenge, during which input is ignored. Which
+## of the three applies is decided by the outcome, not by a single flat cost:
+## a clean slide is back up quickly, a missed slide is on the floor watching
+## play go past, and a standing challenge barely breaks stride.
+## RECOVERY is the fallback for the post-window timeout path.
+const RECOVERY: float = 0.65
+## Seconds of stumble after a slide that WON the ball cleanly.
+const RECOVERY_CLEAN: float = 0.25
+## Seconds of stumble after a standing challenge — a jab at the ball from an
+## upright body, not a committed dive, so the defender stays on their feet.
+const RECOVERY_STANDING: float = 0.28
+
+## Distance (px) a committed slide travels from the moment of the lunge. The
+## lunge solves its own launch speed against SLIDE_FRICTION_SCALE to cover
+## exactly this, rather than applying a fixed impulse: a flat 190px/s impulse
+## against standing friction (~2140px/s^2 at 75kg) put the tackler on the
+## ground after roughly 33px, which is barely further than simply standing
+## still and reaching, and left a "slide tackle" with none of a slide's
+## commitment or its cost.
+const SLIDE_DISTANCE: float = 110.0
+## Fraction of base_friction acting on a sliding body. Grass under a sliding
+## player is far slicker than under a decelerating one on their feet.
+const SLIDE_FRICTION_SCALE: float = 0.30
+
+## Reach (px) of a standing challenge. Inside this the defender can win the
+## ball off an upright body without committing to the slide, and pays only
+## RECOVERY_STANDING for it.
+const STANDING_SWEEP_RADIUS: float = 38.0
 ## How hard a won ball is knocked clear of the loser.
 const DISPOSSESS_IMPULSE: float = 150.0
 ## A miss that still lands the tackler this close to an opponent is judged a
@@ -44,6 +68,10 @@ const BACK_TACKLE_FOUL_DOT: float = -0.10
 var _elapsed: float = 0.0
 var _resolved: bool = false
 var _foul_checked: bool = false
+## Recovery cost for THIS challenge, chosen by outcome — see the RECOVERY_*
+## constants. Starts at the missed-slide cost and is lowered when the
+## challenge resolves better than that.
+var _recovery_cost: float = RECOVERY
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 
 
@@ -51,11 +79,29 @@ func enter(player: HeavyPlayerController) -> void:
 	_elapsed = 0.0
 	_resolved = false
 	_foul_checked = false
-	# Commit the body forward. The lunge is an impulse, not a steering change:
-	# once you have dived in, you are going where you were pointed.
-	player.apply_external_impulse(player.facing_direction * LUNGE_SPEED)
+	_recovery_cost = RECOVERY
+
+	# Slick the turf for the duration of the slide, then solve the launch speed
+	# that carries the body SLIDE_DISTANCE against that friction:
+	#     v = sqrt(2 * a * d),  a = base_friction * SLIDE_FRICTION_SCALE
+	# Only ever ADDS pace (a defender already travelling faster is not slowed),
+	# and goes through apply_external_impulse() so this state never writes
+	# velocity itself.
+	player.slide_friction_scale = SLIDE_FRICTION_SCALE
+	var slide_decel: float = maxf(player.base_friction * SLIDE_FRICTION_SCALE, 1.0)
+	var launch_speed: float = sqrt(2.0 * slide_decel * SLIDE_DISTANCE)
+	var speed_gain: float = maxf(launch_speed - player.velocity.length(), 0.0)
+	# apply_external_impulse() divides by mass, so pre-multiply to land on the
+	# intended velocity change for a player of any weight.
+	var impulse: float = speed_gain * (maxf(player.player_mass, 1.0) / HeavyPlayerController.NEUTRAL_MASS)
+	player.apply_external_impulse(player.facing_direction * impulse)
+
 	player.is_sprinting = false
 	player.show_action_text("TACKLE", Color(1.0, 0.45, 0.4))
+
+
+func exit(player: HeavyPlayerController) -> void:
+	player.slide_friction_scale = 1.0
 
 
 func process(player: HeavyPlayerController, delta: float) -> StringName:
@@ -73,7 +119,7 @@ func process(player: HeavyPlayerController, delta: float) -> StringName:
 		_foul_checked = true
 		_check_mistimed_foul(player)
 
-	if _elapsed >= WINDUP + WINDOW + RECOVERY:
+	if _elapsed >= WINDUP + WINDOW + _recovery_cost:
 		return MOVE if player.movement_intent.length() > 0.05 else IDLE
 
 	return &""
@@ -111,6 +157,12 @@ func _try_win_ball(player: HeavyPlayerController) -> bool:
 		if victim.is_holding_ball():
 			return false
 		victim.ball_control_lockout = TACKLE_DISPOSSESS_LOCKOUT
+
+	# A challenge won from inside STANDING_SWEEP_RADIUS is a standing jab, not a
+	# committed dive — the defender stays upright and pays only
+	# RECOVERY_STANDING. Anything won from further out was a genuine slide.
+	var reach: float = player.global_position.distance_to(ball.global_position)
+	_recovery_cost = RECOVERY_STANDING if reach <= STANDING_SWEEP_RADIUS else RECOVERY_CLEAN
 
 	ball.apply_kick(player.facing_direction * DISPOSSESS_IMPULSE, 0.0, player)
 	if player.can_carry_ball():

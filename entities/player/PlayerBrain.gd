@@ -150,7 +150,19 @@ const CHASE_RADIUS: float = 220.0
 ## Distance inside which a ChaseBall-committed defender's lunge has a
 ## realistic chance of reaching foot-sensor range (15px, HeavyPlayer.tscn)
 ## before TackleState's own WINDUP+WINDOW elapses.
-const TACKLE_ATTEMPT_RANGE: float = 30.0
+## Calibration: widened 30 -> 42. At 30px a CPU defender had to be inside
+## foot-sensor range (15px) plus barely a body width before it would even
+## consider committing, so by the time the gate opened the carrier had
+## normally already turned away — CPU sides contained without ever actually
+## challenging. 42px is roughly one closing stride out, which is where a real
+## challenge is launched from.
+const TACKLE_ATTEMPT_RANGE: float = 42.0
+## Minimum alignment between the defender's own movement intent and the
+## direction to the carrier before a challenge is committed. Distinct from the
+## facing check below: facing says the body is pointed at the ball, this says
+## the defender is actually travelling into the challenge rather than being
+## carried past it by momentum from somewhere else.
+const TACKLE_INTENT_DOT: float = 0.55
 
 ## Minimum gap between CPU-initiated tackle attempts by the same brain.
 ## Raised to 3.0s to reflect professional restraint and avoid slide tackle spam.
@@ -164,7 +176,11 @@ const TACKLE_ATTEMPT_COOLDOWN: float = 3.0
 ## option (a covering defender holding the line instead of diving in) can
 ## still outscore it — this nudges the chase/hold-shape balance, it does not
 ## override it.
-const PRESS_TRIGGER_CHASE_BONUS: float = 0.18
+## Calibration: 0.18 -> 0.15 so that this bonus plus
+## DUTY_TRIGGER_PRESS_CHASE_BONUS sums to exactly the +0.45 commitment the
+## named presser is meant to carry, while a nearby non-presser still only gets
+## the smaller nudge.
+const PRESS_TRIGGER_CHASE_BONUS: float = 0.15
 
 ## Extra additive bonus to _score_chase() for the single OUTFIELD_DEFENDER
 ## _resolve_defensive_duty() has actually assigned TRIGGER_PRESS this tick, on
@@ -310,6 +326,16 @@ const GOALIE_SWEEPER_BALL_DIST: float = 500.0
 const GOALIE_SWEEPER_MAX_DIST: float = 280.0
 const GOALIE_SWEEPER_LINE_MARGIN: float = 60.0
 
+## How much closer to a loose ball played in behind the keeper must be than the
+## nearest opposing runner before committing to sweep it up. A tie is not
+## enough — losing this race leaves an empty net.
+const SWEEPER_RUSH_MARGIN: float = 45.0
+## How far from goal the keeper may sweep when the trigger is a through-ball in
+## behind, as opposed to the 380px defensive-third cap that governs the loose-
+## ball and 1v1 cases. Just past the penalty area, so the keeper can smother
+## outside the box without ending up in midfield.
+const SWEEPER_RUSH_MAX_DIST: float = 460.0
+
 ## Physics frames between decision re-evaluations. Combined with player_index as
 ## a phase offset, this spreads 22 brains over 15 frames — at most two think on
 ## any given tick instead of all of them.
@@ -331,6 +357,88 @@ var _effective_update_interval: int = UPDATE_INTERVAL
 ## its own decision tree. Without it the receiver re-evaluates mid-flight and
 ## can turn away from a pass that was played to where it was going.
 const PASS_LOCK_DURATION: float = 0.35
+
+## --- Pass strike calibration -------------------------------------------------
+## Seconds of receiver velocity the pass is aimed ahead of — the lead point
+## PassUtilityScorer.LEAD_PASS_BONUS prices as a through-ball.
+const PASS_LEAD_SECONDS: float = 0.3
+## Overshoot factor on the closed-form launch speed. The exact solution
+## v0 = sqrt(2 * d * a) arrives with precisely zero pace, which in practice
+## means the ball dies a stride short of a receiver who is still moving. 1.18
+## delivers it at roughly a third of launch speed — a driven ball that can be
+## taken in stride rather than one the receiver has to stop and wait for.
+const PASS_SPEED_OVERSHOOT: float = 1.18
+## Floor and ceiling on the solved launch speed. The floor keeps a six-yard
+## exchange from being a nudge the nearest opponent walks onto; the ceiling
+## keeps a maximum-range ball inside the striking power of a ground pass.
+## The ceiling is set from the ball's own roll model rather than picked by
+## feel: at the tuned 206 px/s^2 ground deceleration a ball struck at 505 px/s
+## rolls 505^2 / (2 * 206) = 620px before coming to rest, which is the top of
+## the driven-pass range. The floor's 240 px/s correspondingly rolls ~140px, so
+## even the shortest exchange is firm rather than a nudge an opponent walks on
+## to. Retune the ceiling together with Pseudo3DBall.pitch_friction — the two
+## numbers only mean anything relative to each other.
+const PASS_SPEED_MIN: float = 240.0
+const PASS_SPEED_MAX: float = 505.0
+## Charge ratio reported to GameEvents.ball_struck for a CPU ground pass.
+const PASS_CHARGE_RATIO: float = 0.4
+## Pressure index at or above which the settle window is overridden and the
+## carrier may release the pass immediately — a player being closed down does
+## not get a beat to take a touch and look up.
+const SETTLE_OVERRIDE_PRESSURE: float = 0.55
+
+## --- Composure under crowding ------------------------------------------------
+## Radius (px) and body count that together define "genuinely crowded". Two
+## opponents inside CROWDING_RADIUS is a player being closed from both sides,
+## which is where technique starts to fail — distinct from the smooth
+## PRESSURE_RADIUS index, which counts a single distant opponent as pressure.
+const CROWDING_RADIUS: float = 75.0
+const CROWDING_BODY_COUNT: int = 2
+## Maximum accuracy decay a fully crowded, zero-composure player suffers.
+## Scaled by (1 - composure), so a composed player barely notices and a
+## panicky one loses control of the ball's direction entirely.
+const CROWDING_MAX_ACCURACY_DECAY: float = 1.0
+## Radians of aim scatter a ground pass picks up at full crowding decay.
+## Passing was previously pinpoint under any amount of pressure, which is a
+## large part of why possession never actually broke down: a surrounded
+## defender played exactly the same ball as an unmarked one in open space.
+const PASS_CROWDING_SCATTER: float = 0.16
+
+
+## 0.0-1.0 accuracy decay from being closed down by multiple opponents at once.
+## Zero unless at least CROWDING_BODY_COUNT opponents are inside
+## CROWDING_RADIUS; from there it scales with how far composure falls short of
+## perfect. Spatial read routes through MatchWorldModel; allocates nothing.
+func _crowding_accuracy_decay(eff_composure: float) -> float:
+	if player == null:
+		return 0.0
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return 0.0
+	var crowd: int = world.count_nearby_opponents(player.global_position, CROWDING_RADIUS, player.team)
+	if crowd < CROWDING_BODY_COUNT:
+		return 0.0
+	# Each body past the first two deepens it, saturating at four.
+	var crowd_ratio: float = clampf(float(crowd - CROWDING_BODY_COUNT + 1) / 3.0, 0.0, 1.0)
+	return CROWDING_MAX_ACCURACY_DECAY * crowd_ratio * (1.0 - clampf(eff_composure, 0.0, 1.0))
+
+
+## Launch speed (px/s) that carries a ground pass `distance` px to its target
+## with pace still on it, solved against the ball's own current deceleration:
+##     v0 = sqrt(2 * d * a) * PASS_SPEED_OVERSHOOT
+## Calibration note: every CPU pass previously left the foot at a flat
+## 260 px/s. Against the tuned 206 px/s^2 pitch friction that ball stops after
+## 164px — shorter than PassUtilityScorer.PREFERRED_DISTANCE (220px) and less
+## than a third of MAX_USEFUL_DISTANCE (520px). So the scorer was selecting
+## progressive balls the strike could not physically deliver: anything but the
+## shortest exchange died in open grass and was collected by whoever was
+## closest, which reads as aimless recycling. Solving the speed from the
+## distance is what makes the retuned pass weights actually reachable, and it
+## puts a driven ball (PASS_SPEED_MAX-adjacent) in the 480-620px band.
+func _solve_pass_speed(distance: float) -> float:
+	var decel: float = ball.get_ground_deceleration() if ball != null else 206.0
+	var solved: float = sqrt(2.0 * maxf(distance, 0.0) * maxf(decel, 1.0)) * PASS_SPEED_OVERSHOOT
+	return clampf(solved, PASS_SPEED_MIN, PASS_SPEED_MAX)
 
 ## Seconds over which _steer_for_action() eases from the direction a player
 ## was actually moving in into a freshly chosen one, whenever current_action
@@ -448,8 +556,16 @@ var _opponents_buffer: Array[Node2D] = []
 var _off_ball_candidates: Array[Vector2] = []
 var _opp_y_coords: Array[float] = []
 
+## Fixed-size opponent-position scratch handed to UtilityMath.calculate_xg()
+## so the xG comparison behind SHOOT_OVERRIDE_XG_RATIO never allocates on a
+## decision tick. Sized once in _ready() to one slot per opponent and refilled
+## in place by _shot_xg_at(); a slot whose player is not live is written with
+## OFF_PITCH_SENTINEL, which can never fall inside a shot triangle.
+var _xg_opp_scratch: PackedVector2Array = PackedVector2Array()
+
 
 func _ready() -> void:
+	_xg_opp_scratch.resize(MatchWorldModel.TOTAL_PLAYERS / 2)
 	# Between MatchWorldModel (-100), which refreshes the spatial cache, and
 	# HeavyPlayerController (100), which consumes the steering this produces.
 	process_priority = 0
@@ -840,6 +956,23 @@ func _score_chase(ctx: UtilityContext) -> float:
 ## carry is not pressing), or the trigger's carrier is missing/on this
 ## player's own team (a backward/square pass trigger names the kicker, so a
 ## teammate's own backward pass must not boost this player's own chase score).
+## True when a live pressing trigger names an opposing carrier this player
+## should be sprinting at right now. Shares _press_trigger_chase_bonus()'s
+## gating (own team not in possession, trigger carrier is a valid opponent
+## still on the ball) but is evaluated per frame from _steer_for_action(),
+## where wants_sprint lives, rather than on the decision tick.
+func _press_trigger_commits(is_chasing: bool) -> bool:
+	if not is_chasing or player == null or _team_has_ball():
+		return false
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null or not world.press_trigger_active:
+		return false
+	var carrier: HeavyPlayerController = world.press_trigger_carrier
+	if not is_instance_valid(carrier) or carrier.team == player.team or carrier.is_holding_ball():
+		return false
+	return true
+
+
 func _press_trigger_chase_bonus(ctx: UtilityContext) -> float:
 	if ctx.team_has_ball or player == null:
 		return 0.0
@@ -930,29 +1063,198 @@ func _score_dribble(ctx: UtilityContext) -> float:
 	return clampf(base, 0.0, 1.0)
 
 
+## --- Shooting calibration ----------------------------------------------------
+## Range gate (px, player -> opponent goal centre) inside which a shot is legal
+## at all, and the normalising distance for the proximity ramp below.
+const SHOOT_RANGE: float = 320.0
+## Steepness of the exponential final-third proximity ramp:
+##     U_shoot = U_base * exp(SHOOT_PROXIMITY_RAMP * (1 - d / SHOOT_RANGE)) * facing
+## exp(2.2) ~= 9.03 on the goal line, decaying to a 1.0x no-op at the range
+## gate. The previous linear prox_bonus (max +0.30) left a shot from 12 yards
+## scoring below a square recycling pass, which is the arithmetic behind the
+## 0.0-shots / 0.0-xG diagnosis: possession never converted because shooting
+## never won the utility contest anywhere on the pitch. The ramp makes the
+## final third genuinely different from the rest of it rather than a linear
+## continuation of it.
+const SHOOT_PROXIMITY_RAMP: float = 2.2
+## Floor on the facing term (body heading . unit vector to goal centre) so a
+## striker with the ball at their feet but half-turned still reads as able to
+## shoot rather than scoring a hard zero. This term is also the repo's only
+## available proxy for a strike-across-the-body penalty: PlayerData carries no
+## footedness field, so a literal weak-foot multiplier would mean adding a new
+## persisted attribute rather than retuning an existing one.
+const SHOOT_FACING_FLOOR: float = 0.15
+## Range (px) treated as "in the box" for the finishing bonus and the
+## late-game desperation boost.
+const SHOOT_IN_BOX_RANGE: float = 240.0
+## Fraction of a goalpost lane that may be occluded before the strike stops
+## counting as a clear sight of goal. Both posts must clear this bar.
+const SHOOT_CLEAR_LANE_MAX_OCCLUSION: float = 0.40
+## How far (px) the nearest closing defender must be before the clear-lane
+## utility floor arms.
+const SHOOT_CLEAR_LANE_DEFENDER_DIST: float = 70.0
+## Absolute utility floor applied once a clear sight of goal is confirmed — a
+## genuinely unblocked strike is never allowed to lose to a recycling pass on
+## base-score arithmetic alone. See _shot_override_active() for the companion
+## suppression of Pass/FindSpace.
+const SHOOT_CLEAR_LANE_FLOOR: float = 0.76
+## A teammate must be worth this multiple of the shooter's own xG before a
+## confirmed clear sight of goal defers to a pass instead.
+const SHOOT_OVERRIDE_XG_RATIO: float = 1.8
+## Flat boost to shooting inside SHOOT_IN_BOX_RANGE while this team is trailing
+## in the closing stage (GameManager.STAGE_3_FRACTION = 75/90 = 0.833).
+const SHOOT_DESPERATION_BOOST: float = 0.25
+## Multiplier collapsing MaintainFormation inside the opponent penalty area — a
+## player in the box is a poacher, a blocker or a loose-ball predator, never a
+## stationary formation anchor.
+const BOX_FORMATION_FLOOR_COLLAPSE: float = 0.05
+## Stand-in position for a non-live roster slot in _xg_opp_scratch. Far enough
+## off-pitch that is_point_in_triangle() can never report it as a blocker,
+## which keeps the scratch buffer a fixed size instead of being resized (and
+## therefore reallocated) per call.
+const OFF_PITCH_SENTINEL: Vector2 = Vector2(1.0e6, 1.0e6)
+
+
 ## Score for attempting a shot on goal.
-## Only legal when the player owns the ball and is within shooting range.
-## Aggression drives the base desire; proximity and pressure add urgency.
-## Calibration: range gate tightened (360 -> 320) and base/proximity/in-box
-## coefficients lowered so shooting is no longer the reflex option any time a
-## player is loosely in range — this was producing runaway scoring (arcade
-## pinball) instead of believable buildup-then-strike football. Shots now have
-## to be genuinely earned by proximity/aggression rather than winning the
-## utility contest by default against a comparable Pass score.
+## Only legal when the player owns the ball and is within SHOOT_RANGE.
+## Conviction is a blend of aggression (willingness), close control (technique)
+## and composure (nerve); the exponential ramp and the facing term then decide
+## how much that conviction is actually worth from this position.
 func _score_shoot(ctx: UtilityContext) -> float:
 	if not ctx.is_possessor:
 		return 0.0
-	if ctx.dist_to_goal > 320.0:
+	if ctx.dist_to_goal > SHOOT_RANGE:
 		return 0.0
-	var base: float = 0.28 + ctx.eff_aggression * 0.35
-	# The closer to goal, the harder the shot is to ignore.
-	var prox_bonus: float = clampf(1.0 - ctx.dist_to_goal / 320.0, 0.0, 1.0) * 0.30
-	# Under pressure, get the shot off before being tackled.
-	var pressure_urgency: float = ctx.pressure * ctx.eff_aggression * 0.15
-	# 1-on-1 / In-box finishing bonus: inside 240px with goal in sight
-	if ctx.dist_to_goal < 240.0:
-		base += 0.15
-	return clampf(base + prox_bonus + pressure_urgency, 0.0, 1.0)
+
+	var technique: float = player.get_close_control() if player != null else 0.65
+	var base: float = 0.28 + ctx.eff_aggression * 0.28 + technique * 0.14 + ctx.eff_composure * 0.10
+
+	var facing: float = SHOOT_FACING_FLOOR
+	if player != null and pitch_boundary != null:
+		facing = maxf(
+			player.get_facing_dot(pitch_boundary.get_goal_centre(1 - player.team)),
+			SHOOT_FACING_FLOOR)
+
+	var ramp: float = exp(SHOOT_PROXIMITY_RAMP * (1.0 - ctx.dist_to_goal / SHOOT_RANGE))
+	var score: float = base * ramp * facing
+
+	# Under pressure, get the shot away before the challenge arrives.
+	score += ctx.pressure * ctx.eff_aggression * 0.15
+
+	if ctx.dist_to_goal < SHOOT_IN_BOX_RANGE:
+		score += 0.15
+		if _is_trailing_in_crunch():
+			score += SHOOT_DESPERATION_BOOST
+
+	if _has_clear_sight_of_goal():
+		score = maxf(score, SHOOT_CLEAR_LANE_FLOOR)
+
+	return clampf(score, 0.0, 1.0)
+
+
+## True while this player's team is behind on the scoreboard in the closing
+## stage of the match. Reads GameManager's already-published stage/score state
+## rather than re-deriving the clock. Feeds SHOOT_DESPERATION_BOOST and the
+## trailing-state progression bias in _find_best_pass_target().
+func _is_trailing_in_crunch() -> bool:
+	if player == null:
+		return false
+	if GameManager.get_match_time_ratio() < GameManager.STAGE_3_FRACTION:
+		return false
+	return GameManager.score[player.team] < GameManager.score[1 - player.team]
+
+
+## True when both goalpost lanes are clear enough to strike through and no
+## defender is close enough to close the shot down — the "unblockable" trigger
+## behind SHOOT_CLEAR_LANE_FLOOR. Routes every spatial read through
+## MatchWorldModel and allocates nothing.
+func _has_clear_sight_of_goal() -> bool:
+	if player == null or ball == null or pitch_boundary == null:
+		return false
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return false
+
+	var shot_pos: Vector2 = ball.global_position
+	if world.nearest_opponent_dist_to(shot_pos, player.team) <= SHOOT_CLEAR_LANE_DEFENDER_DIST:
+		return false
+
+	var goal_centre: Vector2 = pitch_boundary.get_goal_centre(1 - player.team)
+	var half_mouth: float = pitch_boundary.goal_mouth_height * 0.5
+	var top_post: Vector2 = Vector2(goal_centre.x, goal_centre.y - half_mouth)
+	var bottom_post: Vector2 = Vector2(goal_centre.x, goal_centre.y + half_mouth)
+
+	if _lane_occlusion(shot_pos, top_post) >= SHOOT_CLEAR_LANE_MAX_OCCLUSION:
+		return false
+	return _lane_occlusion(shot_pos, bottom_post) < SHOOT_CLEAR_LANE_MAX_OCCLUSION
+
+
+## 0.0 (nobody near the lane) to 1.0 (an opponent standing on it) for the
+## corridor between [from_pos] and [to_pos], normalised against
+## PASS_LANE_CLEARANCE. Thin wrapper over MatchWorldModel's existing lane
+## distance query so the occlusion percentage is expressed once, here.
+func _lane_occlusion(from_pos: Vector2, to_pos: Vector2) -> float:
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null or player == null:
+		return 0.0
+	var min_dist: float = world.get_passing_lane_min_distance(from_pos, to_pos, player.team)
+	return clampf(1.0 - min_dist / PASS_LANE_CLEARANCE, 0.0, 1.0)
+
+
+## Expected goals for a strike taken from [shot_pos], using the repo's existing
+## logistic xG solver (UtilityMath.calculate_xg) rather than a second model.
+## Opponent positions are copied into the pre-sized _xg_opp_scratch buffer so
+## the call allocates nothing; dead roster slots are filled with
+## OFF_PITCH_SENTINEL to keep the buffer a fixed length.
+func _shot_xg_at(shot_pos: Vector2) -> float:
+	if player == null or pitch_boundary == null:
+		return 0.0
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return 0.0
+
+	var opp_team: int = 1 - player.team
+	var slot: int = 0
+	var capacity: int = _xg_opp_scratch.size()
+	for i: int in range(MatchWorldModel.TOTAL_PLAYERS):
+		if slot >= capacity:
+			break
+		if world.player_teams[i] != opp_team or not world.is_slot_live(i):
+			continue
+		_xg_opp_scratch.set(slot, world.player_positions[i])
+		slot += 1
+	while slot < capacity:
+		_xg_opp_scratch.set(slot, OFF_PITCH_SENTINEL)
+		slot += 1
+
+	var goal_centre: Vector2 = pitch_boundary.get_goal_centre(opp_team)
+	var half_mouth: float = pitch_boundary.goal_mouth_height * 0.5
+	return UtilityMath.calculate_xg(
+		shot_pos, goal_centre,
+		Vector2(goal_centre.x, goal_centre.y - half_mouth),
+		Vector2(goal_centre.x, goal_centre.y + half_mouth),
+		_xg_opp_scratch, false)
+
+
+## True when a confirmed clear sight of goal should suppress Pass/FindSpace
+## outright. The one football-legitimate reason to pass up an unblocked strike
+## is a teammate standing in a materially better position, so this defers only
+## when the cached pass target's own xG beats the shooter's by
+## SHOOT_OVERRIDE_XG_RATIO. Cheap by construction: the xG pair is only ever
+## evaluated for the possessor, and only once _has_clear_sight_of_goal() has
+## already returned true.
+func _shot_override_active(ctx: UtilityContext) -> bool:
+	if not ctx.is_possessor or ball == null:
+		return false
+	if ctx.dist_to_goal > SHOOT_RANGE:
+		return false
+	if not _has_clear_sight_of_goal():
+		return false
+	if not is_instance_valid(_cached_pass_target):
+		return true
+	var own_xg: float = _shot_xg_at(ball.global_position)
+	var mate_xg: float = _shot_xg_at(_cached_pass_target.global_position)
+	return mate_xg <= own_xg * SHOOT_OVERRIDE_XG_RATIO
 
 
 ## Score for maintaining formation (conservative option).
@@ -990,6 +1292,18 @@ func _score_maintain_formation(ctx: UtilityContext) -> float:
 		var anchor_urgency: float = clampf(anchor_dist / CHASE_RADIUS, 0.0, 1.0)
 		base += anchor_urgency * 0.30
 
+	# Penalty-box floor collapse: inside the opponent's 18-yard box there is no
+	# such thing as holding shape. A player in there is a poacher attacking the
+	# near post, a runner arriving late, or a body blocking the keeper's view —
+	# never a dot standing on an anchor. Without this collapse the flat
+	# discipline base (up to 0.55 for a defender, 0.20 + anchor urgency for
+	# everyone else) reliably out-argues FindSpace for the attackers who should
+	# be overloading the six-yard area, which is why box entries produced no
+	# secondary runners and therefore no rebounds, cut-backs or tap-ins.
+	if player != null and pitch_boundary != null \
+			and pitch_boundary.is_in_penalty_area(player.global_position, 1 - player.team):
+		base *= BOX_FORMATION_FLOOR_COLLAPSE
+
 	return clampf(base, 0.0, 1.0)
 
 
@@ -1016,7 +1330,25 @@ func _should_goalkeeper_rush() -> bool:
 		if pressure_on_carrier < 0.30:
 			is_1v1_breakaway = true
 
-	if not is_loose_near_box and not is_1v1_breakaway:
+	# Condition 3: a through-ball has been played in behind — the ball is loose
+	# between this team's own defensive line and its goal — and the keeper is
+	# clearly favourite to reach it. That "clearly" is the whole point of
+	# SWEEPER_RUSH_MARGIN: a keeper who is merely level with the attacker and
+	# comes anyway is a keeper stranded in no-man's land, so the margin has to
+	# be won, not tied. Reads the shared defensive line from MatchWorldModel
+	# rather than deriving a private one (see docs/CORE_INVARIANTS.md).
+	var is_through_ball_in_behind: bool = false
+	if ball.possessor == null:
+		var attack_sign: float = _get_attack_sign()
+		var line_x: float = world.defensive_line_x[player.team]
+		# "Behind the line" means goal-side of it along this team's own axis.
+		if (ball_pos.x - line_x) * attack_sign < 0.0:
+			var gk_dist: float = player.global_position.distance_to(ball_pos)
+			var chaser_dist: float = world.nearest_opponent_dist_to(ball_pos, player.team)
+			if gk_dist < chaser_dist - SWEEPER_RUSH_MARGIN:
+				is_through_ball_in_behind = true
+
+	if not is_loose_near_box and not is_1v1_breakaway and not is_through_ball_in_behind:
 		return false
 
 	# Intercept point calculation
@@ -1030,8 +1362,12 @@ func _should_goalkeeper_rush() -> bool:
 		INTERCEPT_REACTION_TIME
 	)
 
-	# Don't rush outside the defensive third (> 380px of goal)
-	if intercept_pt.distance_to(goal_centre) > 380.0:
+	# Don't rush outside the defensive third (> 380px of goal). A through-ball
+	# in behind is the exception the sweeper-keeper role exists for: the whole
+	# value of coming is meeting the ball before the runner does, which by
+	# definition happens further out than the box.
+	var rush_limit: float = SWEEPER_RUSH_MAX_DIST if is_through_ball_in_behind else 380.0
+	if intercept_pt.distance_to(goal_centre) > rush_limit:
 		return false
 
 	var gk_time: float = player.global_position.distance_to(intercept_pt) / maxf(gk_top_speed, 1.0)
@@ -1090,8 +1426,16 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D] = []) -> StringNam
 			best_score = s_panic
 			best_action = &"PanicClear"
 
+	# Clear sight of goal outranks buildup: a striker with an unblocked strike
+	# and no defender within SHOOT_CLEAR_LANE_DEFENDER_DIST does not square it
+	# off. Evaluated once here rather than inside each scorer so Pass and
+	# FindSpace are suppressed together and the shot is compared against the
+	# only option that legitimately beats it — a teammate in a materially
+	# better position (SHOOT_OVERRIDE_XG_RATIO).
+	var shot_overrides: bool = _shot_override_active(ctx)
+
 	var s_pass: float = clampf(_score_pass(ctx) + _rng.randf_range(-0.04, 0.04), 0.0, 1.0)
-	if s_pass > best_score:
+	if s_pass > best_score and not shot_overrides:
 		best_score = s_pass
 		best_action = &"Pass"
 
@@ -1101,7 +1445,7 @@ func evaluate_tactical_action(defenders_nearby: Array[Node2D] = []) -> StringNam
 		best_action = &"ChaseBall"
 
 	var s_space: float = clampf(_score_find_space(ctx) + _rng.randf_range(-0.04, 0.04), 0.0, 1.0)
-	if s_space > best_score:
+	if s_space > best_score and not shot_overrides:
 		best_score = s_space
 		best_action = &"FindSpace"
 
@@ -1495,6 +1839,31 @@ func _find_best_pass_target(passer_pressure: float = 0.0, allow_backward_pass: b
 	var urgent_w_press: float = base_w_press * (1.0 - 0.45 * world_urgency)
 	var urgent_w_adv: float = base_w_adv * (1.0 + 0.6 * world_urgency)
 
+	# --- Directional bias context (loop-invariant) ---------------------------
+	# A side chasing the game in the closing stage leans harder into progression
+	# and refuses the unforced backward ball outright; see PassUtilityScorer's
+	# TRAILING_PROGRESS_MULTIPLIER / BACKWARD_PASS_PENALTY_TRAILING.
+	var trailing_late: bool = _is_trailing_in_crunch()
+	if trailing_late:
+		urgent_w_adv *= PassUtilityScorer.TRAILING_PROGRESS_MULTIPLIER
+	var backward_penalty: float = PassUtilityScorer.BACKWARD_PASS_PENALTY_TRAILING if trailing_late \
+		else PassUtilityScorer.BACKWARD_PASS_PENALTY
+
+	# The backward damper only applies from the middle third forward, and only
+	# while the carrier actually has time on the ball — a centre-back genuinely
+	# pinned by a presser keeps the safety valve.
+	var carrier_axis_x: float = (ball_pos.x - (pitch_boundary.get_centre_spot().x if pitch_boundary != null else 0.0)) * attack_dir.x
+	var nearest_presser: float = world.nearest_opponent_dist_to(ball_pos, player.team)
+	var damp_backward: bool = carrier_axis_x > PassUtilityScorer.BACKWARD_DAMP_MIN_AXIS_X \
+		and nearest_presser > PassUtilityScorer.UNPRESSURED_DEFENDER_DIST
+
+	# Centre-back-to-centre-back recycling is the single clearest signature of
+	# the sterile possession loop, so it is gated separately and harder: two
+	# defenders may only pass between themselves once every forward lane out of
+	# defence is genuinely shut (CB_RECYCLE_MIN_OCCLUSION).
+	var passer_is_defender: bool = role == Role.OUTFIELD_DEFENDER
+	var forward_lanes_shut: bool = passer_is_defender and _forward_lanes_are_shut()
+
 	# xT lookup is loop-invariant on everything except candidate_pos: pitch
 	# size and the origin-centred offset UtilityMath.get_xt_value() expects
 	# (see its doc comment) don't change per candidate this tick.
@@ -1539,10 +1908,32 @@ func _find_best_pass_target(passer_pressure: float = 0.0, allow_backward_pass: b
 		var facing_dot: float = 1.0 if allow_backward_pass else player.get_facing_dot(candidate_pos)
 		var xt_value: float = UtilityMath.get_xt_value(candidate_pos - xt_origin, xt_pitch_size, xt_attack_sign)
 
+		# Packing: how many opponents this ball actually eliminates. Spatial read,
+		# so it comes from the world model cache, not a local roster walk.
+		var bypassed: float = float(world.count_bypassed_opponents(
+			ball_pos, candidate_pos, player.team, xt_attack_sign))
+
+		# Directional bias, resolved here (the scorer stays match-state-free).
+		var directional_bias: float = 0.0
+		var is_negative_ball: bool = forward_dot < PassUtilityScorer.BACKWARD_PASS_DOT
+		if is_negative_ball:
+			if allow_backward_pass:
+				pass
+			elif passer_is_defender and candidate_brain != null \
+					and candidate_brain.role == Role.OUTFIELD_DEFENDER and not forward_lanes_shut:
+				# Back-line recycle with a way forward still available — refuse it.
+				continue
+			elif damp_backward:
+				directional_bias -= backward_penalty
+		elif _is_lead_pass_candidate(candidate, attack_dir):
+			# Ball into the space ahead of a runner rather than into their feet.
+			directional_bias += PassUtilityScorer.LEAD_PASS_BONUS
+
 		# Hot path: bare float, allocates nothing (see PassUtilityScorer docs).
 		var score: float = PassUtilityScorer.score_pass(
 			distance, facing_dot, forward_dot, min_opp_dist, effective_pressure,
-			w_dist, w_angle, urgent_w_press, urgent_w_adv, xt_value)
+			w_dist, w_angle, urgent_w_press, urgent_w_adv, xt_value,
+			bypassed, directional_bias)
 
 		# Trust bias: how much this passer trusts THIS candidate as a receiver
 		# nudges the already-computed utility score up or down. Neutral trust
@@ -1569,13 +1960,15 @@ func _find_best_pass_target(passer_pressure: float = 0.0, allow_backward_pass: b
 		if debug_log_pass_scores:
 			var breakdown: PassUtilityScorer.PassScoreBreakdown = PassUtilityScorer.score_pass_breakdown(
 				distance, facing_dot, forward_dot, min_opp_dist, effective_pressure, candidate,
-				w_dist, w_angle, urgent_w_press, urgent_w_adv, xt_value)
+				w_dist, w_angle, urgent_w_press, urgent_w_adv, xt_value,
+				bypassed, directional_bias)
 			# breakdown.total is pre-trust; `score` (post-multiplier) is what
 			# actually decides best_target below, so print both.
-			print("[PassScorer] %s -> %s  dist=%.2f angle=%.2f pressure=%.2f adv=%.2f xt=%.2f  raw=%.3f trust_adj=%.3f" % [
+			print("[PassScorer] %s -> %s  dist=%.2f angle=%.2f pressure=%.2f adv=%.2f pack=%.2f xt=%.2f bias=%+.2f  raw=%.3f trust_adj=%.3f" % [
 				player.name, candidate.name,
 				breakdown.distance_utility, breakdown.angle_utility,
-				breakdown.pressure_utility, breakdown.advancement_utility, xt_value,
+				breakdown.pressure_utility, breakdown.advancement_utility,
+				breakdown.packing_utility, xt_value, directional_bias,
 				breakdown.total, score])
 
 		if score > best_score:
@@ -1587,6 +1980,52 @@ func _find_best_pass_target(passer_pressure: float = 0.0, allow_backward_pass: b
 
 	_cached_pass_score = best_score if best_target != null else 0.0
 	return best_target
+
+
+## True when every forward outlet from the current ball position is occluded
+## past PassUtilityScorer.CB_RECYCLE_MIN_OCCLUSION — the only condition under
+## which two centre-backs are allowed to pass between themselves. Samples the
+## lane to each forward teammate rather than a fan of arbitrary probe points,
+## so "no way out" means no actual pass exists, not merely that a fixed
+## direction happens to be blocked. Allocation-free.
+func _forward_lanes_are_shut() -> bool:
+	if player == null or ball == null:
+		return true
+	var world: MatchWorldModel = MatchWorldModel.instance
+	if world == null:
+		return true
+	var attack_dir: Vector2 = _get_attack_direction()
+	var ball_pos: Vector2 = ball.global_position
+
+	for c: int in range(MatchWorldModel.TOTAL_PLAYERS):
+		if world.player_teams[c] != player.team or not world.is_slot_live(c):
+			continue
+		var candidate: HeavyPlayerController = world.player_nodes[c]
+		if candidate == player:
+			continue
+		var candidate_pos: Vector2 = world.player_positions[c]
+		var to_candidate: Vector2 = candidate_pos - ball_pos
+		if to_candidate.length_squared() < 1.0:
+			continue
+		if to_candidate.normalized().dot(attack_dir) <= 0.0:
+			continue
+		if _lane_occlusion(ball_pos, candidate_pos) < PassUtilityScorer.CB_RECYCLE_MIN_OCCLUSION:
+			return false
+	return true
+
+
+## True when [candidate] is running onto the ball rather than standing to
+## receive it — sprinting, and carrying real velocity along the attacking
+## axis. The pass is then worth playing into the space ahead of them
+## (PassUtilityScorer.LEAD_PASS_BONUS); _steer_for_action() already aims every
+## pass at a lead point, so this only prices the option, it does not change
+## where the ball is struck.
+func _is_lead_pass_candidate(candidate: HeavyPlayerController, attack_dir: Vector2) -> bool:
+	if not is_instance_valid(candidate) or not candidate.wants_sprint:
+		return false
+	if candidate.velocity.length_squared() < 1.0:
+		return false
+	return candidate.velocity.normalized().dot(attack_dir) > PassUtilityScorer.LEAD_PASS_MIN_FORWARD_DOT
 
 
 ## Returns true only if this player is the most appropriate chaser on the team.
@@ -1832,10 +2271,26 @@ func _current_team_phase() -> FormationAnchorMath.TeamPhase:
 ## ROLE_SPACE_ALPHA is kept as a fallback for any player entity that does not
 ## yet have a role_config .tres assigned. New entities should always have one.
 ## Remove this constant once all HeavyPlayerController scenes are migrated.
+## Roam alpha per role — the INVERSE of PlayerRoleConfig.anchor_weight (see
+## docs/CORE_INVARIANTS.md): 0.0 holds the formation anchor rigidly, 1.0 roams
+## freely. This dictionary, not the .tres presets, is what a live match
+## actually runs on: role_config is an unassigned @export on every player in
+## pitch/PitchScene.tscn, so _evaluate_off_ball_target() falls through to here.
+## The presets in shared/roles/ are kept numerically consistent with it
+## (alpha == 1.0 - anchor_weight) so assigning one never silently changes
+## behaviour.
+##
+## Calibration (elastic geometry): the attacker's 0.65 (anchor_weight 0.35)
+## kept strikers tethered close enough to a static anchor that they were never
+## ahead of the ball when it arrived in the final third — there was simply
+## nobody to pass forward to, which is half of why possession recycled instead
+## of progressing. 0.78 (anchor_weight 0.22) lets a poacher play off the last
+## defender's shoulder. Defenders move the other way (0.20 -> 0.15) to hold the
+## rest-defence band; see MatchWorldModel.LINE_OFFSET_REST_DEFENCE.
 const ROLE_SPACE_ALPHA: Dictionary = {
-	Role.OUTFIELD_DEFENDER: 0.20,
-	Role.OUTFIELD_MIDFIELDER: 0.40,
-	Role.OUTFIELD_ATTACKER: 0.65,
+	Role.OUTFIELD_DEFENDER: 0.15,
+	Role.OUTFIELD_MIDFIELDER: 0.50,
+	Role.OUTFIELD_ATTACKER: 0.78,
 }
 
 ## Fan of candidate offsets sampled around the anchor point handed to
@@ -1857,6 +2312,33 @@ const OFF_BALL_CANDIDATE_OFFSETS: Array[Vector2] = [
 const OFF_BALL_OPENNESS_RADIUS: float = 220.0
 ## Distance below which a teammate standing near a candidate counts against it.
 const OFF_BALL_CROWD_RADIUS: float = 70.0
+## --- Role-specific anchor elasticity ----------------------------------------
+## Lateral distance (px) from the pitch centre line beyond which an
+## OUTFIELD_ATTACKER's formation anchor marks them as a wide player rather than
+## a central striker. Read off the anchor rather than a role name because
+## role_config — the only place a role string lives — is an unassigned @export
+## in pitch/PitchScene.tscn (see ROLE_SPACE_ALPHA).
+const WIDE_ATTACKER_ANCHOR_Y: float = 150.0
+## Ball lateral offset (px) from the centre line past which the ball counts as
+## being on the far flank from a given winger, arming the far-post bias.
+const OPPOSITE_FLANK_BALL_Y: float = 120.0
+## How far (0-1) a weak-side winger collapses off their own touchline toward
+## the far post while the ball is worked down the opposite flank. Without this
+## the far-side winger holds width on a flank the ball is never coming to, so
+## a cross arrives into a box containing one striker and no second runner.
+const FAR_POST_BIAS: float = 0.55
+## Depth (px) off the goal line the far-post arrival point sits at — roughly
+## the back edge of the six-yard box, where a cut-back or deep cross lands.
+const FAR_POST_DEPTH: float = 90.0
+## Fraction of the goal mouth half-height the far-post arrival point sits from
+## the goal's centre.
+const FAR_POST_MOUTH_RATIO: float = 0.85
+
+## Distance (px) a midfielder's passing-triangle position is pulled toward the
+## carrier, on top of the lateral offset, so the outlet is a genuine short
+## diagonal rather than a flat square ball the first presser cuts out.
+const TRIANGLE_CARRIER_PULL: float = 45.0
+
 ## Distance at which a candidate's anchor-proximity score has decayed to 0.0.
 ## Comfortably above the largest offset in OFF_BALL_CANDIDATE_OFFSETS (~92px
 ## at the widest role radius) so every candidate still gets a graded score
@@ -2017,7 +2499,15 @@ func clamp_chase_target(
 		player: HeavyPlayerController,
 		wm: MatchWorldModel
 ) -> Vector2:
-	if wm.press_trigger_active and wm.press_trigger_carrier != null \
+	# Only the ONE defender _resolve_defensive_duty() actually named as this
+	# tick's presser is released from the chase budget. Previously any player at
+	# all had the budget lifted for the whole duration of a press trigger, so
+	# both centre-backs (and everyone else) could abandon their anchor and
+	# converge on the same carrier at once — the shape broke exactly when a
+	# turnover was most likely, and there was no rest defence left behind the
+	# ball. Everyone else presses within their radius or holds the line.
+	if current_duty == DefensiveDuty.TRIGGER_PRESS \
+			and wm.press_trigger_active and wm.press_trigger_carrier != null \
 			and is_instance_valid(wm.press_trigger_carrier) and wm.press_trigger_carrier.team != player.team:
 		return desired
 	var budget: float = MAX_CHASE_DEFAULT
@@ -2202,7 +2692,36 @@ func _find_channel_run_target(ball_pos: Vector2) -> Vector2:
 			_get_attack_sign(),
 			MatchWorldModel.instance.team_urgency[player.team] if MatchWorldModel.instance != null else 0.0
 		)
+	dynamic_anchor = _apply_far_post_bias(dynamic_anchor, ball_pos)
 	return _evaluate_off_ball_target(dynamic_anchor)
+
+
+## Pulls a weak-side winger off their own touchline and in toward the far post
+## while the ball is being worked down the opposite flank — the inward
+## half-space bias that turns a cross into a chance instead of a clearance.
+## No-op for central strikers, for midfielders and defenders, and whenever the
+## ball is on this player's own side of the pitch. Returns [anchor] unchanged
+## in every one of those cases, so the caller can apply it unconditionally.
+func _apply_far_post_bias(anchor: Vector2, ball_pos: Vector2) -> Vector2:
+	if role != Role.OUTFIELD_ATTACKER or player == null or pitch_boundary == null:
+		return anchor
+	if not _team_has_ball():
+		return anchor
+
+	var centre_y: float = pitch_boundary.get_centre_spot().y
+	var my_side: float = signf(formation_anchor.y - centre_y)
+	if is_zero_approx(my_side) or absf(formation_anchor.y - centre_y) < WIDE_ATTACKER_ANCHOR_Y:
+		return anchor  # central striker, not a winger
+
+	var ball_side_offset: float = ball_pos.y - centre_y
+	if absf(ball_side_offset) < OPPOSITE_FLANK_BALL_Y or signf(ball_side_offset) == my_side:
+		return anchor  # ball is central, or already on this winger's flank
+
+	var goal_centre: Vector2 = pitch_boundary.get_goal_centre(1 - player.team)
+	var far_post: Vector2 = Vector2(
+		goal_centre.x - _get_attack_sign() * FAR_POST_DEPTH,
+		goal_centre.y + my_side * pitch_boundary.goal_mouth_height * 0.5 * FAR_POST_MOUTH_RATIO)
+	return anchor.lerp(far_post, FAR_POST_BIAS)
 
 
 ## Returns a position in a passing triangle: offset laterally and slightly
@@ -2221,6 +2740,17 @@ func _find_passing_triangle_position(ball_pos: Vector2) -> Vector2:
 	var triangle_pos: Vector2 = ball_pos + Vector2(offset_x, offset_y)
 	# Blend 65% with formation_anchor so midfielders maintain their tactical depth without collapsing into the ball carrier
 	var blended_pos: Vector2 = triangle_pos.lerp(formation_anchor, 0.65)
+
+	# Shift the settled position TRIANGLE_CARRIER_PULL px back toward the
+	# carrier. The 65% anchor blend above is what stops midfielders collapsing
+	# onto the ball, but it also pushed the outlet far enough away that the
+	# short diagonal escape ball stopped existing — the carrier's only options
+	# were long or backwards. This restores the near leg of the triangle
+	# without giving back the depth discipline.
+	var to_carrier: Vector2 = ball_pos - blended_pos
+	if to_carrier.length_squared() > TRIANGLE_CARRIER_PULL * TRIANGLE_CARRIER_PULL:
+		blended_pos += to_carrier.normalized() * TRIANGLE_CARRIER_PULL
+
 	return clamp_to_playable_area(blended_pos)
 
 
@@ -2559,6 +3089,15 @@ func _should_attempt_tackle() -> bool:
 	if player.get_facing_dot(ball.global_position) < 0.60:
 		return false
 
+	# ...and the defender must be moving INTO the challenge, not drifting across
+	# it. Without this a defender whose body happens to point at the ball while
+	# its momentum carries it elsewhere still launches, which is the mistimed
+	# lunge TackleState then punishes with a foul.
+	var to_carrier: Vector2 = holder.global_position - player.global_position
+	if player.movement_intent.length_squared() > 0.0001 and to_carrier.length_squared() > 0.0001:
+		if player.movement_intent.normalized().dot(to_carrier.normalized()) < TACKLE_INTENT_DOT:
+			return false
+
 	# Disciplinary caution: a player already carrying a yellow card avoids reckless slide tackles.
 	var pdata: PlayerData = player.get_meta(&"player_data", null) as PlayerData
 	if pdata != null and pdata.yellow_cards_this_match > 0:
@@ -2574,6 +3113,15 @@ func _should_attempt_tackle() -> bool:
 	var commit_chance: float = eff_aggression * 0.35 + (1.0 - eff_composure) * 0.15
 	if role == Role.OUTFIELD_DEFENDER and current_duty == DefensiveDuty.TRIGGER_PRESS:
 		commit_chance = minf(commit_chance + 0.30, 0.75)
+
+	# Attribute contest: a defender reads how likely it is to actually get the
+	# ball off THIS carrier before diving in. close_control is the repo's
+	# technical/dribbling attribute (see PlayerData.calculate_overall_rating),
+	# so a defender's own control stands in for tackling technique and the
+	# carrier's for their ability to ride the challenge. Centred on 1.0 so an
+	# even matchup is a no-op and only a genuine mismatch moves the odds.
+	var contest: float = 1.0 + (player.get_close_control() - holder.get_close_control()) * 0.5
+	commit_chance *= clampf(contest, 0.55, 1.45)
 
 	if _rng.randf() > clampf(commit_chance, 0.10, 0.65):
 		return false
@@ -2647,11 +3195,38 @@ func _steer_for_action(delta: float) -> Vector2:
 
 	# --- Pass execution ---
 	var is_throw_in_taker: bool = player != null and player.state_factory != null and player.state_factory.current_state_name == &"ThrowIn"
-	if current_action == &"Pass" and _cached_pass_target != null and is_instance_valid(_cached_pass_target) and not is_throw_in_taker:
+	# Settle window: a carrier who has just taken the ball under control holds
+	# it for DribbleState's CONTROL_SETTLE window before releasing a pass, so a
+	# reception is a touch-turn-look-up rather than a first-time redirection of
+	# whatever arrived. The exception is a carrier under genuine pressure with a
+	# defender already on them — that player has no time to settle anything and
+	# must be free to move it immediately, which is also what keeps the panic
+	# outlet intact.
+	var settle_holds: bool = player.ball_settle_timer > 0.0 \
+		and calculate_pressure_index() < SETTLE_OVERRIDE_PRESSURE
+	if current_action == &"Pass" and _cached_pass_target != null and is_instance_valid(_cached_pass_target) \
+			and not is_throw_in_taker and not settle_holds:
 		if player.global_position.distance_to(ball.global_position) < 80.0 and player.get_ball_in_foot_range() != null:
-			var lead_pos: Vector2 = _cached_pass_target.global_position + _cached_pass_target.velocity * 0.3
-			var aim: Vector2 = (lead_pos - ball.global_position).normalized()
-			ball.apply_kick(aim * 260.0, 0.0, player)
+			var lead_pos: Vector2 = _cached_pass_target.global_position + _cached_pass_target.velocity * PASS_LEAD_SECONDS
+			var to_target: Vector2 = lead_pos - ball.global_position
+			var aim: Vector2 = to_target.normalized()
+
+			# Crowded passers misplace the ball. Scatter is applied to the struck
+			# direction, not to the target selection, so the AI still *intends* the
+			# right pass and simply fails to execute it — which is what turns a
+			# press into turnovers rather than into slower but equally perfect
+			# possession.
+			var pass_mood: MoodSystem = player.get_mood()
+			var pass_composure: float = clampf(
+				composure_attribute + (pass_mood.get_composure_delta() if pass_mood != null else 0.0), 0.0, 1.0)
+			var pass_decay: float = _crowding_accuracy_decay(pass_composure)
+			if pass_decay > 0.0:
+				_rng.seed = player.get_instance_id() + GameManager.get_match_tick()
+				var scatter: float = _rng.randf_range(-PASS_CROWDING_SCATTER, PASS_CROWDING_SCATTER) * pass_decay
+				aim = aim.rotated(scatter)
+
+			var pass_speed: float = _solve_pass_speed(to_target.length())
+			ball.apply_kick(aim * pass_speed, 0.0, player)
 
 			# Register this pass with the passer's TrustSystem before the
 			# target reference is cleared below — DribbleState resolves this
@@ -2671,7 +3246,7 @@ func _steer_for_action(delta: float) -> Vector2:
 				target_brain._pass_lock_passer = ball.possessor
 
 			player.show_action_text("PASS")
-			GameEvents.ball_struck.emit(player, 260.0, 0.4, false)
+			GameEvents.ball_struck.emit(player, pass_speed, PASS_CHARGE_RATIO, false)
 			MatchStatsTracker.record_pass_attempt(player, MatchStatsTracker.is_pass_toward_teammate(player, aim))
 
 			_cached_pass_target = null
@@ -2688,7 +3263,11 @@ func _steer_for_action(delta: float) -> Vector2:
 		var scatter_y: float = _rng.randf_range(-0.35, 0.35)
 		var clear_dir: Vector2 = (attack_dir + Vector2(0.0, scatter_y)).normalized()
 		var clear_speed: float = 480.0
-		var clear_height: float = 280.0
+		# 340 px/s against the ball's 580 px/s^2 gravity is a 1.17s hang — inside
+		# the aerial-contest window (see ChargeKickState.LOB_MIN_VELOCITY_Z).
+		# At the previous 280 the clearance was down again in 0.97s, landing
+		# before anyone could organise a challenge for the second ball.
+		var clear_height: float = 340.0
 		ball.apply_kick(clear_dir * clear_speed, clear_height, player)
 		player.show_action_text("CLEAR")
 		GameEvents.ball_struck.emit(player, clear_speed, 0.75, false)
@@ -2726,7 +3305,11 @@ func _steer_for_action(delta: float) -> Vector2:
 
 		# Target corner placement: 68% of half mouth (~68px from center, 32px inside post)
 		var corner_target_y: float = goal_centre.y + side_sign * (half_mouth * 0.68)
-		var spread: float = (1.0 - eff_composure) * 35.0
+		# Base placement spread from composure, widened further when the striker
+		# is being closed down by more than one defender at the moment of the
+		# strike — the difference between picking a corner and getting a shot away.
+		var shot_decay: float = _crowding_accuracy_decay(eff_composure)
+		var spread: float = (1.0 - eff_composure) * 35.0 + shot_decay * 40.0
 		var aim_y: float = clampf(corner_target_y + _rng.randf_range(-spread, spread), goal_centre.y - half_mouth + 15.0, goal_centre.y + half_mouth - 15.0)
 
 		var aim_target: Vector2 = Vector2(goal_centre.x, aim_y)
@@ -2890,7 +3473,13 @@ func _steer_for_action(delta: float) -> Vector2:
 
 	# Sprint is expressed as intent, not the resolved is_sprinting — the
 	# controller alone decides whether stamina actually allows it.
-	player.wants_sprint = current_action == &"ChaseBall" and distance > CHASE_RADIUS * 0.5
+	# A press trigger is a moment, not a position: the whole value of spotting a
+	# backward-facing carrier, a touchline trap or a heavy touch is arriving
+	# before it passes. So the chasing presser commits to a sprint regardless of
+	# distance, rather than jogging the first half of CHASE_RADIUS and only then
+	# accelerating — by which point the trigger has usually expired.
+	var chasing: bool = current_action == &"ChaseBall"
+	player.wants_sprint = chasing and (distance > CHASE_RADIUS * 0.5 or _press_trigger_commits(chasing))
 	var sacchi_force: Vector2 = Vector2.ZERO
 	# Off-ball only: ambient team-shape nudge applied only when team spread exceeds SACCHI_MAX_OUTFIELD_SPREAD.
 	# All on-ball / urgent actions (ChaseBall, PanicClear, AttemptShoot, AttemptDribble, Pass) are strictly exempt.

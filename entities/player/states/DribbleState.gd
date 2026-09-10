@@ -57,6 +57,39 @@ const POSSESSION_GRACE: float = 0.10
 ## Sprint multiplier on touch speed. The ball still drifts looser at pace,
 ## but by one body length — not three.
 const SPRINT_TOUCH_BONUS: float = 1.15
+
+## --- Control settle window ---------------------------------------------------
+## Seconds after taking the ball under control during which the carrier will
+## not release a pass (see HeavyPlayerController.ball_settle_timer, read by
+## PlayerBrain's pass execution gate). Scaled by close control: a technical
+## player is settled and looking up in CONTROL_SETTLE_MIN, a poor one needs
+## CONTROL_SETTLE_MAX to get the ball out of their feet.
+##
+## Without this the carrier could pass on the very first frame of possession,
+## which produced the frame-1 dumping the ball-retention diagnosis names: every
+## reception was resolved before a single off-ball run had time to develop, so
+## the only pass ever available was the one that already existed at the moment
+## the ball arrived. The window is what gives runs time to happen.
+const CONTROL_SETTLE_MIN: float = 0.40
+const CONTROL_SETTLE_MAX: float = 0.65
+
+## --- Micro-touch cadence -----------------------------------------------------
+## Seconds between touches, lerped by close control. Best case is one touch per
+## stride at pace; worst case is a heavier, less frequent push.
+const TOUCH_INTERVAL_BEST: float = 0.22
+const TOUCH_INTERVAL_WORST: float = 0.34
+## Fraction of top speed a touch is struck at, lerped the same way. Lower than
+## the old 0.85/0.50 pair because the touch now has to carry the ball for a
+## longer interval without outrunning the carry offset.
+const TOUCH_RATIO_BEST: float = 0.62
+const TOUCH_RATIO_WORST: float = 0.44
+
+## Carry offset (px ahead of the player) at full close control and at none.
+## The retuned pair keeps the ball inside the 18-26px band the foot sensor can
+## reliably re-capture, instead of the previous 16-28px which let a heavy
+## touch drift just past the sensor's reach at pace.
+const CARRY_OFFSET_TIGHT: float = 18.0
+const CARRY_OFFSET_LOOSE: float = 26.0
 ## Close control: dribbling costs a slice of top speed.
 const DRIBBLE_SPEED_PENALTY: float = 0.9
 
@@ -81,9 +114,18 @@ func enter(player: HeavyPlayerController) -> void:
 		_notify_trust_of_reception(player, ball)
 		ball.set_possessor(player)
 		_possessed_ball = ball
+		_open_settle_window(player)
 		player.possession_gained.emit()
 	else:
 		_possessed_ball = null
+
+
+## Opens the settle window on [player], scaled by close control. Called at
+## every point possession is actually claimed so a reception mid-state gets the
+## same touch-and-look-up beat as one that entered through enter().
+func _open_settle_window(player: HeavyPlayerController) -> void:
+	player.ball_settle_timer = lerpf(
+		CONTROL_SETTLE_MAX, CONTROL_SETTLE_MIN, player.get_close_control())
 
 
 func exit(player: HeavyPlayerController) -> void:
@@ -122,6 +164,7 @@ func process(player: HeavyPlayerController, delta: float) -> StringName:
 			_notify_trust_of_reception(player, ball_in_range)
 			_possessed_ball = ball_in_range
 			ball_in_range.set_possessor(player)
+			_open_settle_window(player)
 	else:
 		# Ball has left the sensor, or someone else now legitimately owns it
 		# (e.g. a won tackle) — check grace window before dropping. See
@@ -196,7 +239,7 @@ func physics_process(player: HeavyPlayerController, delta: float) -> void:
 			shield_dir = -to_opp
 			player.show_action_text("SHIELD", Color(1.0, 0.82, 0.30))
 
-	var dynamic_offset: float = lerpf(28.0, 16.0, player.get_close_control())
+	var dynamic_offset: float = lerpf(CARRY_OFFSET_LOOSE, CARRY_OFFSET_TIGHT, player.get_close_control())
 	var carry_target: Vector2 = player.global_position + shield_dir * dynamic_offset
 
 	# --- Branch: touch frames skip the magnet entirely -----------------------
@@ -246,8 +289,14 @@ func _apply_magnet(ball: Pseudo3DBall, carry_dir: Vector2, carry_target: Vector2
 func _apply_touch(player: HeavyPlayerController, carry_dir: Vector2, shield_dir: Vector2) -> void:
 	var ball: Pseudo3DBall = _possessed_ball
 	var control: float = player.get_close_control() if player.has_method(&"get_close_control") else 0.65
-	var effective_touch_ratio: float = lerpf(0.85, 0.50, 1.0 - control)
-	var effective_interval: float = lerpf(0.10, 0.20, 1.0 - control)
+	# Touch cadence: an elite dribbler takes small, frequent touches
+	# (TOUCH_INTERVAL_BEST), a poor one bigger, rarer ones. The old 0.10s best
+	# case pushed the ball on so often that consecutive touches compounded
+	# faster than the magnet could gather them, which is what produced the
+	# overshoot oscillation; 0.22s is one touch per stride at pace and keeps the
+	# ball inside the CARRY_OFFSET_TIGHT/_LOOSE band below.
+	var effective_touch_ratio: float = lerpf(TOUCH_RATIO_WORST, TOUCH_RATIO_BEST, control)
+	var effective_interval: float = lerpf(TOUCH_INTERVAL_WORST, TOUCH_INTERVAL_BEST, control)
 
 	# Push the ball along the running line rather than the stick line: a heavy
 	# player cannot redirect the ball faster than they can redirect themselves.

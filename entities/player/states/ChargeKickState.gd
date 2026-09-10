@@ -199,11 +199,26 @@ func _get_resolved_aim(player: HeavyPlayerController) -> Vector2:
 	return player.facing_direction
 
 
+## Vertical launch speed bounds for a lofted ball, in px/s. Under the ball's
+## 580 px/s^2 gravity a launch of vz gives a hang time of 2*vz/g, so these two
+## numbers ARE the hang-time window:
+##     LOB_MIN_VELOCITY_Z (320) -> 1.10s
+##     LOB_MAX_VELOCITY_Z (464) -> 1.60s
+## Calibration: the floor was 120 px/s, a 0.41s hang. A cross or lofted
+## through-ball delivered that flat lands before any aerial contest can
+## resolve — the attacker, the defender and the goalkeeper are all still
+## closing when it arrives, so a delivery into the box was decided by whoever
+## happened to already be standing there rather than by a contest. Floor and
+## ceiling now bracket the window an aerial duel and a keeper's claim need.
+const LOB_MIN_VELOCITY_Z: float = 320.0
+const LOB_MAX_VELOCITY_Z: float = 464.0
+
+
 func _calculate_lob_velocity_z(distance: float, speed_xy: float, gravity: float = 580.0) -> float:
 	var safe_speed: float = maxf(speed_xy, 100.0)
 	var safe_dist: float = maxf(distance, 50.0)
 	var vz: float = (gravity * safe_dist) / (1.8 * safe_speed)
-	return clampf(vz, 120.0, 480.0)
+	return clampf(vz, LOB_MIN_VELOCITY_Z, LOB_MAX_VELOCITY_Z)
 
 
 ## Box–Muller Gaussian sample scaled to `sigma`. Only mutates _rng state, no

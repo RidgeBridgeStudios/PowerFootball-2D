@@ -553,6 +553,7 @@
         "autoloads/GameManager.gd",
         "autoloads/MatchStatsTracker.gd",
         "autoloads/MatchTelemetryLogger.gd",
+        "entities/goalkeeper/GoalkeeperDiveBrain.gd",
         "entities/manager/ManagerDirector.gd",
         "entities/manager/ManagerVisual.gd",
         "entities/player/HeavyPlayerController.gd",
@@ -580,6 +581,7 @@
       ],
       "signals_connected": [
         "ball_struck",
+        "half_time_ended",
         "match_phase_changed",
         "match_stage_changed",
         "team_momentum_updated",
@@ -699,6 +701,7 @@
         "autoloads/GameEvents.gd",
         "entities/ball/BallStateFactory.gd",
         "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
         "pitch/PitchBoundary.gd",
         "shared/CollisionLayers.gd"
       ],
@@ -820,6 +823,7 @@
       "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "RefCounted",
       "direct_dependencies": [
+        "autoloads/MatchWorldModel.gd",
         "entities/ball/Pseudo3DBall.gd",
         "entities/player/HeavyPlayerController.gd",
         "entities/player/states/GoalkeeperDiveState.gd",
@@ -827,6 +831,7 @@
       ],
       "direct_dependents": [
         "entities/player/PlayerBrain.gd",
+        "entities/player/states/GoalkeeperDiveState.gd",
         "pitch/PitchScene.gd"
       ],
       "signals_declared": [],
@@ -1131,12 +1136,14 @@
         "shared/FormationAnchorMath.gd",
         "shared/PassUtilityScorer.gd",
         "shared/PlayerData.gd",
+        "shared/PlayerRoleConfig.gd",
         "shared/UtilityMath.gd"
       ],
       "direct_dependents": [
         "autoloads/GameEvents.gd",
         "autoloads/GameManager.gd",
         "autoloads/MatchWorldModel.gd",
+        "entities/ball/Pseudo3DBall.gd",
         "entities/manager/ManagerDirector.gd",
         "entities/player/HeavyPlayerController.gd",
         "entities/player/MoodSystem.gd",
@@ -1410,6 +1417,7 @@
         "autoloads/GameManager.gd",
         "autoloads/MatchWorldModel.gd",
         "entities/ball/Pseudo3DBall.gd",
+        "entities/goalkeeper/GoalkeeperDiveBrain.gd",
         "entities/player/HeavyPlayerController.gd",
         "entities/player/PlayerState.gd",
         "entities/player/states/GoalkeeperHoldState.gd"
@@ -2604,6 +2612,7 @@
       "direct_dependents": [
         "entities/manager/ManagerDirector.gd",
         "entities/player/HeavyPlayerController.gd",
+        "entities/player/PlayerBrain.gd",
         "shared/TeamManagementData.gd",
         "ui/tactics/TacticsEditor.gd"
       ],

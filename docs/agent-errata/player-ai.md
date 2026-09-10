@@ -18,6 +18,8 @@ This page documents historical bugs, unexpected emergent behaviors, utility-scor
 - [arrive-radius-strands-correct-chase-decision](#arrive-radius-strands-correct-chase-decision)
 - [find-space-outscores-chase-on-loose-ball](#find-space-outscores-chase-on-loose-ball)
 - [sacchi-force-cancels-urgent-ball-actions](#sacchi-force-cancels-urgent-ball-actions)
+- [pass-strike-speed-was-flat-while-pass-selection-was-distance-scored](#pass-strike-speed-was-flat-while-pass-selection-was-distance-scored)
+- [role-config-is-null-in-live-matches-so-role-space-alpha-is-what-runs](#role-config-is-null-in-live-matches-so-role-space-alpha-is-what-runs)
 - [possessor-can-chase-own-ball](#possessor-can-chase-own-ball)
 - [defender-marking-was-uncoordinated-and-boundary-clamp-already-existed](#defender-marking-was-uncoordinated-and-boundary-clamp-already-existed)
 - [cpu-players-never-gated-into-tackle-state](#cpu-players-never-gated-into-tackle-state)
@@ -817,3 +819,79 @@ This page documents historical bugs, unexpected emergent behaviors, utility-scor
       - shared/PlayerRoleConfig.gd
 ```
 
+---
+
+
+## pass-strike-speed-was-flat-while-pass-selection-was-distance-scored
+
+```yaml
+- id: pass-strike-speed-was-flat-while-pass-selection-was-distance-scored
+    discovered_date: 2026-09-10
+    discovered_by: Claude
+    category: ai
+    target_files:
+      - entities/player/PlayerBrain.gd
+      - entities/ball/Pseudo3DBall.gd
+    invariant: >
+      PassUtilityScorer scored candidates out to MAX_USEFUL_DISTANCE (520px)
+      around a PREFERRED_DISTANCE of 220px, but PlayerBrain's pass EXECUTION
+      struck every ball at a flat 260 px/s regardless of how far away the
+      chosen receiver was. Against the tuned ground deceleration (206 px/s^2 =
+      pitch_friction 0.94 * FRICTION_SCALE 200 + REST_DRAG_FLAT 18) a 260 px/s
+      ball rolls 260^2 / (2*206) = 164px and stops. That is SHORTER than
+      PREFERRED_DISTANCE and less than a third of MAX_USEFUL_DISTANCE, so the
+      scorer was selecting progressive passes the strike could not physically
+      deliver: anything but the shortest exchange died in open grass and was
+      collected by whoever happened to be nearest, which reads on screen as
+      aimless recycling and shows up in telemetry as possession that never
+      progresses. The selection layer and the execution layer were tuned
+      against different models of the same pass.
+      Fixed by solving the launch speed from the distance and the ball's OWN
+      current deceleration (Pseudo3DBall.get_ground_deceleration(), added so
+      the AI and the physics cannot drift apart):
+        v0 = sqrt(2 * d * a) * PASS_SPEED_OVERSHOOT(1.18)
+      clamped to [PASS_SPEED_MIN 240, PASS_SPEED_MAX 505]. The ceiling is not a
+      feel number: 505^2 / (2*206) = 620px, the top of the driven-pass range,
+      so it must be retuned together with pitch_friction or it stops meaning
+      anything.
+      GENERAL RULE: whenever a utility scorer ranks options by distance, check
+      that the execution path can actually reach that distance. A scorer and an
+      executor tuned independently will silently disagree.
+    promotion_target: .claude/rules/ai-architect.md
+    status: pending
+```
+
+---
+
+## role-config-is-null-in-live-matches-so-role-space-alpha-is-what-runs
+
+```yaml
+- id: role-config-is-null-in-live-matches-so-role-space-alpha-is-what-runs
+    discovered_date: 2026-09-10
+    discovered_by: Claude
+    category: ai
+    target_files:
+      - entities/player/PlayerBrain.gd
+      - entities/player/HeavyPlayerController.gd
+      - shared/roles/
+    invariant: >
+      HeavyPlayerController.role_config is an @export that NOTHING assigns:
+      pitch/PitchScene.tscn contains zero role_config entries and
+      PlayerFactory never sets one. Every outfield player therefore runs with
+      role_config == null in a live match, and every consumer falls through to
+      its hardcoded default — PlayerBrain.ROLE_SPACE_ALPHA for the off-ball
+      roam blend, MAX_CHASE_DEFAULT (250px) for the chase budget, and
+      PassUtilityScorer's own class constants for the pass weights.
+      The practical consequence for anyone retuning tactical behaviour: editing
+      the .tres presets in shared/roles/ changes NOTHING that a match actually
+      executes. A retune that only touches those files will pass every linter,
+      look correct in the Inspector, and have zero measurable effect.
+      Both must be kept consistent, and the relationship is INVERTED:
+      ROLE_SPACE_ALPHA is a roam weight, PlayerRoleConfig.anchor_weight is a
+      hold-the-anchor weight, so alpha == 1.0 - anchor_weight (already noted in
+      docs/CORE_INVARIANTS.md, but easy to satisfy in one file and not the
+      other). Verified this pass by retuning both together — attacker roam
+      0.65 -> 0.78 alongside role_st.tres anchor_weight 0.30 -> 0.22.
+    promotion_target: .claude/rules/ai-architect.md
+    status: pending
+```

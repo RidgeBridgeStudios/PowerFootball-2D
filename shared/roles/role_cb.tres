@@ -7,10 +7,10 @@
 [resource]
 script = ExtResource("PlayerRoleConfig.gd")
 role_name = "CB"
-anchor_weight = 0.80
+anchor_weight = 0.85
 max_chase_distance = 200.0
-w_dist = 0.30
-w_angle = 0.20
-w_press = 0.35
-w_adv = 0.15
+w_dist = 0.26
+w_angle = 0.18
+w_press = 0.3
+w_adv = 0.22
 pitch_bounds = Rect2(-0.5, -0.5, 0.55, 1.0)

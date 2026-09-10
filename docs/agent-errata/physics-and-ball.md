@@ -14,6 +14,7 @@ This page documents physical interaction bugs, dribble magnet overshoot oscillat
 - [dribble-claim-ignores-existing-possessor-dual-driver-jitter](#dribble-claim-ignores-existing-possessor-dual-driver-jitter)
 - [verify-external-agent-prompts-against-source-before-executing](#verify-external-agent-prompts-against-source-before-executing)
 - [eval-simulation-harness-was-decoupled-from-gdscript-tuning](#eval-simulation-harness-was-decoupled-from-gdscript-tuning)
+- [eval-harness-index-phase-and-claim-gate-were-structural-artifacts](#eval-harness-index-phase-and-claim-gate-were-structural-artifacts)
 
 ---
 
@@ -377,3 +378,64 @@ This page documents physical interaction bugs, dribble magnet overshoot oscillat
     status: pending
 ```
 
+
+---
+
+## eval-harness-index-phase-and-claim-gate-were-structural-artifacts
+
+```yaml
+- id: eval-harness-index-phase-and-claim-gate-were-structural-artifacts
+    discovered_date: 2026-09-10
+    discovered_by: Claude
+    category: tooling
+    target_files:
+      - tools/eval_simulation.py
+      - tools/fuzz_formations.py
+    invariant: >
+      Three further structural (not tuning) defects in the analytical harness,
+      found while retuning Layers 1-3. Each produced telemetry that looked like
+      an AI problem and was not.
+      (1) DECISION-STAGGER PHASE WAS THE TEAM INDEX. The 15-frame stagger gate
+      was `(i + tick) % 15 == 0`, and in this harness the roster index IS the
+      team (0-10 vs 11-21). At every kickoff and every restart, team 0's
+      attackers (i=9,10) took their first decision on ticks 5-6 while team 1's
+      (i=20,21) waited until ticks 9-10 — a permanent ~4-tick head start to a
+      stationary centre-spot ball. Measured across 6 seeds: 64% of all
+      possession and field tilt stuck near 66/34, with one team on zero goals
+      across every seed. Fixed with a seeded, shuffled `_eval_phase` list —
+      same remedy, and same reasoning, as the pre-existing `_scan_order`
+      shuffle. The ShouldUpdate(i,f) contract is preserved exactly: still a
+      fixed per-player offset, still exactly 15 frames apart, so
+      ai_cadence_violations stays 0.
+      (2) THE CARRIER SURVIVED A GOAL-LINE RESET. _update_carry() re-teleports
+      the ball onto the carrier's feet every tick, but the goal-line handler
+      only cleared `carrier` on an actual goal, not on the reset that follows
+      any goal-line crossing. A dribbler who crossed the line dragged the ball
+      straight back out of the reset and crossed it again, giving whichever
+      team was camped in the attacking third a repeating score. Clear the
+      carry on EVERY reset path, touchline included.
+      (3) BALL CLAIMS WERE GATED ON `ball_speed < 30`, WHICH HAS NO SOURCE
+      COUNTERPART. HeavyPlayerController's foot sensor applies no speed gate at
+      all to a grounded ball — get_ball_in_foot_range() checks radius and
+      pseudo-3D height only. The harness therefore required every pass to roll
+      to a near-standstill before anyone could receive it: measured, the ball
+      was loose and uncontrolled for 79% of every trial and only 3% of carry
+      time ever reached shooting range, which is most of why the report showed
+      0.0 shots. Replaced with CLAIM_SPEED_LIMIT (above a pass's arrival speed,
+      below a struck shot's) plus a STRIKE_LOCKOUT_TICKS re-claim lockout
+      mirroring ball_control_lockout.
+      Separately: the harness had NO carry phase whatsoever — a player either
+      kicked an almost-stopped ball on contact or nothing happened — so a
+      striker could never receive outside the box and carry it in. The model
+      was structurally incapable of producing a shot, which is what the 0.0
+      shots / 0.0 xG report was actually measuring. _update_carry() now mirrors
+      DribbleState plus PlayerBrain's decision tick.
+      GENERAL RULE FOR THIS FILE: before treating an eval_report.json number as
+      an AI defect, check whether the harness can represent the behaviour at
+      all. tools/fuzz_formations.py has the same hazard and had already drifted
+      (its PHASE_LINE_PUSH read -0.06 against a source value of -0.08, and it
+      omitted _ROLE_Y_BALL_WEIGHT entirely) — a fuzzer proving invariants about
+      a model the game no longer runs proves nothing.
+    promotion_target: .claude/rules/soccer-physics.md
+    status: pending
+```
