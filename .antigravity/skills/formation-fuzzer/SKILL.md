@@ -10,7 +10,7 @@ Use this workflow to stress test `FormationAnchorMath.get_dynamic_anchor_positio
 ## Execution Command
 
 ```bash
-python tools/fuzz_formations.py --iterations 50000 --seed 42
+py -3 tools/fuzz_formations.py --iterations 50000 --seed 42
 ```
 
 ## Evaluated Invariants

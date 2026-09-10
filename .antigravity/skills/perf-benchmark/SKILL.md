@@ -12,7 +12,7 @@ Use this workflow to profile execution times, algorithm regressions, and through
 ### 1. Mathematical Solvers Micro-Benchmark
 
 ```bash
-python tools/benchmark_math.py --iterations 100000
+py -3 tools/benchmark_math.py --iterations 100000
 ```
 
 Evaluates:
@@ -24,7 +24,7 @@ Evaluates:
 ### 2. Spatial Hash Grid Latency Benchmark
 
 ```bash
-python tools/spatial_grid_bench.py
+py -3 tools/spatial_grid_bench.py
 ```
 
 Evaluates:

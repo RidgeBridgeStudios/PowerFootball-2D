@@ -34,7 +34,7 @@ This repository maintains an active Graphify knowledge graph (`graphify-out/grap
 - **Before Tier 2 (Cross-Module) and Tier 3 (Core Simulation) Edits:**
   - Run dependency blast radius:
     ```bash
-    python tools/dump_dep_graph.py --blast-radius <target_file>
+    py -3 tools/dump_dep_graph.py --blast-radius <target_file>
     ```
   - Query Graphify neighbors/path (`get_neighbors` / `graphify explain "<target>"`) to map dependent modules and affected simulation layers prior to touching code.
 
@@ -54,10 +54,10 @@ Follow this 5-step checklist before concluding any turn or proposing changes:
    All 10 linters must pass with 0 errors (`gdcheck`, `lint_invariants`, `lint_scope`, `lint_type_comparisons`, `lint_stringnames`, `lint_shadowing`, `lint_allocations`, `lint_xref`, `tscn_linter`, `verify_db`).
 2. **Targeted Subsystem Test / Smoke Check:**
    Execute the relevant domain check based on touched files:
-   - Kinematics/solvers: `python tools/fuzz_solvers.py --iterations=10000`
-   - Formations/tactics: `python tools/fuzz_formations.py --iterations=5000`
-   - Match simulation: `python tools/eval_simulation.py --duration=10`
-   - Determinism: `python tools/replay_test.py`
+   - Kinematics/solvers: `py -3 tools/fuzz_solvers.py --iterations=10000`
+   - Formations/tactics: `py -3 tools/fuzz_formations.py --iterations=5000`
+   - Match simulation: `py -3 tools/eval_simulation.py --duration=10`
+   - Determinism: `py -3 tools/replay_test.py`
 3. **Diff Review & Invariant Audit:**
    Inspect `git diff` to confirm strict typing on all variables/signatures, zero hot-path allocations, no object-to-string comparisons, and no accidental changes.
 4. **Graphify Refresh:**

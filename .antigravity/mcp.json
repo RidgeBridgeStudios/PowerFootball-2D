@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "powerfootball": {
-      "command": "python",
-      "args": ["tools/mcp_server.py"],
+      "command": "py",
+      "args": ["-3", "tools/mcp_server.py"],
       "env": {
         "PYTHONIOENCODING": "utf-8",
         "PYTHONUNBUFFERED": "1"

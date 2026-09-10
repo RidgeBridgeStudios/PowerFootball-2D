@@ -3,7 +3,7 @@
 <!-- Canonical vision, roadmap, system design, and agent protocol for PowerFootball-2D -->
 <!-- Read this before any feature work. Synthesizes grand vision, recommended build order, and AI-agent operating guidance. -->
 <!-- ENGINE LOCK: Godot 4.7-stable | GDScript 2.0 ONLY | NO DEPRECATED APIS -->
-<!-- VERIFICATION: python3 tools/gdcheck.py -->
+<!-- VERIFICATION: py -3 tools/gdcheck.py -->
 
 ---
 
@@ -392,7 +392,7 @@ INVARIANTS:
 
 TASK: [precise feature request]
 MATHEMATICAL SPEC: [explicit formulas, thresholds, budgets]
-VERIFY: Run python3 tools/gdcheck.py after every file write.
+VERIFY: Run py -3 tools/gdcheck.py after every file write.
 Do not stop until gdcheck reports zero errors.
 ```
 

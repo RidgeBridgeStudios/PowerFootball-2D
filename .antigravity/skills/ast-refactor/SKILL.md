@@ -22,6 +22,6 @@ Guidelines and verification loop for rewriting or refactoring GDScript component
 
 After any file modification, run:
 ```bash
-python tools/gdcheck.py && python tools/lint_invariants.py
+py -3 tools/gdcheck.py && py -3 tools/lint_invariants.py
 ```
 Do not proceed until both report `0 errors`.

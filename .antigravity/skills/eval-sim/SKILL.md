@@ -10,7 +10,7 @@ Use this workflow to run headless simulation verification on match kinematics an
 ## Execution Command
 
 ```bash
-python tools/eval_simulation.py --duration=60
+py -3 tools/eval_simulation.py --duration=60
 ```
 
 ## Assertion Thresholds & Failure Criteria
@@ -26,5 +26,5 @@ The simulation harness verifies:
 - Inspect `eval_report.json` for score, possession, and pass completion telemetry.
 - If visual inspection is needed, generate match slices with:
   ```bash
-  python tools/dump_match_frames.py --frames=5
+  py -3 tools/dump_match_frames.py --frames=5
   ```

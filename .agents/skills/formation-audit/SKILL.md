@@ -10,7 +10,7 @@ Use this workflow to audit tactical formation anchor coordinates and evaluate dy
 ## Execution Command
 
 ```bash
-python tools/formation_ascii.py --formation=4-3-3 --all
+py -3 tools/formation_ascii.py --formation=4-3-3 --all
 ```
 
 ## Supported Formations

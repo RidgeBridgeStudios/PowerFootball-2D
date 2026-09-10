@@ -185,7 +185,7 @@ This page records rules and gotchas governing match lifecycle timing, possession
       whose stated invariants (home-perspective-only, signal-argument-count
       matching) were themselves accurate and worth trusting outright rather
       than needing correction. gdcheck + full lint suite + the
-      prompt-specified python3 tools/verify_gate.py --full (15 steps,
+      prompt-specified py -3 tools/verify_gate.py --full (15 steps,
       including eval_simulation/fuzz_solvers/fuzz_formations/dump_api/
       generate_symbols/compact_errata) all pass. Note --full's
       compact_errata step has the side effect of reformatting this file and
