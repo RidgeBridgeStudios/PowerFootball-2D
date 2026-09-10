@@ -19,14 +19,14 @@ Enforces token-efficient intake, layer context scoping, and pre-edit verificatio
    - **Tooling / Docs:** Standalone scripts or markdown rules. Tier 1.
 
 2. **Scoped Context Loading (Zero File Dumps):**
-   - *Layer Context:* Run `python3 tools/layer_context.py [1-5]` instead of dumping full invariant docs.
-   - *Roadmap Tasks:* Run `python3 tools/next_task.py` instead of reading `ROADMAP.md`.
-   - *Errata & Rules:* Consult `docs/agent-errata/<topic>.md` or run `python3 tools/semantic_search.py "<query>"`. Never read full `AGENTS_ERRATA.md`.
-   - *Signatures / Methods:* Run `python3 tools/codebase_slice.py <file> --func <name>` or `--class-header`.
+   - *Layer Context:* Run `py -3 tools/layer_context.py [1-5]` instead of dumping full invariant docs.
+   - *Roadmap Tasks:* Run `py -3 tools/next_task.py` instead of reading `ROADMAP.md`.
+   - *Errata & Rules:* Consult `docs/agent-errata/<topic>.md` or run `py -3 tools/semantic_search.py "<query>"`. Never read full `AGENTS_ERRATA.md`.
+   - *Signatures / Methods:* Run `py -3 tools/codebase_slice.py <file> --func <name>` or `--class-header`.
 
 3. **Structural Reconnaissance & Blast Radius (Tier 2/3):**
    - Query Graphify or run dependency blast radius:
-     `python3 tools/dump_dep_graph.py --blast-radius <target_file>`
+     `py -3 tools/dump_dep_graph.py --blast-radius <target_file>`
    - Inspect affected signals in `autoloads/GameEvents.gd` and spatial calls in `autoloads/MatchWorldModel.gd`.
 
 4. **Formulate Short Plan (Approval Gate):**
@@ -35,6 +35,6 @@ Enforces token-efficient intake, layer context scoping, and pre-edit verificatio
 
 5. **Execute & Verification Gate:**
    - Fast Gate (post-write / Tier 1-2):
-     `python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast`
+     `py -3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast`
    - Full Battery (Tier 3 / pre-turn completion):
-     `python3 tools/verify_gate.py --full || python tools/verify_gate.py --full || py -3 tools/verify_gate.py --full`
+     `py -3 tools/verify_gate.py --full || python tools/verify_gate.py --full || py -3 tools/verify_gate.py --full`

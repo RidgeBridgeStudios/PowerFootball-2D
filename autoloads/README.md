@@ -157,7 +157,7 @@ Similar to DataLoader; pure database loaders.
 3. Update boot order in CLAUDE.md if it has dependencies on other autoloads
 4. Emit all events through GameEvents; receive through signal connections in `_ready()`
 5. Export a singleton getter if other scenes need to access it
-6. Run `python3 tools/gdcheck.py` to verify no undeclared members
+6. Run `py -3 tools/gdcheck.py` to verify no undeclared members
 
 ---
 
