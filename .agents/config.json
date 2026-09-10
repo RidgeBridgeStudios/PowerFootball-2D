@@ -1,0 +1,5 @@
+{
+  "model": "gemini-3.8-flash",
+  "reasoning_effort": "low",
+  "temperature": 0.2
+}

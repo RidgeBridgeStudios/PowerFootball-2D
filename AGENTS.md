@@ -49,10 +49,10 @@ This repository maintains an active Graphify knowledge graph (`graphify-out/grap
 ### Navigation Hierarchy
 1. **Query Knowledge Graph First:** Before browsing files or running broad text searches, query Graphify:
    - CLI: `graphify query "<question>"`, `graphify path "<A>" "<B>"`, `graphify explain "<concept>"`.
-     *(Or run via python: `python -m graphify query ...`)*
+     *(Or run via py -3: `py -3 -m graphify query ...`)*
    - MCP: Use `query_graph`, `shortest_path`, `get_node`, `get_neighbors`, `god_nodes`.
 2. **Mandatory Pre-Edit Blast Radius (Tier 2 & Tier 3):**
-   - Run dependency blast radius: `python3 tools/dump_dep_graph.py --blast-radius <target>`.
+   - Run dependency blast radius: `py -3 tools/dump_dep_graph.py --blast-radius <target>`.
    - Query Graphify neighbors/path (`get_neighbors` or `graphify explain "<target>"`) to map dependent modules across simulation layers before editing code.
 3. **Consult Wiki/Report:** If `graphify-out/wiki/index.md` exists, consult it for conceptual domain maps. Read `graphify-out/GRAPH_REPORT.md` for high-level architecture overviews.
 4. **Targeted Inspection:** Open source files with targeted line ranges (`tools/codebase_slice.py` or `view_file` on specific line slices) ONLY AFTER Graphify has localized the relevant symbols or choke points.
@@ -74,10 +74,22 @@ Every code modification in this repository falls into one of three distinct impa
 
 | Tier | Scope & Affected Files | Pre-Edit Requirement | Verification Gate |
 |---|---|---|---|
-| **Tier 1: Local** | Self-contained leaf files: UI styling/labels (`ui/ActionText.gd`, `ui/TouchlineBubble.gd`), standalone math/formatting helpers without contract changes, isolated comments, documentation. | Local file inspection; confirm no exported variables or public signatures are altered. | Fast Gate:<br>`python3 tools/verify_gate.py --fast`<br>(0 errors required) |
-| **Tier 2: Cross-Module** | Multi-file interactions within or between adjacent simulation layers: signal signatures in `autoloads/GameEvents.gd`, shared resources (`shared/PlayerData.gd`, `shared/TeamData.gd`, `shared/career/*`), role configurations (`shared/PlayerRoleConfig.gd`), or exported properties accessed across scenes. | Run dependency blast radius (`python3 tools/dump_dep_graph.py --blast-radius <target>`) and query Graphify neighbors (`get_neighbors`). Check all call sites and signal receivers before editing. | Fast Gate + Targeted Linters:<br>`python3 tools/verify_gate.py --fast`<br>+ relevant domain tests. |
-| **Tier 3: Core Simulation** | Architectural choke points (`autoloads/MatchWorldModel.gd`, `entities/player/HeavyPlayerController.gd`, `entities/player/PlayerBrain.gd`, `entities/ball/Pseudo3DBall.gd`, `shared/CollisionLayers.gd`, `pitch/PitchScene.gd`, `autoloads/GameManager.gd`, `autoloads/CareerManager.gd`, `autoloads/DataLoader.gd`, `shared/PlayerFactory.gd`), process priority, boot order, 22-player declarative layout, or 6-layer collision matrix. | Mandatory blast radius DAG (`tools/dump_dep_graph.py --blast-radius <target>`), Graphify dependency path trace, and explicit review of `docs/CORE_INVARIANTS.md` and `docs/ANTI_PATTERNS.md`. | Full Pre-Turn Battery:<br>`python3 tools/verify_gate.py --full`<br>(all 10 static linters + fuzzers + 60s analytical sim + replay test). |
+| **Tier 1: Local** | Self-contained leaf files: UI styling/labels (`ui/ActionText.gd`, `ui/TouchlineBubble.gd`), standalone math/formatting helpers without contract changes, isolated comments, documentation. | Local file inspection; confirm no exported variables or public signatures are altered. | Fast Gate:<br>`py -3 tools/verify_gate.py --fast`<br>(0 errors required) |
+| **Tier 2: Cross-Module** | Multi-file interactions within or between adjacent simulation layers: signal signatures in `autoloads/GameEvents.gd`, shared resources (`shared/PlayerData.gd`, `shared/TeamData.gd`, `shared/career/*`), role configurations (`shared/PlayerRoleConfig.gd`), or exported properties accessed across scenes. | Run dependency blast radius (`py -3 tools/dump_dep_graph.py --blast-radius <target>`) and query Graphify neighbors (`get_neighbors`). Check all call sites and signal receivers before editing. | Fast Gate + Targeted Linters:<br>`py -3 tools/verify_gate.py --fast`<br>+ relevant domain tests. |
+| **Tier 3: Core Simulation** | Architectural choke points (`autoloads/MatchWorldModel.gd`, `entities/player/HeavyPlayerController.gd`, `entities/player/PlayerBrain.gd`, `entities/ball/Pseudo3DBall.gd`, `shared/CollisionLayers.gd`, `pitch/PitchScene.gd`, `autoloads/GameManager.gd`, `autoloads/CareerManager.gd`, `autoloads/DataLoader.gd`, `shared/PlayerFactory.gd`), process priority, boot order, 22-player declarative layout, or 6-layer collision matrix. | Mandatory blast radius DAG (`tools/dump_dep_graph.py --blast-radius <target>`), Graphify dependency path trace, and explicit review of `docs/CORE_INVARIANTS.md` and `docs/ANTI_PATTERNS.md`. | Full Pre-Turn Battery:<br>`py -3 tools/verify_gate.py --full`<br>(all 10 static linters + fuzzers + 60s analytical sim + replay test). |
 </change_impact_tiers>
+
+<ponytail_gating>
+## 3.5. Reuse & Complexity Gating (Ponytail)
+
+Before writing new code or standing up new infrastructure (a new MCP server, a new autoload, a new data store), climb the reuse ladder in [.claude/rules/ponytail.md](.claude/rules/ponytail.md) (mirrored at `.agents/rules/ponytail.md`) — applies to every agent listed at the top of this document, including DeepSeek harnesses. In short: YAGNI-gate against `ROADMAP.md`, reuse `MatchWorldModel`/`GameEvents`/`AGENTS_ERRATA.md` before inventing parallel systems, and never add a tool/package/MCP-server reference to a config file without first confirming it is actually installed in this repo.
+</ponytail_gating>
+
+<football_domain_intelligence>
+## 3.6. Football Domain Intelligence (`football-expert` MCP server)
+
+A local, offline `football-expert` MCP server (`tools/football_mcp.py`, SQLite knowledge base at `.agents/football_domain.db`, rebuilt via `scripts/build_football_kb.py`) exposes `verify_kinematics`, `audit_tactical_compactness`, `query_ifab_rule`, `audit_action_transition`, and `diagnose_tactical_deviation`. Full usage guidance — including when to call it and when not to — is in [.claude/rules/football-domain.md](.claude/rules/football-domain.md) (mirrored at `.agents/rules/football-domain.md`). Its numeric ranges are tuning-plausibility heuristics compiled from public sports-science sources and the IFAB Laws, not hard physical constants — verify against the actual code before changing tuning values based on its output.
+</football_domain_intelligence>
 
 <documentation_policy>
 ## 4. Conditional Documentation-Update Policy
@@ -85,16 +97,16 @@ Every code modification in this repository falls into one of three distinct impa
 To prevent documentation decay without generating unnecessary token churn, agents must update documentation strictly based on change triggers:
 
 - **Public API / Signatures Changed:** If any public method, export variable, signal, or class interface in GDScript is added, modified, or deleted:
-  - Regenerate public API map: `python3 tools/dump_api.py` -> `docs/API_SURFACE.md`.
-  - Regenerate symbol index: `python3 tools/generate_symbols.py` -> `docs/SYMBOLS.json`.
+  - Regenerate public API map: `py -3 tools/dump_api.py` -> `docs/API_SURFACE.md`.
+  - Regenerate symbol index: `py -3 tools/generate_symbols.py` -> `docs/SYMBOLS.json`.
 - **Dependencies or Autoloads Changed:** If imports, autoload singletons in `project.godot`, or cross-file class references change:
-  - Regenerate dependency DAG: `python3 tools/dump_dep_graph.py` -> `docs/DEPENDENCY_GRAPH.json`.
+  - Regenerate dependency DAG: `py -3 tools/dump_dep_graph.py` -> `docs/DEPENDENCY_GRAPH.json`.
 - **Architectural Laws / Choke Points Changed:** If engine contracts, physics formulas, collision masks, or layer invariants are modified:
   - Update `docs/CORE_INVARIANTS.md` and synchronize corresponding rules in `.claude/rules/` and `.agents/rules/`.
 - **Bugs, Edge Cases, or New Invariants Discovered:**
   - Consult topic-specific errata pages in `docs/agent-errata/` (e.g. `player-ai.md`, `physics-and-ball.md`, `set-pieces.md`) rather than loading full errata history.
   - Record new findings in `AGENTS_ERRATA.md` following the structured YAML schema (`discovered_rules` or `session_state`).
-  - Run `/sync-rules` (`python3 tools/sync_rules.py`) or `/compact-errata` (`python3 tools/compact_errata.py`) to promote pending rules.
+  - Run `/sync-rules` (`py -3 tools/sync_rules.py`) or `/compact-errata` (`py -3 tools/compact_errata.py`) to promote pending rules.
 - **Roadmap Milestones Achieved:**
   - Mark completed tasks with `[x]` in `ROADMAP.md`.
 - **Internal / Non-Interface Changes:**
@@ -117,7 +129,7 @@ To prevent documentation decay without generating unnecessary token churn, agent
 <autonomous_discipline>
 ## 6. Autonomous Agent Verification Discipline
 
-- **Pre-Edit:** For Tier 2 and Tier 3 tasks, execute `python3 tools/dump_dep_graph.py --blast-radius <file>` before modifying shared classes.
+- **Pre-Edit:** For Tier 2 and Tier 3 tasks, execute `py -3 tools/dump_dep_graph.py --blast-radius <file>` before modifying shared classes.
 - **Post-Write:** Every `.gd`, `.tscn`, or `.json` write automatically triggers static analysis:
   ```bash
   python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast
@@ -138,33 +150,33 @@ Static checking with `tools/gdcheck.py` alone is **NOT sufficient** — `gdcheck
 ### Unified Verification Gates
 ```bash
 # Fast post-write gate (<150ms) — 10 static linters:
-python3 tools/verify_gate.py --fast
+py -3 tools/verify_gate.py --fast
 
 # Full pre-turn completion battery — 17 checks (linters + fuzzers + simulation + symbols + graphify):
-python3 tools/verify_gate.py --full
+py -3 tools/verify_gate.py --full
 ```
 
 ### Standalone Linters
 ```bash
-python3 tools/gdcheck.py                # Type safety and syntax
-python3 tools/lint_invariants.py        # Layer separation and choke point contracts
-python3 tools/lint_scope.py             # Duplicate variable declarations and dead code
-python3 tools/lint_type_comparisons.py  # Object vs String/StringName comparisons
-python3 tools/lint_stringnames.py       # &'string_name' literal enforcement
-python3 tools/lint_shadowing.py         # Member variable and autoload shadowing
-python3 tools/lint_allocations.py       # Zero hot-path allocations and distance_squared_to
-python3 tools/lint_xref.py              # Qualified member access and res:// paths
-python3 tools/tscn_linter.py            # Scene tree integrity and collision masks
-python3 tools/verify_db.py              # JSON database schema validation
+py -3 tools/gdcheck.py                # Type safety and syntax
+py -3 tools/lint_invariants.py        # Layer separation and choke point contracts
+py -3 tools/lint_scope.py             # Duplicate variable declarations and dead code
+py -3 tools/lint_type_comparisons.py  # Object vs String/StringName comparisons
+py -3 tools/lint_stringnames.py       # &'string_name' literal enforcement
+py -3 tools/lint_shadowing.py         # Member variable and autoload shadowing
+py -3 tools/lint_allocations.py       # Zero hot-path allocations and distance_squared_to
+py -3 tools/lint_xref.py              # Qualified member access and res:// paths
+py -3 tools/tscn_linter.py            # Scene tree integrity and collision masks
+py -3 tools/verify_db.py              # JSON database schema validation
 ```
 
 ### Simulation & Property Testing
 ```bash
-python3 tools/fuzz_solvers.py           # 100k kinematic and boundary fuzzing tests
-python3 tools/fuzz_formations.py        # 50k formation anchor property stress tests
-python3 tools/eval_simulation.py        # 60s headless simulation assertion harness
-python3 tools/replay_test.py            # Bit-exact deterministic replay test
-python3 tools/benchmark_math.py         # Math solvers latency benchmark
+py -3 tools/fuzz_solvers.py           # 100k kinematic and boundary fuzzing tests
+py -3 tools/fuzz_formations.py        # 50k formation anchor property stress tests
+py -3 tools/eval_simulation.py        # 60s headless simulation assertion harness
+py -3 tools/replay_test.py            # Bit-exact deterministic replay test
+py -3 tools/benchmark_math.py         # Math solvers latency benchmark
 ```
 
 ### Non-Destructive Validation Checklist
@@ -172,7 +184,7 @@ Before concluding any editing turn or proposing changes, all agents must complet
 1. **Format & Static Lint (Fast Gate):** Run `python tools/verify_gate.py --fast` (or `py -3 tools/verify_gate.py --fast`). All 10 linters must show 0 errors.
 2. **Targeted Smoke Test:** Run the relevant domain check (`fuzz_solvers.py`, `fuzz_formations.py`, `eval_simulation.py --duration=10`, or `replay_test.py`).
 3. **Diff Review & Invariant Audit:** Check `git diff` against strict typing, zero allocations, no object-to-string comparisons, and architectural contracts.
-4. **Graphify Refresh:** Synchronize graph topology via `graphify update .` or pre-turn gate `python tools/verify_gate.py --full` (Step 17).
+4. **Graphify Refresh:** Synchronize graph topology via `graphify update .` or pre-turn gate `py -3 tools/verify_gate.py --full` (Step 17).
 5. **Concise Final Evidence:** Report linters passed, execution duration, and zero invariant violations.
 
 ### Autoload Handling Contract
@@ -243,6 +255,6 @@ Before concluding any editing turn or proposing changes, all agents must complet
 
 - **Topic-Scoped Errata:** Errata and historical failure modes are modularized under `docs/agent-errata/` (`player-ai.md`, `match-state.md`, `physics-and-ball.md`, `set-pieces.md`, `scene-and-node-paths.md`, `data-and-persistence.md`, `telemetry-and-stats.md`, `ui-and-signals.md`). Agents must read only the relevant topic page.
 - **Cross-Agent Shared Memory:** Record novel failure modes, API misconceptions, runtime discoveries, and pending rule proposals in `AGENTS_ERRATA.md` using the structured YAML schema (`discovered_rules` or `session_state`).
-- **Rule Promotion:** Promote validated errata to `.claude/rules/`, `.agents/rules/`, and `docs/CORE_INVARIANTS.md` via `/sync-rules` (`python3 tools/sync_rules.py`) or `/compact-errata` (`python3 tools/compact_errata.py`).
+- **Rule Promotion:** Promote validated errata to `.claude/rules/`, `.agents/rules/`, and `docs/CORE_INVARIANTS.md` via `/sync-rules` (`py -3 tools/sync_rules.py`) or `/compact-errata` (`py -3 tools/compact_errata.py`).
 - **Atomic Work Units:** Work in cohesive units: one feature/fix = targeted file set + verification pass.
 </shared_agent_memory>

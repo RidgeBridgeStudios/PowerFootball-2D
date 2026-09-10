@@ -10,17 +10,17 @@ Adaptive workflow for implementing gameplay, engine, or subsystem features in Po
 ## Execution Protocol
 
 1. **Roadmap & Scope Alignment:**
-   - Query roadmap via `python3 tools/next_task.py` or search with `python3 tools/semantic_search.py "<feature>"`.
+   - Query roadmap via `py -3 tools/next_task.py` or search with `py -3 tools/semantic_search.py "<feature>"`.
    - Planned: adopt exact wording/scope from `ROADMAP.md`. Unplanned: flag scope boundary and non-goals.
 
 2. **Vision & Invariant Guardrail:**
-   - Retrieve layer constraints with `python3 tools/layer_context.py [1-5]` or `python3 tools/semantic_search.py "<feature> vision"`.
+   - Retrieve layer constraints with `py -3 tools/layer_context.py [1-5]` or `py -3 tools/semantic_search.py "<feature> vision"`.
    - Never dump `POWERFOOTBALL_MASTER_VISION.md`. If request conflicts with invariants or vision, stop and report immediately.
 
 3. **Subsystem Reconnaissance & Blast Radius:**
    - Determine affected layers (1: Physics, 2: AI, 3: Social, 4: Club World, 5: UI).
-   - Single-layer: inspect targeted file slices via `python3 tools/codebase_slice.py <file> --func <name>`.
-   - Multi-system (Tier 2/3): run `python3 tools/dump_dep_graph.py --blast-radius <target>` and query Graphify.
+   - Single-layer: inspect targeted file slices via `py -3 tools/codebase_slice.py <file> --func <name>`.
+   - Multi-system (Tier 2/3): run `py -3 tools/dump_dep_graph.py --blast-radius <target>` and query Graphify.
 
 4. **Implementation Plan & Approval Gate:**
    - Multi-subsystem features: adopt `.agents/skills/cross-system-feature/SKILL.md`.
@@ -32,12 +32,12 @@ Adaptive workflow for implementing gameplay, engine, or subsystem features in Po
 
 6. **Conditional Documentation Updates:**
    - Apply AGENTS.md §4: DO NOT touch docs for internal/leaf changes.
-   - Public APIs changed: `python3 tools/dump_api.py` and `python3 tools/generate_symbols.py`.
-   - Dependencies changed: `python3 tools/dump_dep_graph.py`.
+   - Public APIs changed: `py -3 tools/dump_api.py` and `py -3 tools/generate_symbols.py`.
+   - Dependencies changed: `py -3 tools/dump_dep_graph.py`.
    - Roadmap item completed: mark `[x]` in `ROADMAP.md`.
 
 7. **Verification Gate:**
    - Post-write / Tier 1-2 Fast Gate:
-     `python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast`
+     `py -3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast`
    - Pre-turn / Tier 3 Full Battery:
-     `python3 tools/verify_gate.py --full || python tools/verify_gate.py --full || py -3 tools/verify_gate.py --full`
+     `py -3 tools/verify_gate.py --full || python tools/verify_gate.py --full || py -3 tools/verify_gate.py --full`

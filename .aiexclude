@@ -41,3 +41,12 @@ eval_report.json
 
 # Historical archive files
 docs/archive/
+
+# Media & Raw Binary Assets
+art/**/*.png
+art/flags/*.png
+*.png
+*.wav
+*.ogg
+*.mp3
+audio/

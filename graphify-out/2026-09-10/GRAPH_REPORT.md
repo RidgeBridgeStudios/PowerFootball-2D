@@ -1,11 +1,11 @@
 # Graph Report - PowerFootball-2D-main  (2026-09-10)
 
 ## Corpus Check
-- 156 files · ~336,121 words
+- 156 files · ~331,291 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1611 nodes · 1872 edges · 137 communities (99 shown, 29 thin omitted)
+- 1597 nodes · 1842 edges · 136 communities (98 shown, 29 thin omitted)
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 101 edges (avg confidence: 0.92)
 - Token cost: 0 input · 0 output
 
@@ -133,7 +133,6 @@
 - README.md
 - telemetry-and-stats.md
 - GDScript 2.0 & Godot 4.7 Strict Architecture Rules
-- Career Mode
 - Workflow: cross-system-feature
 - Workflow: bug-investigation
 - Workflow: data-database
@@ -182,7 +181,7 @@
 - **Api Surface Concepts** — docs_api_surface_powerfootball2d___public_api_surface_map, docs_api_surface_table_of_contents, docs_api_surface_layer_1___physics___kinematics, docs_api_surface_entities_ball_ballstategd, docs_api_surface_entities_ball_ballstatefactorygd [INFERRED 0.85]
 - **Core Invariants Concepts** — docs_core_invariants_coreinvariantsmd___powerfootball2d_archi, docs_core_invariants_1_engine_lock, docs_core_invariants_prohibited___strictly_forbidden_apis, docs_core_invariants_strict_typing_invariant, docs_core_invariants_scene_initialization___serialization [INFERRED 0.85]
 
-## Communities (137 total, 29 thin omitted)
+## Communities (136 total, 29 thin omitted)
 
 ### Community 0 - "Api Surface"
 Cohesion: 0.01
@@ -249,8 +248,8 @@ Cohesion: 0.13
 Nodes (15): Math Solvers, 1 Kinematic PointtoSegment Projection & Distance, 1 Quadratic Distance Utility Decay, 2 Angular Cosine Alignment, 2 Kinematic Turning Penalty & Acceleration Curve, 3 Ballistic Pseudo3D Flight & Height Trajectory, 3 Receiver Openness, 4 Bisection RootFinding Ball Intercept Algorithm (+7 more)
 
 ### Community 16 - "Readme"
-Cohesion: 0.08
-Nodes (26): Errata History, Errata History Archive, generate_markdown(), get_layer_for_path(), main(), parse_gd_file(), ScriptAPI, Readme (+18 more)
+Cohesion: 0.05
+Nodes (43): Errata History, Errata History Archive, Llms, 1 Vision & Architectural Invariants, 2 FiveLayer Simulation Stack Semantic Routing, 3 Tooling & Automation, Layer 1 — Physics & Kinematics, Layer 2 — Match AI & Spatial Navigation (+35 more)
 
 ### Community 17 - "Agents"
 Cohesion: 0.15
@@ -517,8 +516,8 @@ Cohesion: 0.14
 Nodes (13): Cross-System Gameplay Feature Workflow, Invocation in Antigravity, Step 10: Final Verification Report, Step 1: Restate Requested Outcome and Non-Goals, Step 2: Classify Change-Impact Tier, Step 3: Graphify Impact Query Before Reading Broad Source Files, Step 4: Reading Only Relevant Module READMEs, Hub Maps, and Targeted Files, Step 5: Short Written Implementation Plan (+5 more)
 
 ### Community 114 - "AnalyticalSimulationHarness"
-Cohesion: 0.13
-Nodes (13): range, AnalyticalSimulationHarness, find_godot_binary(), main(), print_summary_table(), Any, Deterministic analytical 60Hz match physics & AI decision simulator. Simulates…, Team in possession, or -1 while the ball is genuinely loose. (+5 more)
+Cohesion: 0.23
+Nodes (9): range, AnalyticalSimulationHarness, find_godot_binary(), main(), print_summary_table(), Any, Deterministic analytical 60Hz match physics & AI decision simulator. Simulates…, run_analytical_trials() (+1 more)
 
 ### Community 115 - "verify_gate.py"
 Cohesion: 0.60
@@ -568,10 +567,6 @@ Nodes (4): crowding-space-creation-diagnostics, Discovered Rules, Table of Conte
 Cohesion: 0.33
 Nodes (5): 1. Strict Typing Discipline, 2. Forbidden Pythonisms, 3. GDScript 2.0 Language Invariants, 4. Hot-Path Performance Rules, GDScript 2.0 & Godot 4.7 Strict Architecture Rules
 
-### Community 127 - "Career Mode"
-Cohesion: 0.13
-Nodes (17): Career Mode, Career Mode Layer 4 Invariants, Compounded corrections — verified against the source, gdcheck cannot see through autoloads — use lintxref, Inbox options are deliberately NOT serialised, Match side is NOT the league team index, squadindex IS the identity so removing a player renumbers everyone behind them, The career > match bridge runs through PlayerFactory once per player per bind (+9 more)
-
 ### Community 140 - "Errata Session History & Handoff Logs"
 Cohesion: 0.33
 Nodes (6): Architectural & Gotcha Findings from this Session, Errata Session History & Handoff Logs, Next Steps Handoff, Recent Session State Archive, Session State: 2026-09-02 (Manager Career Mode, Phase 4), Table of Contents
@@ -582,18 +577,18 @@ Nodes (3): find_godot_binary(), main(), run_godot_verification()
 
 ## Knowledge Gaps
 - **748 isolated node(s):** `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `Career Mode (Layer 4) Invariants` (+743 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1165 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1162 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **29 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Agents` connect `Agents` to `Api Surface`, `Course Implementation Specification`, `Anti Patterns`, `Agents Errata`, `Powerfootball Master Vision`, `mcp_server.py`, `Vector2`, `Core Invariants`, `fuzz_formations.py`, `lint_invariants.py`, `Math Solvers`, `Readme`, `semantic_search.py`, `Graphify Lifecycle & Agent Navigation Protocol — PowerFootball-2D`, `DeterministicMatchSimulator`, `generate_symbols.py`, `benchmark_math.py`, `AnalyticalSimulationHarness`, `README.md`?**
-  _High betweenness centrality (0.132) - this node is a cross-community bridge._
-- **Why does `Api Surface` connect `Api Surface` to `Readme`, `Agents`, `Core Invariants`?**
-  _High betweenness centrality (0.080) - this node is a cross-community bridge._
-- **Why does `Agents Errata` connect `Agents Errata` to `Course Implementation Specification`, `Powerfootball Master Vision`, `Core Invariants`, `gdcheck.py`, `Readme`, `Agents`, `verify_gate.py`, `Set Pieces & Restarts Errata`, `Match State, Pacing & Urgency Errata`, `Physics, Ball Dynamics & Kinematics Errata`, `UI, HUD & Signal Bus Errata`, `README.md`, `telemetry-and-stats.md`, `Career Mode`?**
-  _High betweenness centrality (0.079) - this node is a cross-community bridge._
+  _High betweenness centrality (0.174) - this node is a cross-community bridge._
+- **Why does `Api Surface` connect `Api Surface` to `Readme`, `Agents`?**
+  _High betweenness centrality (0.100) - this node is a cross-community bridge._
+- **Why does `Agents Errata` connect `Agents Errata` to `Course Implementation Specification`, `Powerfootball Master Vision`, `Core Invariants`, `gdcheck.py`, `Readme`, `Agents`, `verify_gate.py`, `Set Pieces & Restarts Errata`, `Match State, Pacing & Urgency Errata`, `Physics, Ball Dynamics & Kinematics Errata`, `UI, HUD & Signal Bus Errata`, `README.md`, `telemetry-and-stats.md`?**
+  _High betweenness centrality (0.097) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `Api Surface` (e.g. with `Agents` and `dump_api.py`) actually correct?**
   _`Api Surface` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 5 inferred relationships involving `Course Implementation Specification` (e.g. with `Agents` and `Core Invariants`) actually correct?**

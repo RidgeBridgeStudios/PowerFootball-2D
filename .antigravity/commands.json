@@ -57,7 +57,7 @@
     },
     "blast-radius": {
       "description": "Calculates dependency DAG blast radius for a target file (tools/dump_dep_graph.py --blast-radius <target>)",
-      "command": "python3 tools/dump_dep_graph.py --blast-radius",
+      "command": "py -3 tools/dump_dep_graph.py --blast-radius",
       "stream_output": true
     },
     "dump-dep-graph": {
@@ -168,7 +168,7 @@
   },
   "/blast-radius": {
     "description": "Calculates dependency DAG blast radius for a target file (tools/dump_dep_graph.py --blast-radius <target>)",
-    "command": "python3 tools/dump_dep_graph.py --blast-radius",
+    "command": "py -3 tools/dump_dep_graph.py --blast-radius",
     "stream_output": true
   },
   "/dump-dep-graph": {

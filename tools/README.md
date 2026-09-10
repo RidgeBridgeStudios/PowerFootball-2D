@@ -33,8 +33,8 @@ Static analysis, invariant AST linting, scene graph verification, headless simul
 
 **Usage:**
 ```bash
-python tools/lint_invariants.py
-python tools/lint_invariants.py --xml
+py -3 tools/lint_invariants.py
+py -3 tools/lint_invariants.py --xml
 ```
 
 ---
@@ -45,8 +45,8 @@ python tools/lint_invariants.py --xml
 
 **Usage:**
 ```bash
-python tools/tscn_linter.py
-python tools/tscn_linter.py --xml
+py -3 tools/tscn_linter.py
+py -3 tools/tscn_linter.py --xml
 ```
 
 ---
@@ -57,7 +57,7 @@ python tools/tscn_linter.py --xml
 
 **Usage:**
 ```bash
-python tools/validate_schemas.py
+py -3 tools/validate_schemas.py
 ```
 
 ---
@@ -68,7 +68,7 @@ python tools/validate_schemas.py
 
 **Usage:**
 ```bash
-python tools/fuzz_solvers.py --iterations=100000 --seed=42
+py -3 tools/fuzz_solvers.py --iterations=100000 --seed=42
 ```
 
 ---
@@ -79,7 +79,7 @@ python tools/fuzz_solvers.py --iterations=100000 --seed=42
 
 **Usage:**
 ```bash
-python tools/spatial_grid_bench.py --queries=50000
+py -3 tools/spatial_grid_bench.py --queries=50000
 ```
 
 ---
@@ -96,7 +96,7 @@ python tools/spatial_grid_bench.py --queries=50000
 
 **Usage:**
 ```bash
-python tools/eval_simulation.py --duration=60 --output-json=eval_report.json
+py -3 tools/eval_simulation.py --duration=60 --output-json=eval_report.json
 ```
 
 ---
@@ -109,8 +109,8 @@ python tools/eval_simulation.py --duration=60 --output-json=eval_report.json
 
 **Usage:**
 ```bash
-python tools/dump_match_frames.py --frames=5 --output-dir=match_frames
-python tools/formation_ascii.py --formation=4-3-3 --all
+py -3 tools/dump_match_frames.py --frames=5 --output-dir=match_frames
+py -3 tools/formation_ascii.py --formation=4-3-3 --all
 ```
 
 ---
@@ -121,8 +121,8 @@ python tools/formation_ascii.py --formation=4-3-3 --all
 
 **Usage:**
 ```bash
-python tools/dump_dep_graph.py
-python tools/dump_dep_graph.py --blast-radius entities/player/PlayerBrain.gd
+py -3 tools/dump_dep_graph.py
+py -3 tools/dump_dep_graph.py --blast-radius entities/player/PlayerBrain.gd
 ```
 
 ---
@@ -133,7 +133,7 @@ python tools/dump_dep_graph.py --blast-radius entities/player/PlayerBrain.gd
 
 **Usage:**
 ```bash
-python tools/dump_api.py
+py -3 tools/dump_api.py
 ```
 
 ---
@@ -144,7 +144,7 @@ python tools/dump_api.py
 
 **Usage:**
 ```bash
-python tools/layer_context.py 2   # Context for Layer 2 Match AI
+py -3 tools/layer_context.py 2   # Context for Layer 2 Match AI
 ```
 
 ---
@@ -157,8 +157,8 @@ python tools/layer_context.py 2   # Context for Layer 2 Match AI
 
 **Usage:**
 ```bash
-python tools/mcp_server.py
-python tools/lsp_client.py --check
+py -3 tools/mcp_server.py
+py -3 tools/lsp_client.py --check
 ```
 
 ---
@@ -169,11 +169,11 @@ python tools/lsp_client.py --check
 
 **Usage:**
 ```bash
-python tools/worktree_manager.py list
-python tools/worktree_manager.py create feature/aerial-contest
-python tools/worktree_manager.py verify feature/aerial-contest
-python tools/worktree_manager.py merge feature/aerial-contest
-python tools/worktree_manager.py cleanup feature/aerial-contest
+py -3 tools/worktree_manager.py list
+py -3 tools/worktree_manager.py create feature/aerial-contest
+py -3 tools/worktree_manager.py verify feature/aerial-contest
+py -3 tools/worktree_manager.py merge feature/aerial-contest
+py -3 tools/worktree_manager.py cleanup feature/aerial-contest
 ```
 
 ---

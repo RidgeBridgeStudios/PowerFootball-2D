@@ -72,14 +72,14 @@
     "semantic_hash": ""
   },
   "docs/DEPENDENCY_GRAPH.json": {
-    "mtime": 1789042962.3835378,
-    "seen": 1789045546.4281669,
-    "ast_hash": "88c936a3726ae86d0b9c004736a2ce2e",
+    "mtime": 1789045870.891356,
+    "seen": 1789045873.5982573,
+    "ast_hash": "c019b4d5e2a14342c71a5be9cb7b233e",
     "semantic_hash": ""
   },
   "docs/SYMBOLS.json": {
-    "mtime": 1789045542.6412861,
-    "seen": 1789045546.4281683,
+    "mtime": 1789045870.8943894,
+    "seen": 1789045873.598259,
     "ast_hash": "8828e78d97f30fd518264f13ec78f7d1",
     "semantic_hash": ""
   },
@@ -126,9 +126,9 @@
     "semantic_hash": ""
   },
   "tools/eval_simulation.py": {
-    "mtime": 1789045515.1047382,
-    "seen": 1789045546.4281766,
-    "ast_hash": "238e14bd3e719dc54070bb1281923c9c",
+    "mtime": 1789045870.927538,
+    "seen": 1789045873.598267,
+    "ast_hash": "f6ddb16183e2d36d421ef972cb99084c",
     "semantic_hash": ""
   },
   "tools/expand_database.py": {
@@ -150,9 +150,9 @@
     "semantic_hash": ""
   },
   "tools/fuzz_formations.py": {
-    "mtime": 1789043793.1437204,
-    "seen": 1789045546.4281805,
-    "ast_hash": "757b5e147f5b6be144c0e7b82ace233d",
+    "mtime": 1789045870.9285352,
+    "seen": 1789045873.598271,
+    "ast_hash": "708d19374f04e26bb6b22c131a78a73c",
     "semantic_hash": ""
   },
   "tools/fuzz_solvers.py": {
@@ -612,9 +612,9 @@
     "semantic_hash": ""
   },
   "AGENTS_ERRATA.md": {
-    "mtime": 1789037417.0809135,
-    "seen": 1789037774.4663491,
-    "ast_hash": "70d39005e271ea4db6eeca077fd22e43",
+    "mtime": 1789045870.8873463,
+    "seen": 1789045873.5983608,
+    "ast_hash": "b501c426063ba01269ebf5ee877fff32",
     "semantic_hash": ""
   },
   "CLAUDE.md": {
@@ -654,15 +654,15 @@
     "semantic_hash": ""
   },
   "docs/API_SURFACE.md": {
-    "mtime": 1789045542.4699922,
-    "seen": 1789045546.4282794,
+    "mtime": 1789045870.88935,
+    "seen": 1789045873.598369,
     "ast_hash": "0ad94c4a0f3f2d0b1201d5a9e996736c",
     "semantic_hash": ""
   },
   "docs/CORE_INVARIANTS.md": {
-    "mtime": 1788391030.0,
-    "seen": 1789037774.4663563,
-    "ast_hash": "87e5a80882b52c691d80863f8eabaeff",
+    "mtime": 1789045870.8903549,
+    "seen": 1789045873.5983698,
+    "ast_hash": "131e49a1b298b8b9ca8a5cfc9ca88d57",
     "semantic_hash": ""
   },
   "docs/MATH_SOLVERS.md": {
@@ -1098,15 +1098,15 @@
     "semantic_hash": ""
   },
   "docs/agent-errata/physics-and-ball.md": {
-    "mtime": 1789037417.0932512,
-    "seen": 1789037774.4663634,
-    "ast_hash": "6ee527952729302dd694046fd58dce80",
+    "mtime": 1789045870.895382,
+    "seen": 1789045873.5983765,
+    "ast_hash": "c769484808d0361085af8786f79160d8",
     "semantic_hash": ""
   },
   "docs/agent-errata/player-ai.md": {
-    "mtime": 1788899386.016104,
-    "seen": 1789037774.4663644,
-    "ast_hash": "cb115a6717d72eb5062a885b3b7b5815",
+    "mtime": 1789045870.89639,
+    "seen": 1789045873.5983772,
+    "ast_hash": "4e8d35631b229f4ff7f61b6f9ae1e8ec",
     "semantic_hash": ""
   },
   "docs/agent-errata/scene-and-node-paths.md": {

@@ -1,8 +1,8 @@
 {
   "mcpServers": {
     "powerfootball": {
-      "command": "python",
-      "args": ["tools/mcp_server.py"],
+      "command": "py",
+      "args": ["-3", "tools/mcp_server.py"],
       "env": {
         "PYTHONIOENCODING": "utf-8",
         "PYTHONUNBUFFERED": "1"
@@ -11,6 +11,14 @@
     "graphify": {
       "command": "C:\\Users\\emanu\\AppData\\Roaming\\uv\\tools\\graphifyy\\Scripts\\python.exe",
       "args": ["-m", "graphify.serve", "graphify-out/graph.json"],
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONUNBUFFERED": "1"
+      }
+    },
+    "football-expert": {
+      "command": "py",
+      "args": ["-3", "tools/football_mcp.py"],
       "env": {
         "PYTHONIOENCODING": "utf-8",
         "PYTHONUNBUFFERED": "1"

@@ -1,144 +1,24 @@
 {
-  "gdcheck-verification": {
-    "enabled": true,
-    "PostToolUse": [
+  "hooks": {
+    "PreToolUse": [
       {
-        "matcher": "write_to_file|replace_file_content",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
-            "timeout": 30
-          }
-        ]
+        "matcher": "write_to_file",
+        "condition": "args.path.endsWith('.gd') && file_exists(args.path)",
+        "action": "reject",
+        "reason": "Full file overwrites on existing GDScript files are strictly prohibited. Use edit_file or unified diffs to make localized, surgical modifications."
+      },
+      {
+        "matcher": "grep|search",
+        "condition": "!args.path || args.path === '.'",
+        "action": "warn",
+        "message": "Broad workspace grep is discouraged. Prefer querying Graphify (py -3 -m graphify query <concept>) or using py -3 tools/codebase_slice.py."
       }
     ],
     "Stop": [
       {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "python3 tools/verify_gate.py --full || python tools/verify_gate.py --full || py -3 tools/verify_gate.py --full",
-            "timeout": 90
-          }
-        ]
-      }
-    ],
-    "post_file_write": [
-      {
-        "matcher": "**/*.{gd,tscn,json}",
-        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
-        "timeout": 30
-      }
-    ],
-    "pre_turn_complete": [
-      {
-        "matcher": "*",
-        "command": "python3 tools/verify_gate.py --full || python tools/verify_gate.py --full || py -3 tools/verify_gate.py --full",
-        "timeout": 90
-      }
-    ]
-  },
-  "session-bootstrap": {
-    "enabled": true,
-    "PreInvocation": [
-      {
-        "type": "command",
-        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
-        "timeout": 30
-      }
-    ],
-    "session_start": [
-      {
-        "matcher": "*",
-        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
-        "timeout": 30
-      }
-    ]
-  },
-  "task-intake-routing": {
-    "enabled": true,
-    "PreInvocation": [
-      {
-        "type": "command",
-        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
-        "timeout": 30
-      }
-    ],
-    "user_request": [
-      {
-        "matcher": "*",
-        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
-        "timeout": 30
-      }
-    ]
-  },
-  "feature-implementation": {
-    "enabled": true,
-    "PreInvocation": [
-      {
-        "type": "command",
-        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
-        "timeout": 30
-      }
-    ],
-    "feature_request": [
-      {
-        "matcher": "*",
-        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
-        "timeout": 30
-      }
-    ]
-  },
-  "bug-investigation": {
-    "enabled": true,
-    "PreInvocation": [
-      {
-        "type": "command",
-        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
-        "timeout": 30
-      }
-    ],
-    "bug_report": [
-      {
-        "matcher": "*",
-        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
-        "timeout": 30
-      }
-    ]
-  },
-  "performance-work": {
-    "enabled": true,
-    "PreInvocation": [
-      {
-        "type": "command",
-        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
-        "timeout": 30
-      }
-    ],
-    "performance_task": [
-      {
-        "matcher": "*",
-        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
-        "timeout": 30
-      }
-    ]
-  },
-  "data-database": {
-    "enabled": true,
-    "PreInvocation": [
-      {
-        "type": "command",
-        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
-        "timeout": 30
-      }
-    ],
-    "data_task": [
-      {
-        "matcher": "*",
-        "command": "python3 tools/verify_gate.py --fast || python tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
-        "timeout": 30
+        "action": "exec",
+        "command": "python tools/verify_gate.py --fast || python3 tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+        "block_on_failure": true
       }
     ]
   }

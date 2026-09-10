@@ -149,7 +149,7 @@
       "file_type": "code",
       "norm_label": "analyticalsimulationharness",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L210"
+      "source_location": "L86"
     },
     {
       "id": "tools_verify_gate_checkresult",
@@ -399,6 +399,54 @@
       "source_location": "L29"
     },
     {
+      "id": "tools_lint_xref_collect",
+      "label": "collect()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 10,
+      "community_name": "Core Invariants",
+      "file_type": "code",
+      "norm_label": "collect()",
+      "source_file": "tools/lint_xref.py",
+      "source_location": "L55"
+    },
+    {
+      "id": "tools_lint_xref_gd_files",
+      "label": "gd_files()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 10,
+      "community_name": "Core Invariants",
+      "file_type": "code",
+      "norm_label": "gd_files()",
+      "source_file": "tools/lint_xref.py",
+      "source_location": "L93"
+    },
+    {
+      "id": "tools_lint_xref_main",
+      "label": "main()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 10,
+      "community_name": "Core Invariants",
+      "file_type": "code",
+      "norm_label": "main()",
+      "source_file": "tools/lint_xref.py",
+      "source_location": "L105"
+    },
+    {
+      "id": "tools_lint_xref_strip_noise",
+      "label": "strip_noise()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 10,
+      "community_name": "Core Invariants",
+      "file_type": "code",
+      "norm_label": "strip_noise()",
+      "source_file": "tools/lint_xref.py",
+      "source_location": "L86"
+    },
+    {
       "id": "tools_generate_symbols_find_gd_files",
       "label": "find_gd_files()",
       "_callable": true,
@@ -576,31 +624,7 @@
       "file_type": "code",
       "norm_label": "._check_nan_inf()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L335"
-    },
-    {
-      "id": "tools_eval_simulation_analyticalsimulationharness_count_bypassed",
-      "label": "._count_bypassed()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 114,
-      "community_name": "AnalyticalSimulationHarness",
-      "file_type": "code",
-      "norm_label": "._count_bypassed()",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L953"
-    },
-    {
-      "id": "tools_eval_simulation_analyticalsimulationharness_has_clear_sight",
-      "label": "._has_clear_sight()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 114,
-      "community_name": "AnalyticalSimulationHarness",
-      "file_type": "code",
-      "norm_label": "._has_clear_sight()",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L858"
+      "source_location": "L187"
     },
     {
       "id": "tools_eval_simulation_analyticalsimulationharness_init",
@@ -612,67 +636,7 @@
       "file_type": "code",
       "norm_label": ".__init__()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L225"
-    },
-    {
-      "id": "tools_eval_simulation_analyticalsimulationharness_lane_min_distance",
-      "label": "._lane_min_distance()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 114,
-      "community_name": "AnalyticalSimulationHarness",
-      "file_type": "code",
-      "norm_label": "._lane_min_distance()",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L875"
-    },
-    {
-      "id": "tools_eval_simulation_analyticalsimulationharness_offside_line_axis",
-      "label": "._offside_line_axis()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 114,
-      "community_name": "AnalyticalSimulationHarness",
-      "file_type": "code",
-      "norm_label": "._offside_line_axis()",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L364"
-    },
-    {
-      "id": "tools_eval_simulation_analyticalsimulationharness_pass_candidate_score",
-      "label": "._pass_candidate_score()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 114,
-      "community_name": "AnalyticalSimulationHarness",
-      "file_type": "code",
-      "norm_label": "._pass_candidate_score()",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L903"
-    },
-    {
-      "id": "tools_eval_simulation_analyticalsimulationharness_possessing_team",
-      "label": "._possessing_team()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 114,
-      "community_name": "AnalyticalSimulationHarness",
-      "file_type": "code",
-      "norm_label": "._possessing_team()",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L342"
-    },
-    {
-      "id": "tools_eval_simulation_analyticalsimulationharness_resolve_chasers",
-      "label": "._resolve_chasers()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 114,
-      "community_name": "AnalyticalSimulationHarness",
-      "file_type": "code",
-      "norm_label": "._resolve_chasers()",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L348"
+      "source_location": "L101"
     },
     {
       "id": "tools_eval_simulation_analyticalsimulationharness_resolve_pass",
@@ -684,7 +648,7 @@
       "file_type": "code",
       "norm_label": "._resolve_pass()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L978"
+      "source_location": "L441"
     },
     {
       "id": "tools_eval_simulation_analyticalsimulationharness_resolve_shot",
@@ -696,19 +660,7 @@
       "file_type": "code",
       "norm_label": "._resolve_shot()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L685"
-    },
-    {
-      "id": "tools_eval_simulation_analyticalsimulationharness_role_target",
-      "label": "._role_target()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 114,
-      "community_name": "AnalyticalSimulationHarness",
-      "file_type": "code",
-      "norm_label": "._role_target()",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L377"
+      "source_location": "L376"
     },
     {
       "id": "tools_eval_simulation_analyticalsimulationharness_run",
@@ -720,19 +672,7 @@
       "file_type": "code",
       "norm_label": ".run()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1086"
-    },
-    {
-      "id": "tools_eval_simulation_analyticalsimulationharness_solve_pass_speed",
-      "label": "._solve_pass_speed()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 114,
-      "community_name": "AnalyticalSimulationHarness",
-      "file_type": "code",
-      "norm_label": "._solve_pass_speed()",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L973"
+      "source_location": "L549"
     },
     {
       "id": "tools_eval_simulation_analyticalsimulationharness_step",
@@ -744,19 +684,7 @@
       "file_type": "code",
       "norm_label": ".step()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L475"
-    },
-    {
-      "id": "tools_eval_simulation_analyticalsimulationharness_update_carry",
-      "label": "._update_carry()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 114,
-      "community_name": "AnalyticalSimulationHarness",
-      "file_type": "code",
-      "norm_label": "._update_carry()",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L747"
+      "source_location": "L193"
     },
     {
       "id": "tools_eval_simulation_find_godot_binary",
@@ -780,7 +708,7 @@
       "file_type": "code",
       "norm_label": "main()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1270"
+      "source_location": "L733"
     },
     {
       "id": "tools_eval_simulation_print_summary_table",
@@ -792,7 +720,7 @@
       "file_type": "code",
       "norm_label": "print_summary_table()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1242"
+      "source_location": "L705"
     },
     {
       "id": "tools_eval_simulation_run_analytical_trials",
@@ -804,7 +732,7 @@
       "file_type": "code",
       "norm_label": "run_analytical_trials()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1158"
+      "source_location": "L621"
     },
     {
       "id": "tools_eval_simulation_run_evaluation",
@@ -816,7 +744,7 @@
       "file_type": "code",
       "norm_label": "run_evaluation()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1208"
+      "source_location": "L671"
     },
     {
       "id": "tools_verify_gate_checkresult_init",
@@ -975,54 +903,6 @@
       "source_location": "L129"
     },
     {
-      "id": "tools_lint_xref_collect",
-      "label": "collect()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 127,
-      "community_name": "Career Mode",
-      "file_type": "code",
-      "norm_label": "collect()",
-      "source_file": "tools/lint_xref.py",
-      "source_location": "L55"
-    },
-    {
-      "id": "tools_lint_xref_gd_files",
-      "label": "gd_files()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 127,
-      "community_name": "Career Mode",
-      "file_type": "code",
-      "norm_label": "gd_files()",
-      "source_file": "tools/lint_xref.py",
-      "source_location": "L93"
-    },
-    {
-      "id": "tools_lint_xref_main",
-      "label": "main()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 127,
-      "community_name": "Career Mode",
-      "file_type": "code",
-      "norm_label": "main()",
-      "source_file": "tools/lint_xref.py",
-      "source_location": "L105"
-    },
-    {
-      "id": "tools_lint_xref_strip_noise",
-      "label": "strip_noise()",
-      "_callable": true,
-      "_origin": "ast",
-      "community": 127,
-      "community_name": "Career Mode",
-      "file_type": "code",
-      "norm_label": "strip_noise()",
-      "source_file": "tools/lint_xref.py",
-      "source_location": "L86"
-    },
-    {
       "id": "tools_fuzz_formations_clampf",
       "label": "clampf()",
       "_callable": true,
@@ -1032,7 +912,7 @@
       "file_type": "code",
       "norm_label": "clampf()",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L91"
+      "source_location": "L64"
     },
     {
       "id": "tools_fuzz_formations_get_dynamic_anchor_position",
@@ -1044,7 +924,7 @@
       "file_type": "code",
       "norm_label": "get_dynamic_anchor_position()",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L99"
+      "source_location": "L72"
     },
     {
       "id": "tools_fuzz_formations_lerpf",
@@ -1056,7 +936,7 @@
       "file_type": "code",
       "norm_label": "lerpf()",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L95"
+      "source_location": "L68"
     },
     {
       "id": "tools_fuzz_formations_main",
@@ -1068,7 +948,7 @@
       "file_type": "code",
       "norm_label": "main()",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L248"
+      "source_location": "L216"
     },
     {
       "id": "tools_fuzz_formations_run_formation_fuzzer",
@@ -1080,7 +960,7 @@
       "file_type": "code",
       "norm_label": "run_formation_fuzzer()",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L146"
+      "source_location": "L114"
     },
     {
       "id": "tools_lint_invariants_check_brain_mutations",
@@ -3675,6 +3555,39 @@
       "source_location": "L45"
     },
     {
+      "id": "tools_lint_xref",
+      "label": "lint_xref.py",
+      "_origin": "ast",
+      "community": 10,
+      "community_name": "Core Invariants",
+      "file_type": "code",
+      "norm_label": "lint_xref.py",
+      "source_file": "tools/lint_xref.py",
+      "source_location": "L1"
+    },
+    {
+      "id": "tools_lint_xref_rationale_56",
+      "label": "(class_name, surface_set, source) for one .gd file.",
+      "_origin": "ast",
+      "community": 10,
+      "community_name": "Core Invariants",
+      "file_type": "rationale",
+      "norm_label": "(class_name, surface_set, source) for one .gd file.",
+      "source_file": "tools/lint_xref.py",
+      "source_location": "L56"
+    },
+    {
+      "id": "tools_lint_xref_rationale_87",
+      "label": "Remove string literals and trailing comments so paths are not scanned.",
+      "_origin": "ast",
+      "community": 10,
+      "community_name": "Core Invariants",
+      "file_type": "rationale",
+      "norm_label": "remove string literals and trailing comments so paths are not scanned.",
+      "source_file": "tools/lint_xref.py",
+      "source_location": "L87"
+    },
+    {
       "id": "tools_refactor_brain_2",
       "label": "refactor_brain_2.py",
       "_origin": "ast",
@@ -4876,7 +4789,7 @@
       "source_location": ""
     },
     {
-      "id": "tools_eval_simulation_rationale_211",
+      "id": "tools_eval_simulation_rationale_87",
       "label": "Deterministic analytical 60Hz match physics & AI decision simulator. Simulates\u2026",
       "_origin": "ast",
       "community": 114,
@@ -4884,51 +4797,7 @@
       "file_type": "rationale",
       "norm_label": "deterministic analytical 60hz match physics & ai decision simulator. simulates...",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L211"
-    },
-    {
-      "id": "tools_eval_simulation_rationale_343",
-      "label": "Team in possession, or -1 while the ball is genuinely loose.",
-      "_origin": "ast",
-      "community": 114,
-      "community_name": "AnalyticalSimulationHarness",
-      "file_type": "rationale",
-      "norm_label": "team in possession, or -1 while the ball is genuinely loose.",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L343"
-    },
-    {
-      "id": "tools_eval_simulation_rationale_349",
-      "label": "One outfield chaser per team \u2014 mirrors PlayerBrain._should_chase_ball()'s\u2026",
-      "_origin": "ast",
-      "community": 114,
-      "community_name": "AnalyticalSimulationHarness",
-      "file_type": "rationale",
-      "norm_label": "one outfield chaser per team \u2014 mirrors playerbrain._should_chase_ball()'s...",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L349"
-    },
-    {
-      "id": "tools_eval_simulation_rationale_365",
-      "label": "Attack-axis coordinate of the OPPONENT's last outfield defender, i.e. the\u2026",
-      "_origin": "ast",
-      "community": 114,
-      "community_name": "AnalyticalSimulationHarness",
-      "file_type": "rationale",
-      "norm_label": "attack-axis coordinate of the opponent's last outfield defender, i.e. the...",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L365"
-    },
-    {
-      "id": "tools_eval_simulation_rationale_388",
-      "label": "Where this player wants to be, blended from the drifted formation anchor toward\u2026",
-      "_origin": "ast",
-      "community": 114,
-      "community_name": "AnalyticalSimulationHarness",
-      "file_type": "rationale",
-      "norm_label": "where this player wants to be, blended from the drifted formation anchor toward...",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L388"
+      "source_location": "L87"
     },
     {
       "id": "tools_verify_gate",
@@ -6250,39 +6119,6 @@
       "norm_label": "gdscript 2.0 & godot 4.7 strict architecture rules",
       "source_file": ".agents/rules/godot_gdscript.md",
       "source_location": "L7"
-    },
-    {
-      "id": "tools_lint_xref",
-      "label": "lint_xref.py",
-      "_origin": "ast",
-      "community": 127,
-      "community_name": "Career Mode",
-      "file_type": "code",
-      "norm_label": "lint_xref.py",
-      "source_file": "tools/lint_xref.py",
-      "source_location": "L1"
-    },
-    {
-      "id": "tools_lint_xref_rationale_56",
-      "label": "(class_name, surface_set, source) for one .gd file.",
-      "_origin": "ast",
-      "community": 127,
-      "community_name": "Career Mode",
-      "file_type": "rationale",
-      "norm_label": "(class_name, surface_set, source) for one .gd file.",
-      "source_file": "tools/lint_xref.py",
-      "source_location": "L56"
-    },
-    {
-      "id": "tools_lint_xref_rationale_87",
-      "label": "Remove string literals and trailing comments so paths are not scanned.",
-      "_origin": "ast",
-      "community": 127,
-      "community_name": "Career Mode",
-      "file_type": "rationale",
-      "norm_label": "remove string literals and trailing comments so paths are not scanned.",
-      "source_file": "tools/lint_xref.py",
-      "source_location": "L87"
     },
     {
       "id": "agents_workflows_cross_system_feature",
@@ -12121,231 +11957,6 @@
       "source_url": null
     },
     {
-      "id": "llms_1_vision___architectural_invariants",
-      "label": "1 Vision & Architectural Invariants",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 10,
-      "community_name": "Core Invariants",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "1 vision & architectural invariants",
-      "source_file": "llms.txt",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "llms_2_fivelayer_simulation_stack_semantic_ro",
-      "label": "2 FiveLayer Simulation Stack Semantic Routing",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 10,
-      "community_name": "Core Invariants",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "2 fivelayer simulation stack semantic routing",
-      "source_file": "llms.txt",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "llms_3_tooling___automation",
-      "label": "3 Tooling & Automation",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 10,
-      "community_name": "Core Invariants",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "3 tooling & automation",
-      "source_file": "llms.txt",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "llms_layer_1___physics___kinematics",
-      "label": "Layer 1 \u2014 Physics & Kinematics",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 10,
-      "community_name": "Core Invariants",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "layer 1 \u2014 physics & kinematics",
-      "source_file": "llms.txt",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "llms_layer_2___match_ai___spatial_navigation",
-      "label": "Layer 2 \u2014 Match AI & Spatial Navigation",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 10,
-      "community_name": "Core Invariants",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "layer 2 \u2014 match ai & spatial navigation",
-      "source_file": "llms.txt",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "llms_layer_3___match_social___dynamic_psychol",
-      "label": "Layer 3 \u2014 Match Social & Dynamic Psychology",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 10,
-      "community_name": "Core Invariants",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "layer 3 \u2014 match social & dynamic psychology",
-      "source_file": "llms.txt",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "llms_layer_4___club_world___persistent_entiti",
-      "label": "Layer 4 \u2014 Club World & Persistent Entities",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 10,
-      "community_name": "Core Invariants",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "layer 4 \u2014 club world & persistent entities",
-      "source_file": "llms.txt",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "llms_layer_5___narrative_presentation___user",
-      "label": "Layer 5 \u2014 Narrative Presentation & User Interface",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 10,
-      "community_name": "Core Invariants",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "layer 5 \u2014 narrative presentation & user interface",
-      "source_file": "llms.txt",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "llms_powerfootball2d___semantic_repository_ma",
-      "label": "PowerFootball2D \u2014 Semantic Repository Map & RAG Router",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 10,
-      "community_name": "Core Invariants",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "powerfootball2d \u2014 semantic repository map & rag router",
-      "source_file": "llms.txt",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "roadmap_phase_1___gameplay_completeness",
-      "label": "PHASE 1 \u2014 Gameplay Completeness",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 10,
-      "community_name": "Core Invariants",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "phase 1 \u2014 gameplay completeness",
-      "source_file": "ROADMAP.md",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "roadmap_phase_2___personality_and_traits",
-      "label": "PHASE 2 \u2014 Personality and Traits",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 10,
-      "community_name": "Core Invariants",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "phase 2 \u2014 personality and traits",
-      "source_file": "ROADMAP.md",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "roadmap_phase_3___club_world",
-      "label": "PHASE 3 \u2014 Club World",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 10,
-      "community_name": "Core Invariants",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "phase 3 \u2014 club world",
-      "source_file": "ROADMAP.md",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "roadmap_phase_4___career_mode",
-      "label": "PHASE 4 \u2014 Career Mode",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 10,
-      "community_name": "Core Invariants",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "phase 4 \u2014 career mode",
-      "source_file": "ROADMAP.md",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "roadmap_phase_5___polish",
-      "label": "PHASE 5 \u2014 Polish",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 10,
-      "community_name": "Core Invariants",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "phase 5 \u2014 polish",
-      "source_file": "ROADMAP.md",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "roadmap_roadmapmd",
-      "label": "ROADMAPmd",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 10,
-      "community_name": "Core Invariants",
-      "contributor": null,
-      "file_type": "concept",
-      "norm_label": "roadmapmd",
-      "source_file": "ROADMAP.md",
-      "source_location": null,
-      "source_url": null
-    },
-    {
       "id": "claude",
       "label": "Claude",
       "_origin": "semantic",
@@ -12357,6 +11968,21 @@
       "file_type": "document",
       "norm_label": "claude",
       "source_file": "CLAUDE.md",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "claude_rules_career_mode",
+      "label": "Career Mode",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 10,
+      "community_name": "Core Invariants",
+      "contributor": null,
+      "file_type": "document",
+      "norm_label": "career mode",
+      "source_file": ".claude/rules/career-mode.md",
       "source_location": null,
       "source_url": null
     },
@@ -12391,32 +12017,152 @@
       "source_url": null
     },
     {
-      "id": "llms",
-      "label": "Llms",
+      "id": "claude_rules_career_mode_career_mode_layer_4_invariants",
+      "label": "Career Mode Layer 4 Invariants",
       "_origin": "semantic",
       "author": null,
       "captured_at": null,
       "community": 10,
       "community_name": "Core Invariants",
       "contributor": null,
-      "file_type": "document",
-      "norm_label": "llms",
-      "source_file": "llms.txt",
+      "file_type": "rationale",
+      "norm_label": "career mode layer 4 invariants",
+      "source_file": ".claude/rules/career-mode.md",
       "source_location": null,
       "source_url": null
     },
     {
-      "id": "roadmap",
-      "label": "Roadmap",
+      "id": "claude_rules_career_mode_compounded_corrections___verified_agains",
+      "label": "Compounded corrections \u2014 verified against the source",
       "_origin": "semantic",
       "author": null,
       "captured_at": null,
       "community": 10,
       "community_name": "Core Invariants",
       "contributor": null,
-      "file_type": "document",
-      "norm_label": "roadmap",
-      "source_file": "ROADMAP.md",
+      "file_type": "rationale",
+      "norm_label": "compounded corrections \u2014 verified against the source",
+      "source_file": ".claude/rules/career-mode.md",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "claude_rules_career_mode_gdcheck_cannot_see_through_autoloads___u",
+      "label": "gdcheck cannot see through autoloads \u2014 use lintxref",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 10,
+      "community_name": "Core Invariants",
+      "contributor": null,
+      "file_type": "rationale",
+      "norm_label": "gdcheck cannot see through autoloads \u2014 use lintxref",
+      "source_file": ".claude/rules/career-mode.md",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "claude_rules_career_mode_inbox_options_are_deliberately_not_seria",
+      "label": "Inbox options are deliberately NOT serialised",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 10,
+      "community_name": "Core Invariants",
+      "contributor": null,
+      "file_type": "rationale",
+      "norm_label": "inbox options are deliberately not serialised",
+      "source_file": ".claude/rules/career-mode.md",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "claude_rules_career_mode_match_side_is_not_the_league_team_index",
+      "label": "Match side is NOT the league team index",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 10,
+      "community_name": "Core Invariants",
+      "contributor": null,
+      "file_type": "rationale",
+      "norm_label": "match side is not the league team index",
+      "source_file": ".claude/rules/career-mode.md",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "claude_rules_career_mode_squadindex_is_the_identity_so_removing_a",
+      "label": "squadindex IS the identity so removing a player renumbers everyone behind them",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 10,
+      "community_name": "Core Invariants",
+      "contributor": null,
+      "file_type": "rationale",
+      "norm_label": "squadindex is the identity so removing a player renumbers everyone behind them",
+      "source_file": ".claude/rules/career-mode.md",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "claude_rules_career_mode_the_career___match_bridge_runs_through_p",
+      "label": "The career > match bridge runs through PlayerFactory once per player per bind",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 10,
+      "community_name": "Core Invariants",
+      "contributor": null,
+      "file_type": "rationale",
+      "norm_label": "the career > match bridge runs through playerfactory once per player per bind",
+      "source_file": ".claude/rules/career-mode.md",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "claude_rules_career_mode_the_season_calendar_is_derived_never_a_f",
+      "label": "The season calendar is derived never a fixed weekly rhythm",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 10,
+      "community_name": "Core Invariants",
+      "contributor": null,
+      "file_type": "rationale",
+      "norm_label": "the season calendar is derived never a fixed weekly rhythm",
+      "source_file": ".claude/rules/career-mode.md",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "claude_rules_career_mode_this_container_still_has_no_engine",
+      "label": "This container still has no engine",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 10,
+      "community_name": "Core Invariants",
+      "contributor": null,
+      "file_type": "rationale",
+      "norm_label": "this container still has no engine",
+      "source_file": ".claude/rules/career-mode.md",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "claude_rules_career_mode_trust_lives_in_two_spaces_and_they_are_n",
+      "label": "Trust lives in two spaces and they are not the same numbers",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 10,
+      "community_name": "Core Invariants",
+      "contributor": null,
+      "file_type": "rationale",
+      "norm_label": "trust lives in two spaces and they are not the same numbers",
+      "source_file": ".claude/rules/career-mode.md",
       "source_location": null,
       "source_url": null
     },
@@ -13306,171 +13052,6 @@
       "source_url": null
     },
     {
-      "id": "claude_rules_career_mode",
-      "label": "Career Mode",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 127,
-      "community_name": "Career Mode",
-      "contributor": null,
-      "file_type": "document",
-      "norm_label": "career mode",
-      "source_file": ".claude/rules/career-mode.md",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "claude_rules_career_mode_career_mode_layer_4_invariants",
-      "label": "Career Mode Layer 4 Invariants",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 127,
-      "community_name": "Career Mode",
-      "contributor": null,
-      "file_type": "rationale",
-      "norm_label": "career mode layer 4 invariants",
-      "source_file": ".claude/rules/career-mode.md",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "claude_rules_career_mode_compounded_corrections___verified_agains",
-      "label": "Compounded corrections \u2014 verified against the source",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 127,
-      "community_name": "Career Mode",
-      "contributor": null,
-      "file_type": "rationale",
-      "norm_label": "compounded corrections \u2014 verified against the source",
-      "source_file": ".claude/rules/career-mode.md",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "claude_rules_career_mode_gdcheck_cannot_see_through_autoloads___u",
-      "label": "gdcheck cannot see through autoloads \u2014 use lintxref",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 127,
-      "community_name": "Career Mode",
-      "contributor": null,
-      "file_type": "rationale",
-      "norm_label": "gdcheck cannot see through autoloads \u2014 use lintxref",
-      "source_file": ".claude/rules/career-mode.md",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "claude_rules_career_mode_inbox_options_are_deliberately_not_seria",
-      "label": "Inbox options are deliberately NOT serialised",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 127,
-      "community_name": "Career Mode",
-      "contributor": null,
-      "file_type": "rationale",
-      "norm_label": "inbox options are deliberately not serialised",
-      "source_file": ".claude/rules/career-mode.md",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "claude_rules_career_mode_match_side_is_not_the_league_team_index",
-      "label": "Match side is NOT the league team index",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 127,
-      "community_name": "Career Mode",
-      "contributor": null,
-      "file_type": "rationale",
-      "norm_label": "match side is not the league team index",
-      "source_file": ".claude/rules/career-mode.md",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "claude_rules_career_mode_squadindex_is_the_identity_so_removing_a",
-      "label": "squadindex IS the identity so removing a player renumbers everyone behind them",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 127,
-      "community_name": "Career Mode",
-      "contributor": null,
-      "file_type": "rationale",
-      "norm_label": "squadindex is the identity so removing a player renumbers everyone behind them",
-      "source_file": ".claude/rules/career-mode.md",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "claude_rules_career_mode_the_career___match_bridge_runs_through_p",
-      "label": "The career > match bridge runs through PlayerFactory once per player per bind",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 127,
-      "community_name": "Career Mode",
-      "contributor": null,
-      "file_type": "rationale",
-      "norm_label": "the career > match bridge runs through playerfactory once per player per bind",
-      "source_file": ".claude/rules/career-mode.md",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "claude_rules_career_mode_the_season_calendar_is_derived_never_a_f",
-      "label": "The season calendar is derived never a fixed weekly rhythm",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 127,
-      "community_name": "Career Mode",
-      "contributor": null,
-      "file_type": "rationale",
-      "norm_label": "the season calendar is derived never a fixed weekly rhythm",
-      "source_file": ".claude/rules/career-mode.md",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "claude_rules_career_mode_this_container_still_has_no_engine",
-      "label": "This container still has no engine",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 127,
-      "community_name": "Career Mode",
-      "contributor": null,
-      "file_type": "rationale",
-      "norm_label": "this container still has no engine",
-      "source_file": ".claude/rules/career-mode.md",
-      "source_location": null,
-      "source_url": null
-    },
-    {
-      "id": "claude_rules_career_mode_trust_lives_in_two_spaces_and_they_are_n",
-      "label": "Trust lives in two spaces and they are not the same numbers",
-      "_origin": "semantic",
-      "author": null,
-      "captured_at": null,
-      "community": 127,
-      "community_name": "Career Mode",
-      "contributor": null,
-      "file_type": "rationale",
-      "norm_label": "trust lives in two spaces and they are not the same numbers",
-      "source_file": ".claude/rules/career-mode.md",
-      "source_location": null,
-      "source_url": null
-    },
-    {
       "id": "docs_math_solvers_1_kinematic_pointtosegment_projection",
       "label": "1 Kinematic PointtoSegment Projection & Distance",
       "_origin": "semantic",
@@ -13707,6 +13288,231 @@
       "file_type": "concept",
       "norm_label": "errata history archive",
       "source_file": "docs/archive/errata_history.md",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "llms_1_vision___architectural_invariants",
+      "label": "1 Vision & Architectural Invariants",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 16,
+      "community_name": "Readme",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "1 vision & architectural invariants",
+      "source_file": "llms.txt",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "llms_2_fivelayer_simulation_stack_semantic_ro",
+      "label": "2 FiveLayer Simulation Stack Semantic Routing",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 16,
+      "community_name": "Readme",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "2 fivelayer simulation stack semantic routing",
+      "source_file": "llms.txt",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "llms_3_tooling___automation",
+      "label": "3 Tooling & Automation",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 16,
+      "community_name": "Readme",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "3 tooling & automation",
+      "source_file": "llms.txt",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "llms_layer_1___physics___kinematics",
+      "label": "Layer 1 \u2014 Physics & Kinematics",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 16,
+      "community_name": "Readme",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "layer 1 \u2014 physics & kinematics",
+      "source_file": "llms.txt",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "llms_layer_2___match_ai___spatial_navigation",
+      "label": "Layer 2 \u2014 Match AI & Spatial Navigation",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 16,
+      "community_name": "Readme",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "layer 2 \u2014 match ai & spatial navigation",
+      "source_file": "llms.txt",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "llms_layer_3___match_social___dynamic_psychol",
+      "label": "Layer 3 \u2014 Match Social & Dynamic Psychology",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 16,
+      "community_name": "Readme",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "layer 3 \u2014 match social & dynamic psychology",
+      "source_file": "llms.txt",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "llms_layer_4___club_world___persistent_entiti",
+      "label": "Layer 4 \u2014 Club World & Persistent Entities",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 16,
+      "community_name": "Readme",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "layer 4 \u2014 club world & persistent entities",
+      "source_file": "llms.txt",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "llms_layer_5___narrative_presentation___user",
+      "label": "Layer 5 \u2014 Narrative Presentation & User Interface",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 16,
+      "community_name": "Readme",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "layer 5 \u2014 narrative presentation & user interface",
+      "source_file": "llms.txt",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "llms_powerfootball2d___semantic_repository_ma",
+      "label": "PowerFootball2D \u2014 Semantic Repository Map & RAG Router",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 16,
+      "community_name": "Readme",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "powerfootball2d \u2014 semantic repository map & rag router",
+      "source_file": "llms.txt",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "roadmap_phase_1___gameplay_completeness",
+      "label": "PHASE 1 \u2014 Gameplay Completeness",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 16,
+      "community_name": "Readme",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "phase 1 \u2014 gameplay completeness",
+      "source_file": "ROADMAP.md",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "roadmap_phase_2___personality_and_traits",
+      "label": "PHASE 2 \u2014 Personality and Traits",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 16,
+      "community_name": "Readme",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "phase 2 \u2014 personality and traits",
+      "source_file": "ROADMAP.md",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "roadmap_phase_3___club_world",
+      "label": "PHASE 3 \u2014 Club World",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 16,
+      "community_name": "Readme",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "phase 3 \u2014 club world",
+      "source_file": "ROADMAP.md",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "roadmap_phase_4___career_mode",
+      "label": "PHASE 4 \u2014 Career Mode",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 16,
+      "community_name": "Readme",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "phase 4 \u2014 career mode",
+      "source_file": "ROADMAP.md",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "roadmap_phase_5___polish",
+      "label": "PHASE 5 \u2014 Polish",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 16,
+      "community_name": "Readme",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "phase 5 \u2014 polish",
+      "source_file": "ROADMAP.md",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "roadmap_roadmapmd",
+      "label": "ROADMAPmd",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 16,
+      "community_name": "Readme",
+      "contributor": null,
+      "file_type": "concept",
+      "norm_label": "roadmapmd",
+      "source_file": "ROADMAP.md",
       "source_location": null,
       "source_url": null
     },
@@ -13962,6 +13768,36 @@
       "file_type": "document",
       "norm_label": "errata history",
       "source_file": "docs/archive/errata_history.md",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "llms",
+      "label": "Llms",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 16,
+      "community_name": "Readme",
+      "contributor": null,
+      "file_type": "document",
+      "norm_label": "llms",
+      "source_file": "llms.txt",
+      "source_location": null,
+      "source_url": null
+    },
+    {
+      "id": "roadmap",
+      "label": "Roadmap",
+      "_origin": "semantic",
+      "author": null,
+      "captured_at": null,
+      "community": 16,
+      "community_name": "Readme",
+      "contributor": null,
+      "file_type": "document",
+      "norm_label": "roadmap",
+      "source_file": "ROADMAP.md",
       "source_location": null,
       "source_url": null
     },
@@ -22653,66 +22489,6 @@
       "weight": 1.0
     },
     {
-      "source": "tools_eval_simulation_analyticalsimulationharness_has_clear_sight",
-      "target": "tools_eval_simulation_analyticalsimulationharness_lane_min_distance",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L870",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness_pass_candidate_score",
-      "target": "tools_eval_simulation_analyticalsimulationharness_count_bypassed",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L938",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness_resolve_pass",
-      "target": "tools_eval_simulation_analyticalsimulationharness_count_bypassed",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L1030",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness_resolve_pass",
-      "target": "tools_eval_simulation_analyticalsimulationharness_solve_pass_speed",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L1034",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness_resolve_pass",
-      "target": "tools_eval_simulation_analyticalsimulationharness_pass_candidate_score",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L993",
-      "weight": 1.0
-    },
-    {
       "source": "tools_eval_simulation_analyticalsimulationharness_run",
       "target": "tools_eval_simulation_analyticalsimulationharness_step",
       "relation": "calls",
@@ -22721,55 +22497,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1088",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness_step",
-      "target": "tools_eval_simulation_analyticalsimulationharness_possessing_team",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L495",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness_step",
-      "target": "tools_eval_simulation_analyticalsimulationharness_resolve_chasers",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L496",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness_step",
-      "target": "tools_eval_simulation_analyticalsimulationharness_offside_line_axis",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L497",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness_step",
-      "target": "tools_eval_simulation_analyticalsimulationharness_role_target",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L514",
+      "source_location": "L551",
       "weight": 1.0
     },
     {
@@ -22781,47 +22509,11 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L565",
+      "source_location": "L271",
       "weight": 1.0
     },
     {
       "source": "tools_eval_simulation_analyticalsimulationharness_step",
-      "target": "tools_eval_simulation_analyticalsimulationharness_update_carry",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L610",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness_update_carry",
-      "target": "tools_eval_simulation_analyticalsimulationharness_pass_candidate_score",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L810",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness_update_carry",
-      "target": "tools_eval_simulation_analyticalsimulationharness_has_clear_sight",
-      "relation": "calls",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "call",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L828",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness_update_carry",
       "target": "tools_eval_simulation_analyticalsimulationharness_resolve_shot",
       "relation": "calls",
       "_origin": "ast",
@@ -22829,11 +22521,11 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L841",
+      "source_location": "L330",
       "weight": 1.0
     },
     {
-      "source": "tools_eval_simulation_analyticalsimulationharness_update_carry",
+      "source": "tools_eval_simulation_analyticalsimulationharness_step",
       "target": "tools_eval_simulation_analyticalsimulationharness_resolve_pass",
       "relation": "calls",
       "_origin": "ast",
@@ -22841,7 +22533,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L849",
+      "source_location": "L332",
       "weight": 1.0
     },
     {
@@ -22853,7 +22545,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1277",
+      "source_location": "L740",
       "weight": 1.0
     },
     {
@@ -22865,7 +22557,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1282",
+      "source_location": "L745",
       "weight": 1.0
     },
     {
@@ -22877,7 +22569,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1159",
+      "source_location": "L622",
       "weight": 1.0
     },
     {
@@ -22889,7 +22581,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1209",
+      "source_location": "L672",
       "weight": 1.0
     },
     {
@@ -22901,7 +22593,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1234",
+      "source_location": "L697",
       "weight": 1.0
     },
     {
@@ -23009,7 +22701,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L114",
+      "source_location": "L87",
       "weight": 1.0
     },
     {
@@ -23021,7 +22713,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L122",
+      "source_location": "L95",
       "weight": 1.0
     },
     {
@@ -23033,7 +22725,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L254",
+      "source_location": "L222",
       "weight": 1.0
     },
     {
@@ -23045,7 +22737,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L192",
+      "source_location": "L160",
       "weight": 1.0
     },
     {
@@ -25577,7 +25269,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1086",
+      "source_location": "L549",
       "weight": 1.0
     },
     {
@@ -25589,7 +25281,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1242",
+      "source_location": "L705",
       "weight": 1.0
     },
     {
@@ -25601,7 +25293,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1158",
+      "source_location": "L621",
       "weight": 1.0
     },
     {
@@ -25613,7 +25305,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1208",
+      "source_location": "L671",
       "weight": 1.0
     },
     {
@@ -26061,54 +25753,6 @@
       "weight": 1.0
     },
     {
-      "source": "tools_eval_simulation_analyticalsimulationharness_count_bypassed",
-      "target": "range",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "parameter_type",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L953",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness_has_clear_sight",
-      "target": "range",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "parameter_type",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L858",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness_lane_min_distance",
-      "target": "range",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "parameter_type",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L875",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness_pass_candidate_score",
-      "target": "range",
-      "relation": "references",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "context": "parameter_type",
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L903",
-      "weight": 1.0
-    },
-    {
       "source": "tools_eval_simulation_analyticalsimulationharness_resolve_pass",
       "target": "range",
       "relation": "references",
@@ -26117,7 +25761,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L978",
+      "source_location": "L441",
       "weight": 1.0
     },
     {
@@ -26129,7 +25773,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L99",
+      "source_location": "L72",
       "weight": 1.0
     },
     {
@@ -26141,7 +25785,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L99",
+      "source_location": "L72",
       "weight": 1.0
     },
     {
@@ -29884,13 +29528,24 @@
     },
     {
       "source": "tools_eval_simulation",
+      "target": "tools_eval_simulation_find_godot_binary",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L43",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation",
       "target": "tools_eval_simulation_run_analytical_trials",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1158",
+      "source_location": "L621",
       "weight": 1.0
     },
     {
@@ -29901,7 +29556,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1208",
+      "source_location": "L671",
       "weight": 1.0
     },
     {
@@ -29912,7 +29567,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1242",
+      "source_location": "L705",
       "weight": 1.0
     },
     {
@@ -29923,7 +29578,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L1270",
+      "source_location": "L733",
       "weight": 1.0
     },
     {
@@ -29934,18 +29589,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L210",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation",
-      "target": "tools_eval_simulation_find_godot_binary",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L43",
+      "source_location": "L86",
       "weight": 1.0
     },
     {
@@ -30044,7 +29688,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L146",
+      "source_location": "L114",
       "weight": 1.0
     },
     {
@@ -30055,7 +29699,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L248",
+      "source_location": "L216",
       "weight": 1.0
     },
     {
@@ -30088,7 +29732,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L91",
+      "source_location": "L64",
       "weight": 1.0
     },
     {
@@ -30099,7 +29743,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L95",
+      "source_location": "L68",
       "weight": 1.0
     },
     {
@@ -30110,7 +29754,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L99",
+      "source_location": "L72",
       "weight": 1.0
     },
     {
@@ -32018,24 +31662,13 @@
     },
     {
       "source": "tools_eval_simulation_analyticalsimulationharness",
-      "target": "tools_eval_simulation_analyticalsimulationharness_run",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L1086",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness",
       "target": "tools_eval_simulation_analyticalsimulationharness_init",
       "relation": "method",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L225",
+      "source_location": "L101",
       "weight": 1.0
     },
     {
@@ -32046,51 +31679,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L335",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness",
-      "target": "tools_eval_simulation_analyticalsimulationharness_possessing_team",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L342",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness",
-      "target": "tools_eval_simulation_analyticalsimulationharness_resolve_chasers",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L348",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness",
-      "target": "tools_eval_simulation_analyticalsimulationharness_offside_line_axis",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L364",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness",
-      "target": "tools_eval_simulation_analyticalsimulationharness_role_target",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L377",
+      "source_location": "L187",
       "weight": 1.0
     },
     {
@@ -32101,7 +31690,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L475",
+      "source_location": "L193",
       "weight": 1.0
     },
     {
@@ -32112,73 +31701,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L685",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness",
-      "target": "tools_eval_simulation_analyticalsimulationharness_update_carry",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L747",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness",
-      "target": "tools_eval_simulation_analyticalsimulationharness_has_clear_sight",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L858",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness",
-      "target": "tools_eval_simulation_analyticalsimulationharness_lane_min_distance",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L875",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness",
-      "target": "tools_eval_simulation_analyticalsimulationharness_pass_candidate_score",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L903",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness",
-      "target": "tools_eval_simulation_analyticalsimulationharness_count_bypassed",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L953",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness",
-      "target": "tools_eval_simulation_analyticalsimulationharness_solve_pass_speed",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L973",
+      "source_location": "L376",
       "weight": 1.0
     },
     {
@@ -32189,7 +31712,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L978",
+      "source_location": "L441",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness",
+      "target": "tools_eval_simulation_analyticalsimulationharness_run",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L549",
       "weight": 1.0
     },
     {
@@ -32644,58 +32178,14 @@
       "weight": 1.0
     },
     {
-      "source": "tools_eval_simulation_rationale_211",
+      "source": "tools_eval_simulation_rationale_87",
       "target": "tools_eval_simulation_analyticalsimulationharness",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L211",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_rationale_343",
-      "target": "tools_eval_simulation_analyticalsimulationharness_possessing_team",
-      "relation": "rationale_for",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L343",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_rationale_349",
-      "target": "tools_eval_simulation_analyticalsimulationharness_resolve_chasers",
-      "relation": "rationale_for",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L349",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_rationale_365",
-      "target": "tools_eval_simulation_analyticalsimulationharness_offside_line_axis",
-      "relation": "rationale_for",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L365",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_rationale_388",
-      "target": "tools_eval_simulation_analyticalsimulationharness_role_target",
-      "relation": "rationale_for",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L388",
+      "source_location": "L87",
       "weight": 1.0
     },
     {

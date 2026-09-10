@@ -72,14 +72,14 @@
     "semantic_hash": ""
   },
   "docs/DEPENDENCY_GRAPH.json": {
-    "mtime": 1789045604.476622,
-    "seen": 1789045716.7975373,
+    "mtime": 1789045870.891356,
+    "seen": 1789045873.5982573,
     "ast_hash": "c019b4d5e2a14342c71a5be9cb7b233e",
     "semantic_hash": ""
   },
   "docs/SYMBOLS.json": {
-    "mtime": 1789045713.0816975,
-    "seen": 1789045716.797539,
+    "mtime": 1789045891.274305,
+    "seen": 1789045895.3410378,
     "ast_hash": "8828e78d97f30fd518264f13ec78f7d1",
     "semantic_hash": ""
   },
@@ -126,9 +126,9 @@
     "semantic_hash": ""
   },
   "tools/eval_simulation.py": {
-    "mtime": 1789045515.1047382,
-    "seen": 1789045546.4281766,
-    "ast_hash": "238e14bd3e719dc54070bb1281923c9c",
+    "mtime": 1789045870.927538,
+    "seen": 1789045873.598267,
+    "ast_hash": "f6ddb16183e2d36d421ef972cb99084c",
     "semantic_hash": ""
   },
   "tools/expand_database.py": {
@@ -150,9 +150,9 @@
     "semantic_hash": ""
   },
   "tools/fuzz_formations.py": {
-    "mtime": 1789043793.1437204,
-    "seen": 1789045546.4281805,
-    "ast_hash": "757b5e147f5b6be144c0e7b82ace233d",
+    "mtime": 1789045870.9285352,
+    "seen": 1789045873.598271,
+    "ast_hash": "708d19374f04e26bb6b22c131a78a73c",
     "semantic_hash": ""
   },
   "tools/fuzz_solvers.py": {
@@ -612,9 +612,9 @@
     "semantic_hash": ""
   },
   "AGENTS_ERRATA.md": {
-    "mtime": 1789045674.5213215,
-    "seen": 1789045716.797645,
-    "ast_hash": "b2016922923e83c556c95f0b7c1b6aab",
+    "mtime": 1789045870.8873463,
+    "seen": 1789045873.5983608,
+    "ast_hash": "b501c426063ba01269ebf5ee877fff32",
     "semantic_hash": ""
   },
   "CLAUDE.md": {
@@ -654,15 +654,15 @@
     "semantic_hash": ""
   },
   "docs/API_SURFACE.md": {
-    "mtime": 1789045712.916672,
-    "seen": 1789045716.7976534,
+    "mtime": 1789045891.1019242,
+    "seen": 1789045895.3411841,
     "ast_hash": "0ad94c4a0f3f2d0b1201d5a9e996736c",
     "semantic_hash": ""
   },
   "docs/CORE_INVARIANTS.md": {
-    "mtime": 1789045702.8597896,
-    "seen": 1789045716.7976546,
-    "ast_hash": "989f28612f88acae61c012fedb0df9e9",
+    "mtime": 1789045870.8903549,
+    "seen": 1789045873.5983698,
+    "ast_hash": "131e49a1b298b8b9ca8a5cfc9ca88d57",
     "semantic_hash": ""
   },
   "docs/MATH_SOLVERS.md": {
@@ -1098,15 +1098,15 @@
     "semantic_hash": ""
   },
   "docs/agent-errata/physics-and-ball.md": {
-    "mtime": 1789045674.5198157,
-    "seen": 1789045716.7976615,
-    "ast_hash": "0b55aaebbe5b711d45d790064e02abb3",
+    "mtime": 1789045870.895382,
+    "seen": 1789045873.5983765,
+    "ast_hash": "c769484808d0361085af8786f79160d8",
     "semantic_hash": ""
   },
   "docs/agent-errata/player-ai.md": {
-    "mtime": 1789045674.5198157,
-    "seen": 1789045716.7976625,
-    "ast_hash": "2a608239d38985a6b7086f5e4b0771eb",
+    "mtime": 1789045870.89639,
+    "seen": 1789045873.5983772,
+    "ast_hash": "4e8d35631b229f4ff7f61b6f9ae1e8ec",
     "semantic_hash": ""
   },
   "docs/agent-errata/scene-and-node-paths.md": {

@@ -25,6 +25,6 @@ Guidelines and verification loop for rewriting or refactoring GDScript component
 
 After any file modification, run:
 ```bash
-python tools/verify_gate.py --fast
+py -3 tools/verify_gate.py --fast
 ```
 Do not proceed until the gate output reports 0 errors.

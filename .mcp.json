@@ -1,0 +1,12 @@
+{
+  "mcpServers": {
+    "football-expert": {
+      "command": "py",
+      "args": ["-3", "tools/football_mcp.py"],
+      "env": {
+        "PYTHONIOENCODING": "utf-8",
+        "PYTHONUNBUFFERED": "1"
+      }
+    }
+  }
+}

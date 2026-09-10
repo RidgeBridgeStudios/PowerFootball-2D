@@ -63,7 +63,7 @@ The repository uses Graphify (`graphifyy`) to maintain a persistent knowledge gr
 - **When:** Automatically during the pre-turn completion verification battery.
 - **Enforcement Mechanism:** Step 17 of `tools/verify_gate.py --full`:
   ```bash
-  python tools/verify_gate.py --full
+  py -3 tools/verify_gate.py --full
   ```
   If `graphify-out/graph.json` exists, `verify_gate.py` invokes `graphify update .` using the discovered `graphify` binary or the interpreter pinned in `graphify-out/.graphify_python`.
 - **Developer Live Watch (Optional):**
@@ -94,7 +94,7 @@ The repository uses Graphify (`graphifyy`) to maintain a persistent knowledge gr
   ```ini
   [merge "graphify"]
       name = graphify graph.json union merge
-      driver = "<python>" -m graphify merge-driver %O %A %B
+      driver = "<py -3>" -m graphify merge-driver %O %A %B
   ```
   Performs automatic union merging of `graph.json` across branches, preventing merge conflict stalls on generated graph files.
 
@@ -116,7 +116,7 @@ All agents working in the repository must adhere to the **Graphify-First Navigat
 2. **Before Tier 2 (Cross-Module) and Tier 3 (Core Simulation) Changes:**
    - Mandatory blast-radius analysis before modifying shared resources, singletons, or choke points:
      ```bash
-     python tools/dump_dep_graph.py --blast-radius <target_file>
+     py -3 tools/dump_dep_graph.py --blast-radius <target_file>
      ```
    - Must query Graphify neighbors or path:
      - Query `get_neighbors` on the target class/symbol or run `graphify explain "<target>"`.
@@ -150,10 +150,10 @@ Before completing any code editing turn or proposing changes, agents must follow
 
 - [ ] 2. Targeted Subsystem Test / Smoke Check
       Execute the domain-specific test matching modified files:
-      - Kinematics / Physics: `python tools/fuzz_solvers.py --iterations=10000`
-      - Tactical AI / Formations: `python tools/fuzz_formations.py --iterations=5000`
-      - Match Simulation Invariants: `python tools/eval_simulation.py --duration=10`
-      - Replay Determinism: `python tools/replay_test.py`
+      - Kinematics / Physics: `py -3 tools/fuzz_solvers.py --iterations=10000`
+      - Tactical AI / Formations: `py -3 tools/fuzz_formations.py --iterations=5000`
+      - Match Simulation Invariants: `py -3 tools/eval_simulation.py --duration=10`
+      - Replay Determinism: `py -3 tools/replay_test.py`
       - Engine Compilation / GUT (if available): `godot --headless -s addons/gut/gut_cmdln.gd -gexit`
 
 - [ ] 3. Diff Review & Contract Audit
@@ -167,7 +167,7 @@ Before completing any code editing turn or proposing changes, agents must follow
 - [ ] 4. Graphify Topology Refresh
       Synchronize graph topology:
       - Fast update: `graphify update .`
-      - Or Full Battery: `python tools/verify_gate.py --full` (automatically executes Step 17 graphify_update).
+      - Or Full Battery: `py -3 tools/verify_gate.py --full` (automatically executes Step 17 graphify_update).
 
 - [ ] 5. Concise Final Evidence
       Report exact execution metrics in the final summary:
@@ -225,5 +225,5 @@ Because Git does not track `.git/hooks/` across remotes, developers or CI enviro
    ```
 4. **Run Unified Verification Gate:**
    ```bash
-   python tools/verify_gate.py --fast
+   py -3 tools/verify_gate.py --fast
    ```
