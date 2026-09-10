@@ -1,16 +1,16 @@
 # Graph Report - PowerFootball-2D-main  (2026-09-10)
 
 ## Corpus Check
-- 156 files · ~331,291 words
+- 156 files · ~337,342 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1597 nodes · 1842 edges · 136 communities (98 shown, 29 thin omitted)
+- 1614 nodes · 1875 edges · 136 communities (98 shown, 29 thin omitted)
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 101 edges (avg confidence: 0.92)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `163c6c85`
+- Built from commit: `834a272c`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -504,8 +504,8 @@ Cohesion: 0.11
 Nodes (17): 1. Purpose and Non-Responsibilities, 2. Public API, Signals, Events, Contracts & Dependencies, 3. State Model & Architectural Invariants, 4. Change-Impact Checklist, 5. Known Risks & Errata Search Terms, 6. Sources Examined, Anti-Double-Touch Law, Architecture Hub: SetPieceCoordinator (+9 more)
 
 ### Community 111 - "Player AI & Spatial Navigation Errata"
-Cohesion: 0.12
-Nodes (17): arrive-radius-strands-correct-chase-decision, bresenham-threat-shadowed-real-lane-check-match-wide, chase-radius-crushes-legal-loose-ball-chase-score, cpu-players-never-gated-into-tackle-state, defender-marking-was-uncoordinated-and-boundary-clamp-already-existed, Discovered Rules, ERR-20260830-01, Error Logs (+9 more)
+Cohesion: 0.11
+Nodes (19): arrive-radius-strands-correct-chase-decision, bresenham-threat-shadowed-real-lane-check-match-wide, chase-radius-crushes-legal-loose-ball-chase-score, cpu-players-never-gated-into-tackle-state, defender-marking-was-uncoordinated-and-boundary-clamp-already-existed, Discovered Rules, ERR-20260830-01, Error Logs (+11 more)
 
 ### Community 112 - "benchmark_math.py"
 Cohesion: 0.47
@@ -516,8 +516,8 @@ Cohesion: 0.14
 Nodes (13): Cross-System Gameplay Feature Workflow, Invocation in Antigravity, Step 10: Final Verification Report, Step 1: Restate Requested Outcome and Non-Goals, Step 2: Classify Change-Impact Tier, Step 3: Graphify Impact Query Before Reading Broad Source Files, Step 4: Reading Only Relevant Module READMEs, Hub Maps, and Targeted Files, Step 5: Short Written Implementation Plan (+5 more)
 
 ### Community 114 - "AnalyticalSimulationHarness"
-Cohesion: 0.23
-Nodes (9): range, AnalyticalSimulationHarness, find_godot_binary(), main(), print_summary_table(), Any, Deterministic analytical 60Hz match physics & AI decision simulator. Simulates…, run_analytical_trials() (+1 more)
+Cohesion: 0.13
+Nodes (13): range, AnalyticalSimulationHarness, find_godot_binary(), main(), print_summary_table(), Any, Deterministic analytical 60Hz match physics & AI decision simulator. Simulates…, Team in possession, or -1 while the ball is genuinely loose. (+5 more)
 
 ### Community 115 - "verify_gate.py"
 Cohesion: 0.60
@@ -540,8 +540,8 @@ Cohesion: 0.25
 Nodes (7): Discovered Rules, manager-risk-profile-is-derived-not-authored, match-stage-boundaries-are-fractions-not-literal-seconds, Match State, Pacing & Urgency Errata, possession-hold-timer-has-two-non-interchangeable-variants, stage-3-fraction-is-83-percent-not-90-and-urgency-doesnt-self-saturate, Table of Contents
 
 ### Community 120 - "Physics, Ball Dynamics & Kinematics Errata"
-Cohesion: 0.22
-Nodes (8): bicycle-kick-dominates-ambiguous-facing, Discovered Rules, dribble-claim-ignores-existing-possessor-dual-driver-jitter, dribble-magnet-forward-overshoot-oscillation, eval-simulation-harness-was-decoupled-from-gdscript-tuning, Physics, Ball Dynamics & Kinematics Errata, Table of Contents, verify-external-agent-prompts-against-source-before-executing
+Cohesion: 0.20
+Nodes (9): bicycle-kick-dominates-ambiguous-facing, Discovered Rules, dribble-claim-ignores-existing-possessor-dual-driver-jitter, dribble-magnet-forward-overshoot-oscillation, eval-harness-index-phase-and-claim-gate-were-structural-artifacts, eval-simulation-harness-was-decoupled-from-gdscript-tuning, Physics, Ball Dynamics & Kinematics Errata, Table of Contents (+1 more)
 
 ### Community 121 - "Complete Item Migration Manifest"
 Cohesion: 0.25
@@ -576,19 +576,19 @@ Cohesion: 0.83
 Nodes (3): find_godot_binary(), main(), run_godot_verification()
 
 ## Knowledge Gaps
-- **748 isolated node(s):** `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `Career Mode (Layer 4) Invariants` (+743 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1162 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **751 isolated node(s):** `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `Career Mode (Layer 4) Invariants` (+746 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1168 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **29 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Agents` connect `Agents` to `Api Surface`, `Course Implementation Specification`, `Anti Patterns`, `Agents Errata`, `Powerfootball Master Vision`, `mcp_server.py`, `Vector2`, `Core Invariants`, `fuzz_formations.py`, `lint_invariants.py`, `Math Solvers`, `Readme`, `semantic_search.py`, `Graphify Lifecycle & Agent Navigation Protocol — PowerFootball-2D`, `DeterministicMatchSimulator`, `generate_symbols.py`, `benchmark_math.py`, `AnalyticalSimulationHarness`, `README.md`?**
-  _High betweenness centrality (0.174) - this node is a cross-community bridge._
+  _High betweenness centrality (0.125) - this node is a cross-community bridge._
 - **Why does `Api Surface` connect `Api Surface` to `Readme`, `Agents`?**
-  _High betweenness centrality (0.100) - this node is a cross-community bridge._
+  _High betweenness centrality (0.078) - this node is a cross-community bridge._
 - **Why does `Agents Errata` connect `Agents Errata` to `Course Implementation Specification`, `Powerfootball Master Vision`, `Core Invariants`, `gdcheck.py`, `Readme`, `Agents`, `verify_gate.py`, `Set Pieces & Restarts Errata`, `Match State, Pacing & Urgency Errata`, `Physics, Ball Dynamics & Kinematics Errata`, `UI, HUD & Signal Bus Errata`, `README.md`, `telemetry-and-stats.md`?**
-  _High betweenness centrality (0.097) - this node is a cross-community bridge._
+  _High betweenness centrality (0.078) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `Api Surface` (e.g. with `Agents` and `dump_api.py`) actually correct?**
   _`Api Surface` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 5 inferred relationships involving `Course Implementation Specification` (e.g. with `Agents` and `Core Invariants`) actually correct?**
@@ -596,4 +596,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Are the 11 inferred relationships involving `Agents Errata` (e.g. with `Agents` and `Core Invariants`) actually correct?**
   _`Agents Errata` has 11 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `python` to the rest of the system?**
-  _748 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _751 weakly-connected nodes found - possible documentation gaps or missing edges._

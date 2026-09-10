@@ -1,16 +1,16 @@
 # Graph Report - PowerFootball-2D-main  (2026-09-10)
 
 ## Corpus Check
-- 156 files · ~337,342 words
+- 163 files · ~341,580 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 1614 nodes · 1875 edges · 136 communities (98 shown, 29 thin omitted)
+- 1652 nodes · 1924 edges · 143 communities (102 shown, 31 thin omitted)
 - Extraction: 95% EXTRACTED · 5% INFERRED · 0% AMBIGUOUS · INFERRED: 101 edges (avg confidence: 0.92)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `834a272c`
+- Built from commit: `25aa6bce`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -66,11 +66,11 @@
 - graphify
 - 2. Public API, Signals, Events, Contracts & Dependencies
 - lint_shadowing.py
-- graphify
+- football-expert
 - eval-sim
 - formation-audit
 - perf-benchmark
-- graphify
+- football-expert
 - Scratchpad
 - eval-sim
 - formation-audit
@@ -133,13 +133,19 @@
 - README.md
 - telemetry-and-stats.md
 - GDScript 2.0 & Godot 4.7 Strict Architecture Rules
+- football_mcp.py
 - Workflow: cross-system-feature
+- football-expert
 - Workflow: bug-investigation
 - Workflow: data-database
 - Workflow: feature-implementation
 - Workflow: performance-work
 - Workflow: session-bootstrap
 - Workflow: task-intake-routing
+- Football Domain Intelligence (`football-expert` MCP server)
+- Football Domain Intelligence (`football-expert` MCP server)
+- Ponytail Decision Ladder (Reuse & Complexity Gating)
+- Ponytail Decision Ladder (Reuse & Complexity Gating)
 - Errata Session History & Handoff Logs
 - godot_verify.py
 
@@ -181,7 +187,7 @@
 - **Api Surface Concepts** — docs_api_surface_powerfootball2d___public_api_surface_map, docs_api_surface_table_of_contents, docs_api_surface_layer_1___physics___kinematics, docs_api_surface_entities_ball_ballstategd, docs_api_surface_entities_ball_ballstatefactorygd [INFERRED 0.85]
 - **Core Invariants Concepts** — docs_core_invariants_coreinvariantsmd___powerfootball2d_archi, docs_core_invariants_1_engine_lock, docs_core_invariants_prohibited___strictly_forbidden_apis, docs_core_invariants_strict_typing_invariant, docs_core_invariants_scene_initialization___serialization [INFERRED 0.85]
 
-## Communities (136 total, 29 thin omitted)
+## Communities (143 total, 31 thin omitted)
 
 ### Community 0 - "Api Surface"
 Cohesion: 0.01
@@ -387,9 +393,9 @@ Nodes (18): 1. Purpose and Non-Responsibilities, 2. Public API, Signals, Events,
 Cohesion: 0.48
 Nodes (6): audit_file_shadowing(), find_gd_files(), get_autoload_names(), main(), parse_function_params(), Parses comma-separated parameter declarations into (param_name,…
 
-### Community 51 - "graphify"
-Cohesion: 0.38
-Nodes (6): PYTHONIOENCODING, PYTHONUNBUFFERED, C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe, python, graphify, powerfootball
+### Community 51 - "football-expert"
+Cohesion: 0.43
+Nodes (7): PYTHONIOENCODING, PYTHONUNBUFFERED, C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe, py, football-expert, graphify, powerfootball
 
 ### Community 52 - "eval-sim"
 Cohesion: 0.40
@@ -403,9 +409,9 @@ Nodes (5): formation-audit, Evaluated Spacing Metrics, Execution Command, Format
 Cohesion: 0.40
 Nodes (5): perf-benchmark, 1 Mathematical Solvers MicroBenchmark, 2 Spatial Hash Grid Latency Benchmark, Execution Commands, Performance Benchmark & Solvers Profiling Skill
 
-### Community 55 - "graphify"
-Cohesion: 0.38
-Nodes (6): PYTHONIOENCODING, PYTHONUNBUFFERED, C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe, python, graphify, powerfootball
+### Community 55 - "football-expert"
+Cohesion: 0.43
+Nodes (7): PYTHONIOENCODING, PYTHONUNBUFFERED, C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe, py, football-expert, graphify, powerfootball
 
 ### Community 56 - "Scratchpad"
 Cohesion: 0.40
@@ -567,6 +573,22 @@ Nodes (4): crowding-space-creation-diagnostics, Discovered Rules, Table of Conte
 Cohesion: 0.33
 Nodes (5): 1. Strict Typing Discipline, 2. Forbidden Pythonisms, 3. GDScript 2.0 Language Invariants, 4. Hot-Path Performance Rules, GDScript 2.0 & Godot 4.7 Strict Architecture Rules
 
+### Community 127 - "football_mcp.py"
+Cohesion: 0.25
+Nodes (14): Connection, tool, audit_action_transition(), audit_tactical_compactness(), _connect(), diagnose_tactical_deviation(), _list_column(), query_ifab_rule() (+6 more)
+
+### Community 129 - "football-expert"
+Cohesion: 0.40
+Nodes (4): PYTHONIOENCODING, PYTHONUNBUFFERED, py, football-expert
+
+### Community 136 - "Football Domain Intelligence (`football-expert` MCP server)"
+Cohesion: 0.50
+Nodes (3): Football Domain Intelligence (`football-expert` MCP server), Keeping it current, When to call it
+
+### Community 137 - "Football Domain Intelligence (`football-expert` MCP server)"
+Cohesion: 0.50
+Nodes (3): Football Domain Intelligence (`football-expert` MCP server), Keeping it current, When to call it
+
 ### Community 140 - "Errata Session History & Handoff Logs"
 Cohesion: 0.33
 Nodes (6): Architectural & Gotcha Findings from this Session, Errata Session History & Handoff Logs, Next Steps Handoff, Recent Session State Archive, Session State: 2026-09-02 (Manager Career Mode, Phase 4), Table of Contents
@@ -576,24 +598,24 @@ Cohesion: 0.83
 Nodes (3): find_godot_binary(), main(), run_godot_verification()
 
 ## Knowledge Gaps
-- **751 isolated node(s):** `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `Career Mode (Layer 4) Invariants` (+746 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1168 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **29 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **758 isolated node(s):** `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `When to call it`, `Keeping it current`, `1. Strict Typing Discipline`, `2. Forbidden Pythonisms` (+753 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1188 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **31 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `Agents` connect `Agents` to `Api Surface`, `Course Implementation Specification`, `Anti Patterns`, `Agents Errata`, `Powerfootball Master Vision`, `mcp_server.py`, `Vector2`, `Core Invariants`, `fuzz_formations.py`, `lint_invariants.py`, `Math Solvers`, `Readme`, `semantic_search.py`, `Graphify Lifecycle & Agent Navigation Protocol — PowerFootball-2D`, `DeterministicMatchSimulator`, `generate_symbols.py`, `benchmark_math.py`, `AnalyticalSimulationHarness`, `README.md`?**
-  _High betweenness centrality (0.125) - this node is a cross-community bridge._
-- **Why does `Api Surface` connect `Api Surface` to `Readme`, `Agents`?**
-  _High betweenness centrality (0.078) - this node is a cross-community bridge._
+  _High betweenness centrality (0.155) - this node is a cross-community bridge._
 - **Why does `Agents Errata` connect `Agents Errata` to `Course Implementation Specification`, `Powerfootball Master Vision`, `Core Invariants`, `gdcheck.py`, `Readme`, `Agents`, `verify_gate.py`, `Set Pieces & Restarts Errata`, `Match State, Pacing & Urgency Errata`, `Physics, Ball Dynamics & Kinematics Errata`, `UI, HUD & Signal Bus Errata`, `README.md`, `telemetry-and-stats.md`?**
-  _High betweenness centrality (0.078) - this node is a cross-community bridge._
+  _High betweenness centrality (0.084) - this node is a cross-community bridge._
+- **Why does `Api Surface` connect `Api Surface` to `Readme`, `Agents`?**
+  _High betweenness centrality (0.082) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `Api Surface` (e.g. with `Agents` and `dump_api.py`) actually correct?**
   _`Api Surface` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 5 inferred relationships involving `Course Implementation Specification` (e.g. with `Agents` and `Core Invariants`) actually correct?**
   _`Course Implementation Specification` has 5 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 11 inferred relationships involving `Agents Errata` (e.g. with `Agents` and `Core Invariants`) actually correct?**
   _`Agents Errata` has 11 INFERRED edges - model-reasoned connections that need verification._
-- **What connects `python`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `python` to the rest of the system?**
-  _751 weakly-connected nodes found - possible documentation gaps or missing edges._
+- **What connects `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `When to call it`, `Keeping it current` to the rest of the system?**
+  _758 weakly-connected nodes found - possible documentation gaps or missing edges._

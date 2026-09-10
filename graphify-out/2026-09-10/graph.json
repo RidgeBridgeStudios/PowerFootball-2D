@@ -149,7 +149,7 @@
       "file_type": "code",
       "norm_label": "analyticalsimulationharness",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L86"
+      "source_location": "L210"
     },
     {
       "id": "tools_verify_gate_checkresult",
@@ -624,7 +624,31 @@
       "file_type": "code",
       "norm_label": "._check_nan_inf()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L187"
+      "source_location": "L335"
+    },
+    {
+      "id": "tools_eval_simulation_analyticalsimulationharness_count_bypassed",
+      "label": "._count_bypassed()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "code",
+      "norm_label": "._count_bypassed()",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L953"
+    },
+    {
+      "id": "tools_eval_simulation_analyticalsimulationharness_has_clear_sight",
+      "label": "._has_clear_sight()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "code",
+      "norm_label": "._has_clear_sight()",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L858"
     },
     {
       "id": "tools_eval_simulation_analyticalsimulationharness_init",
@@ -636,7 +660,67 @@
       "file_type": "code",
       "norm_label": ".__init__()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L101"
+      "source_location": "L225"
+    },
+    {
+      "id": "tools_eval_simulation_analyticalsimulationharness_lane_min_distance",
+      "label": "._lane_min_distance()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "code",
+      "norm_label": "._lane_min_distance()",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L875"
+    },
+    {
+      "id": "tools_eval_simulation_analyticalsimulationharness_offside_line_axis",
+      "label": "._offside_line_axis()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "code",
+      "norm_label": "._offside_line_axis()",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L364"
+    },
+    {
+      "id": "tools_eval_simulation_analyticalsimulationharness_pass_candidate_score",
+      "label": "._pass_candidate_score()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "code",
+      "norm_label": "._pass_candidate_score()",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L903"
+    },
+    {
+      "id": "tools_eval_simulation_analyticalsimulationharness_possessing_team",
+      "label": "._possessing_team()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "code",
+      "norm_label": "._possessing_team()",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L342"
+    },
+    {
+      "id": "tools_eval_simulation_analyticalsimulationharness_resolve_chasers",
+      "label": "._resolve_chasers()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "code",
+      "norm_label": "._resolve_chasers()",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L348"
     },
     {
       "id": "tools_eval_simulation_analyticalsimulationharness_resolve_pass",
@@ -648,7 +732,7 @@
       "file_type": "code",
       "norm_label": "._resolve_pass()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L441"
+      "source_location": "L978"
     },
     {
       "id": "tools_eval_simulation_analyticalsimulationharness_resolve_shot",
@@ -660,7 +744,19 @@
       "file_type": "code",
       "norm_label": "._resolve_shot()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L376"
+      "source_location": "L685"
+    },
+    {
+      "id": "tools_eval_simulation_analyticalsimulationharness_role_target",
+      "label": "._role_target()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "code",
+      "norm_label": "._role_target()",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L377"
     },
     {
       "id": "tools_eval_simulation_analyticalsimulationharness_run",
@@ -672,7 +768,19 @@
       "file_type": "code",
       "norm_label": ".run()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L549"
+      "source_location": "L1086"
+    },
+    {
+      "id": "tools_eval_simulation_analyticalsimulationharness_solve_pass_speed",
+      "label": "._solve_pass_speed()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "code",
+      "norm_label": "._solve_pass_speed()",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L973"
     },
     {
       "id": "tools_eval_simulation_analyticalsimulationharness_step",
@@ -684,7 +792,19 @@
       "file_type": "code",
       "norm_label": ".step()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L193"
+      "source_location": "L475"
+    },
+    {
+      "id": "tools_eval_simulation_analyticalsimulationharness_update_carry",
+      "label": "._update_carry()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "code",
+      "norm_label": "._update_carry()",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L747"
     },
     {
       "id": "tools_eval_simulation_find_godot_binary",
@@ -708,7 +828,7 @@
       "file_type": "code",
       "norm_label": "main()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L733"
+      "source_location": "L1270"
     },
     {
       "id": "tools_eval_simulation_print_summary_table",
@@ -720,7 +840,7 @@
       "file_type": "code",
       "norm_label": "print_summary_table()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L705"
+      "source_location": "L1242"
     },
     {
       "id": "tools_eval_simulation_run_analytical_trials",
@@ -732,7 +852,7 @@
       "file_type": "code",
       "norm_label": "run_analytical_trials()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L621"
+      "source_location": "L1158"
     },
     {
       "id": "tools_eval_simulation_run_evaluation",
@@ -744,7 +864,7 @@
       "file_type": "code",
       "norm_label": "run_evaluation()",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L671"
+      "source_location": "L1208"
     },
     {
       "id": "tools_verify_gate_checkresult_init",
@@ -912,7 +1032,7 @@
       "file_type": "code",
       "norm_label": "clampf()",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L64"
+      "source_location": "L91"
     },
     {
       "id": "tools_fuzz_formations_get_dynamic_anchor_position",
@@ -924,7 +1044,7 @@
       "file_type": "code",
       "norm_label": "get_dynamic_anchor_position()",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L72"
+      "source_location": "L99"
     },
     {
       "id": "tools_fuzz_formations_lerpf",
@@ -936,7 +1056,7 @@
       "file_type": "code",
       "norm_label": "lerpf()",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L68"
+      "source_location": "L95"
     },
     {
       "id": "tools_fuzz_formations_main",
@@ -948,7 +1068,7 @@
       "file_type": "code",
       "norm_label": "main()",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L216"
+      "source_location": "L248"
     },
     {
       "id": "tools_fuzz_formations_run_formation_fuzzer",
@@ -960,7 +1080,7 @@
       "file_type": "code",
       "norm_label": "run_formation_fuzzer()",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L114"
+      "source_location": "L146"
     },
     {
       "id": "tools_lint_invariants_check_brain_mutations",
@@ -4378,7 +4498,7 @@
       "node_kind": "heading",
       "norm_label": "arrive-radius-strands-correct-chase-decision",
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L382"
+      "source_location": "L384"
     },
     {
       "id": "docs_agent_errata_player_ai_bresenham_threat_shadowed_real_lane_check_match_wide",
@@ -4390,7 +4510,7 @@
       "node_kind": "heading",
       "norm_label": "bresenham-threat-shadowed-real-lane-check-match-wide",
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L195"
+      "source_location": "L197"
     },
     {
       "id": "docs_agent_errata_player_ai_chase_radius_crushes_legal_loose_ball_chase_score",
@@ -4402,7 +4522,7 @@
       "node_kind": "heading",
       "norm_label": "chase-radius-crushes-legal-loose-ball-chase-score",
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L320"
+      "source_location": "L322"
     },
     {
       "id": "docs_agent_errata_player_ai_cpu_players_never_gated_into_tackle_state",
@@ -4414,7 +4534,7 @@
       "node_kind": "heading",
       "norm_label": "cpu-players-never-gated-into-tackle-state",
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L708"
+      "source_location": "L710"
     },
     {
       "id": "docs_agent_errata_player_ai_defender_marking_was_uncoordinated_and_boundary_clamp_already_existed",
@@ -4426,7 +4546,7 @@
       "node_kind": "heading",
       "norm_label": "defender-marking-was-uncoordinated-and-boundary-clamp-already-existed",
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L615"
+      "source_location": "L617"
     },
     {
       "id": "docs_agent_errata_player_ai_discovered_rules",
@@ -4450,7 +4570,7 @@
       "node_kind": "heading",
       "norm_label": "err-20260830-01",
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L794"
+      "source_location": "L796"
     },
     {
       "id": "docs_agent_errata_player_ai_error_logs",
@@ -4462,7 +4582,7 @@
       "node_kind": "heading",
       "norm_label": "error logs",
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L25"
+      "source_location": "L27"
     },
     {
       "id": "docs_agent_errata_player_ai_find_space_outscores_chase_on_loose_ball",
@@ -4474,7 +4594,7 @@
       "node_kind": "heading",
       "norm_label": "find-space-outscores-chase-on-loose-ball",
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L442"
+      "source_location": "L444"
     },
     {
       "id": "docs_agent_errata_player_ai_loose_ball_anchor_clamp_deadlock",
@@ -4486,7 +4606,7 @@
       "node_kind": "heading",
       "norm_label": "loose-ball-anchor-clamp-deadlock",
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L65"
+      "source_location": "L67"
     },
     {
       "id": "docs_agent_errata_player_ai_loose_ball_max_dist_cap_also_needed_a_bypass",
@@ -4498,7 +4618,7 @@
       "node_kind": "heading",
       "norm_label": "loose-ball-max-dist-cap-also-needed-a-bypass",
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L261"
+      "source_location": "L263"
     },
     {
       "id": "docs_agent_errata_player_ai_maintain_formation_floor_freezes_ball_carrier",
@@ -4510,7 +4630,19 @@
       "node_kind": "heading",
       "norm_label": "maintain-formation-floor-freezes-ball-carrier",
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L129"
+      "source_location": "L131"
+    },
+    {
+      "id": "docs_agent_errata_player_ai_pass_strike_speed_was_flat_while_pass_selection_was_distance_scored",
+      "label": "pass-strike-speed-was-flat-while-pass-selection-was-distance-scored",
+      "_origin": "ast",
+      "community": 111,
+      "community_name": "Player AI & Spatial Navigation Errata",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "pass-strike-speed-was-flat-while-pass-selection-was-distance-scored",
+      "source_file": "docs/agent-errata/player-ai.md",
+      "source_location": "L825"
     },
     {
       "id": "docs_agent_errata_player_ai_player_ai_spatial_navigation_errata",
@@ -4534,7 +4666,7 @@
       "node_kind": "heading",
       "norm_label": "possessor-can-chase-own-ball",
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L554"
+      "source_location": "L556"
     },
     {
       "id": "docs_agent_errata_player_ai_press_trigger_needs_time_backstop",
@@ -4546,7 +4678,19 @@
       "node_kind": "heading",
       "norm_label": "press-trigger-needs-time-backstop",
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L30"
+      "source_location": "L32"
+    },
+    {
+      "id": "docs_agent_errata_player_ai_role_config_is_null_in_live_matches_so_role_space_alpha_is_what_runs",
+      "label": "role-config-is-null-in-live-matches-so-role-space-alpha-is-what-runs",
+      "_origin": "ast",
+      "community": 111,
+      "community_name": "Player AI & Spatial Navigation Errata",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "role-config-is-null-in-live-matches-so-role-space-alpha-is-what-runs",
+      "source_file": "docs/agent-errata/player-ai.md",
+      "source_location": "L866"
     },
     {
       "id": "docs_agent_errata_player_ai_sacchi_force_cancels_urgent_ball_actions",
@@ -4558,7 +4702,7 @@
       "node_kind": "heading",
       "norm_label": "sacchi-force-cancels-urgent-ball-actions",
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L493"
+      "source_location": "L495"
     },
     {
       "id": "docs_agent_errata_player_ai_table_of_contents",
@@ -4789,7 +4933,7 @@
       "source_location": ""
     },
     {
-      "id": "tools_eval_simulation_rationale_87",
+      "id": "tools_eval_simulation_rationale_211",
       "label": "Deterministic analytical 60Hz match physics & AI decision simulator. Simulates\u2026",
       "_origin": "ast",
       "community": 114,
@@ -4797,7 +4941,51 @@
       "file_type": "rationale",
       "norm_label": "deterministic analytical 60hz match physics & ai decision simulator. simulates...",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L87"
+      "source_location": "L211"
+    },
+    {
+      "id": "tools_eval_simulation_rationale_343",
+      "label": "Team in possession, or -1 while the ball is genuinely loose.",
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "rationale",
+      "norm_label": "team in possession, or -1 while the ball is genuinely loose.",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L343"
+    },
+    {
+      "id": "tools_eval_simulation_rationale_349",
+      "label": "One outfield chaser per team \u2014 mirrors PlayerBrain._should_chase_ball()'s\u2026",
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "rationale",
+      "norm_label": "one outfield chaser per team \u2014 mirrors playerbrain._should_chase_ball()'s...",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L349"
+    },
+    {
+      "id": "tools_eval_simulation_rationale_365",
+      "label": "Attack-axis coordinate of the OPPONENT's last outfield defender, i.e. the\u2026",
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "rationale",
+      "norm_label": "attack-axis coordinate of the opponent's last outfield defender, i.e. the...",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L365"
+    },
+    {
+      "id": "tools_eval_simulation_rationale_388",
+      "label": "Where this player wants to be, blended from the drifted formation anchor toward\u2026",
+      "_origin": "ast",
+      "community": 114,
+      "community_name": "AnalyticalSimulationHarness",
+      "file_type": "rationale",
+      "norm_label": "where this player wants to be, blended from the drifted formation anchor toward...",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L388"
     },
     {
       "id": "tools_verify_gate",
@@ -5465,7 +5653,7 @@
       "node_kind": "heading",
       "norm_label": "bicycle-kick-dominates-ambiguous-facing",
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L101"
+      "source_location": "L102"
     },
     {
       "id": "docs_agent_errata_physics_and_ball_discovered_rules",
@@ -5489,7 +5677,7 @@
       "node_kind": "heading",
       "norm_label": "dribble-claim-ignores-existing-possessor-dual-driver-jitter",
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L158"
+      "source_location": "L159"
     },
     {
       "id": "docs_agent_errata_physics_and_ball_dribble_magnet_forward_overshoot_oscillation",
@@ -5501,7 +5689,19 @@
       "node_kind": "heading",
       "norm_label": "dribble-magnet-forward-overshoot-oscillation",
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L20"
+      "source_location": "L21"
+    },
+    {
+      "id": "docs_agent_errata_physics_and_ball_eval_harness_index_phase_and_claim_gate_were_structural_artifacts",
+      "label": "eval-harness-index-phase-and-claim-gate-were-structural-artifacts",
+      "_origin": "ast",
+      "community": 120,
+      "community_name": "Physics, Ball Dynamics & Kinematics Errata",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "eval-harness-index-phase-and-claim-gate-were-structural-artifacts",
+      "source_file": "docs/agent-errata/physics-and-ball.md",
+      "source_location": "L384"
     },
     {
       "id": "docs_agent_errata_physics_and_ball_eval_simulation_harness_was_decoupled_from_gdscript_tuning",
@@ -5513,7 +5713,7 @@
       "node_kind": "heading",
       "norm_label": "eval-simulation-harness-was-decoupled-from-gdscript-tuning",
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L315"
+      "source_location": "L316"
     },
     {
       "id": "docs_agent_errata_physics_and_ball_physics_ball_dynamics_kinematics_errata",
@@ -5549,7 +5749,7 @@
       "node_kind": "heading",
       "norm_label": "verify-external-agent-prompts-against-source-before-executing",
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L248"
+      "source_location": "L249"
     },
     {
       "id": "docs_agent_errata_readme_agent_errata_lessons_learned_index",
@@ -22489,6 +22689,66 @@
       "weight": 1.0
     },
     {
+      "source": "tools_eval_simulation_analyticalsimulationharness_has_clear_sight",
+      "target": "tools_eval_simulation_analyticalsimulationharness_lane_min_distance",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L870",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness_pass_candidate_score",
+      "target": "tools_eval_simulation_analyticalsimulationharness_count_bypassed",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L938",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness_resolve_pass",
+      "target": "tools_eval_simulation_analyticalsimulationharness_count_bypassed",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L1030",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness_resolve_pass",
+      "target": "tools_eval_simulation_analyticalsimulationharness_solve_pass_speed",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L1034",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness_resolve_pass",
+      "target": "tools_eval_simulation_analyticalsimulationharness_pass_candidate_score",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L993",
+      "weight": 1.0
+    },
+    {
       "source": "tools_eval_simulation_analyticalsimulationharness_run",
       "target": "tools_eval_simulation_analyticalsimulationharness_step",
       "relation": "calls",
@@ -22497,7 +22757,55 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L551",
+      "source_location": "L1088",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness_step",
+      "target": "tools_eval_simulation_analyticalsimulationharness_possessing_team",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L495",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness_step",
+      "target": "tools_eval_simulation_analyticalsimulationharness_resolve_chasers",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L496",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness_step",
+      "target": "tools_eval_simulation_analyticalsimulationharness_offside_line_axis",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L497",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness_step",
+      "target": "tools_eval_simulation_analyticalsimulationharness_role_target",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L514",
       "weight": 1.0
     },
     {
@@ -22509,11 +22817,47 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L271",
+      "source_location": "L565",
       "weight": 1.0
     },
     {
       "source": "tools_eval_simulation_analyticalsimulationharness_step",
+      "target": "tools_eval_simulation_analyticalsimulationharness_update_carry",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L610",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness_update_carry",
+      "target": "tools_eval_simulation_analyticalsimulationharness_pass_candidate_score",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L810",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness_update_carry",
+      "target": "tools_eval_simulation_analyticalsimulationharness_has_clear_sight",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L828",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness_update_carry",
       "target": "tools_eval_simulation_analyticalsimulationharness_resolve_shot",
       "relation": "calls",
       "_origin": "ast",
@@ -22521,11 +22865,11 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L330",
+      "source_location": "L841",
       "weight": 1.0
     },
     {
-      "source": "tools_eval_simulation_analyticalsimulationharness_step",
+      "source": "tools_eval_simulation_analyticalsimulationharness_update_carry",
       "target": "tools_eval_simulation_analyticalsimulationharness_resolve_pass",
       "relation": "calls",
       "_origin": "ast",
@@ -22533,7 +22877,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L332",
+      "source_location": "L849",
       "weight": 1.0
     },
     {
@@ -22545,7 +22889,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L740",
+      "source_location": "L1277",
       "weight": 1.0
     },
     {
@@ -22557,7 +22901,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L745",
+      "source_location": "L1282",
       "weight": 1.0
     },
     {
@@ -22569,7 +22913,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L622",
+      "source_location": "L1159",
       "weight": 1.0
     },
     {
@@ -22581,7 +22925,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L672",
+      "source_location": "L1209",
       "weight": 1.0
     },
     {
@@ -22593,7 +22937,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L697",
+      "source_location": "L1234",
       "weight": 1.0
     },
     {
@@ -22701,7 +23045,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L87",
+      "source_location": "L114",
       "weight": 1.0
     },
     {
@@ -22713,7 +23057,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L95",
+      "source_location": "L122",
       "weight": 1.0
     },
     {
@@ -22725,7 +23069,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L222",
+      "source_location": "L254",
       "weight": 1.0
     },
     {
@@ -22737,7 +23081,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L160",
+      "source_location": "L192",
       "weight": 1.0
     },
     {
@@ -25269,7 +25613,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L549",
+      "source_location": "L1086",
       "weight": 1.0
     },
     {
@@ -25281,7 +25625,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L705",
+      "source_location": "L1242",
       "weight": 1.0
     },
     {
@@ -25293,7 +25637,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L621",
+      "source_location": "L1158",
       "weight": 1.0
     },
     {
@@ -25305,7 +25649,7 @@
       "confidence_score": 1.0,
       "context": "generic_arg",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L671",
+      "source_location": "L1208",
       "weight": 1.0
     },
     {
@@ -25753,6 +26097,54 @@
       "weight": 1.0
     },
     {
+      "source": "tools_eval_simulation_analyticalsimulationharness_count_bypassed",
+      "target": "range",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "parameter_type",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L953",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness_has_clear_sight",
+      "target": "range",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "parameter_type",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L858",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness_lane_min_distance",
+      "target": "range",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "parameter_type",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L875",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness_pass_candidate_score",
+      "target": "range",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "parameter_type",
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L903",
+      "weight": 1.0
+    },
+    {
       "source": "tools_eval_simulation_analyticalsimulationharness_resolve_pass",
       "target": "range",
       "relation": "references",
@@ -25761,7 +26153,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L441",
+      "source_location": "L978",
       "weight": 1.0
     },
     {
@@ -25773,7 +26165,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L72",
+      "source_location": "L99",
       "weight": 1.0
     },
     {
@@ -25785,7 +26177,7 @@
       "confidence_score": 1.0,
       "context": "parameter_type",
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L72",
+      "source_location": "L99",
       "weight": 1.0
     },
     {
@@ -26751,7 +27143,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L101",
+      "source_location": "L102",
       "weight": 1.0
     },
     {
@@ -26762,7 +27154,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L158",
+      "source_location": "L159",
       "weight": 1.0
     },
     {
@@ -26773,7 +27165,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L20",
+      "source_location": "L21",
       "weight": 1.0
     },
     {
@@ -26784,7 +27176,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L248",
+      "source_location": "L249",
       "weight": 1.0
     },
     {
@@ -26795,7 +27187,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/physics-and-ball.md",
-      "source_location": "L315",
+      "source_location": "L316",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_agent_errata_physics_and_ball_physics_ball_dynamics_kinematics_errata",
+      "target": "docs_agent_errata_physics_and_ball_eval_harness_index_phase_and_claim_gate_were_structural_artifacts",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/agent-errata/physics-and-ball.md",
+      "source_location": "L384",
       "weight": 1.0
     },
     {
@@ -26839,7 +27242,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L129",
+      "source_location": "L131",
       "weight": 1.0
     },
     {
@@ -26850,7 +27253,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L195",
+      "source_location": "L197",
       "weight": 1.0
     },
     {
@@ -26861,7 +27264,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L261",
+      "source_location": "L263",
       "weight": 1.0
     },
     {
@@ -26872,7 +27275,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L30",
+      "source_location": "L32",
       "weight": 1.0
     },
     {
@@ -26883,7 +27286,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L320",
+      "source_location": "L322",
       "weight": 1.0
     },
     {
@@ -26894,7 +27297,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L382",
+      "source_location": "L384",
       "weight": 1.0
     },
     {
@@ -26905,7 +27308,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L442",
+      "source_location": "L444",
       "weight": 1.0
     },
     {
@@ -26916,7 +27319,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L493",
+      "source_location": "L495",
       "weight": 1.0
     },
     {
@@ -26927,7 +27330,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L554",
+      "source_location": "L556",
       "weight": 1.0
     },
     {
@@ -26938,7 +27341,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L615",
+      "source_location": "L617",
       "weight": 1.0
     },
     {
@@ -26949,7 +27352,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L65",
+      "source_location": "L67",
       "weight": 1.0
     },
     {
@@ -26960,7 +27363,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L708",
+      "source_location": "L710",
       "weight": 1.0
     },
     {
@@ -26971,7 +27374,29 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L794",
+      "source_location": "L796",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_agent_errata_player_ai_player_ai_spatial_navigation_errata",
+      "target": "docs_agent_errata_player_ai_pass_strike_speed_was_flat_while_pass_selection_was_distance_scored",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/agent-errata/player-ai.md",
+      "source_location": "L825",
+      "weight": 1.0
+    },
+    {
+      "source": "docs_agent_errata_player_ai_player_ai_spatial_navigation_errata",
+      "target": "docs_agent_errata_player_ai_role_config_is_null_in_live_matches_so_role_space_alpha_is_what_runs",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "docs/agent-errata/player-ai.md",
+      "source_location": "L866",
       "weight": 1.0
     },
     {
@@ -26993,7 +27418,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "docs/agent-errata/player-ai.md",
-      "source_location": "L25",
+      "source_location": "L27",
       "weight": 1.0
     },
     {
@@ -29528,24 +29953,13 @@
     },
     {
       "source": "tools_eval_simulation",
-      "target": "tools_eval_simulation_find_godot_binary",
-      "relation": "contains",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L43",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation",
       "target": "tools_eval_simulation_run_analytical_trials",
       "relation": "contains",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L621",
+      "source_location": "L1158",
       "weight": 1.0
     },
     {
@@ -29556,7 +29970,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L671",
+      "source_location": "L1208",
       "weight": 1.0
     },
     {
@@ -29567,7 +29981,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L705",
+      "source_location": "L1242",
       "weight": 1.0
     },
     {
@@ -29578,7 +29992,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L733",
+      "source_location": "L1270",
       "weight": 1.0
     },
     {
@@ -29589,7 +30003,18 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L86",
+      "source_location": "L210",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation",
+      "target": "tools_eval_simulation_find_godot_binary",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L43",
       "weight": 1.0
     },
     {
@@ -29688,7 +30113,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L114",
+      "source_location": "L146",
       "weight": 1.0
     },
     {
@@ -29699,7 +30124,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L216",
+      "source_location": "L248",
       "weight": 1.0
     },
     {
@@ -29732,7 +30157,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L64",
+      "source_location": "L91",
       "weight": 1.0
     },
     {
@@ -29743,7 +30168,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L68",
+      "source_location": "L95",
       "weight": 1.0
     },
     {
@@ -29754,7 +30179,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/fuzz_formations.py",
-      "source_location": "L72",
+      "source_location": "L99",
       "weight": 1.0
     },
     {
@@ -31662,13 +32087,24 @@
     },
     {
       "source": "tools_eval_simulation_analyticalsimulationharness",
+      "target": "tools_eval_simulation_analyticalsimulationharness_run",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L1086",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness",
       "target": "tools_eval_simulation_analyticalsimulationharness_init",
       "relation": "method",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L101",
+      "source_location": "L225",
       "weight": 1.0
     },
     {
@@ -31679,7 +32115,51 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L187",
+      "source_location": "L335",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness",
+      "target": "tools_eval_simulation_analyticalsimulationharness_possessing_team",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L342",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness",
+      "target": "tools_eval_simulation_analyticalsimulationharness_resolve_chasers",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L348",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness",
+      "target": "tools_eval_simulation_analyticalsimulationharness_offside_line_axis",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L364",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness",
+      "target": "tools_eval_simulation_analyticalsimulationharness_role_target",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L377",
       "weight": 1.0
     },
     {
@@ -31690,7 +32170,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L193",
+      "source_location": "L475",
       "weight": 1.0
     },
     {
@@ -31701,7 +32181,73 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L376",
+      "source_location": "L685",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness",
+      "target": "tools_eval_simulation_analyticalsimulationharness_update_carry",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L747",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness",
+      "target": "tools_eval_simulation_analyticalsimulationharness_has_clear_sight",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L858",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness",
+      "target": "tools_eval_simulation_analyticalsimulationharness_lane_min_distance",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L875",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness",
+      "target": "tools_eval_simulation_analyticalsimulationharness_pass_candidate_score",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L903",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness",
+      "target": "tools_eval_simulation_analyticalsimulationharness_count_bypassed",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L953",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_analyticalsimulationharness",
+      "target": "tools_eval_simulation_analyticalsimulationharness_solve_pass_speed",
+      "relation": "method",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L973",
       "weight": 1.0
     },
     {
@@ -31712,18 +32258,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L441",
-      "weight": 1.0
-    },
-    {
-      "source": "tools_eval_simulation_analyticalsimulationharness",
-      "target": "tools_eval_simulation_analyticalsimulationharness_run",
-      "relation": "method",
-      "_origin": "ast",
-      "confidence": "EXTRACTED",
-      "confidence_score": 1.0,
-      "source_file": "tools/eval_simulation.py",
-      "source_location": "L549",
+      "source_location": "L978",
       "weight": 1.0
     },
     {
@@ -32178,14 +32713,58 @@
       "weight": 1.0
     },
     {
-      "source": "tools_eval_simulation_rationale_87",
+      "source": "tools_eval_simulation_rationale_211",
       "target": "tools_eval_simulation_analyticalsimulationharness",
       "relation": "rationale_for",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "tools/eval_simulation.py",
-      "source_location": "L87",
+      "source_location": "L211",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_rationale_343",
+      "target": "tools_eval_simulation_analyticalsimulationharness_possessing_team",
+      "relation": "rationale_for",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L343",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_rationale_349",
+      "target": "tools_eval_simulation_analyticalsimulationharness_resolve_chasers",
+      "relation": "rationale_for",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L349",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_rationale_365",
+      "target": "tools_eval_simulation_analyticalsimulationharness_offside_line_axis",
+      "relation": "rationale_for",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L365",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_eval_simulation_rationale_388",
+      "target": "tools_eval_simulation_analyticalsimulationharness_role_target",
+      "relation": "rationale_for",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/eval_simulation.py",
+      "source_location": "L388",
       "weight": 1.0
     },
     {
@@ -42784,5 +43363,5 @@
       "source_file": "docs/CORE_INVARIANTS.md"
     }
   ],
-  "built_at_commit": "163c6c85c988d7ebf4d5553d8ad5b9db5a350389"
+  "built_at_commit": "834a272cebd9a24408053bb74e76bcf89fc0f630"
 }

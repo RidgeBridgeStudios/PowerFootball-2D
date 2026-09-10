@@ -1023,6 +1023,90 @@
       "source_location": "L129"
     },
     {
+      "id": "tools_football_mcp_audit_action_transition",
+      "label": "audit_action_transition()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 127,
+      "community_name": "football_mcp.py",
+      "file_type": "code",
+      "norm_label": "audit_action_transition()",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L165"
+    },
+    {
+      "id": "tools_football_mcp_audit_tactical_compactness",
+      "label": "audit_tactical_compactness()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 127,
+      "community_name": "football_mcp.py",
+      "file_type": "code",
+      "norm_label": "audit_tactical_compactness()",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L99"
+    },
+    {
+      "id": "tools_football_mcp_connect",
+      "label": "_connect()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 127,
+      "community_name": "football_mcp.py",
+      "file_type": "code",
+      "norm_label": "_connect()",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L42"
+    },
+    {
+      "id": "tools_football_mcp_diagnose_tactical_deviation",
+      "label": "diagnose_tactical_deviation()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 127,
+      "community_name": "football_mcp.py",
+      "file_type": "code",
+      "norm_label": "diagnose_tactical_deviation()",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L196"
+    },
+    {
+      "id": "tools_football_mcp_list_column",
+      "label": "_list_column()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 127,
+      "community_name": "football_mcp.py",
+      "file_type": "code",
+      "norm_label": "_list_column()",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L236"
+    },
+    {
+      "id": "tools_football_mcp_query_ifab_rule",
+      "label": "query_ifab_rule()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 127,
+      "community_name": "football_mcp.py",
+      "file_type": "code",
+      "norm_label": "query_ifab_rule()",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L146"
+    },
+    {
+      "id": "tools_football_mcp_verify_kinematics",
+      "label": "verify_kinematics()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 127,
+      "community_name": "football_mcp.py",
+      "file_type": "code",
+      "norm_label": "verify_kinematics()",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L53"
+    },
+    {
       "id": "tools_fuzz_formations_clampf",
       "label": "clampf()",
       "_callable": true,
@@ -1369,6 +1453,18 @@
       "norm_label": "run_godot_verification()",
       "source_file": "tools/godot_verify.py",
       "source_location": "L56"
+    },
+    {
+      "id": "scripts_build_football_kb_build",
+      "label": "build()",
+      "_callable": true,
+      "_origin": "ast",
+      "community": 142,
+      "community_name": "build_football_kb.py",
+      "file_type": "code",
+      "norm_label": "build()",
+      "source_file": "scripts/build_football_kb.py",
+      "source_location": "L160"
     },
     {
       "id": "tools_dump_api_generate_markdown",
@@ -6321,6 +6417,94 @@
       "source_location": "L7"
     },
     {
+      "id": "connection",
+      "label": "Connection",
+      "_origin": "ast",
+      "community": 127,
+      "community_name": "football_mcp.py",
+      "file_type": "code",
+      "norm_label": "connection",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "tool",
+      "label": "tool",
+      "_origin": "ast",
+      "community": 127,
+      "community_name": "football_mcp.py",
+      "file_type": "code",
+      "norm_label": "tool",
+      "source_file": "",
+      "source_location": ""
+    },
+    {
+      "id": "tools_football_mcp",
+      "label": "football_mcp.py",
+      "_origin": "ast",
+      "community": 127,
+      "community_name": "football_mcp.py",
+      "file_type": "code",
+      "norm_label": "football_mcp.py",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L1"
+    },
+    {
+      "id": "tools_football_mcp_rationale_100",
+      "label": "Audit a team's block depth/width in meters against professional compactness\u2026",
+      "_origin": "ast",
+      "community": 127,
+      "community_name": "football_mcp.py",
+      "file_type": "rationale",
+      "norm_label": "audit a team's block depth/width in meters against professional compactness...",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L100"
+    },
+    {
+      "id": "tools_football_mcp_rationale_147",
+      "label": "Retrieve IFAB Law text matching a topic keyword (e.g. 'offside', 'dogso',\u2026",
+      "_origin": "ast",
+      "community": 127,
+      "community_name": "football_mcp.py",
+      "file_type": "rationale",
+      "norm_label": "retrieve ifab law text matching a topic keyword (e.g. 'offside', 'dogso',...",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L147"
+    },
+    {
+      "id": "tools_football_mcp_rationale_166",
+      "label": "Check whether the elapsed time between two discrete player states respects the\u2026",
+      "_origin": "ast",
+      "community": 127,
+      "community_name": "football_mcp.py",
+      "file_type": "rationale",
+      "norm_label": "check whether the elapsed time between two discrete player states respects the...",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L166"
+    },
+    {
+      "id": "tools_football_mcp_rationale_197",
+      "label": "Match a free-text description of match-AI misbehavior against known tactical\u2026",
+      "_origin": "ast",
+      "community": 127,
+      "community_name": "football_mcp.py",
+      "file_type": "rationale",
+      "norm_label": "match a free-text description of match-ai misbehavior against known tactical...",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L197"
+    },
+    {
+      "id": "tools_football_mcp_rationale_59",
+      "label": "Check a velocity/acceleration/turn-rate value against plausibility bounds.\u2026",
+      "_origin": "ast",
+      "community": 127,
+      "community_name": "football_mcp.py",
+      "file_type": "rationale",
+      "norm_label": "check a velocity/acceleration/turn-rate value against plausibility bounds....",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L59"
+    },
+    {
       "id": "agents_workflows_cross_system_feature",
       "label": "cross-system-feature.md",
       "_origin": "ast",
@@ -6359,6 +6543,76 @@
       "norm_label": "workflow: cross-system-feature",
       "source_file": ".agents/workflows/cross-system-feature.md",
       "source_location": "L6"
+    },
+    {
+      "id": "mcp",
+      "label": ".mcp.json",
+      "_origin": "ast",
+      "community": 129,
+      "community_name": "football-expert",
+      "file_type": "code",
+      "metadata": {
+        "mcp_kind": "mcp_config_file"
+      },
+      "norm_label": ".mcp.json",
+      "source_file": ".mcp.json",
+      "source_location": "L1"
+    },
+    {
+      "id": "mcp_json_env_var_pythonioencoding",
+      "label": "PYTHONIOENCODING",
+      "_origin": "ast",
+      "community": 129,
+      "community_name": "football-expert",
+      "file_type": "code",
+      "metadata": {
+        "mcp_kind": "env_var"
+      },
+      "norm_label": "pythonioencoding",
+      "source_file": ".mcp.json",
+      "source_location": "L1"
+    },
+    {
+      "id": "mcp_json_env_var_pythonunbuffered",
+      "label": "PYTHONUNBUFFERED",
+      "_origin": "ast",
+      "community": 129,
+      "community_name": "football-expert",
+      "file_type": "code",
+      "metadata": {
+        "mcp_kind": "env_var"
+      },
+      "norm_label": "pythonunbuffered",
+      "source_file": ".mcp.json",
+      "source_location": "L1"
+    },
+    {
+      "id": "mcp_json_mcp_command_py",
+      "label": "py",
+      "_origin": "ast",
+      "community": 129,
+      "community_name": "football-expert",
+      "file_type": "code",
+      "metadata": {
+        "mcp_kind": "mcp_command"
+      },
+      "norm_label": "py",
+      "source_file": ".mcp.json",
+      "source_location": "L1"
+    },
+    {
+      "id": "mcp_mcp_server_football_expert",
+      "label": "football-expert",
+      "_origin": "ast",
+      "community": 129,
+      "community_name": "football-expert",
+      "file_type": "code",
+      "metadata": {
+        "mcp_kind": "mcp_server"
+      },
+      "norm_label": "football-expert",
+      "source_file": ".mcp.json",
+      "source_location": "L1"
     },
     {
       "id": "tools_fuzz_formations",
@@ -6612,6 +6866,174 @@
       "source_location": "L6"
     },
     {
+      "id": "agents_rules_football_domain",
+      "label": ".agents/rules/football-domain.md",
+      "_origin": "ast",
+      "community": 136,
+      "community_name": "Football Domain Intelligence (`football-expert` MCP server)",
+      "file_type": "document",
+      "node_kind": "page",
+      "norm_label": ".agents/rules/football-domain.md",
+      "source_file": ".agents/rules/football-domain.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "agents_rules_football_domain_football_domain_intelligence_football_expert_mcp_server",
+      "label": "Football Domain Intelligence (`football-expert` MCP server)",
+      "_origin": "ast",
+      "community": 136,
+      "community_name": "Football Domain Intelligence (`football-expert` MCP server)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "football domain intelligence (`football-expert` mcp server)",
+      "source_file": ".agents/rules/football-domain.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "agents_rules_football_domain_keeping_it_current",
+      "label": "Keeping it current",
+      "_origin": "ast",
+      "community": 136,
+      "community_name": "Football Domain Intelligence (`football-expert` MCP server)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "keeping it current",
+      "source_file": ".agents/rules/football-domain.md",
+      "source_location": "L17"
+    },
+    {
+      "id": "agents_rules_football_domain_when_to_call_it",
+      "label": "When to call it",
+      "_origin": "ast",
+      "community": 136,
+      "community_name": "Football Domain Intelligence (`football-expert` MCP server)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "when to call it",
+      "source_file": ".agents/rules/football-domain.md",
+      "source_location": "L5"
+    },
+    {
+      "id": "claude_rules_football_domain",
+      "label": ".claude/rules/football-domain.md",
+      "_origin": "ast",
+      "community": 137,
+      "community_name": "Football Domain Intelligence (`football-expert` MCP server)",
+      "file_type": "document",
+      "node_kind": "page",
+      "norm_label": ".claude/rules/football-domain.md",
+      "source_file": ".claude/rules/football-domain.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "claude_rules_football_domain_football_domain_intelligence_football_expert_mcp_server",
+      "label": "Football Domain Intelligence (`football-expert` MCP server)",
+      "_origin": "ast",
+      "community": 137,
+      "community_name": "Football Domain Intelligence (`football-expert` MCP server)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "football domain intelligence (`football-expert` mcp server)",
+      "source_file": ".claude/rules/football-domain.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "claude_rules_football_domain_keeping_it_current",
+      "label": "Keeping it current",
+      "_origin": "ast",
+      "community": 137,
+      "community_name": "Football Domain Intelligence (`football-expert` MCP server)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "keeping it current",
+      "source_file": ".claude/rules/football-domain.md",
+      "source_location": "L17"
+    },
+    {
+      "id": "claude_rules_football_domain_when_to_call_it",
+      "label": "When to call it",
+      "_origin": "ast",
+      "community": 137,
+      "community_name": "Football Domain Intelligence (`football-expert` MCP server)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "when to call it",
+      "source_file": ".claude/rules/football-domain.md",
+      "source_location": "L5"
+    },
+    {
+      "id": "agents_rules_ponytail",
+      "label": ".agents/rules/ponytail.md",
+      "_origin": "ast",
+      "community": 138,
+      "community_name": "Ponytail Decision Ladder (Reuse & Complexity Gating)",
+      "file_type": "document",
+      "node_kind": "page",
+      "norm_label": ".agents/rules/ponytail.md",
+      "source_file": ".agents/rules/ponytail.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "agents_rules_ponytail_ponytail_decision_ladder_reuse_complexity_gating",
+      "label": "Ponytail Decision Ladder (Reuse & Complexity Gating)",
+      "_origin": "ast",
+      "community": 138,
+      "community_name": "Ponytail Decision Ladder (Reuse & Complexity Gating)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "ponytail decision ladder (reuse & complexity gating)",
+      "source_file": ".agents/rules/ponytail.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "agents_rules_ponytail_real_navigation_verification_stack_do_not_reinvent_it",
+      "label": "Real navigation/verification stack \u2014 do not reinvent it",
+      "_origin": "ast",
+      "community": 138,
+      "community_name": "Ponytail Decision Ladder (Reuse & Complexity Gating)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "real navigation/verification stack \u2014 do not reinvent it",
+      "source_file": ".agents/rules/ponytail.md",
+      "source_location": "L15"
+    },
+    {
+      "id": "claude_rules_ponytail",
+      "label": ".claude/rules/ponytail.md",
+      "_origin": "ast",
+      "community": 139,
+      "community_name": "Ponytail Decision Ladder (Reuse & Complexity Gating)",
+      "file_type": "document",
+      "node_kind": "page",
+      "norm_label": ".claude/rules/ponytail.md",
+      "source_file": ".claude/rules/ponytail.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "claude_rules_ponytail_ponytail_decision_ladder_reuse_complexity_gating",
+      "label": "Ponytail Decision Ladder (Reuse & Complexity Gating)",
+      "_origin": "ast",
+      "community": 139,
+      "community_name": "Ponytail Decision Ladder (Reuse & Complexity Gating)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "ponytail decision ladder (reuse & complexity gating)",
+      "source_file": ".claude/rules/ponytail.md",
+      "source_location": "L1"
+    },
+    {
+      "id": "claude_rules_ponytail_real_navigation_verification_stack_do_not_reinvent_it",
+      "label": "Real navigation/verification stack \u2014 do not reinvent it",
+      "_origin": "ast",
+      "community": 139,
+      "community_name": "Ponytail Decision Ladder (Reuse & Complexity Gating)",
+      "file_type": "document",
+      "node_kind": "heading",
+      "norm_label": "real navigation/verification stack \u2014 do not reinvent it",
+      "source_file": ".claude/rules/ponytail.md",
+      "source_location": "L15"
+    },
+    {
       "id": "tools_lint_invariants",
       "label": "lint_invariants.py",
       "_origin": "ast",
@@ -6736,6 +7158,17 @@
       "file_type": "code",
       "norm_label": "godot_verify.py",
       "source_file": "tools/godot_verify.py",
+      "source_location": "L1"
+    },
+    {
+      "id": "scripts_build_football_kb",
+      "label": "build_football_kb.py",
+      "_origin": "ast",
+      "community": 142,
+      "community_name": "build_football_kb.py",
+      "file_type": "code",
+      "norm_label": "build_football_kb.py",
+      "source_file": "scripts/build_football_kb.py",
       "source_location": "L1"
     },
     {
@@ -7958,7 +8391,7 @@
       "label": ".agents/mcp.json",
       "_origin": "ast",
       "community": 51,
-      "community_name": "graphify",
+      "community_name": "football-expert",
       "file_type": "code",
       "metadata": {
         "mcp_kind": "mcp_config_file"
@@ -7972,7 +8405,7 @@
       "label": "PYTHONIOENCODING",
       "_origin": "ast",
       "community": 51,
-      "community_name": "graphify",
+      "community_name": "football-expert",
       "file_type": "code",
       "metadata": {
         "mcp_kind": "env_var"
@@ -7986,7 +8419,7 @@
       "label": "PYTHONUNBUFFERED",
       "_origin": "ast",
       "community": 51,
-      "community_name": "graphify",
+      "community_name": "football-expert",
       "file_type": "code",
       "metadata": {
         "mcp_kind": "env_var"
@@ -8000,7 +8433,7 @@
       "label": "C:\\Users\\emanu\\AppData\\Roaming\\uv\\tools\\graphifyy\\Scripts\\python.exe",
       "_origin": "ast",
       "community": 51,
-      "community_name": "graphify",
+      "community_name": "football-expert",
       "file_type": "code",
       "metadata": {
         "mcp_kind": "mcp_command"
@@ -8010,16 +8443,30 @@
       "source_location": "L1"
     },
     {
-      "id": "agents_mcp_json_mcp_command_python",
-      "label": "python",
+      "id": "agents_mcp_json_mcp_command_py",
+      "label": "py",
       "_origin": "ast",
       "community": 51,
-      "community_name": "graphify",
+      "community_name": "football-expert",
       "file_type": "code",
       "metadata": {
         "mcp_kind": "mcp_command"
       },
-      "norm_label": "python",
+      "norm_label": "py",
+      "source_file": ".agents/mcp.json",
+      "source_location": "L1"
+    },
+    {
+      "id": "agents_mcp_mcp_server_football_expert",
+      "label": "football-expert",
+      "_origin": "ast",
+      "community": 51,
+      "community_name": "football-expert",
+      "file_type": "code",
+      "metadata": {
+        "mcp_kind": "mcp_server"
+      },
+      "norm_label": "football-expert",
       "source_file": ".agents/mcp.json",
       "source_location": "L1"
     },
@@ -8028,7 +8475,7 @@
       "label": "graphify",
       "_origin": "ast",
       "community": 51,
-      "community_name": "graphify",
+      "community_name": "football-expert",
       "file_type": "code",
       "metadata": {
         "mcp_kind": "mcp_server"
@@ -8042,7 +8489,7 @@
       "label": "powerfootball",
       "_origin": "ast",
       "community": 51,
-      "community_name": "graphify",
+      "community_name": "football-expert",
       "file_type": "code",
       "metadata": {
         "mcp_kind": "mcp_server"
@@ -8056,7 +8503,7 @@
       "label": ".antigravity/mcp.json",
       "_origin": "ast",
       "community": 55,
-      "community_name": "graphify",
+      "community_name": "football-expert",
       "file_type": "code",
       "metadata": {
         "mcp_kind": "mcp_config_file"
@@ -8070,7 +8517,7 @@
       "label": "PYTHONIOENCODING",
       "_origin": "ast",
       "community": 55,
-      "community_name": "graphify",
+      "community_name": "football-expert",
       "file_type": "code",
       "metadata": {
         "mcp_kind": "env_var"
@@ -8084,7 +8531,7 @@
       "label": "PYTHONUNBUFFERED",
       "_origin": "ast",
       "community": 55,
-      "community_name": "graphify",
+      "community_name": "football-expert",
       "file_type": "code",
       "metadata": {
         "mcp_kind": "env_var"
@@ -8098,7 +8545,7 @@
       "label": "C:\\Users\\emanu\\AppData\\Roaming\\uv\\tools\\graphifyy\\Scripts\\python.exe",
       "_origin": "ast",
       "community": 55,
-      "community_name": "graphify",
+      "community_name": "football-expert",
       "file_type": "code",
       "metadata": {
         "mcp_kind": "mcp_command"
@@ -8108,16 +8555,30 @@
       "source_location": "L1"
     },
     {
-      "id": "antigravity_mcp_json_mcp_command_python",
-      "label": "python",
+      "id": "antigravity_mcp_json_mcp_command_py",
+      "label": "py",
       "_origin": "ast",
       "community": 55,
-      "community_name": "graphify",
+      "community_name": "football-expert",
       "file_type": "code",
       "metadata": {
         "mcp_kind": "mcp_command"
       },
-      "norm_label": "python",
+      "norm_label": "py",
+      "source_file": ".antigravity/mcp.json",
+      "source_location": "L1"
+    },
+    {
+      "id": "antigravity_mcp_mcp_server_football_expert",
+      "label": "football-expert",
+      "_origin": "ast",
+      "community": 55,
+      "community_name": "football-expert",
+      "file_type": "code",
+      "metadata": {
+        "mcp_kind": "mcp_server"
+      },
+      "norm_label": "football-expert",
       "source_file": ".antigravity/mcp.json",
       "source_location": "L1"
     },
@@ -8126,7 +8587,7 @@
       "label": "graphify",
       "_origin": "ast",
       "community": 55,
-      "community_name": "graphify",
+      "community_name": "football-expert",
       "file_type": "code",
       "metadata": {
         "mcp_kind": "mcp_server"
@@ -8140,7 +8601,7 @@
       "label": "powerfootball",
       "_origin": "ast",
       "community": 55,
-      "community_name": "graphify",
+      "community_name": "football-expert",
       "file_type": "code",
       "metadata": {
         "mcp_kind": "mcp_server"
@@ -22977,6 +23438,102 @@
       "weight": 1.0
     },
     {
+      "source": "tools_football_mcp_audit_action_transition",
+      "target": "tools_football_mcp_connect",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L168",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp_audit_tactical_compactness",
+      "target": "tools_football_mcp_connect",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L104",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp_diagnose_tactical_deviation",
+      "target": "tools_football_mcp_connect",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L202",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp_diagnose_tactical_deviation",
+      "target": "tools_football_mcp_list_column",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L217",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp_query_ifab_rule",
+      "target": "tools_football_mcp_connect",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L148",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp_query_ifab_rule",
+      "target": "tools_football_mcp_list_column",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L158",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp_verify_kinematics",
+      "target": "tools_football_mcp_connect",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L69",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp_verify_kinematics",
+      "target": "tools_football_mcp_list_column",
+      "relation": "calls",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "call",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L78",
+      "weight": 1.0
+    },
+    {
       "source": "tools_formation_ascii_display_all_phases",
       "target": "tools_formation_ascii_calculate_phase_positions",
       "relation": "calls",
@@ -25497,6 +26054,18 @@
       "weight": 1.0
     },
     {
+      "source": "agents_mcp_mcp_server_football_expert",
+      "target": "agents_mcp_json_mcp_command_py",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "command",
+      "source_file": ".agents/mcp.json",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
       "source": "agents_mcp_mcp_server_graphify",
       "target": "agents_mcp_json_mcp_command_c_users_emanu_appdata_roaming_uv_tools_graphifyy_scripts_python_exe",
       "relation": "references",
@@ -25510,13 +26079,25 @@
     },
     {
       "source": "agents_mcp_mcp_server_powerfootball",
-      "target": "agents_mcp_json_mcp_command_python",
+      "target": "agents_mcp_json_mcp_command_py",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "context": "command",
       "source_file": ".agents/mcp.json",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "antigravity_mcp_mcp_server_football_expert",
+      "target": "antigravity_mcp_json_mcp_command_py",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "command",
+      "source_file": ".antigravity/mcp.json",
       "source_location": "L1",
       "weight": 1.0
     },
@@ -25534,7 +26115,7 @@
     },
     {
       "source": "antigravity_mcp_mcp_server_powerfootball",
-      "target": "antigravity_mcp_json_mcp_command_python",
+      "target": "antigravity_mcp_json_mcp_command_py",
       "relation": "references",
       "_origin": "ast",
       "confidence": "EXTRACTED",
@@ -25542,6 +26123,78 @@
       "context": "command",
       "source_file": ".antigravity/mcp.json",
       "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "mcp_mcp_server_football_expert",
+      "target": "mcp_json_mcp_command_py",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "command",
+      "source_file": ".mcp.json",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp_audit_action_transition",
+      "target": "tool",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "decorator",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L164",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp_audit_tactical_compactness",
+      "target": "tool",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "decorator",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L98",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp_diagnose_tactical_deviation",
+      "target": "tool",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "decorator",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L195",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp_query_ifab_rule",
+      "target": "tool",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "decorator",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L145",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp_verify_kinematics",
+      "target": "tool",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "decorator",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L52",
       "weight": 1.0
     },
     {
@@ -26289,6 +26942,29 @@
       "weight": 1.0
     },
     {
+      "source": "tools_football_mcp_connect",
+      "target": "connection",
+      "relation": "references",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "context": "return_type",
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "agents_mcp",
+      "target": "agents_mcp_mcp_server_football_expert",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".agents/mcp.json",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
       "source": "agents_mcp",
       "target": "agents_mcp_mcp_server_graphify",
       "relation": "contains",
@@ -26421,6 +27097,39 @@
       "weight": 1.0
     },
     {
+      "source": "agents_rules_football_domain",
+      "target": "agents_rules_football_domain_football_domain_intelligence_football_expert_mcp_server",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".agents/rules/football-domain.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "agents_rules_football_domain_football_domain_intelligence_football_expert_mcp_server",
+      "target": "agents_rules_football_domain_keeping_it_current",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".agents/rules/football-domain.md",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "agents_rules_football_domain_football_domain_intelligence_football_expert_mcp_server",
+      "target": "agents_rules_football_domain_when_to_call_it",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".agents/rules/football-domain.md",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
       "source": "agents_rules_godot_gdscript",
       "target": "agents_rules_godot_gdscript_gdscript_2_0_godot_4_7_strict_architecture_rules",
       "relation": "contains",
@@ -26473,6 +27182,28 @@
       "confidence_score": 1.0,
       "source_file": ".agents/rules/godot_gdscript.md",
       "source_location": "L29",
+      "weight": 1.0
+    },
+    {
+      "source": "agents_rules_ponytail",
+      "target": "agents_rules_ponytail_ponytail_decision_ladder_reuse_complexity_gating",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".agents/rules/ponytail.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "agents_rules_ponytail_ponytail_decision_ladder_reuse_complexity_gating",
+      "target": "agents_rules_ponytail_real_navigation_verification_stack_do_not_reinvent_it",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".agents/rules/ponytail.md",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -26774,6 +27505,17 @@
     },
     {
       "source": "antigravity_mcp",
+      "target": "antigravity_mcp_mcp_server_football_expert",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".antigravity/mcp.json",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "antigravity_mcp",
       "target": "antigravity_mcp_mcp_server_graphify",
       "relation": "contains",
       "_origin": "ast",
@@ -26938,6 +27680,39 @@
       "weight": 1.0
     },
     {
+      "source": "claude_rules_football_domain",
+      "target": "claude_rules_football_domain_football_domain_intelligence_football_expert_mcp_server",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".claude/rules/football-domain.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "claude_rules_football_domain_football_domain_intelligence_football_expert_mcp_server",
+      "target": "claude_rules_football_domain_keeping_it_current",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".claude/rules/football-domain.md",
+      "source_location": "L17",
+      "weight": 1.0
+    },
+    {
+      "source": "claude_rules_football_domain_football_domain_intelligence_football_expert_mcp_server",
+      "target": "claude_rules_football_domain_when_to_call_it",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".claude/rules/football-domain.md",
+      "source_location": "L5",
+      "weight": 1.0
+    },
+    {
       "source": "claude_rules_graphify",
       "target": "claude_rules_graphify_graphify",
       "relation": "contains",
@@ -26979,6 +27754,28 @@
       "confidence_score": 1.0,
       "source_file": ".claude/rules/graphify.md",
       "source_location": "L27",
+      "weight": 1.0
+    },
+    {
+      "source": "claude_rules_ponytail",
+      "target": "claude_rules_ponytail_ponytail_decision_ladder_reuse_complexity_gating",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".claude/rules/ponytail.md",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "claude_rules_ponytail_ponytail_decision_ladder_reuse_complexity_gating",
+      "target": "claude_rules_ponytail_real_navigation_verification_stack_do_not_reinvent_it",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".claude/rules/ponytail.md",
+      "source_location": "L15",
       "weight": 1.0
     },
     {
@@ -29534,6 +30331,28 @@
       "weight": 1.0
     },
     {
+      "source": "mcp",
+      "target": "mcp_mcp_server_football_expert",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".mcp.json",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "scripts_build_football_kb",
+      "target": "scripts_build_football_kb_build",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "scripts/build_football_kb.py",
+      "source_location": "L160",
+      "weight": 1.0
+    },
+    {
       "source": "tools_audit_process_modes",
       "target": "tools_audit_process_modes_audit_process_modes",
       "relation": "contains",
@@ -30059,6 +30878,83 @@
       "confidence_score": 1.0,
       "source_file": "tools/expand_database.py",
       "source_location": "L359",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp",
+      "target": "tools_football_mcp_query_ifab_rule",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L146",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp",
+      "target": "tools_football_mcp_audit_action_transition",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L165",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp",
+      "target": "tools_football_mcp_diagnose_tactical_deviation",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L196",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp",
+      "target": "tools_football_mcp_list_column",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L236",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp",
+      "target": "tools_football_mcp_connect",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L42",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp",
+      "target": "tools_football_mcp_verify_kinematics",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L53",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp",
+      "target": "tools_football_mcp_audit_tactical_compactness",
+      "relation": "contains",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L99",
       "weight": 1.0
     },
     {
@@ -32768,6 +33664,61 @@
       "weight": 1.0
     },
     {
+      "source": "tools_football_mcp_rationale_100",
+      "target": "tools_football_mcp_audit_tactical_compactness",
+      "relation": "rationale_for",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L100",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp_rationale_147",
+      "target": "tools_football_mcp_query_ifab_rule",
+      "relation": "rationale_for",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L147",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp_rationale_166",
+      "target": "tools_football_mcp_audit_action_transition",
+      "relation": "rationale_for",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L166",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp_rationale_197",
+      "target": "tools_football_mcp_diagnose_tactical_deviation",
+      "relation": "rationale_for",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L197",
+      "weight": 1.0
+    },
+    {
+      "source": "tools_football_mcp_rationale_59",
+      "target": "tools_football_mcp_verify_kinematics",
+      "relation": "rationale_for",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": "tools/football_mcp.py",
+      "source_location": "L59",
+      "weight": 1.0
+    },
+    {
       "source": "tools_gdcheck_rationale_130",
       "target": "tools_gdcheck_strip_code",
       "relation": "rationale_for",
@@ -33164,6 +34115,28 @@
       "weight": 1.0
     },
     {
+      "source": "agents_mcp_mcp_server_football_expert",
+      "target": "agents_mcp_json_env_var_pythonioencoding",
+      "relation": "requires_env",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".agents/mcp.json",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "agents_mcp_mcp_server_football_expert",
+      "target": "agents_mcp_json_env_var_pythonunbuffered",
+      "relation": "requires_env",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".agents/mcp.json",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
       "source": "agents_mcp_mcp_server_graphify",
       "target": "agents_mcp_json_env_var_pythonioencoding",
       "relation": "requires_env",
@@ -33208,6 +34181,28 @@
       "weight": 1.0
     },
     {
+      "source": "antigravity_mcp_mcp_server_football_expert",
+      "target": "antigravity_mcp_json_env_var_pythonioencoding",
+      "relation": "requires_env",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".antigravity/mcp.json",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "antigravity_mcp_mcp_server_football_expert",
+      "target": "antigravity_mcp_json_env_var_pythonunbuffered",
+      "relation": "requires_env",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".antigravity/mcp.json",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
       "source": "antigravity_mcp_mcp_server_graphify",
       "target": "antigravity_mcp_json_env_var_pythonioencoding",
       "relation": "requires_env",
@@ -33248,6 +34243,28 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": ".antigravity/mcp.json",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "mcp_mcp_server_football_expert",
+      "target": "mcp_json_env_var_pythonioencoding",
+      "relation": "requires_env",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".mcp.json",
+      "source_location": "L1",
+      "weight": 1.0
+    },
+    {
+      "source": "mcp_mcp_server_football_expert",
+      "target": "mcp_json_env_var_pythonunbuffered",
+      "relation": "requires_env",
+      "_origin": "ast",
+      "confidence": "EXTRACTED",
+      "confidence_score": 1.0,
+      "source_file": ".mcp.json",
       "source_location": "L1",
       "weight": 1.0
     },
@@ -43363,5 +44380,5 @@
       "source_file": "docs/CORE_INVARIANTS.md"
     }
   ],
-  "built_at_commit": "834a272cebd9a24408053bb74e76bcf89fc0f630"
+  "built_at_commit": "25aa6bce4fa3f8b087dbe19a89472c6eb8b0d901"
 }
