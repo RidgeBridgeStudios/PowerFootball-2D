@@ -372,14 +372,16 @@ def print_blast_radius_report(report: dict[str, Any]) -> None:
 def main() -> int:
     parser = argparse.ArgumentParser(description="Static Dependency DAG & Blast Radius Analyzer")
     parser.add_argument("--blast-radius", help="Calculate blast radius for target file")
+    parser.add_argument("--target", help="Target script file path (alias for --blast-radius)")
     parser.add_argument("--output", default=OUTPUT_PATH, help="Output path for DEPENDENCY_GRAPH.json")
     args = parser.parse_args()
 
     nodes, class_to_file = scan_repository()
     export_graph_json(nodes, args.output)
 
-    if args.blast_radius:
-        report = calculate_blast_radius(args.blast_radius, nodes)
+    target = args.target or args.blast_radius
+    if target:
+        report = calculate_blast_radius(target, nodes)
         print_blast_radius_report(report)
     else:
         print(f"[dump_dep_graph] Mapped {len(nodes)} GDScript files into Dependency DAG -> {args.output}")

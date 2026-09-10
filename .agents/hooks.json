@@ -12,6 +12,20 @@
         "condition": "!args.path || args.path === '.'",
         "action": "warn",
         "message": "Broad workspace grep is discouraged. Prefer querying Graphify (py -3 -m graphify query <concept>) or using py -3 tools/codebase_slice.py."
+      },
+      {
+        "matcher": "run_command",
+        "action": "exec",
+        "command": "bash .agents/scripts/tool_gatekeeper.sh",
+        "timeout": 2
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "replace_file_content|multi_replace_file_content",
+        "action": "exec",
+        "command": "python3 tools/verify_gate.py --fast || py -3 tools/verify_gate.py --fast",
+        "timeout": 5
       }
     ],
     "Stop": [
@@ -21,5 +35,31 @@
         "block_on_failure": true
       }
     ]
+  },
+  "tool-loop-interceptor": {
+    "enabled": true,
+    "PreToolUse": {
+      "matcher": "run_command",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "bash .agents/scripts/tool_gatekeeper.sh",
+          "timeout": 2
+        }
+      ]
+    }
+  },
+  "fast-fail-linter": {
+    "enabled": true,
+    "PostToolUse": {
+      "matcher": "replace_file_content|multi_replace_file_content",
+      "hooks": [
+        {
+          "type": "command",
+          "command": "python3 tools/verify_gate.py --fast",
+          "timeout": 5
+        }
+      ]
+    }
   }
 }
