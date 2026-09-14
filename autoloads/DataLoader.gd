@@ -23,6 +23,11 @@ const CUSTOM_LEAGUE_PATH: String = "user://custom_league.json"
 const DEFAULT_LEAGUE_PATH: String = "res://data/league.json"
 
 var league: LeagueData = null
+var divisions: Array[Dictionary] = []
+var active_division_index: int = 0
+var loaded_shards: Dictionary = {}
+var dirty_shards: Dictionary = {}
+var manifest_mode: bool = false
 
 
 func _ready() -> void:
@@ -152,7 +157,8 @@ func _load_league() -> void:
 	_build_default_league()
 
 
-## Parses a JSON league file into the live `league`.
+## Parses a JSON league file into the live `league`. Supports both sharded manifest
+## files (containing "divisions") and flat legacy league files (containing "teams").
 func _parse_json_league(path: String) -> bool:
 	var file := FileAccess.open(path, FileAccess.READ)
 	if file == null:
@@ -161,23 +167,136 @@ func _parse_json_league(path: String) -> bool:
 
 	var text: String = file.get_as_text()
 	var parsed: Variant = JSON.parse_string(text)
-	if typeof(parsed) != TYPE_DICTIONARY or not parsed.has("teams"):
-		push_error("DataLoader: %s is missing a \"teams\" key." % path)
+	if typeof(parsed) != TYPE_DICTIONARY:
+		push_error("DataLoader: %s does not parse to a valid JSON dictionary." % path)
+		return false
+
+	var dict: Dictionary = parsed as Dictionary
+	if not dict.has("teams") and not dict.has("divisions"):
+		push_error("DataLoader: %s is missing both \"teams\" and \"divisions\" keys." % path)
 		return false
 
 	var parsed_league := LeagueData.new()
-	parsed_league.league_name = parsed.get("league_name", "League")
+	parsed_league.league_name = str(dict.get("league_name", "League"))
 
+	divisions.clear()
+	loaded_shards.clear()
+	dirty_shards.clear()
 	var teams: Array[TeamData] = []
-	for team_dict: Variant in parsed["teams"]:
+
+	if dict.has("divisions"):
+		manifest_mode = true
+		for div_raw: Variant in dict["divisions"]:
+			if typeof(div_raw) == TYPE_DICTIONARY:
+				divisions.append(div_raw as Dictionary)
+
+		if dict.has("teams"):
+			for team_dict: Variant in dict["teams"]:
+				if typeof(team_dict) == TYPE_DICTIONARY:
+					teams.append(_team_from_dict(team_dict as Dictionary))
+		else:
+			for div_desc: Dictionary in divisions:
+				var count: int = int(div_desc.get("team_count", 0))
+				var div_name: String = str(div_desc.get("name", "Division"))
+				var tier_idx: int = int(div_desc.get("tier_index", 1))
+				var div_teams: Array = div_desc.get("teams", [])
+				for i: int in range(count):
+					if i < div_teams.size() and typeof(div_teams[i]) == TYPE_DICTIONARY:
+						teams.append(_team_from_dict(div_teams[i] as Dictionary))
+					else:
+						var stub := TeamData.new()
+						stub.team_name = "%s Team %d" % [div_name, i + 1]
+						stub.team_color = Color.WHITE
+						stub.secondary_color = Color(0.2, 0.2, 0.2, 1.0)
+						stub.reputation = clampf(1.0 - (float(tier_idx) - 1.0) * 0.15, 0.1, 0.95)
+						stub.stature = stub.get_stature_from_reputation()
+						stub.lineup_indices = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+						teams.append(stub)
+
+		parsed_league.teams = teams
+		league = parsed_league
+
+		# Load active human-managed division's shard
+		if not divisions.is_empty():
+			var active_idx: int = clampi(active_division_index, 0, divisions.size() - 1)
+			load_division_shard(divisions[active_idx])
+		return true
+
+	# Flat legacy league mode (100% backward compatible)
+	manifest_mode = false
+	for team_dict: Variant in dict["teams"]:
 		if typeof(team_dict) != TYPE_DICTIONARY:
 			push_error("DataLoader: malformed team entry in %s." % path)
 			return false
-		teams.append(_team_from_dict(team_dict))
+		teams.append(_team_from_dict(team_dict as Dictionary))
 	parsed_league.teams = teams
 
 	league = parsed_league
 	return true
+
+
+## Loads and caches one division shard on demand.
+func load_division_shard(descriptor: Dictionary) -> bool:
+	var shard_rel: String = str(descriptor.get("shard", ""))
+	if shard_rel.is_empty():
+		return false
+	if loaded_shards.get(shard_rel, false):
+		return true
+
+	var candidate_paths: Array[String] = [
+		"res://data/" + shard_rel,
+		"data/" + shard_rel,
+		shard_rel
+	]
+	var shard_path: String = ""
+	for cp: String in candidate_paths:
+		if FileAccess.file_exists(cp):
+			shard_path = cp
+			break
+
+	if shard_path.is_empty():
+		push_warning("DataLoader.load_division_shard: shard file '%s' not found on disk." % shard_rel)
+		return false
+
+	var file := FileAccess.open(shard_path, FileAccess.READ)
+	if file == null:
+		push_error("DataLoader.load_division_shard: cannot open %s (%s)." % [shard_path, error_string(FileAccess.get_open_error())])
+		return false
+
+	var content: String = file.get_as_text()
+	var parsed: Variant = JSON.parse_string(content)
+	if typeof(parsed) != TYPE_DICTIONARY:
+		push_error("DataLoader.load_division_shard: invalid JSON in %s." % shard_path)
+		return false
+
+	var shard_dict: Dictionary = parsed as Dictionary
+	var raw_teams: Array = shard_dict.get("teams", [])
+	var div_start_idx: int = _get_division_start_team_index(descriptor)
+
+	for i: int in range(raw_teams.size()):
+		var target_idx: int = div_start_idx + i
+		if typeof(raw_teams[i]) == TYPE_DICTIONARY:
+			var loaded_team: TeamData = _team_from_dict(raw_teams[i] as Dictionary)
+			if target_idx < league.teams.size():
+				league.teams[target_idx] = loaded_team
+			else:
+				league.teams.append(loaded_team)
+
+	loaded_shards[shard_rel] = true
+	return true
+
+
+func _get_division_start_team_index(descriptor: Dictionary) -> int:
+	var start_idx: int = 0
+	for d: Dictionary in divisions:
+		if d == descriptor or (d.get("name") == descriptor.get("name") and d.get("tier_index") == descriptor.get("tier_index")):
+			break
+		start_idx += int(d.get("team_count", 0))
+	return start_idx
+
+
+func mark_shard_dirty(shard_path: String) -> void:
+	dirty_shards[shard_path] = true
 
 
 func _team_from_dict(team_dict: Dictionary) -> TeamData:
@@ -447,16 +566,40 @@ func _team_to_dict(t: TeamData) -> Dictionary:
 	}
 
 
-## Persists the live league data to JSON.
+## Persists the live league data to JSON. If in sharded manifest mode,
+## saves the manifest and dirty shards.
 func save_league(path: String = CUSTOM_LEAGUE_PATH) -> bool:
 	if league == null:
 		return false
+
+	if manifest_mode and not divisions.is_empty():
+		var manifest_file := FileAccess.open(path, FileAccess.WRITE)
+		if manifest_file == null:
+			push_error("DataLoader: could not open %s for writing (%s)." % [path, error_string(FileAccess.get_open_error())])
+			return false
+		var manifest_payload: Dictionary = {
+			"league_name": league.league_name,
+			"divisions": divisions
+		}
+		manifest_file.store_string(JSON.stringify(manifest_payload, "\t"))
+		manifest_file.close()
+
+		var base_dir: String = path.get_base_dir()
+		for div_desc: Dictionary in divisions:
+			var shard_rel: String = str(div_desc.get("shard", ""))
+			if shard_rel.is_empty() or not dirty_shards.get(shard_rel, false):
+				continue
+			var shard_full_path: String = base_dir + "/" + shard_rel
+			_save_single_shard(div_desc, shard_full_path)
+			dirty_shards.erase(shard_rel)
+		return true
+
 	var team_list: Array = []
 	for t: TeamData in league.teams:
 		team_list.append(_team_to_dict(t))
 
-	var file := FileAccess.open(path, FileAccess.WRITE)
-	if file == null:
+	var flat_file := FileAccess.open(path, FileAccess.WRITE)
+	if flat_file == null:
 		push_error("DataLoader: could not open %s for writing (%s)." % [path, error_string(FileAccess.get_open_error())])
 		return false
 
@@ -464,7 +607,33 @@ func save_league(path: String = CUSTOM_LEAGUE_PATH) -> bool:
 		"league_name": league.league_name,
 		"teams": team_list
 	}
-	file.store_string(JSON.stringify(payload, "\t"))
+	flat_file.store_string(JSON.stringify(payload, "\t"))
+	return true
+
+
+func _save_single_shard(div_desc: Dictionary, full_path: String) -> bool:
+	var dir_path: String = full_path.get_base_dir()
+	if not DirAccess.dir_exists_absolute(dir_path):
+		DirAccess.make_dir_recursive_absolute(dir_path)
+
+	var start_idx: int = _get_division_start_team_index(div_desc)
+	var count: int = int(div_desc.get("team_count", 0))
+	var shard_teams: Array = []
+	for i: int in range(count):
+		var idx: int = start_idx + i
+		if idx < league.teams.size():
+			shard_teams.append(_team_to_dict(league.teams[idx]))
+
+	var f := FileAccess.open(full_path, FileAccess.WRITE)
+	if f == null:
+		push_error("DataLoader: cannot write shard %s." % full_path)
+		return false
+	var payload: Dictionary = {
+		"division": div_desc.get("name", ""),
+		"teams": shard_teams
+	}
+	f.store_string(JSON.stringify(payload, "\t"))
+	f.close()
 	return true
 
 

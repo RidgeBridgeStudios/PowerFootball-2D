@@ -54,6 +54,8 @@ const PHASE_NAMES: Array[String] = ["Pre-Season", "Regular Season", "Off-Season"
 ## Division/tier rosters: team indices in Tier 1 (Premier) and Tier 2 (Championship).
 @export var tier_1_indices: Array[int] = []
 @export var tier_2_indices: Array[int] = []
+## Generalized tier rosters for unbounded tiers (index 0 = Tier 1, index 1 = Tier 2, etc.).
+@export var tier_indices: Array[Array] = []
 @export var continental_indices: Array[int] = []
 
 ## --- Per-club career state --------------------------------------------------------

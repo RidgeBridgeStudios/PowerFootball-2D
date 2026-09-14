@@ -136,6 +136,7 @@ static func to_dict(c: CareerSaveData) -> Dictionary:
 		"season_archive": c.season_archive,
 		"tier_1_indices": c.tier_1_indices,
 		"tier_2_indices": c.tier_2_indices,
+		"tier_indices": c.tier_indices,
 		"continental_indices": c.continental_indices,
 		"player_states": states,
 		"club_finances": finances,
@@ -247,6 +248,17 @@ static func from_dict(d: Dictionary) -> CareerSaveData:
 	for raw_t2: Variant in d.get("tier_2_indices", []):
 		t2.append(int(raw_t2))
 	c.tier_2_indices = t2
+
+	var raw_tiers: Variant = d.get("tier_indices", [])
+	if typeof(raw_tiers) == TYPE_ARRAY:
+		var parsed_tiers: Array[Array] = []
+		for t_item: Variant in raw_tiers:
+			if typeof(t_item) == TYPE_ARRAY:
+				var sub_arr: Array[int] = []
+				for sub_val: Variant in t_item:
+					sub_arr.append(int(sub_val))
+				parsed_tiers.append(sub_arr)
+		c.tier_indices = parsed_tiers
 
 	var cont: Array[int] = []
 	for raw_cont: Variant in d.get("continental_indices", []):
