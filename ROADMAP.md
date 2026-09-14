@@ -60,7 +60,7 @@ Multi-match progression with persistence, transfers, and season structure.
 - [x] Finances: budgets, ledger, amortisation, gate receipts (`ClubFinances`)
 - [x] Training schedules, individual focus, injuries (`TrainingSchedule`)
 - [ ] Continental competition beyond the simplified knockout placeholder
-- [ ] Promotion/relegation across multiple divisions (needs a multi-tier league)
+- [x] Promotion/relegation across multiple divisions (multi-tier support via `tier_indices` in `CareerSaveData` and `CareerManager._apply_promotion_relegation()`; see `docs/PHASE_0_FIXES.md`)
 
 ## PHASE 5 — Polish
 

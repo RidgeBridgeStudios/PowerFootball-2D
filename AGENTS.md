@@ -166,6 +166,7 @@ py -3 tools/verify_db.py              # JSON database schema validation
 
 ### Simulation & Property Testing
 ```bash
+godot --headless tests/TestRunner.tscn # Headless regression test runner (P1-P4 architectural suite)
 py -3 tools/test_quick_sim.py         # CURRENT GATE: validates shared/QuickSimEngine.gd statistical resolution
 py -3 tools/replay_test.py            # Bit-exact deterministic replay test
 py -3 tools/fuzz_solvers.py           # Mathematical solver fuzzing (shared/UtilityMath.gd)

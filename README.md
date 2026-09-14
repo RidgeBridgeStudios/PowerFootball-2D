@@ -8,14 +8,18 @@ A **manager-only** football management game built in **Godot 4.7** (GDScript) â€
 
 ## Running it
 
-Open the project folder in Godot 4.7 and press F5. The main scene is
-`res://ui/SplashScreen.tscn`, which fades into `res://ui/MainMenu.tscn`.
-The menu has exactly three choices: **Manager Mode**, **Options**, and **Quit**.
+Open the project folder in Godot 4.7 and press F5. The main scene is `res://ui/SplashScreen.tscn`, which fades into `res://ui/MainMenu.tscn`.
+The menu choices are: **Manager Mode**, **Quick Match** (standalone exhibition match isolated from career saves), **Options** (including custom league import), and **Quit**.
 
 Manager Mode opens the manager/slot creation screen, loads or starts a career,
 and hands off to the career hub (`res://ui/manager_mode/ManagerModeRoot.tscn`).
 There is no real-time match to play: pressing Continue resolves the next fixture
 through the quick-sim engine and folds the result back into the career world.
+
+To execute the headless regression test suite:
+```bash
+godot --headless tests/TestRunner.tscn
+```
 
 ## Architecture at a Glance
 
