@@ -296,48 +296,26 @@ func _build_competitions() -> void:
 		return
 
 	var total_teams: int = DataLoader.league.teams.size()
-
-	# Initialize tiers if not set
-	if career.tier_1_indices.is_empty() or career.tier_2_indices.is_empty():
-		career.tier_1_indices.clear()
-		career.tier_2_indices.clear()
-		for i: int in range(total_teams):
-			if i < 8:
-				career.tier_1_indices.append(i)
-			else:
-				career.tier_2_indices.append(i)
-
-	if career.continental_indices.is_empty():
-		career.continental_indices.clear()
-		for i_c: int in range(mini(4, career.tier_1_indices.size())):
-			career.continental_indices.append(career.tier_1_indices[i_c])
+	if total_teams == 0:
+		return
 
 	var first_matchday: CareerDate = CareerDate.make(
 		career.today.year, FIRST_MATCHDAY_MONTH, FIRST_MATCHDAY_DAY
 	)
 
-	# 1. Tier 1: Premier Championship
-	var t1_names: Array[String] = []
-	for idx: int in career.tier_1_indices:
-		t1_names.append(DataLoader.league.teams[idx].team_name)
-	var t1_league: CompetitionData = CompetitionData.build_league(
-		"Premier Championship", career.tier_1_indices, t1_names, 1
-	)
-	t1_league.generate_league_fixtures(first_matchday, _matchday_spacing(career.tier_1_indices.size(), 2), 2)
-	career.competitions.append(t1_league)
+	# 1. Initialize tiers and competitions
+	if not DataLoader.divisions.is_empty():
+		_build_divisions_competitions(first_matchday)
+	else:
+		_build_flat_competitions(first_matchday, total_teams)
 
-	# 2. Tier 2: Championship Division One (if teams exist)
-	if not career.tier_2_indices.is_empty():
-		var t2_names: Array[String] = []
-		for idx2: int in career.tier_2_indices:
-			t2_names.append(DataLoader.league.teams[idx2].team_name)
-		var t2_league: CompetitionData = CompetitionData.build_league(
-			"Championship Division One", career.tier_2_indices, t2_names, 2
-		)
-		t2_league.generate_league_fixtures(first_matchday, _matchday_spacing(career.tier_2_indices.size(), 2), 2)
-		career.competitions.append(t2_league)
+	# 2. European Champions Cup (Tier 1 qualifiers - top 4)
+	var t1_teams: Array[int] = _get_tier_team_indices(1)
+	if career.continental_indices.is_empty():
+		career.continental_indices.clear()
+		for i_c: int in range(mini(4, t1_teams.size())):
+			career.continental_indices.append(t1_teams[i_c])
 
-	# 3. European Champions Cup (Tier 1 qualifiers)
 	if not career.continental_indices.is_empty():
 		var continental: CompetitionData = CompetitionData.build_continental(
 			"European Champions Cup", career.continental_indices, true
@@ -345,7 +323,7 @@ func _build_competitions() -> void:
 		continental.draw_cup_round(first_matchday.advanced_by(18), _rng)
 		career.competitions.append(continental)
 
-	# 4. Domestic Cup: Knockout among all teams
+	# 3. Domestic Cup: Knockout among all teams (with automatic bye seeding)
 	var all_indices: Array[int] = []
 	for i_all: int in range(total_teams):
 		all_indices.append(i_all)
@@ -356,8 +334,142 @@ func _build_competitions() -> void:
 	_tag_user_fixtures()
 
 
-## Days between league matchdays, chosen so the last round lands near
-## LAST_MATCHDAY_* whatever the league size.
+func _build_divisions_competitions(first_matchday: CareerDate) -> void:
+	career.tier_indices.clear()
+	var current_idx: int = 0
+	var tier_map: Dictionary = {}
+
+	for div_desc: Dictionary in DataLoader.divisions:
+		var count: int = int(div_desc.get("team_count", 0))
+		var div_name: String = str(div_desc.get("name", "Division"))
+		var tier_idx: int = int(div_desc.get("tier_index", 1))
+		var grp_idx: int = int(div_desc.get("group_index", -1)) if div_desc.get("group_index") != null else -1
+		var promo: int = int(div_desc.get("promotion_slots", 2))
+		var releg: int = int(div_desc.get("relegation_slots", 2))
+
+		var div_team_indices: Array[int] = []
+		var div_team_names: Array[String] = []
+		for i: int in range(count):
+			var t_idx: int = current_idx + i
+			if t_idx < DataLoader.league.teams.size():
+				div_team_indices.append(t_idx)
+				div_team_names.append(DataLoader.league.teams[t_idx].team_name)
+		current_idx += count
+
+		var comp: CompetitionData = CompetitionData.build_league(
+			div_name, div_team_indices, div_team_names, tier_idx, grp_idx, promo, releg
+		)
+		_schedule_league_competition(comp, first_matchday)
+		career.competitions.append(comp)
+
+		if not tier_map.has(tier_idx):
+			var arr: Array[int] = []
+			tier_map[tier_idx] = arr
+		var t_list: Array[int] = tier_map[tier_idx] as Array[int]
+		t_list.append_array(div_team_indices)
+
+	var sorted_tier_keys: Array = tier_map.keys()
+	sorted_tier_keys.sort()
+	for tk: Variant in sorted_tier_keys:
+		career.tier_indices.append(tier_map[tk])
+
+	career.tier_1_indices = _get_tier_team_indices(1)
+	career.tier_2_indices = _get_tier_team_indices(2)
+
+
+func _build_flat_competitions(first_matchday: CareerDate, total_teams: int) -> void:
+	if career.tier_indices.is_empty():
+		career.tier_indices.clear()
+		if total_teams <= 20:
+			var t1: Array[int] = []
+			for i in range(total_teams):
+				t1.append(i)
+			career.tier_indices.append(t1)
+		else:
+			var teams_per_tier: int = 20
+			var num_tiers: int = (total_teams + teams_per_tier - 1) / teams_per_tier
+			var cur: int = 0
+			for _t_i: int in range(num_tiers):
+				var t_arr: Array[int] = []
+				for _j: int in range(teams_per_tier):
+					if cur < total_teams:
+						t_arr.append(cur)
+						cur += 1
+				if not t_arr.is_empty():
+					career.tier_indices.append(t_arr)
+
+	career.tier_1_indices = _get_tier_team_indices(1)
+	career.tier_2_indices = _get_tier_team_indices(2)
+
+	for t_num: int in range(1, career.tier_indices.size() + 1):
+		var t_indices: Array[int] = _get_tier_team_indices(t_num)
+		if t_indices.is_empty():
+			continue
+		var t_names: Array[String] = []
+		for idx: int in t_indices:
+			t_names.append(DataLoader.league.teams[idx].team_name)
+		var comp_name: String = "Premier Championship" if t_num == 1 else ("Championship Division %d" % (t_num - 1))
+		var promo_slots: int = 0 if t_num == 1 else 2
+		var releg_slots: int = 0 if t_num == career.tier_indices.size() else 2
+		var comp: CompetitionData = CompetitionData.build_league(
+			comp_name, t_indices, t_names, t_num, -1, promo_slots, releg_slots
+		)
+		_schedule_league_competition(comp, first_matchday)
+		career.competitions.append(comp)
+
+
+func _get_tier_team_indices(tier_num: int) -> Array[int]:
+	var res: Array[int] = []
+	var idx: int = tier_num - 1
+	if idx >= 0 and idx < career.tier_indices.size():
+		var raw: Array = career.tier_indices[idx]
+		for item: Variant in raw:
+			res.append(int(item))
+	elif tier_num == 1:
+		return career.tier_1_indices
+	elif tier_num == 2:
+		return career.tier_2_indices
+	return res
+
+
+func _schedule_league_competition(comp: CompetitionData, first_matchday: CareerDate) -> void:
+	var team_count: int = comp.participant_indices.size()
+	if team_count < 2:
+		return
+
+	var first: CareerDate = CareerDate.make(
+		career.today.year, FIRST_MATCHDAY_MONTH, FIRST_MATCHDAY_DAY
+	)
+	var last: CareerDate = CareerDate.make(
+		career.today.year + 1, LAST_MATCHDAY_MONTH, LAST_MATCHDAY_DAY
+	)
+	var window: int = first.days_until(last)
+	var double_rounds: int = (team_count - 1) * 2
+	var double_fixtures: int = team_count * (team_count - 1)
+
+	var use_single: bool = false
+	var max_cap: int = -1
+
+	if double_fixtures > 500 or (double_rounds - 1) * MIN_MATCHDAY_SPACING_DAYS > window:
+		push_warning("CareerManager: division '%s' (%d teams) cannot fit double round-robin in season window (%d days) or exceeds 500 fixtures; falling back to single round-robin." % [
+			comp.competition_name, team_count, window
+		])
+		use_single = true
+
+	var single_fixtures: int = team_count * (team_count - 1) / 2
+	var single_rounds: int = team_count - 1
+	if use_single and (single_fixtures > 500 or (single_rounds - 1) * MIN_MATCHDAY_SPACING_DAYS > window):
+		push_warning("CareerManager: division '%s' (%d teams) exceeds 500 fixtures in single round-robin; capping fixtures." % [
+			comp.competition_name, team_count
+		])
+		max_cap = 500 / maxi(team_count / 2, 1)
+
+	var spacing: int = _matchday_spacing(team_count, 1 if use_single else 2)
+	comp.generate_league_fixtures(first_matchday, spacing, 1, use_single, max_cap)
+
+
+## Days between league matchdays, bounded so the season fits within window
+## without generating decades-long spacing.
 func _matchday_spacing(team_count: int, repeat_cycles: int = 1) -> int:
 	var rounds: int = maxi((team_count - 1) * 2 * repeat_cycles, 1)
 	if rounds <= 1:
@@ -369,7 +481,13 @@ func _matchday_spacing(team_count: int, repeat_cycles: int = 1) -> int:
 		career.today.year + 1, LAST_MATCHDAY_MONTH, LAST_MATCHDAY_DAY
 	)
 	var window: int = first.days_until(last)
-	return maxi(window / (rounds - 1), MIN_MATCHDAY_SPACING_DAYS)
+	var target_spacing: int = window / (rounds - 1)
+	if target_spacing < MIN_MATCHDAY_SPACING_DAYS:
+		push_warning("CareerManager._matchday_spacing: division of %d teams requires %d rounds which cannot fit in %d-day window with spacing >= %d; using minimum spacing." % [
+			team_count, rounds, window, MIN_MATCHDAY_SPACING_DAYS
+		])
+		return MIN_MATCHDAY_SPACING_DAYS
+	return target_spacing
 
 
 func _tag_user_fixtures() -> void:
@@ -1430,76 +1548,101 @@ func _run_season_end() -> void:
 	})
 
 	# Promotion, Relegation & Continental Qualification across tiers
-	var t1_comp: CompetitionData = null
-	var t2_comp: CompetitionData = null
+	_apply_promotion_relegation()
+
+	GameEvents.career_season_ended.emit(career.season_start_year, position)
+	_start_new_season()
+
+
+func _apply_promotion_relegation() -> void:
+	var tier_comps: Dictionary = {}
 	for c: CompetitionData in career.competitions:
 		if c.kind == CompetitionData.Kind.LEAGUE:
-			if c.tier == 1:
-				t1_comp = c
-			elif c.tier == 2:
-				t2_comp = c
+			if not tier_comps.has(c.tier):
+				var arr: Array[CompetitionData] = []
+				tier_comps[c.tier] = arr
+			(tier_comps[c.tier] as Array[CompetitionData]).append(c)
 
-	if t1_comp != null and t2_comp != null:
+	var tiers: Array = tier_comps.keys()
+	tiers.sort()
+	if tiers.is_empty():
+		return
+
+	var club: TeamData = user_team()
+
+	if tiers.size() >= 2:
+		for i: int in range(tiers.size() - 1):
+			var upper_tier: int = int(tiers[i])
+			var lower_tier: int = int(tiers[i + 1])
+			var upper_list: Array[CompetitionData] = tier_comps[upper_tier]
+			var lower_list: Array[CompetitionData] = tier_comps[lower_tier]
+
+			var relegated_indices: Array[int] = []
+			for u_comp: CompetitionData in upper_list:
+				var u_table: Array[LeagueTableRow] = u_comp.sorted_table()
+				var r_count: int = mini(u_comp.relegation_slots, u_table.size())
+				for r_i: int in range(u_table.size() - r_count, u_table.size()):
+					relegated_indices.append(u_table[r_i].team_index)
+
+			var promoted_indices: Array[int] = []
+			for l_comp: CompetitionData in lower_list:
+				var l_table: Array[LeagueTableRow] = l_comp.sorted_table()
+				var p_count: int = mini(l_comp.promotion_slots, l_table.size())
+				for p_i: int in range(p_count):
+					promoted_indices.append(l_table[p_i].team_index)
+
+			if promoted_indices.has(career.user_team_index):
+				if career.profile != null:
+					career.profile.promotions += 1
+					career.profile.reputation = clampf(career.profile.reputation + 0.10, 0.05, 0.99)
+				_push_inbox(InboxEngine.build_simple(
+					"PROMOTION CELEBRATIONS!",
+					"Congratulations! You have led %s to promotion!" % (club.team_name if club != null else "your club"),
+					InboxItem.Category.BOARD, 1.0, career.today
+				))
+			elif relegated_indices.has(career.user_team_index):
+				if career.profile != null:
+					career.profile.relegations += 1
+					career.profile.reputation = clampf(career.profile.reputation - 0.12, 0.05, 0.99)
+				_push_inbox(InboxEngine.build_simple(
+					"RELEGATION HEARTBREAK",
+					"%s have suffered relegation. The board expect an immediate return next season." % (club.team_name if club != null else "Your club"),
+					InboxItem.Category.BOARD, 1.0, career.today
+				))
+
+			var u_idx: int = upper_tier - 1
+			var l_idx: int = lower_tier - 1
+			if u_idx < career.tier_indices.size() and l_idx < career.tier_indices.size():
+				var u_roster: Array = career.tier_indices[u_idx]
+				var l_roster: Array = career.tier_indices[l_idx]
+				for rel: int in relegated_indices:
+					u_roster.erase(rel)
+					l_roster.append(rel)
+				for promo: int in promoted_indices:
+					l_roster.erase(promo)
+					u_roster.append(promo)
+
+	career.tier_1_indices = _get_tier_team_indices(1)
+	career.tier_2_indices = _get_tier_team_indices(2)
+
+	# Continental qualification from Tier 1
+	var t1_comp: CompetitionData = null
+	for c_t1: CompetitionData in career.competitions:
+		if c_t1.kind == CompetitionData.Kind.LEAGUE and c_t1.tier == 1:
+			t1_comp = c_t1
+			break
+	if t1_comp != null:
 		var t1_table: Array[LeagueTableRow] = t1_comp.sorted_table()
-		var t2_table: Array[LeagueTableRow] = t2_comp.sorted_table()
-
-		var relegated_indices: Array[int] = []
-		if t1_table.size() >= 2:
-			relegated_indices.append(t1_table[t1_table.size() - 1].team_index)
-			relegated_indices.append(t1_table[t1_table.size() - 2].team_index)
-
-		var promoted_indices: Array[int] = []
-		if t2_table.size() >= 2:
-			promoted_indices.append(t2_table[0].team_index)
-			promoted_indices.append(t2_table[1].team_index)
-
-		if promoted_indices.has(career.user_team_index):
-			if career.profile != null:
-				career.profile.promotions += 1
-				career.profile.reputation = clampf(career.profile.reputation + 0.10, 0.05, 0.99)
-			_push_inbox(InboxEngine.build_simple(
-				"PROMOTION CELEBRATIONS!",
-				"Congratulations! You have led %s to promotion into the Premier Championship!" % club.team_name,
-				InboxItem.Category.BOARD, 1.0, career.today
-			))
-		elif relegated_indices.has(career.user_team_index):
-			if career.profile != null:
-				career.profile.relegations += 1
-				career.profile.reputation = clampf(career.profile.reputation - 0.12, 0.05, 0.99)
-			_push_inbox(InboxEngine.build_simple(
-				"RELEGATION HEARTBREAK",
-				"%s have suffered relegation from the top flight. The board expect an immediate return next season." % club.team_name,
-				InboxItem.Category.BOARD, 1.0, career.today
-			))
-
-		var new_t1: Array[int] = []
-		for r_t1: LeagueTableRow in t1_table:
-			if not relegated_indices.has(r_t1.team_index):
-				new_t1.append(r_t1.team_index)
-		new_t1.append_array(promoted_indices)
-		career.tier_1_indices = new_t1
-
-		var new_t2: Array[int] = []
-		for r_t2: LeagueTableRow in t2_table:
-			if not promoted_indices.has(r_t2.team_index):
-				new_t2.append(r_t2.team_index)
-		new_t2.append_array(relegated_indices)
-		career.tier_2_indices = new_t2
-
 		var new_cont: Array[int] = []
 		for i_q: int in range(mini(4, t1_table.size())):
 			new_cont.append(t1_table[i_q].team_index)
 		career.continental_indices = new_cont
-
 		if new_cont.has(career.user_team_index):
 			_push_inbox(InboxEngine.build_simple(
 				"European Champions Cup Qualification",
-				"Your league finish secures European football for %s next season!" % club.team_name,
+				"Your league finish secures European football for %s next season!" % (club.team_name if club != null else "your club"),
 				InboxItem.Category.BOARD, 0.95, career.today
 			))
-
-	GameEvents.career_season_ended.emit(career.season_start_year, position)
-	_start_new_season()
 
 
 func _start_new_season() -> void:

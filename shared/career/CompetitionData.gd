@@ -44,16 +44,32 @@ const ROUND_LABELS: Dictionary = {
 @export var two_legged: bool = false
 ## Which division/tier this league belongs to (1 = top flight, 2 = second division, etc.).
 @export var tier: int = 1
+## Group index within the tier (-1 for undivided tiers, 0, 1, 2... for named groups).
+@export var group_index: int = -1
+## Number of clubs promoted or relegated at season end.
+@export var promotion_slots: int = 2
+@export var relegation_slots: int = 2
 ## Which FixtureData.Competition tag fixtures from this competition carry.
 @export var fixture_tag: FixtureData.Competition = FixtureData.Competition.LEAGUE
 
 
-static func build_league(p_name: String, team_indices: Array[int], team_names: Array[String], p_tier: int = 1) -> CompetitionData:
+static func build_league(
+	p_name: String,
+	team_indices: Array[int],
+	team_names: Array[String],
+	p_tier: int = 1,
+	p_group_index: int = -1,
+	p_promotion_slots: int = 2,
+	p_relegation_slots: int = 2
+) -> CompetitionData:
 	var c := CompetitionData.new()
 	c.competition_name = p_name
 	c.kind = Kind.LEAGUE
 	c.fixture_tag = FixtureData.Competition.LEAGUE
 	c.tier = p_tier
+	c.group_index = p_group_index
+	c.promotion_slots = p_promotion_slots
+	c.relegation_slots = p_relegation_slots
 	c.participant_indices = team_indices.duplicate()
 	var rows: Array[LeagueTableRow] = []
 	for i: int in range(team_indices.size()):
@@ -95,7 +111,14 @@ static func build_continental(p_name: String, team_indices: Array[int], p_two_le
 ## `first_date` is the first matchday; each subsequent round is `spacing_days`
 ## later, which is what makes league fixtures land on real weekend dates.
 ## If `repeat_cycles` > 1, the full double round-robin is repeated (e.g. 2 cycles = 4 matches against each team).
-func generate_league_fixtures(first_date: CareerDate, spacing_days: int, repeat_cycles: int = 1) -> void:
+## If `single_round_robin` is true, only 1 leg is played per pairing (half-season).
+func generate_league_fixtures(
+	first_date: CareerDate,
+	spacing_days: int,
+	repeat_cycles: int = 1,
+	single_round_robin: bool = false,
+	max_rounds_cap: int = -1
+) -> void:
 	fixtures.clear()
 	var slots_base: Array[int] = participant_indices.duplicate()
 	if slots_base.size() < 2:
@@ -106,13 +129,17 @@ func generate_league_fixtures(first_date: CareerDate, spacing_days: int, repeat_
 
 	var half: int = slots_base.size() / 2
 	var rounds_per_half: int = slots_base.size() - 1
-	var single_cycle_rounds: int = rounds_per_half * 2
+	var single_cycle_rounds: int = rounds_per_half if single_round_robin else rounds_per_half * 2
 	total_rounds = single_cycle_rounds * maxi(repeat_cycles, 1)
+	if max_rounds_cap > 0:
+		total_rounds = mini(total_rounds, max_rounds_cap)
 
 	var current_round_offset: int = 0
 	for cycle: int in range(maxi(repeat_cycles, 1)):
 		var slots: Array[int] = slots_base.duplicate()
 		for r: int in range(rounds_per_half):
+			if max_rounds_cap > 0 and (current_round_offset + r) >= max_rounds_cap:
+				break
 			var match_date: CareerDate = first_date.advanced_by((current_round_offset + r) * spacing_days)
 			var reverse_date: CareerDate = first_date.advanced_by((current_round_offset + r + rounds_per_half) * spacing_days)
 			for i: int in range(half):
@@ -127,19 +154,23 @@ func generate_league_fixtures(first_date: CareerDate, spacing_days: int, repeat_
 
 				var first_leg: FixtureData = FixtureData.make(fixture_tag, current_round_offset + r + 1, match_date, home, away)
 				fixtures.append(first_leg)
-				# Reverse fixture in the second half of this cycle.
-				var second_leg: FixtureData = FixtureData.make(fixture_tag, current_round_offset + r + 1 + rounds_per_half, reverse_date, away, home)
-				fixtures.append(second_leg)
+				if not single_round_robin:
+					if max_rounds_cap <= 0 or (current_round_offset + r + rounds_per_half) < max_rounds_cap:
+						var second_leg: FixtureData = FixtureData.make(fixture_tag, current_round_offset + r + 1 + rounds_per_half, reverse_date, away, home)
+						fixtures.append(second_leg)
 
 			# Rotate: slot 0 is fixed, everything else shifts one place.
 			var tail: int = slots.pop_back()
 			slots.insert(1, tail)
 		current_round_offset += single_cycle_rounds
+		if max_rounds_cap > 0 and current_round_offset >= max_rounds_cap:
+			break
 
 
 ## Pairs whoever is still alive into the next knockout round. Called at the
 ## start of each round rather than seeding the whole bracket upfront, which is
 ## how a real cup draw works — you cannot know round 3 until round 2 is played.
+## For non-power-of-two participant counts, seeds automatic byes to stabilize bracket.
 func draw_cup_round(match_date: CareerDate, rng: RandomNumberGenerator) -> void:
 	if remaining_indices.size() < 2:
 		if remaining_indices.size() == 1:
@@ -154,8 +185,25 @@ func draw_cup_round(match_date: CareerDate, rng: RandomNumberGenerator) -> void:
 		pool[i] = pool[j]
 		pool[j] = tmp
 
-	var label: String = String(ROUND_LABELS.get(pool.size(), "Round %d" % current_round))
-	var pair_count: int = pool.size() / 2
+	# Calculate nearest lower or equal power of 2
+	var n: int = pool.size()
+	var p2: int = 1
+	while p2 <= n:
+		p2 *= 2
+	p2 /= 2
+
+	var pair_count: int = n / 2
+	if p2 < n:
+		# Non-power-of-two team count: seed byes so subsequent rounds become an exact power of 2.
+		# Teams playing = 2 * (n - p2), Bye teams = n - 2 * (n - p2) = 2 * p2 - n.
+		pair_count = n - p2
+
+	var label: String = ""
+	if pair_count * 2 < pool.size():
+		label = "Preliminary Round" if current_round == 1 else "Round %d" % current_round
+	else:
+		label = String(ROUND_LABELS.get(pool.size(), "Round %d" % current_round))
+
 	for p: int in range(pair_count):
 		var home: int = pool[p * 2]
 		var away: int = pool[p * 2 + 1]
@@ -174,10 +222,6 @@ func draw_cup_round(match_date: CareerDate, rng: RandomNumberGenerator) -> void:
 			f2.tie_id = tie
 			f2.leg = 2
 			fixtures.append(f2)
-
-	# An odd club out gets a bye straight into the next round.
-	if pool.size() % 2 != 0:
-		pass
 
 
 ## Applies a played result to the table (leagues) or advances the bracket
