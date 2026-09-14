@@ -18,3 +18,9 @@ __pycache__/
 .worktrees/
 .claude/worktrees/
 match_frames/
+
+# Archived legacy real-time match engine
+legacy/
+
+# Generated fictional databases
+data/generated/

@@ -1,6 +1,0 @@
-# Godot import-time ignore marker.
-#
-# Everything under legacy/ is archived pre-pivot code (real-time match engine:
-# player entities, ball physics, referees, pitch scene, match-facing UI). It is
-# kept for reference only and must never be scanned, imported, or compiled by
-# the engine. The static verification linters additionally skip this tree.

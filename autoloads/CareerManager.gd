@@ -21,8 +21,7 @@
 ## Depends on: GameEvents, GameManager, DataLoader, ManagerLoader, StaffLoader,
 ##             RefereeLoader, WorldEventLog, and the whole shared/career layer.
 ## Exposes: start_new_career(), load_career(), save_career(), is_career_active(),
-##          advance_day(), continue_until_event(), play_next_fixture(),
-##          simulate_next_fixture(), record_user_match_result(), career.
+##          advance_day(), continue_until_event(), simulate_next_fixture(), career.
 ##
 
 extends Node
@@ -1224,31 +1223,6 @@ func _check_expiring_contracts(club: TeamData) -> void:
 
 ## --- Fixtures and results -------------------------------------------------------------
 
-## Legacy real-time match-scene hand-off; no longer called by the UI since the
-## manager-only pivot. The fixture is remembered so a result can be attributed.
-func play_next_fixture() -> bool:
-	var fixture: FixtureData = career.next_user_fixture()
-	if fixture == null:
-		return false
-
-	GameManager.set_meta(&"home_team_index", fixture.home_team_index)
-	GameManager.set_meta(&"away_team_index", fixture.away_team_index)
-	GameManager.set_meta(&"vs_mode", "cpu")
-	GameManager.set_meta(&"simulate_match", false)
-	GameManager.set_meta(&"practice_mode", false)
-	GameManager.set_meta(&"manager_career_active", true)
-	GameManager.set_meta(&"manager_user_team", career.user_team_index)
-	GameManager.set_meta(&"stats_return_scene", "res://ui/manager_mode/ManagerModeRoot.tscn")
-
-	career.awaiting_match_result = true
-	career.pending_fixture_round = fixture.round_number
-	career.pending_fixture_competition = int(fixture.competition)
-	save_career()
-
-	GameEvents.career_match_ready.emit(fixture.home_team_index, fixture.away_team_index)
-	return true
-
-
 ## Quick-sims the user's next fixture through the existing QuickSimEngine.
 func simulate_next_fixture() -> FixtureData:
 	var fixture: FixtureData = career.next_user_fixture()
@@ -1258,38 +1232,6 @@ func simulate_next_fixture() -> FixtureData:
 	_advance_cup_rounds()
 	save_career()
 	return fixture
-
-
-## Legacy result-recording entry point; no longer called by the UI since the
-## manager-only pivot. Records the result the archived match scene left on GameManager.
-func record_user_match_result(home_score: int, away_score: int) -> void:
-	if career == null or not career.awaiting_match_result:
-		return
-	var fixture: FixtureData = _find_pending_fixture()
-	career.awaiting_match_result = false
-	career.pending_fixture_round = -1
-	career.pending_fixture_competition = -1
-	if fixture == null:
-		return
-
-	fixture.played = true
-	fixture.home_score = home_score
-	fixture.away_score = away_score
-	_apply_fixture_result(fixture)
-	_advance_cup_rounds()
-	GameEvents.career_result_recorded.emit(home_score, away_score)
-	save_career()
-
-
-func _find_pending_fixture() -> FixtureData:
-	for comp: CompetitionData in career.competitions:
-		if int(comp.fixture_tag) != career.pending_fixture_competition:
-			continue
-		for f: FixtureData in comp.fixtures:
-			if f.round_number == career.pending_fixture_round and f.involves(career.user_team_index) and not f.played:
-				return f
-	# Fall back to the next unplayed user fixture rather than losing the result.
-	return career.next_user_fixture()
 
 
 func _simulate_ai_fixture(fixture: FixtureData) -> void:
