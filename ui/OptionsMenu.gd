@@ -32,7 +32,10 @@ const DURATION_OPTIONS: Array[Dictionary] = [
 @onready var chk_fullscreen: CheckButton = $Panel/Layout/GraphicsSection/FullscreenRow/FullscreenCheck
 @onready var chk_fps: CheckButton = $Panel/Layout/GraphicsSection/FpsRow/FpsCheck
 @onready var opt_half_length: OptionButton = $Panel/Layout/GameplaySection/HalfLengthRow/HalfLengthOption
+@onready var btn_custom_league: Button = $Panel/Layout/DatabaseSection/CustomLeagueRow/CustomLeagueButton
+@onready var lbl_league_status: Label = $Panel/Layout/DatabaseSection/CustomLeagueStatusLabel
 @onready var btn_back: Button = $Panel/Layout/BackButton
+@onready var file_dialog: ConfirmationDialog = $FileDialog
 
 
 func _ready() -> void:
@@ -44,6 +47,10 @@ func _ready() -> void:
 	chk_fps.toggled.connect(_on_fps_toggled)
 	if opt_half_length != null:
 		opt_half_length.item_selected.connect(_on_half_length_selected)
+	if btn_custom_league != null:
+		btn_custom_league.pressed.connect(_on_custom_league_pressed)
+	if file_dialog != null:
+		file_dialog.file_selected.connect(_on_league_file_selected)
 	btn_back.pressed.connect(_on_back_pressed)
 
 	_populate_durations()
@@ -119,6 +126,22 @@ func _on_fullscreen_toggled(on: bool) -> void:
 
 func _on_fps_toggled(on: bool) -> void:
 	GameManager.set_meta(&"show_fps", on)
+
+
+func _on_custom_league_pressed() -> void:
+	if file_dialog != null:
+		file_dialog.popup_centered()
+
+
+func _on_league_file_selected(path: String) -> void:
+	if DataLoader.load_league_from(path):
+		var count: int = DataLoader.league.teams.size() if DataLoader.league != null else 0
+		var name_str: String = DataLoader.league.league_name if DataLoader.league != null else ""
+		if lbl_league_status != null:
+			lbl_league_status.text = "Loaded: %s (%d teams)" % [name_str, count]
+	else:
+		if lbl_league_status != null:
+			lbl_league_status.text = "Failed to load league from %s" % path
 
 
 func _on_back_pressed() -> void:

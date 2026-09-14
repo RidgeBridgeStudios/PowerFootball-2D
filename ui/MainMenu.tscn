@@ -58,6 +58,12 @@ custom_minimum_size = Vector2(0, 44)
 alignment = 0
 text = "🏆 Manager Mode"
 
+[node name="QuickMatchButton" type="Button" parent="MenuList"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 44)
+alignment = 0
+text = "⚡ Quick Match"
+
 [node name="OptionsButton" type="Button" parent="MenuList"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 44)

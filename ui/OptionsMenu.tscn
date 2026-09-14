@@ -191,6 +191,40 @@ text = "Half Duration"
 [node name="HalfLengthOption" type="OptionButton" parent="Panel/Layout/GameplaySection/HalfLengthRow"]
 layout_mode = 2
 
+[node name="Separator3" type="HSeparator" parent="Panel/Layout"]
+layout_mode = 2
+
+[node name="DatabaseSection" type="VBoxContainer" parent="Panel/Layout"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="DatabaseLabel" type="Label" parent="Panel/Layout/DatabaseSection"]
+layout_mode = 2
+text = "DATABASE"
+theme_override_colors/font_color = Color(0.419608, 0.486275, 0.423529, 1)
+
+[node name="CustomLeagueRow" type="HBoxContainer" parent="Panel/Layout/DatabaseSection"]
+layout_mode = 2
+theme_override_constants/separation = 12
+
+[node name="CustomLeagueButton" type="Button" parent="Panel/Layout/DatabaseSection/CustomLeagueRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+text = "📂 Load Custom League JSON"
+
+[node name="CustomLeagueStatusLabel" type="Label" parent="Panel/Layout/DatabaseSection"]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.6, 0.8, 0.6, 1)
+theme_override_font_sizes/font_size = 14
+horizontal_alignment = 1
+
 [node name="BackButton" type="Button" parent="Panel/Layout"]
 layout_mode = 2
 text = "← Back"
+
+[node name="FileDialog" type="FileDialog" parent="."]
+title = "Open League JSON"
+size = Vector2i(600, 400)
+file_mode = 0
+access = 2
+filters = PackedStringArray("*.json ; JSON League Files")
