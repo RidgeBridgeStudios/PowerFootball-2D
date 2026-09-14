@@ -80,8 +80,8 @@ const PHASE_NAMES: Array[String] = ["Pre-Season", "Regular Season", "Off-Season"
 @export var is_sacked: bool = false
 @export var unemployed: bool = false
 @export var awaiting_match_result: bool = false
-## Fixture the user has been sent into PitchScene to play, so the result can be
-## attributed when they come back.
+## Fixture handed to the retired real-time match layer by play_next_fixture(), so
+## a returned result can be attributed. Unused by the quick-sim path.
 @export var pending_fixture_round: int = -1
 @export var pending_fixture_competition: int = -1
 

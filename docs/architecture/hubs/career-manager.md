@@ -1,7 +1,10 @@
+> [!NOTE]
+> **Partially superseded (post-pivot).** The lifecycle, calendar, transfer, and save-ownership material below is still current. Two parts are stale: the "Career-to-Match Bridge" (`apply_career_state_to_player()` seeds the archived `MoodSystem`/`TrustSystem`) and the boot-order line (live order is `GameEvents` → `GameManager` → `MatchStatsTracker` → four loaders → `WorldEventLog` → `CareerManager`; `InputHelper` is archived). `play_next_fixture()` / `record_user_match_result()` exist but are no longer called by the UI. See [architecture-pivot.md](../../agent-errata/architecture-pivot.md).
+
 # Architecture Hub: CareerManager
 
-**Canonical Location:** [`docs/architecture/hubs/career-manager.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/architecture/hubs/career-manager.md)  
-**Source Script:** [`autoloads/CareerManager.gd`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/CareerManager.gd)  
+**Canonical Location:** [`docs/architecture/hubs/career-manager.md`](career-manager.md)  
+**Source Script:** [`autoloads/CareerManager.gd`](../../../autoloads/CareerManager.gd)  
 **Simulation Layer:** Layer 4 — Club World & Persistent Entities  
 **Node Type:** Autoload Singleton (`Node`, registered in `project.godot`)  
 
@@ -13,9 +16,9 @@
 `CareerManager` is the authoritative state and progression singleton for Manager Career Mode. Acting as `GameManager`'s off-pitch counterpart, it owns the active `CareerSaveData` resource, executes the continuous calendar day loop (`advance_day`, `continue_until_event`), handles player recovery, progression, and physical decline, processes transfer market bids and contract negotiations, coordinates scouting assignments, tracks board objectives and financial budgets, and manages squad assignments (Senior vs. U23). It serves as the primary bridge from persistent career history into match gameplay by seeding `MoodSystem` and `TrustSystem` via `apply_career_state_to_player()`.
 
 ### Non-Responsibilities
-- **No Real-Time Match Simulation:** Does not run pitch physics, ball flight, or frame-by-frame player kinematics. Match gameplay is executed by [`PitchScene`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/pitch/PitchScene.gd), and quick results are calculated via statistical resolution in `simulate_next_fixture()`.
-- **No League Database Ownership:** The static league catalog, base attributes, and team rosters are loaded and owned by [`DataLoader`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/DataLoader.gd). `CareerManager` saves and applies career-specific delta states per slot.
-- **No Direct Narrative Generation:** Narrative history and press reactions are logged through [`WorldEventLog`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/WorldEventLog.gd) and surfaced by [`PressOffice`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/manager/PressOffice.gd).
+- **No Real-Time Match Simulation:** Does not run pitch physics, ball flight, or frame-by-frame player kinematics. Match gameplay is executed by [`PitchScene`](../../../legacy/pitch/PitchScene.gd), and quick results are calculated via statistical resolution in `simulate_next_fixture()`.
+- **No League Database Ownership:** The static league catalog, base attributes, and team rosters are loaded and owned by [`DataLoader`](../../../autoloads/DataLoader.gd). `CareerManager` saves and applies career-specific delta states per slot.
+- **No Direct Narrative Generation:** Narrative history and press reactions are logged through [`WorldEventLog`](../../../autoloads/WorldEventLog.gd) and surfaced by [`PressOffice`](../../../entities/manager/PressOffice.gd).
 - **No `class_name` Declaration:** As an autoload singleton in Godot 4.7+, declaring `class_name` is forbidden to prevent global namespace collision.
 
 ---
@@ -78,8 +81,8 @@
   - `GameEvents.career_manager_sacked`
 
 ### Core Dependencies
-- Upstream: [`DataLoader`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/DataLoader.gd), [`ManagerLoader`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/ManagerLoader.gd), [`StaffLoader`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/StaffLoader.gd), [`RefereeLoader`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/RefereeLoader.gd), [`WorldEventLog`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/WorldEventLog.gd), [`GameEvents`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/GameEvents.gd), [`GameManager`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/GameManager.gd).
-- Downstream / Resources: All 18 career resources in `shared/career/` (`CareerSaveData`, `BoardState`, `ContractData`, `ScoutReport`, `TransferOffer`, `MoraleEngine`, `ProgressionEngine`, `CareerSerializer`), [`ManagerModeRoot`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/ui/manager_mode/ManagerModeRoot.gd).
+- Upstream: [`DataLoader`](../../../autoloads/DataLoader.gd), [`ManagerLoader`](../../../autoloads/ManagerLoader.gd), [`StaffLoader`](../../../autoloads/StaffLoader.gd), [`RefereeLoader`](../../../autoloads/RefereeLoader.gd), [`WorldEventLog`](../../../autoloads/WorldEventLog.gd), [`GameEvents`](../../../autoloads/GameEvents.gd), [`GameManager`](../../../autoloads/GameManager.gd).
+- Downstream / Resources: All 18 career resources in `shared/career/` (`CareerSaveData`, `BoardState`, `ContractData`, `ScoutReport`, `TransferOffer`, `MoraleEngine`, `ProgressionEngine`, `CareerSerializer`), [`ManagerModeRoot`](../../../ui/manager_mode/ManagerModeRoot.gd).
 
 ---
 
@@ -121,7 +124,7 @@ When modifying `CareerManager.gd`:
 
 ## 5. Known Risks & Errata Search Terms
 
-When investigating career progression or save state bugs, consult [`AGENTS_ERRATA.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/AGENTS_ERRATA.md) for these documented edge cases:
+When investigating career progression or save state bugs, consult [`AGENTS_ERRATA.md`](../../../AGENTS_ERRATA.md) for these documented edge cases:
 - `Session State: 2026-09-02 (Manager Career Mode, Phase 4)` (lines 1970–2049):
   - `RefereeLoader.get_or_assign_referee()`: Implemented deterministic assignment so all screens reference the identical referee for a given fixture.
   - `TrustSystem.trust_multiplier()` clamp fix: Fixed input clamping so neutral trust (1.0) does not map to maximum bonus.
@@ -133,8 +136,8 @@ When investigating career progression or save state bugs, consult [`AGENTS_ERRAT
 
 ## 6. Sources Examined
 
-- [`autoloads/CareerManager.gd`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/CareerManager.gd)
-- [`autoloads/README.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/README.md)
-- [`docs/CORE_INVARIANTS.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/CORE_INVARIANTS.md)
-- [`docs/API_SURFACE.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/API_SURFACE.md)
-- [`AGENTS_ERRATA.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/AGENTS_ERRATA.md)
+- [`autoloads/CareerManager.gd`](../../../autoloads/CareerManager.gd)
+- [`autoloads/README.md`](../../../autoloads/README.md)
+- [`docs/CORE_INVARIANTS.md`](../../CORE_INVARIANTS.md)
+- [`docs/API_SURFACE.md`](../../API_SURFACE.md)
+- [`AGENTS_ERRATA.md`](../../../AGENTS_ERRATA.md)

@@ -6,7 +6,7 @@
 ## entry per player (11 total including the goalkeeper at index 0). Each entry
 ## has exactly two keys: "role" (String) and "anchor_offset" (Vector2), an
 ## offset from the pitch centre in pixels for Team A (attacking right).
-## ManagerDirector mirrors both axes of anchor_offset for Team B.
+## Anchor offsets are mirrored on both axes for the away-side team.
 ##
 ## Coordinate system: pitch is 1920x1080px, origin at the pitch centre.
 ## Positive X = right, positive Y = down.

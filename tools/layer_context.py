@@ -5,8 +5,22 @@ layer_context.py — Targeted Simulation Layer Context Extractor.
 Extracts layer-specific invariant rules, key file paths, choke points, and
 rulebook excerpts for zero-waste prompt injection into autonomous LLM turns.
 
+This tool exposes the CURRENT 3-layer stack. The pre-pivot 1-5 taxonomy is gone:
+Layers 1-3 (Physics & Kinematics / Match AI & Spatial / Match Social) collapsed
+into the single Quick-Sim Match layer, the old Layer 4 (Club World) is now
+Layer 1 (Career World), and the old Layer 5 (Narrative & Presentation) is now
+Layer 3. The retired real-time match layer is archived under legacy/ behind
+legacy/.gdignore and is intentionally absent from every key-file list below.
+
+Pre-pivot id/name -> current layer:
+    pre-pivot 1 physics, kinematics      -> 2 (Quick-Sim Match)
+    pre-pivot 2 ai, match_ai, spatial    -> 2 (Quick-Sim Match)
+    pre-pivot 3 social, match_social     -> 2 (Quick-Sim Match)
+    pre-pivot 4 club, club_world, data   -> 1 (Career World)
+    pre-pivot 5 narrative, ui            -> 3 (Narrative & Presentation)
+
 Usage:
-  python tools/layer_context.py [1|2|3|4|5|physics|ai|social|club|narrative]
+  python tools/layer_context.py [1|2|3|career|quicksim|narrative|...]
 """
 
 from __future__ import annotations
@@ -21,169 +35,116 @@ if hasattr(sys.stderr, "reconfigure"):
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+# Aliases: current 3-layer names, plus the pre-pivot 1-5 ids and names remapped
+# onto their closest live layer so existing callers keep working. Note the
+# numeric ids always mean the CURRENT taxonomy: "3" is Narrative, while the
+# pre-pivot name "social" maps to Quick-Sim Match (2).
 LAYER_ALIASES = {
-    "1": 1, "physics": 1, "kinematics": 1,
-    "2": 2, "ai": 2, "match_ai": 2, "spatial": 2,
-    "3": 3, "social": 3, "match_social": 3, "psychology": 3,
-    "4": 4, "club": 4, "club_world": 4, "data": 4, "database": 4,
-    "5": 5, "narrative": 5, "ui": 5, "presentation": 5,
+    # Layer 1 — Career World
+    "1": 1, "career": 1, "career_world": 1,
+    "4": 1, "club": 1, "club_world": 1, "data": 1, "database": 1,
+    # Layer 2 — Quick-Sim Match
+    "2": 2, "quicksim": 2, "quick_sim": 2, "match": 2, "simulation": 2, "math": 2,
+    "physics": 2, "kinematics": 2,
+    "ai": 2, "match_ai": 2, "spatial": 2,
+    "social": 2, "match_social": 2, "psychology": 2,
+    # Layer 3 — Narrative & Presentation
+    "3": 3, "narrative": 3, "presentation": 3, "ui": 3, "press": 3, "events": 3,
+    "5": 3,
 }
 
 LAYER_DATA = {
     1: {
-        "title": "Layer 1 — Physics & Kinematics",
-        "description": "Ball physics, pseudo-3D height trajectory, player kinematic bodies, turning penalties, pitch boundaries, and collision matrices.",
+        "title": "Layer 1 — Career World",
+        "description": "Persistent manager-only career state: the live CareerSaveData, the league database (squads, staff, attributes), finances, morale, board confidence, transfers, scouting, player development, and the season calendar.",
         "invariants": [
-            "Direct velocity assignment on players is FORBIDDEN. Always use: v_t = move_toward(v_{t-1}, v_target, a_eff * delta).",
-            "Turning penalty formula: a_eff = a_base * (1.0 - γ * (θ / π)) where θ = arccos(v̂_current · v̂_target).",
-            "Pseudo-3D Ball: z(t+Δt) = z(t) + vz(t)*Δt - 0.5*g*(Δt)². Sprite Y offset = -z, Shadow scale = clamp(1.0 - z/300.0, 0.35, 1.0).",
-            "Ball friction is proportional (velocity * coefficient + REST_DRAG_FLAT), NOT a constant deceleration.",
-            "Collision Matrix: CharacterBody2D masks Layer 1 (World) + Layer 2 (Players) ONLY. NEVER mask Layer 3 (Ball) in CharacterBody2D.",
-            "Ball interaction is sensed via Area2D on Layer 4 detecting Layer 3.",
-            "Ball ownership: possessor (Node2D, active carrier) vs last_touched_by (HeavyPlayerController, last kicker)."
+            "CareerManager owns the ONLY live CareerSaveData. The league (squads, staff, attributes) stays owned by DataLoader and is saved per slot via DataLoader.save_league().",
+            "A CareerSaveData is constructed only by CareerSaveData.make_new() (called from CareerManager) or CareerSerializer.load_from_slot(). Never build a second save state anywhere else.",
+            "Squad index is player identity; transfers repair lineups and player states rather than re-keying players.",
+            "Database integrity: data/{league,players,managers,referees,staff}.json must pass tools/verify_db.py with 0 errors; every squad holds 16-22 players and exactly 11 distinct lineup_indices (GK first).",
+            "All career randomness flows through CareerManager's seeded _rng (seeded from CareerSaveData.rng_seed); never call the global randf()/randi() in the career layer.",
+            "Strict typing on every variable, parameter and return type; no Pythonisms (None/True/False/def/len/isinstance/import) and no object-to-string comparisons.",
         ],
         "choke_points": [
-            "entities/player/HeavyPlayerController.gd — Physics execution body. Reads movement_intent and wants_sprint from PlayerBrain. Never contains tactical utility logic.",
-            "entities/ball/Pseudo3DBall.gd — Pseudo-3D ball solver. Manages z-axis gravity, bounce restitution, and proportional drag.",
-            "shared/CollisionLayers.gd — Bitmask constants (Layer 1 World, Layer 2 Players, Layer 3 Ball, Layer 4 Hitboxes)."
+            "autoloads/CareerManager.gd — Owns the live CareerSaveData; simulate_next_fixture() is the match-day entry point and _apply_fixture_result() folds the result into the table, finances, morale, board confidence and cups.",
+            "autoloads/DataLoader.gd — Owns DataLoader.league (squads, staff, attributes) and persists it per slot via save_league().",
+            "shared/career/CareerSerializer.gd — The only read/write path for a career slot; the only CareerSaveData constructor besides CareerSaveData.make_new().",
+            "autoloads/GameEvents.gd — The only cross-layer signal bus; career state never talks to presentation directly.",
         ],
         "key_files": [
-            "entities/ball/Pseudo3DBall.gd",
-            "entities/ball/BallState.gd",
-            "entities/ball/BallStateFactory.gd",
-            "entities/ball/states/FlightState.gd",
-            "entities/ball/states/GroundRollState.gd",
-            "entities/ball/states/PossessionState.gd",
-            "entities/player/HeavyPlayerController.gd",
-            "entities/player/PlayerState.gd",
-            "entities/player/states/MoveState.gd",
-            "entities/player/states/DribbleState.gd",
-            "entities/player/states/ChargeKickState.gd",
-            "entities/player/states/TackleState.gd",
-            "entities/player/states/AerialState.gd",
-            "pitch/PitchBoundary.gd",
-            "pitch/GoalZone.gd",
-            "pitch/PitchScene.gd",
-            "shared/CollisionLayers.gd"
-        ],
-        "rule_file": ".claude/rules/soccer-physics.md"
-    },
-    2: {
-        "title": "Layer 2 — Match AI & Spatial Navigation",
-        "description": "Spatial indexing, utility scoring, time-sliced decision engines, dynamic formation anchors, goalkeeper dive AI, and officiating crew.",
-        "invariants": [
-            "Zero scene-tree polling: Calling get_tree().get_nodes_in_group() in _process or _physics_process is FORBIDDEN.",
-            "All spatial reads must query MatchWorldModel.player_positions[i].",
-            "Time-sliced decision updates: NPC tactical updates run on 15-frame stagger: (player_index + frame_count) % 15 == 0.",
-            "Zero allocations in hot paths: Vector2(), Array(), RandomNumberGenerator.new() inside decision loops are FORBIDDEN.",
-            "Defensive line depth: MatchWorldModel.defensive_line_x is computed ONCE per frame for each team, never per-defender.",
-            "PlayerBrain writes ONLY player.movement_intent (Vector2) and player.wants_sprint (bool/scale) — never velocity or acceleration.",
-            "PlayerRoleConfig.anchor_weight (0-1): 1.0 = rigid anchor, 0.0 = roam freely (the inverse of PlayerBrain roam alpha). Guard with `if player.role_config != null`."
-        ],
-        "choke_points": [
-            "autoloads/MatchWorldModel.gd — ALL spatial reads route here. Owns 22-player cache + ball + defensive_line_x.",
-            "entities/player/PlayerBrain.gd — Utility decision engine. Reads world model; writes ONLY movement_intent and wants_sprint.",
-            "shared/PlayerRoleConfig.gd — Data-driven role tuning resource. Inverts anchor_weight when calculating open space roam alpha."
-        ],
-        "key_files": [
-            "autoloads/MatchWorldModel.gd",
-            "entities/player/PlayerBrain.gd",
-            "shared/PassUtilityScorer.gd",
-            "shared/UtilityMath.gd",
-            "shared/FormationAnchorMath.gd",
-            "shared/FormationLibrary.gd",
-            "shared/FormationRegistry.gd",
-            "shared/PlayerRoleConfig.gd",
-            "entities/goalkeeper/GoalkeeperDiveBrain.gd",
-            "entities/referee/MatchReferee.gd",
-            "entities/referee/OffsideDetector.gd",
-            "entities/manager/ManagerDirector.gd"
-        ],
-        "rule_file": ".claude/rules/ai-architect.md"
-    },
-    3: {
-        "title": "Layer 3 — Match Social & Dynamic Psychology",
-        "description": "Player form/mood dynamics (SLUMP/NORMAL/STREAK), passing trust dynamics, dynamic player performance ratings, and match event stats tracking.",
-        "invariants": [
-            "MoodSystem modifies scatter and confidence: SLUMP increases scatter (+35%), STREAK sharpens execution (-25%).",
-            "TrustSystem tracks dynamic in-match passer-receiver trust based on pass completions, turnovers, and assists.",
-            "Player ratings dynamically calculate between 1.0 and 10.0 based on positive/negative actions (passes, tackles, saves, goals, fouls).",
-            "MatchStatsTracker accumulates per-player and per-team event metrics without interfering with physics processing."
-        ],
-        "choke_points": [
-            "entities/player/MoodSystem.gd — Manages player psychological momentum and modifiers to physical actions.",
-            "entities/player/TrustSystem.gd — Dynamic trust matrix biasing pass selection in PassUtilityScorer.",
-            "autoloads/MatchStatsTracker.gd — Aggregates match events dispatched from GameEvents."
-        ],
-        "key_files": [
-            "entities/player/MoodSystem.gd",
-            "entities/player/TrustSystem.gd",
-            "shared/PlayerRatingCalculator.gd",
-            "autoloads/MatchStatsTracker.gd"
-        ],
-        "rule_file": None
-    },
-    4: {
-        "title": "Layer 4 — Club World & Persistent Entities",
-        "description": "Persistent player profiles, team rosters, manager personalities with trait bitmasks, referee officiating profiles, and JSON database loaders.",
-        "invariants": [
-            "Database integrity: All data files (data/league.json, data/managers.json, data/referees.json) must pass verify_db.py with 0 errors.",
-            "Every squad in league.json contains 16-22 players with exactly 11 distinct starting lineup_indices (GK first).",
-            "Manager data enforces 10-bit trait masks, prized attributes, and preferred playstyles.",
-            "Referee data enforces personality spectrums (strictness, composure, unprofessionalism, incoherence).",
-            "DataLoader, ManagerLoader, and RefereeLoader provide fallback hierarchy and bounds-safe queries."
-        ],
-        "choke_points": [
-            "autoloads/DataLoader.gd — Single source of truth for player data, squads, and league database ingestion.",
-            "autoloads/ManagerLoader.gd — Tactical manager profile catalog and persistence.",
-            "autoloads/RefereeLoader.gd — Match referee personality catalog.",
-            "shared/PlayerData.gd — Persistent player attributes, traits, and physical parameters.",
-            "docs/json-schema.md — Formal schema specifications for external databases."
-        ],
-        "key_files": [
+            "autoloads/CareerManager.gd",
             "autoloads/DataLoader.gd",
             "autoloads/ManagerLoader.gd",
             "autoloads/RefereeLoader.gd",
-            "shared/PlayerData.gd",
+            "autoloads/StaffLoader.gd",
+            "shared/career/CareerSaveData.gd",
+            "shared/career/CareerSerializer.gd",
+            "shared/career/CompetitionData.gd",
             "shared/TeamData.gd",
-            "shared/TeamManagementData.gd",
+            "shared/PlayerData.gd",
             "shared/LeagueData.gd",
             "shared/ManagerData.gd",
             "shared/RefereeData.gd",
-            "shared/PlayerFactory.gd",
-            "docs/json-schema.md",
-            "tools/verify_db.py"
+            "shared/StaffData.gd",
+            "shared/TeamManagementData.gd",
+            "shared/NationDatabase.gd",
+            "shared/CareerProgressionEngine.gd",
+            "data/league.json"
+        ],
+        "rule_file": ".claude/rules/career-mode.md"
+    },
+    2: {
+        "title": "Layer 2 — Quick-Sim Match",
+        "description": "Statistical match resolution: the QuickSimEngine Poisson/Dixon-Coles model, per-player rating calculation, the shared allocation-free math solvers, the MatchStatsTracker container, and the GameManager scoreboard boundary. There is no player control, ball physics, real-time frames or per-frame AI.",
+        "invariants": [
+            "Matches resolve entirely by statistics: shared/QuickSimEngine.gd is the only thing that produces a match result.",
+            "QuickSimEngine.apply_to_match_stats_tracker() is the single publish point. It writes GameManager (score / current_phase / match_time / simulated_match_time) and fills MatchStatsTracker; no other code may publish a match outcome.",
+            "MatchStatsTracker is a passive container (reset(), stop_possession_sampling() no-op, get_player_events(), compute_all_ratings(), get_stats(), get_advanced_stats()). It never polls the scene tree and never subscribes to real-time events; possession_pct reports its neutral 50.0 fallback.",
+            "GameManager is a thin scoreboard shell: TEAM_A, TEAM_B, enum MatchPhase { PREGAME, FULL_TIME }, current_phase, score, match_time, match_duration, half_duration_real_sec, simulated_match_time, set_half_duration(). Never reintroduce a phase machine, clock or set-piece state there.",
+            "Zero hot-path allocation: no .new(), Array literals or Dictionary literals inside the live shared/UtilityMath.gd solvers (calculate_intercept_point, solve_pass_intercept, closest_point_on_segment, distance_squared_to_segment, distance_to_segment).",
+        ],
+        "choke_points": [
+            "shared/QuickSimEngine.gd — Statistical resolver. calculate_probabilities() / simulate_match() are pure; apply_to_match_stats_tracker() is the single publish point into GameManager + MatchStatsTracker.",
+            "autoloads/MatchStatsTracker.gd — Flat stats container written only by QuickSimEngine and read back by MatchStatsUI.",
+            "autoloads/GameManager.gd — Scoreboard boundary between the career world and a resolved fixture.",
+            "shared/UtilityMath.gd — Live allocation-free math helper class (deliberately KEPT, not archived), used by QuickSimEngine and the solver fuzzers.",
+        ],
+        "key_files": [
+            "shared/QuickSimEngine.gd",
+            "shared/PlayerRatingCalculator.gd",
+            "shared/UtilityMath.gd",
+            "autoloads/MatchStatsTracker.gd",
+            "autoloads/GameManager.gd"
         ],
         "rule_file": None
     },
-    5: {
-        "title": "Layer 5 — Narrative, Presentation & User Interface",
-        "description": "Global event bus, match lifecycle manager, camera tracking modes, broadcast HUD, floating action text, touchline bubbles, and UI menus.",
+    3: {
+        "title": "Layer 3 — Narrative & Presentation",
+        "description": "The event log, press office and manager-mode UI: the GameEvents signal bus, narrative generation, and the presentation panels that react to signals instead of polling simulation state.",
         "invariants": [
-            "GameEvents.gd is the ONLY inter-system signal hub. Cross-layer signals must never be emitted directly between components.",
-            "GameManager.gd is the single source of truth for match state, score, clock, and set-piece phases.",
-            "InputHelper.gd abstracts human keyboard and gamepad inputs uniformly.",
-            "HUD, minimap, and action text render cleanly without altering simulation or physics state."
+            "GameEvents.gd is the ONLY inter-system signal hub and carries exactly 11 signals (formation_changed, lineup_changed, career_started, career_day_advanced, career_advance_halted, career_inbox_changed, career_match_ready, career_result_recorded, career_season_ended, career_manager_sacked, world_event_logged).",
+            "Never widen an existing signal signature: append a NEW signal instead, because under-declared listeners break silently.",
+            "Presentation reacts to GameEvents; it never emits cross-system signals from a component and never polls the scene tree with get_tree().get_nodes_in_group().",
+            "The career UI never leaves ui/manager_mode/ManagerModeRoot.gd to play a match: _on_continue_pressed() calls CareerManager.simulate_next_fixture().",
+            "WorldEventLog is not the owner of the events: CareerSaveData.world_events is the persisted array, and WorldEventLog.log_event() is the single append path (plus the world_event_logged emit).",
+            "UI reads state; it never writes MatchStatsTracker or publishes a GameManager match result.",
         ],
         "choke_points": [
             "autoloads/GameEvents.gd — ALL inter-system events propagate via signals on this bus.",
-            "autoloads/GameManager.gd — Single source of truth for match lifecycle, score, clock, and set-piece states.",
-            "autoloads/InputHelper.gd — Controller input mapping and device abstraction."
+            "autoloads/WorldEventLog.gd — Live view over CareerSaveData.world_events; bind(), log_event(), record() and the query helpers are the only access path.",
+            "ui/manager_mode/ManagerModeRoot.gd — The career shell; the Continue loop resolves fixtures through CareerManager.simulate_next_fixture().",
+            "entities/manager/PressOffice.gd — Stateless quote generator driven by the event log.",
         ],
         "key_files": [
             "autoloads/GameEvents.gd",
-            "autoloads/GameManager.gd",
-            "autoloads/InputHelper.gd",
+            "autoloads/WorldEventLog.gd",
             "entities/manager/PressOffice.gd",
-            "pitch/MatchCamera.gd",
-            "pitch/Minimap.gd",
-            "ui/HUD.gd",
-            "ui/ActionText.gd",
-            "ui/TouchlineBubble.gd",
-            "ui/FormationDiagram.gd",
+            "ui/manager_mode/ManagerModeRoot.gd",
+            "ui/manager_mode/TacticsPanel.gd",
+            "ui/MainMenu.gd",
+            "ui/OptionsMenu.gd",
             "ui/MatchStatsUI.gd",
-            "ui/pregame/PreGameScreen.gd",
-            "ui/pause/PauseMenu.gd"
+            "ui/QuickSimModal.gd"
         ],
         "rule_file": None
     }
@@ -236,16 +197,20 @@ def print_layer_context(layer_id: int) -> None:
 
 def main() -> int:
     if len(sys.argv) < 2:
-        print("Usage: python tools/layer_context.py [1|2|3|4|5|physics|ai|social|club|narrative]", file=sys.stderr)
-        print("\nAvailable Layers:")
-        for lid in range(1, 6):
-            print(f"  {lid}: {LAYER_DATA[lid]['title']}")
+        print("Usage: python tools/layer_context.py [1|2|3|career|quicksim|narrative|...]", file=sys.stderr)
+        print("\nLive 3-layer stack (pre-pivot ids/names are accepted as aliases):", file=sys.stderr)
+        for lid in range(1, 4):
+            print(f"  {lid}: {LAYER_DATA[lid]['title']}", file=sys.stderr)
         return 1
 
     query = sys.argv[1].lower().strip()
     layer_id = LAYER_ALIASES.get(query)
     if not layer_id or layer_id not in LAYER_DATA:
-        print(f"[layer-context] Unknown layer: '{query}'. Choose 1, 2, 3, 4, or 5.", file=sys.stderr)
+        print(
+            f"[layer-context] Unknown layer: '{query}'. Choose 1 (Career World), 2 (Quick-Sim Match), "
+            "or 3 (Narrative & Presentation); pre-pivot names such as physics/ai/social/club/narrative are remapped.",
+            file=sys.stderr
+        )
         return 1
 
     print_layer_context(layer_id)

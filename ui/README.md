@@ -1,148 +1,104 @@
-# ui/ — HUD, Menus, & User Feedback
+# ui/ — Menus, Career Screens, & Match Presentation
 
-User interface screens, HUD overlays, match statistics, and menu systems.
+All user-facing screens. In the manager-only architecture this is Layer 3 (Narrative & Presentation): the UI reads career state and resolved match results, and never drives a live match.
 
 ## Architecture Overview
 
 ```
-MainMenu.tscn (entry point)
-  ├─ KickOffMenu (team selection)
-  ├─ OptionsMenu (settings)
-  └─ Quit
-  
-PitchScene.tscn (match)
-  ├─ HUD (in-match UI)
-  │   ├─ ActionText (floating PASS/SHOT/TACKLE labels)
-  │   ├─ TouchlineBubble (manager animated quotes)
-  │   ├─ Minimap (top-down position radar)
-  │   └─ SubstitutionBanner & Referee Banners
-  │
-  ├─ PauseMenu (ESC / UI pause)
-  │   ├─ Tactical formation adjustments
-  │   └─ Bench substitution UI (max 3 substitutions)
-  │
-  ├─ PreGameScreen (pre-match)
-  │   ├─ Starting XI & reserve bench lineup editor
-  │   ├─ FormationDiagram preview
-  │   └─ Team tactics setup
-  │
-  ├─ MatchStatsUI (full-time screen)
-  │   ├─ Final score and team statistics
-  │   └─ Per-player 1.0–10.0 performance ratings
-  │
-  └─ MatchCamera (cinematic + ball-follow modes)
+SplashScreen.tscn (main scene, fades into the menu)
+  └─ MainMenu.tscn
+       ├─ Manager Mode → manager_mode/ManagerCreationScreen.tscn
+       │                    └─ manager_mode/ManagerModeRoot.tscn (career hub)
+       ├─ OptionsMenu.tscn
+       └─ Quit
+
+ManagerModeRoot.tscn — the career never leaves this scene to play a match
+  ├─ Career panels: Overview, Inbox, Squad, Tactics, Training, Transfers,
+  │    Scouting, Staff, Fixtures, League, Finances, Board, Calendar
+  ├─ QuickSimModal.tscn (manual quick-sim modal)
+  └─ MatchStatsUI.tscn (full-time result and ratings view)
 ```
 
+**Archive note:** the pre-pivot real-time match screens (HUD, pre-game, pause, tactics diagram, touchline overlays) now live under `legacy/ui/` and are not part of the live UI tree.
+
 ## Key Scenes
+
+### SplashScreen.tscn
+
+**Responsibilities:**
+- The project's main scene: fade in, hold, then load `MainMenu.tscn`
+- Allow skipping the splash with input
+
+---
 
 ### MainMenu.tscn
 
 **Responsibilities:**
-- Display menu options (Kick Off, Practice, Career, Options, Quit)
-- Route to KickOffMenu for 8-team league match setup
-- Launch PitchScene with selected parameters via `GameManager` meta
+- Display exactly three buttons: **Manager Mode**, **Options**, and **Quit**
+- Route Manager Mode to `manager_mode/ManagerCreationScreen.tscn` (creation/slot selection decides whether to load a career or start a new one)
+- Open `OptionsMenu.tscn` and confirm quit via a dialog
 
 ---
 
-### PauseMenu.tscn
+### OptionsMenu.tscn
 
 **Responsibilities:**
-- Display pause overlay
-- Allow live formation changes mid-match
-- Execute in-match player substitutions (up to 3 per match) via `TeamManagementData`
-- Resume, restart match, or return to main menu
-
-**Signals:**
-- Emits `GameEvents.substitution_made(team, out_idx, in_idx)`
-- Emits `GameEvents.formation_changed(team, name)`
+- Adjust audio buses (master/music/SFX), fullscreen, and FPS display
+- Select half duration; written through `GameManager.set_half_duration()`
+- Emit `menu_closed` so the main menu can restore focus
 
 ---
 
-### PreGameScreen.tscn
+### manager_mode/ManagerCreationScreen.tscn
 
 **Responsibilities:**
-- Display starting XI and reserve bench
-- Allow lineup swapping and bench assignments before kickoff
-- Display formation preview with `FormationDiagram.gd`
-- Confirm readiness via `GameEvents.pregame_confirmed`
+- Render career slots and create-or-load selection
+- Gather manager identity and pick a club/job
+- Populate `CareerManager` and hand off to `manager_mode/ManagerModeRoot.tscn`
+
+---
+
+### manager_mode/ManagerModeRoot.tscn
+
+**Responsibilities:**
+- The career hub. Sidebar navigation swaps one `CareerPanel` subclass into the content host at a time: `OverviewPanel`, `InboxPanel`, `SquadPanel`, `TacticsPanel`, `TrainingPanel`, `TransfersPanel`, `ScoutingPanel`, `StaffPanel`, `FixturesPanel`, `LeaguePanel`, `FinancesPanel`, `BoardPanel`, `CalendarPanel`
+- Drive the Continue loop: `_on_continue_pressed()` calls `CareerManager.simulate_next_fixture()`, which resolves the next fixture through `QuickSimEngine` and folds the result back into the career
+- Surface contract negotiation (`ContractNegotiationModal.gd`), theming (`CareerTheme.gd`, `CareerThemePalette`) and shared panel base (`CareerPanel.gd`)
+
+---
+
+### QuickSimModal.tscn
+
+**Responsibilities:**
+- Present a pre-sim summary and open a manual quick-sim
+- On completion, emit `match_completed(result: QuickSimEngine.QuickSimResult)` for the caller to consume
+- Emit `modal_closed` when dismissed
 
 ---
 
 ### MatchStatsUI.tscn
 
 **Responsibilities:**
-- Displayed upon `GameEvents.match_ended` at FULL_TIME
-- Shows final score, team possession percentages, total shots, shots on target, passes (completed/attempted), fouls, corners, offsides, and cards
-- Displays per-player match performance ratings (1.0–10.0) computed by `PlayerRatingCalculator.gd`
-- Provides button to return to Main Menu
+- Full-time view populated from `MatchStatsTracker` and the published `QuickSimResult`
+- Tabs for the summary, traditional stats and advanced stats (xG, PSxG, xT, packing, progressive actions)
+- Display per-player match ratings (1.0–10.0) computed by `PlayerRatingCalculator.gd`
+- Emit `stats_dismissed` to return control to the career hub
 
 ---
 
-### HUD.gd (MatchHUD)
+## Presentation Contract
 
-**Responsibilities:**
-- Render minimap with team-colored dots and ball tracking
-- Display floating action text (PASS, SHOT, LOB, TACKLE, SAVE, REBOUND)
-- Display match clock, score, current phase banner, and referee event alerts
-- Render stamina bar and facing arrow for user-controlled player
-
----
-
-### TouchlineBubble.gd
-
-**Responsibilities:**
-- Spawns animated speech bubbles for manager reactions to key events (goals, missed chances, yellow/red cards, foul disputes).
-
----
-
-## HUD Rendering Contract
-
-All HUD updates route through signal connections:
-
-**From GameEvents:**
-- `player_switched(new_player)` — Update active controlled player highlight
-- `ball_struck(player, speed, charge_ratio, is_shot)` — Spawn ActionText
-- `goal_scored(team, scorer)` — Highlight scorer, update score
-- `match_phase_changed(phase)` — Update clock/phase display
-- `yellow_card_shown` / `red_card_shown` — Display card presentation overlays
-- `offside_called` — Display offside decision banner
-- `substitution_made` — Display player swap overlay
-
-**From MatchWorldModel:**
-- Polls `player_positions[i]` every frame for minimap
-- Polls `ball_position` and `ball_position_z` for ball radar
+- All UI updates are passive: listen to the `GameEvents` signal bus; never mutate career state or match state directly.
+- Career panels read `CareerManager.career` and the `shared/career/*` data classes; they do not own career state.
+- Match presentation reads results published by `QuickSimEngine.apply_to_match_stats_tracker()`; the UI never resolves a fixture itself.
 
 **DO NOT:**
-- Query scene tree for player positions; use MatchWorldModel
-- Direct node manipulation; use signals
-- Cache player references; query MatchWorldModel every frame
+- Change scene out of `ManagerModeRoot` to play a match
+- Duplicate career or match state in UI nodes
+- Emit cross-system signals outside `GameEvents`
 
 ---
 
-## Themes & Styling (Phase 5)
+## Themes & Styling
 
-Currently uses custom Godot theme styling with clean flat arcade visuals.
-
-**Planned (Phase 5):**
-- Additional custom font stack
-- Extended team-aware stadium cosmetics
-- Audio soundscape integration
-
----
-
-## Camera Systems (MatchCamera.gd)
-
-Three modes selectable by player:
-1. **BALL_FOLLOW** — Camera centered on ball with dynamic zoom
-2. **DYNAMIC** — Weighted blend between ball and controlled player
-3. **FULL_FIELD** — Static view covering entire pitch
-
----
-
-## Notes
-
-- All UI updates are passive (listen to GameEvents; never mutate physics state directly).
-- Minimap is the primary spatial feedback for off-screen players.
-- Stamina display reads `HeavyPlayerController.stamina` and `stamina_state_changed` signal.
-- Formation UI is independent of tactical AI (UI shows preview; ManagerDirector applies to brains).
-
+Career screens use the shared career theme (`CareerTheme.gd`, `manager_mode_theme.tres`, `shared/career/CareerThemePalette.gd`) for a clean, flat management-game look.

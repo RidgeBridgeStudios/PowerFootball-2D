@@ -1,10 +1,10 @@
 ##
 ## PlayerData
 ##
-## Pure data container for one player: identity, physical tuning, and brain
+## Pure data container for one player: identity, physical profile, and
 ## personality. Saveable as a .tres resource so a squad can be authored and
-## edited without touching a scene. PlayerFactory is what turns an instance of
-## this into a live HeavyPlayerController — this resource never touches a Node.
+## edited without touching a scene. The quick-sim match layer reads an instance
+## of this directly — this resource never touches a Node.
 ##
 ## Depends on: nothing.
 ## Exposes: the fields below and make_default().
@@ -27,7 +27,7 @@ extends Resource
 ## Array of Dictionaries: [{"language": "Nordlandic", "proficiency": 1.0, "level": "Native"}, ...]
 @export var spoken_languages: Array[Dictionary] = []
 
-## --- Physical identity — maps 1:1 onto HeavyPlayerController exports ---------
+## --- Physical identity — read by quick-sim ratings and player development ----
 
 @export var mass: float = 75.0
 @export var top_speed: float = 210.0
@@ -45,7 +45,7 @@ extends Resource
 @export var stamina_drain: float = 18.0
 @export var stamina_recover: float = 9.0
 
-## --- Brain personality — maps 1:1 onto PlayerBrain exports --------------------
+## --- Personality — drives quick-sim ratings, scouting, and progression --------
 
 @export_range(0.0, 1.0) var vision: float = 0.75
 @export_range(0.0, 1.0) var composure: float = 0.60
@@ -107,7 +107,7 @@ extends Resource
 ## slightly each match a player does not feature. Default 6.5 = neutral form.
 @export var form: float = 6.5
 
-## Career goals and assists — incremented by PitchScene after each match.
+## Career goals and assists — accumulated by accumulate_match_stats() each match.
 @export var career_goals: int = 0
 @export var career_assists: int = 0
 
@@ -132,7 +132,7 @@ extends Resource
 @export var is_unavailable: bool = false
 
 ## --- Transient per-match card counts -------------------------------------------
-## Reset to 0 by MatchReferee.bind() at the start of each match. Not persisted —
+## Reset to 0 by the pre-pivot match layer, archived under legacy/. Not persisted —
 ## RefereeData.red_cards_issued is the career stat.
 var yellow_cards_this_match: int = 0
 var red_cards_this_match: int = 0

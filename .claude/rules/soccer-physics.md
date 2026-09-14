@@ -2,6 +2,13 @@
 description: Kinematic weight, turning arcs, and pseudo-3D trajectory rules
 paths: ["**/entities/**", "**/pitch/**"]
 ---
+> [!WARNING]
+> **SUPERSEDED — pre-pivot real-time match layer.** This rulebook governed the
+> 22-player physics match engine, which is now archived under `legacy/` behind
+> `legacy/.gdignore`. Retained as historical reference for `QuickSimEngine`
+> depth work; **do not apply it to current code**. See
+> `docs/agent-errata/architecture-pivot.md` and `docs/CORE_INVARIANTS.md`.
+
 ## PowerFootball-2d Physics Invariants
 
 CHARACTER KINEMATICS:

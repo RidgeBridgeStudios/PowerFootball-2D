@@ -1,168 +1,174 @@
 # autoloads/ — Singletons & Global Services
 
-Autoloads are the backbone of PowerFootball-2D's layered architecture. They initialize in order (see CLAUDE.md) and must never reference each other directly in `_ready()`.
+Autoloads are the backbone of PowerFootball-2D's 3-layer manager-only architecture. They initialize in a fixed order (see below and `project.godot`) and must never reference each other directly in `_ready()` — use signal connections or deferred calls.
 
 ## Boot Order (project.godot)
 
-1. **MatchWorldModel** — Spatial cache for all players and ball
-2. **GameEvents** — Signal bus for inter-system events
-3. **GameManager** — Match phase, score, clock, set piece coordination
-4. **MatchStatsTracker** — Per-match team stats and per-player ratings event accumulator
-5. **DataLoader** — JSON parsing; player/manager/team instantiation
-6. **RefereeLoader** — Referee database
-7. **ManagerLoader** — Manager database and formation library
-8. **InputHelper** — Player input mapping
+1. **GameEvents** — Signal bus for inter-system events
+2. **GameManager** — Thin scoreboard shell (score, phase, durations)
+3. **MatchStatsTracker** — Quick-sim team stats and per-player rating container
+4. **DataLoader** — League, team and player data (JSON)
+5. **RefereeLoader** — Referee database
+6. **ManagerLoader** — Manager database and formation library
+7. **StaffLoader** — Staff database
+8. **WorldEventLog** — Career narrative event log
+9. **CareerManager** — Career state owner and day loop
 
-Do not change this order without updating CLAUDE.md and all dependent systems.
-
-## Key Responsibilities
-
-### MatchWorldModel.gd
-
-**Contract:** Single source of truth for player and ball positions in 3D space.
-
-**Exports:**
-- `player_positions: Dictionary[int, Vector2]` — Spatial cache keyed by world_index
-- `player_nodes: Array[Node2D]` — Direct references
-- `ball_node: Node2D` — Ball reference (set by PitchScene)
-- `instance: MatchWorldModel` — Singleton getter
-
-**Must Read From:**
-- `player_index = world_index` assignment per player in `_ready()`
-- `register_player(index, node, team)` for roster initialization
-- `nearest_opponent_dist_to(from_index, exclude_team)` for spatial queries
-
-**DO NOT:**
-- Call `get_tree().get_nodes_in_group()` inside AI loops
-- Cache player positions; query the model every frame
-- Use stale `player_nodes` references in Practice Arena (many freed mid-match)
+**Invariant:** `GameEvents` boots FIRST; all four loaders precede `WorldEventLog`, which precedes `CareerManager`. `tools/gdcheck.py` enforces this and fails the gate if the order is broken. Do not change it without updating `docs/CORE_INVARIANTS.md`.
 
 ---
 
 ### GameEvents.gd
 
-**Contract:** Central signal bus. No other system references each other directly; all communication routes here.
+**Contract:** The ONLY signal bus. No system references another directly; all communication routes here. It carries exactly 11 signals:
 
-**Critical Signals:**
-- `ball_struck(kicker, speed, charge_ratio, is_shot)` — Any kick action
-- `goal_scored(team, scorer)` — Ball in goal (scorer is last_touched_by; scorer.team != team is an own goal)
-- `foul_committed(offender, victim, foul_type)` — Player rule violation
-- `match_phase_changed(new_phase)` — Phase transitions
-- `substitution_made(team, player_out_idx, player_in_idx)` — Reserve entry
-- `manager_formation_changed(team, formation_name)` — Tactical shift (emitted by ManagerDirector, not ManagerLoader)
-- `formation_anchors_changed(team, new_anchors)` — World-space anchor updates for AI steering
+| Signal | Meaning |
+|---|---|
+| `formation_changed(team, new_formation)` | Team formation changed via tactics |
+| `lineup_changed(team)` | Starting XI / bench changed |
+| `career_started(save_name, club_name)` | A new or loaded career became active |
+| `career_day_advanced(iso_date)` | The day loop advanced one day |
+| `career_advance_halted(reason)` | Continue stopped and needs the manager |
+| `career_inbox_changed(unread_count, pending_decisions)` | Inbox state changed |
+| `career_match_ready(home_team_index, away_team_index)` | A user fixture is ready |
+| `career_result_recorded(home_score, away_score)` | A fixture result was folded in |
+| `career_season_ended(season_year, final_position)` | Season rolled over |
+| `career_manager_sacked(club_name, reason)` | The user was dismissed |
+| `world_event_logged(event)` | A `WorldEvent` entered the log |
 
 **DO NOT:**
 - Reference other autoloads or scene nodes directly from GameEvents
-- Emit signals outside of their intended origin file
-- Use signals for cheap state queries; that is what MatchWorldModel and data structures are for
+- Emit cross-system signals from individual components instead of the bus
+- Add signals beyond the documented set
 
 ---
 
 ### GameManager.gd
 
-**Contract:** Owns match phase, score, clock, and set piece initiation.
-
-**Exports:**
-- `match_clock: float` — Seconds elapsed (for UI and match flow)
-- `score: Array[int]` — Current score `[home, away]`
-- `current_phase: GameManager.MatchPhase` — Enum (PREGAME, KICKOFF, IN_PLAY, HALF_TIME, FULL_TIME, etc.)
-- `match_duration: float` — Full-time duration (default 300.0s)
+**Contract:** A thin scoreboard shell — the boundary between the career world and a resolved fixture. Members are ONLY:
+- `TEAM_A`, `TEAM_B` — side constants
+- `enum MatchPhase { PREGAME, FULL_TIME }` — the two states the career world observes
+- `current_phase: MatchPhase`
+- `score: Array[int]`
+- `match_time: float`, `match_duration: float`, `half_duration_real_sec: float`, `simulated_match_time: float`
+- `set_half_duration(real_sec: float)`
 
 **Responsibilities:**
-- Drive `GameEvents.match_phase_changed` on phase transitions
-- Update clock and emit score changes
-- Coordinate set pieces and penalties via `SetPieceCoordinator`
-- Call `_end_match()` when time expires
+- Hold the last published score, phase and clock for the full-time view
+- Be written by `QuickSimEngine.apply_to_match_stats_tracker()`, read by `MatchStatsUI` and `MatchStatsTracker`
 
 **DO NOT:**
-- Make gameplay decisions (fouls, offsides, possession). That is ref/AI territory.
-- Directly modify player state
-- Emit or consume non-match-phase signals
+- Grow a phase machine, per-frame clock loop, set-piece state or shootout controller back into it
+- Make gameplay decisions or hold duplicate career state
 
 ---
 
 ### MatchStatsTracker.gd
 
-**Contract:** Per-match team aggregate stats and per-player event tracker for full-time ratings.
+**Contract:** Pure quick-sim stats container. It no longer collects events from a live match; `QuickSimEngine` fills it.
 
 **Responsibilities:**
-- Samples possession every 30 physics ticks (`POSSESSION_SAMPLE_INTERVAL = 30`) via `MatchWorldModel.possessor_index`
-- Accumulates team stats: shots (total/on target), passes (attempted/completed), fouls, cards, corners, offsides
-- Tracks per-player events keyed by `team * 1000 + squad_index`
-- Computes end-of-match player ratings (1.0–10.0) via `PlayerRatingCalculator.gd`
-- Provides match summary statistics to `MatchStatsUI.gd`
+- Hold the traditional stat arrays (shots, passes, fouls, cards, corners, offsides) and advanced stats (xG, PSxG, xT delta, packing, IMPECT, progressive actions, VAEP, …)
+- Provide `reset()`, `stop_possession_sampling()` (no-op retained for API compatibility), `get_player_events()`, `compute_all_ratings()`, `get_stats(team_index)` and `get_advanced_stats(team_index)`
+- Compute end-of-match player ratings (1.0–10.0) via `PlayerRatingCalculator.gd`
 
 **DO NOT:**
-- Query scene tree during possession sampling
-- Mutate PlayerData directly; provide rating calculations via `compute_all_ratings()`
+- Sample live possession or assume a running real-time match exists
+- Mutate `PlayerData` directly; provide ratings via `compute_all_ratings()`
 
 ---
 
 ### DataLoader.gd
 
-**Contract:** Parses JSON; instantiates PlayerData, ManagerData, TeamData; populates singletons.
-
-**Exports:**
-- `players: Dictionary[String, PlayerData]` — Keyed by player_id
-- `managers: Dictionary[String, ManagerData]` — Keyed by manager_id
-- `teams: Dictionary[String, TeamData]` — Keyed by team_id
+**Contract:** Loads and owns the league: teams, squads and player data. Persists per slot.
 
 **Responsibilities:**
-- Load `res://data/*.json` at boot
-- Instantiate data classes from JSON
-- Validate references (team IDs exist, etc.)
+- Load league JSON into `league: LeagueData`
+- Expose `get_team(index)`, `get_team_by_name(...)`, `get_match_team(side)` and `get_player(team_index, squad_index)`
+- Save changed league data via `save_league()`
 
 **DO NOT:**
-- Modify data at runtime (data is loaded once; use WorldEvent log for career changes)
-- Emit GameEvents (that is GameManager's role)
+- Emit GameEvents
 - Reference scene nodes
 
 ---
 
-### RefereeLoader.gd & ManagerLoader.gd
+### RefereeLoader.gd
 
-Similar to DataLoader; pure database loaders.
+**Contract:** Referee database loader.
 
-**RefereeLoader:**
-- `referees: Dictionary[String, RefereeData]`
-- Used by `MatchReferee` to instantiate personality-weighted foul decisions
-
-**ManagerLoader:**
-- `managers: Dictionary[String, ManagerData]`
-- Formation library accessed by `ManagerDirector`
-- Note: Formation signal is emitted by ManagerDirector, not ManagerLoader
+**Responsibilities:**
+- `get_referee(index)`, `get_random_referee()`, `get_or_assign_referee(home_team_name, away_team_name)`
+- `save_referees()` for persisted referee state
 
 ---
 
-### InputHelper.gd
+### ManagerLoader.gd
 
-**Contract:** Maps player input to standardized action signals.
+**Contract:** Manager database loader and owner of manager records for every club.
 
 **Responsibilities:**
-- Detect gamepad and keyboard input
-- Emit action events (move, pass, tackle, sprint, etc.)
-- Handle input blocking during pause/cutscenes
+- `get_manager_for_team(team_name)`, `get_or_assign_manager(team_name)`, `all_available()`
+- `save_managers()` for persisted manager state
+- Formation library data consumed by the tactics UI — the formation-change signal is emitted by the UI, not by this loader
+
+---
+
+### StaffLoader.gd
+
+**Contract:** Staff database loader.
+
+**Responsibilities:**
+- `get_staff_for_team(team_name)`, `get_assistant_manager`, `get_head_physio`, `get_tactical_analyst`, `all_available_staff()`
+- `hire_staff(...)`, `terminate_staff(...)`, `save_staff()`
+
+---
+
+### WorldEventLog.gd
+
+**Contract:** The club world's history book (Layer 1 → Layer 3). It is a live view over `CareerSaveData.world_events`, plus the append API and query helpers — it does NOT own the events; `CareerSaveData` persists them.
+
+**Responsibilities:**
+- `bind(career)`, `log_event(event)`, `record(...)`, `record_for_player(...)`
+- Query helpers: `all_events()`, `recent()`, `for_player()`, `by_category()`, `since()`, `newsworthy()`
+- `generate_press_reaction(event, manager)` via `PressOffice`, `clear()`
 
 **DO NOT:**
-- Make gameplay decisions based on input (that is PlayerBrain)
-- Cache player references; query MatchWorldModel
+- Treat autoload state as durable storage; the log must survive a save/load round trip, so `CareerSaveData` owns it
+
+---
+
+### CareerManager.gd
+
+**Contract:** The career-state singleton. It owns the ONLY live `CareerSaveData`, drives the day loop, and is the only thing that mutates career state.
+
+**Responsibilities:**
+- `start_new_career(...)`, `load_career(slot)`, `save_career()`, `is_career_active()`
+- `advance_day()` — one simulated day: recovery, training, scouting, transfers, AI club activity, inbox expiry, then fixtures
+- `continue_until_event()` — repeats `advance_day()` until something needs the manager (the FM "Continue" button)
+- `simulate_next_fixture()` — resolves the user's next fixture via `QuickSimEngine` and folds the outcome into table, finances, morale, board confidence, player records and cups
+- Uses its own `_rng: RandomNumberGenerator`, seeded from `CareerSaveData.rng_seed`
+
+`play_next_fixture()` and `record_user_match_result()` still exist but are no longer called by the UI.
+
+**DO NOT:**
+- Duplicate league ownership (that is `DataLoader`)
+- Let the UI or narrative layer mutate career state
 
 ---
 
 ## Adding a New Autoload
 
 1. Create the file in `autoloads/`
-2. Register in `project.godot` (Scene → Autoload)
-3. Update boot order in CLAUDE.md if it has dependencies on other autoloads
+2. Register in `project.godot` (Project → Project Settings → Autoload)
+3. Update the boot order in `docs/CORE_INVARIANTS.md` if it has dependencies on other autoloads
 4. Emit all events through GameEvents; receive through signal connections in `_ready()`
-5. Export a singleton getter if other scenes need to access it
-6. Run `py -3 tools/gdcheck.py` to verify no undeclared members
+5. Run `py -3 tools/gdcheck.py` to verify no undeclared members
 
 ---
 
 ## Notes
 
-- Autoloads persist across scene changes; clear state in `_ready()` if re-entering a match
+- Autoloads persist across scene changes; clear state explicitly when re-entering a career
 - Avoid circular references by never calling another autoload in `_ready()`; use signal connections instead
-- Use `@export` only for things that are authored in the inspector (rare in autoloads)
+- Never add a `class_name` to an autoload script — Godot 4.7 rejects a `class_name` that collides with the injected autoload global

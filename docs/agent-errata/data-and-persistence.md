@@ -1,9 +1,9 @@
 # Data, Persistence & Career Calibration Errata
 
-**Simulation Layer:** Layer 4 — Club World & Career Persistence  
+**Simulation Layer:** Layer 1 — Career World (career persistence)  
 **Primary Modules:** `autoloads/CareerManager.gd`, `autoloads/DataLoader.gd`, `shared/PlayerData.gd`, `shared/career/*`
 
-This page documents gotchas in career mode progression curves, player aging decline formulas, morale-to-mood seeding slopes, and season calendar fixture spacing.
+This page documents gotchas in career mode progression curves, player aging decline formulas, season calendar fixture spacing, and the historical morale→mood seeding calibration (that seeding target, `MoodSystem`, is now archived under `legacy/` — see [architecture-pivot.md](architecture-pivot.md)).
 
 ---
 
@@ -25,7 +25,7 @@ plotting them:
   a gentle ramp: ~23% loss across ages 30-38, and traits now spread that from
   156 (fragile, unprofessional) to 197 (IronMan professional) on a 220 base.
 
-- **Morale -> MoodSystem seeding** used a symmetric slope that dropped a merely
+- **Morale -> MoodSystem seeding** *(historical: `MoodSystem` is archived under `legacy/`; the surviving career morale model is `shared/career/MoraleEngine.gd`)* used a symmetric slope that dropped a merely
   "Restless" player (morale 0.45) into SLUMP — a heavy penalty tier. Made
   asymmetric (0.56 down / 0.70 up) so SLUMP needs genuine unhappiness. Verified
   anchors: authored default (0.70/6.5) lands exactly on 0.500 NORMAL.

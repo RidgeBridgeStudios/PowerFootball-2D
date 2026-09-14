@@ -1,3 +1,9 @@
+> [!WARNING]
+> **PARTIALLY SUPERSEDED — scope note.**
+> Sections §4–§6 and the choke-point examples reference the abandoned 22-player real-time match engine (`PlayerBrain`, `MatchWorldModel`, `HeavyPlayerController`, the 6-layer collision matrix, per-frame AI scoring). That code now lives archived under `legacy/` and must not be read as current implementation guidance.
+> The general Godot 4.7 / GDScript 2.0 pitfalls (§1–§2), strict-typing and autoload rules (§3), signal-bus rules, and zero-allocation rules remain current.
+> Start with [architecture-pivot.md](agent-errata/architecture-pivot.md); canonical contracts: [CORE_INVARIANTS.md](CORE_INVARIANTS.md).
+
 # ANTI_PATTERNS.md — Anti-Hallucination & Architectural Integrity Corpus
 
 This document catalogues canonical failure modes, false assumptions, Godot 4.7 / GDScript 2.0 pitfalls, postmortem discoveries, and architectural violations for autonomous agents (Antigravity, Gemini, Claude, DeepSeek) and human contributors working on **PowerFootball-2D**.

@@ -35,8 +35,8 @@ PATTERN_PLAIN_STRING = re.compile(
 def find_gd_files(root_dir: str) -> list[str]:
     gd_files: list[str] = []
     for dirpath, dirnames, filenames in os.walk(root_dir):
-        # Ignore .godot, .git, etc.
-        dirnames[:] = [d for d in dirnames if not d.startswith(".")]
+        # Ignore .godot, .git, etc. plus the archived legacy/ tree.
+        dirnames[:] = [d for d in dirnames if d != "legacy" and not d.startswith(".")]
         for f in filenames:
             if f.endswith(".gd"):
                 gd_files.append(os.path.join(dirpath, f))

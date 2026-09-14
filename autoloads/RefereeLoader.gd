@@ -4,8 +4,8 @@
 ## Owns the live referee pool. Loads custom referees from
 ## user://custom_referees.json if the file exists, otherwise loads from
 ## packaged res://data/referees.json, and falls back to built-in programmatic
-## referees if neither file is present. PitchScene draws a referee from here
-## at match start rather than constructing a RefereeData itself.
+## referees if neither file is present. CareerManager draws a referee from here
+## for each simulated match rather than constructing a RefereeData itself.
 ##
 ## Depends on: RefereeData.
 ## Exposes: referee_pool, get_referee(index), get_random_referee(), save_referees()

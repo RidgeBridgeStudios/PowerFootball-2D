@@ -2,25 +2,59 @@
 """
 lint_invariants.py — Domain-Specific AST Invariant Linter for PowerFootball-2D.
 
-Programmatically enforces architectural laws, layer separation, zero-allocation
-hot paths, collision matrix integrity, and choke points beyond standard syntax checks:
+Enforces the post-pivot, manager-only architecture described in AGENTS.md §9 and
+docs/agent-errata/architecture-pivot.md: the 3-layer simulation stack, its live
+choke points, and the zero-allocation hot-path rule. Every rule below is scoped
+to files that exist at a live path; legacy/ is skipped by the directory walk
+(and the linter fails loudly if that walk ever discovers no live file at all).
 
-1. BRAIN MUTATION:
-   PlayerBrain.gd and entities/player/states/*.gd must NEVER write to
-   player.velocity, player.global_position, player.base_acceleration, or invoke move_and_slide().
-   All physical integration is strictly owned by HeavyPlayerController.gd.
+SIMULATION STACK (3 layers)
+  Layer 1 — Career World
+      autoloads/CareerManager.gd + DataLoader/ManagerLoader/RefereeLoader/StaffLoader,
+      shared/career/*, shared/*Data.gd, shared/TeamManagementData.gd,
+      shared/CareerProgressionEngine.gd.
+  Layer 2 — Quick-Sim Match
+      shared/QuickSimEngine.gd, shared/PlayerRatingCalculator.gd,
+      shared/UtilityMath.gd, autoloads/MatchStatsTracker.gd, with GameManager as
+      the scoreboard boundary the simulated result is published through.
+  Layer 3 — Narrative & Presentation
+      autoloads/WorldEventLog.gd, entities/manager/PressOffice.gd, ui/manager_mode/*,
+      ui/MainMenu.gd, ui/OptionsMenu.gd, ui/MatchStatsUI.gd, ui/QuickSimModal.gd.
 
-2. HOT-PATH ZERO-ALLOCATION:
-   Methods on hot paths (score_pass, score_pass_breakdown non-debug branch,
-   calculate_intercept_point, _physics_process, get_dynamic_anchor_position)
-   must not allocate memory (.new(), Array literals [], Dictionary literals {}).
+RULES ENFORCED
+  RULE-01-HOT-PATH-ALLOC ....... no heap allocation inside the live UtilityMath
+                                solvers that run per-candidate on hot paths.
+  RULE-02-SCENE-TREE-CRAWL ..... no get_tree().get_nodes_in_group() polling,
+                                no get_node("/root/...") crawling, no chained
+                                get_parent() wiring in live code.
+  RULE-03-SIGNAL-BUS-SURFACE ... autoloads/GameEvents.gd carries exactly its 11
+                                post-pivot signals, no more and no fewer.
+  RULE-04-PUBLISH-OWNERSHIP .... QuickSimEngine.apply_to_match_stats_tracker() is
+                                the only writer of GameManager match state and of
+                                the MatchStatsTracker container.
+  RULE-05-GAMEMANAGER-SHELL .... GameManager stays the thin scoreboard shell; no
+                                phase machine, clock, set-piece state or signals
+                                may be reintroduced there.
+  RULE-06-STATE-OWNERSHIP ...... CareerManager owns the only live CareerSaveData
+                                (constructed only by its factory/serializer) and
+                                DataLoader owns the league object.
 
-3. COLLISION LAYER MATRIX GUARD:
-   CharacterBody2D nodes in .gd and .tscn must NEVER mask Layer 3 (BallPhysicsBody, bit 3 / value 4).
-
-4. CHOKE-POINT BYPASS DETECTION:
-   Non-autoload scripts must not bypass MatchWorldModel.gd by scanning
-   get_tree().get_nodes_in_group() or crawling get_node("/root/...") in AI decision loops.
+RETIRED WITH THE REAL-TIME MATCH LAYER (now archived under legacy/)
+  The archived files are excluded from Godot via legacy/.gdignore and skipped by
+  this linter, so the pre-pivot rules could only ever pass vacuously — they were
+  deleted rather than left in place:
+    * Brain mutation contract — PlayerBrain.gd and entities/player/states/*.gd
+      writes to player.velocity / global_position / base_acceleration, plus
+      move_and_slide() ownership by HeavyPlayerController.gd.
+    * Collision layer matrix guard — CharacterBody2D masking Layer 3
+      (BallPhysicsBody) and shared/CollisionLayers.gd, in .gd and .tscn. Live
+      scene integrity is covered by tools/tscn_linter.py.
+    * Spatial-cache choke point — MatchWorldModel.gd query routing, the 15-frame
+      decision stagger, and the archived AI-loop file scope
+      (entities/goalkeeper/, shared/PassUtilityScorer.gd). The surviving half of
+      that rule — do not wire systems by crawling the scene tree — is RULE-02.
+  There is no player control, ball physics, per-frame AI or match clock left to
+  lint: matches are resolved statistically by shared/QuickSimEngine.gd.
 
 Exit code 0 on pass, 1 on invariant error.
 """
@@ -32,16 +66,18 @@ import html
 import os
 import re
 import sys
-from typing import List, Tuple
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
+# Directories that are never live game code.
+SKIP_DIRS = (".git", "addons", ".claude", "__pycache__", "legacy")
 
 # Regex utilities for GDScript code analysis
 STRING_RE = re.compile(r'"(?:[^"\\]|\\.)*"|\'(?:[^\'\\]|\\.)*\'')
 COMMENT_RE = re.compile(r'#.*$')
-FUNC_DEF_RE = re.compile(r'^\s*(?:static\s+)?func\s+([A-Za-z0-9_]+)\s*\((.*?)\)(?:\s*->\s*[^:]+)?\s*:', re.MULTILINE)
-CLASS_NAME_RE = re.compile(r'^\s*class_name\s+([A-Za-z0-9_]+)', re.MULTILINE)
-EXTENDS_RE = re.compile(r'^\s*extends\s+([A-Za-z0-9_]+)', re.MULTILINE)
+FUNC_DECL_RE = re.compile(r'^(?P<indent>[ \t]*)(?:static\s+)?func\s+(?P<name>[A-Za-z0-9_]+)\s*\(')
+NEW_ALLOC_RE = re.compile(r'\b[A-Za-z0-9_]+\.new\s*\(')
+SIGNAL_DECL_RE = re.compile(r'^\s*signal\s+([A-Za-z_][A-Za-z0-9_]*)')
 
 
 class InvariantViolation:
@@ -64,238 +100,164 @@ def strip_comments_and_strings(line: str) -> str:
     return clean
 
 
+def repo_rel(file_path: str) -> str:
+    return os.path.relpath(file_path, ROOT).replace("\\", "/")
+
+
 def get_all_gd_files(base_dir: str) -> list[str]:
     files = []
     for dirpath, dirnames, filenames in os.walk(base_dir):
-        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude", "__pycache__")]
+        dirnames[:] = [d for d in dirnames if d not in SKIP_DIRS]
         for f in filenames:
             if f.endswith(".gd"):
                 files.append(os.path.join(dirpath, f))
     return sorted(files)
 
 
-def get_all_tscn_files(base_dir: str) -> list[str]:
-    files = []
-    for dirpath, dirnames, filenames in os.walk(base_dir):
-        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude", "__pycache__")]
-        for f in filenames:
-            if f.endswith(".tscn"):
-                files.append(os.path.join(dirpath, f))
-    return sorted(files)
+def iter_function_bodies(lines: list[str]):
+    """Yields (function_name, declaration_line, [(line_number, raw_line), ...]).
 
-
-# ---------------------------------------------------------------------------
-# Rule 1: Brain Mutation Enforcement
-# ---------------------------------------------------------------------------
-FORBIDDEN_MUTATIONS = [
-    (re.compile(r'\bplayer\.velocity\s*='), "Direct write to player.velocity is forbidden; write player.movement_intent instead"),
-    (re.compile(r'\bplayer\.global_position\s*='), "Direct write to player.global_position is forbidden in player FSM/brain"),
-    (re.compile(r'\bplayer\.base_acceleration\s*='), "Direct write to player.base_acceleration is forbidden; controller owns mass scaling"),
-    (re.compile(r'\bplayer\.move_and_slide\s*\('), "Calling move_and_slide() on player is forbidden; strictly owned by HeavyPlayerController"),
-]
-
-
-def check_brain_mutations(file_path: str, lines: list[str]) -> list[InvariantViolation]:
-    violations: list[InvariantViolation] = []
-    rel = os.path.relpath(file_path, ROOT).replace("\\", "/")
-
-    is_brain_file = (
-        rel == "entities/player/PlayerBrain.gd" or
-        rel.startswith("entities/player/states/") or
-        rel.startswith("entities/goalkeeper/")
-    )
-
-    if not is_brain_file:
-        return violations
-
-    for idx, raw_line in enumerate(lines, start=1):
-        code = strip_comments_and_strings(raw_line)
-        if not code.strip():
+    Handles multi-line GDScript signatures, and only the declaration's own body
+    lines are yielded (a line at or below the declaration indent ends it).
+    """
+    i = 0
+    total = len(lines)
+    while i < total:
+        match = FUNC_DECL_RE.match(lines[i])
+        if not match:
+            i += 1
             continue
 
-        for pattern, msg in FORBIDDEN_MUTATIONS:
-            if pattern.search(code):
-                violations.append(InvariantViolation(
-                    rule_id="RULE-01-BRAIN-MUTATION",
-                    file_path=file_path,
-                    line_number=idx,
-                    message=msg
-                ))
+        name = match.group("name")
+        indent = len(match.group("indent").expandtabs(4))
 
-    return violations
+        # Walk the (possibly multi-line) signature to its closing ':'.
+        depth = 0
+        j = i
+        while j < total:
+            sig_code = strip_comments_and_strings(lines[j])
+            depth += sig_code.count("(") - sig_code.count(")")
+            if depth <= 0 and sig_code.rstrip().endswith(":"):
+                break
+            j += 1
+
+        body: list[tuple[int, str]] = []
+        k = j + 1
+        while k < total:
+            raw = lines[k]
+            stripped = raw.lstrip()
+            if stripped:
+                line_indent = len(raw) - len(stripped)
+                if line_indent <= indent and not stripped.startswith("#"):
+                    break
+            body.append((k + 1, raw))
+            k += 1
+
+        yield name, i + 1, body
+        i += 1
 
 
 # ---------------------------------------------------------------------------
-# Rule 2: Hot-Path Zero-Allocation Watchdog
+# Rule 1: Hot-Path Zero-Allocation Watchdog (Rule 2 pre-pivot, re-pointed)
 # ---------------------------------------------------------------------------
+# Live allocation-free solvers in shared/UtilityMath.gd. The retired per-frame
+# names (score_pass, get_dynamic_anchor_position, _physics_process) belonged to
+# the archived match engine and no longer exist at a live path.
 HOT_PATH_FUNCTIONS = {
-    "score_pass",
+    # Bisection intercept solver, called once per candidate pass/shot.
     "calculate_intercept_point",
-    "get_dynamic_anchor_position",
-    "_physics_process",
+    # Closed-form pass lead solver, called once per pass option.
+    "solve_pass_intercept",
+    # Geometry primitives the solvers above are built from.
+    "closest_point_on_segment",
+    "distance_squared_to_segment",
+    "distance_to_segment",
 }
 
-# Regex to detect allocations in GDScript code
-NEW_ALLOC_RE = re.compile(r'\b[A-Za-z0-9_]+\.new\s*\(')
 
-
-def check_hot_path_allocations(file_path: str, content: str) -> list[InvariantViolation]:
+def check_hot_path_allocations(file_path: str, lines: list[str]) -> list[InvariantViolation]:
     violations: list[InvariantViolation] = []
-    lines = content.split("\n")
 
-    current_func: str | None = None
-    func_start_line = 0
-    func_indent = 0
-
-    for idx, raw_line in enumerate(lines, start=1):
-        stripped = raw_line.lstrip()
-        indent = len(raw_line) - len(stripped)
-        code = strip_comments_and_strings(raw_line)
-
-        # Check function declaration
-        func_match = re.match(r'^(?:static\s+)?func\s+([A-Za-z0-9_]+)\s*\(', stripped)
-        if func_match:
-            current_func = func_match.group(1)
-            func_start_line = idx
-            func_indent = indent
+    for func_name, _decl_line, body in iter_function_bodies(lines):
+        if func_name not in HOT_PATH_FUNCTIONS:
             continue
 
-        if current_func:
-            # Check if function ended (unindented non-empty line)
-            if stripped and indent <= func_indent and not stripped.startswith("#"):
-                current_func = None
-
-        if current_func in HOT_PATH_FUNCTIONS:
-            # Exclude signature lines
-            if idx == func_start_line or raw_line.strip().endswith("->") or (":" in raw_line and "func " in lines[func_start_line - 1]):
+        for lineno, raw_line in body:
+            code = strip_comments_and_strings(raw_line)
+            if not code.strip():
                 continue
 
-            # Check for .new()
             if NEW_ALLOC_RE.search(code):
                 violations.append(InvariantViolation(
-                    rule_id="RULE-02-HOT-PATH-ALLOC",
+                    rule_id="RULE-01-HOT-PATH-ALLOC",
                     file_path=file_path,
-                    line_number=idx,
-                    message=f"Forbidden heap allocation (.new()) in hot-path function '{current_func}'"
+                    line_number=lineno,
+                    message=f"Forbidden heap allocation (.new()) in hot-path solver '{func_name}'"
                 ))
 
-            # Check for inline dynamic Array allocation (ignoring type annotations like Array[int] and indexing arr[i])
+            # Strip type annotations, packed arrays and subscript indexing before
+            # looking for dynamic Array literals.
             clean_code = re.sub(r'Array\[[^\]]*\]', '', code)
             clean_code = re.sub(r'Packed[A-Za-z0-9]+Array', '', clean_code)
-            clean_code = re.sub(r'[A-Za-z0-9_]+\[[^\]]+\]', '', clean_code)  # Subscript indexing
-            clean_code = re.sub(r'\[\s*\]', '', clean_code)  # Empty brackets in types
+            clean_code = re.sub(r'[A-Za-z0-9_]+\[[^\]]+\]', '', clean_code)
+            clean_code = re.sub(r'\[\s*\]', '', clean_code)
 
-            # Check for array literals with elements like [a, b]
             if re.search(r'=\s*\[[^\]]+\]', clean_code) or re.search(r'return\s+\[[^\]]+\]', clean_code):
                 violations.append(InvariantViolation(
-                    rule_id="RULE-02-HOT-PATH-ALLOC",
+                    rule_id="RULE-01-HOT-PATH-ALLOC",
                     file_path=file_path,
-                    line_number=idx,
-                    message=f"Forbidden Array literal allocation in hot-path function '{current_func}'"
+                    line_number=lineno,
+                    message=f"Forbidden Array literal allocation in hot-path solver '{func_name}'"
                 ))
 
-            # Check for inline dynamic Dictionary allocation
             if re.search(r'=\s*\{[^\}]+\}', clean_code) or re.search(r'return\s+\{[^\}]+\}', clean_code):
                 violations.append(InvariantViolation(
-                    rule_id="RULE-02-HOT-PATH-ALLOC",
+                    rule_id="RULE-01-HOT-PATH-ALLOC",
                     file_path=file_path,
-                    line_number=idx,
-                    message=f"Forbidden Dictionary literal allocation in hot-path function '{current_func}'"
+                    line_number=lineno,
+                    message=f"Forbidden Dictionary literal allocation in hot-path solver '{func_name}'"
                 ))
 
     return violations
 
 
 # ---------------------------------------------------------------------------
-# Rule 3: Collision Layer Matrix Guard
+# Rule 2: Scene-Tree Crawl Guard (Rule 4 pre-pivot, re-pointed)
 # ---------------------------------------------------------------------------
-def check_collision_matrix_gd(file_path: str, lines: list[str]) -> list[InvariantViolation]:
-    violations: list[InvariantViolation] = []
-    rel = os.path.relpath(file_path, ROOT).replace("\\", "/")
-
-    # Check CharacterBody2D collision_mask configuration
-    for idx, raw_line in enumerate(lines, start=1):
-        code = strip_comments_and_strings(raw_line)
-        if "collision_mask" in code and ("HeavyPlayerController" in rel or "Player" in rel or "entities/player" in rel):
-            if "LAYER_BALL_PHYSICS" in code or "MASK_BALL_PHYSICS" in code:
-                violations.append(InvariantViolation(
-                    rule_id="RULE-03-COLLISION-LAYER",
-                    file_path=file_path,
-                    line_number=idx,
-                    message="Player CharacterBody2D must NEVER mask Layer 3 (BallPhysicsBody); use FootSensor (Layer 4) instead."
-                ))
-            num_match = re.search(r'collision_mask\s*=\s*(\d+)', code)
-            if num_match:
-                mask_val = int(num_match.group(1))
-                if (mask_val & 4) != 0:
-                    violations.append(InvariantViolation(
-                        rule_id="RULE-03-COLLISION-LAYER",
-                        file_path=file_path,
-                        line_number=idx,
-                        message=f"Player CharacterBody2D assigns numeric collision_mask {mask_val} which enables Layer 3 (Ball)."
-                    ))
-
-    return violations
-
-
-def check_collision_matrix_tscn(file_path: str, content: str) -> list[InvariantViolation]:
-    violations: list[InvariantViolation] = []
-    lines = content.split("\n")
-
-    in_player_character_body = False
-    node_name = ""
-
-    for idx, raw_line in enumerate(lines, start=1):
-        line = raw_line.strip()
-        if line.startswith("[node "):
-            if 'type="CharacterBody2D"' in line and ("Player" in line or "player" in line):
-                in_player_character_body = True
-                node_name = line
-            else:
-                in_player_character_body = False
-
-        if in_player_character_body and line.startswith("collision_mask"):
-            val_match = re.search(r'=\s*(\d+)', line)
-            if val_match:
-                val = int(val_match.group(1))
-                if (val & 4) != 0:
-                    violations.append(InvariantViolation(
-                        rule_id="RULE-03-COLLISION-LAYER",
-                        file_path=file_path,
-                        line_number=idx,
-                        message=f"TSCN node '{node_name}' sets collision_mask={val} (enables Layer 3 / Ball)."
-                    ))
-
-    return violations
-
-
-# ---------------------------------------------------------------------------
-# Rule 4: Choke-Point Bypass Detection
-# ---------------------------------------------------------------------------
+# Pre-pivot this enforced the MatchWorldModel spatial cache. The cache is
+# archived; what remains true is that live systems are wired through autoloads,
+# explicit references and GameEvents — not by polling or crawling the tree.
 TREE_CRAWL_PATTERNS = [
     (re.compile(r'get_tree\s*\(\s*\)\s*\.\s*get_nodes_in_group\s*\('),
-     "get_tree().get_nodes_in_group() in AI loops violates spatial choke point; route queries through MatchWorldModel.gd"),
-    (re.compile(r'get_node\s*\(\s*["\']\/root\/'),
-     "Direct /root tree crawling bypasses dependency contracts; use Autoload singletons or explicit dependency injection"),
+     "Scene-tree polling (get_tree().get_nodes_in_group()) bypasses the autoload/signal-bus contracts; hold an explicit reference or react to a GameEvents signal"),
     (re.compile(r'get_parent\s*\(\s*\)\s*\.\s*get_parent\s*\('),
-     "Chained get_parent().get_parent() in AI logic bypasses dependency contracts; use dependency injection or direct typed references"),
+     "Chained get_parent().get_parent() couples a script to a scene layout; pass the dependency in or use an autoload"),
 ]
 
+# This pattern lives inside the node path string, so it must be matched against
+# the comment-stripped line BEFORE strip_comments_and_strings blanks the literal.
+ROOT_CRAWL_RE = re.compile(r'get_node(?:_or_null)?\s*\(\s*["\']\/root\/')
+ROOT_CRAWL_MESSAGE = (
+    "Crawling get_node(\"/root/...\") bypasses dependency injection; use the autoload singleton directly or pass the dependency in"
+)
 
-def check_choke_point_bypass(file_path: str, lines: list[str]) -> list[InvariantViolation]:
+
+def check_scene_tree_crawl(file_path: str, lines: list[str]) -> list[InvariantViolation]:
     violations: list[InvariantViolation] = []
-    rel = os.path.relpath(file_path, ROOT).replace("\\", "/")
-
-    is_ai_loop = (
-        rel == "entities/player/PlayerBrain.gd" or
-        rel.startswith("entities/goalkeeper/") or
-        rel == "shared/PassUtilityScorer.gd"
-    )
-
-    if not is_ai_loop:
-        return violations
 
     for idx, raw_line in enumerate(lines, start=1):
+        comment_stripped = COMMENT_RE.sub('', raw_line)
+        if not comment_stripped.strip():
+            continue
+
+        if ROOT_CRAWL_RE.search(comment_stripped):
+            violations.append(InvariantViolation(
+                rule_id="RULE-02-SCENE-TREE-CRAWL",
+                file_path=file_path,
+                line_number=idx,
+                message=ROOT_CRAWL_MESSAGE
+            ))
+
         code = strip_comments_and_strings(raw_line)
         if not code.strip():
             continue
@@ -303,7 +265,7 @@ def check_choke_point_bypass(file_path: str, lines: list[str]) -> list[Invariant
         for pattern, msg in TREE_CRAWL_PATTERNS:
             if pattern.search(code):
                 violations.append(InvariantViolation(
-                    rule_id="RULE-04-CHOKE-POINT-BYPASS",
+                    rule_id="RULE-02-SCENE-TREE-CRAWL",
                     file_path=file_path,
                     line_number=idx,
                     message=msg
@@ -313,43 +275,348 @@ def check_choke_point_bypass(file_path: str, lines: list[str]) -> list[Invariant
 
 
 # ---------------------------------------------------------------------------
+# Rule 3: Signal Bus Surface Guard
+# ---------------------------------------------------------------------------
+GAME_EVENTS_PATH = "autoloads/GameEvents.gd"
+GAME_EVENTS_SIGNALS = (
+    "formation_changed",
+    "lineup_changed",
+    "career_started",
+    "career_day_advanced",
+    "career_advance_halted",
+    "career_inbox_changed",
+    "career_match_ready",
+    "career_result_recorded",
+    "career_season_ended",
+    "career_manager_sacked",
+    "world_event_logged",
+)
+
+
+def check_signal_bus_surface(file_path: str, lines: list[str]) -> list[InvariantViolation]:
+    violations: list[InvariantViolation] = []
+
+    if repo_rel(file_path) != GAME_EVENTS_PATH:
+        return violations
+
+    declared: dict[str, int] = {}
+    for idx, raw_line in enumerate(lines, start=1):
+        match = SIGNAL_DECL_RE.match(strip_comments_and_strings(raw_line))
+        if match:
+            declared[match.group(1)] = idx
+
+    for name, lineno in sorted(declared.items(), key=lambda item: item[1]):
+        if name not in GAME_EVENTS_SIGNALS:
+            violations.append(InvariantViolation(
+                rule_id="RULE-03-SIGNAL-BUS-SURFACE",
+                file_path=file_path,
+                line_number=lineno,
+                message=(
+                    f"'{name}' is not part of the post-pivot GameEvents contract. Match-engine signals were "
+                    "retired with the real-time layer; append a career/presentation signal deliberately and "
+                    "update the canonical 11-signal list with it."
+                )
+            ))
+
+    for name in GAME_EVENTS_SIGNALS:
+        if name not in declared:
+            violations.append(InvariantViolation(
+                rule_id="RULE-03-SIGNAL-BUS-SURFACE",
+                file_path=file_path,
+                line_number=1,
+                message=f"GameEvents lost the required signal '{name}'; the signal bus is a fixed cross-layer contract.",
+            ))
+
+    return violations
+
+
+# ---------------------------------------------------------------------------
+# Rule 4: Quick-Sim Publishing Ownership
+# ---------------------------------------------------------------------------
+QUICK_SIM_ENGINE_PATH = "shared/QuickSimEngine.gd"
+MATCH_STATS_TRACKER_PATH = "autoloads/MatchStatsTracker.gd"
+GAME_MANAGER_PATH = "autoloads/GameManager.gd"
+
+GAME_MANAGER_MATCH_FIELDS = (
+    "score",
+    "current_phase",
+    "match_time",
+    "match_duration",
+    "half_duration_real_sec",
+    "simulated_match_time",
+)
+GAME_MANAGER_STATE_WRITE_RE = re.compile(
+    r'\bGameManager\.(?:' + "|".join(GAME_MANAGER_MATCH_FIELDS) + r')\s*(?:\[[^\]]*\]\s*)?(?:[+\-*/%|]?=)(?!=)'
+)
+MATCH_STATS_WRITE_RE = re.compile(
+    r'\bMatchStatsTracker\.[A-Za-z_][A-Za-z0-9_]*\s*(?:\[[^\]]*\]\s*)?(?:[+\-*/%|]?=)(?!=)'
+)
+MATCH_STATS_MUTATOR_RE = re.compile(r'\bMatchStatsTracker\.(?:reset|stop_possession_sampling)\s*\(')
+
+
+def check_publish_ownership(file_path: str, lines: list[str]) -> list[InvariantViolation]:
+    violations: list[InvariantViolation] = []
+    rel = repo_rel(file_path)
+
+    may_write_game_manager = rel in (QUICK_SIM_ENGINE_PATH, GAME_MANAGER_PATH)
+    may_write_match_stats = rel in (QUICK_SIM_ENGINE_PATH, MATCH_STATS_TRACKER_PATH)
+
+    for idx, raw_line in enumerate(lines, start=1):
+        code = strip_comments_and_strings(raw_line)
+        if not code.strip():
+            continue
+
+        if not may_write_game_manager and GAME_MANAGER_STATE_WRITE_RE.search(code):
+            violations.append(InvariantViolation(
+                rule_id="RULE-04-PUBLISH-OWNERSHIP",
+                file_path=file_path,
+                line_number=idx,
+                message=(
+                    "Only QuickSimEngine.apply_to_match_stats_tracker() may publish a simulated result into "
+                    "GameManager (score / current_phase / match_time / simulated_match_time)."
+                )
+            ))
+
+        if not may_write_match_stats and (
+            MATCH_STATS_WRITE_RE.search(code) or MATCH_STATS_MUTATOR_RE.search(code)
+        ):
+            violations.append(InvariantViolation(
+                rule_id="RULE-04-PUBLISH-OWNERSHIP",
+                file_path=file_path,
+                line_number=idx,
+                message=(
+                    "MatchStatsTracker is a passive container: only QuickSimEngine.apply_to_match_stats_tracker() "
+                    "writes a simulated result into it. Presentation code reads it back."
+                )
+            ))
+
+    return violations
+
+
+# ---------------------------------------------------------------------------
+# Rule 5: GameManager Thin-Shell Guard
+# ---------------------------------------------------------------------------
+GAME_MANAGER_ALLOWED_CONSTS = {"TEAM_A", "TEAM_B", "SIMULATED_MATCH_DURATION"}
+GAME_MANAGER_ALLOWED_VARS = {
+    "current_phase",
+    "score",
+    "match_time",
+    "half_duration_real_sec",
+    "match_duration",
+    "simulated_match_time",
+}
+GAME_MANAGER_ALLOWED_FUNCS = {"set_half_duration"}
+GAME_MANAGER_ALLOWED_ENUMS = {"MatchPhase": ("PREGAME", "FULL_TIME")}
+
+GM_VAR_RE = re.compile(r'^\s*(?:@[A-Za-z_][A-Za-z0-9_]*(?:\([^)]*\))?\s+)*var\s+([A-Za-z_][A-Za-z0-9_]*)')
+GM_CONST_RE = re.compile(r'^\s*const\s+([A-Za-z_][A-Za-z0-9_]*)')
+GM_FUNC_RE = re.compile(r'^\s*(?:static\s+)?func\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(')
+GM_SIGNAL_RE = re.compile(r'^\s*signal\s+([A-Za-z_][A-Za-z0-9_]*)')
+GM_ENUM_RE = re.compile(r'^\s*enum\s+([A-Za-z_][A-Za-z0-9_]*)')
+ENUM_BLOCK_RE = re.compile(r'\benum\s+([A-Za-z_][A-Za-z0-9_]*)\s*\{([^}]*)\}', re.DOTALL)
+
+
+def _enum_members(body: str) -> list[str]:
+    members: list[str] = []
+    for segment in body.split(","):
+        match = re.match(r'\s*([A-Za-z_][A-Za-z0-9_]*)', segment)
+        if match:
+            members.append(match.group(1))
+    return members
+
+
+def check_game_manager_thin_shell(file_path: str, lines: list[str]) -> list[InvariantViolation]:
+    violations: list[InvariantViolation] = []
+
+    if repo_rel(file_path) != GAME_MANAGER_PATH:
+        return violations
+
+    for idx, raw_line in enumerate(lines, start=1):
+        code = strip_comments_and_strings(raw_line)
+        if not code.strip():
+            continue
+
+        match = GM_SIGNAL_RE.match(code)
+        if match:
+            violations.append(InvariantViolation(
+                rule_id="RULE-05-GAMEMANAGER-SHELL",
+                file_path=file_path,
+                line_number=idx,
+                message=(
+                    f"GameManager must not declare signals ('{match.group(1)}'): cross-system events belong on "
+                    "GameEvents, the single signal bus."
+                )
+            ))
+            continue
+
+        match = GM_VAR_RE.match(code)
+        if match and match.group(1) not in GAME_MANAGER_ALLOWED_VARS:
+            violations.append(InvariantViolation(
+                rule_id="RULE-05-GAMEMANAGER-SHELL",
+                file_path=file_path,
+                line_number=idx,
+                message=(
+                    f"'{match.group(1)}' is outside the GameManager thin-shell surface. The retired per-frame "
+                    "match machinery (clock, set-piece state, phase machine) must not come back here; put live "
+                    "match state in QuickSimEngine/MatchStatsTracker."
+                )
+            ))
+            continue
+
+        match = GM_CONST_RE.match(code)
+        if match and match.group(1) not in GAME_MANAGER_ALLOWED_CONSTS:
+            violations.append(InvariantViolation(
+                rule_id="RULE-05-GAMEMANAGER-SHELL",
+                file_path=file_path,
+                line_number=idx,
+                message=f"'{match.group(1)}' is outside the GameManager thin-shell surface."
+            ))
+            continue
+
+        match = GM_FUNC_RE.match(code)
+        if match and match.group(1) not in GAME_MANAGER_ALLOWED_FUNCS:
+            violations.append(InvariantViolation(
+                rule_id="RULE-05-GAMEMANAGER-SHELL",
+                file_path=file_path,
+                line_number=idx,
+                message=(
+                    f"'{match.group(1)}()' is outside the GameManager thin-shell surface. Only "
+                    "set_half_duration() survives; match behaviour belongs to QuickSimEngine."
+                )
+            ))
+            continue
+
+        match = GM_ENUM_RE.match(code)
+        if match and match.group(1) not in GAME_MANAGER_ALLOWED_ENUMS:
+            violations.append(InvariantViolation(
+                rule_id="RULE-05-GAMEMANAGER-SHELL",
+                file_path=file_path,
+                line_number=idx,
+                message=(
+                    f"enum '{match.group(1)}' is outside the GameManager thin-shell surface; the only surviving "
+                    "phase model is enum MatchPhase { PREGAME, FULL_TIME }."
+                )
+            ))
+
+    # MatchPhase must keep exactly its two post-pivot states.
+    cleaned = "\n".join(strip_comments_and_strings(line) for line in lines)
+    for enum_match in ENUM_BLOCK_RE.finditer(cleaned):
+        enum_name = enum_match.group(1)
+        if enum_name not in GAME_MANAGER_ALLOWED_ENUMS:
+            continue
+        expected = GAME_MANAGER_ALLOWED_ENUMS[enum_name]
+        members = _enum_members(enum_match.group(2))
+        for member in members:
+            if member not in expected:
+                violations.append(InvariantViolation(
+                    rule_id="RULE-05-GAMEMANAGER-SHELL",
+                    file_path=file_path,
+                    line_number=1,
+                    message=f"MatchPhase gained state '{member}'; the post-pivot phase model is exactly PREGAME and FULL_TIME."
+                ))
+        for member in expected:
+            if member not in members:
+                violations.append(InvariantViolation(
+                    rule_id="RULE-05-GAMEMANAGER-SHELL",
+                    file_path=file_path,
+                    line_number=1,
+                    message=f"MatchPhase lost state '{member}'; GameManager.MatchPhase is a fixed two-state contract."
+                ))
+
+    return violations
+
+
+# ---------------------------------------------------------------------------
+# Rule 6: Career / League State Ownership
+# ---------------------------------------------------------------------------
+CAREER_SAVE_DATA_PATH = "shared/career/CareerSaveData.gd"
+CAREER_SERIALIZER_PATH = "shared/career/CareerSerializer.gd"
+DATA_LOADER_PATH = "autoloads/DataLoader.gd"
+
+CAREER_SAVE_CTOR_RE = re.compile(r'\bCareerSaveData\.new\s*\(')
+LEAGUE_ASSIGN_RE = re.compile(r'\bDataLoader\.league\s*(?:\[[^\]]*\]\s*)?(?:[+\-*/%|]?=)(?!=)')
+
+
+def check_state_ownership(file_path: str, lines: list[str]) -> list[InvariantViolation]:
+    violations: list[InvariantViolation] = []
+    rel = repo_rel(file_path)
+
+    may_construct_career = rel in (CAREER_SAVE_DATA_PATH, CAREER_SERIALIZER_PATH)
+    may_assign_league = rel == DATA_LOADER_PATH
+
+    for idx, raw_line in enumerate(lines, start=1):
+        code = strip_comments_and_strings(raw_line)
+        if not code.strip():
+            continue
+
+        if not may_construct_career and CAREER_SAVE_CTOR_RE.search(code):
+            violations.append(InvariantViolation(
+                rule_id="RULE-06-STATE-OWNERSHIP",
+                file_path=file_path,
+                line_number=idx,
+                message=(
+                    "CareerManager owns the ONLY live CareerSaveData. Build one through CareerSaveData.make_new() "
+                    "from CareerManager, or CareerSerializer.load_from_slot(); never construct a second save state."
+                )
+            ))
+
+        if not may_assign_league and LEAGUE_ASSIGN_RE.search(code):
+            violations.append(InvariantViolation(
+                rule_id="RULE-06-STATE-OWNERSHIP",
+                file_path=file_path,
+                line_number=idx,
+                message=(
+                    "DataLoader owns DataLoader.league (squads, staff, attributes); only DataLoader may replace it, "
+                    "and it is saved per slot via DataLoader.save_league()."
+                )
+            ))
+
+    return violations
+
+
+# ---------------------------------------------------------------------------
 # Main Analysis Runner
 # ---------------------------------------------------------------------------
+RULE_CHECKS = (
+    check_hot_path_allocations,
+    check_scene_tree_crawl,
+    check_signal_bus_surface,
+    check_publish_ownership,
+    check_game_manager_thin_shell,
+    check_state_ownership,
+)
+
+
 def run_invariant_linter(target_dir: str = ROOT) -> list[InvariantViolation]:
     violations: list[InvariantViolation] = []
 
     gd_files = get_all_gd_files(target_dir)
-    tscn_files = get_all_tscn_files(target_dir)
+
+    # Self-integrity guard: a skip list that swallows the whole repository would
+    # otherwise let every rule pass vacuously — the exact failure this linter
+    # exists to prevent.
+    if not gd_files:
+        violations.append(InvariantViolation(
+            rule_id="INTERNAL-ERROR",
+            file_path=os.path.join(target_dir, "<scan>"),
+            line_number=1,
+            message=f"No live .gd files discovered under {target_dir}; the skip list is swallowing the repository.",
+        ))
+        return violations
 
     for gd_path in gd_files:
         try:
             with open(gd_path, "r", encoding="utf-8", errors="replace") as f:
-                content = f.read()
-                lines = content.split("\n")
+                lines = f.read().split("\n")
 
-            violations.extend(check_brain_mutations(gd_path, lines))
-            violations.extend(check_hot_path_allocations(gd_path, content))
-            violations.extend(check_collision_matrix_gd(gd_path, lines))
-            violations.extend(check_choke_point_bypass(gd_path, lines))
+            for check in RULE_CHECKS:
+                violations.extend(check(gd_path, lines))
         except Exception as e:
             violations.append(InvariantViolation(
                 rule_id="INTERNAL-ERROR",
                 file_path=gd_path,
                 line_number=1,
                 message=f"Failed to parse file: {e}"
-            ))
-
-    for tscn_path in tscn_files:
-        try:
-            with open(tscn_path, "r", encoding="utf-8", errors="replace") as f:
-                content = f.read()
-            violations.extend(check_collision_matrix_tscn(tscn_path, content))
-        except Exception as e:
-            violations.append(InvariantViolation(
-                rule_id="INTERNAL-ERROR",
-                file_path=tscn_path,
-                line_number=1,
-                message=f"Failed to parse TSCN: {e}"
             ))
 
     return violations
@@ -375,6 +642,7 @@ def main() -> int:
     args = parser.parse_args()
 
     target_path = os.path.abspath(args.target) if args.target else ROOT
+    scanned = len(get_all_gd_files(target_path))
     violations = run_invariant_linter(target_path)
 
     if violations:
@@ -388,7 +656,10 @@ def main() -> int:
         return 1
 
     if not args.xml:
-        print(f"lint_invariants: 0 invariant errors across repository.")
+        print(
+            f"lint_invariants: 0 invariant errors across {scanned} live .gd files "
+            f"({len(RULE_CHECKS)} rules active; legacy/ skipped)."
+        )
     return 0
 
 

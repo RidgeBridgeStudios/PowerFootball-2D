@@ -1,41 +1,34 @@
 ##
 ## MoraleEngine
 ##
-## Owns player morale between matches, and — more importantly — is the bridge
-## that makes off-pitch career state visible ON the pitch.
+## Owns player morale between matches.
 ##
-## Two responsibilities:
+## DRIVES morale from the things that actually move a footballer: playing
+## time against the status they were promised, results, personal form,
+## contract satisfaction, how the manager treats them, and the dressing
+## room around them. Each driver is a separate signed contribution so the
+## UI can show a player exactly why they are unhappy, FM-style.
 ##
-## 1. DRIVE morale from the things that actually move a footballer: playing
-##    time against the status they were promised, results, personal form,
-##    contract satisfaction, how the manager treats them, and the dressing
-##    room around them. Each driver is a separate signed contribution so the
-##    UI can show a player exactly why they are unhappy, FM-style.
-##
-## 2. WRITE that state down into the match layers at kickoff:
-##      - Layer 3: career morale + form seed MoodSystem.mood_value, so a
-##        player in a prolonged unhappy career state genuinely starts the
-##        match in SLUMP and one riding a renewal starts in STREAK.
-##      - Layer 2: persistent RelationshipData trust seeds TrustSystem, so
-##        PassUtilityScorer's trust multiplier opens the match already
-##        carrying months of accumulated social memory instead of a flat
-##        neutral slate.
+## Before the manager-only pivot this was also the bridge that wrote career
+## morale onto the live 22-player match entities at kickoff (seeding the
+## Layer 3 MoodSystem tier and Layer 2 TrustSystem memory). That path went
+## with the real-time match layer; morale now reaches a match only through
+## the statistical QuickSimEngine ratings.
 ##
 ## The seeding maths is calibrated so the DEFAULT authored player (morale 0.70,
-## form 6.5) lands exactly on NORMAL — see seed_mood_value(). Without that
-## anchor every player in the game would start every match on a streak.
+## form 6.5) lands exactly on NORMAL — see seed_mood_value().
 ##
-## Depends on: PlayerData, PlayerCareerState, CareerSaveData, MoodSystem,
-##             TrustSystem, HeavyPlayerController, RelationshipData, TeamData.
-## Exposes: seed_mood_value(), apply_to_match_player(), evaluate_drivers(),
-##          daily_drift(), apply_result_reaction(), describe_drivers().
+## Depends on: PlayerData, PlayerCareerState, CareerSaveData, RelationshipData,
+##             TeamData.
+## Exposes: seed_mood_value(), evaluate_drivers(), daily_drift(),
+##          apply_result_reaction(), describe_drivers().
 ##
 
 class_name MoraleEngine
 extends RefCounted
 
 ## The authored neutral baseline. A player sitting exactly here maps to a
-## MoodSystem value of 0.5 — dead centre of NORMAL.
+## 0.5 mood scalar — dead centre of the normal band.
 const NEUTRAL_MORALE: float = 0.70
 const NEUTRAL_FORM: float = 6.5
 
@@ -72,10 +65,11 @@ const W_DRESSING_ROOM: float = 0.08
 const MORALE_LERP_RATE: float = 0.22
 
 
-## --- Layer 3 bridge ------------------------------------------------------------
+## --- Morale-to-mood seeding -----------------------------------------------------
 
-## Maps persistent career state onto the 0..1 value MoodSystem uses. Pure and
-## side-effect free so it can be unit-reasoned about and previewed in the UI.
+## Maps persistent career state onto the 0..1 mood scalar the ratings model uses.
+## Pure and side-effect free so it can be unit-reasoned about and previewed in
+## the UI.
 static func seed_mood_value(morale: float, form: float, sharpness: float) -> float:
 	var mood: float = 0.5
 	var morale_delta: float = clampf(morale, 0.0, 1.0) - NEUTRAL_MORALE
@@ -84,59 +78,6 @@ static func seed_mood_value(morale: float, form: float, sharpness: float) -> flo
 	mood += (clampf(form, 0.0, 10.0) - NEUTRAL_FORM) * FORM_TO_MOOD
 	mood += (clampf(sharpness, 0.0, 1.0) - 0.6) * SHARPNESS_TO_MOOD
 	return clampf(mood, 0.0, 1.0)
-
-
-## Called once per player at match bind, from PlayerFactory. Writes the career
-## layer's accumulated state into that player's live MoodSystem and TrustSystem.
-##
-## Both systems have just been reset() by PlayerFactory, so this overwrites a
-## known-neutral slate rather than compounding onto last match's values.
-static func apply_to_match_player(
-	player: HeavyPlayerController,
-	data: PlayerData,
-	state: PlayerCareerState,
-	mood: MoodSystem,
-	trust: TrustSystem
-) -> void:
-	if data == null:
-		return
-
-	# --- Layer 3: mood tier -----------------------------------------------
-	if mood != null:
-		var sharpness: float = state.sharpness if state != null else 0.6
-		var seeded: float = seed_mood_value(data.morale, data.form, sharpness)
-		# PressureImmune (4) players resist the extremes in both directions —
-		# the trait's stated job is to blunt SLUMP logic.
-		if data.has_trait(4):
-			seeded = lerpf(0.5, seeded, 0.55)
-		mood.apply_delta(seeded - mood.mood_value)
-
-	# --- Layer 2: relationship trust ---------------------------------------
-	if trust != null and state != null:
-		for other_key: int in state.relationships:
-			var rel: RelationshipData = state.relationships[other_key] as RelationshipData
-			if rel == null:
-				continue
-			# RelationshipData.trust is career-space 0..1; TrustSystem stores
-			# 0.5..1.5. seed_trust() does that conversion, and rivalry is
-			# folded in the same way to_match_multiplier() folds it.
-			var effective: float = clampf(rel.trust - rel.rivalry_score * 0.5, 0.0, 1.0)
-			trust.seed_trust(other_key, effective)
-
-	# --- Matchday condition arrow (PES-style short-term momentum) ----------
-	# A separate seed from the mood tier above: this scales the PHYSICAL
-	# numbers PlayerFactory already copied onto the controller, not the
-	# decision-making tier. Mirrors PlayerFactory's own manager-coaching-bonus
-	# pattern of a small post-hoc adjustment after the initial apply.
-	if state != null and player != null:
-		var arrow_mult: float = state.condition_arrow_attribute_multiplier()
-		if not is_equal_approx(arrow_mult, 1.0):
-			player.top_speed = clampf(player.top_speed * arrow_mult, 150.0, 275.0)
-			player.stamina_max = clampf(player.stamina_max * arrow_mult, 60.0, 140.0)
-			# Lower acceleration_time is faster, so a good arrow divides it.
-			player.acceleration_time = clampf(player.acceleration_time / arrow_mult, 0.11, 0.42)
-			player._recalculate_movement_curve()
-			player.stamina = player.stamina_max
 
 
 ## --- Morale drivers -------------------------------------------------------------

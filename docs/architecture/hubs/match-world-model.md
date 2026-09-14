@@ -1,7 +1,13 @@
+> [!WARNING]
+> **SUPERSEDED — pre-pivot real-time match architecture.**
+> This hub documents a file from the abandoned 22-player real-time match engine. That code now lives archived under `legacy/` (excluded from Godot via `legacy/.gdignore` and skipped by every linter) and must never be cited as live or "fixed".
+> It is retained as historical reference — useful when deepening `QuickSimEngine` — not as current implementation guidance.
+> Current architecture: [architecture-pivot.md](../../agent-errata/architecture-pivot.md) · canonical contracts: [CORE_INVARIANTS.md](../../CORE_INVARIANTS.md).
+
 # Architecture Hub: MatchWorldModel
 
-**Canonical Location:** [`docs/architecture/hubs/match-world-model.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/architecture/hubs/match-world-model.md)  
-**Source Script:** [`autoloads/MatchWorldModel.gd`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/MatchWorldModel.gd)  
+**Canonical Location:** [`docs/architecture/hubs/match-world-model.md`](match-world-model.md)  
+**Source Script:** [`autoloads/MatchWorldModel.gd`](../../../legacy/autoloads/MatchWorldModel.gd)  
 **Simulation Layer:** Layer 2 — Match AI & Spatial Navigation  
 **Node Type:** Autoload Singleton (`Node`, registered in `project.godot`)  
 
@@ -13,9 +19,9 @@
 `MatchWorldModel` is the match's central spatial cache and high-performance tactical indexing layer. Instead of allowing 22 independent player brains to execute expensive `get_tree().get_nodes_in_group()` scans, this singleton collects the world-space positions and velocities of all 22 players and the ball into contiguous packed arrays once per physics frame. It acts as the single source of truth for all spatial queries, computes shared per-team defensive line depths (`defensive_line_x`), evaluates a 12x8 pitch control dominance grid, derives macro pressing triggers, and tracks ball possessor residency.
 
 ### Non-Responsibilities
-- **No Kinematic Movement:** It never modifies player velocity, never resolves collision geometry, and never calls `move_and_slide()`. That responsibility belongs strictly to [`HeavyPlayerController`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/HeavyPlayerController.gd).
-- **No Tactical Decision Making:** It evaluates spatial conditions (distances, lane openness, pitch control, pressing triggers), but never chooses actions for individual players. Action selection is the sole responsibility of [`PlayerBrain`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/PlayerBrain.gd).
-- **No Match Lifecycle Ownership:** It does not manage match clock, game phases, scores, or set-piece lifecycles. That responsibility belongs strictly to [`GameManager`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/GameManager.gd).
+- **No Kinematic Movement:** It never modifies player velocity, never resolves collision geometry, and never calls `move_and_slide()`. That responsibility belongs strictly to [`HeavyPlayerController`](../../../legacy/entities/player/HeavyPlayerController.gd).
+- **No Tactical Decision Making:** It evaluates spatial conditions (distances, lane openness, pitch control, pressing triggers), but never chooses actions for individual players. Action selection is the sole responsibility of [`PlayerBrain`](../../../legacy/entities/player/PlayerBrain.gd).
+- **No Match Lifecycle Ownership:** It does not manage match clock, game phases, scores, or set-piece lifecycles. That responsibility belongs strictly to [`GameManager`](../../../autoloads/GameManager.gd).
 - **No Scene Tree Scanning:** It never scans groups or scene trees at runtime; player registration is push-based in player `_ready()`.
 - **No `class_name` Declaration:** Godot 4.7+ rejects a `class_name` that collides with an autoload singleton's injected global name.
 
@@ -25,7 +31,7 @@
 
 ### Process Priority & Boot Order
 - **Boot Order (`project.godot`):** Initialized 1st, ahead of all other singletons (`MatchWorldModel` -> `GameEvents` -> `GameManager` -> `MatchStatsTracker`...).
-- **Process Priority:** Runs at `process_priority = -100`. The cache is fully updated before any [`PlayerBrain`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/PlayerBrain.gd) (`0`) evaluates tactics or any [`HeavyPlayerController`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/HeavyPlayerController.gd) (`100`) executes physics.
+- **Process Priority:** Runs at `process_priority = -100`. The cache is fully updated before any [`PlayerBrain`](../../../legacy/entities/player/PlayerBrain.gd) (`0`) evaluates tactics or any [`HeavyPlayerController`](../../../legacy/entities/player/HeavyPlayerController.gd) (`100`) executes physics.
 
 ### Constants & Enums
 - `const TOTAL_PLAYERS: int = 22` — Exactly 11 per team (10 outfield + 1 goalkeeper).
@@ -84,7 +90,7 @@
 
 ### Core Dependencies
 - Upstream: None (Boot singleton #1).
-- Downstream: [`PlayerBrain`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/PlayerBrain.gd), [`HeavyPlayerController`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/HeavyPlayerController.gd), [`MatchStatsTracker`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/MatchStatsTracker.gd), [`MatchReferee`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/referee/MatchReferee.gd), [`OffsideDetector`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/referee/OffsideDetector.gd), [`HUD`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/ui/HUD.gd), [`Minimap`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/pitch/Minimap.gd), [`PassUtilityScorer`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/shared/PassUtilityScorer.gd), [`FormationAnchorMath`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/shared/FormationAnchorMath.gd).
+- Downstream: [`PlayerBrain`](../../../legacy/entities/player/PlayerBrain.gd), [`HeavyPlayerController`](../../../legacy/entities/player/HeavyPlayerController.gd), [`MatchStatsTracker`](../../../autoloads/MatchStatsTracker.gd), [`MatchReferee`](../../../legacy/entities/referee/MatchReferee.gd), [`OffsideDetector`](../../../legacy/entities/referee/OffsideDetector.gd), [`HUD`](../../../legacy/ui/HUD.gd), [`Minimap`](../../../legacy/pitch/Minimap.gd), [`PassUtilityScorer`](../../../legacy/shared/PassUtilityScorer.gd), [`FormationAnchorMath`](../../../legacy/shared/FormationAnchorMath.gd).
 
 ---
 
@@ -129,7 +135,7 @@ When modifying `MatchWorldModel.gd`:
 
 ## 5. Known Risks & Errata Search Terms
 
-When debugging or altering spatial behavior, consult [`AGENTS_ERRATA.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/AGENTS_ERRATA.md) for these documented edge cases:
+When debugging or altering spatial behavior, consult [`AGENTS_ERRATA.md`](../../../AGENTS_ERRATA.md) for these documented edge cases:
 - `press-trigger-needs-time-backstop` (lines 22–52): Posture-only triggers failed against calm ball-carriers holding position; required `PROLONGED_POSSESSION` time backstop.
 - `possession-hold-timer-has-two-non-interchangeable-variants` (lines 1020–1060): Clarified differences between raw possession timer and continuous true-carrier hold timer (`get_active_possession_hold_seconds()`).
 - `match-stage-boundaries-are-fractions-not-literal-seconds` (lines 852–870): Match stages are fractional thresholds of total duration, not fixed second counters.
@@ -141,8 +147,8 @@ When debugging or altering spatial behavior, consult [`AGENTS_ERRATA.md`](file:/
 
 ## 6. Sources Examined
 
-- [`autoloads/MatchWorldModel.gd`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/MatchWorldModel.gd)
-- [`autoloads/README.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/README.md)
-- [`docs/CORE_INVARIANTS.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/CORE_INVARIANTS.md)
-- [`docs/API_SURFACE.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/API_SURFACE.md)
-- [`AGENTS_ERRATA.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/AGENTS_ERRATA.md)
+- [`autoloads/MatchWorldModel.gd`](../../../legacy/autoloads/MatchWorldModel.gd)
+- [`autoloads/README.md`](../../../autoloads/README.md)
+- [`docs/CORE_INVARIANTS.md`](../../CORE_INVARIANTS.md)
+- [`docs/API_SURFACE.md`](../../API_SURFACE.md)
+- [`AGENTS_ERRATA.md`](../../../AGENTS_ERRATA.md)

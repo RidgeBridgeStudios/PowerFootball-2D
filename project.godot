@@ -20,18 +20,15 @@ config/icon="res://art/player.png"
 
 [autoload]
 
-MatchWorldModel="*res://autoloads/MatchWorldModel.gd"
 GameEvents="*res://autoloads/GameEvents.gd"
 GameManager="*res://autoloads/GameManager.gd"
 MatchStatsTracker="*res://autoloads/MatchStatsTracker.gd"
-MatchTelemetryLogger="*res://autoloads/MatchTelemetryLogger.gd"
 DataLoader="*res://autoloads/DataLoader.gd"
 RefereeLoader="*res://autoloads/RefereeLoader.gd"
 ManagerLoader="*res://autoloads/ManagerLoader.gd"
 StaffLoader="*res://autoloads/StaffLoader.gd"
 WorldEventLog="*res://autoloads/WorldEventLog.gd"
 CareerManager="*res://autoloads/CareerManager.gd"
-InputHelper="*res://autoloads/InputHelper.gd"
 
 [display]
 

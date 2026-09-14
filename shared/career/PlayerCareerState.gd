@@ -7,8 +7,8 @@
 ## deep without bloating the resource the match engine binds to 22 times.
 ##
 ## Keyed in CareerSaveData by the synthesized team*1000+squad_index id that
-## MatchStatsTracker and TrustSystem already use (see ai-architect.md — there
-## is no PlayerData.player_id, and squad_index is the only stable identity).
+## MatchStatsTracker and QuickSimEngine already use (there is no
+## PlayerData.player_id, and squad_index is the only stable identity).
 ##
 ## Depends on: ContractData, RelationshipData, CareerDate, PlayerData.
 ## Exposes: the fields below, make_for(), condition_label(), is_available(),

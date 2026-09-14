@@ -61,7 +61,7 @@ def get_all_gd_files(base_dir: str) -> list[str]:
     if os.path.isfile(base_dir):
         return [base_dir] if base_dir.endswith(".gd") else []
     for dirpath, dirnames, filenames in os.walk(base_dir):
-        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude", "__pycache__", ".godot")]
+        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude", "__pycache__", ".godot", "legacy")]
         for f in filenames:
             if f.endswith(".gd"):
                 files.append(os.path.join(dirpath, f))

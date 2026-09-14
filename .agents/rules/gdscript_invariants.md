@@ -15,22 +15,16 @@
 
 ## ARCHITECTURAL CHOKE POINTS & LAYER BOUNDARIES
 
-The simulation relies on an encapsulated 5-layer simulation stack. You are FORBIDDEN from bypassing established boundaries:
-
-- DO NOT query the scene tree directly using `get_tree().get_nodes_in_group()` or absolute node paths (`$root/...`). All spatial state queries must route through `MatchWorldModel`:
-  ```gdscript
-  var defenders: Array[PlayerState] = MatchWorldModel.query_spatial_radius(pos, radius)
-  ```
+The simulation is an encapsulated 3-layer stack — Career World -> Quick-Sim Match -> Narrative & Presentation. You are FORBIDDEN from bypassing established boundaries:
 
 - DO NOT invoke methods directly across simulation modules. Route decoupled communications through `GameEvents`:
   ```gdscript
-  GameEvents.player_state_changed.emit(player_id, new_state)
+  GameEvents.career_result_recorded.emit(home_score, away_score)
   ```
 
-- KINEMATIC INTEGRITY: Never assign `CharacterBody2D.velocity` directly from tactical AI logic (Layers 3/4). Invoke the validated movement interface:
-  ```gdscript
-  KinematicController.request_velocity(vector)
-  ```
+- CAREER STATE OWNERSHIP: `CareerManager` owns the ONLY live `CareerSaveData`; nothing else mutates it. Match outcomes are published only through `QuickSimEngine.apply_to_match_stats_tracker()`.
+
+- RETIRED — the spatial cache (`MatchWorldModel`), the per-frame player brains and kinematic controller, and their scene-tree-polling ban and `movement_intent` choke point were archived under `legacy/` with the real-time match layer. Those boundaries no longer apply; see `docs/agent-errata/architecture-pivot.md`.
 
 ## VERIFICATION
 

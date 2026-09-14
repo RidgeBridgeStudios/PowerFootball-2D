@@ -1,13 +1,17 @@
 ##
 ## MainMenu
 ##
-## Entry point of the game (res://ui/MainMenu.tscn is run/main_scene). Owns the
-## six top-level menu buttons and the small always-on-top popups (coming soon,
-## quit confirmation); KickOffMenu and OptionsMenu are separate scenes instanced
-## as children and shown/hidden as overlays rather than swapped scenes, so the
-## menu list underneath never has to reload state.
+## Entry point of the game (res://ui/SplashScreen.tscn is run/main_scene and
+## hands off here). Owns the three top-level menu buttons and the quit
+## confirmation popup; OptionsMenu is a separate scene instanced as a child and
+## shown/hidden as an overlay rather than a swapped scene, so the menu list
+## underneath never has to reload state.
 ##
-## Depends on: GameManager, KickOffMenu, OptionsMenu.
+## The manager-only pivot retired the Kick Off and Practice Arena buttons along
+## with the real-time PitchScene they launched, and with them the locked
+## "Player Career" placeholder — Manager Mode is now the single playable mode.
+##
+## Depends on: OptionsMenu.
 ## Exposes: nothing — this is a scene root, not a service other scripts call into.
 ##
 
@@ -18,56 +22,31 @@ const ACCENT_COLOR: Color = Color(0.24, 0.86, 0.41)
 const TEXT_COLOR: Color = Color(0.909804, 0.941176, 0.913725)
 
 @onready var menu_list: VBoxContainer = $MenuList
-@onready var btn_kickoff: Button = $MenuList/KickOffButton
-@onready var btn_practice: Button = $MenuList/PracticeButton
 @onready var btn_manager: Button = $MenuList/ManagerButton
-@onready var btn_career: Button = $MenuList/CareerButton
 @onready var btn_options: Button = $MenuList/OptionsButton
 @onready var btn_quit: Button = $MenuList/QuitButton
 
-@onready var kickoff_menu: Control = $KickOffMenu
 @onready var options_menu: Control = $OptionsMenu
 @onready var menu_music: AudioStreamPlayer = $MenuMusic
 
-@onready var coming_soon_dialog: AcceptDialog = $ComingSoonDialog
 @onready var quit_dialog: ConfirmationDialog = $QuitDialog
 
 var _last_focused_button: Button = null
 
 
 func _ready() -> void:
-	btn_kickoff.pressed.connect(_on_kickoff_pressed)
-	btn_practice.pressed.connect(_on_practice_pressed)
 	btn_manager.pressed.connect(_on_manager_pressed)
-	btn_career.pressed.connect(_on_career_pressed)
 	btn_options.pressed.connect(_on_options_pressed)
 	btn_quit.pressed.connect(_on_quit_pressed)
 
-	kickoff_menu.menu_closed.connect(_return_to_main_menu)
 	options_menu.menu_closed.connect(_return_to_main_menu)
 
-	coming_soon_dialog.visibility_changed.connect(_on_coming_soon_visibility_changed)
 	quit_dialog.confirmed.connect(_on_quit_confirmed)
 	quit_dialog.visibility_changed.connect(_on_quit_visibility_changed)
 
 	_style_menu_buttons()
 	_start_menu_music()
-	btn_kickoff.grab_focus()
-
-
-func _on_kickoff_pressed() -> void:
-	_last_focused_button = btn_kickoff
-	menu_list.hide()
-	kickoff_menu.open()
-
-
-func _on_practice_pressed() -> void:
-	GameManager.match_duration = 300.0
-	GameManager.set_meta(&"home_team_index", 0)
-	GameManager.set_meta(&"away_team_index", 0)
-	GameManager.set_meta(&"vs_mode", "cpu")
-	GameManager.set_meta(&"practice_mode", true)
-	get_tree().change_scene_to_file("res://pitch/PitchScene.tscn")
+	btn_manager.grab_focus()
 
 
 func _on_manager_pressed() -> void:
@@ -75,10 +54,6 @@ func _on_manager_pressed() -> void:
 	# to load an existing slot or start a new career, and only then hands off
 	# to ManagerModeRoot with CareerManager already populated.
 	get_tree().change_scene_to_file("res://ui/manager_mode/ManagerCreationScreen.tscn")
-
-
-func _on_career_pressed() -> void:
-	_show_coming_soon(btn_career, "Player Career — Coming Soon")
 
 
 func _on_options_pressed() -> void:
@@ -101,34 +76,20 @@ func _on_quit_visibility_changed() -> void:
 		_last_focused_button.grab_focus()
 
 
-func _show_coming_soon(source_button: Button, message: String) -> void:
-	_last_focused_button = source_button
-	coming_soon_dialog.dialog_text = message
-	coming_soon_dialog.popup_centered()
-
-
-func _on_coming_soon_visibility_changed() -> void:
-	if not coming_soon_dialog.visible and is_instance_valid(_last_focused_button):
-		_last_focused_button.grab_focus()
-
-
 func _return_to_main_menu() -> void:
-	kickoff_menu.hide()
 	options_menu.hide()
 	menu_list.show()
 	if is_instance_valid(_last_focused_button):
 		_last_focused_button.grab_focus()
 	else:
-		btn_kickoff.grab_focus()
+		btn_manager.grab_focus()
 
 
-## Manager Mode and Player Career stay real, focusable, clickable buttons.
-## Button.disabled would also swallow the "pressed" signal this needs to show
-## the Coming Soon popup, so the locked look is styling only (dimmed alpha +
-## the 🔒 already baked into the button text in MainMenu.tscn) rather than the
-## engine's disabled state.
+## Every button left here is a real, focusable destination — the pivot removed
+## the styled-but-locked "Coming Soon" pattern along with the Player Career
+## placeholder that used it.
 func _style_menu_buttons() -> void:
-	for button: Button in [btn_kickoff, btn_practice, btn_manager, btn_career, btn_options, btn_quit]:
+	for button: Button in [btn_manager, btn_options, btn_quit]:
 		button.add_theme_font_size_override("font_size", MENU_FONT_SIZE)
 		button.add_theme_color_override("font_color", TEXT_COLOR)
 		button.add_theme_color_override("font_hover_color", ACCENT_COLOR)
@@ -139,13 +100,10 @@ func _style_menu_buttons() -> void:
 		button.add_theme_stylebox_override("pressed", _make_stylebox(Color(0.24, 0.86, 0.41, 0.1), 4))
 		button.add_theme_stylebox_override("focus", _make_stylebox(Color(0.24, 0.86, 0.41, 0.06), 4))
 
-	# Player Career remains locked; Manager Mode is now a real destination.
-	btn_career.modulate.a = 0.4
 
-
-## KickOffMenu is an overlay shown/hidden inside this same scene (see class
-## doc above), so this single player already covers both the main menu list
-## and the Kick Off team-select screen with no extra wiring.
+## OptionsMenu is an overlay shown/hidden inside this same scene (see class doc
+## above), so this single player already covers both the main menu list and the
+## options screen with no extra wiring.
 func _start_menu_music() -> void:
 	var stream: AudioStream = menu_music.stream
 	if stream is AudioStreamWAV:

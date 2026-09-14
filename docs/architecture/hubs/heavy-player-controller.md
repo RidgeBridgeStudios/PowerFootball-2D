@@ -1,7 +1,13 @@
+> [!WARNING]
+> **SUPERSEDED — pre-pivot real-time match architecture.**
+> This hub documents a file from the abandoned 22-player real-time match engine. That code now lives archived under `legacy/` (excluded from Godot via `legacy/.gdignore` and skipped by every linter) and must never be cited as live or "fixed".
+> It is retained as historical reference — useful when deepening `QuickSimEngine` — not as current implementation guidance.
+> Current architecture: [architecture-pivot.md](../../agent-errata/architecture-pivot.md) · canonical contracts: [CORE_INVARIANTS.md](../../CORE_INVARIANTS.md).
+
 # Architecture Hub: HeavyPlayerController
 
-**Canonical Location:** [`docs/architecture/hubs/heavy-player-controller.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/architecture/hubs/heavy-player-controller.md)  
-**Source Script:** [`entities/player/HeavyPlayerController.gd`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/HeavyPlayerController.gd)  
+**Canonical Location:** [`docs/architecture/hubs/heavy-player-controller.md`](heavy-player-controller.md)  
+**Source Script:** [`entities/player/HeavyPlayerController.gd`](../../../legacy/entities/player/HeavyPlayerController.gd)  
 **Simulation Layer:** Layer 1 — Physics & Kinematics  
 **Node Type:** `HeavyPlayerController` extends `CharacterBody2D`  
 
@@ -13,10 +19,10 @@
 `HeavyPlayerController` is the physics execution body and kinematic weight model for human and CPU players. It realizes the core physical feel of the game: mass-scaled inertia, acceleration curves, momentum bleed through turns, friction deceleration, sprint stamina consumption, progressive three-tier fatigue slowing, sprint-jostle shoulder duels, knockback resolution, and `move_and_slide()` integration. It hosts the player state machine (`PlayerStateFactory`) and exposes sensor ranges for foot and aerial ball contact.
 
 ### Non-Responsibilities
-- **No Tactical Decision Making:** It contains zero utility scoring, offside logic, or tactical planning. It consumes intent exclusively via `movement_intent`, `wants_sprint`, and `wants_tackle` provided by [`PlayerBrain`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/PlayerBrain.gd) or [`InputHelper`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/InputHelper.gd).
+- **No Tactical Decision Making:** It contains zero utility scoring, offside logic, or tactical planning. It consumes intent exclusively via `movement_intent`, `wants_sprint`, and `wants_tackle` provided by [`PlayerBrain`](../../../legacy/entities/player/PlayerBrain.gd) or [`InputHelper`](../../../legacy/autoloads/InputHelper.gd).
 - **No Direct Velocity Snapping:** Velocity is never set directly to input vectors. Acceleration and turning penalties are always integrated continuously via `move_toward()`.
 - **No Direct Ball Collision Masking:** The `CharacterBody2D` MUST NOT mask Layer 3 (`BallPhysicsBody`). Direct kinematic collisions with the ball would zero player velocity in Godot's solver and flatten the momentum model.
-- **No Scene Tree Scanning:** It never queries scene tree groups for other players or the ball; all spatial lookups route through [`MatchWorldModel`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/MatchWorldModel.gd).
+- **No Scene Tree Scanning:** It never queries scene tree groups for other players or the ball; all spatial lookups route through [`MatchWorldModel`](../../../legacy/autoloads/MatchWorldModel.gd).
 
 ---
 
@@ -74,9 +80,9 @@
   - `show_action_text(message: String, color: Color = Color.WHITE) -> void`
 
 ### Core Dependencies
-- Upstream: [`InputHelper`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/InputHelper.gd) (for user player), [`PlayerBrain`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/PlayerBrain.gd) (for CPU), [`MatchWorldModel`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/MatchWorldModel.gd).
-- State Machine: [`PlayerStateFactory`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/PlayerStateFactory.gd) and all child states in `entities/player/states/`.
-- Sibling Systems: [`MoodSystem`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/MoodSystem.gd), [`TrustSystem`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/TrustSystem.gd).
+- Upstream: [`InputHelper`](../../../legacy/autoloads/InputHelper.gd) (for user player), [`PlayerBrain`](../../../legacy/entities/player/PlayerBrain.gd) (for CPU), [`MatchWorldModel`](../../../legacy/autoloads/MatchWorldModel.gd).
+- State Machine: [`PlayerStateFactory`](../../../legacy/entities/player/PlayerStateFactory.gd) and all child states in `entities/player/states/`.
+- Sibling Systems: [`MoodSystem`](../../../legacy/entities/player/MoodSystem.gd), [`TrustSystem`](../../../legacy/entities/player/TrustSystem.gd).
 
 ---
 
@@ -123,7 +129,7 @@ When modifying `HeavyPlayerController.gd`:
 
 ## 5. Known Risks & Errata Search Terms
 
-When investigating movement glitches or controller instability, consult [`AGENTS_ERRATA.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/AGENTS_ERRATA.md) for these documented edge cases:
+When investigating movement glitches or controller instability, consult [`AGENTS_ERRATA.md`](../../../AGENTS_ERRATA.md) for these documented edge cases:
 - `dribble-magnet-forward-overshoot-oscillation` (lines 576–605): Dribble magnet overshooting target forward offset produced oscillatory stutter; required dampening.
 - `dribble-claim-ignores-existing-possessor-dual-driver-jitter` (lines 1275–1310): Dual-driver jitter occurred when multiple controllers claimed possession simultaneously.
 - `cpu-players-never-gated-into-tackle-state` (lines 1337–1360): Tackle state transition required explicit distance, angle, and cooldown gates.
@@ -133,8 +139,8 @@ When investigating movement glitches or controller instability, consult [`AGENTS
 
 ## 6. Sources Examined
 
-- [`entities/player/HeavyPlayerController.gd`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/HeavyPlayerController.gd)
-- [`entities/player/README.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/README.md)
-- [`docs/CORE_INVARIANTS.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/CORE_INVARIANTS.md)
-- [`docs/API_SURFACE.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/API_SURFACE.md)
-- [`AGENTS_ERRATA.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/AGENTS_ERRATA.md)
+- [`entities/player/HeavyPlayerController.gd`](../../../legacy/entities/player/HeavyPlayerController.gd)
+- [`entities/player/README.md`](../../../legacy/entities/player/README.md)
+- [`docs/CORE_INVARIANTS.md`](../../CORE_INVARIANTS.md)
+- [`docs/API_SURFACE.md`](../../API_SURFACE.md)
+- [`AGENTS_ERRATA.md`](../../../AGENTS_ERRATA.md)

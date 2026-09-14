@@ -5,7 +5,7 @@
 ## and everything that has happened to them across jobs and seasons.
 ##
 ## Deliberately NOT a second ManagerData. ManagerData is the per-club tactical
-## brain the match layer binds to (ManagerDirector reads it every match), and
+## brain the match layer binds to (QuickSimEngine reads it every match), and
 ## the profile OWNS one of those — `tactical` — which it keeps in sync so the
 ## human manager's philosophy actually drives their team on the pitch. This
 ## resource adds the things only a playable career needs: attributes that grow,
@@ -280,7 +280,7 @@ func record_result(goals_for: int, goals_against: int) -> void:
 
 
 ## Pushes philosophy and attributes down onto the ManagerData the match layer
-## binds to, so the human manager's choices actually reach ManagerDirector and
+## binds to, so the human manager's choices actually reach the match engine and
 ## are not just profile decoration.
 func sync_to_tactical() -> void:
 	if tactical == null:

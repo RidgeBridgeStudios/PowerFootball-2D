@@ -6,21 +6,28 @@
 > Agents should **NOT** load this file in full or search across all errata. Instead, consult the topic page for the specific simulation layer or subsystem you are editing.
 > See **[docs/agent-errata/README.md](docs/agent-errata/README.md)** for the complete reading guide and search protocols.
 
+> [!WARNING]
+> **Architecture Pivot — read before using any topic page below:**
+> The project is now a **manager-only, quick-sim football management game** (3-layer stack: Career World → Quick-Sim Match → Narrative). The real-time 22-player match layer — ball/player physics, per-frame AI, the pitch scene, the collision matrix and the in-match HUD — is **archived under `legacy/`** and excluded from Godot (`.gdignore`) and from every linter.
+> Topic pages marked **⚠️ historical** below record failure modes from that archived engine. They are retained as reference (they remain genuinely useful when deepening `shared/QuickSimEngine.gd`), but **must not be applied to current code**.
+> Start with **[docs/agent-errata/architecture-pivot.md](docs/agent-errata/architecture-pivot.md)** and **[docs/CORE_INVARIANTS.md](docs/CORE_INVARIANTS.md)** for the current contracts.
+
 ---
 
 ## Topic Reference Pages
 
 | Subsystem / Layer | Reference Page | Key Content |
 |---|---|---|
-| **Layer 2 Match AI** | **[docs/agent-errata/player-ai.md](docs/agent-errata/player-ai.md)** | `PlayerBrain` decision scoring baselines, loose-ball chase clamp deadlocks, Bresenham passing lane check, Sacchi force gating, defender marking, CPU tackle gating |
-| **Layer 2 / Layer 5 Match Lifecycle** | **[docs/agent-errata/match-state.md](docs/agent-errata/match-state.md)** | `GameManager` match stage temporal fraction boundaries, possession hold timers, macro urgency saturation, manager risk profile derivation |
-| **Layer 1 Physics & Kinematics** | **[docs/agent-errata/physics-and-ball.md](docs/agent-errata/physics-and-ball.md)** | `Pseudo3DBall`, `DribbleState` magnet oscillation & dual-driver possession jitter, `AerialState` bicycle kick gating, `HeavyPlayerController` sprint jostle impulse & fatigue tiers |
-| **Layer 1 / Layer 2 Set Pieces** | **[docs/agent-errata/set-pieces.md](docs/agent-errata/set-pieces.md)** | `SetPieceCoordinator`, kickoff low-composure backward pass veto & freeze, corner kick run triggers, throw-in CPU execution stalls, boundary legality rects |
-| **Cross-Module & Engine Architecture** | **[docs/agent-errata/scene-and-node-paths.md](docs/agent-errata/scene-and-node-paths.md)** | Autoload contracts, `tools/lint_xref.py` enforcement, TackleState MatchWorldModel property crash, static cross-referencing latent crashes, non-ASCII identifier parser gotcha |
-| **Layer 4 Club World & Persistence** | **[docs/agent-errata/data-and-persistence.md](docs/agent-errata/data-and-persistence.md)** | `CareerManager`, `PlayerData`, player aging decline curve calibration, morale-to-mood seeding slopes, season fixture calendar spacing rhythm |
-| **Layer 2 / Layer 3 Observability** | **[docs/agent-errata/telemetry-and-stats.md](docs/agent-errata/telemetry-and-stats.md)** | `MatchWorldModel.debug_spacing_diagnostics`, crowding metrics, avoiding competing telemetry systems |
-| **Layer 5 Presentation & UI** | **[docs/agent-errata/ui-and-signals.md](docs/agent-errata/ui-and-signals.md)** | `ball_struck` signal argument count mismatch, `TouchlineBubble` singleton instance repositioning, HUD substitution banner player lookup |
-| **Session Handoffs & History** | **[docs/agent-errata/session-history.md](docs/agent-errata/session-history.md)** | Archived session state logs (Antigravity & Claude) and Manager Career Mode session handoff notes |
+| **⚠️ historical — pre-pivot match AI** | **[docs/agent-errata/player-ai.md](docs/agent-errata/player-ai.md)** | `PlayerBrain` decision scoring baselines, loose-ball chase clamp deadlocks, Bresenham passing lane check, Sacchi force gating, defender marking, CPU tackle gating |
+| **⚠️ historical — pre-pivot match lifecycle** | **[docs/agent-errata/match-state.md](docs/agent-errata/match-state.md)** | `GameManager` match stage temporal fraction boundaries, possession hold timers, macro urgency saturation, manager risk profile derivation |
+| **⚠️ historical — pre-pivot physics** | **[docs/agent-errata/physics-and-ball.md](docs/agent-errata/physics-and-ball.md)** | `Pseudo3DBall`, `DribbleState` magnet oscillation & dual-driver possession jitter, `AerialState` bicycle kick gating, `HeavyPlayerController` sprint jostle impulse & fatigue tiers |
+| **⚠️ historical — pre-pivot set pieces** | **[docs/agent-errata/set-pieces.md](docs/agent-errata/set-pieces.md)** | `SetPieceCoordinator`, kickoff low-composure backward pass veto & freeze, corner kick run triggers, throw-in CPU execution stalls, boundary legality rects |
+| **Cross-Module & Engine Architecture** | **[docs/agent-errata/scene-and-node-paths.md](docs/agent-errata/scene-and-node-paths.md)** | Autoload contracts, `tools/lint_xref.py` enforcement, static cross-referencing latent crashes, non-ASCII identifier parser gotcha |
+| **Layer 1 Club World & Persistence** | **[docs/agent-errata/data-and-persistence.md](docs/agent-errata/data-and-persistence.md)** | `CareerManager`, `PlayerData`, player aging decline curve calibration, morale-to-mood seeding slopes, season fixture calendar spacing rhythm |
+| **⚠️ historical — pre-pivot observability** | **[docs/agent-errata/telemetry-and-stats.md](docs/agent-errata/telemetry-and-stats.md)** | `MatchWorldModel.debug_spacing_diagnostics`, crowding metrics, avoiding competing telemetry systems |
+| **⚠️ historical — pre-pivot presentation** | **[docs/agent-errata/ui-and-signals.md](docs/agent-errata/ui-and-signals.md)** | `ball_struck` signal argument count mismatch, `TouchlineBubble` singleton instance repositioning, HUD substitution banner player lookup |
+| **Session Handoffs & History** | **[docs/agent-errata/session-history.md](docs/agent-errata/session-history.md)** | Archived session state logs and Manager Career Mode session handoff notes |
+| **Architecture** | **[docs/agent-errata/architecture-pivot.md](docs/agent-errata/architecture-pivot.md)** | **Start here.** The manager-only pivot: what moved to `legacy/`, the 3-layer stack, the 9-autoload boot order, and the traps the pivot left behind |
 
 ---
 

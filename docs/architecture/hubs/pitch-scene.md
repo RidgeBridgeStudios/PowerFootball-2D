@@ -1,8 +1,14 @@
+> [!WARNING]
+> **SUPERSEDED — pre-pivot real-time match architecture.**
+> This hub documents a file from the abandoned 22-player real-time match engine. That code now lives archived under `legacy/` (excluded from Godot via `legacy/.gdignore` and skipped by every linter) and must never be cited as live or "fixed".
+> It is retained as historical reference — useful when deepening `QuickSimEngine` — not as current implementation guidance.
+> Current architecture: [architecture-pivot.md](../../agent-errata/architecture-pivot.md) · canonical contracts: [CORE_INVARIANTS.md](../../CORE_INVARIANTS.md).
+
 # Architecture Hub: PitchScene
 
-**Canonical Location:** [`docs/architecture/hubs/pitch-scene.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/architecture/hubs/pitch-scene.md)  
-**Source Script:** [`pitch/PitchScene.gd`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/pitch/PitchScene.gd)  
-**Source Scene:** [`pitch/PitchScene.tscn`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/pitch/PitchScene.tscn)  
+**Canonical Location:** [`docs/architecture/hubs/pitch-scene.md`](pitch-scene.md)  
+**Source Script:** [`pitch/PitchScene.gd`](../../../legacy/pitch/PitchScene.gd)  
+**Source Scene:** [`pitch/PitchScene.tscn`](../../../legacy/pitch/PitchScene.tscn)  
 **Simulation Layer:** Layer 1 — Physics & Kinematics (Root Match Harness)  
 **Node Type:** `PitchScene` extends `Node2D`  
 
@@ -14,11 +20,11 @@
 `PitchScene` is the root match scene coordinator. It wires together physical field boundaries, scoring zones, ball dynamics, camera tracking, and HUD overlays. It manages the declarative 22-player squad lifecycle, drives match setup and kickoff placement, executes post-goal celebration pauses, triggers half-time pauses, orchestrates human player auto-switching, manages the Practice Arena environment, and hosts the headless analytical simulation assertion harness.
 
 ### Non-Responsibilities
-- **No Kinematic Integration:** It does not integrate velocity or calculate inertia; player physics are resolved solely inside [`HeavyPlayerController`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/HeavyPlayerController.gd).
-- **No Tactical Decision Making:** It does not score utility functions or steer players; tactical AI belongs to [`PlayerBrain`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/PlayerBrain.gd) and tactical managerial overrides belong to [`ManagerDirector`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/manager/ManagerDirector.gd).
-- **No Match Lifecycle Authority:** It does not own the primary match clock, official score, or game phase transitions; it reacts to and triggers phases via [`GameManager`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/GameManager.gd).
-- **No Dead-Ball Geometry:** Restart placement, defensive wall positioning, and set-piece freeze states are delegated entirely to [`SetPieceCoordinator`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/pitch/SetPieceCoordinator.gd).
-- **No Officiating Rules:** Card thresholds, foul evaluations, and offside lines are calculated by [`MatchReferee`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/referee/MatchReferee.gd) and [`OffsideDetector`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/referee/OffsideDetector.gd).
+- **No Kinematic Integration:** It does not integrate velocity or calculate inertia; player physics are resolved solely inside [`HeavyPlayerController`](../../../legacy/entities/player/HeavyPlayerController.gd).
+- **No Tactical Decision Making:** It does not score utility functions or steer players; tactical AI belongs to [`PlayerBrain`](../../../legacy/entities/player/PlayerBrain.gd) and tactical managerial overrides belong to [`ManagerDirector`](../../../legacy/entities/manager/ManagerDirector.gd).
+- **No Match Lifecycle Authority:** It does not own the primary match clock, official score, or game phase transitions; it reacts to and triggers phases via [`GameManager`](../../../autoloads/GameManager.gd).
+- **No Dead-Ball Geometry:** Restart placement, defensive wall positioning, and set-piece freeze states are delegated entirely to [`SetPieceCoordinator`](../../../legacy/pitch/SetPieceCoordinator.gd).
+- **No Officiating Rules:** Card thresholds, foul evaluations, and offside lines are calculated by [`MatchReferee`](../../../legacy/entities/referee/MatchReferee.gd) and [`OffsideDetector`](../../../legacy/entities/referee/OffsideDetector.gd).
 
 ---
 
@@ -75,15 +81,15 @@ PitchScene (Node2D)
   - Emits via `GameEvents`: `kickoff_confirmed`, `half_time_ended`, `player_switched`, `manager_stats_updated`, `player_mood_changed`.
 
 ### Core Dependencies
-- Upstream: [`GameManager`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/GameManager.gd), [`GameEvents`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/GameEvents.gd), [`DataLoader`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/DataLoader.gd).
-- Scene Children: [`PitchBoundary`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/pitch/PitchBoundary.gd), [`Pseudo3DBall`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/ball/Pseudo3DBall.gd), [`HeavyPlayerController`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/HeavyPlayerController.gd), [`SetPieceCoordinator`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/pitch/SetPieceCoordinator.gd), [`MatchReferee`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/referee/MatchReferee.gd), [`HUD`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/ui/HUD.gd).
+- Upstream: [`GameManager`](../../../autoloads/GameManager.gd), [`GameEvents`](../../../autoloads/GameEvents.gd), [`DataLoader`](../../../autoloads/DataLoader.gd).
+- Scene Children: [`PitchBoundary`](../../../legacy/pitch/PitchBoundary.gd), [`Pseudo3DBall`](../../../legacy/entities/ball/Pseudo3DBall.gd), [`HeavyPlayerController`](../../../legacy/entities/player/HeavyPlayerController.gd), [`SetPieceCoordinator`](../../../legacy/pitch/SetPieceCoordinator.gd), [`MatchReferee`](../../../legacy/entities/referee/MatchReferee.gd), [`HUD`](../../../legacy/ui/HUD.gd).
 
 ---
 
 ## 3. State Model & Architectural Invariants
 
 ### 22-Player Declarative Layout Invariant
-All 22 players exist as pre-instantiated nodes under `$Players` in `PitchScene.tscn`. The scene does not dynamically instantiate outfield players at runtime. In `_ready()`, each player binds to [`MatchWorldModel`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/MatchWorldModel.gd) via self-service static indexing.
+All 22 players exist as pre-instantiated nodes under `$Players` in `PitchScene.tscn`. The scene does not dynamically instantiate outfield players at runtime. In `_ready()`, each player binds to [`MatchWorldModel`](../../../legacy/autoloads/MatchWorldModel.gd) via self-service static indexing.
 
 ### Six-Layer Collision Matrix
 The pitch configuration strictly respects the repository collision matrix:
@@ -125,7 +131,7 @@ When modifying `PitchScene.gd` or `PitchScene.tscn`:
 
 ## 5. Known Risks & Errata Search Terms
 
-When debugging match scene failures, consult [`AGENTS_ERRATA.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/AGENTS_ERRATA.md) for these documented edge cases:
+When debugging match scene failures, consult [`AGENTS_ERRATA.md`](../../../AGENTS_ERRATA.md) for these documented edge cases:
 - `Three latent runtime crashes found by static cross-referencing` (lines 1988–1992): `PitchScene` previously referenced `GameManager.score_team_a` and `MatchStatsTracker.fouls_a`; both are typed arrays (`score[TEAM_A]`, `fouls[TEAM_A]`).
 - `ball-struck-signal-arg-count-mismatch` (lines 171–208): Discrepancies between signal emission and handler argument counts broke shot reporting.
 - `touchline-bubble-is-one-shared-instance-home-perspective-only` (lines 866–890): Touchline manager commentary uses a single shared bubble instance aligned with the home perspective.
@@ -136,9 +142,9 @@ When debugging match scene failures, consult [`AGENTS_ERRATA.md`](file:///f:/Pow
 
 ## 6. Sources Examined
 
-- [`pitch/PitchScene.gd`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/pitch/PitchScene.gd)
-- [`pitch/PitchScene.tscn`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/pitch/PitchScene.tscn)
-- [`pitch/README.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/pitch/README.md)
-- [`docs/CORE_INVARIANTS.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/CORE_INVARIANTS.md)
-- [`docs/API_SURFACE.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/API_SURFACE.md)
-- [`AGENTS_ERRATA.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/AGENTS_ERRATA.md)
+- [`pitch/PitchScene.gd`](../../../legacy/pitch/PitchScene.gd)
+- [`pitch/PitchScene.tscn`](../../../legacy/pitch/PitchScene.tscn)
+- [`pitch/README.md`](../../../legacy/pitch/README.md)
+- [`docs/CORE_INVARIANTS.md`](../../CORE_INVARIANTS.md)
+- [`docs/API_SURFACE.md`](../../API_SURFACE.md)
+- [`AGENTS_ERRATA.md`](../../../AGENTS_ERRATA.md)

@@ -15,7 +15,7 @@ Pasting raw shell output (>3 lines) into context without summary:
 find . -name "*.gd" -not -path "./.git/*"
 
 # CORRECT — pasted summary
-find: 47 files [autoloads/MatchWorldModel.gd, entities/player/PlayerBrain.gd, ...]
+find: 47 files [autoloads/CareerManager.gd, shared/QuickSimEngine.gd, ...]
 ```
 
 Reading entire directories at session start as "orientation":
@@ -40,8 +40,8 @@ Always reduce shell output to structured summary before injecting:
 | Tool | Output Format | Example |
 |------|---------------|---------|
 | gdcheck | `gdcheck: N errors \| PASS/FAIL [— lines X, Y, Z]` | `gdcheck: 3 errors \| FAIL — lines 42, 103, 156` |
-| grep | `grep: N matches in M files [filenames]` | `grep: 12 matches in 3 files [PlayerBrain.gd, HeavyPlayerController.gd, UtilityScorer.gd]` |
-| find | `find: N files [paths]` | `find: 47 files [autoloads/MatchWorldModel.gd, entities/player/PlayerBrain.gd, ...]` |
+| grep | `grep: N matches in M files [filenames]` | `grep: 12 matches in 3 files [CareerManager.gd, QuickSimEngine.gd, MatchStatsTracker.gd]` |
+| find | `find: N files [paths]` | `find: 47 files [autoloads/CareerManager.gd, shared/QuickSimEngine.gd, ...]` |
 | git status | `git status: N unstaged, M untracked` | `git status: 3 unstaged, 2 untracked [AGENTS.md, .claude/rules/context-hygiene.md]` |
 
 ### Pre-Load Rule
@@ -78,4 +78,4 @@ Monitor context usage across three phases:
 | 70–85% | DANGER | Run `/compact` to compress prior messages. Do not start new features. |
 | 85%+ | CRITICAL | Run `/compact` or `/clear` before next task. Switch subsystems only. |
 
-Switch major subsystems with `/clear` (physics ↔ AI, match ↔ career). CLAUDE.md and .claude/rules/ survive both compaction and clear.
+Switch major subsystems with `/clear` (career world ↔ quick-sim match ↔ narrative/presentation). CLAUDE.md and .claude/rules/ survive both compaction and clear.

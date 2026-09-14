@@ -370,7 +370,7 @@ def main() -> int:
     scripts = []
 
     for dirpath, dirnames, filenames in os.walk(ROOT):
-        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude")]
+        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude", "legacy")]
         for name in filenames:
             if name.endswith(".gd"):
                 full_path = os.path.join(dirpath, name)

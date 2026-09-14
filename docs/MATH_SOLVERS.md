@@ -1,3 +1,9 @@
+> [!WARNING]
+> **PARTIALLY SUPERSEDED — scope note.**
+> Sections 2–6 document solvers for the abandoned 22-player real-time engine (`HeavyPlayerController` turning penalty, `Pseudo3DBall` flight, ball-intercept bisection, `PassUtilityScorer`, `FormationAnchorMath`). That code now lives archived under `legacy/`; these formulas are retained as reference math for deepening `QuickSimEngine`, not as current implementation guidance.
+> Section 1 (`shared/UtilityMath.gd`) is still live.
+> Start with [architecture-pivot.md](agent-errata/architecture-pivot.md); canonical contracts: [CORE_INVARIANTS.md](CORE_INVARIANTS.md).
+
 # MATH_SOLVERS.md — Ground-Truth Mathematical Solvers & Closed-Form Formulations
 
 Canonical mathematical specifications, derivation proofs, and GDScript reference implementations for **PowerFootball-2D** simulation layers.

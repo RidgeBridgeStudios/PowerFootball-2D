@@ -1,9 +1,15 @@
+> [!WARNING]
+> **SUPERSEDED — pre-pivot real-time match architecture.**
+> This hub documents a file from the abandoned 22-player real-time match engine. That code now lives archived under `legacy/` (excluded from Godot via `legacy/.gdignore` and skipped by every linter) and must never be cited as live or "fixed".
+> It is retained as historical reference — useful when deepening `QuickSimEngine` — not as current implementation guidance.
+> Current architecture: [architecture-pivot.md](../../agent-errata/architecture-pivot.md) · canonical contracts: [CORE_INVARIANTS.md](../../CORE_INVARIANTS.md).
+
 # Architecture Hub: PlayerBrain
 
-**Canonical Location:** [`docs/architecture/hubs/player-brain.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/architecture/hubs/player-brain.md)  
-**Source Script:** [`entities/player/PlayerBrain.gd`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/PlayerBrain.gd)  
+**Canonical Location:** [`docs/architecture/hubs/player-brain.md`](player-brain.md)  
+**Source Script:** [`entities/player/PlayerBrain.gd`](../../../legacy/entities/player/PlayerBrain.gd)  
 **Simulation Layer:** Layer 2 — Match AI & Spatial Navigation  
-**Node Type:** `PlayerBrain` extends `Node` (Child of [`HeavyPlayerController`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/HeavyPlayerController.gd))  
+**Node Type:** `PlayerBrain` extends `Node` (Child of [`HeavyPlayerController`](../../../legacy/entities/player/HeavyPlayerController.gd))  
 
 ---
 
@@ -13,21 +19,21 @@
 `PlayerBrain` is the autonomous utility-scored decision engine for outfield CPU players and goalkeepers. Instead of an imperative `if/else` decision tree, it builds a contextual snapshot (`UtilityContext`) from match geometry and passes it through personality attributes (`vision_attribute`, `composure_attribute`, `aggression_attribute`), mood modifiers (`MoodSystem`), and chemistry ratings (`TrustSystem`). It selects tactical actions (such as `MaintainFormation`, `Pass`, `ChaseBall`, `FindSpace`, `AttemptDribble`, `AttemptShoot`, `PanicClear`, `GoaliePatrol`, `GoalieRush`) and converts them into steering directives for its parent controller.
 
 ### Non-Responsibilities
-- **No Direct Kinematics:** `PlayerBrain` NEVER writes to `velocity`, `acceleration`, or `is_sprinting` on [`HeavyPlayerController`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/HeavyPlayerController.gd). It writes strictly to `player.movement_intent` (normalized `Vector2` steering vector) and `player.wants_sprint` (`bool`).
-- **No Scene Tree Polling:** Calling `get_tree().get_nodes_in_group()` inside any method is strictly forbidden. All spatial queries, teammate checks, and opponent tracking must route through [`MatchWorldModel`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/MatchWorldModel.gd).
-- **No Physics Integration:** Collision detection, turning inertia, weight scaling, stamina expenditure, and `move_and_slide()` belong solely to [`HeavyPlayerController`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/HeavyPlayerController.gd).
+- **No Direct Kinematics:** `PlayerBrain` NEVER writes to `velocity`, `acceleration`, or `is_sprinting` on [`HeavyPlayerController`](../../../legacy/entities/player/HeavyPlayerController.gd). It writes strictly to `player.movement_intent` (normalized `Vector2` steering vector) and `player.wants_sprint` (`bool`).
+- **No Scene Tree Polling:** Calling `get_tree().get_nodes_in_group()` inside any method is strictly forbidden. All spatial queries, teammate checks, and opponent tracking must route through [`MatchWorldModel`](../../../legacy/autoloads/MatchWorldModel.gd).
+- **No Physics Integration:** Collision detection, turning inertia, weight scaling, stamina expenditure, and `move_and_slide()` belong solely to [`HeavyPlayerController`](../../../legacy/entities/player/HeavyPlayerController.gd).
 - **No Direct State Mutation:** The brain does not transition the player state machine directly during open play; state machines evaluate controller variables and trigger transitions based on context.
-- **No Macro Rule Derivation:** Macro pressing triggers (e.g. `FACING_OWN_GOAL`, `TOUCHLINE_ISOLATION`, `PROLONGED_POSSESSION`) are derived centrally in [`MatchWorldModel`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/MatchWorldModel.gd). The brain only reads the active flag.
+- **No Macro Rule Derivation:** Macro pressing triggers (e.g. `FACING_OWN_GOAL`, `TOUCHLINE_ISOLATION`, `PROLONGED_POSSESSION`) are derived centrally in [`MatchWorldModel`](../../../legacy/autoloads/MatchWorldModel.gd). The brain only reads the active flag.
 
 ---
 
 ## 2. Public API, Signals, Events, Contracts & Dependencies
 
 ### Node Hierarchy & Priority
-- **Hierarchy:** `PitchScene` -> `$Players` -> `PlayerInstance` ([`HeavyPlayerController`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/HeavyPlayerController.gd)) -> `PlayerBrain` (`Node`).
+- **Hierarchy:** `PitchScene` -> `$Players` -> `PlayerInstance` ([`HeavyPlayerController`](../../../legacy/entities/player/HeavyPlayerController.gd)) -> `PlayerBrain` (`Node`).
 - **Process Priority:** Runs at `process_priority = 0`.
-  - Runs *after* [`MatchWorldModel`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/MatchWorldModel.gd) (`-100`).
-  - Runs *before* [`HeavyPlayerController`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/HeavyPlayerController.gd) (`100`).
+  - Runs *after* [`MatchWorldModel`](../../../legacy/autoloads/MatchWorldModel.gd) (`-100`).
+  - Runs *before* [`HeavyPlayerController`](../../../legacy/entities/player/HeavyPlayerController.gd) (`100`).
 
 ### Exported Properties
 - `@export_range(0.0, 1.0) var vision_attribute: float = 0.75` — Awareness of passing lanes and teammate runs.
@@ -37,7 +43,7 @@
 - `@export_range(0.0, 1.0) var formation_ball_weight: float = 0.35` — Compactness drift toward ball.
 - `@export var decision_interval: float = 0.25` — Backward compatibility setter that translates legacy duration to pressing intensity via `set_pressing_intensity()`.
 - `@export var is_goalkeeper: bool = false` — Diverts execution from outfield scoring to `GoaliePatrol`/`GoalieRush`.
-- `@export var player_index: int = 0` — Index (0–21) registered in [`MatchWorldModel`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/MatchWorldModel.gd).
+- `@export var player_index: int = 0` — Index (0–21) registered in [`MatchWorldModel`](../../../legacy/autoloads/MatchWorldModel.gd).
 
 ### Enums & Types
 - `enum Role { OUTFIELD_ATTACKER, OUTFIELD_MIDFIELDER, OUTFIELD_DEFENDER, GOALKEEPER }`
@@ -63,10 +69,10 @@
   - Emits via `GameEvents`: `ball_struck(kicker, speed, charge_ratio, is_shot)`, `powerful_shot_landed(shot_position)`.
 
 ### Core Dependencies
-- Upstream: [`MatchWorldModel`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/MatchWorldModel.gd), [`GameEvents`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/GameEvents.gd), [`GameManager`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/GameManager.gd).
-- Downstream: [`HeavyPlayerController`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/HeavyPlayerController.gd) (writes intent).
-- Sibling Components: [`MoodSystem`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/MoodSystem.gd), [`TrustSystem`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/TrustSystem.gd).
-- Math Utilities: [`PassUtilityScorer`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/shared/PassUtilityScorer.gd), [`FormationAnchorMath`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/shared/FormationAnchorMath.gd), [`UtilityMath`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/shared/UtilityMath.gd), [`PlayerRoleConfig`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/shared/PlayerRoleConfig.gd).
+- Upstream: [`MatchWorldModel`](../../../legacy/autoloads/MatchWorldModel.gd), [`GameEvents`](../../../autoloads/GameEvents.gd), [`GameManager`](../../../autoloads/GameManager.gd).
+- Downstream: [`HeavyPlayerController`](../../../legacy/entities/player/HeavyPlayerController.gd) (writes intent).
+- Sibling Components: [`MoodSystem`](../../../legacy/entities/player/MoodSystem.gd), [`TrustSystem`](../../../legacy/entities/player/TrustSystem.gd).
+- Math Utilities: [`PassUtilityScorer`](../../../legacy/shared/PassUtilityScorer.gd), [`FormationAnchorMath`](../../../legacy/shared/FormationAnchorMath.gd), [`UtilityMath`](../../../shared/UtilityMath.gd), [`PlayerRoleConfig`](../../../shared/PlayerRoleConfig.gd).
 
 ---
 
@@ -84,7 +90,7 @@ Where $i = \text{player\_index}$ and $f = \text{\_frame\_counter}$. Maximum 2 br
 - Uses `distance_squared_to()` exclusively for sorting and candidate comparisons.
 
 ### Defensive Line Invariant
-Outfield defenders (`Role.OUTFIELD_DEFENDER`) blend their anchor target with [`MatchWorldModel.instance.defensive_line_x[team]`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/MatchWorldModel.gd) rather than computing independent defensive line depths.
+Outfield defenders (`Role.OUTFIELD_DEFENDER`) blend their anchor target with [`MatchWorldModel.instance.defensive_line_x[team]`](../../../legacy/autoloads/MatchWorldModel.gd) rather than computing independent defensive line depths.
 
 ---
 
@@ -111,7 +117,7 @@ When modifying `PlayerBrain.gd`:
 
 ## 5. Known Risks & Errata Search Terms
 
-When debugging or altering behavior, consult [`AGENTS_ERRATA.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/AGENTS_ERRATA.md) for these documented edge cases:
+When debugging or altering behavior, consult [`AGENTS_ERRATA.md`](../../../AGENTS_ERRATA.md) for these documented edge cases:
 - `press-trigger-needs-time-backstop` (lines 22–52): Posture-only triggers failed against a calm ball-carrier holding position; required `PROLONGED_POSSESSION` time backstop.
 - `kickoff-backward-pass-veto-starves-taker` (lines 53–100): Composure-gated backward pass veto caused kickoffs to starve and turnover; set piece pass search must use `allow_backward_pass = true`.
 - `loose-ball-anchor-clamp-deadlock` (lines 101–140): Anchor distance clamping prevented outfielders from chasing uncontested loose balls.
@@ -124,8 +130,8 @@ When debugging or altering behavior, consult [`AGENTS_ERRATA.md`](file:///f:/Pow
 
 ## 6. Sources Examined
 
-- [`entities/player/PlayerBrain.gd`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/PlayerBrain.gd)
-- [`entities/player/README.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/README.md)
-- [`docs/CORE_INVARIANTS.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/CORE_INVARIANTS.md)
-- [`docs/API_SURFACE.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/API_SURFACE.md)
-- [`AGENTS_ERRATA.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/AGENTS_ERRATA.md)
+- [`entities/player/PlayerBrain.gd`](../../../legacy/entities/player/PlayerBrain.gd)
+- [`entities/player/README.md`](../../../legacy/entities/player/README.md)
+- [`docs/CORE_INVARIANTS.md`](../../CORE_INVARIANTS.md)
+- [`docs/API_SURFACE.md`](../../API_SURFACE.md)
+- [`AGENTS_ERRATA.md`](../../../AGENTS_ERRATA.md)

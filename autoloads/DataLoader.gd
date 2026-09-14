@@ -4,8 +4,8 @@
 ## Owns the live league data. Loads custom league from user://custom_league.json
 ## if one exists, otherwise loads from packaged res://data/league.json, and
 ## falls back to built-in programmatic squads if neither file is present.
-## PitchScene, PlayerFactory, and UI screens read squad data through this rather
-## than touching a Resource file directly.
+## CareerManager, QuickSimEngine, and UI screens read squad data through this
+## rather than touching a Resource file directly.
 ##
 ## Depends on: PlayerData, TeamData, LeagueData.
 ## Exposes: league, get_team(index), get_match_team(match_team_index),
@@ -13,7 +13,7 @@
 ##
 ## get_team()/get_player() never return null, even for an index a loaded
 ## league doesn't cover — they fall back to a procedurally generated placeholder
-## instead, so callers like PitchScene._bind_players() can iterate without null
+## instead, so callers like the quick-sim lineup builder can iterate without null
 ## checks or crashes.
 ##
 

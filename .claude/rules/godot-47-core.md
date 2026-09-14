@@ -25,37 +25,31 @@ TSCN SERIALIZATION:
 
 ## Compounded corrections — verified against the source
 
-### ManagerLoader emits NO formation signal — ManagerDirector does
+### ManagerLoader emits NO formation signal — the manager-mode tactics UI does
 `autoloads/ManagerLoader.gd` is a pure database loader (pool, JSON parse,
-`save_managers()`). It has no signals and no match-time behaviour. The
-formation event lives on the per-team match brain:
+`save_managers()`). It has no signals and no match-time behaviour. The live
+formation event is emitted by the manager-mode tactics panel:
 
 ```gdscript
-# entities/manager/ManagerDirector.gd — _shift_to()
-GameEvents.manager_formation_changed.emit(_team, formation_name)
+# ui/manager_mode/TacticsPanel.gd
+GameEvents.formation_changed.emit(GameManager.TEAM_A, formation)
 ```
 
 Payload is `(team: int, new_formation: String)` — a NAME, no anchor data.
-Anchors are written straight onto each brain by `_apply_formation()`. A
-listener wanting positions needs `GameEvents.formation_anchors_changed(team,
-new_anchors)`, added for exactly that reason; `new_anchors` maps
-`PlayerBrain.player_index` → `Vector2`.
+`formation_changed` and `lineup_changed` are the whole live team-management
+signal surface. There is no `formation_anchors_changed` and no per-player brain
+to write anchors onto: the pre-pivot `ManagerDirector` (which emitted a
+similarly named `manager_formation_changed`) was archived under `legacy/`.
+Check the emitter before connecting.
 
-Note `GameEvents` also carries an unrelated `formation_changed(team, name)`,
-emitted by `PauseMenu` and `PreGameScreen` for the team-management UI. Three
-similarly named signals — check the emitter before connecting.
-
-### "Deprecated" export ≠ unused export
-`PlayerBrain.decision_interval` is superseded by the `UPDATE_INTERVAL` frame
-stagger for *scheduling*, but `ManagerDirector._apply_brain_overrides()` still
-writes it every bind:
-
-```gdscript
-brain.decision_interval = lerpf(0.35, 0.15, _live_pressing)
-```
-
-Deleting the export would break that write and drop the value out of every
-serialised `.tscn`. Grep for writers before removing any `@export`.
+### "Deprecated" export ≠ unused export (historical pre-pivot example)
+Before the pivot, `PlayerBrain.decision_interval` was superseded by the
+`UPDATE_INTERVAL` frame stagger for *scheduling*, but
+`ManagerDirector._apply_brain_overrides()` still wrote it every bind. Both of
+those files are archived under `legacy/`, so the concrete example no longer
+applies — the rule it illustrates still does: grep for writers before removing
+any `@export`. A stale writer is a runtime error, and the serialised value can
+silently drop out of every `.tscn`.
 
 ### `@onready` / `@export` and the `\b` word-boundary trap
 A regex like `\bonready\s+var\b` matches inside `@onready var` — `\b` fires
@@ -77,13 +71,19 @@ nowhere in `TeamData.gd`.
 `tools/gdcheck.py` used to flag every `var x: MatchWorldModel` (or any other
 autoload used as a type annotation) as `unknown type — no class_name and not
 an engine type`, because it only recognised types with a declared
-`class_name`. `MatchWorldModel.gd` deliberately has no `class_name` — Godot
-4.7+ rejects a `class_name` that collides with an autoload's injected global
-name — so the fix was in the checker, not the script: `gdcheck.py` now reads
-`[autoload]` from `project.godot` once (`parse_autoload_entries()`) and
-treats every autoload name as a known type in `check_static_access()`. If a
+`class_name`. The now-archived `MatchWorldModel.gd` deliberately had no
+`class_name` — Godot 4.7+ rejects a `class_name` that collides with an
+autoload's injected global name — so the fix was in the checker, not the
+script: `gdcheck.py` now reads `[autoload]` from `project.godot` once
+(`parse_autoload_entries()`) and treats every autoload name as a known type in
+`check_static_access()`. A live example is `var manager: CareerManager`. If a
 type-annotation error ever names an autoload again, the bug is in the
 checker's autoload parsing, not a missing `class_name` — do not add one.
+
+`gdcheck.py` also enforces the boot contract: `GameEvents` must be the FIRST
+`[autoload]`, the four loaders (`DataLoader`, `RefereeLoader`, `ManagerLoader`,
+`StaffLoader`) must precede `WorldEventLog`, and `WorldEventLog` must precede
+`CareerManager`.
 
 ### This container has no engine and no GUT
 Neither a `godot` binary nor `addons/gut/` exists here, so

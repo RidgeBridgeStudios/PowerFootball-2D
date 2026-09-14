@@ -4,8 +4,8 @@
 ## Pure data container for one manager: identity, tactical philosophy, squad
 ## and signing preferences, personality traits, and career stats. Saveable as
 ## a .tres resource so a manager can be authored and edited without touching a
-## scene, the same way PlayerData is. ManagerDirector and PressOffice are what
-## turn an instance of this into live match behaviour and press quotes — this
+## scene, the same way PlayerData is. QuickSimEngine and PressOffice are what
+## turn an instance of this into match behaviour and press quotes — this
 ## resource never touches a Node.
 ##
 ## current_team matches TeamData.team_name of the team this manager manages.
@@ -48,13 +48,13 @@ extends Resource
 ## --- Tactical philosophy ---------------------------------------------------
 
 ## 0 = deep compact block, 1 = aggressive high line.
-## ManagerDirector uses this to shift formation_anchor Y values up the pitch.
+## Shifts formation-anchor Y values up the pitch.
 @export_range(0.0, 1.0) var defensive_line: float = 0.5
 ## 0 = patient possession build-up (low formation_ball_weight),
 ## 1 = direct / counter-attack (high formation_ball_weight).
 @export_range(0.0, 1.0) var tempo: float = 0.5
 ## 0 = narrow shape, 1 = wide shape.
-## ManagerDirector scales formation_anchor X spread by this.
+## Scales formation-anchor X spread by this.
 @export_range(0.0, 1.0) var width: float = 0.5
 ## 0 = passive mid-block, 1 = relentless gegenpressing.
 ## Raises aggression_attribute and shortens decision_interval on all players.
@@ -90,7 +90,7 @@ extends Resource
 ## rates highly in transfer scouting.
 @export var preferred_mass_min: float = 65.0
 @export var preferred_mass_max: float = 90.0
-## The PlayerBrain attribute the manager prizes most when scouting.
+## The player attribute the manager prizes most when scouting.
 ## Valid values: "vision", "composure", "aggression", "none".
 @export var prized_attribute: String = "none"
 ## Playstyle tag the manager recruits toward.
@@ -128,7 +128,7 @@ func has_trait(bit: int) -> bool:
 
 
 ## --- Career stats ------------------------------------------------------------
-## Not @export: written back by PitchScene._log_manager_stats() after a match
+## Not @export: written back by QuickSimEngine after a simulated match
 ## and persisted through ManagerLoader.save_managers(), the same split PlayerData
 ## uses between authored fields and runtime-accumulated ones.
 

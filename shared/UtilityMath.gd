@@ -3,7 +3,7 @@
 ##
 ## Pure static maths for the CPU decision layer — no instance state, no
 ## lifecycle, no autoload entry. Everything here is a closed-form or
-## fixed-iteration answer to a question PlayerBrain used to answer by
+## fixed-iteration answer to a spatial question that used to require
 ## simulating: where will the ball be when I get there, is that pass on, how
 ## much is this worth at this range.
 ##
@@ -71,9 +71,8 @@ const XT_GRID: PackedFloat32Array = [
 ## t_p is monotone-ish and the feasible set is an interval ending at t_stop, so
 ## bisection steps over [0, t_stop] land close enough to run at.
 ##
-## `friction` is the combined per-second deceleration in px/s^2 — for
-## Pseudo3DBall that is `pitch_friction * Pseudo3DBall.FRICTION_SCALE`, not the
-## raw exported coefficient.
+## `friction` is the combined per-second deceleration in px/s^2, not a raw
+## exported coefficient — the caller supplies the already-combined value.
 ##
 ## Returns b_pos unchanged when the ball is already at rest.
 static func calculate_intercept_point(
@@ -192,11 +191,11 @@ static func sigmoid(value: float, midpoint: float, steepness: float) -> float:
 
 ## Looks up XT_GRID for the zone containing `pitch_pos`. `pitch_pos` is
 ## origin-centred pitch space (world position with the pitch centre at (0,0)
-## — the convention every PitchBoundary.get_pitch_rect() default already
-## uses; this function has no pitch_centre param, so a caller whose boundary
-## is not centred at the origin must offset pitch_pos itself first).
+## — the convention the default pitch layout already uses; this function has no
+## pitch_centre param, so a caller whose pitch is not centred at the origin must
+## offset pitch_pos itself first).
 ## `pitch_size` is the full pitch Rect2's .size. `attack_sign` (+1.0/-1.0, the
-## same convention as FormationAnchorMath) orients the attacking-byline axis
+## same convention the formation anchors use) orients the attacking-byline axis
 ## per team so the returned value is always "how threatening is this zone for
 ## the team attacking in that direction", not a raw world-space reading.
 ## Zero allocation: two clamped divides, two int casts, one array index.

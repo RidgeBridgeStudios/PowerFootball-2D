@@ -5,11 +5,10 @@
 ## player B (or how a player regards the manager). Directed on purpose — a
 ## senior pro can rate a youngster far higher than the youngster rates them.
 ##
-## trust here is the PERSISTENT, between-match memory. It is distinct from
-## entities/player/TrustSystem.gd, which is the in-match, per-90-minutes
-## accumulator that resets at kickoff. CareerManager seeds the in-match system
-## from this one before every match (see seed_match_trust()), which is the
-## bridge that makes off-pitch fallout visible in on-pitch passing.
+## trust here is the PERSISTENT, between-match memory. The in-match accumulator
+## it used to seed before every match (seed_match_trust()) belonged to the
+## pre-pivot real-time match layer archived under legacy/, so nothing in the live
+## quick-sim path consumes trust yet.
 ##
 ## Depends on: nothing.
 ## Exposes: the fields below, adjust_trust(), adjust_rivalry(), note(),
@@ -33,9 +32,9 @@ const HISTORY_CAP: int = 12
 ## Trust drifts this far back toward neutral per 30 idle days.
 const MONTHLY_DECAY: float = 0.02
 
-## The in-match TrustSystem multiplier band this maps onto. Kept identical to
-## TrustSystem.TRUST_MULT_MIN/MAX so a seeded value and an earned value mean
-## exactly the same thing to PassUtilityScorer.
+## The in-match pass-utility multiplier band this maps onto, kept identical to the
+## retired in-match trust band so a seeded value and an earned value would mean
+## the same thing. Both consumers were archived under legacy/.
 const MATCH_MULT_MIN: float = 0.85
 const MATCH_MULT_MAX: float = 1.15
 

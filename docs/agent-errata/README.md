@@ -3,25 +3,32 @@
 **Navigation Rule for AI Agents:**  
 DO NOT load all errata files into context. Identify the simulation layer or system you are modifying, consult this index, and read ONLY the corresponding topic page.
 
+> [!WARNING]
+> **Several pages below are historical.** The manager-only pivot retired the real-time match layer; its code now lives under `legacy/`. Pages marked **Historical** record findings about that archived engine — useful as reference when deepening `QuickSimEngine`, but they must **not** be applied to current code. Start with **[architecture-pivot.md](architecture-pivot.md)**.
+
 ---
 
 ## Topic Reference Pages
 
-| Topic Page | Layer / Subsystem | Key Covered Systems |
-|---|---|---|
-| **[player-ai.md](player-ai.md)** | Layer 2 Match AI | `PlayerBrain`, decision scoring baselines, loose-ball chase clamp deadlocks, Bresenham passing lane check, Sacchi force gating, defender marking, tackle gating |
-| **[match-state.md](match-state.md)** | Layer 2 / Layer 5 | `GameManager`, match stage temporal fraction boundaries, possession hold timers, macro urgency saturation, manager risk profile derivation |
-| **[physics-and-ball.md](physics-and-ball.md)** | Layer 1 Physics | `Pseudo3DBall`, `DribbleState` magnet oscillation & dual-driver possession jitter, `AerialState` bicycle kick gating, `HeavyPlayerController` sprint jostle impulse & fatigue tiers |
-| **[set-pieces.md](set-pieces.md)** | Layer 1 / Layer 2 | `SetPieceCoordinator`, kickoff low-composure backward pass veto & freeze, corner kick run triggers, throw-in CPU execution stalls, boundary legality rects |
-| **[scene-and-node-paths.md](scene-and-node-paths.md)** | Cross-Module / Engine | Autoload contracts, `tools/lint_xref.py` enforcement, TackleState MatchWorldModel property crash, static cross-referencing latent crashes, non-ASCII identifier parser gotcha |
-| **[data-and-persistence.md](data-and-persistence.md)** | Layer 4 Persistence | `CareerManager`, `PlayerData`, player aging decline curve calibration, morale-to-mood seeding slopes, season fixture calendar spacing rhythm |
-| **[telemetry-and-stats.md](telemetry-and-stats.md)** | Layer 2 / Layer 3 | `MatchWorldModel.debug_spacing_diagnostics`, crowding metrics, avoiding competing telemetry systems |
-| **[ui-and-signals.md](ui-and-signals.md)** | Layer 5 Presentation | `ball_struck` signal argument count mismatch, `TouchlineBubble` singleton instance repositioning, HUD substitution banner player lookup |
-| **[session-history.md](session-history.md)** | Agent Handoffs | Archived session state logs (Antigravity & Claude) and Manager Career Mode session handoff notes |
+| Status | Topic Page | Layer / Subsystem | Key Covered Systems |
+|---|---|---|---|
+| **Current — read first** | **[architecture-pivot.md](architecture-pivot.md)** | All layers | Manager-only pivot record: what changed and why, `legacy/` archive layout and exclusions, the 3-layer stack, the 9-autoload boot order, and the surviving `GameManager` / `GameEvents` / `MatchStatsTracker` surfaces |
+| **Current** | **[data-and-persistence.md](data-and-persistence.md)** | Layer 1 Career World | `CareerManager`, `PlayerData`, player aging decline curve calibration, season fixture calendar spacing rhythm |
+| Historical — pre-pivot match layer | **[player-ai.md](player-ai.md)** | Archived Layer 2 Match AI | `PlayerBrain`, decision scoring baselines, loose-ball chase clamp deadlocks, Bresenham passing lane check, Sacchi force gating, defender marking, tackle gating |
+| Historical — pre-pivot match layer | **[match-state.md](match-state.md)** | Archived match lifecycle | `GameManager` phase machine, match stage temporal fraction boundaries, possession hold timers, macro urgency saturation, manager risk profile derivation |
+| Historical — pre-pivot match layer | **[physics-and-ball.md](physics-and-ball.md)** | Archived Layer 1 Physics | `Pseudo3DBall`, `DribbleState` magnet oscillation & dual-driver possession jitter, `AerialState` bicycle kick gating, `HeavyPlayerController` sprint jostle impulse & fatigue tiers |
+| Historical — pre-pivot match layer | **[set-pieces.md](set-pieces.md)** | Archived Layer 1 / 2 | `SetPieceCoordinator`, kickoff low-composure backward pass veto & freeze, corner kick run triggers, throw-in CPU execution stalls, boundary legality rects |
+| Historical — mostly pre-pivot | **[scene-and-node-paths.md](scene-and-node-paths.md)** | Cross-Module / Engine | Autoload contracts, `tools/lint_xref.py` enforcement, TackleState `MatchWorldModel` property crash, static cross-referencing latent crashes, non-ASCII identifier parser gotcha (the parser and cross-reference lessons are still current) |
+| Historical — pre-pivot match layer | **[telemetry-and-stats.md](telemetry-and-stats.md)** | Archived match observability | `MatchWorldModel.debug_spacing_diagnostics`, crowding metrics, avoiding competing telemetry systems |
+| Historical — pre-pivot match layer | **[ui-and-signals.md](ui-and-signals.md)** | Archived match presentation | `ball_struck` signal argument count mismatch, `TouchlineBubble` singleton instance repositioning, HUD substitution banner player lookup |
+| Historical archive | **[session-history.md](session-history.md)** | Agent Handoffs | Archived session state logs (Antigravity & Claude) and Manager Career Mode session handoff notes |
 
 ---
 
 ## Complete Item Migration Manifest
+
+> [!NOTE]
+> This manifest is a **historical migration record**. Nearly every entry below concerns the archived real-time match layer (`PlayerBrain`, `MatchWorldModel`, `SetPieceCoordinator`, `HeavyPlayerController`, `Pseudo3DBall`, `HUD`); see the pivoted status column in the table above before following a link.
 
 Every original entry from the former monolithic `AGENTS_ERRATA.md` has been mapped to exactly one topic page:
 

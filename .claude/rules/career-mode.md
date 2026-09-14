@@ -2,7 +2,7 @@
 description: Career layer contracts, identity rules, and the match-layer bridge
 paths: ["**/shared/career/**", "**/autoloads/CareerManager*", "**/autoloads/WorldEventLog*", "**/ui/manager_mode/**"]
 ---
-## Career Mode (Layer 4) Invariants
+## Career Mode (Layer 1) Invariants
 
 STATE OWNERSHIP:
   CareerManager owns the ONLY live CareerSaveData. Nothing else mutates it.
@@ -11,8 +11,9 @@ STATE OWNERSHIP:
   per slot via DataLoader.save_league() — never duplicated into the career save.
 
 IDENTITY:
-  player_key = team_index * 1000 + squad_index, matching MatchStatsTracker and
-  TrustSystem. There is still no PlayerData.player_id (see ai-architect.md).
+  player_key = team_index * 1000 + squad_index, matching MatchStatsTracker's
+  per-player keys and PlayerCareerState.player_key. There is still no
+  PlayerData.player_id, so squad_index is the identity (see below).
 
 PERSISTENCE:
   JSON, not .tres. A career must survive the SCRIPTS changing; ResourceSaver
@@ -42,26 +43,31 @@ Never call `squad.remove_at()` anywhere else. A transfer that skips the repair
 leaves the club fielding a different eleven than the one the manager picked,
 with no error anywhere.
 
-### The career -> match bridge runs through PlayerFactory, once per player per bind
-`PlayerFactory.apply()` calls `CareerManager.apply_career_state_to_player()`
-immediately AFTER it has reset the player's MoodSystem and TrustSystem. That
-ordering is load-bearing: seeding before the reset would be wiped, and seeding
-without a reset would compound last match's values.
-
-Both systems must stay no-ops outside a career — `CareerManager.career` is null
-in Kick Off and the Practice Arena, and the neutral reset must survive.
+### The career -> match bridge is the quick-sim result folded back by CareerManager
+There is no live match entity for career state to seed: the pre-pivot
+`PlayerFactory.apply()` bridge (and the in-match `MoodSystem` / `TrustSystem`
+it reset) was archived with the real-time layer. A career match now resolves
+entirely inside `QuickSimEngine`, and `CareerManager._apply_fixture_result()` is
+the one place a result reaches the world. It forwards to
+`CareerProgressionEngine.process_matchday_progression()` (reputation, board
+confidence, referee drift, accumulated PlayerData stats) and then to
+`_record_player_match_state()`, which writes appearance and rating into each
+`PlayerCareerState` and runs `MoraleEngine.apply_result_reaction()` /
+`apply_reputation_drift()`. Never write a morale, rating, or reputation update
+anywhere else.
 
 ### Match side is NOT the league team index
-The match runs on two sides (`GameManager.TEAM_A`/`TEAM_B`); the career runs on
-league indices. `GameManager`'s `home_team_index` / `away_team_index` metadata
-is the mapping, exactly as `DataLoader.get_match_team()` already uses it.
-`CareerManager._league_index_for_match_side()` is the single conversion — a
-career lookup keyed on `player.team` directly reads the wrong club's state
-whenever the user's club is not league index 0 or 1.
+The quick-sim runs on two sides (`GameManager.TEAM_A`/`TEAM_B`); the career runs
+on league indices. `GameManager`'s `home_team_index` / `away_team_index`
+metadata (set by `CareerManager.play_next_fixture()`) is the mapping, and
+`DataLoader.get_match_team()` / `DataLoader.get_player()` is the single
+conversion — a career lookup keyed on the side directly reads the wrong club's
+state whenever the user's club is not league index 0 or 1.
 
 The same trap exists in reverse for QuickSimEngine results:
 `QuickSimResult.player_ratings` is keyed by match SIDE (0/1), not league index,
-so `_record_player_match_state()` looks up `side * 1000 + squad_index`.
+so `_record_player_match_state()` looks up `side * 1000 + squad_index` while
+walking the real `team.lineup_indices`.
 
 ### Inbox options are deliberately NOT serialised
 `InboxItem.Option` carries behaviour-defining deltas (morale, board confidence,
@@ -74,16 +80,15 @@ player is left with an unanswerable message that will silently escalate.
 `CareerManager._rehydrate_inbox()` does that from the item's category and
 payload. A new decision-bearing inbox category needs a matching branch there.
 
-### Trust lives in two spaces and they are not the same numbers
-- `RelationshipData.trust` — persistent, career space, 0.0-1.0, neutral 0.5.
-- `TrustSystem._trust` — in-match, stored space, 0.5-1.5, neutral 1.0.
-
-`TrustSystem.normalise_trust()` / `denormalise_trust()` are the only bridge.
-This was a live bug: `trust_multiplier()` fed the STORED value into a
+### Trust lives in career space only now
+`RelationshipData.trust` — persistent, career space, 0.0-1.0, neutral 0.5 — is
+the only live trust value. The in-match `TrustSystem` (stored space 0.5-1.5,
+bridged by `normalise_trust()` / `denormalise_trust()`) was archived with the
+real-time match layer; nothing loads, seeds, or resets it any more. If an
+in-match trust model is reintroduced, keep the two spaces apart: the historical
+bug was `trust_multiplier()` feeding the STORED value into a
 `clampf(t, 0.0, 1.0)` lerp, so neutral trust (1.0) mapped to the MAXIMUM 1.15x
-and every value from 1.0 to 1.5 flattened onto that ceiling — the entire
-trust-gain half of the system was inert while losses still bit. Never mix the
-two spaces.
+and every value from 1.0 to 1.5 flattened onto that ceiling.
 
 ### The season calendar is derived, never a fixed weekly rhythm
 `CareerManager._matchday_spacing()` fits the round count between the first and

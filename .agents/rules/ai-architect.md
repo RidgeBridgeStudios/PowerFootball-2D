@@ -2,6 +2,13 @@
 description: Centralized data caching and time-sliced utility AI rules
 paths: ["**/entities/player/**", "**/autoloads/MatchWorldModel*"]
 ---
+> [!WARNING]
+> **SUPERSEDED — pre-pivot real-time match layer.** This rulebook governed the
+> 22-player physics match engine, which is now archived under `legacy/` behind
+> `legacy/.gdignore`. Retained as historical reference for `QuickSimEngine`
+> depth work; **do not apply it to current code**. See
+> `docs/agent-errata/architecture-pivot.md` and `docs/CORE_INVARIANTS.md`.
+
 ## AI & Spatial Decision Invariants
 
 ZERO SCENE TREE POLLING:

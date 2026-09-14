@@ -148,7 +148,7 @@ def scan_repository() -> tuple[dict[str, ScriptNode], dict[str, str]]:
 
     # 1. First pass: find all scripts and class definitions
     for dirpath, dirnames, filenames in os.walk(ROOT):
-        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude", "__pycache__", "docs")]
+        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude", "__pycache__", "docs", "legacy")]
         for f in filenames:
             if f.endswith(".gd"):
                 full_path = os.path.join(dirpath, f)

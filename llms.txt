@@ -1,188 +1,240 @@
 # PowerFootball-2D — Semantic Repository Map & RAG Router
 
-**Godot 4.7 · GDScript 2.0 · Top-Down Football Simulation**
-"Dwarf Fortress with a football." Simple overhead visuals; deep systemic simulation.
+**Godot 4.7 · GDScript 2.0 · Manager-Only Quick-Sim Football Management Game**
+"Football Manager with a living world." You manage the club; `QuickSimEngine` resolves the football.
+
+> **Pivot notice:** the project is manager-only. Matches are fully resolved by `shared/QuickSimEngine.gd`,
+> a statistical simulator — there is no player control, real-time match engine, ball physics, or per-frame AI.
+> The former 22-player physics game is archived under `legacy/` (see section 3) and is preserved as reference.
 
 ---
 
 ## 1. Vision & Architectural Invariants
 
 <core_invariants>
-- **docs/CORE_INVARIANTS.md** — Canonical single source of truth: Engine lock, simulation stack, choke points, and physics/AI laws.
+- **docs/CORE_INVARIANTS.md** — Canonical single source of truth: engine lock, 3-layer simulation stack, choke points, and current laws.
 - **docs/GRAPHIFY_LIFECYCLE.md** — Canonical Graphify lifecycle, git hooks, update mechanics, and enforcement matrix.
-- **docs/API_SURFACE.md** — Auto-generated public API surface map across all 76+ scripts, exports, signals, and methods.
+- **docs/API_SURFACE.md** — Auto-generated public API surface map across all live scripts, exports, signals, and methods.
 - **docs/ANTI_PATTERNS.md** — Curated anti-pattern and hallucination corpus for autonomous agent reasoning.
 - **docs/MATH_SOLVERS.md** — Ground-truth mathematical solvers catalog with exact formulas, proofs, and GDScript reference code.
-- **docs/SYMBOLS.json** — Complete line-indexed symbol map across all 76 classes, 764 methods, 925 properties, and 52 signals.
+- **docs/SYMBOLS.json** — Complete line-indexed symbol map across all classes, methods, properties, and signals.
 - **docs/DEPENDENCY_GRAPH.json** — Static bidirectional dependency DAG and blast radius graph.
-- **POWERFOOTBALL_MASTER_VISION.md** — Master design vision, 5-layer simulation stack, systems design, and North Star.
-- **ROADMAP.md** — Tactical `[ ]`/`[x]` feature checklist across 5 development phases.
+- **POWERFOOTBALL_MASTER_VISION.md** — Historical pre-pivot design vision. Read its `## Pivot Note` first; the rest is a record of the abandoned real-time architecture, not current guidance.
+- **ROADMAP.md** — Tactical `[ ]`/`[x]` feature checklist across 5 development phases, re-based on the manager-only pivot.
 - **docs/course_implementation_specification.md** — Course-derived reference specification (READ-ONLY): FSMs, formulas, gotchas.
 - **AGENTS.md** — Canonical shared policy & architecture guide for all AI agents across the repository.
 - **AGENTS_ERRATA.md** — Compact migration index & pending rule proposal staging.
-- **docs/agent-errata/README.md** — Topic-specific errata index & reading guide (player-ai, match-state, physics-and-ball, set-pieces, scene-and-node-paths, data-and-persistence, telemetry-and-stats, ui-and-signals, session-history).
-- **docs/architecture/hubs/** — Concise architecture hub maps for central gameplay systems (PlayerBrain, MatchWorldModel, PitchScene, CareerManager, HeavyPlayerController, SetPieceCoordinator).
+- **docs/agent-errata/README.md** — Topic-specific errata index & reading guide.
+- **docs/architecture/hubs/career-manager.md** — Architecture hub map for the live `CareerManager` career world.
+- **docs/json-schema.md** — Formal specification for the external JSON club/player/manager/referee/staff databases.
 </core_invariants>
 
 ---
 
-## 2. Five-Layer Simulation Stack (Semantic Routing)
+## 2. Three-Layer Simulation Stack (Semantic Routing)
 
-<layer_1_physics>
-### Layer 1 — Physics & Kinematics
-Ball physics, pseudo-3D height trajectory, player kinematic body, turning penalties, and collision bounding.
+<layer_1_career_world>
+### Layer 1 — Career World
+Persistent club world: the single live `CareerSaveData`, the league database behind it, the day loop, transfers,
+contracts, finances, morale, board confidence, scouting, youth and season progression.
 
-- **entities/ball/Pseudo3DBall.gd** — Pseudo-3D ball physics solver (z-axis, gravity, proportional friction, shadow scaling).
-- **entities/ball/BallState.gd** — Base state for ball FSM.
-- **entities/ball/BallStateFactory.gd** — Ball state instantiation factory.
-- **entities/ball/states/FlightState.gd** — Ball in airborne parabolic trajectory.
-- **entities/ball/states/GroundRollState.gd** — Ball rolling on pitch surface with proportional friction drag.
-- **entities/ball/states/PossessionState.gd** — Ball attached to carrier dribble offset.
-- **entities/ball/states/DeadBallState.gd** — Ball stationary during set pieces or stoppages.
-- **entities/player/HeavyPlayerController.gd** — Player kinematic body, acceleration curves, turning penalties, stamina, input resolution.
-- **entities/player/PlayerState.gd** — Base player state machine class.
-- **entities/player/PlayerStateFactory.gd** — Player state machine factory.
-- **entities/player/states/MoveState.gd** — Off-ball running and pursuit steering.
-- **entities/player/states/DribbleState.gd** — Close ball control and continuous possession magnetism.
-- **entities/player/states/IdleState.gd** — Deceleration to rest and stationary stance.
-- **entities/player/states/ChargeKickState.gd** — Kick power charge and Gaussian scatter calculation.
-- **entities/player/states/TackleState.gd** — Slide/standing challenge execution and recovery delay.
-- **entities/player/states/GoalkeeperDiveState.gd** — Goalkeeper commitment, dive velocity, and save window.
-- **entities/player/states/AerialState.gd** — Jump timing, aerial contest, and heading resolution.
-- **entities/player/states/ShotLockState.gd** — Travel-direction carry lock before striking.
-- **entities/player/states/ThrowInState.gd** — Sideline throw-in positioning and delivery.
-- **entities/player/states/PenaltyKickState.gd** — Penalty spot execution and run-up.
-- **entities/player/states/SetPieceFreezeState.gd** — Wall and defensive positioning freeze during dead balls.
-- **shared/CollisionLayers.gd** — Bitmask constants (Layer 1 World, Layer 2 Players, Layer 3 Ball, Layer 4 Hitboxes).
-- **pitch/PitchBoundary.gd** — Touchlines, goal lines, ball out-of-bounds detection.
-- **pitch/GoalZone.gd** — Goal net detection areas and scorer attribution.
-- **pitch/PitchMarkings.gd** — Pitch line drawing and dimensions.
-- **pitch/PitchScene.gd** — Pitch root scene managing declarative 22-player squad, match coordinator, and headless simulation telemetry harness.
-- **pitch/SetPieceCoordinator.gd** — Set-piece positioning, wall placement, and restart triggers.
-- **pitch/PenaltyShootoutCoordinator.gd** — Post-match penalty shootout turn resolution.
-</layer_1_physics>
-
-<layer_2_match_ai>
-### Layer 2 — Match AI & Spatial Navigation
-Spatial indexing, utility scoring, time-sliced decision engines, dynamic formation anchors, and officiating.
-
-- **autoloads/MatchWorldModel.gd** — Global spatial position cache of 22 players + ball; computes shared team defensive line depth (`defensive_line_x`).
-- **entities/player/PlayerBrain.gd** — Utility-scored decision engine running on 15-frame stagger; writes `movement_intent` and `wants_sprint`.
-- **shared/PassUtilityScorer.gd** — Pass candidate utility scoring (lane safety, receiver openness, forward progress, trust modifier).
-- **shared/UtilityMath.gd** — Geometric interception solver, lane raycast/occlusion math, sigmoid and exponential transforms.
-- **shared/FormationAnchorMath.gd** — Compactness lerping and phase-dependent dynamic anchor calculations (In Possession / Out of Possession / Transition).
-- **shared/FormationLibrary.gd** — Standard tactical formations (4-4-2, 4-3-3, 3-5-2, etc.) and anchor coordinate maps.
-- **shared/FormationRegistry.gd** — Formation catalog and lookup helper.
-- **shared/PlayerRoleConfig.gd** — Data-driven role tuning resource (`anchor_weight`, chase aggression, open space bias).
-- **entities/goalkeeper/GoalkeeperDiveBrain.gd** — Goalkeeper shot trajectory anticipation, dive commitment, and intercept triggers.
-- **entities/referee/MatchReferee.gd** — Foul evaluation, card thresholds, penalty awards, and whistle execution.
-- **entities/referee/OffsideDetector.gd** — Second-last defender line tracking and pass-release offside validation.
-- **entities/referee/MatchOfficialCrew.gd** — Complete 4-official referee crew coordinator.
-- **entities/referee/WhistleSynthesizer.gd** — Procedural referee whistle sound synthesizer.
-- **entities/manager/ManagerDirector.gd** — In-match tactical shifts, pressing tempo overrides, formation adjustments.
-</layer_2_match_ai>
-
-<layer_3_match_social>
-### Layer 3 — Match Social & Dynamic Psychology
-Player mood, slump/streak momentum, dynamic trust relationships, and individual match ratings.
-
-- **entities/player/MoodSystem.gd** — Player form states (SLUMP / NORMAL / STREAK) modifying kick scatter and decision confidence.
-- **entities/player/TrustSystem.gd** — In-match dynamic passing trust and chemistry modifier.
-- **shared/PlayerRatingCalculator.gd** — Dynamic 1.0–10.0 performance rating algorithm based on completed passes, tackles, saves, and errors.
-- **autoloads/MatchStatsTracker.gd** — Per-player and per-team match event accumulator (shots, passes, possession, fouls).
-</layer_3_match_social>
-
-<layer_4_club_world>
-### Layer 4 — Club World & Persistent Entities
-Persistent player profiles, manager personalities, team rosters, league databases, and JSON ingestion schemas.
-
-- **shared/PlayerData.gd** — Persistent player attributes (speed, passing, tackling), traits, and long-term relationships.
-- **shared/TeamData.gd** — Team identity, tactics, lineup indices, shirt colors, and stadium parameters.
-- **shared/TeamManagementData.gd** — Lineup management, roster changes, and bench assignments.
-- **shared/LeagueData.gd** — League table, fixtures, season standings, and division parameters.
-- **shared/ManagerData.gd** — Manager personality profile, tactical preferences, and adaptability.
-- **shared/RefereeData.gd** — Referee strictness, foul bias, card leniency, and historical profile.
-- **shared/PlayerFactory.gd** — Procedural player generation and default roster builder.
-- **autoloads/DataLoader.gd** — JSON database ingestion for players, teams, and leagues.
+- **autoloads/CareerManager.gd** — Owns the ONLY live `CareerSaveData`. Day loop, fixture dispatch (`simulate_next_fixture()`), result application (`_apply_fixture_result()`), transfers, contracts, injuries, season rollover.
+- **autoloads/DataLoader.gd** — JSON ingestion for players, teams and leagues; per-slot persistence via `save_league()`.
 - **autoloads/ManagerLoader.gd** — Manager database JSON loader.
 - **autoloads/RefereeLoader.gd** — Referee database JSON loader.
-- **docs/json-schema.md** — Formal specification for external JSON rosters, traits, and club databases.
-</layer_4_club_world>
+- **autoloads/StaffLoader.gd** — Staff database JSON loader.
+- **shared/CareerProgressionEngine.gd** — Career growth, ageing and progression math.
+- **shared/career/CareerSaveData.gd** — Root career save aggregate.
+- **shared/career/CareerSerializer.gd** — Versioned JSON save/load across 3 slots.
+- **shared/career/CareerDate.gd** — Career calendar date arithmetic.
+- **shared/career/CompetitionData.gd** — League/knockout competition state, table, cup rounds, tie resolution.
+- **shared/career/FixtureData.gd** — Fixture record and result container.
+- **shared/career/LeagueTableRow.gd** — Standings row model.
+- **shared/career/ClubFinances.gd** — Budgets, ledger, amortisation, gate receipts.
+- **shared/career/ContractData.gd** — Player contracts and expiry.
+- **shared/career/TransferMarket.gd** — Transfer windows, listing and negotiation flow.
+- **shared/career/TransferOffer.gd** — Individual transfer bid state.
+- **shared/career/ScoutingNetwork.gd** — Scouting assignments and knowledge accumulation.
+- **shared/career/ScoutReport.gd** — Uncertainty-based scout report.
+- **shared/career/YouthAcademy.gd** — Youth intake and academy progression.
+- **shared/career/TrainingSchedule.gd** — Training intensity, fatigue and daily injury risk.
+- **shared/career/PlayerCareerState.gd** — Per-player career state (condition, injuries, development).
+- **shared/career/PlayerDevelopmentEngine.gd** — Attribute growth and decline.
+- **shared/career/MoraleEngine.gd** — Morale, form and reputation drift; career-level relationship effects.
+- **shared/career/ManagerCareerProfile.gd** — Manager career record and reputation.
+- **shared/career/BoardState.gd** — Board expectations, confidence, requests and sacking.
+- **shared/career/InboxEngine.gd** — Inbox generation from career events.
+- **shared/career/InboxItem.gd** — Individual inbox message/decision.
+- **shared/career/RelationshipData.gd** — Career-level player relationship graph.
+- **shared/career/WorldEvent.gd** — Club-world event record consumed by the narrative layer.
+- **shared/career/CareerThemePalette.gd** — Career UI theme palette helper.
+- **shared/TeamData.gd** — Team identity, tactics, lineup indices, colours, stadium.
+- **shared/PlayerData.gd** — Persistent player attributes, traits and derived fields.
+- **shared/LeagueData.gd** — League structure, season standings and division parameters.
+- **shared/ManagerData.gd** — Manager profile, tactical preferences, personality traits.
+- **shared/RefereeData.gd** — Referee strictness, consistency, composure and card bias.
+- **shared/StaffData.gd** — Staff roles and coaching/physio/scouting quality.
+- **shared/TeamManagementData.gd** — Lineup management, roster changes and bench assignments.
+- **shared/NationDatabase.gd** — Nationality database helper.
+- **shared/FormationLibrary.gd** — Standard formations (4-4-2, 4-3-3, 3-5-2, etc.).
+- **shared/FormationRegistry.gd** — Formation catalog and lookup helper.
+- **shared/PlayerRoleConfig.gd** — Data-driven role tuning resource.
+- **shared/roles/*.tres** — 12 role tuning resources (GK, CB, LB/RB, DM/CDM/CM/AM/LM/RM/LW/RW/ST).
+- **data/league.json**, **data/players.json**, **data/managers.json**, **data/referees.json**, **data/staff.json** — Authoritative JSON databases.
+</layer_1_career_world>
 
-<layer_5_narrative>
-### Layer 5 — Narrative, Presentation & User Interface
-Press office reactions, touchline dialogue, broadcast HUD, floating labels, match camera, and menus.
+<layer_2_quick_sim_match>
+### Layer 2 — Quick-Sim Match
+The entire match is a statistical simulation. There is no per-frame loop: a fixture is resolved analytically and
+stochastically, then published into the scoreboard and stats trackers.
 
-- **entities/manager/PressOffice.gd** — Match narrative generation, post-game quotes, press controversy.
-- **ui/TouchlineBubble.gd** — Animated manager touchline reaction bubbles responding to match events.
-- **ui/HUD.gd** — Match clock, scoreboard, player nameplates, and minimap HUD coordinator.
-- **ui/ActionText.gd** — Floating floating action indicators (PASS, SHOT, TACKLE, SAVE).
-- **ui/FormationDiagram.gd** — Tactical formation pitch diagram renderer.
-- **ui/MatchStatsUI.gd** — Full-time match summary, shot statistics, and player ratings display.
-- **pitch/MatchCamera.gd** — Camera tracking modes (BALL_FOLLOW, DYNAMIC, FULL_FIELD).
-- **pitch/Minimap.gd** — Real-time 2D radar displaying player dots and ball position.
-- **entities/player/FacingArrow.gd** — Player orientation and pass/kick direction indicator.
-- **ui/MainMenu.gd** — Main entry screen (Kick Off, Practice, Career, Options).
-- **ui/KickOffMenu.gd** — Team selection and match setup.
-- **ui/OptionsMenu.gd** — Audio, visual, and gameplay settings.
-- **ui/pregame/PreGameScreen.gd** — Pre-match tactical setup, formation change, and lineup selection.
-- **ui/pause/PauseMenu.gd** — In-match pause menu, resume, tactical adjustments, restart.
-- **autoloads/GameEvents.gd** — Global signal hub routing all inter-system events across layers.
-- **autoloads/GameManager.gd** — Single source of truth for match lifecycle, score, clock, and set-piece states.
-- **autoloads/InputHelper.gd** — Human controller input abstraction and mapping.
-</layer_5_narrative>
+- **shared/QuickSimEngine.gd** — Probability model (bivariate Poisson / Dixon-Coles) + stochastic match simulation. `calculate_probabilities()` returns the analytical outcome distribution; `simulate_match()` returns score, chronological goal/card timeline, team stats, advanced Moneyball analytics, and per-player events and ratings; `apply_to_match_stats_tracker()` publishes the result into `GameManager` + `MatchStatsTracker`.
+- **shared/PlayerRatingCalculator.gd** — 1.0–10.0 performance ratings from per-player match events.
+- **shared/UtilityMath.gd** — Shared statistical/geometric math helpers.
+- **autoloads/MatchStatsTracker.gd** — Per-player and per-team match event accumulator (shots, possession, cards, offsides, ratings).
+- **autoloads/GameManager.gd** — Thin scoreboard shell only: `TEAM_A`, `TEAM_B`, `enum MatchPhase { PREGAME, FULL_TIME }`, `current_phase`, `score`, `match_time`, `match_duration`, `half_duration_real_sec`, `simulated_match_time`, `set_half_duration()`.
+</layer_2_quick_sim_match>
+
+<layer_3_narrative_presentation>
+### Layer 3 — Narrative & Presentation
+Event log, press reactions, and the entire manager UI. Reacts to simulation state; never mutates it.
+
+- **autoloads/GameEvents.gd** — Signal bus; the ONLY cross-system event route. Carries 11 signals: `formation_changed`, `lineup_changed`, and the career signals `career_started`, `career_day_advanced`, `career_advance_halted`, `career_inbox_changed`, `career_match_ready`, `career_result_recorded`, `career_season_ended`, `career_manager_sacked`, `world_event_logged`.
+- **autoloads/WorldEventLog.gd** — Club-world history; feeds `PressOffice`.
+- **entities/manager/PressOffice.gd** — Press narrative generation: pre/post-match quotes, transfer speculation, injury updates, touchline reactions.
+- **ui/manager_mode/ManagerModeRoot.gd** — FM-style career shell; the career UI never leaves this root.
+- **ui/manager_mode/ManagerCreationScreen.gd** — New-manager creation and club selection.
+- **ui/manager_mode/** panels — `OverviewPanel`, `SquadPanel`, `TacticsPanel`, `TrainingPanel`, `TransfersPanel`, `ScoutingPanel`, `FinancesPanel`, `BoardPanel`, `CalendarPanel`, `FixturesPanel`, `LeaguePanel`, `InboxPanel`, `StaffPanel`, `CareerPanel`, plus `ContractNegotiationModal` and `CareerTheme`.
+- **ui/MainMenu.gd** — Main entry screen; exactly three buttons: **Manager Mode**, **Options**, **Quit**.
+- **ui/OptionsMenu.gd** — Settings (including match half duration).
+- **ui/MatchStatsUI.gd** — Full-time match summary, team stats and player ratings.
+- **ui/QuickSimModal.gd** — Quick-sim result/probability presentation.
+- **ui/SplashScreen.gd** — Boot splash; `project.godot` main scene.
+</layer_3_narrative_presentation>
 
 ---
 
-## 3. Tooling & Automation
+## 3. Live File Tree (source of truth)
+
+```
+project.godot                     # Main scene: res://ui/SplashScreen.tscn; 9 autoloads
+autoloads/                        # 9 autoloads, in boot order:
+  GameEvents.gd                   #   signal bus
+  GameManager.gd                  #   scoreboard shell
+  MatchStatsTracker.gd            #   match stats accumulator
+  DataLoader.gd                   #   players/teams/leagues JSON + save_league()
+  RefereeLoader.gd                #   referees JSON
+  ManagerLoader.gd                #   managers JSON
+  StaffLoader.gd                  #   staff JSON
+  WorldEventLog.gd                #   club-world event log
+  CareerManager.gd                #   live CareerSaveData owner
+shared/
+  QuickSimEngine.gd               # LAYER 2 core statistical match engine
+  PlayerRatingCalculator.gd
+  UtilityMath.gd
+  CareerProgressionEngine.gd
+  TeamData.gd  PlayerData.gd  LeagueData.gd  ManagerData.gd
+  RefereeData.gd  StaffData.gd  TeamManagementData.gd  NationDatabase.gd
+  FormationLibrary.gd  FormationRegistry.gd  PlayerRoleConfig.gd
+  career/                         # 24-file career data model + engines
+  roles/                          # 12 role .tres resources
+entities/
+  manager/PressOffice.gd          # only live entity script
+ui/
+  SplashScreen.*  MainMenu.*  OptionsMenu.*  MatchStatsUI.*  QuickSimModal.*
+  manager_mode/                   # ManagerModeRoot, ManagerCreationScreen, panels, theme
+data/                             # league.json, players.json, managers.json, referees.json, staff.json
+docs/                             # CORE_INVARIANTS, API_SURFACE, SYMBOLS.json, DEPENDENCY_GRAPH.json, ...
+legacy/                           # ARCHIVE — do not treat as live (see below)
+tools/                            # verification linters, fuzzers, generators
+scripts/                          # DB build helpers
+```
+
+<legacy_archive>
+### legacy/ — Archived Real-Time Layer (reference only)
+
+Not deleted and not imported: `legacy/.gdignore` makes Godot and every verification tool skip the tree.
+It holds the abandoned real-time 22-player match engine:
+
+- `legacy/entities/{ball,player,goalkeeper,referee}/` — ball state machines, player kinematic controller and decision brain, mood/trust systems, officiating and offside detection.
+- `legacy/entities/manager/` — in-match manager director and visuals.
+- `legacy/pitch/` — pitch scene, boundaries, goal zones, camera, minimap, set-piece and shootout coordinators.
+- `legacy/autoloads/` — spatial cache, match telemetry, and input helper autoloads.
+- `legacy/shared/` — collision layer constants, pass utility scoring, formation anchor math, and the career→match player factory.
+- `legacy/ui/` — in-match HUD, floating action text, touchline bubbles, match intro, kick-off menu, formation diagram, plus `pregame/`, `pause/` and `tactics/` screens.
+
+Do not reference these paths from live code. They are preserved as design reference for future `QuickSimEngine` depth work.
+</legacy_archive>
+
+---
+
+## 4. Tooling & Automation
 
 <tooling>
-- **tools/verify_gate.py** — Unified verification orchestrator running --fast (<150ms post-write gate) and --full (pre-turn completion battery).
-- **tools/lint_invariants.py** — Domain-specific AST invariant linter enforcing layer separation, zero allocations, collision matrix, and choke points.
+- **tools/verify_gate.py** — Unified verification orchestrator running `--fast` (post-write gate) and `--full` (pre-turn completion battery).
+- **tools/test_quick_sim.py** — CURRENT GATE: automated validation suite for `shared/QuickSimEngine.gd` (probability distribution properties, home advantage, manager/referee influence, ratings sanity).
+- **tools/lint_invariants.py** — Domain-specific AST invariant linter enforcing layer separation and choke point contracts.
 - **tools/lint_scope.py** — Postmortem AST scope linter catching duplicate variable declarations and dead code across function blocks.
 - **tools/lint_type_comparisons.py** — Postmortem type safety linter preventing Object vs String/StringName equality comparisons.
 - **tools/lint_stringnames.py** — StringName literal linter enforcing `&"string_name"` on signal and metadata invocations.
 - **tools/lint_shadowing.py** — Parameter shadowing linter preventing collisions with member variables and autoload singletons.
 - **tools/lint_allocations.py** — Allocation & distance-sorting linter enforcing `distance_squared_to()` and zero transient RNG instantiations.
 - **tools/lint_signal_races.py** — Signal race condition linter enforcing state variable updates prior to signal dispatch.
-- **tools/audit_process_modes.py** — Process mode consistency auditor verifying pausable entities vs always-processing coordinators.
-- **tools/replay_test.py** — Deterministic headless simulation replay harness asserting frame-for-frame bit-exact identity across seeds.
-- **tools/fuzz_formations.py** — Dynamic formation anchor property fuzzer asserting 100% boundary safety and depth ordering across 50,000 iterations.
-- **tools/benchmark_math.py** — Mathematical solvers micro-benchmark suite measuring throughput and execution latency.
-- **tools/generate_symbols.py** — Lightweight symbolic indexer generating `docs/SYMBOLS.json` line-indexed symbol map.
-- **tools/codebase_slice.py** — Targeted code slicing CLI utility extracting functions, enums, signals, or class headers.
-- **tools/semantic_search.py** — Zero-dependency local BM25 knowledge retrieval querying rules, specs, and docstrings.
-- **tools/git_pre_commit.py** — Git pre-commit hook installer and complete verification suite runner.
+- **tools/lint_xref.py** — Qualified-member access and `res://` path checker (included in the fast gate).
 - **tools/tscn_linter.py** — Scene graph and resource resolver validating ext_resource paths, node hierarchies, and collision layer masks.
-- **tools/validate_schemas.py** — Strict JSON Schema and physical invariant validator for club databases (league, managers, referees).
-- **tools/fuzz_solvers.py** — Property-based mathematical solvers and kinematic fuzz tester (100,000 randomized iterations).
-- **tools/spatial_grid_bench.py** — 22-entity spatial query latency benchmark across multiple grid cell sizes.
-- **tools/dump_match_frames.py** — Multimodal top-down SVG frame slice generator for visual evaluation.
-- **tools/formation_ascii.py** — Terminal ASCII pitch renderer for tactical formations across match phases.
-- **tools/eval_simulation.py** — Headless simulation assertion harness and runtime telemetry evaluator.
+- **tools/verify_db.py** — JSON database schema and constraint verification.
+- **tools/validate_schemas.py** — Strict JSON Schema and physical invariant validator for club databases.
+- **tools/gdcheck.py** — Static GDScript checker enforcing typing, valid identifiers, and Godot 4.7 API compliance; also enforces the autoload boot order.
+- **tools/replay_test.py** — Deterministic seeded simulation replay harness.
+- **tools/fuzz_solvers.py** — Property-based mathematical solver fuzzer for shared math.
+- **tools/benchmark_math.py** — Mathematical solvers micro-benchmark suite.
+- **tools/generate_symbols.py** — Symbolic indexer generating `docs/SYMBOLS.json`.
+- **tools/dump_api.py** — Public API surface extractor generating `docs/API_SURFACE.md`.
 - **tools/dump_dep_graph.py** — Static dependency DAG builder and blast radius query tool exporting to `docs/DEPENDENCY_GRAPH.json`.
-- **tools/gdcheck.py** — Static GDScript checker enforcing typing, valid identifiers, and Godot 4.7 API compliance.
-- **tools/hook_gdcheck.py** — Combined verification hook runner with XML diagnostic reporting.
-- **tools/verify_db.py** — Comprehensive database schema and constraint verification tool.
-- **tools/dump_api.py** — Automated public API surface extractor generating `docs/API_SURFACE.md`.
-- **tools/mcp_server.py** — Standard stdio Model Context Protocol (MCP) server for agent tooling and introspection.
-- **tools/lsp_client.py** — Godot Language Server Protocol client with local static diagnostic fallback.
-- **tools/worktree_manager.py** — Automated git worktree isolation and verification sandbox manager.
+- **tools/codebase_slice.py** — Targeted code slicing CLI extracting functions, enums, signals, or class headers.
+- **tools/semantic_search.py** — Zero-dependency local BM25 knowledge retrieval over rules, specs, and GDScript docstrings.
 - **tools/compact_errata.py** — Errata compaction tool promoting discovered rules and archiving old session state.
 - **tools/sync_rules.py** — Tool promoting rules from `AGENTS_ERRATA.md` to `.claude/rules/` and `docs/CORE_INVARIANTS.md`.
-- **tools/next_task.py** — Tool querying `ROADMAP.md` for the next unchecked Phase 1 gameplay task and relevant file context.
-- **tools/layer_context.py** — Targeted context injector for simulation layers 1–5.
-- **graphify** — Knowledge graph extractor, query engine, and Louvain clustering CLI (`graphify query`, `graphify path`, `graphify explain`, `graphify update .`).
+- **tools/next_task.py** — Tool querying `ROADMAP.md` for the next unchecked task and relevant file context.
+- **tools/layer_context.py** — Targeted context injector for simulation layers 1–3.
+- **tools/football_mcp.py** — Local offline `football-expert` MCP server backed by `.agents/football_domain.db` (built by `scripts/build_football_kb.py`).
+- **tools/mcp_server.py** — Standard stdio Model Context Protocol (MCP) server for agent tooling and introspection.
+- **tools/lsp_client.py** — Godot Language Server Protocol client with local static diagnostic fallback.
+- **graphify** — Knowledge graph extractor, query engine, and clustering CLI (`graphify query`, `graphify path`, `graphify explain`, `graphify update .`).
 - **docs/GRAPHIFY_LIFECYCLE.md** — Canonical specification of Graphify build, update, git hooks, and enforcement matrix.
-- **.antigravity/commands.json** — Custom slash commands (`/verify-all`, `/slice`, `/search`, `/benchmark`, `/fuzz-formations`, `/replay-test`, `/gen-symbols`, `/lint-invariants`, `/eval-sim`, `/fuzz-solvers`, `/formation-audit`, `/blast-radius`, `/dump-dep-graph`, `/sync-rules`, `/compact-errata`, `/rebuild-api`, `/next-task`, `/layer-ctx`).
-- **.antigravity/hooks.json** — Lifecycle verification hooks.
-- **.antigravity/skills/** — Antigravity workflow skills (`eval-sim`, `ast-refactor`, `formation-audit`, `formation-fuzzer`, `perf-benchmark`).
+
+**Archived-engine tools (reference only, candidates for retirement):** `tools/eval_simulation.py`, `tools/fuzz_formations.py`, `tools/fuzz_utility_scorer.py`, `tools/formation_ascii.py`, `tools/dump_match_frames.py`, `tools/spatial_grid_bench.py`, `tools/audit_process_modes.py`.
 </tooling>
-- autoloads/CareerManager.gd                   # Career state + day loop (Layer 4)
-- autoloads/WorldEventLog.gd                   # Club-world history -> PressOffice (Layer 5)
-- shared/career/                               # Career data model + engines (18 Resources)
-- shared/career/MoraleEngine.gd                # Career -> MoodSystem/TrustSystem bridge
-- shared/career/CareerSerializer.gd            # JSON save/load, 3 slots, versioned
-- ui/manager_mode/ManagerModeRoot.gd           # FM-style career shell (13 sections)
-- .claude/rules/career-mode.md                 # Career layer contracts
-- tools/lint_xref.py                           # Qualified-member + res:// path checker
+
+---
+
+## 5. Entry Flow & Career Match-Day Flow
+
+<entry_flow>
+- **Boot:** `project.godot` main scene `res://ui/SplashScreen.tscn`.
+- **Menu:** `ui/MainMenu.tscn` — exactly three buttons: **Manager Mode**, **Options**, **Quit**.
+- **Manager Mode:** `ui/manager_mode/ManagerCreationScreen.tscn` → `ui/manager_mode/ManagerModeRoot.tscn`.
+</entry_flow>
+
+<match_day_flow>
+`ui/manager_mode/ManagerModeRoot.gd::_on_continue_pressed()`
+→ `CareerManager.simulate_next_fixture()`
+→ `QuickSimEngine.simulate_match()`
+→ `CareerManager._apply_fixture_result()` updates league table, finances, morale, board confidence, player records and cup rounds.
+
+A full season of matches resolves in seconds; the career UI never leaves `ManagerModeRoot`.
+</match_day_flow>
+
+---
+
+## 6. Key Contracts (Where to Start)
+
+- **autoloads/CareerManager.gd** — Career state + day loop and fixture dispatch (Layer 1).
+- **autoloads/WorldEventLog.gd** — Club-world history → `PressOffice` (Layer 3).
+- **shared/QuickSimEngine.gd** — Statistical match resolution (Layer 2).
+- **shared/career/** — Career data model + engines.
+- **shared/career/CareerSerializer.gd** — JSON save/load, 3 slots, versioned.
+- **ui/manager_mode/ManagerModeRoot.gd** — FM-style career shell.
+- **autoloads/GameEvents.gd** — Signal bus choke point.
+- **.claude/rules/career-mode.md** — Career layer contracts.
+- **tools/lint_xref.py** — Qualified-member + `res://` path checker.

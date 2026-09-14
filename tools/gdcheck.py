@@ -138,7 +138,7 @@ def strip_code(line: str) -> str:
 def gd_files() -> list[str]:
     out = []
     for dirpath, dirnames, filenames in os.walk(ROOT):
-        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude")]
+        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude", "legacy")]
         for name in filenames:
             if name.endswith(".gd"):
                 out.append(os.path.join(dirpath, name))
@@ -350,10 +350,34 @@ def check_autoloads(
                 Problem("WARN", project, idx,
                         "autoload %s declares class_name %s" % (name, info.class_name)))
 
-    if order and order[0] != "MatchWorldModel":
+    # Boot-order invariant, post manager-only pivot. MatchWorldModel (the old
+    # first autoload) was archived with the real-time match layer, so the signal
+    # bus now boots first. The loader/WorldEventLog/CareerManager ordering is the
+    # constraint that actually matters: WorldEventLog and CareerManager must stay
+    # AFTER the loaders, and WorldEventLog before CareerManager.
+    if order and order[0] != "GameEvents":
         problems.append(
             Problem("ERROR", project, 1,
-                    "MatchWorldModel must be the FIRST autoload; found %s" % order[0]))
+                    "GameEvents must be the FIRST autoload; found %s" % order[0]))
+
+    def _precedes(earlier: str, later: str) -> bool:
+        if earlier not in order or later not in order:
+            return True  # absent autoloads are reported elsewhere, not here
+        return order.index(earlier) < order.index(later)
+
+    for loader in ("DataLoader", "RefereeLoader", "ManagerLoader", "StaffLoader"):
+        if not _precedes(loader, "WorldEventLog"):
+            problems.append(
+                Problem("ERROR", project, 1,
+                        "%s must precede WorldEventLog in [autoload]" % loader))
+        if not _precedes(loader, "CareerManager"):
+            problems.append(
+                Problem("ERROR", project, 1,
+                        "%s must precede CareerManager in [autoload]" % loader))
+    if not _precedes("WorldEventLog", "CareerManager"):
+        problems.append(
+            Problem("ERROR", project, 1,
+                    "WorldEventLog must precede CareerManager in [autoload]"))
 
 
 def main() -> int:

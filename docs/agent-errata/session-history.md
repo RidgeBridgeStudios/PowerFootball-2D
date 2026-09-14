@@ -1,3 +1,9 @@
+> [!WARNING]
+> **SUPERSEDED — pre-pivot real-time match layer.**
+> This page records findings about the archived 22-player real-time match engine. That engine now lives under `legacy/` (excluded from Godot and from every linter), so these findings must **not** be applied to current code.
+> They are retained as historical reference — useful when deepening `QuickSimEngine` — not as implementation guidance.
+> Start with [architecture-pivot.md](architecture-pivot.md); canonical contracts are in [CORE_INVARIANTS.md](../CORE_INVARIANTS.md).
+
 # Errata Session History & Handoff Logs
 
 This page records session handoff state logs, historical task descriptions, and files modified across autonomous agent sessions.

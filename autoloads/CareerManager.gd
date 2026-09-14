@@ -11,10 +11,9 @@
 ## repeats that until something actually needs the manager, which is the FM
 ## "Continue" button.
 ##
-## It is also the bridge into the match layers. PlayerFactory calls
-## apply_career_state_to_player() for all 22 players at every bind, which is
-## where accumulated career morale becomes a MoodSystem tier and persistent
-## relationship trust becomes TrustSystem state.
+## Match-day results reach it through QuickSimEngine. The manager-only pivot
+## retired the 22-player real-time match layer, so a fixture is now resolved
+## statistically and its outcome is folded back into the career world here.
 ##
 ## Has no class_name — Godot 4.7 rejects a class_name that collides with an
 ## autoload's injected global (see .claude/rules/godot-47-core.md).
@@ -23,8 +22,7 @@
 ##             RefereeLoader, WorldEventLog, and the whole shared/career layer.
 ## Exposes: start_new_career(), load_career(), save_career(), is_career_active(),
 ##          advance_day(), continue_until_event(), play_next_fixture(),
-##          simulate_next_fixture(), record_user_match_result(),
-##          apply_career_state_to_player(), career.
+##          simulate_next_fixture(), record_user_match_result(), career.
 ##
 
 extends Node
@@ -74,8 +72,6 @@ var _halt_message: String = ""
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	if not GameEvents.player_injured.is_connected(_on_match_player_injured):
-		GameEvents.player_injured.connect(_on_match_player_injured)
 
 
 func is_career_active() -> bool:
@@ -1110,8 +1106,8 @@ func _check_expiring_contracts(club: TeamData) -> void:
 
 ## --- Fixtures and results -------------------------------------------------------------
 
-## Hands off to the live match scene. The fixture is remembered so the result
-## can be attributed when PitchScene returns.
+## Legacy real-time match-scene hand-off; no longer called by the UI since the
+## manager-only pivot. The fixture is remembered so a result can be attributed.
 func play_next_fixture() -> bool:
 	var fixture: FixtureData = career.next_user_fixture()
 	if fixture == null:
@@ -1146,8 +1142,8 @@ func simulate_next_fixture() -> FixtureData:
 	return fixture
 
 
-## Called by the career UI when returning from PitchScene, using the result
-## PitchScene parked on GameManager.
+## Legacy result-recording entry point; no longer called by the UI since the
+## manager-only pivot. Records the result the archived match scene left on GameManager.
 func record_user_match_result(home_score: int, away_score: int) -> void:
 	if career == null or not career.awaiting_match_result:
 		return
@@ -1962,105 +1958,6 @@ func _apply_request_verdict(
 			return "The stadium will be expanded by %d seats." % added
 		_:
 			return "The board have approved your request."
-
-
-## --- Match-layer bridge -------------------------------------------------------------------
-
-## Called by PlayerFactory for every player at every match bind. This is where
-## the career layer becomes visible on the pitch: accumulated morale/form seed
-## the MoodSystem tier, and persistent relationship trust seeds TrustSystem.
-##
-## Safe to call outside a career — it no-ops, leaving the neutral state
-## PlayerFactory just reset.
-func apply_career_state_to_player(
-	player: HeavyPlayerController,
-	data: PlayerData,
-	mood: MoodSystem,
-	trust: TrustSystem
-) -> void:
-	if career == null or player == null or data == null:
-		return
-	var team_index: int = _league_index_for_match_side(player.team)
-	var state: PlayerCareerState = career.state_for_squad(team_index, player.squad_index)
-	MoraleEngine.apply_to_match_player(player, data, state, mood, trust)
-
-
-## Match side (TEAM_A/TEAM_B) -> league team index. The match runs on two
-## sides; the career runs on league indices, and GameManager's metadata is the
-## mapping DataLoader already uses.
-func _league_index_for_match_side(match_side: int) -> int:
-	if match_side == GameManager.TEAM_A and GameManager.has_meta(&"home_team_index"):
-		return int(GameManager.get_meta(&"home_team_index"))
-	if match_side == GameManager.TEAM_B and GameManager.has_meta(&"away_team_index"):
-		return int(GameManager.get_meta(&"away_team_index"))
-	return match_side
-
-
-## Physics severity -> career injury tier, using the exact same bands
-## HeavyPlayerController.apply_injury() gates on (INJURY_MINOR_SEVERITY /
-## INJURY_LIMP_SEVERITY / INJURY_FORCED_SUB_SEVERITY / INJURY_SEVERE_SEVERITY)
-## so a manager reading "Strain — 12 days" in the inbox and a player who just
-## stopped being able to sprint are describing the same knock.
-static func _injury_kind_for_severity(severity: float) -> PlayerCareerState.InjuryKind:
-	if severity >= HeavyPlayerController.INJURY_SEVERE_SEVERITY:
-		return PlayerCareerState.InjuryKind.LIGAMENT
-	if severity >= HeavyPlayerController.INJURY_FORCED_SUB_SEVERITY:
-		return PlayerCareerState.InjuryKind.MUSCLE_TEAR
-	if severity >= HeavyPlayerController.INJURY_LIMP_SEVERITY:
-		return PlayerCareerState.InjuryKind.STRAIN
-	if severity >= HeavyPlayerController.INJURY_MINOR_SEVERITY:
-		return PlayerCareerState.InjuryKind.KNOCK
-	return PlayerCareerState.InjuryKind.NONE
-
-
-## Persists a match-time knock into the career layer. This is deliberately a
-## separate handler from apply_career_state_to_player() rather than a hook
-## inside it: that function is the career -> match seeding path, called once
-## per player per bind (see career-manager.md's Career-to-Match Bridge
-## invariant) — repurposing it for the opposite data direction would run
-## backwards every time it fires outside a fresh bind. This is the match ->
-## career write path instead, and it reuses PlayerCareerState.begin_injury()
-## exactly as training injuries already do in _inflict_injury(), so the
-## recovery-day math (variance, injury_proneness) has one source of truth
-## rather than a second copy diverging over time.
-##
-## Physical condition is already logged by begin_injury() itself
-## (PlayerCareerState.condition) — there is no separate per-player physical
-## log on TrainingSchedule (a stateless static utility: session intensity,
-## coach bonus, daily risk) to write into.
-func _on_match_player_injured(
-	player: HeavyPlayerController, severity: float, injury_tag: StringName
-) -> void:
-	if career == null or player == null:
-		return
-	var kind: PlayerCareerState.InjuryKind = _injury_kind_for_severity(severity)
-	if kind == PlayerCareerState.InjuryKind.NONE:
-		return
-
-	var team_index: int = _league_index_for_match_side(player.team)
-	var team_data: TeamData = DataLoader.get_team(team_index)
-	if team_data == null or player.squad_index < 0 or player.squad_index >= team_data.squad.size():
-		return
-	var data: PlayerData = team_data.squad[player.squad_index]
-	var state: PlayerCareerState = career.state_for_squad(team_index, player.squad_index)
-	if data == null or state == null or state.is_injured():
-		return
-
-	state.begin_injury(kind, career.today, _rng)
-	data.is_unavailable = true
-
-	var is_user_club: bool = team_index == career.user_team_index
-	if is_user_club:
-		_push_inbox(InboxEngine.build_injury_notice(data, state, career.today))
-		WorldEventLog.record_for_player(
-			injury_tag if injury_tag != &"" else &"match_injury", WorldEvent.Category.INJURY,
-			state.player_key, data.player_name,
-			"%s picked up a %s during the match and will be out for around %d days." % [
-				data.player_name, state.injury_name().to_lower(), state.injury_days_remaining
-			],
-			-0.6,
-			clampf(float(state.injury_days_remaining) / 90.0, 0.3, 0.97)
-		)
 
 
 func _fixture_label(fixture: FixtureData) -> String:

@@ -24,9 +24,9 @@ All GDScript written or edited in PowerFootball-2D must strictly adhere to Godot
 ### 3. GDScript 2.0 Language Invariants
 - Lambdas capturing `self`: Capturing `self` inside an anonymous lambda closure is forbidden. Assign `var host: Node = self` first.
 - Direct Callable invocation: Never invoke a `Callable` directly (`my_callable(...)`). Always use `my_callable.call(...)` or `.call_deferred(...)`.
-- Object-to-string comparisons: Never compare an Object directly to a String or StringName literal (`current_state == "DribbleState"`). Check `.state_name == &"DribbleState"` or use `is DribbleState`.
+- Object-to-string comparisons: Never compare an Object or typed enum directly to a String or StringName literal (`current_phase == "FULL_TIME"`). Compare the enum value (`current_phase == GameManager.MatchPhase.FULL_TIME`) or the object's own typed accessor.
 
 ### 4. Hot-Path Performance Rules
 - In sorting or candidate loops, always use `distance_squared_to()` to avoid square root penalties.
-- Zero transient allocations: Never instantiate `RandomNumberGenerator.new()` or temporary resources inside 60Hz physics/process loops.
+- Zero transient allocations: Never instantiate `RandomNumberGenerator.new()` or temporary resources inside a per-player/per-event simulation loop (the 60Hz physics loops were archived with the real-time match layer).
 - Use StringName literal syntax (`&"string_name"`) for signal names and metadata keys.

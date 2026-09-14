@@ -1,9 +1,15 @@
+> [!WARNING]
+> **SUPERSEDED — pre-pivot real-time match architecture.**
+> This hub documents a file from the abandoned 22-player real-time match engine. That code now lives archived under `legacy/` (excluded from Godot via `legacy/.gdignore` and skipped by every linter) and must never be cited as live or "fixed".
+> It is retained as historical reference — useful when deepening `QuickSimEngine` — not as current implementation guidance.
+> Current architecture: [architecture-pivot.md](../../agent-errata/architecture-pivot.md) · canonical contracts: [CORE_INVARIANTS.md](../../CORE_INVARIANTS.md).
+
 # Architecture Hub: SetPieceCoordinator
 
-**Canonical Location:** [`docs/architecture/hubs/set-piece-coordinator.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/architecture/hubs/set-piece-coordinator.md)  
-**Source Script:** [`pitch/SetPieceCoordinator.gd`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/pitch/SetPieceCoordinator.gd)  
+**Canonical Location:** [`docs/architecture/hubs/set-piece-coordinator.md`](set-piece-coordinator.md)  
+**Source Script:** [`pitch/SetPieceCoordinator.gd`](../../../legacy/pitch/SetPieceCoordinator.gd)  
 **Simulation Layer:** Layer 1 — Physics & Kinematics (Match Coordination)  
-**Node Type:** `SetPieceCoordinator` extends `Node` (Child of [`PitchScene`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/pitch/PitchScene.gd))  
+**Node Type:** `SetPieceCoordinator` extends `Node` (Child of [`PitchScene`](../../../legacy/pitch/PitchScene.gd))  
 
 ---
 
@@ -13,9 +19,9 @@
 `SetPieceCoordinator` is the single authority for dead-ball restarts (throw-ins, goal kicks, corner kicks, direct/indirect free kicks, penalty kicks, and practice penalties). It receives out-of-bounds, foul, and offside events, resolves the applicable restart type, selects and positions the restart taker, freezes non-participating players via `SetPieceFreezeState`, enforces legal defensive wall distances (`wall_distance = 176.0`), coordinates human taker cycling (`action_switch`), and manages auto-activation timeouts for CPU takers.
 
 ### Non-Responsibilities
-- **No Open-Play Ball Integration:** Ball flight, height decay, and spin are computed by [`Pseudo3DBall`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/ball/Pseudo3DBall.gd).
-- **No Penalty Shootout Coordination:** Post-match penalty shootouts are managed by [`PenaltyShootoutCoordinator`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/pitch/PenaltyShootoutCoordinator.gd).
-- **No Officiating Judgments:** Foul decisions, cards, and offside calls are evaluated by [`MatchReferee`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/referee/MatchReferee.gd) and [`OffsideDetector`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/referee/OffsideDetector.gd).
+- **No Open-Play Ball Integration:** Ball flight, height decay, and spin are computed by [`Pseudo3DBall`](../../../legacy/entities/ball/Pseudo3DBall.gd).
+- **No Penalty Shootout Coordination:** Post-match penalty shootouts are managed by [`PenaltyShootoutCoordinator`](../../../legacy/pitch/PenaltyShootoutCoordinator.gd).
+- **No Officiating Judgments:** Foul decisions, cards, and offside calls are evaluated by [`MatchReferee`](../../../legacy/entities/referee/MatchReferee.gd) and [`OffsideDetector`](../../../legacy/entities/referee/OffsideDetector.gd).
 - **No Direct Scene Tree Coupling:** It operates only on references provided via `bind(ball, boundary, players)`.
 
 ---
@@ -57,8 +63,8 @@ Child of `PitchScene`: `$PitchScene/SetPieceCoordinator`. Contains a child `Time
   - `GameEvents.set_piece_taken`
 
 ### Core Dependencies
-- Upstream: [`PitchBoundary`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/pitch/PitchBoundary.gd), [`MatchReferee`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/referee/MatchReferee.gd), [`OffsideDetector`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/referee/OffsideDetector.gd), [`GameManager`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/autoloads/GameManager.gd).
-- Downstream: [`HeavyPlayerController`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/HeavyPlayerController.gd), [`PlayerBrain`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/player/PlayerBrain.gd), [`Pseudo3DBall`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/entities/ball/Pseudo3DBall.gd).
+- Upstream: [`PitchBoundary`](../../../legacy/pitch/PitchBoundary.gd), [`MatchReferee`](../../../legacy/entities/referee/MatchReferee.gd), [`OffsideDetector`](../../../legacy/entities/referee/OffsideDetector.gd), [`GameManager`](../../../autoloads/GameManager.gd).
+- Downstream: [`HeavyPlayerController`](../../../legacy/entities/player/HeavyPlayerController.gd), [`PlayerBrain`](../../../legacy/entities/player/PlayerBrain.gd), [`Pseudo3DBall`](../../../legacy/entities/ball/Pseudo3DBall.gd).
 
 ---
 
@@ -111,7 +117,7 @@ When modifying `SetPieceCoordinator.gd`:
 
 ## 5. Known Risks & Errata Search Terms
 
-When investigating restart glitches, consult [`AGENTS_ERRATA.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/AGENTS_ERRATA.md) for these documented edge cases:
+When investigating restart glitches, consult [`AGENTS_ERRATA.md`](../../../AGENTS_ERRATA.md) for these documented edge cases:
 - `kickoff-backward-pass-veto-starves-taker` (lines 53–100): Kickoff confinement rules required backward passing support in pass evaluations.
 - `throw-in-ball-outside-chase-legality-rect` (lines 1922–1940): Placing throw-in ball too close to the boundary line caused sensor re-triggering.
 - `ERR-20260831-01`, `ERR-20260831-02`, `ERR-20260831-03` (lines 1697–1830): Out-of-bounds events firing simultaneously with foul whistles required strict reentrancy gating.
@@ -120,8 +126,8 @@ When investigating restart glitches, consult [`AGENTS_ERRATA.md`](file:///f:/Pow
 
 ## 6. Sources Examined
 
-- [`pitch/SetPieceCoordinator.gd`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/pitch/SetPieceCoordinator.gd)
-- [`pitch/README.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/pitch/README.md)
-- [`docs/CORE_INVARIANTS.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/CORE_INVARIANTS.md)
-- [`docs/API_SURFACE.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/docs/API_SURFACE.md)
-- [`AGENTS_ERRATA.md`](file:///f:/PowerFootball-2D-main/PowerFootball-2D-main/AGENTS_ERRATA.md)
+- [`pitch/SetPieceCoordinator.gd`](../../../legacy/pitch/SetPieceCoordinator.gd)
+- [`pitch/README.md`](../../../legacy/pitch/README.md)
+- [`docs/CORE_INVARIANTS.md`](../../CORE_INVARIANTS.md)
+- [`docs/API_SURFACE.md`](../../API_SURFACE.md)
+- [`AGENTS_ERRATA.md`](../../../AGENTS_ERRATA.md)

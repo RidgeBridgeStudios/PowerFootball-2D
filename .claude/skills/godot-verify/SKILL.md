@@ -11,7 +11,7 @@ If compilation errors exist → extract file path, line number, error message.
   Fix immediately. Re-run /godot-verify. Repeat until clean.
 If GUT test failures exist → inspect assertion, update implementation, re-run.
 If no addons/gut/ found → run syntax check only:
-  godot --headless --check-only --script res://autoloads/MatchWorldModel.gd
+  godot --headless --check-only --script res://autoloads/GameManager.gd
 
 ## Container fallback (no engine on PATH)
 

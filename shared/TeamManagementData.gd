@@ -4,8 +4,8 @@
 ## Transient (not saved) working copy of a team's lineup for the pre-game
 ## screen and pause menu. Holds the current 11-man lineup, the bench order,
 ## the chosen formation, and pending substitutions.
-## Call apply_to_team() to push all changes into the live TeamData so
-## PitchScene can read them at match start.
+## Call apply_to_team() to push all changes into the live TeamData so the
+## quick-sim match layer reads the selected lineup.
 ##
 ## Depends on: TeamData, PlayerData, ManagerData.
 ## Exposes: from_team(), swap(), reshuffle(), apply_to_team().

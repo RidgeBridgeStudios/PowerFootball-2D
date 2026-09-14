@@ -10,35 +10,29 @@ All agents working in the PowerFootball-2D repository must strictly adhere to th
 ## 1. Core Architecture & Invariants
 
 All engine constraints, simulation layers, and critical file contracts are canonically defined across:
-- **[docs/CORE_INVARIANTS.md](docs/CORE_INVARIANTS.md)** — Canonical engine lock, simulation stack, choke points, and physics/AI laws.
+- **[docs/CORE_INVARIANTS.md](docs/CORE_INVARIANTS.md)** — Canonical engine lock, simulation stack, choke points, and layer laws.
 - **[docs/GRAPHIFY_LIFECYCLE.md](docs/GRAPHIFY_LIFECYCLE.md)** — Canonical Graphify lifecycle, git hooks, update mechanics, and enforcement matrix.
 - **[docs/API_SURFACE.md](docs/API_SURFACE.md)** — Auto-generated public API surface map across all scripts, exports, signals, and methods.
 - **[docs/ANTI_PATTERNS.md](docs/ANTI_PATTERNS.md)** — Curated anti-pattern and hallucination corpus for autonomous agent reasoning.
 - **[docs/MATH_SOLVERS.md](docs/MATH_SOLVERS.md)** — Ground-truth mathematical solvers catalog with exact formulas, proofs, and GDScript reference code.
 - **[docs/SYMBOLS.json](docs/SYMBOLS.json)** — Complete line-indexed symbol map across all classes, methods, properties, and signals.
 - **[docs/DEPENDENCY_GRAPH.json](docs/DEPENDENCY_GRAPH.json)** — Static bidirectional dependency DAG and blast radius graph.
-- **[POWERFOOTBALL_MASTER_VISION.md](POWERFOOTBALL_MASTER_VISION.md)** — Master design vision, 5-layer simulation stack, systems design, and North Star.
+- **[POWERFOOTBALL_MASTER_VISION.md](POWERFOOTBALL_MASTER_VISION.md)** — Master design vision, systems design, and North Star.
 - **[docs/agent-errata/README.md](docs/agent-errata/README.md)** — Modular agent errata index and topic-specific failure mode pages.
 - **[ROADMAP.md](ROADMAP.md)** — Tactical `[ ]`/`[x]` feature checklist across 5 development phases.
 - **[docs/course_implementation_specification.md](docs/course_implementation_specification.md)** — Course-derived reference specification (READ-ONLY): FSMs, formulas, gotchas.
 
 ### Key Architectural Invariants
 - **Engine Lock:** Godot 4.7-stable · GDScript 2.0 ONLY · Strict Typing on every variable, parameter, and return type.
-- **Simulation Stack:** 5-layer upward event propagation model (Physics -> AI -> Social -> Club World -> Narrative). Every major feature touches at least two layers.
-- **Spatial Cache Choke Point:** ALL spatial position reads route through `autoloads/MatchWorldModel.gd`. Calling `get_tree().get_nodes_in_group()` inside `_process`/`_physics_process` is FORBIDDEN.
-- **Signal Bus Choke Point:** ALL inter-system events route through `autoloads/GameEvents.gd`. Never emit cross-system signals from individual components directly.
-- **Match Lifecycle Choke Point:** `autoloads/GameManager.gd` is the single source of truth for match lifecycle, score, clock, and set-piece states.
-- **Brain Contract Choke Point:** `PlayerBrain` writes ONLY to `player.movement_intent` (Vector2 direction) and `player.wants_sprint` (bool). Never directly modify `velocity`, `acceleration`, or `is_sprinting`.
-- **Kinematic Execution Choke Point:** `HeavyPlayerController` executes kinematic integration, acceleration curves, and turning penalties. Direct velocity assignment is FORBIDDEN.
-- **Collision Matrix Invariant:** `CharacterBody2D` masks Layer 1 (World) and Layer 2 (Players) ONLY. `CharacterBody2D` MUST NEVER mask Layer 3 (Ball). Ball interaction is handled via Area2D on Layer 4 sensing Layer 3.
+- **Simulation Stack:** 3-layer model — Career World → Quick-Sim Match → Narrative & Presentation. Career state feeds fixtures down into the statistical match resolver; resolved results propagate back up into career state and stats; presentation reacts through `GameEvents`. Every major feature touches at least two layers.
+- **Signal Bus Choke Point:** ALL inter-system events route through `autoloads/GameEvents.gd` (11 signals: `formation_changed`, `lineup_changed`, and the career signals `career_started`, `career_day_advanced`, `career_advance_halted`, `career_inbox_changed`, `career_match_ready`, `career_result_recorded`, `career_season_ended`, `career_manager_sacked`, `world_event_logged`). Never emit cross-system signals from individual components directly.
 - **Career State Ownership:** `CareerManager` owns the ONLY live `CareerSaveData`. The league (squads, staff, attributes) stays owned by `DataLoader` and is saved per slot via `DataLoader.save_league()`.
-- **Career -> Match Bridge:** `PlayerFactory.apply()` is the single choke point where career morale/trust seeds `MoodSystem` and `TrustSystem`.
+- **Quick-Sim Publishing Choke Point:** `QuickSimEngine.apply_to_match_stats_tracker()` is the single place a simulated result is pushed into `GameManager` + `MatchStatsTracker` and accumulated onto `PlayerData`. No other code may publish a match outcome.
+- **Career Match-Day Flow:** `ui/manager_mode/ManagerModeRoot.gd::_on_continue_pressed()` calls `CareerManager.simulate_next_fixture()`, which runs `QuickSimEngine` and folds the result into table/finances/morale/board confidence/cups. The career UI never leaves `ManagerModeRoot` to play a match.
 - **Boot Order (`project.godot`):**
-  `MatchWorldModel` → `GameEvents` → `GameManager` → `MatchStatsTracker` → `MatchTelemetryLogger` → `DataLoader` → `RefereeLoader` → `ManagerLoader` → `StaffLoader` → `WorldEventLog` → `CareerManager` → `InputHelper`.
-  *Constraint:* `WorldEventLog` and `CareerManager` must stay AFTER loaders (`DataLoader`, `ManagerLoader`, `StaffLoader`, `RefereeLoader`), and `WorldEventLog` before `CareerManager`.
-- **Process Priority:**
-  `MatchWorldModel` (-100) → `PlayerBrain` (0) → `HeavyPlayerController` (100).
-- **Declarative Squad Config:** 22 players total (11 per team), spawned declaratively as children of `$Players` in `pitch/PitchScene.tscn`. Self-service index assignment in player `_ready()` using static counter reset via `MatchWorldModel.unregister_all()`.
+  `GameEvents` → `GameManager` → `MatchStatsTracker` → `DataLoader` → `RefereeLoader` → `ManagerLoader` → `StaffLoader` → `WorldEventLog` → `CareerManager`.
+  *Constraint:* `GameEvents` boots first; `WorldEventLog` and `CareerManager` must stay AFTER the four loaders (`DataLoader`, `RefereeLoader`, `ManagerLoader`, `StaffLoader`), and `WorldEventLog` before `CareerManager`. `tools/gdcheck.py` enforces this.
+- **Retired Real-Time Layer:** The former 22-player physics match engine (ball/player/goalkeeper/referee entities, `pitch/`, the real-time match HUD, and the match-time autoloads) is archived under `legacy/` behind `legacy/.gdignore` — not deleted, but excluded from Godot import and from every verification tool. Live code must not reference it: matches have no player control, ball physics, or per-frame AI.
 </core_invariants>
 
 <graphify_navigation>
@@ -74,15 +68,15 @@ Every code modification in this repository falls into one of three distinct impa
 
 | Tier | Scope & Affected Files | Pre-Edit Requirement | Verification Gate |
 |---|---|---|---|
-| **Tier 1: Local** | Self-contained leaf files: UI styling/labels (`ui/ActionText.gd`, `ui/TouchlineBubble.gd`), standalone math/formatting helpers without contract changes, isolated comments, documentation. | Local file inspection; confirm no exported variables or public signatures are altered. | Fast Gate:<br>`py -3 tools/verify_gate.py --fast`<br>(0 errors required) |
+| **Tier 1: Local** | Self-contained leaf files: UI styling/labels (`ui/manager_mode/CareerTheme.gd`, `shared/career/CareerThemePalette.gd`), standalone math/formatting helpers without contract changes, isolated comments, documentation. | Local file inspection; confirm no exported variables or public signatures are altered. | Fast Gate:<br>`py -3 tools/verify_gate.py --fast`<br>(0 errors required) |
 | **Tier 2: Cross-Module** | Multi-file interactions within or between adjacent simulation layers: signal signatures in `autoloads/GameEvents.gd`, shared resources (`shared/PlayerData.gd`, `shared/TeamData.gd`, `shared/career/*`), role configurations (`shared/PlayerRoleConfig.gd`), or exported properties accessed across scenes. | Run dependency blast radius (`py -3 tools/dump_dep_graph.py --blast-radius <target>`) and query Graphify neighbors (`get_neighbors`). Check all call sites and signal receivers before editing. | Fast Gate + Targeted Linters:<br>`py -3 tools/verify_gate.py --fast`<br>+ relevant domain tests. |
-| **Tier 3: Core Simulation** | Architectural choke points (`autoloads/MatchWorldModel.gd`, `entities/player/HeavyPlayerController.gd`, `entities/player/PlayerBrain.gd`, `entities/ball/Pseudo3DBall.gd`, `shared/CollisionLayers.gd`, `pitch/PitchScene.gd`, `autoloads/GameManager.gd`, `autoloads/CareerManager.gd`, `autoloads/DataLoader.gd`, `shared/PlayerFactory.gd`), process priority, boot order, 22-player declarative layout, or 6-layer collision matrix. | Mandatory blast radius DAG (`tools/dump_dep_graph.py --blast-radius <target>`), Graphify dependency path trace, and explicit review of `docs/CORE_INVARIANTS.md` and `docs/ANTI_PATTERNS.md`. | Full Pre-Turn Battery:<br>`py -3 tools/verify_gate.py --full`<br>(all 10 static linters + fuzzers + 60s analytical sim + replay test). |
+| **Tier 3: Core Simulation** | Architectural choke points (`autoloads/CareerManager.gd`, `autoloads/DataLoader.gd`, `autoloads/GameManager.gd`, `autoloads/GameEvents.gd`, `autoloads/MatchStatsTracker.gd`, `shared/QuickSimEngine.gd`, `shared/career/*`, `shared/TeamManagementData.gd`), boot order, signal-bus contracts, career-state ownership, quick-sim publishing, or career match-day flow. | Mandatory blast radius DAG (`tools/dump_dep_graph.py --blast-radius <target>`), Graphify dependency path trace, and explicit review of `docs/CORE_INVARIANTS.md` and `docs/ANTI_PATTERNS.md`. | Full Pre-Turn Battery:<br>`py -3 tools/verify_gate.py --full`<br>(all 10 static linters + quick-sim/solver harnesses + index regeneration). |
 </change_impact_tiers>
 
 <ponytail_gating>
 ## 3.5. Reuse & Complexity Gating (Ponytail)
 
-Before writing new code or standing up new infrastructure (a new MCP server, a new autoload, a new data store), climb the reuse ladder in [.claude/rules/ponytail.md](.claude/rules/ponytail.md) (mirrored at `.agents/rules/ponytail.md`) — applies to every agent listed at the top of this document, including DeepSeek harnesses. In short: YAGNI-gate against `ROADMAP.md`, reuse `MatchWorldModel`/`GameEvents`/`AGENTS_ERRATA.md` before inventing parallel systems, and never add a tool/package/MCP-server reference to a config file without first confirming it is actually installed in this repo.
+Before writing new code or standing up new infrastructure (a new MCP server, a new autoload, a new data store), climb the reuse ladder in [.claude/rules/ponytail.md](.claude/rules/ponytail.md) (mirrored at `.agents/rules/ponytail.md`) — applies to every agent listed at the top of this document, including DeepSeek harnesses. In short: YAGNI-gate against `ROADMAP.md`, reuse `CareerManager`/`GameEvents`/`QuickSimEngine`/`AGENTS_ERRATA.md` before inventing parallel systems, and never add a tool/package/MCP-server reference to a config file without first confirming it is actually installed in this repo.
 </ponytail_gating>
 
 <football_domain_intelligence>
@@ -101,10 +95,10 @@ To prevent documentation decay without generating unnecessary token churn, agent
   - Regenerate symbol index: `py -3 tools/generate_symbols.py` -> `docs/SYMBOLS.json`.
 - **Dependencies or Autoloads Changed:** If imports, autoload singletons in `project.godot`, or cross-file class references change:
   - Regenerate dependency DAG: `py -3 tools/dump_dep_graph.py` -> `docs/DEPENDENCY_GRAPH.json`.
-- **Architectural Laws / Choke Points Changed:** If engine contracts, physics formulas, collision masks, or layer invariants are modified:
+- **Architectural Laws / Choke Points Changed:** If engine contracts, the simulation-layer model, choke points, or layer invariants are modified:
   - Update `docs/CORE_INVARIANTS.md` and synchronize corresponding rules in `.claude/rules/` and `.agents/rules/`.
 - **Bugs, Edge Cases, or New Invariants Discovered:**
-  - Consult topic-specific errata pages in `docs/agent-errata/` (e.g. `player-ai.md`, `physics-and-ball.md`, `set-pieces.md`) rather than loading full errata history.
+  - Consult topic-specific errata pages in `docs/agent-errata/` (e.g. `match-state.md`, `data-and-persistence.md`, `ui-and-signals.md`) rather than loading full errata history.
   - Record new findings in `AGENTS_ERRATA.md` following the structured YAML schema (`discovered_rules` or `session_state`).
   - Run `/sync-rules` (`py -3 tools/sync_rules.py`) or `/compact-errata` (`py -3 tools/compact_errata.py`) to promote pending rules.
 - **Roadmap Milestones Achieved:**
@@ -117,12 +111,12 @@ To prevent documentation decay without generating unnecessary token churn, agent
 ## 5. Strict Type Discipline
 
 - **Explicit Typing Required:** Every variable declaration, function parameter, and function return type must be explicitly typed.
-- **No Object-to-String Comparisons:** Never compare an object instance (`current_state`, `player`, `ball`) to a StringName or String literal. Check if the class exposes a distinct string identifier (e.g., `current_state_name`).
+- **No Object-to-String Comparisons:** Never compare an object instance (`current_phase`, `player`, `career`) to a StringName or String literal. Check if the class exposes a distinct string identifier (e.g., `current_state_name`).
 - **No `self` in Lambda Closures:** In GDScript 2.0, `self` is a special keyword and cannot be captured inside an anonymous lambda closure (`func(): ...`). Assign `self` to an outer local variable (`var host: Control = self`) before the lambda, or use `Callable.bind()`.
 - **Callable Invocation Syntax:** Never invoke a `Callable` variable directly (`my_callable(...)`). Always use `my_callable.call(...)` or `.call_deferred(...)`.
 - **No Pythonisms:** Never use Python syntax (`None`, `True`, `False`, `def`, `len()`, `isinstance()`, `import`). Use GDScript 2.0 equivalents (`null`, `true`, `false`, `func`, `.size()`, `is`, `preload`).
 - **Clean Early Returns:** When introducing an early `return`, inspect the remainder of the function and remove all orphaned code to prevent duplicate declaration parse errors.
-- **Root Class Syntax:** If a root class used as a type annotation (e.g., `PlayerBrain`, `HeavyPlayerController`) produces cascade errors, inspect the root file's syntax first.
+- **Root Class Syntax:** If a root class used as a type annotation (e.g., `QuickSimEngine`, `CareerManager`) produces cascade errors, inspect the root file's syntax first.
 - **Fast Distance Calculations:** In candidate ranking or sorting loops, always use `distance_squared_to()` to avoid costly square root instructions.
 </strict_type_discipline>
 
@@ -152,7 +146,7 @@ Static checking with `tools/gdcheck.py` alone is **NOT sufficient** — `gdcheck
 # Fast post-write gate (<150ms) — 10 static linters:
 py -3 tools/verify_gate.py --fast
 
-# Full pre-turn completion battery — 17 checks (linters + fuzzers + simulation + symbols + graphify):
+# Full pre-turn completion battery — 10 linters + sim harnesses + fuzzers + index regeneration + graphify:
 py -3 tools/verify_gate.py --full
 ```
 
@@ -172,17 +166,23 @@ py -3 tools/verify_db.py              # JSON database schema validation
 
 ### Simulation & Property Testing
 ```bash
-py -3 tools/fuzz_solvers.py           # 100k kinematic and boundary fuzzing tests
-py -3 tools/fuzz_formations.py        # 50k formation anchor property stress tests
-py -3 tools/eval_simulation.py        # 60s headless simulation assertion harness
+py -3 tools/test_quick_sim.py         # CURRENT GATE: validates shared/QuickSimEngine.gd statistical resolution
 py -3 tools/replay_test.py            # Bit-exact deterministic replay test
+py -3 tools/fuzz_solvers.py           # Mathematical solver fuzzing (shared/UtilityMath.gd)
 py -3 tools/benchmark_math.py         # Math solvers latency benchmark
+
+# Legacy real-time match engine — retirement candidates, NOT current gates:
+py -3 tools/eval_simulation.py        # 60s headless assertion harness for the archived match engine
+py -3 tools/fuzz_formations.py        # Formation-anchor stress tests for the archived match engine
 ```
+
+> [!NOTE]
+> `tools/eval_simulation.py`, `tools/fuzz_formations.py`, `tools/fuzz_utility_scorer.py`, `tools/formation_ascii.py`, `tools/dump_match_frames.py`, and `tools/spatial_grid_bench.py` describe the archived real-time engine and are candidates for retirement. `tools/test_quick_sim.py` is the current quick-sim validation gate.
 
 ### Non-Destructive Validation Checklist
 Before concluding any editing turn or proposing changes, all agents must complete this 5-step checklist:
 1. **Format & Static Lint (Fast Gate):** Run `python tools/verify_gate.py --fast` (or `py -3 tools/verify_gate.py --fast`). All 10 linters must show 0 errors.
-2. **Targeted Smoke Test:** Run the relevant domain check (`fuzz_solvers.py`, `fuzz_formations.py`, `eval_simulation.py --duration=10`, or `replay_test.py`).
+2. **Targeted Smoke Test:** Run the relevant domain check (`tools/test_quick_sim.py` for the quick-sim engine, `tools/fuzz_solvers.py` for shared math, or `tools/replay_test.py`).
 3. **Diff Review & Invariant Audit:** Check `git diff` against strict typing, zero allocations, no object-to-string comparisons, and architectural contracts.
 4. **Graphify Refresh:** Synchronize graph topology via `graphify update .` or pre-turn gate `py -3 tools/verify_gate.py --full` (Step 17).
 5. **Concise Final Evidence:** Report linters passed, execution duration, and zero invariant violations.
@@ -200,60 +200,48 @@ Before concluding any editing turn or proposing changes, all agents must complet
 | `/slice` | `tools/codebase_slice.py` | Extract targeted class methods, enums, or headers with line numbers |
 | `/search` | `tools/semantic_search.py` | Query BM25 local keyword index across specs, rules, and GDScript docstrings |
 | `/benchmark` | `tools/benchmark_math.py` | Run mathematical solvers micro-benchmark suite |
-| `/fuzz-formations` | `tools/fuzz_formations.py` | Run 50,000 property-based stress tests on formation anchors |
+| `/fuzz-formations` | `tools/fuzz_formations.py` | Run 50,000 property-based stress tests on formation anchors (archived real-time engine — retirement candidate) |
 | `/replay-test` | `tools/replay_test.py` | Run deterministic simulation replay verification (0 bit-drift) |
 | `/gen-symbols` | `tools/generate_symbols.py` | Regenerate `docs/SYMBOLS.json` line-indexed symbol map |
 | `/lint-invariants` | `tools/lint_invariants.py` | Run domain AST invariant linter |
-| `/eval-sim` | `tools/eval_simulation.py` | Run 60s headless simulation assertion harness |
+| `/eval-sim` | `tools/eval_simulation.py` | Run 60s headless simulation assertion harness (archived real-time engine — retirement candidate) |
 | `/fuzz-solvers` | `tools/fuzz_solvers.py` | Run 100,000 property fuzzing iterations across mathematical solvers |
-| `/formation-audit` | `tools/formation_ascii.py --all` | Render terminal ASCII tactical formation spacing diagrams |
+| `/formation-audit` | `tools/formation_ascii.py --all` | Render terminal ASCII tactical formation spacing diagrams (archived real-time engine — retirement candidate) |
 | `/blast-radius` | `tools/dump_dep_graph.py --blast-radius` | Compute dependency DAG and blast radius for a target file |
 | `/dump-dep-graph` | `tools/dump_dep_graph.py` | Regenerate `docs/DEPENDENCY_GRAPH.json` DAG |
 | `/sync-rules` | `tools/sync_rules.py` | Promote discovered rules from `AGENTS_ERRATA.md` to `.claude/rules/` and `docs/CORE_INVARIANTS.md` |
 | `/compact-errata` | `tools/compact_errata.py` | Promote rules and compact session state history to `docs/archive/` |
 | `/rebuild-api` | `tools/dump_api.py` | Regenerate `docs/API_SURFACE.md` public API surface map |
 | `/next-task` | `tools/next_task.py` | Query `ROADMAP.md` for next Phase 1 gameplay completeness item |
-| `/layer-ctx` | `tools/layer_context.py [1-5]` | Extract targeted context for simulation layers 1-5 |
+| `/layer-ctx` | `tools/layer_context.py` | Extract targeted context for the 3 simulation layers (tool still carries the legacy 1–5 alias taxonomy) |
 </tooling>
 
 <simulation_layers>
-## 9. Five-Layer Simulation Stack
+## 9. Three-Layer Simulation Stack
 
-<layer_1_physics>
-### Layer 1 — Physics & Kinematics
-- **Scope:** `entities/ball/`, `entities/player/HeavyPlayerController.gd`, `entities/player/states/`, `pitch/PitchBoundary.gd`, `pitch/PitchScene.gd`, `shared/CollisionLayers.gd`.
-- **Invariants:** 6-layer collision matrix. `CharacterBody2D` never masks Layer 3 (Ball). Velocity integrated via `HeavyPlayerController` only. Proportional ball friction.
-</layer_1_physics>
+<layer_1_career_world>
+### Layer 1 — Career World
+- **Scope:** `autoloads/CareerManager.gd`, `autoloads/DataLoader.gd`, `autoloads/ManagerLoader.gd`, `autoloads/RefereeLoader.gd`, `autoloads/StaffLoader.gd`, `shared/career/*`, `shared/TeamData.gd`, `shared/PlayerData.gd`, `shared/LeagueData.gd`, `shared/ManagerData.gd`, `shared/RefereeData.gd`, `shared/StaffData.gd`, `shared/TeamManagementData.gd`, `shared/NationDatabase.gd`, `shared/CareerProgressionEngine.gd`.
+- **Invariants:** `CareerManager` owns the ONLY live `CareerSaveData`; the league stays owned by `DataLoader` and is saved per slot via `DataLoader.save_league()`. Database integrity is validated via `verify_db.py`. Squad index is player identity; transfers repair lineups and states.
+</layer_1_career_world>
 
-<layer_2_match_ai>
-### Layer 2 — Match AI & Spatial Navigation
-- **Scope:** `autoloads/MatchWorldModel.gd`, `entities/player/PlayerBrain.gd`, `entities/goalkeeper/`, `entities/manager/`, `entities/referee/`, `shared/PassUtilityScorer.gd`, `shared/FormationAnchorMath.gd`.
-- **Invariants:** All spatial reads via `MatchWorldModel`. Decision updates on 15-frame stagger. Zero allocations in hot paths.
-</layer_2_match_ai>
+<layer_2_quicksim_match>
+### Layer 2 — Quick-Sim Match
+- **Scope:** `shared/QuickSimEngine.gd`, `shared/PlayerRatingCalculator.gd`, `shared/UtilityMath.gd`, `autoloads/MatchStatsTracker.gd`.
+- **Invariants:** Matches are resolved entirely by statistical simulation — no player control, real-time frames, ball physics, or per-frame AI. `QuickSimEngine.apply_to_match_stats_tracker()` is the single publish point into `GameManager` + `MatchStatsTracker` and onto `PlayerData`. `MatchStatsTracker` is a passive stats container (`reset()`, `stop_possession_sampling()` no-op, `get_player_events()`, `compute_all_ratings()`, `get_stats()`, `get_advanced_stats()`).
+</layer_2_quicksim_match>
 
-<layer_3_match_social>
-### Layer 3 — Match Social & Dynamic Form
-- **Scope:** `entities/player/MoodSystem.gd`, `entities/player/TrustSystem.gd`, `shared/PlayerRatingCalculator.gd`, `autoloads/MatchStatsTracker.gd`.
-- **Invariants:** Confidence drift on goals/cards/slumps. Trust weighting on passing decisions. Neutral reset on match initialization.
-</layer_3_match_social>
-
-<layer_4_club_world>
-### Layer 4 — Club World & Career Persistence
-- **Scope:** `autoloads/CareerManager.gd`, `autoloads/DataLoader.gd`, `autoloads/ManagerLoader.gd`, `autoloads/RefereeLoader.gd`, `autoloads/StaffLoader.gd`, `shared/TeamData.gd`, `shared/PlayerData.gd`, `shared/career/*`.
-- **Invariants:** `CareerManager` owns only live `CareerSaveData`. Validated database integrity via `verify_db.py` and `validate_schemas.py`. Squad index is player identity; transfers repair lineups and states.
-</layer_4_club_world>
-
-<layer_5_narrative>
-### Layer 5 — Narrative & Presentation
-- **Scope:** `autoloads/WorldEventLog.gd`, `entities/manager/PressOffice.gd`, `ui/TouchlineBubble.gd`, `ui/ActionText.gd`, `ui/MatchStatsUI.gd`, `ui/HUD.gd`, `ui/manager_mode/*`.
-- **Invariants:** Event log generation and UI presentation reacting strictly to `GameEvents`.
-</layer_5_narrative>
+<layer_3_narrative>
+### Layer 3 — Narrative & Presentation
+- **Scope:** `autoloads/WorldEventLog.gd`, `entities/manager/PressOffice.gd`, `ui/manager_mode/*`, `ui/MainMenu.gd`, `ui/OptionsMenu.gd`, `ui/MatchStatsUI.gd`, `ui/QuickSimModal.gd`.
+- **Invariants:** Event log generation and UI presentation react strictly to `GameEvents`. The career UI never leaves `ui/manager_mode/ManagerModeRoot.gd` to play a match.
+</layer_3_narrative>
 </simulation_layers>
 
 <shared_agent_memory>
 ## 10. Shared Agent Memory & Errata Synchronization
 
-- **Topic-Scoped Errata:** Errata and historical failure modes are modularized under `docs/agent-errata/` (`player-ai.md`, `match-state.md`, `physics-and-ball.md`, `set-pieces.md`, `scene-and-node-paths.md`, `data-and-persistence.md`, `telemetry-and-stats.md`, `ui-and-signals.md`). Agents must read only the relevant topic page.
+- **Topic-Scoped Errata:** Errata and historical failure modes are modularized under `docs/agent-errata/`. **Start with `architecture-pivot.md`** — it documents the manager-only pivot, the `legacy/` archive layout, the 3-layer stack and the traps the pivot left behind. Then read only the relevant topic page. Note that `player-ai.md`, `physics-and-ball.md`, `set-pieces.md`, `match-state.md`, `telemetry-and-stats.md` and `ui-and-signals.md` are marked **historical**: they record findings about the archived real-time match layer and must not be applied to current code.
 - **Cross-Agent Shared Memory:** Record novel failure modes, API misconceptions, runtime discoveries, and pending rule proposals in `AGENTS_ERRATA.md` using the structured YAML schema (`discovered_rules` or `session_state`).
 - **Rule Promotion:** Promote validated errata to `.claude/rules/`, `.agents/rules/`, and `docs/CORE_INVARIANTS.md` via `/sync-rules` (`py -3 tools/sync_rules.py`) or `/compact-errata` (`py -3 tools/compact_errata.py`).
 - **Atomic Work Units:** Work in cohesive units: one feature/fix = targeted file set + verification pass.

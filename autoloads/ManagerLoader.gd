@@ -4,9 +4,9 @@
 ## Owns the pool of all managers across the save file. Loads custom managers
 ## from user://custom_managers.json if the file exists, otherwise loads from
 ## packaged res://data/managers.json, and falls back to built-in programmatic
-## managers if neither file is present. PitchScene assigns a manager to each
-## team from here at match start rather than constructing a ManagerData itself,
-## and writes career stats back through here after every match.
+## managers if neither file is present. CareerManager assigns a manager to each
+## team from here for every fixture rather than constructing a ManagerData itself,
+## and QuickSimEngine's career stats are persisted back through here.
 ##
 ## Depends on: ManagerData.
 ## Exposes: manager_pool, get_manager_for_team(team_name),

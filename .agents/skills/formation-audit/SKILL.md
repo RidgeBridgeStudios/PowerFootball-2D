@@ -3,6 +3,13 @@ name: formation-audit
 description: Audits tactical formation spacing, backline depth, and dynamic accordion stretching across match phases.
 ---
 
+> [!WARNING]
+> **SUPERSEDED — pre-pivot real-time match layer.** This skill governed the
+> 22-player physics match engine, which is now archived under `legacy/` behind
+> `legacy/.gdignore`. Retained as historical reference for `QuickSimEngine`
+> depth work; **do not apply it to current code**. See
+> `docs/agent-errata/architecture-pivot.md` and `docs/CORE_INVARIANTS.md`.
+
 # Formation & Tactical Spacing Audit Skill
 
 Use this workflow to audit tactical formation anchor coordinates and evaluate dynamic accordion stretching across match phases.

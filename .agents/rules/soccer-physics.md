@@ -2,6 +2,13 @@
 description: Kinematic weight, turning arcs, and pseudo-3D trajectory rules
 paths: ["**/entities/**", "**/pitch/**"]
 ---
+> [!WARNING]
+> **SUPERSEDED — pre-pivot real-time match layer.** This rulebook governed the
+> 22-player physics match engine, which is now archived under `legacy/` behind
+> `legacy/.gdignore`. Retained as historical reference for `QuickSimEngine`
+> depth work; **do not apply it to current code**. See
+> `docs/agent-errata/architecture-pivot.md` and `docs/CORE_INVARIANTS.md`.
+
 ## PowerFootball-2d Physics Invariants
 
 CHARACTER KINEMATICS:
@@ -22,7 +29,8 @@ COLLISION MATRIX (INVARIANT):
 ## Compounded corrections — verified against the source
 
 ### Ball friction is PROPORTIONAL, not a constant deceleration
-`Pseudo3DBall.pitch_friction` (default 0.90) scales against `FRICTION_SCALE` (200.0)
+`Pseudo3DBall.pitch_friction` (default 0.94, calibrated up from 0.90 for the
+sim-tuning pass — see AGENTS_ERRATA.md) scales against `FRICTION_SCALE` (200.0)
 and surface wetness, plus flat rest drag:
 
 ```gdscript
@@ -32,7 +40,7 @@ var total_deceleration: float = effective_friction + REST_DRAG_FLAT
 velocity = velocity.move_toward(Vector2.ZERO, total_deceleration * delta)
 ```
 
-Ball friction deceleration is therefore `pitch_friction * Pseudo3DBall.FRICTION_SCALE` (180.0 px/s² at defaults). Pass this full deceleration product to `UtilityMath.calculate_intercept_point()`.
+Ball friction deceleration is therefore `pitch_friction * Pseudo3DBall.FRICTION_SCALE` (188.0 px/s² at defaults, 206.0 including `REST_DRAG_FLAT`). Pass this full deceleration product to `UtilityMath.calculate_intercept_point()`.
 
 ### The ball has TWO ownership properties and they mean different things
 Do not guess one from the other:

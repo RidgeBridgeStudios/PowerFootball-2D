@@ -1,8 +1,7 @@
-[gd_scene load_steps=6 format=3]
+[gd_scene load_steps=5 format=3]
 
 [ext_resource type="Script" path="res://ui/MainMenu.gd" id="1_mainmenu"]
 [ext_resource type="Texture2D" path="res://art/logo.png" id="2_logo"]
-[ext_resource type="PackedScene" path="res://ui/KickOffMenu.tscn" id="3_kickoff"]
 [ext_resource type="PackedScene" path="res://ui/OptionsMenu.tscn" id="4_options"]
 [ext_resource type="AudioStream" path="res://audio/menu_theme.wav" id="5_menu_theme"]
 
@@ -53,29 +52,11 @@ grow_horizontal = 2
 grow_vertical = 2
 theme_override_constants/separation = 6
 
-[node name="KickOffButton" type="Button" parent="MenuList"]
-layout_mode = 2
-custom_minimum_size = Vector2(0, 44)
-alignment = 0
-text = "⚽ Kick Off"
-
-[node name="PracticeButton" type="Button" parent="MenuList"]
-layout_mode = 2
-custom_minimum_size = Vector2(0, 44)
-alignment = 0
-text = "🏟 Practice Arena"
-
 [node name="ManagerButton" type="Button" parent="MenuList"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 44)
 alignment = 0
 text = "🏆 Manager Mode"
-
-[node name="CareerButton" type="Button" parent="MenuList"]
-layout_mode = 2
-custom_minimum_size = Vector2(0, 44)
-alignment = 0
-text = "🌟 Player Career  🔒"
 
 [node name="OptionsButton" type="Button" parent="MenuList"]
 layout_mode = 2
@@ -93,15 +74,8 @@ text = "✖ Quit Game"
 stream = ExtResource("5_menu_theme")
 bus = &"Master"
 
-[node name="KickOffMenu" parent="." instance=ExtResource("3_kickoff")]
-layout_mode = 1
-
 [node name="OptionsMenu" parent="." instance=ExtResource("4_options")]
 layout_mode = 1
-
-[node name="ComingSoonDialog" type="AcceptDialog" parent="."]
-title = "Coming Soon"
-size = Vector2i(360, 120)
 
 [node name="QuitDialog" type="ConfirmationDialog" parent="."]
 title = "Quit Game"

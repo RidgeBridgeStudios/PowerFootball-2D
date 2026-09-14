@@ -1,3 +1,9 @@
+> [!WARNING]
+> **PARTIALLY SUPERSEDED — pre-pivot real-time match architecture.**
+> The Layer 2 (match-AI) levers in this spec — `PlayerBrain`, `MoodSystem`, `TrustSystem`, `HeavyPlayerController`, star-marking — target the abandoned 22-player real-time engine, which now lives archived under `legacy/` and must never be cited as live or "fixed".
+> The Layer 3/4 club-world and career-persistence material is still relevant to the current career world, but read the whole file as a design proposal, not implementation guidance.
+> Start with [architecture-pivot.md](agent-errata/architecture-pivot.md); canonical contracts: [CORE_INVARIANTS.md](CORE_INVARIANTS.md).
+
 # SOCIAL_SIMULATION_ARCHITECTURE.md
 
 **Technical & Game Design Specification — Psychological Traits, Social Memory, and Star Gravity**

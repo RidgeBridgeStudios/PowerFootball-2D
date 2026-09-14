@@ -4,8 +4,8 @@
 ## Formation, team instructions, per-slot roles, and set-piece assignments.
 ##
 ## Writes through TeamManagementData.apply_to_team() and the manager's own
-## ManagerData, which is what ManagerDirector binds to at kickoff — so a change
-## here genuinely reaches the match engine rather than being UI state.
+## ManagerData, which is what the quick-sim engine binds to at match time — so a
+## change here genuinely reaches the match engine rather than being UI state.
 ##
 ## Depends on: CareerPanel, CareerTheme, TeamManagementData, FormationLibrary,
 ##             ManagerCareerProfile, CareerManager, GameEvents.
@@ -158,7 +158,7 @@ func _instructions_card(profile: ManagerCareerProfile, p: CareerThemePalette) ->
 		return body
 
 	body.add_child(CareerTheme.muted(
-		"These feed ManagerDirector directly: tempo shapes each role's ball-weight band, pressing raises aggression and shortens decision intervals, defensive line and width move the formation anchors."
+		"These are read by QuickSimEngine when your fixture is simulated: tempo sets the match's chance and pass volume, while pressing intensity and defensive line shape how the two sides are rated against each other."
 	))
 	body.add_child(_slider_row("Tempo", tactical.tempo, p,
 		func(v: float) -> void: tactical.tempo = v))

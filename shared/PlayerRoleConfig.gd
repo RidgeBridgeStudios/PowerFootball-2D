@@ -2,10 +2,10 @@
 ## PlayerRoleConfig
 ##
 ## Data resource representing a single outfield role's tuning parameters.
-## Replaces hardcoded per-role constants scattered across PlayerBrain.gd with
-## inspector-editable values loaded via @export. One .tres file per role
-## (CB, CDM, CM, ST) lives in res://shared/roles/ and is assigned to each
-## player entity through HeavyPlayerController.role_config.
+## Replaces the pre-pivot per-role constants that were hardcoded in the archived
+## real-time match layer with inspector-editable values loaded via @export. One
+## .tres file per role (CB, CDM, CM, ST) lives in res://shared/roles/ and is
+## stored per tactics slot via TeamManagementData.set_slot_role_config().
 ##
 
 
@@ -29,8 +29,8 @@ extends Resource
 
 ## Pass utility weights — individual @export floats so each is editable
 ## in the Inspector separately. Do NOT collapse into a Dictionary field.
-## Defaults mirror PassUtilityScorer's class-level weights so an unconfigured
-## preset scores identically to a player with no role_config at all.
+## Defaults preserve the archived pass-utility scorer's class-level weights so an
+## unconfigured preset scores identically to a player with no role config at all.
 @export_range(0.0, 1.0) var w_dist: float = 0.20   # distance weight
 @export_range(0.0, 1.0) var w_angle: float = 0.18  # facing angle weight
 @export_range(0.0, 1.0) var w_press: float = 0.25  # receiver pressure weight
@@ -41,6 +41,6 @@ extends Resource
 @export var pitch_bounds: Rect2 = Rect2(-0.5, -0.5, 1.0, 1.0)
 
 
-## Returns pass weights as a Dictionary for PassUtilityScorer consumption.
+## Returns pass weights as a Dictionary for pass-utility scoring.
 func get_pass_weights() -> Dictionary:
 	return { "dist": w_dist, "angle": w_angle, "press": w_press, "adv": w_adv }

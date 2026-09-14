@@ -3,6 +3,13 @@ name: eval-sim
 description: Executes 60-second headless simulation assertion harness and validates runtime invariants (NaNs, escapes, decision stalls, anchor variance).
 ---
 
+> [!WARNING]
+> **SUPERSEDED — pre-pivot real-time match layer.** This skill governed the
+> 22-player physics match engine, which is now archived under `legacy/` behind
+> `legacy/.gdignore`. Retained as historical reference for `QuickSimEngine`
+> depth work; **do not apply it to current code**. See
+> `docs/agent-errata/architecture-pivot.md` and `docs/CORE_INVARIANTS.md`.
+
 # Headless Simulation Evaluation Skill
 
 Use this workflow to run headless simulation verification on match kinematics and AI behavior.

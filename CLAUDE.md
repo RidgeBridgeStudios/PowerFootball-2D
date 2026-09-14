@@ -4,17 +4,24 @@
 `AGENTS.md` is the canonical shared repository policy and architectural guide for all AI agents.
 Before implementing any feature or modifying code, review and adhere to **[AGENTS.md](AGENTS.md)**.
 
+**Simulation stack (3 layers, manager-only):**
+1. **Career World** — `autoloads/CareerManager.gd`, the four loaders (`DataLoader`, `ManagerLoader`, `RefereeLoader`, `StaffLoader`), `shared/career/*`, the `shared/*Data.gd` model, and `shared/CareerProgressionEngine.gd`.
+2. **Quick-Sim Match** — `shared/QuickSimEngine.gd`, `shared/PlayerRatingCalculator.gd`, `shared/UtilityMath.gd`, `autoloads/MatchStatsTracker.gd`.
+3. **Narrative & Presentation** — `autoloads/WorldEventLog.gd`, `entities/manager/PressOffice.gd`, `ui/manager_mode/*`, `ui/MainMenu.gd`, `ui/OptionsMenu.gd`, `ui/MatchStatsUI.gd`, `ui/QuickSimModal.gd`.
+
+The real-time 22-player match layer (ball/player physics, per-frame AI, pitch scene, collision matrix, in-match HUD) is archived under `legacy/` and skipped by all tooling via `legacy/.gdignore`.
+
 ---
 
 ## 1. Primary Reading Order
 
-1. **@AGENTS.md** — Canonical shared policy: engine lock, 5-layer simulation stack, architectural choke points, Graphify-first navigation protocol, change-impact tiers, and conditional documentation policy.
+1. **@AGENTS.md** — Canonical shared policy: engine lock, 3-layer simulation stack, architectural choke points, Graphify-first navigation protocol, change-impact tiers, and conditional documentation policy.
 2. **@docs/GRAPHIFY_LIFECYCLE.md** — Canonical Graphify lifecycle, git hooks, update mechanics, and enforcement matrix.
-3. **@POWERFOOTBALL_MASTER_VISION.md** — Master design vision, 5-layer simulation stack, systems design, and North Star.
+3. **@POWERFOOTBALL_MASTER_VISION.md** — Historical pre-pivot design vision; read its `## Pivot Note` first. Retained as reference for future `QuickSimEngine` depth work, not as current implementation guidance.
 4. **@docs/CORE_INVARIANTS.md** — Canonical engine lock, simulation stack, and critical file contracts.
 5. **@docs/course_implementation_specification.md** — Course-derived reference specification (READ-ONLY): FSMs, formulas, gotchas.
 6. **@ROADMAP.md** — Tactical `[ ]`/`[x]` feature checklist.
-7. **@.claude/rules/** — Path-specific rulebooks automatically evaluated by Claude Code (core contracts, physics, AI architecture, career mode, context hygiene, antipatterns, Graphify, reuse/complexity gating via [ponytail.md](.claude/rules/ponytail.md), and real-world football/IFAB grounding via [football-domain.md](.claude/rules/football-domain.md), backed by the local `football-expert` MCP server).
+7. **@.claude/rules/** — Path-specific rulebooks automatically evaluated by Claude Code (career mode, context hygiene, GDScript antipatterns, Godot 4.7 core contracts, Graphify, reuse/complexity gating via [ponytail.md](.claude/rules/ponytail.md), and real-world football/IFAB grounding via [football-domain.md](.claude/rules/football-domain.md), backed by the local `football-expert` MCP server). The `ai-architect` and `soccer-physics` rulebooks are scoped to archived `legacy/` paths and are retained for reference only.
 
 ---
 
@@ -54,9 +61,9 @@ Follow this 5-step checklist before concluding any turn or proposing changes:
    All 10 linters must pass with 0 errors (`gdcheck`, `lint_invariants`, `lint_scope`, `lint_type_comparisons`, `lint_stringnames`, `lint_shadowing`, `lint_allocations`, `lint_xref`, `tscn_linter`, `verify_db`).
 2. **Targeted Subsystem Test / Smoke Check:**
    Execute the relevant domain check based on touched files:
-   - Kinematics/solvers: `py -3 tools/fuzz_solvers.py --iterations=10000`
-   - Formations/tactics: `py -3 tools/fuzz_formations.py --iterations=5000`
-   - Match simulation: `py -3 tools/eval_simulation.py --duration=10`
+   - Kinematics/solvers (shared math): `py -3 tools/fuzz_solvers.py --iterations=10000`
+   - Formation math (legacy reference solver): `py -3 tools/fuzz_formations.py --iterations=5000`
+   - Quick-sim match simulation: `py -3 tools/eval_simulation.py --duration=10`
    - Determinism: `py -3 tools/replay_test.py`
 3. **Diff Review & Invariant Audit:**
    Inspect `git diff` to confirm strict typing on all variables/signatures, zero hot-path allocations, no object-to-string comparisons, and no accidental changes.
@@ -81,7 +88,7 @@ Follow this 5-step checklist before concluding any turn or proposing changes:
 | **85%+** | **CRITICAL** | Run `/compact` or `/clear` before next task. Major subsystem switches only. |
 
 ### Subsystem Switching
-Switch major subsystems (physics ↔ AI, match ↔ career) with `/clear`.
+Switch major subsystems (career world ↔ quick-sim match ↔ narrative/presentation) with `/clear`.
 `CLAUDE.md`, `AGENTS.md`, `docs/CORE_INVARIANTS.md`, `docs/GRAPHIFY_LIFECYCLE.md`, and `.claude/rules/` survive both compaction and clear.
 
 ---

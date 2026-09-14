@@ -3,8 +3,8 @@
 ##
 ## Pure data container for one team: name, colour, and the squad of PlayerData
 ## resources that make it up. Saveable as a .tres resource. No logic — DataLoader
-## owns building the default league, PlayerFactory owns applying a squad member
-## onto a spawned player.
+## owns building the default league, and the quick-sim match layer reads squad
+## members straight off this container.
 ##
 ## Depends on: PlayerData.
 ## Exposes: the fields below.

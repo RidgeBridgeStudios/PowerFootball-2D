@@ -1,3 +1,21 @@
+## Pivot Note
+
+> **This document predates the manager-only pivot. Read this note before anything below.**
+
+PowerFootball-2D is now a **manager-only quick-sim football management game** in the Championship Manager 01/02 / Football Manager tradition. Matches are resolved entirely by `shared/QuickSimEngine.gd`, a statistical simulator producing a score, goal/card timeline, team stats, Moneyball analytics, and per-player events and ratings. There is no player control, no real-time match engine, no ball physics, and no per-frame AI. The career UI never leaves `ui/manager_mode/ManagerModeRoot.tscn`; a full season of matches resolves in seconds.
+
+The real-time 22-player match layer described throughout this document — ball/player/goalkeeper/referee entities, `pitch/`, the spatial cache, collision matrix, in-match HUD and the rest — was **archived under `legacy/`**, not deleted. `legacy/.gdignore` excludes it from Godot import and from every verification tool. It is preserved as **design reference for future `QuickSimEngine` depth work**: the systemic ambition, narrative propagation and social-simulation ideas below remain the North Star even though their original real-time implementation is retired.
+
+The current simulation stack is **three layers**:
+
+1. **Career World** — `autoloads/CareerManager.gd`, the four loaders (`DataLoader`, `ManagerLoader`, `RefereeLoader`, `StaffLoader`), `shared/career/*`, the `shared/*Data.gd` model, and `shared/CareerProgressionEngine.gd`.
+2. **Quick-Sim Match** — `shared/QuickSimEngine.gd`, `shared/PlayerRatingCalculator.gd`, `shared/UtilityMath.gd`, `autoloads/MatchStatsTracker.gd`.
+3. **Narrative & Presentation** — `autoloads/WorldEventLog.gd`, `entities/manager/PressOffice.gd`, `ui/manager_mode/*`, `ui/MainMenu.gd`, `ui/OptionsMenu.gd`, `ui/MatchStatsUI.gd`, `ui/QuickSimModal.gd`.
+
+**Everything below this note is a historical record of the abandoned real-time architecture. It must not be read as current implementation guidance, file map, or specification.** For current architecture, read `AGENTS.md`, `docs/CORE_INVARIANTS.md` and `llms.txt`.
+
+---
+
 # POWERFOOTBALL_MASTER_VISION.md
 
 <!-- Canonical vision, roadmap, system design, and agent protocol for PowerFootball-2D -->

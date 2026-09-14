@@ -1,11 +1,11 @@
 ---
 name: perf-benchmark
-description: Micro-benchmarks core mathematical solvers, intercept bisections, and spatial query latency.
+description: Micro-benchmarks the core mathematical solvers used by the shared maths layer.
 ---
 
 # Performance Benchmark & Solvers Profiling Skill
 
-Use this workflow to profile execution times, algorithm regressions, and throughput across critical mathematical solvers and spatial hashing routines.
+Use this workflow to profile execution times, algorithm regressions, and throughput across the critical mathematical solvers.
 
 ## Execution Commands
 
@@ -21,7 +21,10 @@ Evaluates:
 - `UtilityMath.quadratic_decay()` (Proximity falloff curve)
 - `UtilityMath.is_lane_blocked()` (Passing lane segment intersection)
 
-### 2. Spatial Hash Grid Latency Benchmark
+### 2. Spatial Hash Grid Latency Benchmark (archived real-time engine)
+
+> The 22-entity spatial hash grid was retired with the real-time match layer;
+> `tools/spatial_grid_bench.py` is a retirement candidate, not a current gate.
 
 ```bash
 py -3 tools/spatial_grid_bench.py

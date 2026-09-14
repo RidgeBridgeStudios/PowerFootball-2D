@@ -1,3 +1,6 @@
+> [!NOTE]
+> **Post-pivot scope note.** This Graphify lifecycle remains current. One item in the §3 validation checklist still names pre-pivot choke points (`PlayerBrain`, `MatchWorldModel`, the 6-layer collision matrix) as live contracts — those are archived under `legacy/` and no longer apply. See [agent-errata/architecture-pivot.md](agent-errata/architecture-pivot.md) and [CORE_INVARIANTS.md](CORE_INVARIANTS.md).
+
 # Graphify Lifecycle & Agent Navigation Protocol — PowerFootball-2D
 
 This document specifies the exact project-local Graphify lifecycle, agent navigation rules, validation checklist, and enforcement boundaries for both **Claude Code** and **Google Antigravity** within the PowerFootball-2D repository.

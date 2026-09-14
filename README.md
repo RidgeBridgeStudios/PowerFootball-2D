@@ -1,81 +1,60 @@
 # PowerFootball 2D
 
-A weighty, deliberate top-down 2D football game built in **Godot 4.7** (GDScript).
-Players have mass, momentum and turning arcs; nothing snaps. Designed controller-first.
+A **manager-only** football management game built in **Godot 4.7** (GDScript) — Championship Manager / Football Manager style. You run a club: pick the team, manage the squad, staff, finances and board, and watch fixtures resolve through a statistical quick-sim engine.
 
 **Vision:** Dwarf Fortress with a football. Simple visuals, deep social simulation. See @./POWERFOOTBALL_MASTER_VISION.md.
 
-**Current state:** Foundation build with core physics, AI, manager systems, and 22-player matches playable. See @./ROADMAP.md for what's next.
+**Current state:** Manager Mode career is playable end to end — create a manager, take a club, advance the day loop, sim fixtures, and react to results. See @./ROADMAP.md for what's next.
 
 ## Running it
 
-Open the project folder in Godot 4.7 and press F5. `res://ui/MainMenu.tscn` is
-the main scene — pick Kick Off (team select) or Practice Arena to load
-`res://pitch/PitchScene.tscn`: four players (one human-controlled, three CPU),
-one ball, two goals, a 5-minute clock.
+Open the project folder in Godot 4.7 and press F5. The main scene is
+`res://ui/SplashScreen.tscn`, which fades into `res://ui/MainMenu.tscn`.
+The menu has exactly three choices: **Manager Mode**, **Options**, and **Quit**.
 
-## Controls
-
-| Action | Gamepad | Keyboard |
-|---|---|---|
-| Move | Left stick (analog — deflection scales pace) | WASD |
-| Aim pass/shot | Right stick | Arrow keys |
-| Pass / shot | A / Cross — tap passes, hold charges | Space |
-| Through ball | X / Square | Q |
-| Tackle | B / Circle | E |
-| Sprint | RT / R2 (drains stamina) | Left Shift |
-| Lob / cross | Y / Triangle | F |
-| Switch player | LB / L1 | Tab |
-| Super Cancel | RB / R1 | Escape |
+Manager Mode opens the manager/slot creation screen, loads or starts a career,
+and hands off to the career hub (`res://ui/manager_mode/ManagerModeRoot.tscn`).
+There is no real-time match to play: pressing Continue resolves the next fixture
+through the quick-sim engine and folds the result back into the career world.
 
 ## Architecture at a Glance
 
-See **@./CLAUDE.md** for invariants and boot order. See **@./llms.txt** for static repo map.
+See **@./docs/CORE_INVARIANTS.md** for engine contracts and the 3-layer stack. See **@./llms.txt** for the static repo map.
 
 ```
-autoloads/     MatchWorldModel (spatial cache), GameEvents (signal bus), GameManager, data loaders
+autoloads/     GameEvents (signal bus), GameManager (scoreboard shell),
+               MatchStatsTracker, career data loaders, WorldEventLog, CareerManager
+shared/        QuickSimEngine, PlayerRatingCalculator, UtilityMath,
+               data classes, career/ state, roles/ presets
+shared/career/ CareerSaveData, fixtures, finances, transfers, inbox, morale, youth
 entities/
-  player/      HeavyPlayerController (weight model), PlayerBrain (utility AI), states/
-  ball/        Pseudo3DBall (physics), states/
-  manager/     ManagerDirector (formations), PressOffice (narrative)
-  referee/     MatchReferee (rules)
-pitch/         PitchScene, PitchBoundary, GoalZone, markings
-ui/            MainMenu, HUD, pause, pregame screens
-shared/        PlayerData, ManagerData, UtilityMath, CollisionLayers
+  manager/     PressOffice (press reactions)
+ui/            SplashScreen, MainMenu, OptionsMenu, MatchStatsUI, QuickSimModal,
+               manager_mode/* (career hub and panels)
 tools/         gdcheck.py (static checker)
-docs/          json-schema.md (data import spec)
+docs/          CORE_INVARIANTS.md, json-schema.md (data import spec)
+legacy/        Archived real-time match layer (skipped by all tools)
 ```
 
 **Three architectural rules:**
 
-1. **Nothing crosses systems directly.** Match events → GameEvents signal bus. HUD, camera, referee never reference each other.
-2. **The ball is not a physics obstacle.** Layer 3 (ball) does not mask layer 2 (players). Possession is bookkeeping; contact flows through foot sensor (layer 4).
-3. **The ball is never parented to a player.** Dribbling is micro-impulses. Sharp turns separate player from ball naturally.
+1. **Nothing crosses systems directly.** Inter-system events route through the `GameEvents` signal bus.
+2. **One match resolver.** Fixtures are resolved only by `shared/QuickSimEngine.gd` and published only through `apply_to_match_stats_tracker()`.
+3. **Career state has one owner.** `CareerManager` owns the live `CareerSaveData`; the career UI and narrative layer never mutate it directly.
 
-### Measured behaviour of the weight model (75kg defaults)
+### The three layers
 
-| Input | Result |
-|---|---|
-| Standstill to top speed | 0.70s (1.00s to sprint top speed) |
-| Coast to a stop | 0.33s / 33px |
-| 45° turn at pace | 92% of speed kept |
-| 90° turn at pace | 71% kept, 1.6s to recover |
-| 180° turn at pace | 10% kept |
-| Half stick deflection | 105 px/s of 210 |
+| Layer | Role | Key files |
+|---|---|---|
+| 1 — Career World | Squad, staff, finances, calendar, day loop | `autoloads/CareerManager.gd`, loaders, `shared/career/*` |
+| 2 — Quick-Sim Match | Statistical match resolution, ratings, analytics | `shared/QuickSimEngine.gd`, `shared/PlayerRatingCalculator.gd`, `shared/UtilityMath.gd` |
+| 3 — Narrative & Presentation | Event log, press, menus, career panels | `autoloads/WorldEventLog.gd`, `entities/manager/PressOffice.gd`, `ui/manager_mode/*` |
 
 ---
 
 ## What's Next?
 
-See **@./ROADMAP.md** for the complete 5-phase feature checklist.
-
-**Phase 1** (Gameplay Completeness) priorities:
-- Substitutions + reserves UI
-- Yellow/red card implementation
-- Offside detection
-- Injury system
-- Match stats screen + full-time scoreboard
-- Goalkeeper dive commitment
+See **@./ROADMAP.md** for the complete feature checklist.
 
 See **@./POWERFOOTBALL_MASTER_VISION.md** for deep systems design, architectural rationale, and long-term vision.
 
@@ -86,7 +65,6 @@ See **@./POWERFOOTBALL_MASTER_VISION.md** for deep systems design, architectural
 1. Open the project folder in Godot 4.7
 2. Godot regenerates `.import` files for `art/*.png` on first open
 3. Confirm autoload boot order in Project Settings → Autoload
-4. Confirm 5 physics layer names in Project Settings → Physics → 2D
-5. Press F5; select Kick Off or Practice Arena to play
+4. Press F5; the splash screen fades into the main menu, where Manager Mode starts a career
 
-**Troubleshooting cyclic type references:** If Godot reports a cyclic reference in FSM classes, type the `player` parameter in `PlayerState` as `CharacterBody2D` instead of the specific controller type.
+**Troubleshooting cyclic type references:** If Godot reports a cyclic reference between `Resource` data classes, type cross-references as the base `Resource` type instead of the specific class.

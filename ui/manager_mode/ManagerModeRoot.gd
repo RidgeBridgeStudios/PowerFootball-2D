@@ -54,15 +54,6 @@ func _ready() -> void:
 	GameEvents.career_advance_halted.connect(_on_advance_halted)
 	GameEvents.career_manager_sacked.connect(_on_sacked)
 
-	# Returning from a played match: PitchScene parks the score on GameManager
-	# and CareerManager attributes it to the pending fixture.
-	if GameManager.has_meta(&"manager_last_match_result"):
-		var res: Dictionary = GameManager.get_meta(&"manager_last_match_result")
-		GameManager.remove_meta(&"manager_last_match_result")
-		CareerManager.record_user_match_result(
-			int(res.get("home_score", 0)), int(res.get("away_score", 0))
-		)
-
 	if not CareerManager.is_career_active():
 		# No career loaded — the creation flow owns getting one started.
 		get_tree().change_scene_to_file(CREATION_SCENE)
@@ -328,8 +319,12 @@ func _on_continue_pressed() -> void:
 		return
 
 	if career.days_until_next_fixture() == 0:
-		if CareerManager.play_next_fixture():
-			get_tree().change_scene_to_file("res://pitch/PitchScene.tscn")
+		# Manager-only pivot: the fixture is resolved statistically by
+		# QuickSimEngine instead of being handed to a real-time match scene.
+		# CareerManager owns the whole result pipeline (table, finances,
+		# morale, board confidence, player records and cup advancement).
+		if CareerManager.simulate_next_fixture() != null:
+			refresh()
 		return
 
 	var reason: int = CareerManager.continue_until_event()

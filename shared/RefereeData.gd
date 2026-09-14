@@ -3,9 +3,9 @@
 ##
 ## Pure data container for one referee: identity, personality, and career stats.
 ## Saveable as a .tres resource, same discipline as PlayerData — this never
-## touches a Node. MatchReferee reads the personality fields to make live
-## per-foul decisions during a match and writes career stats back at FULL_TIME;
-## the personality fields themselves are never mutated at runtime.
+## touches a Node. QuickSimEngine reads the personality fields to resolve fouls
+## and cards during a match and writes career stats back afterwards; the
+## personality fields themselves are never mutated at runtime.
 ##
 ## Depends on: nothing.
 ## Exposes: the fields below, get_fouls_per_match(), get_penalties_per_match(),
