@@ -308,25 +308,82 @@ func _build_competitions() -> void:
 	else:
 		_build_flat_competitions(first_matchday, total_teams)
 
-	# 2. European Champions Cup (Tier 1 qualifiers - top 4)
-	var t1_teams: Array[int] = _get_tier_team_indices(1)
-	if career.continental_indices.is_empty():
-		career.continental_indices.clear()
-		for i_c: int in range(mini(4, t1_teams.size())):
-			career.continental_indices.append(t1_teams[i_c])
+	# 2. Continental & International Competitions
+	var uefa_t1: Array[int] = []
+	var americas_t1: Array[int] = []
+	var afc_t1: Array[int] = []
 
-	if not career.continental_indices.is_empty():
+	var div_offset: int = 0
+	for d_info: Dictionary in DataLoader.divisions:
+		var d_count: int = int(d_info.get("team_count", 0))
+		var conf: String = str(d_info.get("confederation", "UEFA"))
+		var top_slots: int = mini(2, d_count)
+		for s_i: int in range(top_slots):
+			var idx: int = div_offset + s_i
+			if conf == "UEFA":
+				uefa_t1.append(idx)
+			elif conf == "CONMEBOL" or conf == "CONCACAF":
+				americas_t1.append(idx)
+			elif conf == "AFC":
+				afc_t1.append(idx)
+		div_offset += d_count
+
+	# Fallback for flat 16-team testing database
+	if uefa_t1.is_empty():
+		var t1_teams: Array[int] = _get_tier_team_indices(1)
+		for i_c: int in range(mini(4, t1_teams.size())):
+			uefa_t1.append(t1_teams[i_c])
+
+	if not uefa_t1.is_empty():
+		career.continental_indices = uefa_t1
 		var continental: CompetitionData = CompetitionData.build_continental(
 			"European Champions Cup", career.continental_indices, true
 		)
 		continental.draw_cup_round(first_matchday.advanced_by(18), _rng)
 		career.competitions.append(continental)
 
-	# 3. Domestic Cup: Knockout among all teams (with automatic bye seeding)
-	var all_indices: Array[int] = []
-	for i_all: int in range(total_teams):
-		all_indices.append(i_all)
-	var cup: CompetitionData = CompetitionData.build_cup("Domestic Cup", all_indices, false)
+	if not americas_t1.is_empty():
+		var copa: CompetitionData = CompetitionData.build_continental(
+			"Copa Continental", americas_t1, true
+		)
+		copa.draw_cup_round(first_matchday.advanced_by(21), _rng)
+		career.competitions.append(copa)
+
+	var world_cup_teams: Array[int] = []
+	if not uefa_t1.is_empty():
+		for u_i: int in range(mini(4, uefa_t1.size())):
+			world_cup_teams.append(uefa_t1[u_i])
+	if not americas_t1.is_empty():
+		for a_i: int in range(mini(3, americas_t1.size())):
+			world_cup_teams.append(americas_t1[a_i])
+	if not afc_t1.is_empty():
+		for af_i: int in range(mini(1, afc_t1.size())):
+			world_cup_teams.append(afc_t1[af_i])
+
+	if world_cup_teams.size() >= 4:
+		var w_cup: CompetitionData = CompetitionData.build_continental(
+			"World Club Championship", world_cup_teams, false
+		)
+		w_cup.draw_cup_round(first_matchday.advanced_by(27), _rng)
+		career.competitions.append(w_cup)
+
+	# 3. Domestic Cup: Knockout among division teams (or all teams for <= 32)
+	var cup_indices: Array[int] = []
+	var cup_name: String = "Domestic Cup"
+	if not DataLoader.divisions.is_empty() and total_teams > 32:
+		var u_div: Dictionary = _get_user_division_dict()
+		var u_start: int = DataLoader._get_division_start_team_index(u_div)
+		var u_count: int = int(u_div.get("team_count", 16))
+		cup_name = "%s Cup" % str(u_div.get("nation", "Domestic"))
+		for i_u: int in range(u_count):
+			var idx_u: int = u_start + i_u
+			if idx_u < total_teams:
+				cup_indices.append(idx_u)
+	else:
+		for i_all: int in range(total_teams):
+			cup_indices.append(i_all)
+
+	var cup: CompetitionData = CompetitionData.build_cup(cup_name, cup_indices, false)
 	cup.draw_cup_round(first_matchday.advanced_by(24), _rng)
 	career.competitions.append(cup)
 
@@ -1400,16 +1457,29 @@ func _competition_of(fixture: FixtureData) -> CompetitionData:
 	return null
 
 
-## Draws the next round of any cup whose current round has finished.
+## Draws the next round of any cup or continental competition whose current round has finished.
 func _advance_cup_rounds() -> void:
 	for comp: CompetitionData in career.competitions:
-		if comp.kind != CompetitionData.Kind.KNOCKOUT_CUP:
+		if comp.kind != CompetitionData.Kind.KNOCKOUT_CUP and comp.kind != CompetitionData.Kind.CONTINENTAL:
 			continue
 		if comp.is_complete() or not comp.cup_round_finished():
 			continue
 		comp.current_round += 1
 		comp.draw_cup_round(career.today.advanced_by(21), _rng)
 		_tag_user_fixtures()
+
+
+func _get_user_division_dict() -> Dictionary:
+	var u_idx: int = career.user_team_index
+	var cur: int = 0
+	for d: Dictionary in DataLoader.divisions:
+		var c: int = int(d.get("team_count", 0))
+		if u_idx >= cur and u_idx < cur + c:
+			return d
+		cur += c
+	if not DataLoader.divisions.is_empty():
+		return DataLoader.divisions[0]
+	return {}
 
 
 ## --- Season rollover --------------------------------------------------------------------

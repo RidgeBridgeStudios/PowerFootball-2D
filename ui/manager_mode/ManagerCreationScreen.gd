@@ -33,6 +33,7 @@ var _background: ManagerCareerProfile.Background = ManagerCareerProfile.Backgrou
 var _philosophy: ManagerCareerProfile.Philosophy = ManagerCareerProfile.Philosophy.BALANCED
 var _formation_index: int = 0
 var _selected_team: int = -1
+var _selected_division_filter: int = 0
 
 var _profile: ManagerCareerProfile = null
 var _content: VBoxContainer = null
@@ -263,8 +264,31 @@ func _render_jobs() -> void:
 		_content.add_child(CareerTheme.muted("No league data loaded."))
 		return
 
+	if not DataLoader.divisions.is_empty():
+		var div_names: Array[String] = ["All Leagues"]
+		for d: Dictionary in DataLoader.divisions:
+			div_names.append(str(d.get("name", "Division")))
+		var host: Control = self
+		_content.add_child(_option_row(
+			"Filter by League", div_names, _selected_division_filter,
+			func(index: int) -> void:
+				host.set(&"_selected_division_filter", index)
+				if index > 0:
+					DataLoader.active_division_index = index - 1
+					DataLoader.load_division_shard(DataLoader.divisions[index - 1])
+				host.call(&"_render")
+		))
+		_content.add_child(CareerTheme.divider())
+
 	var eligible: int = 0
 	for team_index: int in range(DataLoader.league.teams.size()):
+		if _selected_division_filter > 0:
+			var target_div: Dictionary = DataLoader.divisions[_selected_division_filter - 1]
+			var div_start: int = DataLoader._get_division_start_team_index(target_div)
+			var div_count: int = int(target_div.get("team_count", 0))
+			if team_index < div_start or team_index >= div_start + div_count:
+				continue
+
 		var team: TeamData = DataLoader.league.teams[team_index]
 		var can_apply: bool = _profile.can_apply_to(team.reputation)
 		var board: BoardState = BoardState.make_for_club(team, 24000)
@@ -286,10 +310,20 @@ func _render_jobs() -> void:
 		if can_apply:
 			eligible += 1
 			var apply: Button = CareerTheme.button("Apply")
+			var host_apply: Control = self
 			apply.pressed.connect(func() -> void:
-				_selected_team = team_index
-				_step = Step.CONTRACT
-				_render()
+				host_apply.set(&"_selected_team", team_index)
+				if not DataLoader.divisions.is_empty():
+					var cur_c: int = 0
+					for d_i: int in range(DataLoader.divisions.size()):
+						var c_cnt: int = int(DataLoader.divisions[d_i].get("team_count", 0))
+						if team_index >= cur_c and team_index < cur_c + c_cnt:
+							DataLoader.active_division_index = d_i
+							DataLoader.load_division_shard(DataLoader.divisions[d_i])
+							break
+						cur_c += c_cnt
+				host_apply.set(&"_step", Step.CONTRACT)
+				host_apply.call(&"_render")
 			)
 			row.add_child(apply)
 		else:
@@ -298,7 +332,7 @@ func _render_jobs() -> void:
 
 	if eligible == 0:
 		_content.add_child(CareerTheme.label(
-			"No club will currently interview you. Try a stronger playing background.", p.warning
+			"No club in this selection will currently interview you. Try another league or a stronger background.", p.warning
 		))
 
 	_content.add_child(CareerTheme.divider())

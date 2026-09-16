@@ -60,7 +60,13 @@ const NATION_KEYS: Dictionary = {
 	"japanese": "japan",
 	"usa": "usa",
 	"american": "usa",
-	"united states": "usa"
+	"united states": "usa",
+	"turkey": "turkey",
+	"turkish": "turkey",
+	"russia": "russia",
+	"russian": "russia",
+	"mexico": "mexico",
+	"mexican": "mexico"
 }
 
 const FLAG_EMOJIS: Dictionary = {
@@ -85,6 +91,9 @@ const FLAG_EMOJIS: Dictionary = {
 	"ireland": "🇮🇪",
 	"japan": "🇯🇵",
 	"usa": "🇺🇸",
+	"turkey": "🇹🇷",
+	"russia": "🇷🇺",
+	"mexico": "🇲🇽",
 	"default": "🌐"
 }
 
@@ -109,7 +118,10 @@ const PRIMARY_LANGUAGES: Dictionary = {
 	"austria": "German",
 	"ireland": "English",
 	"japan": "Japanese",
-	"usa": "English"
+	"usa": "English",
+	"turkey": "Turkish",
+	"russia": "Russian",
+	"mexico": "Spanish"
 }
 
 static var _texture_cache: Dictionary = {}

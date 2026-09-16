@@ -273,6 +273,25 @@ def verify_all():
         assert 0.0 <= s.get("tactical_knowledge", 0.0) <= 1.0, f"Staff {sname} tactical_knowledge out of bounds"
 
     print(f"[OK] Staff database verified: {len(staff_members)} staff members across clubs and free agents.")
+
+    # 5. World Sharded Manifest verification (if present)
+    manifest_path = os.path.join(data_dir, "world_manifest.json")
+    if os.path.exists(manifest_path):
+        with open(manifest_path, "r", encoding="utf-8") as f:
+            world_manifest = json.load(f)
+        assert "divisions" in world_manifest, "Missing 'divisions' in world_manifest.json"
+        assert len(world_manifest["divisions"]) == 20, f"Expected 20 divisions in world manifest, got {len(world_manifest['divisions'])}"
+        world_clubs = 0
+        for div in world_manifest["divisions"]:
+            assert "shard" in div, f"Division {div.get('name')} missing shard"
+            shard_path = os.path.join(data_dir, div["shard"])
+            assert os.path.exists(shard_path), f"Missing shard file: {shard_path}"
+            with open(shard_path, "r", encoding="utf-8") as sf:
+                shard_data = json.load(sf)
+            assert "teams" in shard_data, f"Shard {shard_path} missing teams"
+            world_clubs += len(shard_data["teams"])
+        print(f"[OK] World sharded database verified: {len(world_manifest['divisions'])} divisions, {world_clubs} clubs across shards.")
+
     print("=== All Verification Checks Passed (0 errors, 0 warnings) ===")
 
 if __name__ == "__main__":

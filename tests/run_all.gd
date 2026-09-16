@@ -21,6 +21,7 @@ func _ready() -> void:
 	_test_p1_promotion_relegation_multitier()
 	_test_p2_sharded_league_loading()
 	_test_p4_quick_match_isolation()
+	_test_world_database_and_continental()
 
 	print("------------------------------------------------------------------")
 	print("TOTAL TESTS: %d passed, %d failed" % [_passed, _failed])
@@ -248,3 +249,47 @@ func _test_p4_quick_match_isolation() -> void:
 
 	_assert_true(result != null and result.home_score >= 0 and result.away_score >= 0, "P4: QuickSimEngine.simulate_match produces valid exhibition result")
 	_assert_true(CareerManager.career == initial_career, "P4: Quick match simulation does NOT modify or create career state")
+
+
+func _test_world_database_and_continental() -> void:
+	var ok: bool = DataLoader.load_world_database()
+	_assert_true(ok and DataLoader.manifest_mode and DataLoader.divisions.size() == 20, "World DB: 20 divisions loaded from manifest")
+	_assert_true(DataLoader.league.teams.size() == 372, "World DB: 372 total clubs indexed in league stubs")
+
+	var shard_ok: bool = DataLoader.load_division_shard(DataLoader.divisions[0])
+	_assert_true(shard_ok, "World DB: Division 0 shard loaded successfully")
+	var team0: TeamData = DataLoader.get_team(0)
+	_assert_true(team0 != null and team0.squad.size() >= 18, "World DB: Team 0 has full 18-player squad")
+	_assert_true(team0.squad[0].position_role == "GK", "World DB: Starter index 0 is GK")
+	_assert_true(team0.lineup_indices.size() == 11, "World DB: Team 0 has 11-player starting lineup")
+
+	var dummy_profile := ManagerCareerProfile.new()
+	dummy_profile.manager_name = "Test Manager"
+	dummy_profile.tactical = ManagerData.new()
+	dummy_profile.tactical.manager_name = "Test Manager"
+	var career_save: CareerSaveData = CareerManager.start_new_career(dummy_profile, 0, 99)
+	_assert_true(career_save != null, "World DB: CareerManager.start_new_career succeeds in world DB mode")
+
+	var has_uefa: bool = false
+	var has_americas: bool = false
+	var has_world_club: bool = false
+	var has_domestic_cup: bool = false
+	if career_save != null:
+		for comp: CompetitionData in career_save.competitions:
+			if comp.competition_name == "European Champions Cup":
+				has_uefa = true
+			elif comp.competition_name == "Copa Continental":
+				has_americas = true
+			elif comp.competition_name == "World Club Championship":
+				has_world_club = true
+			elif comp.kind == CompetitionData.Kind.KNOCKOUT_CUP:
+				has_domestic_cup = true
+
+	_assert_true(has_uefa, "World DB: European Champions Cup generated")
+	_assert_true(has_americas, "World DB: Copa Continental generated")
+	_assert_true(has_world_club, "World DB: World Club Championship generated")
+	_assert_true(has_domestic_cup, "World DB: Division Domestic Cup generated")
+
+	CareerManager.close_career()
+	CareerSerializer.delete_slot(99)
+	DataLoader.load_default_database()

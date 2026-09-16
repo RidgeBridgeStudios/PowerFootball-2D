@@ -21,6 +21,7 @@ extends Node
 
 const CUSTOM_LEAGUE_PATH: String = "user://custom_league.json"
 const DEFAULT_LEAGUE_PATH: String = "res://data/league.json"
+const WORLD_MANIFEST_PATH: String = "res://data/world_manifest.json"
 
 var league: LeagueData = null
 var divisions: Array[Dictionary] = []
@@ -147,9 +148,26 @@ func load_league_from(path: String) -> bool:
 	return _parse_json_league(path)
 
 
+## Switches the active league database to the 20-league world database.
+func load_world_database() -> bool:
+	if FileAccess.file_exists(WORLD_MANIFEST_PATH):
+		return _parse_json_league(WORLD_MANIFEST_PATH)
+	return false
+
+
+## Switches the active league database to the default 16-team testing database.
+func load_default_database() -> bool:
+	if FileAccess.file_exists(DEFAULT_LEAGUE_PATH):
+		return _parse_json_league(DEFAULT_LEAGUE_PATH)
+	return false
+
+
 func _load_league() -> void:
 	if FileAccess.file_exists(CUSTOM_LEAGUE_PATH):
 		if _parse_json_league(CUSTOM_LEAGUE_PATH):
+			return
+	if FileAccess.file_exists(WORLD_MANIFEST_PATH):
+		if _parse_json_league(WORLD_MANIFEST_PATH):
 			return
 	if FileAccess.file_exists(DEFAULT_LEAGUE_PATH):
 		if _parse_json_league(DEFAULT_LEAGUE_PATH):

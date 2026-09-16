@@ -146,10 +146,16 @@ func league_competition() -> CompetitionData:
 
 
 func continental_competition() -> CompetitionData:
+	for c: CompetitionData in competitions:
+		if c.fixture_tag == FixtureData.Competition.CONTINENTAL and c.participant_indices.has(user_team_index):
+			return c
 	return competition(FixtureData.Competition.CONTINENTAL)
 
 
 func cup_competition() -> CompetitionData:
+	for c: CompetitionData in competitions:
+		if c.fixture_tag == FixtureData.Competition.DOMESTIC_CUP and c.participant_indices.has(user_team_index):
+			return c
 	return competition(FixtureData.Competition.DOMESTIC_CUP)
 
 

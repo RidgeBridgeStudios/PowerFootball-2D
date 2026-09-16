@@ -208,7 +208,7 @@ func _build_quick_match_overlay() -> void:
 	_qm_stats_label = Label.new()
 	_qm_stats_label.add_theme_font_size_override("font_size", 12)
 	_qm_stats_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-	_qm_stats_label.theme_override_colors.font_color = Color(0.7, 0.7, 0.7)
+	_qm_stats_label.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
 	layout.add_child(_qm_stats_label)
 
 	var back_btn := Button.new()

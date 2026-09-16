@@ -1,7 +1,7 @@
 {
-  "total_nodes": 72,
+  "total_nodes": 73,
   "layer_summary": {
-    "Layer 1 - Physics & Kinematics": 0,
+    "Layer 1 - Physics & Kinematics": 1,
     "Layer 2 - Match AI & Spatial Navigation": 32,
     "Layer 3 - Match Social & Dynamic Psychology": 2,
     "Layer 4 - Club World & Persistent Entities": 9,
@@ -57,7 +57,6 @@
         "career_day_advanced",
         "career_inbox_changed",
         "career_manager_sacked",
-        "career_match_ready",
         "career_result_recorded",
         "career_season_ended",
         "career_started"
@@ -88,7 +87,10 @@
         "shared/TeamData.gd",
         "shared/career/CareerSaveData.gd",
         "shared/career/CareerSerializer.gd",
+        "tests/run_all.gd",
+        "ui/MainMenu.gd",
         "ui/MatchStatsUI.gd",
+        "ui/OptionsMenu.gd",
         "ui/manager_mode/CalendarPanel.gd",
         "ui/manager_mode/CareerPanel.gd",
         "ui/manager_mode/FixturesPanel.gd",
@@ -177,6 +179,8 @@
         "autoloads/CareerManager.gd",
         "shared/ManagerData.gd",
         "shared/career/CareerSerializer.gd",
+        "tests/run_all.gd",
+        "ui/MainMenu.gd",
         "ui/manager_mode/OverviewPanel.gd"
       ],
       "signals_declared": [],
@@ -220,7 +224,9 @@
         "shared/RefereeData.gd"
       ],
       "direct_dependents": [
-        "autoloads/CareerManager.gd"
+        "autoloads/CareerManager.gd",
+        "tests/run_all.gd",
+        "ui/MainMenu.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -370,6 +376,8 @@
         "shared/career/ManagerCareerProfile.gd",
         "shared/career/ScoutingNetwork.gd",
         "shared/career/TransferMarket.gd",
+        "tests/run_all.gd",
+        "ui/MainMenu.gd",
         "ui/QuickSimModal.gd",
         "ui/manager_mode/OverviewPanel.gd",
         "ui/manager_mode/TacticsPanel.gd"
@@ -505,6 +513,8 @@
         "shared/career/ManagerCareerProfile.gd",
         "shared/career/MoraleEngine.gd",
         "shared/career/PlayerCareerState.gd",
+        "tests/run_all.gd",
+        "ui/MainMenu.gd",
         "ui/QuickSimModal.gd",
         "ui/manager_mode/ManagerModeRoot.gd",
         "ui/manager_mode/TacticsPanel.gd"
@@ -529,6 +539,8 @@
         "shared/CareerProgressionEngine.gd",
         "shared/PlayerData.gd",
         "shared/QuickSimEngine.gd",
+        "tests/run_all.gd",
+        "ui/MainMenu.gd",
         "ui/QuickSimModal.gd"
       ],
       "signals_declared": [],
@@ -591,6 +603,8 @@
         "shared/career/ScoutingNetwork.gd",
         "shared/career/TransferMarket.gd",
         "shared/career/YouthAcademy.gd",
+        "tests/run_all.gd",
+        "ui/MainMenu.gd",
         "ui/QuickSimModal.gd",
         "ui/manager_mode/CalendarPanel.gd",
         "ui/manager_mode/CareerPanel.gd",
@@ -697,6 +711,7 @@
         "shared/career/TransferOffer.gd",
         "shared/career/WorldEvent.gd",
         "shared/career/YouthAcademy.gd",
+        "tests/run_all.gd",
         "ui/manager_mode/CalendarPanel.gd",
         "ui/manager_mode/ContractNegotiationModal.gd"
       ],
@@ -735,6 +750,7 @@
         "shared/career/MoraleEngine.gd",
         "shared/career/PlayerCareerState.gd",
         "shared/career/ScoutingNetwork.gd",
+        "tests/run_all.gd",
         "ui/manager_mode/BoardPanel.gd",
         "ui/manager_mode/CalendarPanel.gd",
         "ui/manager_mode/CareerPanel.gd",
@@ -862,6 +878,7 @@
         "autoloads/CareerManager.gd",
         "shared/career/CareerSaveData.gd",
         "shared/career/CareerSerializer.gd",
+        "tests/run_all.gd",
         "ui/manager_mode/BoardPanel.gd",
         "ui/manager_mode/FixturesPanel.gd",
         "ui/manager_mode/LeaguePanel.gd",
@@ -912,6 +929,7 @@
         "shared/career/CareerSaveData.gd",
         "shared/career/CareerSerializer.gd",
         "shared/career/CompetitionData.gd",
+        "tests/run_all.gd",
         "ui/manager_mode/CalendarPanel.gd",
         "ui/manager_mode/FixturesPanel.gd",
         "ui/manager_mode/LeaguePanel.gd",
@@ -1012,6 +1030,7 @@
         "shared/career/CareerSaveData.gd",
         "shared/career/CareerSerializer.gd",
         "shared/career/InboxEngine.gd",
+        "tests/run_all.gd",
         "ui/manager_mode/ManagerCreationScreen.gd",
         "ui/manager_mode/StaffPanel.gd",
         "ui/manager_mode/TacticsPanel.gd"
@@ -1295,12 +1314,43 @@
       "signals_emitted": [],
       "signals_connected": []
     },
+    "tests/run_all.gd": {
+      "class_name": null,
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/ManagerLoader.gd",
+        "autoloads/RefereeLoader.gd",
+        "shared/ManagerData.gd",
+        "shared/QuickSimEngine.gd",
+        "shared/RefereeData.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerDate.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/CompetitionData.gd",
+        "shared/career/FixtureData.gd",
+        "shared/career/ManagerCareerProfile.gd"
+      ],
+      "direct_dependents": [],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
     "ui/MainMenu.gd": {
       "class_name": null,
       "layer": 5,
       "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "Control",
       "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/ManagerLoader.gd",
+        "autoloads/RefereeLoader.gd",
+        "shared/ManagerData.gd",
+        "shared/QuickSimEngine.gd",
+        "shared/RefereeData.gd",
+        "shared/TeamData.gd",
         "ui/SplashScreen.gd"
       ],
       "direct_dependents": [],
@@ -1308,6 +1358,7 @@
       "signals_emitted": [],
       "signals_connected": [
         "confirmed",
+        "item_selected",
         "menu_closed",
         "pressed",
         "visibility_changed"
@@ -1346,6 +1397,7 @@
       "layer_name": "Layer 5 - Narrative, Presentation & UI",
       "extends": "Control",
       "direct_dependencies": [
+        "autoloads/DataLoader.gd",
         "autoloads/GameManager.gd"
       ],
       "direct_dependents": [],
@@ -1356,6 +1408,7 @@
         "menu_closed"
       ],
       "signals_connected": [
+        "file_selected",
         "item_selected",
         "pressed",
         "toggled",
