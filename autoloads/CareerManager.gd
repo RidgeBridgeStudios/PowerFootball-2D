@@ -568,6 +568,7 @@ func advance_day() -> HaltReason:
 	_process_takeover_tick()
 	_process_international_duty()
 	_process_recovery_and_training()
+	WorldEventGenerator.roll_for_day(career, _rng)
 	_process_scouting()
 	_process_transfer_negotiations()
 	_process_ai_transfer_activity()
@@ -1848,9 +1849,14 @@ func _rehydrate_inbox() -> void:
 				if state != null and club != null \
 						and state.squad_index >= 0 and state.squad_index < club.squad.size():
 					var rebuilt: InboxItem
-					if String(item.payload.get("kind", "")) == "nightlife":
+					var kind_str: String = String(item.payload.get("kind", ""))
+					if kind_str == "nightlife":
 						rebuilt = InboxEngine.build_nightlife_incident(
 							club.squad[state.squad_index], state, item.received
+						)
+					elif kind_str == "confrontation":
+						rebuilt = InboxEngine.build_dressing_room_confrontation_item(
+							club.squad[state.squad_index], state, null, item.received
 						)
 					else:
 						rebuilt = InboxEngine.build_playing_time_complaint(
@@ -1858,6 +1864,22 @@ func _rehydrate_inbox() -> void:
 						)
 					item.options = rebuilt.options
 					item.escalation_option = rebuilt.escalation_option
+			InboxItem.Category.TRAINING:
+				if state != null and club != null \
+						and state.squad_index >= 0 and state.squad_index < club.squad.size():
+					var rebuilt_tr: InboxItem = InboxEngine.build_training_incident_item(
+						club.squad[state.squad_index], state, null, item.received
+					)
+					item.options = rebuilt_tr.options
+					item.escalation_option = rebuilt_tr.escalation_option
+			InboxItem.Category.MEDIA:
+				if state != null and club != null \
+						and state.squad_index >= 0 and state.squad_index < club.squad.size():
+					var rebuilt_med: InboxItem = InboxEngine.build_media_controversy_item(
+						club.squad[state.squad_index], state, item.received
+					)
+					item.options = rebuilt_med.options
+					item.escalation_option = rebuilt_med.escalation_option
 			InboxItem.Category.CONTRACT:
 				if state != null and club != null \
 						and state.squad_index >= 0 and state.squad_index < club.squad.size():

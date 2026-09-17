@@ -290,13 +290,13 @@
         "is_static": false
       },
       "continue_until_event": {
-        "line": 618,
+        "line": 619,
         "args": [],
         "return": "HaltReason",
         "is_static": false
       },
       "_halt": {
-        "line": 633,
+        "line": 634,
         "args": [
           "reason: HaltReason",
           "message: String"
@@ -305,25 +305,25 @@
         "is_static": false
       },
       "_update_season_phase": {
-        "line": 644,
+        "line": 645,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_update_transfer_window": {
-        "line": 660,
+        "line": 661,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_process_recovery_and_training": {
-        "line": 666,
+        "line": 667,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_has_pending_nightlife_incident": {
-        "line": 774,
+        "line": 775,
         "args": [
           "player_key: int"
         ],
@@ -331,7 +331,7 @@
         "is_static": false
       },
       "_staff_quality": {
-        "line": 783,
+        "line": 784,
         "args": [
           "team: TeamData",
           "kind: String"
@@ -340,25 +340,25 @@
         "is_static": false
       },
       "_process_scouting": {
-        "line": 801,
+        "line": 802,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_process_transfer_negotiations": {
-        "line": 831,
+        "line": 832,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_process_ai_transfer_activity": {
-        "line": 865,
+        "line": 866,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_push_bid_received": {
-        "line": 914,
+        "line": 915,
         "args": [
           "buyer: TeamData",
           "target: PlayerData",
@@ -369,7 +369,7 @@
         "is_static": false
       },
       "_transfer_between_ai": {
-        "line": 941,
+        "line": 942,
         "args": [
           "buyer_index: int",
           "seller_index: int",
@@ -380,7 +380,7 @@
         "is_static": false
       },
       "_move_player": {
-        "line": 971,
+        "line": 972,
         "args": [
           "from_team: int",
           "from_squad_index: int",
@@ -390,7 +390,7 @@
         "is_static": false
       },
       "_repair_lineup_after_removal": {
-        "line": 1003,
+        "line": 1004,
         "args": [
           "team: TeamData",
           "removed_index: int"
@@ -399,7 +399,7 @@
         "is_static": false
       },
       "_rekey_states_after_removal": {
-        "line": 1022,
+        "line": 1023,
         "args": [
           "team_index: int",
           "removed_index: int"
@@ -408,7 +408,7 @@
         "is_static": false
       },
       "_execute_transfer": {
-        "line": 1043,
+        "line": 1044,
         "args": [
           "offer: TransferOffer"
         ],
@@ -416,13 +416,13 @@
         "is_static": false
       },
       "_process_loan_expiries": {
-        "line": 1100,
+        "line": 1101,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_return_loan_player": {
-        "line": 1113,
+        "line": 1114,
         "args": [
           "current_team_index: int",
           "squad_index: int",
@@ -433,19 +433,19 @@
         "is_static": false
       },
       "_review_promises": {
-        "line": 1152,
+        "line": 1153,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_run_weekly_cycle": {
-        "line": 1197,
+        "line": 1198,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_run_weekly_morale_pass": {
-        "line": 1225,
+        "line": 1226,
         "args": [
           "club: TeamData"
         ],
@@ -453,7 +453,7 @@
         "is_static": false
       },
       "_median_wage": {
-        "line": 1256,
+        "line": 1257,
         "args": [
           "club: TeamData"
         ],
@@ -461,7 +461,7 @@
         "is_static": false
       },
       "_check_expiring_contracts": {
-        "line": 1266,
+        "line": 1267,
         "args": [
           "club: TeamData"
         ],
@@ -469,13 +469,13 @@
         "is_static": false
       },
       "simulate_next_fixture": {
-        "line": 1284,
+        "line": 1285,
         "args": [],
         "return": "FixtureData",
         "is_static": false
       },
       "_simulate_ai_fixture": {
-        "line": 1294,
+        "line": 1295,
         "args": [
           "fixture: FixtureData"
         ],
@@ -483,7 +483,7 @@
         "is_static": false
       },
       "_simulate_fixture": {
-        "line": 1298,
+        "line": 1299,
         "args": [
           "fixture: FixtureData",
           "is_user: bool"
@@ -492,7 +492,7 @@
         "is_static": false
       },
       "_apply_user_result": {
-        "line": 1397,
+        "line": 1398,
         "args": [
           "fixture: FixtureData"
         ],
@@ -500,7 +500,7 @@
         "is_static": false
       },
       "_competition_of": {
-        "line": 1453,
+        "line": 1454,
         "args": [
           "fixture: FixtureData"
         ],
@@ -508,61 +508,61 @@
         "is_static": false
       },
       "_advance_cup_rounds": {
-        "line": 1461,
+        "line": 1462,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_get_user_division_dict": {
-        "line": 1472,
+        "line": 1473,
         "args": [],
         "return": "Dictionary",
         "is_static": false
       },
       "_check_season_rollover": {
-        "line": 1487,
+        "line": 1488,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "_season_end_year": {
-        "line": 1507,
+        "line": 1508,
         "args": [],
         "return": "int",
         "is_static": false
       },
       "_run_season_end": {
-        "line": 1511,
+        "line": 1512,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_apply_promotion_relegation": {
-        "line": 1569,
+        "line": 1570,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_start_new_season": {
-        "line": 1660,
+        "line": 1661,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_run_youth_intake": {
-        "line": 1704,
+        "line": 1705,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_execute_sacking": {
-        "line": 1737,
+        "line": 1738,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_push_inbox": {
-        "line": 1762,
+        "line": 1763,
         "args": [
           "item: InboxItem"
         ],
@@ -570,13 +570,13 @@
         "is_static": false
       },
       "_emit_inbox_changed": {
-        "line": 1771,
+        "line": 1772,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "resolve_inbox_item": {
-        "line": 1781,
+        "line": 1782,
         "args": [
           "item: InboxItem",
           "option_index: int"
@@ -585,7 +585,7 @@
         "is_static": false
       },
       "_handle_structural_inbox_action": {
-        "line": 1793,
+        "line": 1794,
         "args": [
           "item: InboxItem",
           "option_index: int"
@@ -594,7 +594,7 @@
         "is_static": false
       },
       "_release_player": {
-        "line": 1815,
+        "line": 1816,
         "args": [
           "state: PlayerCareerState"
         ],
@@ -602,13 +602,13 @@
         "is_static": false
       },
       "_rehydrate_inbox": {
-        "line": 1838,
+        "line": 1839,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "toggle_shortlist": {
-        "line": 1887,
+        "line": 1909,
         "args": [
           "player_key: int"
         ],
@@ -616,7 +616,7 @@
         "is_static": false
       },
       "scout_player": {
-        "line": 1899,
+        "line": 1921,
         "args": [
           "team_index: int",
           "squad_index: int"
@@ -625,7 +625,7 @@
         "is_static": false
       },
       "submit_transfer_bid": {
-        "line": 1931,
+        "line": 1953,
         "args": [
           "team_index: int",
           "squad_index: int",
@@ -635,7 +635,7 @@
         "is_static": false
       },
       "raise_transfer_bid": {
-        "line": 1964,
+        "line": 1986,
         "args": [
           "offer: TransferOffer",
           "new_fee: int"
@@ -644,7 +644,7 @@
         "is_static": false
       },
       "offer_personal_terms": {
-        "line": 1983,
+        "line": 2005,
         "args": [
           "offer: TransferOffer",
           "wage: int = -1"
@@ -653,7 +653,7 @@
         "is_static": false
       },
       "withdraw_offer": {
-        "line": 2018,
+        "line": 2040,
         "args": [
           "offer: TransferOffer"
         ],
@@ -661,7 +661,7 @@
         "is_static": false
       },
       "file_board_request": {
-        "line": 2029,
+        "line": 2051,
         "args": [
           "kind: BoardState.RequestKind"
         ],
@@ -669,7 +669,7 @@
         "is_static": false
       },
       "_request_amount": {
-        "line": 2064,
+        "line": 2086,
         "args": [
           "kind: BoardState.RequestKind",
           "finances: ClubFinances"
@@ -678,7 +678,7 @@
         "is_static": false
       },
       "_fixture_label": {
-        "line": 2118,
+        "line": 2140,
         "args": [
           "fixture: FixtureData"
         ],
@@ -686,7 +686,7 @@
         "is_static": false
       },
       "_ordinal": {
-        "line": 2127,
+        "line": 2149,
         "args": [
           "n: int"
         ],
@@ -694,13 +694,13 @@
         "is_static": false
       },
       "_process_takeover_tick": {
-        "line": 2144,
+        "line": 2166,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "is_international_break": {
-        "line": 2198,
+        "line": 2220,
         "args": [
           "date: CareerDate"
         ],
@@ -708,19 +708,19 @@
         "is_static": false
       },
       "_process_international_duty": {
-        "line": 2214,
+        "line": 2236,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_simulate_u23_fixtures": {
-        "line": 2260,
+        "line": 2282,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "move_player_to_u23": {
-        "line": 2275,
+        "line": 2297,
         "args": [
           "player_key: int"
         ],
@@ -728,7 +728,7 @@
         "is_static": false
       },
       "move_player_to_senior": {
-        "line": 2281,
+        "line": 2303,
         "args": [
           "player_key: int"
         ],
@@ -736,7 +736,7 @@
         "is_static": false
       },
       "submit_loan_bid": {
-        "line": 2289,
+        "line": 2311,
         "args": [
           "player_key: int",
           "wage_share: float"
@@ -745,7 +745,7 @@
         "is_static": false
       },
       "sign_free_agent": {
-        "line": 2307,
+        "line": 2329,
         "args": [
           "player: PlayerData",
           "contract: ContractData"
@@ -754,7 +754,7 @@
         "is_static": false
       },
       "hire_staff_member": {
-        "line": 2344,
+        "line": 2366,
         "args": [
           "staff: StaffData",
           "weekly_salary: int",
@@ -764,7 +764,7 @@
         "is_static": false
       },
       "sack_staff_member": {
-        "line": 2351,
+        "line": 2373,
         "args": [
           "staff: StaffData"
         ],
@@ -772,7 +772,7 @@
         "is_static": false
       },
       "assign_scout_to_region": {
-        "line": 2357,
+        "line": 2379,
         "args": [
           "scout_name: String",
           "region: String"
@@ -781,7 +781,7 @@
         "is_static": false
       },
       "get_scout_region": {
-        "line": 2361,
+        "line": 2383,
         "args": [
           "scout_name: String"
         ],
@@ -789,7 +789,7 @@
         "is_static": false
       },
       "get_tactical_preset": {
-        "line": 2367,
+        "line": 2389,
         "args": [
           "slot_index: int"
         ],
@@ -6501,7 +6501,7 @@
         "is_static": true
       },
       "build_youth_intake": {
-        "line": 287,
+        "line": 397,
         "args": [
           "club_name: String",
           "summary: String",
@@ -6511,7 +6511,7 @@
         "is_static": true
       },
       "sorted_inbox": {
-        "line": 475,
+        "line": 617,
         "args": [
           "career: CareerSaveData"
         ],
@@ -6519,7 +6519,7 @@
         "is_static": true
       },
       "_category_to_event_category": {
-        "line": 491,
+        "line": 633,
         "args": [
           "c: InboxItem.Category"
         ],
@@ -6527,7 +6527,7 @@
         "is_static": true
       },
       "_ordinal": {
-        "line": 513,
+        "line": 655,
         "args": [
           "n: int"
         ],
@@ -7247,17 +7247,17 @@
         "is_const": true
       },
       "REPUTATION_GAIN_EXCELLENT": {
-        "line": 256,
+        "line": 278,
         "type": "float",
         "is_const": true
       },
       "REPUTATION_GAIN_GOOD": {
-        "line": 257,
+        "line": 279,
         "type": "float",
         "is_const": true
       },
       "REPUTATION_LOSS_POOR": {
-        "line": 258,
+        "line": 280,
         "type": "float",
         "is_const": true
       }
@@ -7300,7 +7300,7 @@
         "is_static": true
       },
       "apply_reputation_drift": {
-        "line": 261,
+        "line": 283,
         "args": [
           "data: PlayerData",
           "rating: float",
@@ -7310,7 +7310,7 @@
         "is_static": true
       },
       "daily_drift": {
-        "line": 281,
+        "line": 303,
         "args": [
           "data: PlayerData"
         ],
@@ -7318,7 +7318,7 @@
         "is_static": true
       },
       "_trust_label": {
-        "line": 287,
+        "line": 309,
         "args": [
           "t: float"
         ],
@@ -7326,7 +7326,7 @@
         "is_static": true
       },
       "morale_label": {
-        "line": 299,
+        "line": 321,
         "args": [
           "morale: float"
         ],
@@ -7334,7 +7334,7 @@
         "is_static": true
       },
       "morale_color": {
-        "line": 313,
+        "line": 335,
         "args": [
           "morale: float"
         ],
@@ -7342,7 +7342,7 @@
         "is_static": true
       },
       "describe_drivers": {
-        "line": 327,
+        "line": 349,
         "args": [
           "drivers: Array[Driver]"
         ],
@@ -8918,6 +8918,99 @@
         "args": [],
         "return": "String",
         "is_static": false
+      }
+    }
+  },
+  "WorldEventGenerator": {
+    "path": "shared/career/WorldEventGenerator.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "BASE_DAILY_EVENT_CHANCE": {
+        "line": 16,
+        "type": "float",
+        "is_const": true
+      },
+      "TRAIT_HOT_HEADED_TACKLER": {
+        "line": 19,
+        "type": "int",
+        "is_const": true
+      },
+      "TRAIT_LOCKER_ROOM_CANCER": {
+        "line": 20,
+        "type": "int",
+        "is_const": true
+      },
+      "TRAIT_CAPTAIN_MATERIAL": {
+        "line": 21,
+        "type": "int",
+        "is_const": true
+      },
+      "TRAIT_STREET_BALLER": {
+        "line": 22,
+        "type": "int",
+        "is_const": true
+      },
+      "TRAIT_PRIDE_GLORY": {
+        "line": 23,
+        "type": "int",
+        "is_const": true
+      },
+      "TRAIT_VETERAN_LEADER": {
+        "line": 24,
+        "type": "int",
+        "is_const": true
+      },
+      "TRAIT_DEAD_BALL_SPECIALIST": {
+        "line": 25,
+        "type": "int",
+        "is_const": true
+      },
+      "TRAIT_NIGHT_OWL": {
+        "line": 26,
+        "type": "int",
+        "is_const": true
+      }
+    },
+    "methods": {
+      "roll_for_day": {
+        "line": 29,
+        "args": [
+          "career: CareerSaveData",
+          "rng: RandomNumberGenerator"
+        ],
+        "return": "void",
+        "is_static": true
+      },
+      "_trait_weight": {
+        "line": 53,
+        "args": [
+          "data: PlayerData",
+          "state: PlayerCareerState"
+        ],
+        "return": "float",
+        "is_static": true
+      },
+      "_pick_teammate": {
+        "line": 194,
+        "args": [
+          "team: TeamData",
+          "exclude_idx: int",
+          "rng: RandomNumberGenerator"
+        ],
+        "return": "int",
+        "is_static": true
+      },
+      "_has_pending_item_with_tag": {
+        "line": 206,
+        "args": [
+          "career: CareerSaveData",
+          "player_key: int",
+          "tag: String"
+        ],
+        "return": "bool",
+        "is_static": true
       }
     }
   },

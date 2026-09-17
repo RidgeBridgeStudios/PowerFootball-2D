@@ -1,8 +1,8 @@
 {
-  "total_nodes": 73,
+  "total_nodes": 74,
   "layer_summary": {
     "Layer 1 - Physics & Kinematics": 1,
-    "Layer 2 - Match AI & Spatial Navigation": 32,
+    "Layer 2 - Match AI & Spatial Navigation": 33,
     "Layer 3 - Match Social & Dynamic Psychology": 2,
     "Layer 4 - Club World & Persistent Entities": 9,
     "Layer 5 - Narrative, Presentation & UI": 29
@@ -48,6 +48,7 @@
         "shared/career/TransferMarket.gd",
         "shared/career/TransferOffer.gd",
         "shared/career/WorldEvent.gd",
+        "shared/career/WorldEventGenerator.gd",
         "shared/career/YouthAcademy.gd"
       ],
       "direct_dependents": [],
@@ -87,6 +88,7 @@
         "shared/TeamData.gd",
         "shared/career/CareerSaveData.gd",
         "shared/career/CareerSerializer.gd",
+        "shared/career/WorldEventGenerator.gd",
         "tests/run_all.gd",
         "ui/MainMenu.gd",
         "ui/MatchStatsUI.gd",
@@ -120,6 +122,7 @@
         "autoloads/GameManager.gd",
         "autoloads/MatchStatsTracker.gd",
         "autoloads/WorldEventLog.gd",
+        "shared/career/WorldEventGenerator.gd",
         "ui/manager_mode/ManagerModeRoot.gd",
         "ui/manager_mode/TacticsPanel.gd"
       ],
@@ -438,6 +441,7 @@
         "shared/career/TrainingSchedule.gd",
         "shared/career/TransferMarket.gd",
         "shared/career/WorldEvent.gd",
+        "shared/career/WorldEventGenerator.gd",
         "shared/career/YouthAcademy.gd",
         "ui/MatchStatsUI.gd",
         "ui/manager_mode/ContractNegotiationModal.gd",
@@ -602,6 +606,7 @@
         "shared/career/MoraleEngine.gd",
         "shared/career/ScoutingNetwork.gd",
         "shared/career/TransferMarket.gd",
+        "shared/career/WorldEventGenerator.gd",
         "shared/career/YouthAcademy.gd",
         "tests/run_all.gd",
         "ui/MainMenu.gd",
@@ -750,6 +755,7 @@
         "shared/career/MoraleEngine.gd",
         "shared/career/PlayerCareerState.gd",
         "shared/career/ScoutingNetwork.gd",
+        "shared/career/WorldEventGenerator.gd",
         "tests/run_all.gd",
         "ui/manager_mode/BoardPanel.gd",
         "ui/manager_mode/CalendarPanel.gd",
@@ -802,6 +808,7 @@
         "autoloads/DataLoader.gd",
         "shared/career/CareerSaveData.gd",
         "shared/career/InboxItem.gd",
+        "tests/run_all.gd",
         "ui/manager_mode/ManagerCreationScreen.gd"
       ],
       "signals_declared": [],
@@ -966,6 +973,7 @@
       "direct_dependents": [
         "autoloads/CareerManager.gd",
         "shared/career/InboxItem.gd",
+        "shared/career/WorldEventGenerator.gd",
         "ui/manager_mode/InboxPanel.gd"
       ],
       "signals_declared": [],
@@ -989,6 +997,7 @@
         "shared/career/CareerSerializer.gd",
         "shared/career/InboxEngine.gd",
         "shared/career/WorldEvent.gd",
+        "shared/career/WorldEventGenerator.gd",
         "ui/manager_mode/InboxPanel.gd"
       ],
       "signals_declared": [],
@@ -1090,6 +1099,7 @@
         "shared/career/PlayerDevelopmentEngine.gd",
         "shared/career/ScoutingNetwork.gd",
         "shared/career/TransferMarket.gd",
+        "shared/career/WorldEventGenerator.gd",
         "shared/career/YouthAcademy.gd",
         "ui/manager_mode/ContractNegotiationModal.gd",
         "ui/manager_mode/FinancesPanel.gd",
@@ -1285,11 +1295,37 @@
         "shared/career/CareerSerializer.gd",
         "shared/career/InboxEngine.gd",
         "shared/career/InboxItem.gd",
+        "shared/career/WorldEventGenerator.gd",
         "ui/manager_mode/OverviewPanel.gd",
         "ui/manager_mode/SquadPanel.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
+      "signals_connected": []
+    },
+    "shared/career/WorldEventGenerator.gd": {
+      "class_name": "WorldEventGenerator",
+      "layer": 2,
+      "layer_name": "Layer 2 - Match AI & Spatial Navigation",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "autoloads/GameEvents.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd",
+        "shared/career/CareerSaveData.gd",
+        "shared/career/InboxEngine.gd",
+        "shared/career/InboxItem.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/WorldEvent.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [
+        "career_inbox_changed"
+      ],
       "signals_connected": []
     },
     "shared/career/YouthAcademy.gd": {
@@ -1329,6 +1365,7 @@
         "shared/TeamData.gd",
         "shared/career/CareerDate.gd",
         "shared/career/CareerSaveData.gd",
+        "shared/career/CareerSerializer.gd",
         "shared/career/CompetitionData.gd",
         "shared/career/FixtureData.gd",
         "shared/career/ManagerCareerProfile.gd"

@@ -37,11 +37,11 @@ Make players feel like individuals with relationships and hidden depth.
 Bridge between match events and player life between matches.
 
 - [x] WorldEvent struct and WorldEventLog autoload
-- [ ] Substitution reaction events
-- [ ] Training incidents and dressing-room confrontations
-- [ ] Street football / nightlife / media events
+- [x] Substitution reaction events
+- [x] Training incidents and dressing-room confrontations
+- [x] Street football / nightlife / media events
 - [x] PressOffice consumption of WorldEvent log (`WorldEventLog.generate_press_reaction()`)
-- [ ] Manager response system
+- [x] Manager response system
 
 ## PHASE 4 — Career Mode
 

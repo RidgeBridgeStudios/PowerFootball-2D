@@ -246,6 +246,28 @@ static func apply_result_reaction(data: PlayerData, played: bool, goal_diff: int
 	data.morale = clampf(data.morale + delta, 0.0, 1.0)
 
 
+static func apply_substitution_reaction(
+	data: PlayerData,
+	minute: int,
+	goal_diff: int,
+	rating: float
+) -> void:
+	if data == null:
+		return
+	var delta: float = -0.03
+	# Subbed off early (before 60') while game is close stings more
+	if minute < 60 and absi(goal_diff) <= 1:
+		delta -= 0.04
+	# Bad personal performance explains the sub
+	if rating < 6.0:
+		delta += 0.015
+	# PrideGlory (256): substitution hit is doubled
+	if data.has_trait(256):
+		delta *= 2.0
+
+	data.morale = clampf(data.morale + delta, 0.0, 1.0)
+
+
 ## --- Reputation ------------------------------------------------------------------
 
 ## A standout or poor match rating nudges player_reputation, so fame is

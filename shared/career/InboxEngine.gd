@@ -284,6 +284,116 @@ static func build_nightlife_incident(
 	return item
 
 
+static func build_training_incident_item(
+	data: PlayerData,
+	state: PlayerCareerState,
+	teammate: PlayerData,
+	today: CareerDate
+) -> InboxItem:
+	var teammate_name: String = teammate.player_name if teammate != null else "a teammate"
+	var body: String = "%s was involved in a heated training-ground clash with %s after a dangerous tackle.\n\nThe coaching staff intervened before blows were exchanged, but tension remains high." % [
+		data.player_name, teammate_name
+	]
+	var item: InboxItem = InboxItem.make(
+		"Training incident: %s & %s" % [data.player_name, teammate_name],
+		body, InboxItem.Category.TRAINING, today
+	)
+	item.with_subject_player(state.player_key, data.player_name)
+	item.priority = 0.65
+	item.payload = {
+		"kind": "training_incident",
+		"teammate_name": teammate_name
+	}
+	item.add_option(
+		"Demand formal apologies and issue warnings",
+		"Sets firm boundaries. Both players will be disciplined.",
+		&"training_discipline_both", 0.02, -0.05, 0.01, 0.01
+	)
+	item.add_option(
+		"Send the instigator to train with reserves for 3 days",
+		"Protects squad harmony immediately at the cost of the player's morale.",
+		&"training_banish_instigator", 0.03, -0.15, 0.02, 0.0
+	)
+	item.add_option(
+		"Let the players settle it man-to-man",
+		"Avoids heavy-handed managerial intervention.",
+		&"training_let_settle", -0.02, 0.03, -0.01, -0.01
+	)
+	item.with_deadline(today.advanced_by(2), 0)
+	return item
+
+
+static func build_dressing_room_confrontation_item(
+	data: PlayerData,
+	state: PlayerCareerState,
+	teammate: PlayerData,
+	today: CareerDate
+) -> InboxItem:
+	var teammate_name: String = teammate.player_name if teammate != null else "the squad"
+	var body: String = "%s confronted %s in the dressing room after training, questioning leadership and playing time distribution.\n\nSeveral senior squad members looked on intently." % [
+		data.player_name, teammate_name
+	]
+	var item: InboxItem = InboxItem.make(
+		"Dressing room row: %s" % data.player_name,
+		body, InboxItem.Category.PLAYER, today
+	)
+	item.with_subject_player(state.player_key, data.player_name)
+	item.priority = 0.7
+	item.payload = {
+		"kind": "confrontation",
+		"teammate_name": teammate_name
+	}
+	item.add_option(
+		"Hold an open team meeting to clear the air",
+		"Risky but can build long-term collective trust if handled well.",
+		&"confrontation_team_meeting", 0.04, -0.02, 0.02, 0.01
+	)
+	item.add_option(
+		"Back the squad leadership firmly",
+		"Reaffirms club hierarchy, marginalizing the disruptive player.",
+		&"confrontation_back_hierarchy", 0.02, -0.12, 0.01, 0.0
+	)
+	item.add_option(
+		"Call the player into your office privately",
+		"Address grievances one-on-one away from the group.",
+		&"confrontation_private_talk", 0.01, 0.05, 0.0, 0.01
+	)
+	item.with_deadline(today.advanced_by(2), 0)
+	return item
+
+
+static func build_media_controversy_item(
+	data: PlayerData,
+	state: PlayerCareerState,
+	today: CareerDate
+) -> InboxItem:
+	var body: String = "%s made controversial remarks to journalists regarding recent tactical selections and dressing room morale.\n\nThe comments have gained heavy traction across sports press." % data.player_name
+	var item: InboxItem = InboxItem.make(
+		"Media controversy: %s" % data.player_name,
+		body, InboxItem.Category.MEDIA, today
+	)
+	item.with_subject_player(state.player_key, data.player_name)
+	item.priority = 0.65
+	item.payload = {"kind": "media_controversy"}
+	item.add_option(
+		"Publicly reprimand the player and issue a fine",
+		"Strong show of authority. The media and board will approve; the player will not.",
+		&"media_public_reprimand", 0.01, -0.15, 0.03, 0.02
+	)
+	item.add_option(
+		"Defend the player in the next press briefing",
+		"Protects the player from outside heat, earning their loyalty.",
+		&"media_defend_player", 0.01, 0.10, -0.01, -0.02
+	)
+	item.add_option(
+		"Refuse to comment and handle it internally",
+		"Declines to fuel the press cycle.",
+		&"media_no_comment", 0.0, 0.0, 0.0, -0.01
+	)
+	item.with_deadline(today.advanced_by(2), 0)
+	return item
+
+
 static func build_youth_intake(club_name: String, summary: String, today: CareerDate) -> InboxItem:
 	var item: InboxItem = InboxItem.make(
 		"Youth intake: %s" % club_name, summary, InboxItem.Category.YOUTH, today
@@ -444,6 +554,38 @@ static func _apply_action_tag(
 				if st != null and st.team_index == career.user_team_index:
 					st.manager_trust = clampf(st.manager_trust + 0.02, 0.0, 1.0)
 					st.relationship_with(-1, ordinal)
+		&"training_discipline_both":
+			if subject_state != null:
+				subject_state.manager_trust = clampf(subject_state.manager_trust - 0.05, 0.0, 1.0)
+		&"training_banish_instigator":
+			if subject_state != null and subject_data != null:
+				subject_data.morale = clampf(subject_data.morale - 0.15, 0.0, 1.0)
+				subject_state.manager_trust = clampf(subject_state.manager_trust - 0.10, 0.0, 1.0)
+		&"training_let_settle":
+			if subject_state != null and subject_data != null:
+				subject_data.morale = clampf(subject_data.morale + 0.03, 0.0, 1.0)
+		&"confrontation_team_meeting":
+			for meeting_key: int in career.player_states:
+				var meeting_st: PlayerCareerState = career.player_states[meeting_key] as PlayerCareerState
+				if meeting_st != null and meeting_st.team_index == career.user_team_index:
+					meeting_st.manager_trust = clampf(meeting_st.manager_trust + 0.03, 0.0, 1.0)
+		&"confrontation_back_hierarchy":
+			if subject_state != null:
+				subject_state.manager_trust = clampf(subject_state.manager_trust - 0.15, 0.0, 1.0)
+		&"confrontation_private_talk":
+			if subject_state != null and subject_data != null:
+				subject_data.morale = clampf(subject_data.morale + 0.05, 0.0, 1.0)
+				subject_state.manager_trust = clampf(subject_state.manager_trust + 0.08, 0.0, 1.0)
+		&"media_public_reprimand":
+			if subject_state != null and subject_data != null:
+				subject_data.morale = clampf(subject_data.morale - 0.15, 0.0, 1.0)
+				subject_state.manager_trust = clampf(subject_state.manager_trust - 0.10, 0.0, 1.0)
+		&"media_defend_player":
+			if subject_state != null and subject_data != null:
+				subject_data.morale = clampf(subject_data.morale + 0.10, 0.0, 1.0)
+				subject_state.manager_trust = clampf(subject_state.manager_trust + 0.12, 0.0, 1.0)
+		&"media_no_comment":
+			pass
 		_:
 			pass
 
