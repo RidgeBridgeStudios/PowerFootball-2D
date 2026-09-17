@@ -76,7 +76,23 @@ Every code modification in this repository falls into one of three distinct impa
 <ponytail_gating>
 ## 3.5. Reuse & Complexity Gating (Ponytail)
 
-Before writing new code or standing up new infrastructure (a new MCP server, a new autoload, a new data store), climb the reuse ladder in [.claude/rules/ponytail.md](.claude/rules/ponytail.md) (mirrored at `.agents/rules/ponytail.md`) — applies to every agent listed at the top of this document, including DeepSeek harnesses. In short: YAGNI-gate against `ROADMAP.md`, reuse `CareerManager`/`GameEvents`/`QuickSimEngine`/`AGENTS_ERRATA.md` before inventing parallel systems, and never add a tool/package/MCP-server reference to a config file without first confirming it is actually installed in this repo.
+Enforce the minimal working diff. Climb the Decision Ladder in order:
+1. **YAGNI** — Reject speculative code/infrastructure. Require active `ROADMAP.md` task or explicit user request. Verify packages/tools exist before adding configs.
+2. **Codebase Reuse** — Reuse `CareerManager`, `QuickSimEngine`, `GameEvents`, and `AGENTS_ERRATA.md`. Never invent parallel managers or stores.
+3. **Stdlib/Engine** — Use native GDScript 2.0 / Godot 4.7 built-ins (`distance_squared_to()`, `JSON`, `Callable`).
+4. **Native Node Architecture** — Use existing scene tree and autoloads; no new wrapper layers.
+5. **One-Line Density** — Compact, typed code over boilerplate.
+6. **Shortest Working Diff** — Bounded edits to targeted functions; no full-file rewrites.
+
+**Intensity Levels:**
+- `lite`: Allow sensible scaffolding/helpers.
+- `full` (default): Minimal lines, stdlib first, reject unnecessary abstractions.
+- `ultra`: Absolute minimum diff, inline logic, zero new functions unless required.
+Invoke via chat: `/ponytail lite|full|ultra` or prompt phrasing ("be lazy", "minimal diff").
+
+**When to Break:** Break ponytail rules ONLY for correctness, engine/type safety, explicit user request, or failing tests.
+
+Full ruleset: `.agents/rules/ponytail.md` (mirrored at `.claude/rules/ponytail.md`). Consult it when a decision spans multiple systems or the ladder is unclear.
 </ponytail_gating>
 
 <football_domain_intelligence>
@@ -119,6 +135,22 @@ To prevent documentation decay without generating unnecessary token churn, agent
 - **Root Class Syntax:** If a root class used as a type annotation (e.g., `QuickSimEngine`, `CareerManager`) produces cascade errors, inspect the root file's syntax first.
 - **Fast Distance Calculations:** In candidate ranking or sorting loops, always use `distance_squared_to()` to avoid costly square root instructions.
 </strict_type_discipline>
+
+<communication_style>
+## Communication Style (Caveman)
+
+Default to compressed output. Rules:
+- No "I'll now...", "Let me...", "I've successfully..." preambles.
+- Report actions as `verb noun`: `read file.gd`, `ran make ci`, `edit L42`.
+- Findings as bullets: `L42: missing null check`, not prose.
+- Confirm completion in ≤5 words unless asked to explain.
+- Switch to full prose only when: explaining a design decision, writing docs, or I ask "why".
+- Caveman never compresses: code, commands, file paths, error messages, or
+  stack traces. Only the prose around them.
+
+To invoke a stronger level, send `/caveman lite|full|ultra`.
+To disable, send `/caveman off`.
+</communication_style>
 
 <autonomous_discipline>
 ## 6. Autonomous Agent Verification Discipline

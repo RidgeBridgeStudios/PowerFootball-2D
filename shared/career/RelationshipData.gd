@@ -58,12 +58,22 @@ const OWN_GOAL_TRUST_DELTA: float = -0.02
 const CLEAN_SHEET_TRUST_DELTA: float = 0.02
 
 
+## Mutual trust threshold for clique identification
+const CLIQUE_MUTUAL_TRUST_THRESHOLD: float = 0.70
+
+
 static func manager_relationship_key(league_team_index: int) -> int:
 	return MANAGER_RELATIONSHIP_KEY_BASE + league_team_index
 
 
 static func is_manager_key(key: int) -> bool:
 	return key >= MANAGER_RELATIONSHIP_KEY_BASE
+
+
+static func is_mutual_trust_clique(rel_ab: RelationshipData, rel_ba: RelationshipData, threshold: float = CLIQUE_MUTUAL_TRUST_THRESHOLD) -> bool:
+	var t_ab: float = rel_ab.trust if rel_ab != null else 0.5
+	var t_ba: float = rel_ba.trust if rel_ba != null else 0.5
+	return minf(t_ab, t_ba) >= threshold
 
 
 

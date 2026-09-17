@@ -181,6 +181,22 @@ static func get_primary_language_for_nation(nationality: String) -> String:
 	return PRIMARY_LANGUAGES.get(key, "English")
 
 
+## Returns true if both nationalities are non-empty and map to the same normalized flag key.
+static func share_nationality(nat_a: String, nat_b: String) -> bool:
+	if nat_a == "" or nat_b == "":
+		return false
+	var k_a: String = get_flag_key(nat_a)
+	var k_b: String = get_flag_key(nat_b)
+	return k_a == k_b and k_a != "default"
+
+
+## Returns true if both nationalities map to the same primary language.
+static func share_language(nat_a: String, nat_b: String) -> bool:
+	if nat_a == "" or nat_b == "":
+		return false
+	return get_primary_language_for_nation(nat_a) == get_primary_language_for_nation(nat_b)
+
+
 ## Creates a standalone flag TextureRect widget.
 static func create_flag_rect(identifier: String, size: Vector2 = Vector2(24, 16)) -> TextureRect:
 	var tr := TextureRect.new()

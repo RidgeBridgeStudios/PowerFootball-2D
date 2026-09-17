@@ -65,6 +65,15 @@ const W_DRESSING_ROOM: float = 0.08
 ## single bad week never flips a happy player into revolt.
 const MORALE_LERP_RATE: float = 0.22
 
+## Clique detection & social sub-graph dynamics constants (docs/Social Dynamics Simulation Engine Implementation.md)
+const CLIQUE_TRUST_THRESHOLD: float = 0.70
+const NATIONALITY_AFFINITY_BONUS: float = 0.10
+const LANGUAGE_AFFINITY_BONUS: float = 0.05
+const SHARED_RESENTMENT_BONUS: float = 0.10
+const RESENTMENT_TRUST_CEILING: float = 0.40
+const PEER_DIFFUSION_DAMPING: float = 0.35
+const MAX_DIFFUSION_STEP: float = 0.08
+
 
 ## --- Morale-to-mood seeding -----------------------------------------------------
 
@@ -391,3 +400,326 @@ static func describe_drivers(drivers: Array[Driver]) -> String:
 	if worst == null or worst.contribution() >= -0.02:
 		return "No concerns"
 	return "%s — %s" % [worst.label, worst.detail]
+
+
+## --- Squad Clique & Faction Dynamics -------------------------------------------
+
+## Computes pairwise social affinity between two players in a squad based on mutual trust,
+## shared nationality/language (NationDatabase), shared manager resentment, and rivalry friction.
+static func calculate_social_affinity(
+	p_i: PlayerData,
+	state_i: PlayerCareerState,
+	p_j: PlayerData,
+	state_j: PlayerCareerState,
+	key_i: int,
+	key_j: int
+) -> float:
+	var t_ij: float = 0.5
+	var r_ij: float = 0.0
+	if state_i != null and state_i.relationships.has(key_j):
+		var rel_ij: RelationshipData = state_i.relationships[key_j] as RelationshipData
+		if rel_ij != null:
+			t_ij = rel_ij.trust
+			r_ij = rel_ij.rivalry_score
+
+	var t_ji: float = 0.5
+	var r_ji: float = 0.0
+	if state_j != null and state_j.relationships.has(key_i):
+		var rel_ji: RelationshipData = state_j.relationships[key_i] as RelationshipData
+		if rel_ji != null:
+			t_ji = rel_ji.trust
+			r_ji = rel_ji.rivalry_score
+
+	var base_trust: float = minf(t_ij, t_ji)
+	var max_rivalry: float = maxf(r_ij, r_ji)
+
+	# Shared nationality or language bonus from NationDatabase
+	var cultural_bonus: float = 0.0
+	if p_i != null and p_j != null:
+		if NationDatabase.share_nationality(p_i.nationality, p_j.nationality):
+			cultural_bonus = NATIONALITY_AFFINITY_BONUS
+		elif NationDatabase.share_language(p_i.nationality, p_j.nationality):
+			cultural_bonus = LANGUAGE_AFFINITY_BONUS
+
+	# Shared manager resentment: disaffected players bonding over low manager trust
+	var resentment_bonus: float = 0.0
+	if state_i != null and state_j != null:
+		if state_i.manager_trust < RESENTMENT_TRUST_CEILING and state_j.manager_trust < RESENTMENT_TRUST_CEILING:
+			var res_i: float = 1.0 - state_i.manager_trust
+			var res_j: float = 1.0 - state_j.manager_trust
+			resentment_bonus = SHARED_RESENTMENT_BONUS * minf(res_i, res_j)
+
+	var rivalry_penalty: float = max_rivalry * 0.5
+	return clampf(base_trust + cultural_bonus + resentment_bonus - rivalry_penalty, 0.0, 1.0)
+
+
+## Detects maximal cohesive cliques (size >= 3) within the squad's social graph
+## using 64-bit bitmask Bron-Kerbosch with pivoting. Zero heap allocations during recursion.
+static func detect_squad_cliques(
+	team: TeamData,
+	career: CareerSaveData,
+	team_index: int = -1,
+	threshold: float = CLIQUE_TRUST_THRESHOLD
+) -> Array[PackedInt32Array]:
+	var results: Array[PackedInt32Array] = []
+	if team == null or team.squad.is_empty():
+		return results
+
+	var n: int = mini(team.squad.size(), 62)
+	if n < 3:
+		return results
+
+	var t_idx: int = team_index
+	if t_idx < 0:
+		t_idx = career.user_team_index if career != null else 0
+
+	var keys: PackedInt32Array = PackedInt32Array()
+	keys.resize(n)
+	var states: Array[PlayerCareerState] = []
+	states.resize(n)
+
+	for i in range(n):
+		keys[i] = t_idx * 1000 + i
+		states[i] = career.state_for_squad(t_idx, i) if career != null else null
+
+	var adj: PackedInt64Array = PackedInt64Array()
+	adj.resize(n)
+	for i in range(n):
+		adj[i] = 0
+
+	for i in range(n):
+		var p_i: PlayerData = team.squad[i]
+		var st_i: PlayerCareerState = states[i]
+		var key_i: int = keys[i]
+		for j in range(i + 1, n):
+			var p_j: PlayerData = team.squad[j]
+			var st_j: PlayerCareerState = states[j]
+			var key_j: int = keys[j]
+			var affinity: float = calculate_social_affinity(p_i, st_i, p_j, st_j, key_i, key_j)
+			if affinity >= threshold:
+				adj[i] = adj[i] | (1 << j)
+				adj[j] = adj[j] | (1 << i)
+
+	var clique_masks: PackedInt64Array = PackedInt64Array()
+	var all_candidates: int = (1 << n) - 1
+	_bron_kerbosch_pivot(0, all_candidates, 0, adj, clique_masks)
+
+	for idx in range(clique_masks.size()):
+		var mask: int = clique_masks[idx]
+		var clique_keys: PackedInt32Array = PackedInt32Array()
+		for bit in range(n):
+			if (mask & (1 << bit)) != 0:
+				clique_keys.append(keys[bit])
+		results.append(clique_keys)
+
+	return results
+
+
+static func _bron_kerbosch_pivot(
+	r_mask: int,
+	p_mask: int,
+	x_mask: int,
+	adj: PackedInt64Array,
+	cliques: PackedInt64Array
+) -> void:
+	if p_mask == 0 and x_mask == 0:
+		if _popcount(r_mask) >= 3:
+			cliques.append(r_mask)
+		return
+
+	var p_or_x: int = p_mask | x_mask
+	var max_cnt: int = -1
+	var pivot_u: int = -1
+	var temp: int = p_or_x
+	while temp > 0:
+		var u: int = _lowest_set_bit_index(temp)
+		var bit_u: int = 1 << u
+		var neighbors_in_p: int = _popcount(p_mask & adj[u])
+		if neighbors_in_p > max_cnt:
+			max_cnt = neighbors_in_p
+			pivot_u = u
+		temp &= ~bit_u
+
+	var candidates: int = p_mask & (~adj[pivot_u] if pivot_u >= 0 else -1)
+	while candidates > 0:
+		var v: int = _lowest_set_bit_index(candidates)
+		var bit_v: int = 1 << v
+		_bron_kerbosch_pivot(
+			r_mask | bit_v,
+			p_mask & adj[v],
+			x_mask & adj[v],
+			adj,
+			cliques
+		)
+		p_mask &= ~bit_v
+		x_mask |= bit_v
+		candidates &= ~bit_v
+
+
+static func _popcount(mask: int) -> int:
+	var count: int = 0
+	var m: int = mask
+	while m > 0:
+		m &= m - 1
+		count += 1
+	return count
+
+
+static func _lowest_set_bit_index(mask: int) -> int:
+	if mask <= 0:
+		return -1
+	var lsb: int = mask & -mask
+	var idx: int = 0
+	if (lsb >> 32) != 0:
+		lsb >>= 32
+		idx += 32
+	if (lsb & 0xFFFF0000) != 0:
+		lsb >>= 16
+		idx += 16
+	if (lsb & 0x0000FF00) != 0:
+		lsb >>= 8
+		idx += 8
+	if (lsb & 0x000000F0) != 0:
+		lsb >>= 4
+		idx += 4
+	if (lsb & 0x0000000C) != 0:
+		lsb >>= 2
+		idx += 2
+	if (lsb & 0x00000002) != 0:
+		idx += 1
+	return idx
+
+
+## Determines the faction leader of a clique based on leadership traits,
+## reputation, age, and form standing.
+static func get_clique_leader(
+	team: TeamData,
+	career: CareerSaveData,
+	clique_player_keys: PackedInt32Array
+) -> int:
+	if clique_player_keys.is_empty():
+		return -1
+
+	var best_key: int = clique_player_keys[0]
+	var best_score: float = -999.0
+
+	for k in range(clique_player_keys.size()):
+		var p_key: int = clique_player_keys[k]
+		var squad_idx: int = p_key % 1000
+		if squad_idx < 0 or squad_idx >= team.squad.size():
+			continue
+		var p: PlayerData = team.squad[squad_idx]
+		if p == null:
+			continue
+
+		var score: float = p.player_reputation * 0.50
+		# Trait weights: CaptainMaterial (64), VeteranLeader (512), Talisman (16), Vocal (256)
+		if p.has_trait(64):
+			score += 0.35
+		if p.has_trait(512):
+			score += 0.25
+		if p.has_trait(16):
+			score += 0.15
+		if p.has_trait(256):
+			score += 0.10
+		if p.get_age() >= 28:
+			score += 0.10
+		score += (p.form - 6.0) * 0.05
+
+		if score > best_score:
+			best_score = score
+			best_key = p_key
+
+	return best_key
+
+
+## Propagates faction leader morale swings to clique members via peer diffusion with numerical damping.
+## Strictly non-expansive, bounded within [0.0, 1.0], preventing runaway feedback loops.
+static func propagate_clique_morale(
+	team: TeamData,
+	career: CareerSaveData,
+	team_index: int = -1,
+	damping: float = PEER_DIFFUSION_DAMPING
+) -> void:
+	if team == null or team.squad.is_empty():
+		return
+
+	var t_idx: int = team_index
+	if t_idx < 0:
+		t_idx = career.user_team_index if career != null else 0
+
+	var cliques: Array[PackedInt32Array] = detect_squad_cliques(team, career, t_idx)
+	if cliques.is_empty():
+		return
+
+	var squad_size: int = team.squad.size()
+
+	for clique: PackedInt32Array in cliques:
+		if clique.size() < 2:
+			continue
+
+		var leader_key: int = get_clique_leader(team, career, clique)
+		var leader_idx: int = leader_key % 1000
+		if leader_idx < 0 or leader_idx >= squad_size:
+			continue
+		var leader_p: PlayerData = team.squad[leader_idx]
+		if leader_p == null:
+			continue
+		var leader_state: PlayerCareerState = career.state_for_squad(t_idx, leader_idx) if career != null else null
+		var leader_morale: float = leader_p.morale
+
+		var member_deltas: PackedFloat32Array = PackedFloat32Array()
+		member_deltas.resize(clique.size())
+		var sum_peer_morale: float = 0.0
+		var peer_count: int = 0
+
+		for c_idx in range(clique.size()):
+			var eval_key: int = clique[c_idx]
+			if eval_key == leader_key:
+				member_deltas[c_idx] = 0.0
+				continue
+			var eval_sq_idx: int = eval_key % 1000
+			if eval_sq_idx < 0 or eval_sq_idx >= squad_size:
+				member_deltas[c_idx] = 0.0
+				continue
+			var eval_p: PlayerData = team.squad[eval_sq_idx]
+			if eval_p == null:
+				member_deltas[c_idx] = 0.0
+				continue
+
+			var st: PlayerCareerState = career.state_for_squad(t_idx, eval_sq_idx) if career != null else null
+			var affinity: float = calculate_social_affinity(eval_p, st, leader_p, leader_state, eval_key, leader_key)
+			var raw_gap: float = leader_morale - eval_p.morale
+
+			var susceptibility: float = 1.0
+			# Traits altering susceptibility: PressureImmune (4), LoneWolf (1024), Volatile (2048)
+			if eval_p.has_trait(4) or eval_p.has_trait(1024):
+				susceptibility *= 0.50
+			elif eval_p.has_trait(2048):
+				susceptibility *= 1.25
+
+			var step: float = clampf(damping * affinity * raw_gap * susceptibility, -MAX_DIFFUSION_STEP, MAX_DIFFUSION_STEP)
+			member_deltas[c_idx] = step
+			sum_peer_morale += eval_p.morale
+			peer_count += 1
+
+		# Apply member updates
+		for c_idx in range(clique.size()):
+			var apply_key: int = clique[c_idx]
+			if apply_key == leader_key:
+				continue
+			var apply_sq_idx: int = apply_key % 1000
+			if apply_sq_idx >= 0 and apply_sq_idx < squad_size:
+				var apply_p: PlayerData = team.squad[apply_sq_idx]
+				if apply_p != null:
+					apply_p.morale = clampf(apply_p.morale + member_deltas[c_idx], 0.0, 1.0)
+
+		# Leader experiences heavily damped reciprocal feedback from clique consensus
+		if peer_count > 0:
+			var avg_peer_morale: float = sum_peer_morale / float(peer_count)
+			var leader_feedback_step: float = clampf(
+				0.10 * damping * (avg_peer_morale - leader_p.morale),
+				-MAX_DIFFUSION_STEP * 0.5,
+				MAX_DIFFUSION_STEP * 0.5
+			)
+			leader_p.morale = clampf(leader_p.morale + leader_feedback_step, 0.0, 1.0)

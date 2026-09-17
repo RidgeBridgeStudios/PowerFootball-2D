@@ -25,6 +25,8 @@ func _ready() -> void:
 	_test_relationship_batching()
 	_test_player_manager_relationships_and_sounding_board()
 	_test_mutiny_and_crisis_escalation()
+	_test_squad_cliques_and_faction_dynamics()
+	_test_incident_press_conference_pipeline()
 
 	print("------------------------------------------------------------------")
 
@@ -511,6 +513,282 @@ func _test_mutiny_and_crisis_escalation() -> void:
 	_assert_true(bool(serialized.get("board_intervention_active", false)) == true, "Mutiny: board_intervention_active serialized")
 	var deserialized: BoardState = CareerSerializer._board_from_dict(serialized)
 	_assert_true(deserialized.board_intervention_active, "Mutiny: board_intervention_active deserialized")
+
+
+func _test_squad_cliques_and_faction_dynamics() -> void:
+	# 1. Mutual trust clique edge testing
+	var r_ab := RelationshipData.new()
+	var r_ba := RelationshipData.new()
+	r_ab.trust = 0.80
+	r_ba.trust = 0.75
+	_assert_true(RelationshipData.is_mutual_trust_clique(r_ab, r_ba), "Clique: mutual trust >= 0.70 passes clique threshold")
+	r_ba.trust = 0.50
+	_assert_true(not RelationshipData.is_mutual_trust_clique(r_ab, r_ba), "Clique: one-way trust fails mutual clique threshold")
+
+	# 2. NationDatabase nationality and language sharing
+	_assert_true(NationDatabase.share_nationality("Norwegian", "Norway"), "Clique: shared nationality recognized")
+	_assert_true(not NationDatabase.share_nationality("Norwegian", "Sweden"), "Clique: different nationality recognized")
+	_assert_true(NationDatabase.share_language("England", "USA"), "Clique: shared language English recognized across nations")
+	_assert_true(NationDatabase.share_language("Spain", "Argentina"), "Clique: shared language Spanish recognized across nations")
+	_assert_true(not NationDatabase.share_language("England", "France"), "Clique: distinct languages recognized")
+
+	# 3. Pairwise social affinity calculation
+	var p0 := PlayerData.new()
+	p0.nationality = "Spain"
+	p0.player_reputation = 0.85
+	p0.traits = 64 # CaptainMaterial
+	p0.morale = 0.70
+
+	var p1 := PlayerData.new()
+	p1.nationality = "Spain"
+	p1.player_reputation = 0.60
+	p1.morale = 0.70
+
+	var st0 := PlayerCareerState.new()
+	st0.player_key = 0
+	st0.squad_index = 0
+	st0.team_index = 0
+	st0.manager_trust = 0.20
+
+	var st1 := PlayerCareerState.new()
+	st1.player_key = 1
+	st1.squad_index = 1
+	st1.team_index = 0
+	st1.manager_trust = 0.15
+
+	var rel01 := RelationshipData.new()
+	rel01.trust = 0.65
+	var rel10 := RelationshipData.new()
+	rel10.trust = 0.65
+	st0.relationships[1] = rel01
+	st1.relationships[0] = rel10
+
+	var affinity_01: float = MoraleEngine.calculate_social_affinity(p0, st0, p1, st1, 0, 1)
+	_assert_true(affinity_01 >= 0.75, "Clique: affinity boosts above 0.70 from shared nationality and manager resentment")
+
+	# 4. Bitmask Bron-Kerbosch Clique Detection
+	var team := TeamData.new()
+	team.team_name = "Faction FC"
+
+	var p2 := PlayerData.new()
+	p2.nationality = "Spain"
+	p2.player_reputation = 0.70
+	p2.morale = 0.70
+
+	var st2 := PlayerCareerState.new()
+	st2.player_key = 2
+	st2.squad_index = 2
+	st2.team_index = 0
+	st2.manager_trust = 0.25
+
+	var rel02 := RelationshipData.new()
+	rel02.trust = 0.75
+	var rel20 := RelationshipData.new()
+	rel20.trust = 0.75
+	st0.relationships[2] = rel02
+	st2.relationships[0] = rel20
+
+	var rel12 := RelationshipData.new()
+	rel12.trust = 0.70
+	var rel21 := RelationshipData.new()
+	rel21.trust = 0.70
+	st1.relationships[2] = rel12
+	st2.relationships[1] = rel21
+
+	# French sub-clique (players 3, 4, 5)
+	var p3 := PlayerData.new()
+	p3.nationality = "France"
+	p3.traits = 512 # VeteranLeader
+	p3.player_reputation = 0.80
+	p3.morale = 0.85
+
+	var p4 := PlayerData.new()
+	p4.nationality = "France"
+	p4.morale = 0.85
+
+	var p5 := PlayerData.new()
+	p5.nationality = "France"
+	p5.traits = 4 # PressureImmune
+	p5.morale = 0.85
+
+	var st3 := PlayerCareerState.new()
+	st3.player_key = 3
+	st3.squad_index = 3
+	st3.team_index = 0
+
+	var st4 := PlayerCareerState.new()
+	st4.player_key = 4
+	st4.squad_index = 4
+	st4.team_index = 0
+
+	var st5 := PlayerCareerState.new()
+	st5.player_key = 5
+	st5.squad_index = 5
+	st5.team_index = 0
+
+	var rel34 := RelationshipData.new()
+	rel34.trust = 0.80
+	var rel43 := RelationshipData.new()
+	rel43.trust = 0.80
+	st3.relationships[4] = rel34
+	st4.relationships[3] = rel43
+
+	var rel35 := RelationshipData.new()
+	rel35.trust = 0.80
+	var rel53 := RelationshipData.new()
+	rel53.trust = 0.80
+	st3.relationships[5] = rel35
+	st5.relationships[3] = rel53
+
+	var rel45 := RelationshipData.new()
+	rel45.trust = 0.80
+	var rel54 := RelationshipData.new()
+	rel54.trust = 0.80
+	st4.relationships[5] = rel45
+	st5.relationships[4] = rel54
+
+	team.squad = [p0, p1, p2, p3, p4, p5]
+
+	var today := CareerDate.make(2026, 9, 18)
+	var career: CareerSaveData = CareerSaveData.make_new(null, 0, today, 1)
+	career.player_states[0] = st0
+	career.player_states[1] = st1
+	career.player_states[2] = st2
+	career.player_states[3] = st3
+	career.player_states[4] = st4
+	career.player_states[5] = st5
+
+	var cliques: Array[PackedInt32Array] = MoraleEngine.detect_squad_cliques(team, career)
+	_assert_true(cliques.size() == 2, "Clique: Bron-Kerbosch identifies exactly 2 disjoint cliques of size 3")
+
+	# 5. Faction leader detection
+	var leader_c1: int = MoraleEngine.get_clique_leader(team, career, cliques[0])
+	var leader_c2: int = MoraleEngine.get_clique_leader(team, career, cliques[1])
+	_assert_true(leader_c1 == 0 or leader_c1 == 3, "Clique: leader identified for clique 1")
+	_assert_true(leader_c2 == 0 or leader_c2 == 3, "Clique: leader identified for clique 2")
+	_assert_true(leader_c1 != leader_c2, "Clique: two distinct leaders identified for opposing cliques")
+
+	# 6. Peer diffusion with numerical damping
+	p0.morale = 0.10
+	var initial_m1: float = p1.morale
+	MoraleEngine.propagate_clique_morale(team, career)
+	_assert_true(p1.morale < initial_m1, "Diffusion: member morale drops following leader swing")
+	_assert_true(p1.morale >= initial_m1 - MoraleEngine.MAX_DIFFUSION_STEP, "Diffusion: member drop capped by MAX_DIFFUSION_STEP")
+	_assert_true(p1.morale >= 0.0 and p1.morale <= 1.0, "Diffusion: morale bounded within [0.0, 1.0]")
+
+	# 7. Trait susceptibility damping
+	p3.morale = 0.50
+	p4.morale = 0.80
+	p5.morale = 0.80
+	MoraleEngine.propagate_clique_morale(team, career)
+	var drop_normal: float = 0.80 - p4.morale
+	var drop_immune: float = 0.80 - p5.morale
+	_assert_true(drop_immune < drop_normal, "Diffusion: PressureImmune trait dampens peer contagion")
+
+	# 8. Multi-step numerical stability & feedback loop prevention
+	for _step in range(25):
+		MoraleEngine.propagate_clique_morale(team, career)
+	for p: PlayerData in team.squad:
+		_assert_true(p.morale >= 0.0 and p.morale <= 1.0, "Stability: all squad morale strictly in [0.0, 1.0] after 25 diffusion steps")
+
+
+func _test_incident_press_conference_pipeline() -> void:
+	# 1. Question generation citing player name, event tag, and sentiment
+	var q_train: String = PressOffice.generate_incident_question(
+		&"training_incident", "Marcus Cole", -0.35, false, "North United"
+	)
+	_assert_true(q_train.contains("Marcus Cole"), "PressOffice: Question cites primary player name")
+	_assert_true(q_train.contains("training ground clash"), "PressOffice: Question cites training clash context")
+	_assert_true(q_train.contains("North United"), "PressOffice: Pre-match question cites opponent")
+
+	var q_party: String = PressOffice.generate_incident_question(
+		&"nightlife_incident", "Leo Vance", -0.40, true, "South City"
+	)
+	_assert_true(q_party.contains("Leo Vance"), "PressOffice: Question cites nightlife player name")
+	_assert_true(q_party.contains("partying"), "PressOffice: Question cites partying incident")
+	_assert_true(q_party.contains("Following today's match"), "PressOffice: Post-match question cites timing")
+
+	var q_mutiny: String = PressOffice.generate_incident_question(
+		&"mutiny_warning", "Senior Captain", -0.85, false, "Rival FC"
+	)
+	_assert_true(q_mutiny.contains("Senior Captain") and q_mutiny.contains("mutiny"), "PressOffice: Mutiny question cites mutiny and leader")
+
+	# 2. Quote generation with trait influences
+	var mgr := ManagerData.new()
+	mgr.traits = 16 # Disciplinarian
+	var ctx := PressOffice.PressContext.new()
+	ctx.event = "incident_reaction"
+	ctx.player_name = "Marcus Cole"
+	ctx.match_result = "discipline"
+	var quote_disc: String = PressOffice.new().generate_quote(mgr, ctx)
+	_assert_true(quote_disc.contains("Marcus Cole"), "PressOffice: Quote cites player name")
+	_assert_true(quote_disc.contains("Accountability matters"), "PressOffice: Disciplinarian trait appends accountability")
+
+	mgr.traits = 128 # MediaSavvy
+	var quote_media: String = PressOffice.new().generate_quote(mgr, ctx)
+	_assert_true(quote_media.contains("internally through the appropriate channels"), "PressOffice: MediaSavvy replaces quote")
+
+	# 3. Build incident press conference item
+	var today := CareerDate.make(2026, 9, 18)
+	var ev: WorldEvent = WorldEvent.make(
+		&"training_incident", WorldEvent.Category.TRAINING, today, "Training bust up", -0.30, 0.65
+	).with_player(1000, "Marcus Cole")
+
+	var item: InboxItem = InboxEngine.build_incident_press_conference(ev, false, today, "North United")
+	_assert_true(item != null, "InboxEngine: build_incident_press_conference creates item")
+	_assert_true(item.subject_player_name == "Marcus Cole", "InboxEngine: Item cites subject player name")
+	_assert_true(item.option_count() == 3, "InboxEngine: Item has 3 distinct response options")
+
+	# 4. Resolve options and assert effects on player trust and board confidence
+	var p := PlayerData.new()
+	p.player_name = "Marcus Cole"
+	p.morale = 0.50
+	var team := TeamData.new()
+	team.team_name = "Test FC"
+	team.squad = [p]
+
+	var state := PlayerCareerState.new()
+	state.player_key = 1000
+	state.manager_trust = 0.50
+	state.squad_index = 0
+	state.team_index = 1
+
+	var career := CareerSaveData.make_new(null, 1, today, 1)
+	career.player_states[1000] = state
+	career.board = BoardState.new()
+	career.board.confidence = 0.60
+	career.profile = ManagerCareerProfile.new()
+
+	# Option 0: Defend player
+	var init_trust: float = state.manager_trust
+	var init_board: float = career.board.confidence
+	var res_ev0: WorldEvent = InboxEngine.resolve(career, item, 0, team, today)
+	_assert_true(res_ev0 != null, "InboxEngine: Resolving defend option succeeds")
+	_assert_true(state.manager_trust > init_trust, "InboxEngine: Defending player raises player trust")
+	_assert_true(career.board.confidence < init_board, "InboxEngine: Defending player under negative incident risks board confidence")
+
+	# Option 1: Discipline player
+	var item2: InboxItem = InboxEngine.build_incident_press_conference(ev, false, today, "North United")
+	var pre_disc_trust: float = state.manager_trust
+	var pre_disc_board: float = career.board.confidence
+	var res_ev1: WorldEvent = InboxEngine.resolve(career, item2, 1, team, today)
+	_assert_true(res_ev1 != null, "InboxEngine: Resolving discipline option succeeds")
+	_assert_true(state.manager_trust < pre_disc_trust, "InboxEngine: Disciplining player publicly reduces player trust")
+	_assert_true(career.board.confidence > pre_disc_board, "InboxEngine: Disciplining player publicly raises board confidence")
+
+	# 5. CareerManager incident dispatch
+	CareerManager.career = career
+	WorldEventLog.bind(career)
+	WorldEventLog.clear()
+	var unhandled_ev: WorldEvent = WorldEvent.make(
+		&"nightlife_incident", WorldEvent.Category.PERSONAL_LIFE, today, "Late night partying", -0.40, 0.70
+	).with_player(1000, "Marcus Cole")
+	WorldEventLog.log_event(unhandled_ev)
+
+	var dispatched: Array[InboxItem] = CareerManager.check_and_dispatch_incident_press_conferences(false, "Rival FC")
+	_assert_true(not dispatched.is_empty(), "CareerManager: Unhandled incident dispatched to press conference")
+	_assert_true(dispatched[0].subject_player_name == "Marcus Cole", "CareerManager: Dispatched conference targets incident player")
+
 
 
 

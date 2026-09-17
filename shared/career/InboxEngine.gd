@@ -85,6 +85,69 @@ static func build_press_conference(
 	return item
 
 
+## Pre/post-match incident press conference questionnaire citing player names,
+## incident tags, and sentiment, directly connecting WorldEventLog unhandled incidents.
+static func build_incident_press_conference(
+	event: WorldEvent,
+	is_post_match: bool,
+	today: CareerDate,
+	opponent_name: String = ""
+) -> InboxItem:
+	var player_name: String = event.primary_player_name if event.primary_player_name != "" else "the squad"
+	var question: String = PressOffice.generate_incident_question(
+		event.event_tag, player_name, event.sentiment, is_post_match, opponent_name
+	)
+	var title_prefix: String = "Post-Match Press: " if is_post_match else "Press Conference: "
+	var item: InboxItem = InboxItem.make(
+		title_prefix + event.category_name() + " Incident",
+		question,
+		InboxItem.Category.MEDIA,
+		today
+	)
+	item.with_subject_player(event.primary_player_key, player_name)
+	item.priority = clampf(event.significance + 0.15, 0.5, 0.95)
+	item.payload = {
+		"kind": "incident_press_conference",
+		"event_tag": String(event.event_tag),
+		"sentiment": event.sentiment,
+		"significance": event.significance,
+		"is_post_match": is_post_match,
+		"opponent_name": opponent_name,
+	}
+
+	# 1. Defend player publicly
+	# High player trust delta (+0.08) & squad morale boost (+0.02), slight board risk (-0.02) if negative incident
+	var defend_board_conf: float = -0.02 if event.sentiment < 0.0 else 0.01
+	item.add_option(
+		"Defend the player and keep matters internal",
+		"Builds strong player loyalty and squad solidarity. The board question lax discipline.",
+		&"press_incident_defend",
+		0.02, 0.0, defend_board_conf, -0.01
+	)
+
+	# 2. Demand accountability / discipline
+	# Reassures board (+0.04) and press (+0.02), hits player trust (-0.12) and slight squad tension (-0.01)
+	item.add_option(
+		"Demand accountability and affirm high standards",
+		"Demonstrates authority. Board and press approve; the player feels hung out to dry.",
+		&"press_incident_discipline",
+		-0.01, 0.0, 0.04, 0.02
+	)
+
+	# 3. Dismiss the story / deflect
+	# Neutral impact on board and player, slight press irritation (-0.02)
+	item.add_option(
+		"Dismiss the media speculation entirely",
+		"Focuses attention strictly on football. Neutral impact; press remain unsatisfied.",
+		&"press_incident_dismiss",
+		0.0, 0.0, 0.0, -0.02
+	)
+
+	# Escalation: dismiss/deflect by default
+	item.with_deadline(today.advanced_by(2), 2)
+	return item
+
+
 ## A player unhappy about playing time asks for a meeting.
 static func build_playing_time_complaint(
 	data: PlayerData,
@@ -716,6 +779,19 @@ static func _apply_action_tag(
 				career.board.patience_notes.append("Manager challenged board and demanded unconditional backing.")
 				while career.board.patience_notes.size() > 10:
 					career.board.patience_notes.remove_at(0)
+		&"press_incident_defend":
+			if subject_state != null:
+				subject_state.adjust_manager_trust(0.08, "defended publicly in press conference", career.user_team_index, ordinal)
+			if subject_data != null:
+				subject_data.morale = clampf(subject_data.morale + 0.05, 0.0, 1.0)
+		&"press_incident_discipline":
+			if subject_state != null:
+				subject_state.adjust_manager_trust(-0.12, "disciplined publicly in press conference", career.user_team_index, ordinal)
+			if subject_data != null:
+				subject_data.morale = clampf(subject_data.morale - 0.08, 0.0, 1.0)
+		&"press_incident_dismiss":
+			if subject_state != null:
+				subject_state.adjust_manager_trust(0.02, "dismissed press speculation", career.user_team_index, ordinal)
 		_:
 			pass
 

@@ -597,6 +597,10 @@ func advance_day() -> HaltReason:
 				_simulate_ai_fixture(f)
 		_advance_cup_rounds()
 		if user_fixture != null:
+			var opp_idx: int = user_fixture.opponent_of(career.user_team_index)
+			var opp_team: TeamData = DataLoader.get_team(opp_idx)
+			var opp_name: String = opp_team.team_name if opp_team != null else ""
+			check_and_dispatch_incident_press_conferences(false, opp_name)
 			GameEvents.career_day_advanced.emit(today.to_iso())
 			return _halt(HaltReason.MATCH_DAY, "Matchday: %s" % _fixture_label(user_fixture))
 
@@ -1255,6 +1259,9 @@ func _run_weekly_morale_pass(club: TeamData) -> void:
 				-0.5, 0.55
 			)
 
+	# Faction and clique peer diffusion across dressing room sub-graphs
+	MoraleEngine.propagate_clique_morale(club, career)
+
 
 func _median_wage(club: TeamData) -> int:
 	if club.squad.is_empty():
@@ -1556,6 +1563,8 @@ func _apply_user_result(fixture: FixtureData) -> void:
 		],
 		sentiment, 0.5
 	)
+
+	check_and_dispatch_incident_press_conferences(true, opponent.team_name if opponent != null else "")
 
 
 func _competition_of(fixture: FixtureData) -> CompetitionData:
@@ -1984,7 +1993,22 @@ func _rehydrate_inbox() -> void:
 					item.options = rebuilt_tr.options
 					item.escalation_option = rebuilt_tr.escalation_option
 			InboxItem.Category.MEDIA:
-				if state != null and club != null \
+				var kind_med: String = String(item.payload.get("kind", ""))
+				if kind_med == "incident_press_conference":
+					var ev_dummy := WorldEvent.new()
+					ev_dummy.event_tag = StringName(item.payload.get("event_tag", ""))
+					ev_dummy.sentiment = float(item.payload.get("sentiment", 0.0))
+					ev_dummy.significance = float(item.payload.get("significance", 0.5))
+					ev_dummy.primary_player_name = item.subject_player_name
+					ev_dummy.primary_player_key = item.subject_player_key
+					var is_pm: bool = bool(item.payload.get("is_post_match", false))
+					var opp_name: String = String(item.payload.get("opponent_name", ""))
+					var rebuilt_inc: InboxItem = InboxEngine.build_incident_press_conference(
+						ev_dummy, is_pm, item.received, opp_name
+					)
+					item.options = rebuilt_inc.options
+					item.escalation_option = rebuilt_inc.escalation_option
+				elif state != null and club != null \
 						and state.squad_index >= 0 and state.squad_index < club.squad.size():
 					var rebuilt_med: InboxItem = InboxEngine.build_media_controversy_item(
 						club.squad[state.squad_index], state, item.received
@@ -2518,3 +2542,61 @@ func save_tactical_preset(
 	career.profile.save_preset(
 		slot_index, preset_name, formation, tempo, pressing, def_line, width, phys
 	)
+
+
+## --- Incident Narrative Pipeline -------------------------------------------------
+
+## Checks WorldEventLog for unhandled high-significance incidents (training clashes,
+## nightlife breaches, mutiny warnings, etc.) and connects them into press conferences.
+func check_and_dispatch_incident_press_conferences(is_post_match: bool, opponent_name: String = "") -> Array[InboxItem]:
+	var dispatched: Array[InboxItem] = []
+	if career == null or career.today == null:
+		return dispatched
+
+	# Look back at events from the last 7 days
+	var cutoff: CareerDate = career.today.advanced_by(-7)
+	var recent_events: Array[WorldEvent] = WorldEventLog.all_events()
+
+	for i: int in range(recent_events.size() - 1, -1, -1):
+		var ev: WorldEvent = recent_events[i]
+		if ev == null or ev.resolved:
+			continue
+		if ev.date != null and ev.date.is_before(cutoff):
+			continue
+		# Only unhandled incidents of notable significance
+		if ev.significance < 0.4:
+			continue
+		# Filter for relevant incident tags
+		var tag: StringName = ev.event_tag
+		if (
+			tag == &"training_incident"
+			or tag == &"nightlife_incident"
+			or tag == &"dressing_room_confrontation"
+			or tag == &"media_controversy"
+			or tag == &"mutiny_warning"
+			or tag == &"dressing_room_mutiny"
+		):
+			# Ensure we haven't already queued an incident press conference for this event tag and player
+			var already_queued: bool = false
+			for item: InboxItem in career.inbox:
+				if item.is_resolved:
+					continue
+				if String(item.payload.get("kind", "")) == "incident_press_conference":
+					if (
+						String(item.payload.get("event_tag", "")) == String(tag)
+						and item.subject_player_key == ev.primary_player_key
+					):
+						already_queued = true
+						break
+			if not already_queued:
+				var press_item: InboxItem = InboxEngine.build_incident_press_conference(
+					ev, is_post_match, career.today, opponent_name
+				)
+				career.inbox.push_front(press_item)
+				dispatched.append(press_item)
+				# Limit to at most 1 incident press conference per conference session
+				break
+
+	if not dispatched.is_empty():
+		_emit_inbox_changed()
+	return dispatched

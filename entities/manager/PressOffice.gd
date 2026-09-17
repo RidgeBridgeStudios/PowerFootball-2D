@@ -30,6 +30,10 @@ class PressContext:
 	var is_big_game: bool = false
 	## Optional name of a player being discussed (injuries, signings).
 	var player_name: String = ""
+	## Incident tag for between-match incidents (&"training_incident", &"nightlife_incident", etc.)
+	var incident_tag: StringName = &""
+	## Incident sentiment from -1.0 to 1.0.
+	var incident_sentiment: float = 0.0
 
 
 ## --- Post-match win ---------------------------------------------------------
@@ -209,6 +213,33 @@ const HOTHEAD_SHIFT_PREPEND: Array[String] = [
 ]
 const IDEALIST_SHIFT_APPEND: String = "The shape changes. The principles never do."
 
+## --- Between-match incidents -------------------------------------------------
+
+const INCIDENT_DEFEND_BASE: Array[String] = [
+	"These things stay in-house. [player] has my full backing and we move forward.",
+	"What happens behind closed doors stays there. [player] is fully committed to this club.",
+	"The media always wants a circus. [player] and I are completely aligned.",
+]
+const INCIDENT_DISCIPLINE_BASE: Array[String] = [
+	"Standards are standards at this club. The situation regarding [player] has been dealt with.",
+	"Nobody is above the team. What occurred with [player] was addressed swiftly and firmly.",
+	"Discipline is non-negotiable here. The standard expected of [player] and everyone else does not drop.",
+]
+const INCIDENT_DISMISS_BASE: Array[String] = [
+	"I'm not wasting time on tabloid gossip. We have a match to prepare for.",
+	"It's complete nonsense blown out of proportion. We have zero interest in entertaining it.",
+	"No comment. We are entirely focused on our football.",
+]
+
+const HOTHEAD_INCIDENT_PREPEND: Array[String] = [
+	"You people always dig for drama when you should talk about football —",
+	"I'm sick of answering questions about nonsense like this —",
+]
+const DISCIPLINARIAN_INCIDENT_APPEND: String = "Accountability matters. If you drop your standards here, there are consequences."
+const LOYALIST_INCIDENT_APPEND: String = "We protect our own. Whatever noise comes from outside, this squad stays united."
+const MEDIASAVVY_INCIDENT_REPLACE: String = "The club has addressed the matter internally through the appropriate channels. Our focus is squarely on the upcoming fixture."
+const MINDGAMES_INCIDENT_PREPEND: String = "It's convenient how these stories always leak right before an important match, isn't it?"
+
 
 func generate_quote(data: ManagerData, ctx: PressContext) -> String:
 	if data == null or ctx == null:
@@ -235,6 +266,8 @@ func generate_quote(data: ManagerData, ctx: PressContext) -> String:
 			return _touchline_conceded(data, ctx)
 		"touchline_shift":
 			return _touchline_shift(data, ctx)
+		"incident_reaction":
+			return _incident_reaction(data, ctx)
 		_:
 			return ""
 
@@ -421,3 +454,60 @@ func _assemble(prepend: String, base: String, append: Array[String]) -> String:
 	for fragment: String in append:
 		parts.append(fragment)
 	return " ".join(parts)
+
+
+func _incident_reaction(data: ManagerData, ctx: PressContext) -> String:
+	var prepend: String = ""
+	var subject: String = ctx.player_name if ctx.player_name != "" else "the player"
+	var pool: Array[String] = INCIDENT_DISMISS_BASE
+	if ctx.match_result == "defend":
+		pool = INCIDENT_DEFEND_BASE
+	elif ctx.match_result == "discipline":
+		pool = INCIDENT_DISCIPLINE_BASE
+
+	var base: String = _pick(pool).replace("[player]", subject)
+	var append: Array[String] = []
+
+	if data.has_trait(1): # HotHead
+		prepend = _pick(HOTHEAD_INCIDENT_PREPEND)
+	if data.has_trait(32): # MindGames
+		prepend = MINDGAMES_INCIDENT_PREPEND
+	if data.has_trait(2): # Loyalist
+		append.append(LOYALIST_INCIDENT_APPEND)
+	if data.has_trait(16): # Disciplinarian
+		append.append(DISCIPLINARIAN_INCIDENT_APPEND)
+	if data.has_trait(128): # MediaSavvy
+		prepend = ""
+		base = MEDIASAVVY_INCIDENT_REPLACE
+		append.clear()
+
+	return _assemble(prepend, base, append)
+
+
+## Formats a reporter questionnaire regarding an unhandled between-match incident
+## citing player names, incident tags, and incident sentiment.
+static func generate_incident_question(
+	event_tag: StringName,
+	player_name: String,
+	sentiment: float,
+	is_post_match: bool,
+	opponent_name: String = ""
+) -> String:
+	var timing: String = "Following today's match" if is_post_match else "Ahead of facing %s" % (opponent_name if opponent_name != "" else "our next opponents")
+	var target: String = player_name if player_name != "" else "the squad"
+
+	match event_tag:
+		&"training_incident":
+			return "%s, reports emerged of a heated training ground clash involving %s. How are you dealing with discipline inside the camp?" % [timing, target]
+		&"nightlife_incident":
+			return "%s, photographs surfaced of %s out partying late into the night. Does this breach club conduct standards?" % [timing, target]
+		&"dressing_room_confrontation":
+			return "%s, whispers from the dressing room suggest %s confronted teammates over squad hierarchy. Are you losing control of the dressing room?" % [timing, target]
+		&"media_controversy":
+			return "%s, unsanctioned media comments made by %s caused significant controversy. What action is the club taking?" % [timing, target]
+		&"mutiny_warning", &"dressing_room_mutiny":
+			return "%s, sources close to the squad indicate senior leaders including %s have revolted against your tactical regime. How do you respond to reports of mutiny?" % [timing, target]
+		_:
+			if sentiment < -0.3:
+				return "%s, negative reports concerning %s have circulated this week. What is your reaction to the unrest?" % [timing, target]
+			return "%s, there have been discussions surrounding %s and recent club events. What line are you taking?" % [timing, target]
