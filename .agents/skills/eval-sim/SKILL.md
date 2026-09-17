@@ -1,6 +1,6 @@
 ---
 name: eval-sim
-description: Executes 60-second headless simulation assertion harness and validates runtime invariants (NaNs, escapes, decision stalls, anchor variance).
+description: Execute 60-second headless simulation assertion harness and validate runtime invariants (NaNs, escapes, decision stalls, anchor variance) when inspecting legacy match kinematics.
 ---
 
 > [!WARNING]
@@ -12,13 +12,39 @@ description: Executes 60-second headless simulation assertion harness and valida
 
 # Headless Simulation Evaluation Skill
 
-Use this workflow to run headless simulation verification on match kinematics and AI behavior.
+Run headless simulation verification on match kinematics and AI behavior for historical reference.
 
-## Execution Command
+## When to Use
+- When evaluating legacy 22-player match engine simulations for historical kinematics reference.
+- When validating headless simulation stability across extended multi-second durations.
 
-```bash
-py -3 tools/eval_simulation.py --duration=60
-```
+## When NOT to Use
+- For live career mode fixtures or quick-sim matches (use `CareerManager.simulate_next_fixture()` and `tools/test_quick_sim.py`).
+- For standard static syntax verification (use `tools/verify_gate.py --fast`).
+
+## Step-by-Step Workflow
+
+1. **Verify Tooling Prerequisite**:
+   ```bash
+   set -e
+   test -f tools/eval_simulation.py || exit 1
+   ```
+
+2. **Execute Headless Evaluation**:
+   ```bash
+   set -e
+   py -3 tools/eval_simulation.py --duration=60 || exit 1
+   ```
+
+3. **Validation Check**:
+   - Confirm `eval_report.json` is generated and confirms zero NaNs, escapes, and decision stalls before proceeding.
+
+4. **Optional: Match Frame Slice Dump**:
+   If visual inspection is needed, generate match slices with:
+   ```bash
+   set -e
+   py -3 tools/dump_match_frames.py --frames=5 || exit 1
+   ```
 
 ## Assertion Thresholds & Failure Criteria
 
@@ -28,10 +54,3 @@ The simulation harness verifies:
 3. **AI Decision Cadence Violations == 0**: 15-frame time-slicing must remain strictly periodic: `(player_index + frame_count) % 15 == 0`.
 4. **Anchor Variance Integrity**: Dynamic anchor calculations must remain bounded and stable without jitter.
 
-## Post-Run Actions
-
-- Inspect `eval_report.json` for score, possession, and pass completion telemetry.
-- If visual inspection is needed, generate match slices with:
-  ```bash
-  py -3 tools/dump_match_frames.py --frames=5
-  ```

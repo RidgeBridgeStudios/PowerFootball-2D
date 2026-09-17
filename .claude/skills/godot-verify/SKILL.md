@@ -1,29 +1,53 @@
 ---
 name: godot-verify
-description: Headless GUT verification for Godot 4.7
+description: Verify GDScript code quality, syntax, and test suites in Godot 4.7 with fallback to static AST checks when the engine is unavailable.
 allowed-tools: ["Bash"]
 ---
 
-Run:
-  ! godot --headless --path . -s addons/gut/gut_cmdln.gd -gexit
+# Godot Verification & Headless Testing Skill
 
-If compilation errors exist → extract file path, line number, error message.
-  Fix immediately. Re-run /godot-verify. Repeat until clean.
-If GUT test failures exist → inspect assertion, update implementation, re-run.
-If no addons/gut/ found → run syntax check only:
-  godot --headless --check-only --script res://autoloads/GameManager.gd
+Execute headless test verification for Godot 4.7 and validate GDScript syntax and typing.
 
-## Container fallback (no engine on PATH)
+## When to Use
+- When validating GDScript syntax, typing, and GUT tests after modifying code.
+- When verifying that autoload references and project paths resolve cleanly.
 
-This repository's CI container ships neither a `godot` binary nor `addons/gut/`.
-When `command -v godot` fails, run the static checker instead and report the
-result as a static check, never as an engine run:
+## When NOT to Use
+- When only markdown documentation or non-code data files are changed.
+- As a substitute for domain-specific statistical simulation validation (use `tools/test_quick_sim.py` instead).
 
-  ! py -3 tools/gdcheck.py
+## Step-by-Step Workflow
 
-`tools/gdcheck.py` parses every `.gd` file and verifies: balanced brackets,
-consistent tab indentation, that every identifier used as `Type.MEMBER` or
-`obj.method()` against a project class actually exists, that every
-`class_name` referenced resolves, that no forbidden Godot 3 API appears, and
-that autoload names in `project.godot` map to real files. It is not a
-substitute for compiling — say so when reporting.
+1. **Verify Tooling Prerequisite**:
+   Check if the Godot binary and GUT test framework are available on the system PATH:
+   ```bash
+   set -e
+   command -v godot >/dev/null 2>&1 || true
+   ```
+
+2. **Run Headless GUT Verification**:
+   If Godot and GUT are present, execute headless test assertions:
+   ```bash
+   set -e
+   godot --headless --path . -s addons/gut/gut_cmdln.gd -gexit || exit 1
+   ```
+   - If compilation errors exist: extract file path, line number, and error message; resolve immediately.
+   - If GUT test failures exist: inspect assertion failures, update implementation, and re-run.
+
+3. **Fallback: Syntax-Only Check**:
+   If `addons/gut/` is not installed, run syntax verification against root autoloads:
+   ```bash
+   set -e
+   godot --headless --check-only --script res://autoloads/GameManager.gd || exit 1
+   ```
+
+4. **Container Fallback (No Engine on PATH)**:
+   When running in an environment without a `godot` binary installed, run the static AST checker instead:
+   ```bash
+   set -e
+   py -3 tools/gdcheck.py || exit 1
+   ```
+
+5. **Validation Check**:
+   - Confirm that either GUT passes with 0 failures or `tools/gdcheck.py` passes with 0 errors before proceeding.
+

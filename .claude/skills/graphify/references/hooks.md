@@ -1,3 +1,5 @@
+[← Back to SKILL.md](../SKILL.md)
+
 # graphify reference: commit hook and native CLAUDE.md integration
 
 Load this when the user asked to install the post-commit hook or wire graphify into a project's CLAUDE.md.

@@ -1,11 +1,19 @@
 ---
 name: ast-refactor
-description: Localized GDScript AST refactoring workflow preserving strict typing, choke points, and zero-allocation hot paths.
+description: Refactor GDScript components with localized AST edits while preserving strict static typing, layer choke points, and zero-allocation hot paths.
 ---
 
 # AST Refactor & Invariant Preservation Skill
 
 Guidelines and verification loop for rewriting or refactoring GDScript components in PowerFootball-2D.
+
+## When to Use
+- When modifying or refactoring GDScript classes across `autoloads/`, `shared/`, or `ui/`.
+- When eliminating duplicate declarations, fixing typing warnings, or adhering to layer contracts.
+
+## When NOT to Use
+- For non-code files (JSON database records, markdown docs, project metadata).
+- When making major architectural changes that require an approved implementation plan first.
 
 ## Strict Refactoring Rules
 
@@ -21,10 +29,28 @@ Guidelines and verification loop for rewriting or refactoring GDScript component
    - Avoid duplicate variable declarations across function scopes.
    - Never compare object instances or typed enums (e.g. `current_phase`) directly to String/StringName literals.
 
-## Verification Loop
+## Step-by-Step Workflow
 
-After any file modification, run:
-```bash
-py -3 tools/verify_gate.py --fast
-```
-Do not proceed until the gate output reports 0 errors. For quick-sim changes also run `py -3 tools/test_quick_sim.py`.
+1. **Verify Tooling Prerequisite**:
+   ```bash
+   set -e
+   test -f tools/verify_gate.py || exit 1
+   ```
+
+2. **Execute Fast Verification Gate**:
+   After any file modification, run the 10 static linters:
+   ```bash
+   set -e
+   py -3 tools/verify_gate.py --fast || exit 1
+   ```
+
+3. **Domain Verification**:
+   If editing quick-sim or statistical solvers, run targeted tests:
+   ```bash
+   set -e
+   py -3 tools/test_quick_sim.py || exit 1
+   ```
+
+4. **Validation Check**:
+   - Confirm `tools/verify_gate.py --fast` passes with exactly 0 errors and 0 warnings before concluding changes.
+

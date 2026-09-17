@@ -1,0 +1,92 @@
+# ──────────────────────────────────────────────────────────────
+# Kodus Agent-Readiness configuration
+# Place this file at the root of your repository as
+#   .kodus-readiness.yml   or   .kodus-readiness.yaml
+#
+# Known Scanner False Positives (skillscore v2.0.2):
+# - Category G (Safety): Naive keyword matching flags the string "format" inside
+#   "--formation=4-3-3" (in formation-audit and formation-fuzzer) and words like
+#   "formatting"/"reformat" (in cross-system-feature). These are football tactical
+#   formation parameters and code formatting references, not dangerous disk formats.
+# ──────────────────────────────────────────────────────────────
+
+# ── Pillars ──────────────────────────────────────────────────
+# Toggle entire assessment pillars on or off.
+# Set a pillar to false to skip all of its criteria.
+# All pillars are enabled by default.
+pillars:
+  style-linting: true
+  testing: true
+  documentation: true
+  dev-environment: true
+  ci-cd: true
+  code-health: true
+  security: true
+
+# ── Criteria ─────────────────────────────────────────────────
+# Fine-grained toggles for individual criteria within pillars.
+# Set a criterion to false to skip it during assessment.
+# All criteria are enabled by default.
+criteria:
+  # Style & Linting
+  linter: true
+  formatter: true
+  type-checker: true
+  pre-commit-hooks: true
+  editorconfig: true
+
+  # Testing
+  test-framework: true
+  test-files-exist: true
+  test-script: true
+  coverage-config: true
+  e2e-tests: true
+
+  # Documentation
+  readme: true
+  contributing: true
+  api-docs: false
+  codeowners: true
+  ai-context: true
+  architecture-docs: true
+
+  # Dev Environment
+  lock-file: false
+  containerization: false
+  env-documentation: true
+  setup-script: true
+  version-pinned: true
+
+  # CI / CD
+  ci-config: true
+  ci-runs-tests: true
+  ci-runs-linters: true
+  build-automated: true
+  deploy-pipeline: false
+  branch-protection: false
+
+  # Code Health
+  no-outdated-deps: true
+  dead-code-detection: true
+  bundle-analysis: false
+
+  # Security
+  license: true
+  security-scanning: true
+  secrets-detection: true
+  security-policy: true
+  dep-update-automation: true
+
+# ── Thresholds ───────────────────────────────────────────────
+# Override the scoring thresholds used when computing maturity
+# levels. Values are expressed as decimals between 0 and 1.
+thresholds:
+  # Minimum percentage of criteria that must pass to reach a level
+  # level-pass: 0.8
+
+# ── AI Settings ──────────────────────────────────────────────
+# When AI is enabled, some criteria use an LLM to perform deeper
+# analysis (e.g. reviewing documentation quality).
+# aiEnabled: false
+# apiKey: ""           # Or set KODUS_API_KEY env variable
+# apiBaseUrl: ""       # Custom endpoint for the LLM API

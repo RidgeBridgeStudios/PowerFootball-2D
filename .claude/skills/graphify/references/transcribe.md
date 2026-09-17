@@ -1,3 +1,5 @@
+[← Back to SKILL.md](../SKILL.md)
+
 # graphify reference: transcribe video and audio
 
 Load this only when `detect` reported one or more `video` files. A corpus with no video never reads this.

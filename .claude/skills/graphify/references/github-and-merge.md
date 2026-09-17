@@ -1,3 +1,5 @@
+[← Back to SKILL.md](../SKILL.md)
+
 # graphify reference: GitHub clone and cross-repo merge
 
 Load this when the user passed one or more `https://github.com/...` URLs, or named several local subfolders to merge into one graph.

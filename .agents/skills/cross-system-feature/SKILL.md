@@ -1,6 +1,6 @@
 ---
 name: cross-system-feature
-description: Reusable workflow for safely designing, implementing, and validating gameplay features that span multiple simulation layers and subsystems in PowerFootball-2D.
+description: Design, implement, and validate gameplay features spanning multiple simulation layers in PowerFootball-2D when adding cross-subsystem functionality.
 ---
 
 # Cross-System Gameplay Feature Workflow
@@ -8,6 +8,15 @@ description: Reusable workflow for safely designing, implementing, and validatin
 This workflow governs any change touching multiple gameplay systems across the 3-layer simulation stack in PowerFootball-2D. It enforces architectural choke points, static typing, allocation discipline, and progressive verification.
 
 Canonical Reference: See [AGENTS.md](AGENTS.md) and [docs/CORE_INVARIANTS.md](docs/CORE_INVARIANTS.md) for root architectural policies.
+
+## When to Use
+- When implementing or modifying gameplay features that span multiple simulation layers (Career World, Quick-Sim Match, Narrative & Presentation).
+- When modifying shared data resources or adding new signal bus contracts to `autoloads/GameEvents.gd`.
+
+## When NOT to Use
+- For single-file styling, color palette tweaks, or UI label updates (Tier 1 Local changes).
+- For isolated mathematical helper optimizations without layer or signal interactions.
+- For simple documentation or formatting edits.
 
 ---
 

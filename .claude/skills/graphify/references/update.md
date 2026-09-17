@@ -1,3 +1,5 @@
+[← Back to SKILL.md](../SKILL.md)
+
 # graphify reference: incremental update and cluster-only
 
 Load this only when the user passed `--update` or `--cluster-only`. A first-time full build never reads this file.
