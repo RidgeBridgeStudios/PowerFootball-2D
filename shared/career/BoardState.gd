@@ -266,11 +266,36 @@ func file_request(kind: RequestKind, amount: int, today: CareerDate) -> void:
 	})
 
 
-## Board verdict on one filed request. Confidence and the club's finances both
-## weigh in: a board that rates the manager grants more, and a broke club
+## Adjusts board confidence based on the club's financial health during weekly cycle.
+func apply_financial_health(balance: int, weekly_wage_budget: int) -> void:
+	if balance < 0:
+		var weeks_in_debt: float = float(-balance) / maxf(float(weekly_wage_budget), 10000.0)
+		if weeks_in_debt > 8.0:
+			confidence = clampf(confidence - 0.025, 0.0, 1.0)
+			patience_notes.append("Severe club debt is eroding board confidence.")
+			while patience_notes.size() > 10:
+				patience_notes.remove_at(0)
+		elif weeks_in_debt > 2.0:
+			confidence = clampf(confidence - 0.012, 0.0, 1.0)
+	elif balance > weekly_wage_budget * 25:
+		confidence = clampf(confidence + 0.005 * CONFIDENCE_GAIN_SCALE, 0.0, 1.0)
+
+	if confidence < SACK_THRESHOLD:
+		matches_below_threshold += 1
+	elif matches_below_threshold > 0 and confidence >= SACK_THRESHOLD:
+		matches_below_threshold = 0
+
+
+## Board verdict on one filed request. Confidence, club finances, and club stature
+## all weigh in: a board that rates the manager grants more, and a broke club
 ## grants less regardless of how well the manager is doing.
-func evaluate_request(request: Dictionary, affordability: float, rng: RandomNumberGenerator) -> Dictionary:
-	var favour: float = confidence * 0.55 + trajectory * 0.25 + clampf(affordability, 0.0, 1.0) * 0.20
+func evaluate_request(
+	request: Dictionary,
+	affordability: float,
+	rng: RandomNumberGenerator,
+	stature: float = 0.5
+) -> Dictionary:
+	var favour: float = confidence * 0.50 + trajectory * 0.20 + clampf(affordability, 0.0, 1.0) * 0.20 + clampf(stature, 0.0, 1.0) * 0.10
 	var roll: float = rng.randf()
 	var outcome: String = "rejected"
 	var granted_fraction: float = 0.0

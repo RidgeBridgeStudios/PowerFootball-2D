@@ -235,7 +235,7 @@
         "is_static": false
       },
       "_build_divisions_competitions": {
-        "line": 395,
+        "line": 401,
         "args": [
           "first_matchday: CareerDate"
         ],
@@ -243,7 +243,7 @@
         "is_static": false
       },
       "_build_flat_competitions": {
-        "line": 438,
+        "line": 444,
         "args": [
           "first_matchday: CareerDate",
           "total_teams: int"
@@ -252,7 +252,7 @@
         "is_static": false
       },
       "_get_tier_team_indices": {
-        "line": 479,
+        "line": 485,
         "args": [
           "tier_num: int"
         ],
@@ -260,7 +260,7 @@
         "is_static": false
       },
       "_schedule_league_competition": {
-        "line": 493,
+        "line": 499,
         "args": [
           "comp: CompetitionData",
           "first_matchday: CareerDate"
@@ -269,7 +269,7 @@
         "is_static": false
       },
       "_matchday_spacing": {
-        "line": 531,
+        "line": 537,
         "args": [
           "team_count: int",
           "repeat_cycles: int = 1"
@@ -278,25 +278,25 @@
         "is_static": false
       },
       "_tag_user_fixtures": {
-        "line": 551,
+        "line": 557,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "advance_day": {
-        "line": 561,
+        "line": 567,
         "args": [],
         "return": "HaltReason",
         "is_static": false
       },
       "continue_until_event": {
-        "line": 625,
+        "line": 632,
         "args": [],
         "return": "HaltReason",
         "is_static": false
       },
       "_halt": {
-        "line": 640,
+        "line": 647,
         "args": [
           "reason: HaltReason",
           "message: String"
@@ -305,25 +305,25 @@
         "is_static": false
       },
       "_update_season_phase": {
-        "line": 651,
+        "line": 658,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_update_transfer_window": {
-        "line": 667,
+        "line": 674,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_process_recovery_and_training": {
-        "line": 673,
+        "line": 680,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_has_pending_nightlife_incident": {
-        "line": 781,
+        "line": 788,
         "args": [
           "player_key: int"
         ],
@@ -331,7 +331,7 @@
         "is_static": false
       },
       "_staff_quality": {
-        "line": 790,
+        "line": 797,
         "args": [
           "team: TeamData",
           "kind: String"
@@ -340,25 +340,25 @@
         "is_static": false
       },
       "_process_scouting": {
-        "line": 808,
+        "line": 815,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_process_transfer_negotiations": {
-        "line": 838,
+        "line": 845,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_process_ai_transfer_activity": {
-        "line": 872,
+        "line": 879,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_push_bid_received": {
-        "line": 921,
+        "line": 928,
         "args": [
           "buyer: TeamData",
           "target: PlayerData",
@@ -369,7 +369,7 @@
         "is_static": false
       },
       "_transfer_between_ai": {
-        "line": 948,
+        "line": 955,
         "args": [
           "buyer_index: int",
           "seller_index: int",
@@ -380,7 +380,7 @@
         "is_static": false
       },
       "_move_player": {
-        "line": 978,
+        "line": 985,
         "args": [
           "from_team: int",
           "from_squad_index: int",
@@ -390,7 +390,7 @@
         "is_static": false
       },
       "_repair_lineup_after_removal": {
-        "line": 1010,
+        "line": 1017,
         "args": [
           "team: TeamData",
           "removed_index: int"
@@ -399,7 +399,7 @@
         "is_static": false
       },
       "_rekey_states_after_removal": {
-        "line": 1029,
+        "line": 1036,
         "args": [
           "team_index: int",
           "removed_index: int"
@@ -408,7 +408,7 @@
         "is_static": false
       },
       "_execute_transfer": {
-        "line": 1050,
+        "line": 1057,
         "args": [
           "offer: TransferOffer"
         ],
@@ -416,13 +416,13 @@
         "is_static": false
       },
       "_process_loan_expiries": {
-        "line": 1107,
+        "line": 1114,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_return_loan_player": {
-        "line": 1120,
+        "line": 1127,
         "args": [
           "current_team_index: int",
           "squad_index: int",
@@ -433,19 +433,19 @@
         "is_static": false
       },
       "_review_promises": {
-        "line": 1159,
+        "line": 1166,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_run_weekly_cycle": {
-        "line": 1204,
+        "line": 1211,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_run_weekly_morale_pass": {
-        "line": 1232,
+        "line": 1242,
         "args": [
           "club: TeamData"
         ],
@@ -453,7 +453,7 @@
         "is_static": false
       },
       "_median_wage": {
-        "line": 1266,
+        "line": 1276,
         "args": [
           "club: TeamData"
         ],
@@ -461,7 +461,7 @@
         "is_static": false
       },
       "_check_expiring_contracts": {
-        "line": 1276,
+        "line": 1286,
         "args": [
           "club: TeamData"
         ],
@@ -469,13 +469,13 @@
         "is_static": false
       },
       "simulate_next_fixture": {
-        "line": 1294,
+        "line": 1304,
         "args": [],
         "return": "FixtureData",
         "is_static": false
       },
       "_simulate_ai_fixture": {
-        "line": 1304,
+        "line": 1314,
         "args": [
           "fixture: FixtureData"
         ],
@@ -483,7 +483,7 @@
         "is_static": false
       },
       "_simulate_fixture": {
-        "line": 1308,
+        "line": 1318,
         "args": [
           "fixture: FixtureData",
           "is_user: bool"
@@ -492,7 +492,7 @@
         "is_static": false
       },
       "_apply_user_result": {
-        "line": 1512,
+        "line": 1523,
         "args": [
           "fixture: FixtureData"
         ],
@@ -500,7 +500,7 @@
         "is_static": false
       },
       "_competition_of": {
-        "line": 1570,
+        "line": 1581,
         "args": [
           "fixture: FixtureData"
         ],
@@ -508,61 +508,61 @@
         "is_static": false
       },
       "_advance_cup_rounds": {
-        "line": 1578,
+        "line": 1589,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_get_user_division_dict": {
-        "line": 1589,
+        "line": 1607,
         "args": [],
         "return": "Dictionary",
         "is_static": false
       },
       "_check_season_rollover": {
-        "line": 1604,
+        "line": 1622,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "_season_end_year": {
-        "line": 1624,
+        "line": 1642,
         "args": [],
         "return": "int",
         "is_static": false
       },
       "_run_season_end": {
-        "line": 1628,
+        "line": 1646,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_apply_promotion_relegation": {
-        "line": 1686,
+        "line": 1704,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_start_new_season": {
-        "line": 1777,
+        "line": 1795,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_run_youth_intake": {
-        "line": 1821,
+        "line": 1839,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_execute_sacking": {
-        "line": 1854,
+        "line": 1872,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_push_inbox": {
-        "line": 1879,
+        "line": 1897,
         "args": [
           "item: InboxItem"
         ],
@@ -570,13 +570,13 @@
         "is_static": false
       },
       "_emit_inbox_changed": {
-        "line": 1888,
+        "line": 1906,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "resolve_inbox_item": {
-        "line": 1898,
+        "line": 1916,
         "args": [
           "item: InboxItem",
           "option_index: int"
@@ -585,7 +585,7 @@
         "is_static": false
       },
       "_handle_structural_inbox_action": {
-        "line": 1910,
+        "line": 1928,
         "args": [
           "item: InboxItem",
           "option_index: int"
@@ -594,7 +594,7 @@
         "is_static": false
       },
       "_release_player": {
-        "line": 1932,
+        "line": 1950,
         "args": [
           "state: PlayerCareerState"
         ],
@@ -602,13 +602,13 @@
         "is_static": false
       },
       "_rehydrate_inbox": {
-        "line": 1955,
+        "line": 1973,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "toggle_shortlist": {
-        "line": 2044,
+        "line": 2062,
         "args": [
           "player_key: int"
         ],
@@ -616,7 +616,7 @@
         "is_static": false
       },
       "scout_player": {
-        "line": 2056,
+        "line": 2074,
         "args": [
           "team_index: int",
           "squad_index: int"
@@ -625,7 +625,7 @@
         "is_static": false
       },
       "submit_transfer_bid": {
-        "line": 2088,
+        "line": 2106,
         "args": [
           "team_index: int",
           "squad_index: int",
@@ -635,7 +635,7 @@
         "is_static": false
       },
       "raise_transfer_bid": {
-        "line": 2121,
+        "line": 2139,
         "args": [
           "offer: TransferOffer",
           "new_fee: int"
@@ -644,7 +644,7 @@
         "is_static": false
       },
       "offer_personal_terms": {
-        "line": 2140,
+        "line": 2158,
         "args": [
           "offer: TransferOffer",
           "wage: int = -1"
@@ -653,7 +653,7 @@
         "is_static": false
       },
       "withdraw_offer": {
-        "line": 2175,
+        "line": 2193,
         "args": [
           "offer: TransferOffer"
         ],
@@ -661,7 +661,7 @@
         "is_static": false
       },
       "file_board_request": {
-        "line": 2186,
+        "line": 2203,
         "args": [
           "kind: BoardState.RequestKind"
         ],
@@ -669,7 +669,7 @@
         "is_static": false
       },
       "_request_amount": {
-        "line": 2221,
+        "line": 2240,
         "args": [
           "kind: BoardState.RequestKind",
           "finances: ClubFinances"
@@ -677,8 +677,14 @@
         "return": "int",
         "is_static": false
       },
+      "_process_infrastructure_construction": {
+        "line": 2376,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
       "_fixture_label": {
-        "line": 2275,
+        "line": 2442,
         "args": [
           "fixture: FixtureData"
         ],
@@ -686,7 +692,7 @@
         "is_static": false
       },
       "_ordinal": {
-        "line": 2284,
+        "line": 2451,
         "args": [
           "n: int"
         ],
@@ -694,13 +700,13 @@
         "is_static": false
       },
       "_process_takeover_tick": {
-        "line": 2301,
+        "line": 2468,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "is_international_break": {
-        "line": 2355,
+        "line": 2522,
         "args": [
           "date: CareerDate"
         ],
@@ -708,19 +714,19 @@
         "is_static": false
       },
       "_process_international_duty": {
-        "line": 2371,
+        "line": 2538,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_simulate_u23_fixtures": {
-        "line": 2417,
+        "line": 2584,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "move_player_to_u23": {
-        "line": 2432,
+        "line": 2599,
         "args": [
           "player_key: int"
         ],
@@ -728,7 +734,7 @@
         "is_static": false
       },
       "move_player_to_senior": {
-        "line": 2438,
+        "line": 2605,
         "args": [
           "player_key: int"
         ],
@@ -736,7 +742,7 @@
         "is_static": false
       },
       "submit_loan_bid": {
-        "line": 2446,
+        "line": 2613,
         "args": [
           "player_key: int",
           "wage_share: float"
@@ -745,7 +751,7 @@
         "is_static": false
       },
       "sign_free_agent": {
-        "line": 2464,
+        "line": 2631,
         "args": [
           "player: PlayerData",
           "contract: ContractData"
@@ -754,7 +760,7 @@
         "is_static": false
       },
       "hire_staff_member": {
-        "line": 2501,
+        "line": 2668,
         "args": [
           "staff: StaffData",
           "weekly_salary: int",
@@ -764,7 +770,7 @@
         "is_static": false
       },
       "sack_staff_member": {
-        "line": 2508,
+        "line": 2675,
         "args": [
           "staff: StaffData"
         ],
@@ -772,7 +778,7 @@
         "is_static": false
       },
       "assign_scout_to_region": {
-        "line": 2514,
+        "line": 2681,
         "args": [
           "scout_name: String",
           "region: String"
@@ -781,7 +787,7 @@
         "is_static": false
       },
       "get_scout_region": {
-        "line": 2518,
+        "line": 2685,
         "args": [
           "scout_name: String"
         ],
@@ -789,7 +795,7 @@
         "is_static": false
       },
       "get_tactical_preset": {
-        "line": 2524,
+        "line": 2691,
         "args": [
           "slot_index: int"
         ],
@@ -797,7 +803,7 @@
         "is_static": false
       },
       "check_and_dispatch_incident_press_conferences": {
-        "line": 2551,
+        "line": 2718,
         "args": [
           "is_post_match: bool",
           "opponent_name: String = \"\""
@@ -4597,18 +4603,17 @@
         "return": "void",
         "is_static": false
       },
-      "evaluate_request": {
-        "line": 272,
+      "apply_financial_health": {
+        "line": 270,
         "args": [
-          "request: Dictionary",
-          "affordability: float",
-          "rng: RandomNumberGenerator"
+          "balance: int",
+          "weekly_wage_budget: int"
         ],
-        "return": "Dictionary",
+        "return": "void",
         "is_static": false
       },
       "resolve_request": {
-        "line": 290,
+        "line": 315,
         "args": [
           "index: int",
           "verdict: Dictionary"
@@ -4617,7 +4622,7 @@
         "is_static": false
       },
       "facility_multiplier": {
-        "line": 299,
+        "line": 324,
         "args": [
           "level: int"
         ],
@@ -5367,7 +5372,7 @@
         "is_static": true
       },
       "_finances_from_dict": {
-        "line": 641,
+        "line": 647,
         "args": [
           "raw: Variant"
         ],
@@ -5375,7 +5380,7 @@
         "is_static": true
       },
       "_int_array": {
-        "line": 668,
+        "line": 680,
         "args": [
           "raw: Variant",
           "min_size: int"
@@ -5384,7 +5389,7 @@
         "is_static": true
       },
       "_board_to_dict": {
-        "line": 678,
+        "line": 690,
         "args": [
           "b: BoardState"
         ],
@@ -5392,7 +5397,7 @@
         "is_static": true
       },
       "_board_from_dict": {
-        "line": 705,
+        "line": 718,
         "args": [
           "raw: Variant"
         ],
@@ -5400,7 +5405,7 @@
         "is_static": true
       },
       "_training_to_dict": {
-        "line": 744,
+        "line": 758,
         "args": [
           "t: TrainingSchedule"
         ],
@@ -5408,7 +5413,7 @@
         "is_static": true
       },
       "_training_from_dict": {
-        "line": 756,
+        "line": 770,
         "args": [
           "raw: Variant"
         ],
@@ -5416,7 +5421,7 @@
         "is_static": true
       },
       "_int_keyed": {
-        "line": 771,
+        "line": 785,
         "args": [
           "raw: Variant"
         ],
@@ -5424,23 +5429,39 @@
         "is_static": true
       },
       "_competition_to_dict": {
-        "line": 780,
+        "line": 794,
         "args": [
           "c: CompetitionData"
         ],
         "return": "Dictionary",
         "is_static": true
       },
+      "_group_tables_to_array": {
+        "line": 847,
+        "args": [
+          "tables: Array[Array]"
+        ],
+        "return": "Array",
+        "is_static": true
+      },
       "_competition_from_dict": {
-        "line": 829,
+        "line": 871,
         "args": [
           "d: Dictionary"
         ],
         "return": "CompetitionData",
         "is_static": true
       },
+      "_row_from_dict": {
+        "line": 939,
+        "args": [
+          "raw: Variant"
+        ],
+        "return": "LeagueTableRow",
+        "is_static": true
+      },
       "_inbox_to_dict": {
-        "line": 889,
+        "line": 960,
         "args": [
           "i: InboxItem"
         ],
@@ -5448,7 +5469,7 @@
         "is_static": true
       },
       "_inbox_from_dict": {
-        "line": 912,
+        "line": 983,
         "args": [
           "d: Dictionary"
         ],
@@ -5456,7 +5477,7 @@
         "is_static": true
       },
       "_event_to_dict": {
-        "line": 930,
+        "line": 1001,
         "args": [
           "e: WorldEvent"
         ],
@@ -5464,7 +5485,7 @@
         "is_static": true
       },
       "_event_from_dict": {
-        "line": 949,
+        "line": 1020,
         "args": [
           "d: Dictionary"
         ],
@@ -5472,7 +5493,7 @@
         "is_static": true
       },
       "_report_to_dict": {
-        "line": 968,
+        "line": 1039,
         "args": [
           "r: ScoutReport"
         ],
@@ -5480,7 +5501,7 @@
         "is_static": true
       },
       "_report_from_dict": {
-        "line": 987,
+        "line": 1058,
         "args": [
           "d: Dictionary"
         ],
@@ -5488,7 +5509,7 @@
         "is_static": true
       },
       "_offer_to_dict": {
-        "line": 1006,
+        "line": 1077,
         "args": [
           "o: TransferOffer"
         ],
@@ -5496,7 +5517,7 @@
         "is_static": true
       },
       "_offer_from_dict": {
-        "line": 1035,
+        "line": 1106,
         "args": [
           "d: Dictionary"
         ],
@@ -5837,15 +5858,65 @@
         "is_onready": false
       },
       "spending_frozen": {
-        "line": 68,
+        "line": 67,
         "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "stadium_expansion_capacity": {
+        "line": 69,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "expansion_completion_date": {
+        "line": 70,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      },
+      "expansion_cost": {
+        "line": 71,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "facility_upgrade_type": {
+        "line": 72,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "facility_upgrade_completion_date": {
+        "line": 73,
+        "type": "CareerDate",
+        "is_export": true,
+        "is_onready": false
+      },
+      "facility_upgrade_cost": {
+        "line": 74,
+        "type": "int",
         "is_export": true,
         "is_onready": false
       }
     },
     "methods": {
+      "is_expansion_underway": {
+        "line": 77,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "is_facility_upgrade_underway": {
+        "line": 81,
+        "args": [
+          "kind: int = -1"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
       "from_team": {
-        "line": 71,
+        "line": 89,
         "args": [
           "team: TeamData",
           "capacity: int"
@@ -5854,7 +5925,7 @@
         "is_static": true
       },
       "weekly_wage_bill": {
-        "line": 84,
+        "line": 102,
         "args": [
           "team: TeamData",
           "contracts: Dictionary"
@@ -5863,7 +5934,7 @@
         "is_static": false
       },
       "weekly_staff_bill": {
-        "line": 99,
+        "line": 117,
         "args": [
           "team: TeamData"
         ],
@@ -5871,7 +5942,7 @@
         "is_static": false
       },
       "record_income": {
-        "line": 106,
+        "line": 124,
         "args": [
           "line: Line",
           "amount: int"
@@ -5880,7 +5951,7 @@
         "is_static": false
       },
       "record_expense": {
-        "line": 113,
+        "line": 131,
         "args": [
           "line: Line",
           "amount: int"
@@ -5889,19 +5960,19 @@
         "is_static": false
       },
       "total_income": {
-        "line": 120,
+        "line": 138,
         "args": [],
         "return": "int",
         "is_static": false
       },
       "total_expense": {
-        "line": 127,
+        "line": 145,
         "args": [],
         "return": "int",
         "is_static": false
       },
       "can_afford_fee": {
-        "line": 134,
+        "line": 152,
         "args": [
           "fee: int"
         ],
@@ -5909,7 +5980,7 @@
         "is_static": false
       },
       "can_afford_wage": {
-        "line": 140,
+        "line": 158,
         "args": [
           "new_weekly: int",
           "current_bill: int"
@@ -5918,7 +5989,7 @@
         "is_static": false
       },
       "commit_fee": {
-        "line": 146,
+        "line": 164,
         "args": [
           "fee: int",
           "instalment_years: int",
@@ -5929,7 +6000,7 @@
         "is_static": false
       },
       "receive_fee": {
-        "line": 155,
+        "line": 173,
         "args": [
           "fee: int",
           "instalment_years: int",
@@ -5940,7 +6011,7 @@
         "is_static": false
       },
       "book_matchday": {
-        "line": 166,
+        "line": 184,
         "args": [
           "reputation: float",
           "form_factor: float"
@@ -5949,7 +6020,7 @@
         "is_static": false
       },
       "book_sponsorship": {
-        "line": 174,
+        "line": 192,
         "args": [
           "reputation: float"
         ],
@@ -5957,7 +6028,7 @@
         "is_static": false
       },
       "prize_money_for_position": {
-        "line": 180,
+        "line": 198,
         "args": [
           "position: int",
           "team_count: int"
@@ -5966,7 +6037,7 @@
         "is_static": true
       },
       "post_weekly_cycle": {
-        "line": 186,
+        "line": 204,
         "args": [
           "team: TeamData",
           "contracts: Dictionary",
@@ -5977,7 +6048,7 @@
         "is_static": false
       },
       "project_end_of_season": {
-        "line": 197,
+        "line": 215,
         "args": [
           "team: TeamData",
           "contracts: Dictionary",
@@ -5988,7 +6059,7 @@
         "is_static": false
       },
       "book_sponsorship_estimate": {
-        "line": 212,
+        "line": 230,
         "args": [
           "reputation: float"
         ],
@@ -5996,7 +6067,7 @@
         "is_static": false
       },
       "reallocate": {
-        "line": 218,
+        "line": 236,
         "args": [
           "transfer_delta: int"
         ],
@@ -6004,7 +6075,7 @@
         "is_static": false
       },
       "settle_due_instalments": {
-        "line": 232,
+        "line": 250,
         "args": [
           "season_year: int"
         ],
@@ -6012,7 +6083,7 @@
         "is_static": false
       },
       "reset_season_ledger": {
-        "line": 250,
+        "line": 268,
         "args": [],
         "return": "void",
         "is_static": false
@@ -6031,108 +6102,139 @@
           "KNOCKOUT_CUP",
           "CONTINENTAL"
         ]
+      },
+      "Stage": {
+        "line": 23,
+        "values": [
+          "GROUP_STAGE",
+          "KNOCKOUT"
+        ]
       }
     },
     "properties": {
       "ROUND_LABELS": {
-        "line": 25,
+        "line": 26,
         "type": "Dictionary",
         "is_const": true
       },
       "competition_name": {
-        "line": 33,
+        "line": 34,
         "type": "String",
         "is_export": true,
         "is_onready": false
       },
       "kind": {
-        "line": 34,
+        "line": 35,
         "type": "Kind",
         "is_export": true,
         "is_onready": false
       },
+      "stage": {
+        "line": 37,
+        "type": "Stage",
+        "is_export": true,
+        "is_onready": false
+      },
       "participant_indices": {
-        "line": 36,
+        "line": 39,
         "type": "Array[int]",
         "is_export": true,
         "is_onready": false
       },
       "fixtures": {
-        "line": 37,
+        "line": 40,
         "type": "Array[FixtureData]",
         "is_export": true,
         "is_onready": false
       },
       "table": {
-        "line": 38,
+        "line": 41,
         "type": "Array[LeagueTableRow]",
         "is_export": true,
         "is_onready": false
       },
       "current_round": {
-        "line": 39,
+        "line": 42,
         "type": "int",
         "is_export": true,
         "is_onready": false
       },
       "total_rounds": {
-        "line": 40,
-        "type": "int",
-        "is_export": true,
-        "is_onready": false
-      },
-      "remaining_indices": {
-        "line": 42,
-        "type": "Array[int]",
-        "is_export": true,
-        "is_onready": false
-      },
-      "winner_index": {
         "line": 43,
         "type": "int",
         "is_export": true,
         "is_onready": false
       },
-      "two_legged": {
-        "line": 44,
-        "type": "bool",
+      "remaining_indices": {
+        "line": 45,
+        "type": "Array[int]",
         "is_export": true,
         "is_onready": false
       },
-      "tier": {
+      "winner_index": {
         "line": 46,
         "type": "int",
         "is_export": true,
         "is_onready": false
       },
+      "two_legged": {
+        "line": 47,
+        "type": "bool",
+        "is_export": true,
+        "is_onready": false
+      },
+      "tier": {
+        "line": 49,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
       "group_index": {
-        "line": 48,
-        "type": "int",
-        "is_export": true,
-        "is_onready": false
-      },
-      "promotion_slots": {
-        "line": 50,
-        "type": "int",
-        "is_export": true,
-        "is_onready": false
-      },
-      "relegation_slots": {
         "line": 51,
         "type": "int",
         "is_export": true,
         "is_onready": false
       },
-      "fixture_tag": {
+      "promotion_slots": {
         "line": 53,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "relegation_slots": {
+        "line": 54,
+        "type": "int",
+        "is_export": true,
+        "is_onready": false
+      },
+      "fixture_tag": {
+        "line": 56,
         "type": "FixtureData.Competition",
+        "is_export": true,
+        "is_onready": false
+      },
+      "group_teams": {
+        "line": 58,
+        "type": "Array[Array]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "group_tables": {
+        "line": 60,
+        "type": "Array[Array]",
+        "is_export": true,
+        "is_onready": false
+      },
+      "group_stage_complete": {
+        "line": 61,
+        "type": "bool",
         "is_export": true,
         "is_onready": false
       }
     },
     "methods": {
       "build_cup": {
-        "line": 82,
+        "line": 91,
         "args": [
           "p_name: String",
           "team_indices: Array[int]",
@@ -6141,18 +6243,43 @@
         "return": "CompetitionData",
         "is_static": true
       },
-      "build_continental": {
-        "line": 94,
+      "init_group_stage": {
+        "line": 193,
         "args": [
-          "p_name: String",
-          "team_indices: Array[int]",
-          "p_two_legged: bool = true"
+          "first_date: CareerDate",
+          "spacing_days: int = 14",
+          "rng: RandomNumberGenerator = null"
         ],
-        "return": "CompetitionData",
-        "is_static": true
+        "return": "void",
+        "is_static": false
+      },
+      "group_row_for": {
+        "line": 260,
+        "args": [
+          "team_index: int"
+        ],
+        "return": "LeagueTableRow",
+        "is_static": false
+      },
+      "sorted_group_table": {
+        "line": 270,
+        "args": [
+          "g_idx: int"
+        ],
+        "return": "Array[LeagueTableRow]",
+        "is_static": false
+      },
+      "advance_from_group_stage_to_knockout": {
+        "line": 289,
+        "args": [
+          "match_date: CareerDate",
+          "rng: RandomNumberGenerator"
+        ],
+        "return": "void",
+        "is_static": false
       },
       "draw_cup_round": {
-        "line": 174,
+        "line": 308,
         "args": [
           "match_date: CareerDate",
           "rng: RandomNumberGenerator"
@@ -6161,7 +6288,7 @@
         "is_static": false
       },
       "record_result": {
-        "line": 229,
+        "line": 365,
         "args": [
           "fixture: FixtureData",
           "rng: RandomNumberGenerator"
@@ -6170,7 +6297,7 @@
         "is_static": false
       },
       "_resolve_tie_winner": {
-        "line": 252,
+        "line": 397,
         "args": [
           "fixture: FixtureData",
           "rng: RandomNumberGenerator"
@@ -6179,7 +6306,7 @@
         "is_static": false
       },
       "row_for": {
-        "line": 274,
+        "line": 429,
         "args": [
           "team_index: int"
         ],
@@ -6187,13 +6314,13 @@
         "is_static": false
       },
       "sorted_table": {
-        "line": 282,
+        "line": 437,
         "args": [],
         "return": "Array[LeagueTableRow]",
         "is_static": false
       },
       "position_of": {
-        "line": 290,
+        "line": 445,
         "args": [
           "team_index: int"
         ],
@@ -6201,7 +6328,7 @@
         "is_static": false
       },
       "fixtures_on": {
-        "line": 298,
+        "line": 453,
         "args": [
           "date: CareerDate"
         ],
@@ -6209,7 +6336,7 @@
         "is_static": false
       },
       "next_fixture_for": {
-        "line": 308,
+        "line": 463,
         "args": [
           "team_index: int",
           "from_date: CareerDate"
@@ -6218,19 +6345,19 @@
         "is_static": false
       },
       "unplayed_count": {
-        "line": 320,
+        "line": 475,
         "args": [],
         "return": "int",
         "is_static": false
       },
       "is_complete": {
-        "line": 328,
+        "line": 483,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "cup_round_finished": {
-        "line": 336,
+        "line": 493,
         "args": [],
         "return": "bool",
         "is_static": false
@@ -9526,7 +9653,7 @@
         "is_static": false
       },
       "_assert_true": {
-        "line": 41,
+        "line": 42,
         "args": [
           "cond: bool",
           "msg: String"
@@ -9535,79 +9662,85 @@
         "is_static": false
       },
       "_test_p3_no_legacy_references": {
-        "line": 50,
+        "line": 51,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_p1_cup_byes": {
-        "line": 55,
+        "line": 56,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_p1_synthetic_leagues": {
-        "line": 89,
+        "line": 90,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_p1_matchday_spacing_and_capping": {
-        "line": 136,
+        "line": 137,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_p1_promotion_relegation_multitier": {
-        "line": 150,
+        "line": 151,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_p2_sharded_league_loading": {
-        "line": 194,
+        "line": 195,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_p4_quick_match_isolation": {
-        "line": 244,
+        "line": 245,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_world_database_and_continental": {
-        "line": 260,
+        "line": 261,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_relationship_batching": {
-        "line": 304,
+        "line": 326,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_player_manager_relationships_and_sounding_board": {
-        "line": 358,
+        "line": 380,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_mutiny_and_crisis_escalation": {
-        "line": 421,
+        "line": 443,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_squad_cliques_and_faction_dynamics": {
-        "line": 518,
+        "line": 540,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_incident_press_conference_pipeline": {
-        "line": 695,
+        "line": 717,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_test_stadium_expansion_and_infrastructure": {
+        "line": 815,
         "args": [],
         "return": "void",
         "is_static": false
@@ -10821,24 +10954,14 @@
         "line": 134,
         "args": [
           "board: BoardState",
+          "career: CareerSaveData",
           "p: CareerThemePalette"
         ],
         "return": "VBoxContainer",
         "is_static": false
       },
-      "_facility_row": {
-        "line": 147,
-        "args": [
-          "caption: String",
-          "level: int",
-          "board: BoardState",
-          "p: CareerThemePalette"
-        ],
-        "return": "HBoxContainer",
-        "is_static": false
-      },
       "_requests_card": {
-        "line": 157,
+        "line": 179,
         "args": [
           "board: BoardState",
           "career: CareerSaveData",
@@ -10848,7 +10971,7 @@
         "is_static": false
       },
       "_ordinal": {
-        "line": 210,
+        "line": 263,
         "args": [
           "n: int"
         ],
@@ -11426,7 +11549,7 @@
         "is_static": false
       },
       "_ledger_card": {
-        "line": 102,
+        "line": 103,
         "args": [
           "finances: ClubFinances",
           "p: CareerThemePalette"
@@ -11435,7 +11558,7 @@
         "is_static": false
       },
       "_wages_card": {
-        "line": 130,
+        "line": 131,
         "args": [
           "career: CareerSaveData",
           "team: TeamData",
@@ -11445,7 +11568,16 @@
         "is_static": false
       },
       "_instalments_card": {
-        "line": 167,
+        "line": 168,
+        "args": [
+          "finances: ClubFinances",
+          "p: CareerThemePalette"
+        ],
+        "return": "VBoxContainer",
+        "is_static": false
+      },
+      "_infrastructure_card": {
+        "line": 194,
         "args": [
           "finances: ClubFinances",
           "p: CareerThemePalette"
@@ -11454,7 +11586,7 @@
         "is_static": false
       },
       "_stat": {
-        "line": 193,
+        "line": 232,
         "args": [
           "caption: String",
           "value: String",

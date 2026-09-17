@@ -635,6 +635,12 @@ static func _finances_to_dict(f: ClubFinances) -> Dictionary:
 		"receivables": f.receivables,
 		"last_weekly_cycle": _date_to_str(f.last_weekly_cycle),
 		"spending_frozen": f.spending_frozen,
+		"stadium_expansion_capacity": f.stadium_expansion_capacity,
+		"expansion_completion_date": _date_to_str(f.expansion_completion_date),
+		"expansion_cost": f.expansion_cost,
+		"facility_upgrade_type": f.facility_upgrade_type,
+		"facility_upgrade_completion_date": _date_to_str(f.facility_upgrade_completion_date),
+		"facility_upgrade_cost": f.facility_upgrade_cost,
 	}
 
 
@@ -662,6 +668,12 @@ static func _finances_from_dict(raw: Variant) -> ClubFinances:
 	f.receivables = rec
 	f.last_weekly_cycle = _date_from_str(String(d.get("last_weekly_cycle", "")))
 	f.spending_frozen = bool(d.get("spending_frozen", false))
+	f.stadium_expansion_capacity = int(d.get("stadium_expansion_capacity", 0))
+	f.expansion_completion_date = _date_from_str(String(d.get("expansion_completion_date", "")))
+	f.expansion_cost = int(d.get("expansion_cost", 0))
+	f.facility_upgrade_type = int(d.get("facility_upgrade_type", -1))
+	f.facility_upgrade_completion_date = _date_from_str(String(d.get("facility_upgrade_completion_date", "")))
+	f.facility_upgrade_cost = int(d.get("facility_upgrade_cost", 0))
 	return f
 
 
@@ -688,6 +700,7 @@ static func _board_to_dict(b: BoardState) -> Dictionary:
 		"training_facilities": b.training_facilities,
 		"youth_facilities": b.youth_facilities,
 		"scouting_range": b.scouting_range,
+		"medical_facility": b.medical_facility,
 		"stadium_capacity": b.stadium_capacity,
 		"pending_requests": b.pending_requests,
 		"request_history": b.request_history,
@@ -719,6 +732,7 @@ static func _board_from_dict(raw: Variant) -> BoardState:
 	b.training_facilities = int(d.get("training_facilities", 3))
 	b.youth_facilities = int(d.get("youth_facilities", 3))
 	b.scouting_range = int(d.get("scouting_range", 2))
+	b.medical_facility = int(d.get("medical_facility", 3))
 	b.stadium_capacity = int(d.get("stadium_capacity", 24000))
 	var pend: Array[Dictionary] = []
 	for p: Variant in d.get("pending_requests", []):
@@ -823,13 +837,43 @@ static func _competition_to_dict(c: CompetitionData) -> Dictionary:
 		"two_legged": c.two_legged,
 		"fixture_tag": int(c.fixture_tag),
 		"tier": c.tier,
+		"stage": int(c.stage),
+		"group_stage_complete": c.group_stage_complete,
+		"group_teams": c.group_teams,
+		"group_tables": _group_tables_to_array(c.group_tables),
 	}
+
+
+static func _group_tables_to_array(tables: Array[Array]) -> Array:
+	var out: Array = []
+	for g_rows: Variant in tables:
+		var g_arr: Array = []
+		if typeof(g_rows) == TYPE_ARRAY:
+			for r: Variant in (g_rows as Array):
+				var row: LeagueTableRow = r as LeagueTableRow
+				if row != null:
+					g_arr.append({
+						"team_index": row.team_index,
+						"team_name": row.team_name,
+						"played": row.played,
+						"won": row.won,
+						"drawn": row.drawn,
+						"lost": row.lost,
+						"goals_for": row.goals_for,
+						"goals_against": row.goals_against,
+						"points": row.points,
+						"form": row.form,
+					})
+		out.append(g_arr)
+	return out
 
 
 static func _competition_from_dict(d: Dictionary) -> CompetitionData:
 	var c := CompetitionData.new()
 	c.competition_name = String(d.get("competition_name", "League"))
 	c.kind = int(d.get("kind", 0)) as CompetitionData.Kind
+	c.stage = int(d.get("stage", CompetitionData.Stage.KNOCKOUT)) as CompetitionData.Stage
+	c.group_stage_complete = bool(d.get("group_stage_complete", false))
 	c.participant_indices = _int_array(d.get("participant_indices", []), 0)
 	c.current_round = int(d.get("current_round", 1))
 	c.total_rounds = int(d.get("total_rounds", 1))
@@ -838,6 +882,27 @@ static func _competition_from_dict(d: Dictionary) -> CompetitionData:
 	c.two_legged = bool(d.get("two_legged", false))
 	c.fixture_tag = int(d.get("fixture_tag", 0)) as FixtureData.Competition
 	c.tier = int(d.get("tier", 1))
+
+	var raw_gt: Variant = d.get("group_teams", [])
+	if typeof(raw_gt) == TYPE_ARRAY:
+		var parsed_gt: Array[Array] = []
+		for g_item: Variant in (raw_gt as Array):
+			if typeof(g_item) == TYPE_ARRAY:
+				parsed_gt.append(g_item as Array)
+		c.group_teams = parsed_gt
+
+	var raw_tables: Variant = d.get("group_tables", [])
+	if typeof(raw_tables) == TYPE_ARRAY:
+		var parsed_tables: Array[Array] = []
+		for g_table_raw: Variant in (raw_tables as Array):
+			var table_arr: Array[LeagueTableRow] = []
+			if typeof(g_table_raw) == TYPE_ARRAY:
+				for r_dict: Variant in (g_table_raw as Array):
+					var r_item: LeagueTableRow = _row_from_dict(r_dict)
+					if r_item != null:
+						table_arr.append(r_item)
+			parsed_tables.append(table_arr)
+		c.group_tables = parsed_tables
 
 	var fx: Array[FixtureData] = []
 	for raw: Variant in d.get("fixtures", []):
@@ -864,26 +929,32 @@ static func _competition_from_dict(d: Dictionary) -> CompetitionData:
 
 	var rows: Array[LeagueTableRow] = []
 	for raw2: Variant in d.get("table", []):
-		if typeof(raw2) != TYPE_DICTIONARY:
-			continue
-		var rd: Dictionary = raw2
-		var r := LeagueTableRow.new()
-		r.team_index = int(rd.get("team_index", 0))
-		r.team_name = String(rd.get("team_name", ""))
-		r.played = int(rd.get("played", 0))
-		r.won = int(rd.get("won", 0))
-		r.drawn = int(rd.get("drawn", 0))
-		r.lost = int(rd.get("lost", 0))
-		r.goals_for = int(rd.get("goals_for", 0))
-		r.goals_against = int(rd.get("goals_against", 0))
-		r.points = int(rd.get("points", 0))
-		var form: Array[String] = []
-		for fv: Variant in rd.get("form", []):
-			form.append(String(fv))
-		r.form = form
-		rows.append(r)
+		var r_main: LeagueTableRow = _row_from_dict(raw2)
+		if r_main != null:
+			rows.append(r_main)
 	c.table = rows
 	return c
+
+
+static func _row_from_dict(raw: Variant) -> LeagueTableRow:
+	if typeof(raw) != TYPE_DICTIONARY:
+		return null
+	var rd: Dictionary = raw
+	var r := LeagueTableRow.new()
+	r.team_index = int(rd.get("team_index", 0))
+	r.team_name = String(rd.get("team_name", ""))
+	r.played = int(rd.get("played", 0))
+	r.won = int(rd.get("won", 0))
+	r.drawn = int(rd.get("drawn", 0))
+	r.lost = int(rd.get("lost", 0))
+	r.goals_for = int(rd.get("goals_for", 0))
+	r.goals_against = int(rd.get("goals_against", 0))
+	r.points = int(rd.get("points", 0))
+	var form: Array[String] = []
+	for fv: Variant in rd.get("form", []):
+		form.append(String(fv))
+	r.form = form
+	return r
 
 
 static func _inbox_to_dict(i: InboxItem) -> Dictionary:

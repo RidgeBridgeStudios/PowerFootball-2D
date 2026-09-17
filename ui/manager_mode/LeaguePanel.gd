@@ -125,6 +125,50 @@ func _cup_progress(comp: CompetitionData, career: CareerSaveData, p: CareerTheme
 		))
 		return body
 
+	if comp.stage == CompetitionData.Stage.GROUP_STAGE and not comp.group_tables.is_empty():
+		body.add_child(CareerTheme.label("Group Stage", p.text_primary, p.font_size_heading))
+		for g_idx: int in range(comp.group_tables.size()):
+			body.add_child(CareerTheme.spacer(4))
+			body.add_child(CareerTheme.label("Group %s" % String.chr(65 + g_idx), p.accent))
+			var g_header: HBoxContainer = CareerTheme.header_row()
+			body.add_child(CareerTheme.data_row_root(g_header))
+			g_header.add_child(CareerTheme.cell("#", 28, p.text_muted, HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small))
+			g_header.add_child(CareerTheme.cell("Club", 168, p.text_muted, HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small))
+			for col: String in ["P", "W", "D", "L"]:
+				g_header.add_child(CareerTheme.cell(col, 28, p.text_muted, HORIZONTAL_ALIGNMENT_RIGHT, p.font_size_small))
+			g_header.add_child(CareerTheme.cell("GF", 32, p.text_muted, HORIZONTAL_ALIGNMENT_RIGHT, p.font_size_small))
+			g_header.add_child(CareerTheme.cell("GA", 32, p.text_muted, HORIZONTAL_ALIGNMENT_RIGHT, p.font_size_small))
+			g_header.add_child(CareerTheme.cell("GD", 36, p.text_muted, HORIZONTAL_ALIGNMENT_RIGHT, p.font_size_small))
+			g_header.add_child(CareerTheme.cell("Pts", 34, p.text_muted, HORIZONTAL_ALIGNMENT_RIGHT, p.font_size_small))
+
+			var sorted_rows: Array[LeagueTableRow] = comp.sorted_group_table(g_idx)
+			for r_i: int in range(sorted_rows.size()):
+				var r: LeagueTableRow = sorted_rows[r_i]
+				var pos: int = r_i + 1
+				var is_u: bool = r.team_index == career.user_team_index
+				var g_line: HBoxContainer = CareerTheme.data_row(r_i, is_u)
+				var pos_tint: Color = p.positive if pos <= 2 else p.text_muted
+				var name_tint: Color = p.accent if is_u else p.text_primary
+
+				g_line.add_child(CareerTheme.cell(str(pos), 28, pos_tint))
+				g_line.add_child(CareerTheme.cell(r.team_name, 168, name_tint))
+				g_line.add_child(CareerTheme.cell(str(r.played), 28, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT))
+				g_line.add_child(CareerTheme.cell(str(r.won), 28, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT))
+				g_line.add_child(CareerTheme.cell(str(r.drawn), 28, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT))
+				g_line.add_child(CareerTheme.cell(str(r.lost), 28, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT))
+				g_line.add_child(CareerTheme.cell(str(r.goals_for), 32, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT))
+				g_line.add_child(CareerTheme.cell(str(r.goals_against), 32, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT))
+				var gd: int = r.goal_difference()
+				g_line.add_child(CareerTheme.cell(
+					"+%d" % gd if gd > 0 else str(gd), 36,
+					p.positive if gd > 0 else (p.danger if gd < 0 else p.text_secondary),
+					HORIZONTAL_ALIGNMENT_RIGHT
+				))
+				g_line.add_child(CareerTheme.cell(str(r.points), 34, name_tint, HORIZONTAL_ALIGNMENT_RIGHT))
+				body.add_child(CareerTheme.data_row_root(g_line))
+
+		return body
+
 	var still_in: bool = comp.remaining_indices.has(career.user_team_index)
 	body.add_child(CareerTheme.label(
 		"Round %d · %d clubs remaining" % [comp.current_round, comp.remaining_indices.size()],

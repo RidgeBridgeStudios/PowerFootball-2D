@@ -339,16 +339,22 @@ func _build_competitions() -> void:
 	if not uefa_t1.is_empty():
 		career.continental_indices = uefa_t1
 		var continental: CompetitionData = CompetitionData.build_continental(
-			"European Champions Cup", career.continental_indices, true
+			"European Champions Cup", career.continental_indices, true, uefa_t1.size() >= 4
 		)
-		continental.draw_cup_round(first_matchday.advanced_by(18), _rng)
+		if continental.stage == CompetitionData.Stage.GROUP_STAGE:
+			continental.init_group_stage(first_matchday.advanced_by(18), 14, _rng)
+		else:
+			continental.draw_cup_round(first_matchday.advanced_by(18), _rng)
 		career.competitions.append(continental)
 
 	if not americas_t1.is_empty():
 		var copa: CompetitionData = CompetitionData.build_continental(
-			"Copa Continental", americas_t1, true
+			"Copa Continental", americas_t1, true, americas_t1.size() >= 4
 		)
-		copa.draw_cup_round(first_matchday.advanced_by(21), _rng)
+		if copa.stage == CompetitionData.Stage.GROUP_STAGE:
+			copa.init_group_stage(first_matchday.advanced_by(21), 14, _rng)
+		else:
+			copa.draw_cup_round(first_matchday.advanced_by(21), _rng)
 		career.competitions.append(copa)
 
 	var world_cup_teams: Array[int] = []
@@ -570,6 +576,7 @@ func advance_day() -> HaltReason:
 	_process_takeover_tick()
 	_process_international_duty()
 	_process_recovery_and_training()
+	_process_infrastructure_construction()
 	WorldEventGenerator.roll_for_day(career, _rng)
 	_process_scouting()
 	_process_transfer_negotiations()
@@ -1225,6 +1232,9 @@ func _run_weekly_cycle() -> void:
 	elif fin.spending_frozen and fin.balance > 0:
 		fin.spending_frozen = false
 
+	if career.board != null:
+		career.board.apply_financial_health(fin.balance, fin.wage_budget_weekly)
+
 	_run_weekly_morale_pass(club)
 	_check_expiring_contracts(club)
 
@@ -1314,8 +1324,9 @@ func _simulate_fixture(fixture: FixtureData, is_user: bool) -> void:
 	var away_mgr: ManagerData = ManagerLoader.get_or_assign_manager(away.team_name)
 	var ref: RefereeData = RefereeLoader.get_or_assign_referee(home.team_name, away.team_name)
 
+	var is_neutral: bool = (fixture.leg == 0 and fixture.round_label == "Final")
 	var result: QuickSimEngine.QuickSimResult = QuickSimEngine.simulate_match(
-		home, away, home_mgr, away_mgr, ref, home.lineup_indices, away.lineup_indices
+		home, away, home_mgr, away_mgr, ref, home.lineup_indices, away.lineup_indices, is_neutral
 	)
 	fixture.played = true
 	fixture.home_score = result.home_score
@@ -1579,7 +1590,14 @@ func _advance_cup_rounds() -> void:
 	for comp: CompetitionData in career.competitions:
 		if comp.kind != CompetitionData.Kind.KNOCKOUT_CUP and comp.kind != CompetitionData.Kind.CONTINENTAL:
 			continue
-		if comp.is_complete() or not comp.cup_round_finished():
+		if comp.is_complete():
+			continue
+		if comp.stage == CompetitionData.Stage.GROUP_STAGE:
+			if comp.cup_round_finished():
+				comp.advance_from_group_stage_to_knockout(career.today.advanced_by(21), _rng)
+				_tag_user_fixtures()
+			continue
+		if not comp.cup_round_finished():
 			continue
 		comp.current_round += 1
 		comp.draw_cup_round(career.today.advanced_by(21), _rng)
@@ -2181,8 +2199,7 @@ func withdraw_offer(offer: TransferOffer) -> void:
 
 
 ## Files a request with the board and resolves it immediately — a board does
-## not need days to say no. Affordability is a real read of the club's books,
-## so a broke club is refused however well the manager is doing.
+## not need days to say no. Affordability and club stature are weighed.
 func file_board_request(kind: BoardState.RequestKind) -> void:
 	if career == null or career.board == null:
 		return
@@ -2196,10 +2213,12 @@ func file_board_request(kind: BoardState.RequestKind) -> void:
 			float(finances.balance) / maxf(float(finances.wage_budget_weekly) * 40.0, 1.0), 0.0, 1.0
 		)
 
+	var club: TeamData = user_team()
+	var stature: float = club.reputation if club != null else 0.5
 	var amount: int = _request_amount(kind, finances)
 	career.board.file_request(kind, amount, career.today)
 	var request: Dictionary = career.board.pending_requests[career.board.pending_requests.size() - 1]
-	var verdict: Dictionary = career.board.evaluate_request(request, affordability, _rng)
+	var verdict: Dictionary = career.board.evaluate_request(request, affordability, _rng, stature)
 	var granted: float = float(verdict.get("granted_fraction", 0.0))
 	var status: String = String(verdict.get("status", "rejected"))
 
@@ -2224,6 +2243,17 @@ func _request_amount(kind: BoardState.RequestKind, finances: ClubFinances) -> in
 			return maxi(int(round(float(finances.transfer_budget) * 0.35)) if finances != null else 0, 500000)
 		BoardState.RequestKind.WAGE_BUDGET:
 			return maxi(int(round(float(finances.wage_budget_weekly) * 0.20)) if finances != null else 0, 5000)
+		BoardState.RequestKind.STADIUM_EXPANSION:
+			var cap: int = career.board.stadium_capacity if career.board != null else (finances.stadium_capacity if finances != null else 24000)
+			return maxi(int(round(float(cap) * 0.20)), 2000)
+		BoardState.RequestKind.TRAINING_FACILITIES:
+			return (career.board.training_facilities + 1) if career.board != null else 1
+		BoardState.RequestKind.YOUTH_FACILITIES:
+			return (career.board.youth_facilities + 1) if career.board != null else 1
+		BoardState.RequestKind.SCOUTING_NETWORK:
+			return (career.board.scouting_range + 1) if career.board != null else 1
+		BoardState.RequestKind.MEDICAL_FACILITIES:
+			return (career.board.medical_facility + 1) if career.board != null else 1
 		_:
 			return 1
 
@@ -2236,7 +2266,7 @@ func _apply_request_verdict(
 	finances: ClubFinances
 ) -> String:
 	if status == "rejected" or granted <= 0.0:
-		return "The board have rejected your request to %s." % 			BoardState.REQUEST_NAMES[int(kind)].to_lower()
+		return "The board have rejected your request to %s." % BoardState.REQUEST_NAMES[int(kind)].to_lower()
 
 	var board: BoardState = career.board
 	match kind:
@@ -2250,26 +2280,163 @@ func _apply_request_verdict(
 			if finances != null:
 				finances.wage_budget_weekly += given_wage
 			return "The wage budget has been increased by %s per week." % TransferMarket.format_fee(given_wage)
-		BoardState.RequestKind.TRAINING_FACILITIES:
-			board.training_facilities = clampi(board.training_facilities + 1, 1, 5)
-			return "Training facilities will be upgraded to level %d." % board.training_facilities
-		BoardState.RequestKind.YOUTH_FACILITIES:
-			board.youth_facilities = clampi(board.youth_facilities + 1, 1, 5)
-			return "Youth facilities will be upgraded to level %d." % board.youth_facilities
-		BoardState.RequestKind.SCOUTING_NETWORK:
-			board.scouting_range = clampi(board.scouting_range + 1, 1, 5)
-			return "The scouting network has been expanded to level %d." % board.scouting_range
-		BoardState.RequestKind.MEDICAL_FACILITIES:
-			board.medical_facility = clampi(board.medical_facility + 1, 1, 5)
-			return "The medical centre will be upgraded to level %d." % board.medical_facility
 		BoardState.RequestKind.STADIUM_EXPANSION:
-			var added: int = int(round(float(board.stadium_capacity) * 0.20 * granted))
-			board.stadium_capacity += added
-			if finances != null:
-				finances.stadium_capacity = board.stadium_capacity
-			return "The stadium will be expanded by %d seats." % added
+			if finances == null or board == null:
+				return "The board could not process the stadium request."
+			if finances.is_expansion_underway():
+				return "Stadium expansion is already underway until %s." % (
+					finances.expansion_completion_date.to_display() if finances.expansion_completion_date != null else "completion"
+				)
+			var added: int = maxi(int(round(float(amount) * granted)), 1000)
+			var total_cost: int = added * 750
+			if finances.balance < total_cost / 2:
+				return "The board rejected the expansion: club balance is insufficient for the %s capital expenditure." % TransferMarket.format_fee(total_cost)
+
+			finances.stadium_expansion_capacity = added
+			finances.expansion_cost = total_cost
+			finances.expansion_completion_date = career.today.advanced_by(150)
+
+			if finances.balance >= total_cost * 2:
+				finances.record_expense(ClubFinances.Line.FACILITIES, total_cost)
+				return "The board approved expanding the stadium by %d seats for %s (paid upfront). Completion: %s." % [
+					added, TransferMarket.format_fee(total_cost), finances.expansion_completion_date.to_display()
+				]
+			else:
+				var upfront: int = total_cost / 2
+				var remainder: int = total_cost - upfront
+				finances.record_expense(ClubFinances.Line.FACILITIES, upfront)
+				finances.payables.append({
+					"season_year": career.today.year + 1,
+					"amount": remainder,
+					"note": "Stadium Expansion Capital Expense"
+				})
+				return "The board approved expanding the stadium by %d seats for %s (50%% upfront, 50%% next season). Completion: %s." % [
+					added, TransferMarket.format_fee(total_cost), finances.expansion_completion_date.to_display()
+				]
+		BoardState.RequestKind.TRAINING_FACILITIES, \
+		BoardState.RequestKind.YOUTH_FACILITIES, \
+		BoardState.RequestKind.SCOUTING_NETWORK, \
+		BoardState.RequestKind.MEDICAL_FACILITIES:
+			if finances == null or board == null:
+				return "The board could not process the facility upgrade request."
+			var cur_lvl: int = 1
+			var fac_name: String = ""
+			match kind:
+				BoardState.RequestKind.TRAINING_FACILITIES:
+					cur_lvl = board.training_facilities
+					fac_name = "Training facilities"
+				BoardState.RequestKind.YOUTH_FACILITIES:
+					cur_lvl = board.youth_facilities
+					fac_name = "Youth facilities"
+				BoardState.RequestKind.SCOUTING_NETWORK:
+					cur_lvl = board.scouting_range
+					fac_name = "Scouting network"
+				BoardState.RequestKind.MEDICAL_FACILITIES:
+					cur_lvl = board.medical_facility
+					fac_name = "Medical facilities"
+
+			if cur_lvl >= 5:
+				return "%s are already at the maximum tier (Level 5)." % fac_name
+			if finances.is_facility_upgrade_underway(int(kind)):
+				return "%s upgrade is already in progress until %s." % [
+					fac_name,
+					finances.facility_upgrade_completion_date.to_display() if finances.facility_upgrade_completion_date != null else "completion"
+				]
+
+			var target_lvl: int = cur_lvl + 1
+			var fac_cost: int = target_lvl * 1_250_000
+			if finances.balance < fac_cost / 2:
+				return "The board rejected the upgrade: club balance is insufficient for the %s capital expenditure." % TransferMarket.format_fee(fac_cost)
+
+			finances.facility_upgrade_type = int(kind)
+			finances.facility_upgrade_cost = fac_cost
+			finances.facility_upgrade_completion_date = career.today.advanced_by(90)
+
+			if finances.balance >= fac_cost * 2:
+				finances.record_expense(ClubFinances.Line.FACILITIES, fac_cost)
+				return "The board approved upgrading %s to Level %d for %s (paid upfront). Completion: %s." % [
+					fac_name.to_lower(), target_lvl, TransferMarket.format_fee(fac_cost), finances.facility_upgrade_completion_date.to_display()
+				]
+			else:
+				var fac_upfront: int = fac_cost / 2
+				var fac_remainder: int = fac_cost - fac_upfront
+				finances.record_expense(ClubFinances.Line.FACILITIES, fac_upfront)
+				finances.payables.append({
+					"season_year": career.today.year + 1,
+					"amount": fac_remainder,
+					"note": "%s Upgrade Capital Expense" % fac_name
+				})
+				return "The board approved upgrading %s to Level %d for %s (instalments). Completion: %s." % [
+					fac_name.to_lower(), target_lvl, TransferMarket.format_fee(fac_cost), finances.facility_upgrade_completion_date.to_display()
+				]
 		_:
 			return "The board have approved your request."
+
+
+func _process_infrastructure_construction() -> void:
+	if career == null:
+		return
+	var fin: ClubFinances = career.user_finances()
+	if fin == null:
+		return
+	var today: CareerDate = career.today
+	var board: BoardState = career.board
+
+	if fin.is_expansion_underway():
+		if today.days_until(fin.expansion_completion_date) <= 0:
+			var added: int = fin.stadium_expansion_capacity
+			fin.stadium_capacity += added
+			if board != null:
+				board.stadium_capacity = fin.stadium_capacity
+			fin.stadium_expansion_capacity = 0
+			fin.expansion_completion_date = null
+			fin.expansion_cost = 0
+			var msg: String = "Stadium expansion completed! Total capacity is now %d seats (an increase of %d seats)." % [
+				fin.stadium_capacity, added
+			]
+			_push_inbox(InboxEngine.build_simple(
+				"Stadium Expansion Complete", msg, InboxItem.Category.BOARD, 0.8, today
+			))
+			WorldEventLog.record(
+				&"stadium_expanded", WorldEvent.Category.BOARD, msg, 0.5, 0.6
+			)
+
+	if fin.is_facility_upgrade_underway():
+		if today.days_until(fin.facility_upgrade_completion_date) <= 0:
+			var f_kind: int = fin.facility_upgrade_type
+			var fac_name: String = ""
+			var new_lvl: int = 1
+			if board != null:
+				match f_kind:
+					BoardState.RequestKind.TRAINING_FACILITIES:
+						board.training_facilities = clampi(board.training_facilities + 1, 1, 5)
+						fac_name = "Training facilities"
+						new_lvl = board.training_facilities
+					BoardState.RequestKind.YOUTH_FACILITIES:
+						board.youth_facilities = clampi(board.youth_facilities + 1, 1, 5)
+						fac_name = "Youth facilities"
+						new_lvl = board.youth_facilities
+					BoardState.RequestKind.SCOUTING_NETWORK:
+						board.scouting_range = clampi(board.scouting_range + 1, 1, 5)
+						fac_name = "Scouting network"
+						new_lvl = board.scouting_range
+					BoardState.RequestKind.MEDICAL_FACILITIES:
+						board.medical_facility = clampi(board.medical_facility + 1, 1, 5)
+						fac_name = "Medical facilities"
+						new_lvl = board.medical_facility
+
+			fin.facility_upgrade_type = -1
+			fin.facility_upgrade_completion_date = null
+			fin.facility_upgrade_cost = 0
+
+			if fac_name != "":
+				var fac_msg: String = "%s upgrade completed! Now operating at Level %d." % [fac_name, new_lvl]
+				_push_inbox(InboxEngine.build_simple(
+					"%s Upgrade Complete" % fac_name, fac_msg, InboxItem.Category.BOARD, 0.8, today
+				))
+				WorldEventLog.record(
+					&"facility_upgraded", WorldEvent.Category.BOARD, fac_msg, 0.4, 0.5
+				)
 
 
 func _fixture_label(fixture: FixtureData) -> String:

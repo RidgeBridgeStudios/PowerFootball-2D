@@ -89,6 +89,7 @@
         "shared/TeamData.gd",
         "shared/career/CareerSaveData.gd",
         "shared/career/CareerSerializer.gd",
+        "shared/career/CompetitionData.gd",
         "shared/career/InboxEngine.gd",
         "shared/career/WorldEventGenerator.gd",
         "tests/run_all.gd",
@@ -287,7 +288,8 @@
         "shared/ManagerData.gd",
         "shared/career/InboxEngine.gd",
         "shared/career/ManagerCareerProfile.gd",
-        "shared/career/WorldEvent.gd"
+        "shared/career/WorldEvent.gd",
+        "tests/run_all.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -520,6 +522,7 @@
         "autoloads/MatchStatsTracker.gd",
         "shared/ManagerData.gd",
         "shared/RefereeData.gd",
+        "shared/career/CompetitionData.gd",
         "shared/career/ManagerCareerProfile.gd",
         "shared/career/MoraleEngine.gd",
         "shared/career/PlayerCareerState.gd",
@@ -883,6 +886,8 @@
       "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "Resource",
       "direct_dependencies": [
+        "autoloads/DataLoader.gd",
+        "shared/QuickSimEngine.gd",
         "shared/TeamData.gd",
         "shared/career/CareerDate.gd",
         "shared/career/FixtureData.gd",
@@ -1026,6 +1031,7 @@
         "shared/career/CareerSerializer.gd",
         "shared/career/CompetitionData.gd",
         "shared/career/ScoutingNetwork.gd",
+        "tests/run_all.gd",
         "ui/manager_mode/LeaguePanel.gd",
         "ui/manager_mode/OverviewPanel.gd"
       ],
@@ -1377,6 +1383,7 @@
         "autoloads/DataLoader.gd",
         "autoloads/ManagerLoader.gd",
         "autoloads/RefereeLoader.gd",
+        "entities/manager/PressOffice.gd",
         "shared/ManagerData.gd",
         "shared/NationDatabase.gd",
         "shared/PlayerData.gd",
@@ -1391,6 +1398,7 @@
         "shared/career/FixtureData.gd",
         "shared/career/InboxEngine.gd",
         "shared/career/InboxItem.gd",
+        "shared/career/LeagueTableRow.gd",
         "shared/career/ManagerCareerProfile.gd",
         "shared/career/MoraleEngine.gd",
         "shared/career/PlayerCareerState.gd",

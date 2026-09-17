@@ -25,7 +25,7 @@ func build(host: VBoxContainer, career: CareerSaveData) -> void:
 
 	host.add_child(CareerTheme.card_root(_confidence_card(board, career, p)))
 	host.add_child(CareerTheme.card_root(_takeover_card(board, p)))
-	host.add_child(CareerTheme.card_root(_facilities_card(board, p)))
+	host.add_child(CareerTheme.card_root(_facilities_card(board, career, p)))
 	host.add_child(CareerTheme.card_root(_requests_card(board, career, p)))
 
 
@@ -131,25 +131,47 @@ func _confidence_card(board: BoardState, career: CareerSaveData, p: CareerThemeP
 	return body
 
 
-func _facilities_card(board: BoardState, p: CareerThemePalette) -> VBoxContainer:
+func _facilities_card(board: BoardState, career: CareerSaveData, p: CareerThemePalette) -> VBoxContainer:
 	var body: VBoxContainer = CareerTheme.card("Facilities")
-	body.add_child(_facility_row("Training facilities", board.training_facilities, board, p))
-	body.add_child(_facility_row("Youth facilities", board.youth_facilities, board, p))
-	body.add_child(_facility_row("Scouting network", board.scouting_range, board, p))
-	body.add_child(_facility_row("Medical facilities", board.medical_facility, board, p))
+	var finances: ClubFinances = career.user_finances() if career != null else null
+	body.add_child(_facility_row("Training facilities", board.training_facilities, board, finances, int(BoardState.RequestKind.TRAINING_FACILITIES), p))
+	body.add_child(_facility_row("Youth facilities", board.youth_facilities, board, finances, int(BoardState.RequestKind.YOUTH_FACILITIES), p))
+	body.add_child(_facility_row("Scouting network", board.scouting_range, board, finances, int(BoardState.RequestKind.SCOUTING_NETWORK), p))
+	body.add_child(_facility_row("Medical facilities", board.medical_facility, board, finances, int(BoardState.RequestKind.MEDICAL_FACILITIES), p))
 	var stadium: HBoxContainer = CareerTheme.row()
 	stadium.add_child(CareerTheme.cell("Stadium capacity", 150, p.text_muted))
-	stadium.add_child(CareerTheme.label(str(board.stadium_capacity), p.text_primary))
+	if finances != null and finances.is_expansion_underway():
+		var due_str: String = finances.expansion_completion_date.to_display() if finances.expansion_completion_date != null else "soon"
+		stadium.add_child(CareerTheme.label(
+			"%d (+%d under construction, finishes %s)" % [
+				board.stadium_capacity, finances.stadium_expansion_capacity, due_str
+			],
+			p.warning
+		))
+	else:
+		stadium.add_child(CareerTheme.label(str(board.stadium_capacity), p.text_primary))
 	body.add_child(stadium)
 	return body
 
 
-func _facility_row(caption: String, level: int, board: BoardState, p: CareerThemePalette) -> HBoxContainer:
+func _facility_row(
+	caption: String,
+	level: int,
+	board: BoardState,
+	finances: ClubFinances,
+	kind: int,
+	p: CareerThemePalette
+) -> HBoxContainer:
 	var line: HBoxContainer = CareerTheme.row()
 	line.add_child(CareerTheme.cell(caption, 150, p.text_muted))
 	line.add_child(CareerTheme.bar(float(level) / 5.0, 140))
+	var extra: String = ""
+	if finances != null and finances.is_facility_upgrade_underway(kind):
+		var due_str: String = finances.facility_upgrade_completion_date.to_display() if finances.facility_upgrade_completion_date != null else "soon"
+		extra = " (Upgrading to Level %d, finishes %s)" % [level + 1, due_str]
 	line.add_child(CareerTheme.label(
-		"Level %d of 5  (x%.2f)" % [level, board.facility_multiplier(level)], p.text_secondary
+		"Level %d of 5  (x%.2f)%s" % [level, board.facility_multiplier(level), extra],
+		p.warning if extra != "" else p.text_secondary
 	))
 	return line
 
@@ -160,6 +182,7 @@ func _requests_card(board: BoardState, career: CareerSaveData, p: CareerThemePal
 		"The board weigh your confidence, the season's trajectory, and what the club can afford. Asking too often is refused outright."
 	))
 
+	var finances: ClubFinances = career.user_finances() if career != null else null
 	var grid := GridContainer.new()
 	grid.columns = 2
 	grid.add_theme_constant_override("h_separation", 6)
@@ -170,16 +193,46 @@ func _requests_card(board: BoardState, career: CareerSaveData, p: CareerThemePal
 		var request_kind: BoardState.RequestKind = kind as BoardState.RequestKind
 		var recent: bool = board.has_recent_request(request_kind, career.today)
 		var b: Button = CareerTheme.button(BoardState.REQUEST_NAMES[kind])
-		b.disabled = recent
+		var status_text: String = "Available"
+		var disabled: bool = recent
+		if recent:
+			status_text = "Recently asked"
+
+		if request_kind == BoardState.RequestKind.STADIUM_EXPANSION:
+			if finances != null and finances.is_expansion_underway():
+				disabled = true
+				status_text = "Under construction"
+		elif request_kind in [
+			BoardState.RequestKind.TRAINING_FACILITIES,
+			BoardState.RequestKind.YOUTH_FACILITIES,
+			BoardState.RequestKind.SCOUTING_NETWORK,
+			BoardState.RequestKind.MEDICAL_FACILITIES
+		]:
+			var cur_lvl: int = 1
+			match request_kind:
+				BoardState.RequestKind.TRAINING_FACILITIES:
+					cur_lvl = board.training_facilities
+				BoardState.RequestKind.YOUTH_FACILITIES:
+					cur_lvl = board.youth_facilities
+				BoardState.RequestKind.SCOUTING_NETWORK:
+					cur_lvl = board.scouting_range
+				BoardState.RequestKind.MEDICAL_FACILITIES:
+					cur_lvl = board.medical_facility
+			if cur_lvl >= 5:
+				disabled = true
+				status_text = "Max Level (5)"
+			elif finances != null and finances.is_facility_upgrade_underway(int(request_kind)):
+				disabled = true
+				status_text = "Under construction"
+
+		b.disabled = disabled
 		b.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 		b.pressed.connect(func() -> void:
 			CareerManager.file_board_request(request_kind)
 			refresh()
 		)
 		grid.add_child(b)
-		grid.add_child(CareerTheme.muted(
-			"Recently asked" if recent else "Available"
-		))
+		grid.add_child(CareerTheme.muted(status_text))
 
 	if not board.request_history.is_empty():
 		body.add_child(CareerTheme.divider())

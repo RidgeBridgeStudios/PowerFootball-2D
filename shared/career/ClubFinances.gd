@@ -64,8 +64,26 @@ const PRIZE_STEP: int = 850000
 ## Instalments still owed TO this club from outgoing sales.
 @export var receivables: Array[Dictionary] = []
 @export var last_weekly_cycle: CareerDate = null
-## Set true by the board when it refuses further spending this window.
 @export var spending_frozen: bool = false
+## Ongoing stadium expansion and infrastructure project tracking
+@export var stadium_expansion_capacity: int = 0
+@export var expansion_completion_date: CareerDate = null
+@export var expansion_cost: int = 0
+@export var facility_upgrade_type: int = -1
+@export var facility_upgrade_completion_date: CareerDate = null
+@export var facility_upgrade_cost: int = 0
+
+
+func is_expansion_underway() -> bool:
+	return expansion_completion_date != null and stadium_expansion_capacity > 0
+
+
+func is_facility_upgrade_underway(kind: int = -1) -> bool:
+	if facility_upgrade_completion_date == null or facility_upgrade_type < 0:
+		return false
+	if kind >= 0:
+		return facility_upgrade_type == kind
+	return true
 
 
 static func from_team(team: TeamData, capacity: int) -> ClubFinances:

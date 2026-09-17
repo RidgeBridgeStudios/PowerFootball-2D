@@ -34,6 +34,7 @@ func build(host: VBoxContainer, career: CareerSaveData) -> void:
 	host.add_child(split)
 	split.add_child(CareerTheme.card_root(_ledger_card(finances, p)))
 	split.add_child(CareerTheme.card_root(_wages_card(career, team, p)))
+	host.add_child(CareerTheme.card_root(_infrastructure_card(finances, p)))
 	host.add_child(CareerTheme.card_root(_instalments_card(finances, p)))
 
 
@@ -187,6 +188,44 @@ func _instalments_card(finances: ClubFinances, p: CareerThemePalette) -> VBoxCon
 			CareerTheme.money(int(entry2.get("amount", 0))), 90, p.positive, HORIZONTAL_ALIGNMENT_RIGHT
 		))
 		body.add_child(line2)
+	return body
+
+
+func _infrastructure_card(finances: ClubFinances, p: CareerThemePalette) -> VBoxContainer:
+	var body: VBoxContainer = CareerTheme.card("Infrastructure & Capital Projects")
+	var line_cap: HBoxContainer = CareerTheme.row()
+	line_cap.add_child(CareerTheme.cell("Stadium Capacity", 160, p.text_muted))
+	line_cap.add_child(CareerTheme.label("%d seats" % finances.stadium_capacity, p.text_primary))
+	body.add_child(line_cap)
+
+	if finances.is_expansion_underway():
+		var exp_row: HBoxContainer = CareerTheme.row()
+		exp_row.add_child(CareerTheme.cell("Stadium Expansion", 160, p.warning))
+		var due_str: String = finances.expansion_completion_date.to_display() if finances.expansion_completion_date != null else "Pending"
+		exp_row.add_child(CareerTheme.label(
+			"+%d seats in progress (Cost: %s, Due: %s)" % [
+				finances.stadium_expansion_capacity, CareerTheme.money(finances.expansion_cost), due_str
+			],
+			p.text_secondary
+		))
+		body.add_child(exp_row)
+
+	if finances.is_facility_upgrade_underway():
+		var fac_row: HBoxContainer = CareerTheme.row()
+		var fac_name: String = BoardState.REQUEST_NAMES[clampi(finances.facility_upgrade_type, 0, BoardState.REQUEST_NAMES.size() - 1)] if finances.facility_upgrade_type >= 0 else "Facility"
+		fac_row.add_child(CareerTheme.cell("Facility Upgrade", 160, p.warning))
+		var due_fac: String = finances.facility_upgrade_completion_date.to_display() if finances.facility_upgrade_completion_date != null else "Pending"
+		fac_row.add_child(CareerTheme.label(
+			"%s in progress (Cost: %s, Due: %s)" % [
+				fac_name, CareerTheme.money(finances.facility_upgrade_cost), due_fac
+			],
+			p.text_secondary
+		))
+		body.add_child(fac_row)
+
+	if not finances.is_expansion_underway() and not finances.is_facility_upgrade_underway():
+		body.add_child(CareerTheme.muted("No capital infrastructure construction currently active."))
+
 	return body
 
 

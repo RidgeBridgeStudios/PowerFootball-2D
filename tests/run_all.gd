@@ -27,6 +27,7 @@ func _ready() -> void:
 	_test_mutiny_and_crisis_escalation()
 	_test_squad_cliques_and_faction_dynamics()
 	_test_incident_press_conference_pipeline()
+	_test_stadium_expansion_and_infrastructure()
 
 	print("------------------------------------------------------------------")
 
@@ -280,10 +281,12 @@ func _test_world_database_and_continental() -> void:
 	var has_americas: bool = false
 	var has_world_club: bool = false
 	var has_domestic_cup: bool = false
+	var uefa_comp: CompetitionData = null
 	if career_save != null:
 		for comp: CompetitionData in career_save.competitions:
 			if comp.competition_name == "European Champions Cup":
 				has_uefa = true
+				uefa_comp = comp
 			elif comp.competition_name == "Copa Continental":
 				has_americas = true
 			elif comp.competition_name == "World Club Championship":
@@ -295,6 +298,25 @@ func _test_world_database_and_continental() -> void:
 	_assert_true(has_americas, "World DB: Copa Continental generated")
 	_assert_true(has_world_club, "World DB: World Club Championship generated")
 	_assert_true(has_domestic_cup, "World DB: Division Domestic Cup generated")
+
+	# Continental Multi-stage verification
+	if uefa_comp != null:
+		_assert_true(uefa_comp.stage == CompetitionData.Stage.GROUP_STAGE, "Continental: Stage is GROUP_STAGE")
+		_assert_true(uefa_comp.group_tables.size() > 0, "Continental: Has group tables")
+		var sorted_g: Array[LeagueTableRow] = uefa_comp.sorted_group_table(0)
+		_assert_true(sorted_g.size() >= 2, "Continental: Group table has teams")
+		# Verify serialization of multi-stage state
+		var saved_ok: bool = CareerSerializer.save_to_slot(career_save, 99)
+		_assert_true(saved_ok, "Continental: Saved career with multi-stage continental")
+		var loaded: CareerSaveData = CareerSerializer.load_from_slot(99)
+		_assert_true(loaded != null, "Continental: Loaded career slot 99")
+		var loaded_uefa: CompetitionData = null
+		for c_l: CompetitionData in loaded.competitions:
+			if c_l.competition_name == "European Champions Cup":
+				loaded_uefa = c_l
+				break
+		_assert_true(loaded_uefa != null and loaded_uefa.stage == CompetitionData.Stage.GROUP_STAGE, "Continental: Loaded stage matches")
+		_assert_true(loaded_uefa.group_tables.size() == uefa_comp.group_tables.size(), "Continental: Loaded group tables count matches")
 
 	CareerManager.close_career()
 	CareerSerializer.delete_slot(99)
@@ -788,6 +810,119 @@ func _test_incident_press_conference_pipeline() -> void:
 	var dispatched: Array[InboxItem] = CareerManager.check_and_dispatch_incident_press_conferences(false, "Rival FC")
 	_assert_true(not dispatched.is_empty(), "CareerManager: Unhandled incident dispatched to press conference")
 	_assert_true(dispatched[0].subject_player_name == "Marcus Cole", "CareerManager: Dispatched conference targets incident player")
+
+
+func _test_stadium_expansion_and_infrastructure() -> void:
+	var today: CareerDate = CareerDate.make(2026, 8, 1)
+	var team: TeamData = TeamData.new()
+	team.team_name = "Infrastructure FC"
+	team.reputation = 0.75
+	team.transfer_budget = 10_000_000
+	team.wage_budget_weekly = 150_000
+
+	var fin: ClubFinances = ClubFinances.from_team(team, 20000)
+	var board: BoardState = BoardState.new()
+	board.club_name = team.team_name
+	board.stadium_capacity = 20000
+	board.confidence = 0.70
+	board.training_facilities = 2
+	board.youth_facilities = 2
+	board.medical_facility = 2
+
+	# 1. Verification of default status
+	_assert_true(not fin.is_expansion_underway(), "Finances: No expansion underway initially")
+	_assert_true(not fin.is_facility_upgrade_underway(), "Finances: No facility upgrade underway initially")
+
+	# 2. Gate receipts scaling with capacity
+	var gate_initial: int = fin.book_matchday(team.reputation, 0.5)
+	_assert_true(gate_initial > 0, "Finances: Initial matchday gate receipt booked")
+
+	# 3. Board confidence reaction to financial health
+	var conf_before: float = board.confidence
+	board.apply_financial_health(-2_000_000, fin.wage_budget_weekly)
+	_assert_true(board.confidence < conf_before, "BoardState: Severe debt reduces board confidence")
+
+	var conf_debt: float = board.confidence
+	board.apply_financial_health(10_000_000, fin.wage_budget_weekly)
+	_assert_true(board.confidence > conf_debt, "BoardState: Strong positive balance boosts board confidence")
+
+	# 4. CareerManager setup for request & construction testing
+	var career := CareerSaveData.make_new(null, 0, today, 0)
+	career.club_finances = {0: fin}
+	career.board = board
+	CareerManager.career = career
+	WorldEventLog.bind(career)
+	CareerManager._rng.seed = 42
+	board.confidence = 1.0
+	board.trajectory = 1.0
+
+	# Request stadium expansion with high balance -> lump sum expense
+	fin.balance = 25_000_000
+	var initial_balance: int = fin.balance
+	CareerManager.file_board_request(BoardState.RequestKind.STADIUM_EXPANSION)
+
+	_assert_true(fin.is_expansion_underway(), "CareerManager: Stadium expansion underway after request approved")
+	_assert_true(fin.stadium_expansion_capacity > 0, "CareerManager: Expansion capacity tracked")
+	_assert_true(fin.expansion_cost > 0, "CareerManager: Expansion cost tracked")
+	_assert_true(fin.expansion_completion_date != null, "CareerManager: Expansion completion date set")
+	_assert_true(fin.balance < initial_balance, "CareerManager: Capital expense deducted from balance")
+
+	var added_cap: int = fin.stadium_expansion_capacity
+	# Advance day until completion
+	career.today = fin.expansion_completion_date.advanced_by(1)
+	CareerManager._process_infrastructure_construction()
+
+	_assert_true(fin.stadium_capacity == 20000 + added_cap, "CareerManager: Stadium capacity increased upon completion")
+	_assert_true(board.stadium_capacity == fin.stadium_capacity, "CareerManager: Board stadium capacity synchronized")
+	_assert_true(not fin.is_expansion_underway(), "CareerManager: Expansion flags cleared upon completion")
+
+	# Matchday gate receipt with new expanded capacity
+	fin.reset_season_ledger()
+	var gate_expanded: int = fin.book_matchday(team.reputation, 0.5)
+	_assert_true(gate_expanded > gate_initial, "Finances: Gate receipts accurately scaled with expanded capacity")
+
+	# 5. Facility upgrade flow
+	_assert_true(board.training_facilities == 2, "BoardState: Initial training facility tier is 2")
+	fin.balance = 20_000_000
+	board.confidence = 1.0
+	board.trajectory = 1.0
+	CareerManager._rng.seed = 42
+	var pre_fac_balance: int = fin.balance
+	CareerManager.file_board_request(BoardState.RequestKind.TRAINING_FACILITIES)
+
+	_assert_true(fin.is_facility_upgrade_underway(int(BoardState.RequestKind.TRAINING_FACILITIES)), "CareerManager: Facility upgrade underway")
+	_assert_true(fin.facility_upgrade_cost > 0, "CareerManager: Facility upgrade cost tracked")
+	_assert_true(fin.balance < pre_fac_balance, "CareerManager: Facility upgrade cost deducted")
+
+	career.today = fin.facility_upgrade_completion_date.advanced_by(1)
+	CareerManager._process_infrastructure_construction()
+
+	_assert_true(board.training_facilities == 3, "CareerManager: Training facility tier upgraded to 3 upon completion")
+	_assert_true(not fin.is_facility_upgrade_underway(), "CareerManager: Facility upgrade flags cleared upon completion")
+	_assert_true(board.facility_multiplier(board.training_facilities) == 1.0, "BoardState: Facility multiplier accurate for tier 3")
+
+	# 6. Serialization roundtrip
+	fin.stadium_expansion_capacity = 3500
+	fin.expansion_cost = 2_625_000
+	fin.expansion_completion_date = CareerDate.make(2027, 1, 15)
+	fin.facility_upgrade_type = int(BoardState.RequestKind.YOUTH_FACILITIES)
+	fin.facility_upgrade_cost = 3_750_000
+	fin.facility_upgrade_completion_date = CareerDate.make(2027, 2, 20)
+	board.medical_facility = 4
+
+	var serialized: Dictionary = CareerSerializer.to_dict(career)
+	var deserialized: CareerSaveData = CareerSerializer.from_dict(serialized)
+
+	var d_fin: ClubFinances = deserialized.club_finances.get(0, null) as ClubFinances
+	_assert_true(d_fin != null, "Serializer: ClubFinances deserialized")
+	_assert_true(d_fin.stadium_expansion_capacity == 3500, "Serializer: stadium_expansion_capacity roundtripped")
+	_assert_true(d_fin.expansion_cost == 2_625_000, "Serializer: expansion_cost roundtripped")
+	_assert_true(d_fin.expansion_completion_date != null and d_fin.expansion_completion_date.to_iso() == "2027-01-15", "Serializer: expansion_completion_date roundtripped")
+	_assert_true(d_fin.facility_upgrade_type == int(BoardState.RequestKind.YOUTH_FACILITIES), "Serializer: facility_upgrade_type roundtripped")
+	_assert_true(d_fin.facility_upgrade_cost == 3_750_000, "Serializer: facility_upgrade_cost roundtripped")
+	_assert_true(d_fin.facility_upgrade_completion_date != null and d_fin.facility_upgrade_completion_date.to_iso() == "2027-02-20", "Serializer: facility_upgrade_completion_date roundtripped")
+	_assert_true(deserialized.board.medical_facility == 4, "Serializer: medical_facility roundtripped")
+
 
 
 

@@ -20,6 +20,7 @@ class_name CompetitionData
 extends Resource
 
 enum Kind { LEAGUE = 0, KNOCKOUT_CUP = 1, CONTINENTAL = 2 }
+enum Stage { GROUP_STAGE = 0, KNOCKOUT = 1 }
 
 ## Cup round labels, chosen by how many clubs remain.
 const ROUND_LABELS: Dictionary = {
@@ -32,6 +33,8 @@ const ROUND_LABELS: Dictionary = {
 
 @export var competition_name: String = "League"
 @export var kind: Kind = Kind.LEAGUE
+## Current stage for multi-stage tournaments (group stage vs knockout).
+@export var stage: Stage = Stage.KNOCKOUT
 ## League indices of every participating club.
 @export var participant_indices: Array[int] = []
 @export var fixtures: Array[FixtureData] = []
@@ -51,6 +54,11 @@ const ROUND_LABELS: Dictionary = {
 @export var relegation_slots: int = 2
 ## Which FixtureData.Competition tag fixtures from this competition carry.
 @export var fixture_tag: FixtureData.Competition = FixtureData.Competition.LEAGUE
+## Multi-stage group structures: Array of Array[int] for team indices per group.
+@export var group_teams: Array[Array] = []
+## Multi-stage group standings: Array of Array[LeagueTableRow] per group.
+@export var group_tables: Array[Array] = []
+@export var group_stage_complete: bool = false
 
 
 static func build_league(
@@ -65,6 +73,7 @@ static func build_league(
 	var c := CompetitionData.new()
 	c.competition_name = p_name
 	c.kind = Kind.LEAGUE
+	c.stage = Stage.KNOCKOUT
 	c.fixture_tag = FixtureData.Competition.LEAGUE
 	c.tier = p_tier
 	c.group_index = p_group_index
@@ -83,6 +92,7 @@ static func build_cup(p_name: String, team_indices: Array[int], p_two_legged: bo
 	var c := CompetitionData.new()
 	c.competition_name = p_name
 	c.kind = Kind.KNOCKOUT_CUP
+	c.stage = Stage.KNOCKOUT
 	c.fixture_tag = FixtureData.Competition.DOMESTIC_CUP
 	c.participant_indices = team_indices.duplicate()
 	c.remaining_indices = team_indices.duplicate()
@@ -91,7 +101,12 @@ static func build_cup(p_name: String, team_indices: Array[int], p_two_legged: bo
 	return c
 
 
-static func build_continental(p_name: String, team_indices: Array[int], p_two_legged: bool = true) -> CompetitionData:
+static func build_continental(
+	p_name: String,
+	team_indices: Array[int],
+	p_two_legged: bool = true,
+	has_group_stage: bool = false
+) -> CompetitionData:
 	var c := CompetitionData.new()
 	c.competition_name = p_name
 	c.kind = Kind.CONTINENTAL
@@ -100,6 +115,12 @@ static func build_continental(p_name: String, team_indices: Array[int], p_two_le
 	c.remaining_indices = team_indices.duplicate()
 	c.two_legged = p_two_legged
 	c.current_round = 1
+	if has_group_stage and team_indices.size() >= 4:
+		c.stage = Stage.GROUP_STAGE
+		c.group_stage_complete = false
+	else:
+		c.stage = Stage.KNOCKOUT
+		c.group_stage_complete = true
 	return c
 
 
@@ -167,10 +188,123 @@ func generate_league_fixtures(
 			break
 
 
+## Initializes multi-stage group stage: divides participant_indices into 4-team groups,
+## creates group tables, and schedules round-robin home/away fixtures for each group.
+func init_group_stage(first_date: CareerDate, spacing_days: int = 14, rng: RandomNumberGenerator = null) -> void:
+	stage = Stage.GROUP_STAGE
+	group_stage_complete = false
+	fixtures.clear()
+	group_teams.clear()
+	group_tables.clear()
+
+	var pool: Array[int] = participant_indices.duplicate()
+	if rng != null:
+		for i: int in range(pool.size() - 1, 0, -1):
+			var j: int = rng.randi_range(0, i)
+			var tmp: int = pool[i]
+			pool[i] = pool[j]
+			pool[j] = tmp
+
+	var total_teams: int = pool.size()
+	var group_count: int = maxi(1, total_teams / 4)
+	for g: int in range(group_count):
+		group_teams.append([])
+		var g_rows: Array[LeagueTableRow] = []
+		group_tables.append(g_rows)
+
+	for i: int in range(total_teams):
+		var g_idx: int = i % group_count
+		var t_idx: int = pool[i]
+		(group_teams[g_idx] as Array).append(t_idx)
+		var t_data: TeamData = DataLoader.get_team(t_idx)
+		var t_name: String = t_data.team_name if t_data != null else "Team %d" % t_idx
+		(group_tables[g_idx] as Array).append(LeagueTableRow.make(t_idx, t_name))
+
+	# Double round-robin (6 matchdays for 4 teams) for each group
+	current_round = 1
+	total_rounds = 6
+	for g: int in range(group_count):
+		var g_t: Array = group_teams[g]
+		var slots_base: Array[int] = []
+		for t_val: Variant in g_t:
+			slots_base.append(int(t_val))
+		if slots_base.size() % 2 != 0:
+			slots_base.append(-1)
+		var half: int = slots_base.size() / 2
+		var rounds_per_half: int = slots_base.size() - 1
+
+		var slots: Array[int] = slots_base.duplicate()
+		for r: int in range(rounds_per_half):
+			var match_date: CareerDate = first_date.advanced_by(r * spacing_days)
+			var reverse_date: CareerDate = first_date.advanced_by((r + rounds_per_half) * spacing_days)
+			for i: int in range(half):
+				var a: int = slots[i]
+				var b: int = slots[slots.size() - 1 - i]
+				if a == -1 or b == -1:
+					continue
+				var home: int = a if (r + i) % 2 == 0 else b
+				var away: int = b if (r + i) % 2 == 0 else a
+
+				var f1: FixtureData = FixtureData.make(fixture_tag, r + 1, match_date, home, away)
+				f1.round_label = "Group %s - MD %d" % [String.chr(65 + g), r + 1]
+				fixtures.append(f1)
+
+				var f2: FixtureData = FixtureData.make(fixture_tag, r + 1 + rounds_per_half, reverse_date, away, home)
+				f2.round_label = "Group %s - MD %d" % [String.chr(65 + g), r + 1 + rounds_per_half]
+				fixtures.append(f2)
+
+			var tail: int = slots.pop_back()
+			slots.insert(1, tail)
+
+
+func group_row_for(team_index: int) -> LeagueTableRow:
+	for g_rows: Variant in group_tables:
+		if typeof(g_rows) == TYPE_ARRAY:
+			for r: Variant in (g_rows as Array):
+				var row: LeagueTableRow = r as LeagueTableRow
+				if row != null and row.team_index == team_index:
+					return row
+	return null
+
+
+func sorted_group_table(g_idx: int) -> Array[LeagueTableRow]:
+	var out: Array[LeagueTableRow] = []
+	if g_idx < 0 or g_idx >= group_tables.size():
+		return out
+	var raw: Variant = group_tables[g_idx]
+	if typeof(raw) != TYPE_ARRAY:
+		return out
+	for r: Variant in (raw as Array):
+		var row: LeagueTableRow = r as LeagueTableRow
+		if row != null:
+			out.append(row)
+	out.sort_custom(func(a: LeagueTableRow, b: LeagueTableRow) -> bool:
+		return a.sort_before(b)
+	)
+	return out
+
+
+## Advances competition from group stage to knockout stage: qualifies top 2 teams
+## from each group into remaining_indices and draws the first knockout round.
+func advance_from_group_stage_to_knockout(match_date: CareerDate, rng: RandomNumberGenerator) -> void:
+	stage = Stage.KNOCKOUT
+	group_stage_complete = true
+	remaining_indices.clear()
+
+	for g: int in range(group_tables.size()):
+		var sorted: Array[LeagueTableRow] = sorted_group_table(g)
+		for q: int in range(mini(2, sorted.size())):
+			remaining_indices.append(sorted[q].team_index)
+
+	current_round = 1
+	draw_cup_round(match_date, rng)
+
+
 ## Pairs whoever is still alive into the next knockout round. Called at the
 ## start of each round rather than seeding the whole bracket upfront, which is
 ## how a real cup draw works — you cannot know round 3 until round 2 is played.
 ## For non-power-of-two participant counts, seeds automatic byes to stabilize bracket.
+## Final (2 teams remaining) is played as a neutral single leg.
 func draw_cup_round(match_date: CareerDate, rng: RandomNumberGenerator) -> void:
 	if remaining_indices.size() < 2:
 		if remaining_indices.size() == 1:
@@ -204,6 +338,9 @@ func draw_cup_round(match_date: CareerDate, rng: RandomNumberGenerator) -> void:
 	else:
 		label = String(ROUND_LABELS.get(pool.size(), "Round %d" % current_round))
 
+	var is_final: bool = (pool.size() == 2)
+	var round_two_legged: bool = two_legged and not is_final
+
 	for p: int in range(pair_count):
 		var home: int = pool[p * 2]
 		var away: int = pool[p * 2 + 1]
@@ -212,11 +349,10 @@ func draw_cup_round(match_date: CareerDate, rng: RandomNumberGenerator) -> void:
 		var f1: FixtureData = FixtureData.make(fixture_tag, current_round, match_date, home, away)
 		f1.round_label = label
 		f1.tie_id = tie
-		if two_legged:
-			f1.leg = 1
+		f1.leg = 1 if round_two_legged else 0
 		fixtures.append(f1)
 
-		if two_legged:
+		if round_two_legged:
 			var f2: FixtureData = FixtureData.make(fixture_tag, current_round, match_date.advanced_by(14), away, home)
 			f2.round_label = label
 			f2.tie_id = tie
@@ -224,7 +360,7 @@ func draw_cup_round(match_date: CareerDate, rng: RandomNumberGenerator) -> void:
 			fixtures.append(f2)
 
 
-## Applies a played result to the table (leagues) or advances the bracket
+## Applies a played result to the table (leagues/group stages) or advances the bracket
 ## (cups). Returns the club index that progressed, or -1.
 func record_result(fixture: FixtureData, rng: RandomNumberGenerator) -> int:
 	if kind == Kind.LEAGUE:
@@ -236,7 +372,16 @@ func record_result(fixture: FixtureData, rng: RandomNumberGenerator) -> int:
 			away_row.record(fixture.away_score, fixture.home_score)
 		return -1
 
-	# Knockout: single leg resolves immediately, two legs resolve on leg 2.
+	if stage == Stage.GROUP_STAGE:
+		var g_home: LeagueTableRow = group_row_for(fixture.home_team_index)
+		var g_away: LeagueTableRow = group_row_for(fixture.away_team_index)
+		if g_home != null:
+			g_home.record(fixture.home_score, fixture.away_score)
+		if g_away != null:
+			g_away.record(fixture.away_score, fixture.home_score)
+		return -1
+
+	# Knockout: leg 1 of a two-legged tie does not eliminate anyone.
 	if two_legged and fixture.leg == 1:
 		return -1
 
@@ -253,9 +398,7 @@ func _resolve_tie_winner(fixture: FixtureData, rng: RandomNumberGenerator) -> in
 	var home_total: int = fixture.home_score
 	var away_total: int = fixture.away_score
 
-	if two_legged and fixture.tie_id != "":
-		# Aggregate across both legs. Leg 1 had the sides reversed, so the
-		# first-leg AWAY score belongs to this leg's HOME club.
+	if two_legged and fixture.tie_id != "" and fixture.leg == 2:
 		for f: FixtureData in fixtures:
 			if f.tie_id != fixture.tie_id or f == fixture or not f.played:
 				continue
@@ -266,9 +409,21 @@ func _resolve_tie_winner(fixture: FixtureData, rng: RandomNumberGenerator) -> in
 		return fixture.home_team_index
 	if away_total > home_total:
 		return fixture.away_team_index
-	# Level after normal time: a coin weighted very slightly to the home side
-	# stands in for extra time and penalties.
-	return fixture.home_team_index if rng.randf() < 0.52 else fixture.away_team_index
+
+	# Level aggregate/score: simulate extra-time & penalties via QuickSimEngine team units
+	var h_team: TeamData = DataLoader.get_team(fixture.home_team_index)
+	var a_team: TeamData = DataLoader.get_team(fixture.away_team_index)
+	if h_team != null and a_team != null:
+		var h_units: Dictionary = QuickSimEngine._calculate_team_units(h_team, h_team.lineup_indices)
+		var a_units: Dictionary = QuickSimEngine._calculate_team_units(a_team, a_team.lineup_indices)
+		var h_rating: float = float(h_units.get("overall", 50.0))
+		var a_rating: float = float(a_units.get("overall", 50.0))
+		var diff: float = (h_rating - a_rating) / 100.0
+		# Extra time / shootout win probability with slight home boost (0.02) if not neutral
+		var home_prob: float = clampf(0.50 + diff * 0.40 + (0.02 if fixture.leg != 0 else 0.0), 0.15, 0.85)
+		return fixture.home_team_index if rng.randf() < home_prob else fixture.away_team_index
+
+	return fixture.home_team_index if rng.randf() < 0.50 else fixture.away_team_index
 
 
 func row_for(team_index: int) -> LeagueTableRow:
@@ -328,14 +483,18 @@ func unplayed_count() -> int:
 func is_complete() -> bool:
 	if kind == Kind.LEAGUE:
 		return unplayed_count() == 0
+	if stage == Stage.GROUP_STAGE:
+		return false
 	return winner_index != -1
 
 
-## True when every fixture of the current knockout round has been played and a
+## True when every fixture of the current round or stage has been played and a
 ## new draw is needed.
 func cup_round_finished() -> bool:
 	if kind == Kind.LEAGUE:
 		return false
+	if stage == Stage.GROUP_STAGE:
+		return unplayed_count() == 0
 	for f: FixtureData in fixtures:
 		if f.round_number == current_round and not f.played:
 			return false
