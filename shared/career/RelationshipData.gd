@@ -38,6 +38,34 @@ const MONTHLY_DECAY: float = 0.02
 const MATCH_MULT_MIN: float = 0.85
 const MATCH_MULT_MAX: float = 1.15
 
+## Manager relationship keys live OUTSIDE the 0-21999 player_key space.
+## Key = MANAGER_RELATIONSHIP_KEY_BASE + league_team_index (docs/SOCIAL_SIMULATION_ARCHITECTURE.md §2.3).
+const MANAGER_RELATIONSHIP_KEY_BASE: int = 100000
+
+## Base benching resentment trust delta per match (scaled by 1.0 - loyalty)
+const BENCHING_RESENTMENT_BASE_TRUST_DELTA: float = -0.06
+
+## Match micro-event impact constants (docs/SOCIAL_SIMULATION_ARCHITECTURE.md §2.2)
+const PASS_COMPLETION_TRUST_DELTA: float = 0.01
+const PASS_COMPLETION_TRUST_CAP: float = 0.05
+const PASS_INTERCEPT_TRUST_DELTA: float = -0.02
+const PASS_INTERCEPT_TRUST_CAP: float = -0.08
+const ASSIST_TRUST_DELTA: float = 0.04
+const GOAL_CONVERTED_TRUST_DELTA: float = 0.03
+const RED_CARD_RIVALRY_DELTA: float = 0.05
+const RED_CARD_TRUST_DELTA: float = -0.03
+const OWN_GOAL_TRUST_DELTA: float = -0.02
+const CLEAN_SHEET_TRUST_DELTA: float = 0.02
+
+
+static func manager_relationship_key(league_team_index: int) -> int:
+	return MANAGER_RELATIONSHIP_KEY_BASE + league_team_index
+
+
+static func is_manager_key(key: int) -> bool:
+	return key >= MANAGER_RELATIONSHIP_KEY_BASE
+
+
 
 func adjust_trust(delta: float, reason: String, ordinal: int) -> void:
 	trust = clampf(trust + delta, 0.0, 1.0)
@@ -100,3 +128,53 @@ static func neutral(ordinal: int) -> RelationshipData:
 	var r := RelationshipData.new()
 	r.last_interaction_ordinal = ordinal
 	return r
+
+
+## Batches match micro-events between two teammates into this relationship edge
+## per docs/SOCIAL_SIMULATION_ARCHITECTURE.md §2.2.
+func batch_match_micro_events(
+	passes_completed: int,
+	passes_failed: int,
+	assists_to: int,
+	assists_from: int,
+	teammate_red_card: bool,
+	teammate_own_goal: bool,
+	clean_sheet: bool,
+	ordinal: int
+) -> void:
+	var trust_delta: float = 0.0
+
+	# 1. Pass completion trust (+0.01 per completion, capped at +0.05 per match)
+	if passes_completed > 0:
+		trust_delta += clampf(float(passes_completed) * PASS_COMPLETION_TRUST_DELTA, 0.0, PASS_COMPLETION_TRUST_CAP)
+
+	# 2. Misplaced passes under pressure / interceptions (-0.02 per failure, capped at -0.08 per match)
+	if passes_failed > 0:
+		trust_delta += clampf(float(passes_failed) * PASS_INTERCEPT_TRUST_DELTA, PASS_INTERCEPT_TRUST_CAP, 0.0)
+
+	# 3. Direct goal / assist synergy
+	if assists_from > 0:
+		trust_delta += float(assists_from) * ASSIST_TRUST_DELTA
+	if assists_to > 0:
+		trust_delta += float(assists_to) * GOAL_CONVERTED_TRUST_DELTA
+
+	# 4. Disciplinary and critical blunders
+	if teammate_red_card:
+		trust_delta += RED_CARD_TRUST_DELTA
+		adjust_rivalry(RED_CARD_RIVALRY_DELTA, "teammate red card", ordinal)
+	if teammate_own_goal:
+		trust_delta += OWN_GOAL_TRUST_DELTA
+		note("teammate own goal")
+
+	# 5. Clean sheet defensive solidity
+	if clean_sheet:
+		trust_delta += CLEAN_SHEET_TRUST_DELTA
+
+	if not is_zero_approx(trust_delta):
+		var reason: String = ""
+		if assists_from > 0 or assists_to > 0:
+			reason = "goal combination"
+		elif passes_failed > 2:
+			reason = "misplaced pass under pressure"
+		adjust_trust(trust_delta, reason, ordinal)
+

@@ -71,15 +71,25 @@ func all_available() -> Array[ManagerData]:
 ## Writes the live manager pool (including career stats) to
 ## user://custom_managers.json so progress survives between sessions.
 func save_managers() -> void:
+	save_managers_to(CUSTOM_MANAGERS_PATH)
+
+
+## Writes the live manager pool to an arbitrary target path.
+func save_managers_to(path: String) -> void:
 	var managers: Array = []
 	for manager: ManagerData in manager_pool:
 		managers.append(_to_dict(manager))
 
-	var file := FileAccess.open(CUSTOM_MANAGERS_PATH, FileAccess.WRITE)
+	var file := FileAccess.open(path, FileAccess.WRITE)
 	if file == null:
-		push_error("ManagerLoader: could not open %s for writing (%s)." % [CUSTOM_MANAGERS_PATH, error_string(FileAccess.get_open_error())])
+		push_error("ManagerLoader: could not open %s for writing (%s)." % [path, error_string(FileAccess.get_open_error())])
 		return
 	file.store_string(JSON.stringify({"managers": managers}, "\t"))
+
+
+## Loads the manager pool from an arbitrary path. Returns true on success.
+func load_managers_from(path: String) -> bool:
+	return _parse_json_managers(path)
 
 
 func _load_managers() -> void:

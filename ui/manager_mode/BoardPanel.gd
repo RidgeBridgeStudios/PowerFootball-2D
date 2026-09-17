@@ -122,6 +122,12 @@ func _confidence_card(board: BoardState, career: CareerSaveData, p: CareerThemeP
 			],
 			p.danger
 		))
+
+	if board.board_intervention_active:
+		body.add_child(CareerTheme.label(
+			"CRISIS INTERVENTION: The board has intervened following a dressing room mutiny.",
+			p.danger
+		))
 	return body
 
 

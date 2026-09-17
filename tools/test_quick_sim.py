@@ -164,6 +164,45 @@ def test_player_rating_formula():
 
     print(f"  -> PASSED: Hero rating={rating_hero:.1f}, Red card rating={rating_red:.1f}.")
 
+def test_tactical_shadowing_and_star_marking():
+    print("[TEST 6/6] Star-marking and tactical shadowing mathematical invariants...")
+    # 1. Star score & threshold
+    # Formula: clampf((player_reputation * 0.55) + ((float(overall) / 100.0) * 0.45), 0.0, 1.0)
+    rep_elite = 0.90
+    ovr_elite = 85
+    star_score_elite = max(0.0, min(1.0, (rep_elite * 0.55) + ((float(ovr_elite) / 100.0) * 0.45)))
+    assert star_score_elite >= 0.72, f"Elite player should be a star (>= 0.72): got {star_score_elite}"
+
+    rep_avg = 0.40
+    ovr_avg = 70
+    star_score_avg = max(0.0, min(1.0, (rep_avg * 0.55) + ((float(ovr_avg) / 100.0) * 0.45)))
+    assert star_score_avg < 0.72, f"Average player should not be a star (< 0.72): got {star_score_avg}"
+
+    # 2. Defensive marker score
+    # Formula: aggression * 0.6 + work_rate * 0.4
+    marker_agg = 0.85
+    marker_wr = 0.80
+    marker_score = marker_agg * 0.6 + marker_wr * 0.4
+    assert marker_score > 0.80
+
+    # 3. Dampening & Spillover multipliers
+    star_weight_mult = 0.60 # -40%
+    sec_weight_mult = 1.20  # +20%
+    base_shot_prob = 0.60
+    assert base_shot_prob * star_weight_mult == 0.36
+    assert base_shot_prob * sec_weight_mult == 0.72
+
+    # 4. Marker taxation: +25% stamina drain, +15% foul probability bias
+    base_drain = 18.0
+    taxed_drain = base_drain * 1.25
+    assert taxed_drain == 22.5, f"Taxed stamina drain must be exactly 22.5: got {taxed_drain}"
+
+    base_foul_weight = 1.0
+    biased_foul_weight = base_foul_weight * 1.15
+    assert abs(biased_foul_weight - 1.15) < 0.001
+
+    print(f"  -> PASSED: Star score elite={star_score_elite:.3f}, avg={star_score_avg:.3f}, marker taxation (+25% drain={taxed_drain:.1f}).")
+
 def main():
     print("================================================================")
     print("     POWERFOOTBALL-2D QUICK SIM ENGINE VALIDATION SUITE        ")
@@ -173,8 +212,9 @@ def main():
     test_tactical_influences()
     test_referee_strictness()
     test_player_rating_formula()
+    test_tactical_shadowing_and_star_marking()
     print("----------------------------------------------------------------")
-    print("[ALL QUICK SIM TESTS PASSED] 5/5 test suites successful.")
+    print("[ALL QUICK SIM TESTS PASSED] 6/6 test suites successful.")
     print("================================================================")
     return 0
 

@@ -21,7 +21,8 @@
 ## Depends on: PlayerData, PlayerCareerState, CareerSaveData, RelationshipData,
 ##             TeamData.
 ## Exposes: seed_mood_value(), evaluate_drivers(), daily_drift(),
-##          apply_result_reaction(), describe_drivers().
+##          apply_result_reaction(), apply_pass_starvation_penalty(),
+##          describe_drivers().
 ##
 
 class_name MoraleEngine
@@ -266,6 +267,42 @@ static func apply_substitution_reaction(
 		delta *= 2.0
 
 	data.morale = clampf(data.morale + delta, 0.0, 1.0)
+
+
+## --- Pass Starvation / Ego Catering ----------------------------------------------
+
+## Ego / catering pass-starvation morale penalty (docs/SOCIAL_SIMULATION_ARCHITECTURE.md §4.3).
+## A star who touches the ball meaningfully below their player_reputation-implied
+## expectation sours.
+## expected_share = lerp(0.06, 0.14, player_reputation)
+## actual_share = touches_player / touches_team
+## delta = clampf((actual_share - expected_share) * 1.5, -0.08, 0.04)
+## Asymmetric clamp: failing to feed a star hurts harder (-0.08) than overfeeding rewards (+0.04).
+static func calculate_pass_starvation_delta(
+	player_reputation: float,
+	player_touches: int,
+	team_touches: int
+) -> float:
+	if team_touches <= 0:
+		return 0.0
+	var actual_share: float = float(player_touches) / float(team_touches)
+	var expected_share: float = lerpf(0.06, 0.14, clampf(player_reputation, 0.0, 1.0))
+	return clampf((actual_share - expected_share) * 1.5, -0.08, 0.04)
+
+
+static func apply_pass_starvation_penalty(
+	data: PlayerData,
+	player_touches: int,
+	team_touches: int
+) -> float:
+	if data == null or team_touches <= 0:
+		return 0.0
+	# Goalkeepers are shot-stoppers and do not participate in pass-starvation ego dynamics.
+	if data.position_role == "GK":
+		return 0.0
+	var delta: float = calculate_pass_starvation_delta(data.player_reputation, player_touches, team_touches)
+	data.morale = clampf(data.morale + delta, 0.0, 1.0)
+	return delta
 
 
 ## --- Reputation ------------------------------------------------------------------

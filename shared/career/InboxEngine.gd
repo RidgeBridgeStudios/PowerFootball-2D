@@ -394,6 +394,103 @@ static func build_media_controversy_item(
 	return item
 
 
+## A captain or squad leader with CaptainMaterial (64) approaches the manager
+## as a sounding board regarding dressing room morale and squad confidence.
+## docs/SOCIAL_SIMULATION_ARCHITECTURE.md §1.2, §2.3.
+static func build_captain_sounding_board(
+	data: PlayerData,
+	state: PlayerCareerState,
+	team: TeamData,
+	today: CareerDate
+) -> InboxItem:
+	var club_name: String = team.team_name if team != null else "the squad"
+	var body: String = "%s has requested a private meeting as team captain to discuss dressing room morale and squad harmony at %s.\n\n\"The lads appreciate having an open door, gaffer. A few players have concerns about the current run and expectations, but we're ready to back you if you keep us in the loop.\"" % [
+		data.player_name, club_name
+	]
+	var item: InboxItem = InboxItem.make(
+		"Captain's Consultation: %s" % data.player_name,
+		body, InboxItem.Category.PLAYER, today
+	)
+	item.with_subject_player(state.player_key, data.player_name)
+	item.priority = 0.70
+	item.payload = {"kind": "sounding_board"}
+	item.add_option(
+		"Back the captain to rally the squad in private",
+		"Empowers squad leadership. Squad morale and captain trust improve.",
+		&"sounding_board_rally_squad", 0.03, 0.10, 0.0, 0.01
+	)
+	item.add_option(
+		"Conduct an open tactical briefing to address player doubts",
+		"Addresses tactical concerns directly. Board and players appreciate clarity.",
+		&"sounding_board_tactical_review", 0.02, 0.06, 0.01, 0.01
+	)
+	item.add_option(
+		"Reassure the captain and stay the course",
+		"Steady reassurance. Maintains stability without changing routine.",
+		&"sounding_board_reassure", 0.0, 0.02, 0.0, 0.0
+	)
+	item.add_option(
+		"Dismiss concerns and demand complete focus on performance",
+		"A cold response. Captain feels unheard, and dressing room tension rises.",
+		&"sounding_board_dismiss", -0.03, -0.12, -0.01, -0.01
+	)
+	item.with_deadline(today.advanced_by(3), 3)
+	return item
+
+
+static func build_mutiny_warning(team: TeamData, today: CareerDate) -> InboxItem:
+	var club_name: String = team.team_name if team != null else "the club"
+	var item: InboxItem = InboxItem.make(
+		"CRISIS: Dressing Room Mutiny Warning",
+		"Widespread dissatisfaction in the dressing room at %s has reached boiling point. Senior squad leaders warn that players have lost faith in your management and are on the brink of open revolt. An immediate managerial response is required." % club_name,
+		InboxItem.Category.PLAYER,
+		today
+	)
+	item.priority = 0.95
+	item.payload = {"kind": "mutiny_warning"}
+	item.add_option(
+		"Call emergency squad meeting: Address grievances and promise changes",
+		"Calms the dressing room. Senior leaders feel heard (+0.12 leader trust, +0.08 squad morale). Board notes the unrest (-0.05 confidence).",
+		&"mutiny_concede", 0.08, 0.0, -0.05, -0.05
+	)
+	item.add_option(
+		"Assert managerial authority: Demand discipline and respect",
+		"High-risk confrontation. Further alienates leaders (-0.15 leader trust, -0.05 squad morale), but shows resolve to the board (+0.05 confidence).",
+		&"mutiny_assert_authority", -0.05, 0.0, 0.05, 0.05
+	)
+	item.add_option(
+		"Meet privately with squad leaders: Negotiate a truce",
+		"Constructive compromise. Stabilizes dressing room (+0.08 leader trust, +0.03 squad morale).",
+		&"mutiny_negotiate", 0.03, 0.0, 0.0, 0.0
+	)
+	item.with_deadline(today.advanced_by(3), 1)
+	return item
+
+
+static func build_mutiny_board_ultimatum(team: TeamData, board: BoardState, today: CareerDate) -> InboxItem:
+	var club_name: String = team.team_name if team != null else "the club"
+	var item: InboxItem = InboxItem.make(
+		"BOARD CRISIS: Emergency Intervention on Dressing Room Mutiny",
+		"The board of %s has intervened following a full dressing room mutiny. Senior players have formally notified club leadership that they will no longer play under your management. The board requires an immediate turnaround plan." % club_name,
+		InboxItem.Category.BOARD,
+		today
+	)
+	item.priority = 1.0
+	item.payload = {"kind": "dressing_room_mutiny"}
+	item.add_option(
+		"Accept board terms: Commit to squad reconciliation and immediate turnaround",
+		"Pledges cooperation with the board and rebuilding dressing room relationships (+0.05 board confidence, +0.05 squad morale).",
+		&"mutiny_board_accept", 0.05, 0.0, 0.05, 0.0
+	)
+	item.add_option(
+		"Defend your position: Challenge player power and demand total board backing",
+		"High stakes. If the board does not back you, your position becomes critical (-0.10 board confidence, +0.05 manager reputation).",
+		&"mutiny_board_defend", -0.05, 0.0, -0.10, 0.05
+	)
+	item.with_deadline(today.advanced_by(2), 1)
+	return item
+
+
 static func build_youth_intake(club_name: String, summary: String, today: CareerDate) -> InboxItem:
 	var item: InboxItem = InboxItem.make(
 		"Youth intake: %s" % club_name, summary, InboxItem.Category.YOUTH, today
@@ -456,8 +553,11 @@ static func resolve(
 	if subject_data != null and option.subject_morale_delta != 0.0:
 		subject_data.morale = clampf(subject_data.morale + option.subject_morale_delta, 0.0, 1.0)
 	if subject_state != null and option.subject_trust_delta != 0.0:
-		subject_state.manager_trust = clampf(
-			subject_state.manager_trust + option.subject_trust_delta, 0.0, 1.0
+		subject_state.adjust_manager_trust(
+			option.subject_trust_delta,
+			"inbox decision: %s" % option.label,
+			career.user_team_index,
+			ordinal
 		)
 
 	# 3. Board and press.
@@ -552,8 +652,7 @@ static func _apply_action_tag(
 			for key: int in career.player_states:
 				var st: PlayerCareerState = career.player_states[key] as PlayerCareerState
 				if st != null and st.team_index == career.user_team_index:
-					st.manager_trust = clampf(st.manager_trust + 0.02, 0.0, 1.0)
-					st.relationship_with(-1, ordinal)
+					st.adjust_manager_trust(0.02, "backed players publicly", career.user_team_index, ordinal)
 		&"training_discipline_both":
 			if subject_state != null:
 				subject_state.manager_trust = clampf(subject_state.manager_trust - 0.05, 0.0, 1.0)
@@ -586,8 +685,64 @@ static func _apply_action_tag(
 				subject_state.manager_trust = clampf(subject_state.manager_trust + 0.12, 0.0, 1.0)
 		&"media_no_comment":
 			pass
+		&"sounding_board_rally_squad":
+			if subject_data != null:
+				subject_data.morale = clampf(subject_data.morale + 0.05, 0.0, 1.0)
+			if subject_state != null:
+				subject_state.adjust_manager_trust(0.10, "captain empowered", career.user_team_index, ordinal)
+		&"sounding_board_tactical_review":
+			if subject_state != null:
+				subject_state.adjust_manager_trust(0.06, "open tactical dialogue", career.user_team_index, ordinal)
+		&"sounding_board_reassure":
+			if subject_state != null:
+				subject_state.adjust_manager_trust(0.02, "manager reassurance", career.user_team_index, ordinal)
+		&"sounding_board_dismiss":
+			if subject_state != null:
+				subject_state.adjust_manager_trust(-0.12, "captain concerns dismissed", career.user_team_index, ordinal)
+		&"mutiny_concede":
+			_apply_mutiny_leader_trust_delta(career, 0.12, "emergency squad meeting resolved grievances", ordinal)
+		&"mutiny_assert_authority":
+			_apply_mutiny_leader_trust_delta(career, -0.15, "manager confronted mutiny leaders", ordinal)
+		&"mutiny_negotiate":
+			_apply_mutiny_leader_trust_delta(career, 0.08, "private meeting with squad leaders", ordinal)
+		&"mutiny_board_accept":
+			if career.board != null:
+				career.board.clear_board_intervention()
+				career.board.patience_notes.append("Manager accepted board terms to resolve dressing room mutiny.")
+				while career.board.patience_notes.size() > 10:
+					career.board.patience_notes.remove_at(0)
+		&"mutiny_board_defend":
+			if career.board != null:
+				career.board.patience_notes.append("Manager challenged board and demanded unconditional backing.")
+				while career.board.patience_notes.size() > 10:
+					career.board.patience_notes.remove_at(0)
 		_:
 			pass
+
+
+static func _apply_mutiny_leader_trust_delta(
+	career: CareerSaveData,
+	delta: float,
+	reason: String,
+	ordinal: int
+) -> void:
+	if career == null:
+		return
+	var team: TeamData = DataLoader.get_team(career.user_team_index)
+	if team == null:
+		return
+	for squad_idx: int in range(team.squad.size()):
+		var p: PlayerData = team.squad[squad_idx]
+		var is_leader: bool = (
+			p.has_trait(WorldEventGenerator.TRAIT_CAPTAIN_MATERIAL)
+			or p.has_trait(WorldEventGenerator.TRAIT_VETERAN_LEADER)
+			or p.player_reputation >= 0.70
+			or p.is_captain
+		)
+		if is_leader:
+			var st: PlayerCareerState = career.state_for_squad(career.user_team_index, squad_idx)
+			if st != null:
+				st.adjust_manager_trust(delta, reason, career.user_team_index, ordinal)
 
 
 ## Applies the escalation branch of anything left unanswered past its deadline.

@@ -123,9 +123,11 @@ extends Resource
 @export var career_interceptions: int = 0
 @export var career_clean_sheets: int = 0
 @export var career_psxg_prevented: float = 0.0
+@export var career_touches: int = 0
 
 ## Match rating assigned at end of the last match (0.0 - 10.0). 0.0 = did not play.
 @export var last_match_rating: float = 0.0
+@export var last_match_touches: int = 0
 
 ## Whether this player is marked as unavailable (injured/suspended) for
 ## the next match. The pre-game screen reads this and greys out the card.
@@ -152,6 +154,8 @@ func accumulate_match_stats(events: PlayerRatingCalculator.PlayerMatchEvents) ->
 	career_tackles_won += events.tackles_won
 	career_interceptions += events.interceptions
 	career_psxg_prevented += events.goals_prevented
+	career_touches += events.get_touches()
+	last_match_touches = events.get_touches()
 	if events.kept_clean_sheet:
 		career_clean_sheets += 1
 
@@ -230,6 +234,17 @@ func calculate_overall_rating() -> int:
 
 	var ovr: int = int(round(clampf(45.0 + raw_rating * 0.52, 45.0, 99.0)))
 	return ovr
+
+
+## Calculates star rating derivative score (0.0 to 1.0) combining reputation and overall ability.
+func get_star_score() -> float:
+	var ovr: float = float(calculate_overall_rating())
+	return clampf((player_reputation * 0.55) + ((ovr / 100.0) * 0.45), 0.0, 1.0)
+
+
+## Returns whether player reaches the Star tier threshold (star score >= 0.72).
+func is_star() -> bool:
+	return get_star_score() >= 0.72
 
 
 ## Evaluates mental attributes into Football Manager personality archetypes.

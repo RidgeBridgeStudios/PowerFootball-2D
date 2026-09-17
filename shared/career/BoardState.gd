@@ -71,6 +71,8 @@ const CONFIDENCE_GAIN_SCALE: float = 0.65
 ## Consecutive matchdays confidence has sat below SACK_THRESHOLD.
 @export var matches_below_threshold: int = 0
 @export var patience_notes: Array[String] = []
+## Tracks whether the board has actively intervened in managerial affairs due to crisis.
+@export var board_intervention_active: bool = false
 
 ## Facility levels, 1 (dilapidated) to 5 (state of the art). Feed the training
 ## and youth systems as multipliers.
@@ -206,6 +208,21 @@ func apply_result(league_position: int, team_count: int, won: bool, drew: bool, 
 		matches_below_threshold += 1
 	else:
 		matches_below_threshold = 0
+
+
+func trigger_board_intervention(reason: String = "", drop_confidence: float = 0.20) -> void:
+	board_intervention_active = true
+	confidence = clampf(confidence - drop_confidence, 0.0, 1.0)
+	if confidence < SACK_THRESHOLD:
+		matches_below_threshold = maxi(matches_below_threshold, 1)
+	if reason != "":
+		patience_notes.append(reason)
+		while patience_notes.size() > 10:
+			patience_notes.remove_at(0)
+
+
+func clear_board_intervention() -> void:
+	board_intervention_active = false
 
 
 func should_sack() -> bool:

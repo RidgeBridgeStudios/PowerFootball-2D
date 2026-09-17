@@ -94,15 +94,19 @@ def main() -> int:
         ("verify_db", [py, os.path.join(ROOT, "tools", "verify_db.py")]),
     ]
 
+    godot_bin = shutil.which("godot") or shutil.which("godot4") or shutil.which("godot.exe")
     full_checks = [
         ("godot_verify", [py, os.path.join(ROOT, "tools", "godot_verify.py")]),
-        ("eval_simulation", [py, os.path.join(ROOT, "tools", "eval_simulation.py")]),
+        ("test_quick_sim", [py, os.path.join(ROOT, "tools", "test_quick_sim.py")]),
+        ("eval_simulation", [py, os.path.join(ROOT, "tools", "eval_simulation.py"), "--force-analytical"]),
         ("fuzz_solvers", [py, os.path.join(ROOT, "tools", "fuzz_solvers.py"), "--iterations=10000"]),
         ("fuzz_formations", [py, os.path.join(ROOT, "tools", "fuzz_formations.py"), "--iterations=5000"]),
         ("dump_api", [py, os.path.join(ROOT, "tools", "dump_api.py")]),
         ("generate_symbols", [py, os.path.join(ROOT, "tools", "generate_symbols.py")]),
         ("compact_errata", [py, os.path.join(ROOT, "tools", "compact_errata.py")]),
     ]
+    if godot_bin:
+        full_checks.insert(2, ("test_runner", [godot_bin, "--headless", "tests/TestRunner.tscn"]))
 
     graphify_bin = shutil.which("graphify")
     graphify_py_pin = os.path.join(ROOT, "graphify-out", ".graphify_python")

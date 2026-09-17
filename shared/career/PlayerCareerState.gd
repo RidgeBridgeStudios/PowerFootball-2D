@@ -56,6 +56,12 @@ const ARROW_ATTRIBUTE_MULTIPLIER: Array[float] = [0.85, 0.92, 1.0, 1.05, 1.12]
 ## How many of the most recent match ratings feed the condition arrow.
 const FORM_WINDOW: int = 5
 
+## Manager relationship keys live OUTSIDE the 0-21999 player_key space (§2.3)
+const MANAGER_RELATIONSHIP_KEY_BASE: int = RelationshipData.MANAGER_RELATIONSHIP_KEY_BASE
+
+static func manager_relationship_key(league_team_index: int) -> int:
+	return RelationshipData.manager_relationship_key(league_team_index)
+
 @export var player_key: int = -1
 @export var display_name: String = ""
 @export var squad_index: int = -1
@@ -337,8 +343,23 @@ func relationship_with(other_key: int, ordinal: int) -> RelationshipData:
 	if existing != null:
 		return existing
 	var fresh: RelationshipData = RelationshipData.neutral(ordinal)
+	if RelationshipData.is_manager_key(other_key):
+		fresh.trust = manager_trust
 	relationships[other_key] = fresh
 	return fresh
+
+
+## Returns the RelationshipData edge toward the manager of the given team.
+func manager_relationship(league_team_index: int, ordinal: int) -> RelationshipData:
+	return relationship_with(RelationshipData.manager_relationship_key(league_team_index), ordinal)
+
+
+## Adjusts trust with the manager, updating both the RelationshipData edge
+## and the synchronized manager_trust scalar.
+func adjust_manager_trust(delta: float, reason: String, league_team_index: int, ordinal: int) -> void:
+	var rel: RelationshipData = manager_relationship(league_team_index, ordinal)
+	rel.adjust_trust(delta, reason, ordinal)
+	manager_trust = rel.trust
 
 
 func potential_remaining(current_overall: int) -> int:

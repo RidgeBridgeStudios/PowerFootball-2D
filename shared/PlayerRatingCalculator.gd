@@ -39,6 +39,17 @@ class PlayerMatchEvents:
 	var tackles_won: int = 0
 	var interceptions: int = 0
 	var vaep: float = 0.0
+	var touches: int = 0
+	## Teammate squad_index -> interaction/pass count
+	var teammate_interactions: Dictionary[int, int] = {}
+	## Teammate squad_index -> assists provided
+	var teammate_assists: Dictionary[int, int] = {}
+
+	func get_touches() -> int:
+		if touches > 0:
+			return touches
+		return passes_completed + passes_failed + shots_on_target + shots_off_target + tackles_won + interceptions
+
 
 ## Rating a player who did nothing notable either way finishes on — the centre
 ## of the distribution, not the bottom of it. Calibration: raised 6.0 -> 6.70.

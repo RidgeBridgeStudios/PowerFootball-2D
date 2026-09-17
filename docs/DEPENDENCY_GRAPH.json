@@ -22,6 +22,7 @@
         "shared/CareerProgressionEngine.gd",
         "shared/ManagerData.gd",
         "shared/PlayerData.gd",
+        "shared/PlayerRatingCalculator.gd",
         "shared/QuickSimEngine.gd",
         "shared/RefereeData.gd",
         "shared/StaffData.gd",
@@ -443,6 +444,7 @@
         "shared/career/WorldEvent.gd",
         "shared/career/WorldEventGenerator.gd",
         "shared/career/YouthAcademy.gd",
+        "tests/run_all.gd",
         "ui/MatchStatsUI.gd",
         "ui/manager_mode/ContractNegotiationModal.gd",
         "ui/manager_mode/FinancesPanel.gd",
@@ -466,6 +468,7 @@
         "shared/PlayerData.gd"
       ],
       "direct_dependents": [
+        "autoloads/CareerManager.gd",
         "autoloads/MatchStatsTracker.gd",
         "shared/CareerProgressionEngine.gd",
         "shared/PlayerData.gd",
@@ -974,6 +977,7 @@
         "autoloads/CareerManager.gd",
         "shared/career/InboxItem.gd",
         "shared/career/WorldEventGenerator.gd",
+        "tests/run_all.gd",
         "ui/manager_mode/InboxPanel.gd"
       ],
       "signals_declared": [],
@@ -998,6 +1002,7 @@
         "shared/career/InboxEngine.gd",
         "shared/career/WorldEvent.gd",
         "shared/career/WorldEventGenerator.gd",
+        "tests/run_all.gd",
         "ui/manager_mode/InboxPanel.gd"
       ],
       "signals_declared": [],
@@ -1101,6 +1106,7 @@
         "shared/career/TransferMarket.gd",
         "shared/career/WorldEventGenerator.gd",
         "shared/career/YouthAcademy.gd",
+        "tests/run_all.gd",
         "ui/manager_mode/ContractNegotiationModal.gd",
         "ui/manager_mode/FinancesPanel.gd",
         "ui/manager_mode/OverviewPanel.gd",
@@ -1147,6 +1153,7 @@
         "shared/career/CareerSerializer.gd",
         "shared/career/MoraleEngine.gd",
         "shared/career/PlayerCareerState.gd",
+        "tests/run_all.gd",
         "ui/manager_mode/SquadPanel.gd"
       ],
       "signals_declared": [],
@@ -1296,6 +1303,7 @@
         "shared/career/InboxEngine.gd",
         "shared/career/InboxItem.gd",
         "shared/career/WorldEventGenerator.gd",
+        "tests/run_all.gd",
         "ui/manager_mode/OverviewPanel.gd",
         "ui/manager_mode/SquadPanel.gd"
       ],
@@ -1360,6 +1368,7 @@
         "autoloads/ManagerLoader.gd",
         "autoloads/RefereeLoader.gd",
         "shared/ManagerData.gd",
+        "shared/PlayerData.gd",
         "shared/QuickSimEngine.gd",
         "shared/RefereeData.gd",
         "shared/TeamData.gd",
@@ -1368,7 +1377,12 @@
         "shared/career/CareerSerializer.gd",
         "shared/career/CompetitionData.gd",
         "shared/career/FixtureData.gd",
-        "shared/career/ManagerCareerProfile.gd"
+        "shared/career/InboxEngine.gd",
+        "shared/career/InboxItem.gd",
+        "shared/career/ManagerCareerProfile.gd",
+        "shared/career/PlayerCareerState.gd",
+        "shared/career/RelationshipData.gd",
+        "shared/career/WorldEvent.gd"
       ],
       "direct_dependents": [],
       "signals_declared": [],

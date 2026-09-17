@@ -22,8 +22,12 @@ func _ready() -> void:
 	_test_p2_sharded_league_loading()
 	_test_p4_quick_match_isolation()
 	_test_world_database_and_continental()
+	_test_relationship_batching()
+	_test_player_manager_relationships_and_sounding_board()
+	_test_mutiny_and_crisis_escalation()
 
 	print("------------------------------------------------------------------")
+
 	print("TOTAL TESTS: %d passed, %d failed" % [_passed, _failed])
 	print("==================================================================")
 	if _failed > 0:
@@ -293,3 +297,220 @@ func _test_world_database_and_continental() -> void:
 	CareerManager.close_career()
 	CareerSerializer.delete_slot(99)
 	DataLoader.load_default_database()
+
+
+func _test_relationship_batching() -> void:
+	# 1. Direct micro-event unit test on RelationshipData
+	var rel := RelationshipData.neutral(100)
+	var initial_trust: float = rel.trust # 0.5
+	# 10 passes completed: delta = 10 * 0.01 = 0.10, but capped at PASS_COMPLETION_TRUST_CAP (0.05)
+	rel.batch_match_micro_events(10, 0, 0, 0, false, false, false, 100)
+	_assert_true(is_equal_approx(rel.trust, initial_trust + 0.05), "RelBatch: pass completions trust capped at +0.05")
+
+	# Assists: +0.04 for assist_from, +0.03 for assist_to
+	var rel2 := RelationshipData.neutral(100)
+	rel2.batch_match_micro_events(0, 0, 1, 1, false, false, false, 100)
+	_assert_true(is_equal_approx(rel2.trust, 0.5 + 0.07), "RelBatch: assists adjust trust (+0.07)")
+
+	# Red card: rivalry +0.05, trust -0.03
+	var rel3 := RelationshipData.neutral(100)
+	rel3.batch_match_micro_events(0, 0, 0, 0, true, false, false, 100)
+	_assert_true(is_equal_approx(rel3.rivalry_score, 0.05) and is_equal_approx(rel3.trust, 0.47), "RelBatch: teammate red card adds rivalry and penalizes trust")
+
+	# 2. No-op when career is null
+	var dummy_fixture := FixtureData.new()
+	dummy_fixture.home_team_index = 0
+	dummy_fixture.away_team_index = 1
+	dummy_fixture.home_score = 1
+	dummy_fixture.away_score = 0
+	CareerManager.career = null
+	# Must safely no-op without crashing
+	CareerManager._apply_fixture_result(dummy_fixture, {}, {})
+	_assert_true(CareerManager.career == null, "RelBatch: _apply_fixture_result no-ops when career is null")
+
+	# 3. End-to-end career fixture simulation batches relationships
+	var dummy_profile := ManagerCareerProfile.new()
+	dummy_profile.manager_name = "Test Manager"
+	dummy_profile.tactical = ManagerData.new()
+	dummy_profile.tactical.manager_name = "Test Manager"
+	var cs: CareerSaveData = CareerManager.start_new_career(dummy_profile, 0, 98)
+
+	if cs != null:
+		var home_team: TeamData = DataLoader.get_team(0)
+		var p0_sq: int = home_team.lineup_indices[0]
+		var p1_sq: int = home_team.lineup_indices[1]
+		var p0_state: PlayerCareerState = cs.state_for_squad(0, p0_sq)
+		var rel_before: RelationshipData = p0_state.relationship_with(p1_sq, cs.today.to_ordinal())
+		var initial_last: int = rel_before.last_interaction_ordinal
+
+		var f: FixtureData = CareerManager.simulate_next_fixture()
+		_assert_true(f != null, "RelBatch: CareerManager simulated next fixture")
+		var rel_after: RelationshipData = p0_state.relationship_with(p1_sq, cs.today.to_ordinal())
+		_assert_true(rel_after.last_interaction_ordinal >= initial_last, "RelBatch: relationship last_interaction_ordinal updated after fixture")
+
+		CareerManager.close_career()
+		CareerSerializer.delete_slot(98)
+		DataLoader.load_default_database()
+
+
+func _test_player_manager_relationships_and_sounding_board() -> void:
+	# 1. Key convention and predicates
+	var team_idx: int = 5
+	var mgr_key: int = RelationshipData.manager_relationship_key(team_idx)
+	_assert_true(mgr_key == 100005, "MgrRel: manager_relationship_key(5) == 100005")
+	_assert_true(RelationshipData.is_manager_key(mgr_key), "MgrRel: is_manager_key(100005) is true")
+	_assert_true(not RelationshipData.is_manager_key(5012), "MgrRel: is_manager_key(5012) is false")
+
+	# 2. PlayerCareerState manager relationship initialization and sync
+	var state := PlayerCareerState.new()
+	state.manager_trust = 0.65
+	var rel: RelationshipData = state.manager_relationship(team_idx, 50)
+	_assert_true(rel != null, "MgrRel: state.manager_relationship creates edge")
+	_assert_true(is_equal_approx(rel.trust, 0.65), "MgrRel: fresh edge inherits manager_trust")
+
+	state.adjust_manager_trust(-0.15, "left out of the squad", team_idx, 51)
+	_assert_true(is_equal_approx(rel.trust, 0.50), "MgrRel: adjust_manager_trust updates edge trust")
+	_assert_true(is_equal_approx(state.manager_trust, 0.50), "MgrRel: adjust_manager_trust syncs state.manager_trust")
+
+	# 3. Benching resentment scaling by (1.0 - loyalty)
+	var low_loyalty: float = 0.20
+	var low_loss: float = RelationshipData.BENCHING_RESENTMENT_BASE_TRUST_DELTA * clampf(1.0 - low_loyalty, 0.0, 1.0)
+	_assert_true(is_equal_approx(low_loss, -0.048), "MgrRel: low loyalty (0.2) incurs -0.048 trust delta")
+
+	var max_loyalty: float = 1.0
+	var zero_loss: float = RelationshipData.BENCHING_RESENTMENT_BASE_TRUST_DELTA * clampf(1.0 - max_loyalty, 0.0, 1.0)
+	_assert_true(is_equal_approx(zero_loss, 0.0), "MgrRel: max loyalty (1.0) incurs 0.0 benching resentment")
+
+	# 4. Captain sounding board dialogue generation and resolution
+	var captain_data := PlayerData.new()
+	captain_data.player_name = "Jordan Henderson"
+	captain_data.traits = 64 # CaptainMaterial
+	captain_data.is_captain = true
+	captain_data.morale = 0.70
+
+	var captain_state := PlayerCareerState.new()
+	captain_state.player_key = 12
+	captain_state.squad_index = 0
+	captain_state.team_index = 0
+	captain_state.manager_trust = 0.50
+
+	var today := CareerDate.make(2026, 9, 17)
+	var team := TeamData.new()
+	team.team_name = "Test FC"
+	team.squad = [captain_data]
+
+	var item: InboxItem = InboxEngine.build_captain_sounding_board(captain_data, captain_state, team, today)
+	_assert_true(item != null, "SoundingBoard: item created successfully")
+	_assert_true(item.requires_decision(), "SoundingBoard: requires decision")
+	_assert_true(item.option_count() == 4, "SoundingBoard: has 4 dialogue options")
+	_assert_true(String(item.payload.get("kind", "")) == "sounding_board", "SoundingBoard: payload kind is sounding_board")
+
+	var career: CareerSaveData = CareerSaveData.make_new(null, 0, today, 1)
+	career.player_states[captain_state.player_key] = captain_state
+
+	# Resolve option 0 (Rally the squad)
+	var event: WorldEvent = InboxEngine.resolve(career, item, 0, team, today)
+	_assert_true(event != null and item.is_resolved, "SoundingBoard: resolved with WorldEvent")
+	_assert_true(captain_state.manager_trust > 0.55, "SoundingBoard: captain trust increased after rally")
+	var captain_rel: RelationshipData = captain_state.manager_relationship(0, today.to_ordinal())
+	_assert_true(is_equal_approx(captain_rel.trust, captain_state.manager_trust), "SoundingBoard: manager edge trust in sync with manager_trust")
+
+
+func _test_mutiny_and_crisis_escalation() -> void:
+	# 1. Dual condition threshold evaluation
+	var team := TeamData.new()
+	team.team_name = "Mutiny FC"
+
+	var p_leader := PlayerData.new()
+	p_leader.player_name = "Skipper"
+	p_leader.traits = WorldEventGenerator.TRAIT_CAPTAIN_MATERIAL
+	p_leader.morale = 0.80
+
+	var p_regular := PlayerData.new()
+	p_regular.player_name = "Winger"
+	p_regular.morale = 0.70
+
+	team.squad = [p_leader, p_regular]
+
+	var today := CareerDate.make(2026, 9, 17)
+	var career: CareerSaveData = CareerSaveData.make_new(null, 0, today, 1)
+
+	var st_leader := PlayerCareerState.new()
+	st_leader.player_key = 0
+	st_leader.squad_index = 0
+	st_leader.team_index = 0
+	st_leader.manager_trust = 0.60
+
+	var st_regular := PlayerCareerState.new()
+	st_regular.player_key = 1
+	st_regular.squad_index = 1
+	st_regular.team_index = 0
+	st_regular.manager_trust = 0.50
+
+	career.player_states[0] = st_leader
+	career.player_states[1] = st_regular
+
+	# Baseline: high morale, high trust -> false
+	_assert_true(not WorldEventGenerator.check_mutiny_threshold(team, career), "Mutiny: healthy squad does not trigger threshold")
+
+	# Case A: low squad morale (< 0.35), but leader trust healthy (>= 0.30) -> false
+	p_leader.morale = 0.20
+	p_regular.morale = 0.20
+	st_leader.manager_trust = 0.50
+	_assert_true(not WorldEventGenerator.check_mutiny_threshold(team, career), "Mutiny: low morale alone with healthy leader trust does not trigger")
+
+	# Case B: healthy squad morale (>= 0.35), but leader trust low (< 0.30) -> false
+	p_leader.morale = 0.80
+	p_regular.morale = 0.80
+	st_leader.manager_trust = 0.15
+	_assert_true(not WorldEventGenerator.check_mutiny_threshold(team, career), "Mutiny: low leader trust alone with healthy squad morale does not trigger")
+
+	# Case C: low squad morale (< 0.35) AND leader trust low (< 0.30) -> true!
+	p_leader.morale = 0.20
+	p_regular.morale = 0.20
+	st_leader.manager_trust = 0.15
+	_assert_true(WorldEventGenerator.check_mutiny_threshold(team, career), "Mutiny: dual condition strictly met triggers mutiny threshold")
+
+	# 2. Squad leader detection
+	var leaders: Array[PlayerData] = WorldEventGenerator.get_squad_leaders(team)
+	_assert_true(leaders.size() == 1 and leaders[0].player_name == "Skipper", "Mutiny: squad leaders correctly identified")
+
+	# 3. InboxItem builders and non-closure options
+	var warn_item: InboxItem = InboxEngine.build_mutiny_warning(team, today)
+	_assert_true(warn_item != null and warn_item.priority >= 0.90, "Mutiny: warning inbox item generated with high priority")
+	_assert_true(warn_item.option_count() == 3, "Mutiny: warning item provides 3 tactical manager choices")
+	_assert_true(String(warn_item.payload.get("kind", "")) == "mutiny_warning", "Mutiny: payload kind is mutiny_warning")
+
+	var board_item: InboxItem = InboxEngine.build_mutiny_board_ultimatum(team, career.board, today)
+	_assert_true(board_item != null and board_item.priority == 1.0, "Mutiny: board ultimatum has priority 1.0")
+	_assert_true(board_item.category == InboxItem.Category.BOARD, "Mutiny: board ultimatum is in Category.BOARD")
+
+	# 4. Action resolution effects
+	var initial_trust: float = st_leader.manager_trust
+	var res_event: WorldEvent = InboxEngine.resolve(career, warn_item, 0, team, today) # Concede option
+	_assert_true(res_event != null and warn_item.is_resolved, "Mutiny: warning option resolved into WorldEvent")
+	_assert_true(st_leader.manager_trust > initial_trust, "Mutiny: conceding to mutiny leaders increases leader trust")
+	_assert_true(p_leader.morale > 0.20, "Mutiny: conceding increases squad morale")
+
+	# 5. BoardState crisis intervention
+	career.board = BoardState.make_for_club(team, 25000)
+	var board: BoardState = career.board
+	_assert_true(board != null, "Mutiny: career board exists")
+	var conf_before: float = board.confidence
+	board.trigger_board_intervention("Full dressing room mutiny", 0.20)
+	_assert_true(board.board_intervention_active, "Mutiny: board_intervention_active is set")
+	_assert_true(board.confidence < conf_before, "Mutiny: board confidence drops on intervention")
+	_assert_true(not board.patience_notes.is_empty(), "Mutiny: intervention reason logged in patience_notes")
+
+	board.clear_board_intervention()
+	_assert_true(not board.board_intervention_active, "Mutiny: clear_board_intervention resets active flag")
+
+	# 6. Serialization round-trip for board_intervention_active
+	board.board_intervention_active = true
+	var serialized: Dictionary = CareerSerializer._board_to_dict(board)
+	_assert_true(bool(serialized.get("board_intervention_active", false)) == true, "Mutiny: board_intervention_active serialized")
+	var deserialized: BoardState = CareerSerializer._board_from_dict(serialized)
+	_assert_true(deserialized.board_intervention_active, "Mutiny: board_intervention_active deserialized")
+
+
+

@@ -63,6 +63,8 @@ class QuickSimResult:
 	var away_advanced_stats: Dictionary = {}
 	var player_events: Dictionary[int, PlayerRatingCalculator.PlayerMatchEvents] = {}
 	var player_ratings: Dictionary[int, float] = {}
+	## Tactical shadowing metadata: maps team_id (TEAM_A/TEAM_B) to { "star_key": int, "star_slot": int, "secondary_slot": int, "marker_key": int, "marker_slot": int }
+	var tactical_shadowing: Dictionary = {}
 
 
 ## Baseline goals expected in a neutral top-tier 90-minute match.
@@ -313,13 +315,19 @@ static func simulate_match(
 		var a_key: int = GameManager.TEAM_B * 1000 + a_idx
 		all_player_events[a_key] = PlayerRatingCalculator.PlayerMatchEvents.new()
 
-	# 3. Simulate goals and assign scorers / assists
-	var match_events: Array[MatchEventRecord] = []
-	_generate_goals(result.home_score, GameManager.TEAM_A, home_team, h_lineup, all_player_events, match_events)
-	_generate_goals(result.away_score, GameManager.TEAM_B, away_team, a_lineup, all_player_events, match_events)
+	# 3. Tactical shadowing detection
+	var home_shadowing: Dictionary = _detect_tactical_shadowing(home_team, h_lineup, away_team, a_lineup)
+	var away_shadowing: Dictionary = _detect_tactical_shadowing(away_team, a_lineup, home_team, h_lineup)
+	result.tactical_shadowing[GameManager.TEAM_A] = home_shadowing
+	result.tactical_shadowing[GameManager.TEAM_B] = away_shadowing
 
-	# 4. Simulate fouls, yellow cards, red cards based on referee & player aggression
-	_generate_discipline_events(referee, home_team, away_team, h_lineup, a_lineup, all_player_events, match_events)
+	# 4. Simulate goals and assign scorers / assists
+	var match_events: Array[MatchEventRecord] = []
+	_generate_goals(result.home_score, GameManager.TEAM_A, home_team, h_lineup, all_player_events, match_events, home_shadowing)
+	_generate_goals(result.away_score, GameManager.TEAM_B, away_team, a_lineup, all_player_events, match_events, away_shadowing)
+
+	# 5. Simulate fouls, yellow cards, red cards based on referee & player aggression
+	_generate_discipline_events(referee, home_team, away_team, h_lineup, a_lineup, all_player_events, match_events, home_shadowing, away_shadowing)
 
 	# Sort chronological events
 	match_events.sort_custom(func(a: MatchEventRecord, b: MatchEventRecord) -> bool:
@@ -475,11 +483,11 @@ static func simulate_match(
 	# 6. Distribute remaining event volumes to players
 	_distribute_player_match_stats(
 		GameManager.TEAM_A, home_team, h_lineup, result.home_stats, result.home_advanced_stats,
-		result.home_score, result.away_score, all_player_events
+		result.home_score, result.away_score, all_player_events, home_shadowing
 	)
 	_distribute_player_match_stats(
 		GameManager.TEAM_B, away_team, a_lineup, result.away_stats, result.away_advanced_stats,
-		result.away_score, result.home_score, all_player_events
+		result.away_score, result.home_score, all_player_events, away_shadowing
 	)
 
 	result.player_events = all_player_events
@@ -589,6 +597,10 @@ static func apply_to_match_stats_tracker(
 		dest.tackles_won = src.tackles_won
 		dest.interceptions = src.interceptions
 		dest.vaep = src.vaep
+		dest.touches = src.touches
+		dest.teammate_interactions = src.teammate_interactions.duplicate()
+		dest.teammate_assists = src.teammate_assists.duplicate()
+
 
 	# 5. Persist career stats for all players involved
 	for key: int in sim_result.player_events:
@@ -603,6 +615,10 @@ static func apply_to_match_stats_tracker(
 				# Form drift: high rating boosts form, low rating depresses form
 				var r: float = p_data.last_match_rating
 				p_data.form = clampf(p_data.form * 0.8 + r * 0.2, 3.0, 10.0)
+
+	# Tactical shadowing metadata is recorded on sim_result.tactical_shadowing
+	# (marker foul probability bias is already evaluated during match discipline resolution).
+	# Note: We do NOT mutate PlayerData.stamina_drain permanently on the base resource.
 
 	# 6. Persist manager career stats
 	var winner: int = sim_result.winner
@@ -786,20 +802,104 @@ static func _sample_poisson(lambda_val: float) -> int:
 	return maxi(k - 1, 0)
 
 
+## Detects tactical shadowing matchups: finds highest-rated star forward/midfielder
+## in attacking lineup (star_score >= 0.72) and selects opponent's best defensive marker
+## (outfield CB/DM with highest aggression * 0.6 + work_rate * 0.4).
+## Also identifies secondary attacker (next highest rated forward/winger).
+static func _detect_tactical_shadowing(
+	att_team: TeamData,
+	att_lineup: Array[int],
+	def_team: TeamData,
+	def_lineup: Array[int]
+) -> Dictionary:
+	var res: Dictionary = {
+		"star_slot": -1,
+		"star_sq_idx": -1,
+		"secondary_slot": -1,
+		"secondary_sq_idx": -1,
+		"marker_slot": -1,
+		"marker_sq_idx": -1,
+	}
+	if att_team == null or def_team == null or att_lineup.is_empty() or def_lineup.is_empty():
+		return res
+
+	# 1. Active Star forward/midfielder in att_lineup
+	var best_star_score: float = -1.0
+	var star_slot: int = -1
+	for slot: int in range(1, mini(11, att_lineup.size())):
+		var star_cand_idx: int = att_lineup[slot]
+		if star_cand_idx < 0 or star_cand_idx >= att_team.squad.size():
+			continue
+		var star_cand_p: PlayerData = att_team.squad[star_cand_idx]
+		var is_att_or_mid: bool = (slot >= 5 and slot <= 10) or star_cand_p.position_role in ["DM", "CM", "AM", "CAM", "LM", "RM", "LW", "RW", "ST"]
+		if is_att_or_mid:
+			var score: float = star_cand_p.get_star_score()
+			if score >= 0.72 and score > best_star_score:
+				best_star_score = score
+				star_slot = slot
+
+	if star_slot < 0:
+		return res
+
+	res["star_slot"] = star_slot
+	res["star_sq_idx"] = att_lineup[star_slot]
+
+	# 2. Secondary attacker (next highest rated forward/winger on Star's team)
+	var best_sec_rating: int = -1
+	var sec_slot: int = -1
+	for slot: int in range(1, mini(11, att_lineup.size())):
+		if slot == star_slot:
+			continue
+		var sec_cand_idx: int = att_lineup[slot]
+		if sec_cand_idx < 0 or sec_cand_idx >= att_team.squad.size():
+			continue
+		var sec_cand_p: PlayerData = att_team.squad[sec_cand_idx]
+		var is_forward_winger: bool = (slot >= 8 and slot <= 10) or sec_cand_p.position_role in ["ST", "LW", "RW", "AM", "CAM", "LM", "RM"]
+		if is_forward_winger:
+			var rating: int = sec_cand_p.calculate_overall_rating()
+			if rating > best_sec_rating:
+				best_sec_rating = rating
+				sec_slot = slot
+
+	if sec_slot >= 0:
+		res["secondary_slot"] = sec_slot
+		res["secondary_sq_idx"] = att_lineup[sec_slot]
+
+	# 3. Defensive marker on defending team: outfield CB/DM (slots 1–7)
+	var best_marker_score: float = -1.0
+	var marker_slot: int = -1
+	for slot: int in range(1, mini(8, def_lineup.size())):
+		var marker_cand_idx: int = def_lineup[slot]
+		if marker_cand_idx < 0 or marker_cand_idx >= def_team.squad.size():
+			continue
+		var marker_cand_p: PlayerData = def_team.squad[marker_cand_idx]
+		var marker_score: float = marker_cand_p.aggression * 0.6 + marker_cand_p.work_rate * 0.4
+		if marker_score > best_marker_score:
+			best_marker_score = marker_score
+			marker_slot = slot
+
+	if marker_slot >= 0:
+		res["marker_slot"] = marker_slot
+		res["marker_sq_idx"] = def_lineup[marker_slot]
+
+	return res
+
+
 static func _generate_goals(
 	num_goals: int,
 	team_id: int,
 	team_data: TeamData,
 	lineup: Array[int],
 	events_map: Dictionary[int, PlayerRatingCalculator.PlayerMatchEvents],
-	events_list: Array[MatchEventRecord]
+	events_list: Array[MatchEventRecord],
+	shadowing: Dictionary = {}
 ) -> void:
 	if num_goals <= 0:
 		return
 
 	# Weight player goal candidates based on slot and attributes
 	for _g: int in range(num_goals):
-		var scorer_slot: int = _pick_scorer_slot(team_data, lineup)
+		var scorer_slot: int = _pick_scorer_slot(team_data, lineup, shadowing)
 		var scorer_squad_idx: int = lineup[scorer_slot]
 		var scorer_p: PlayerData = team_data.squad[scorer_squad_idx]
 		var scorer_key: int = team_id * 1000 + scorer_squad_idx
@@ -809,7 +909,7 @@ static func _generate_goals(
 		var assist_squad_idx: int = -1
 		var assist_name: String = ""
 		if randf() < 0.78: # 78% of goals assisted
-			assist_slot = _pick_assist_slot(scorer_slot, lineup)
+			assist_slot = _pick_assist_slot(scorer_slot, lineup, shadowing)
 			if assist_slot >= 0:
 				assist_squad_idx = lineup[assist_slot]
 				assist_name = team_data.squad[assist_squad_idx].player_name
@@ -817,6 +917,10 @@ static func _generate_goals(
 				if events_map.has(a_key):
 					events_map[a_key].assists += 1
 					events_map[a_key].xa += 0.55
+					events_map[a_key].teammate_assists[scorer_squad_idx] = events_map[a_key].teammate_assists.get(scorer_squad_idx, 0) + 1
+					events_map[a_key].teammate_interactions[scorer_squad_idx] = events_map[a_key].teammate_interactions.get(scorer_squad_idx, 0) + 1
+				if events_map.has(scorer_key):
+					events_map[scorer_key].teammate_interactions[assist_squad_idx] = events_map[scorer_key].teammate_interactions.get(assist_squad_idx, 0) + 1
 
 		if events_map.has(scorer_key):
 			events_map[scorer_key].goals += 1
@@ -838,13 +942,19 @@ static func _generate_goals(
 		events_list.append(rec)
 
 
-static func _pick_scorer_slot(team: TeamData, lineup: Array[int]) -> int:
+static func _pick_scorer_slot(team: TeamData, lineup: Array[int], shadowing: Dictionary = {}) -> int:
 	var weights: Array[float] = [0.0, 0.04, 0.08, 0.08, 0.04, 0.10, 0.14, 0.14, 0.32, 0.34, 0.32]
+	var star_slot: int = int(shadowing.get("star_slot", -1))
+	var sec_slot: int = int(shadowing.get("secondary_slot", -1))
 	var total: float = 0.0
 	for i in range(mini(weights.size(), lineup.size())):
 		var sq_idx: int = lineup[i]
 		var p: PlayerData = team.squad[sq_idx]
 		weights[i] *= (p.close_control * 1.5 + p.composure * 1.2 + 0.2)
+		if i == star_slot:
+			weights[i] *= 0.60
+		elif i == sec_slot:
+			weights[i] *= 1.20
 		total += weights[i]
 
 	var r: float = randf() * total
@@ -853,17 +963,34 @@ static func _pick_scorer_slot(team: TeamData, lineup: Array[int]) -> int:
 		cum += weights[i]
 		if r <= cum:
 			return i
-	return 8
+	return mini(8, maxi(0, lineup.size() - 1))
 
 
-static func _pick_assist_slot(scorer_slot: int, lineup: Array[int]) -> int:
+static func _pick_assist_slot(scorer_slot: int, lineup: Array[int], shadowing: Dictionary = {}) -> int:
 	var candidates: Array[int] = []
+	var weights: Array[float] = []
+	var star_slot: int = int(shadowing.get("star_slot", -1))
+	var sec_slot: int = int(shadowing.get("secondary_slot", -1))
+	var total: float = 0.0
 	for i: int in range(1, mini(11, lineup.size())):
 		if i != scorer_slot:
 			candidates.append(i)
+			var w: float = 1.0
+			if i == star_slot:
+				w *= 0.60
+			elif i == sec_slot:
+				w *= 1.20
+			weights.append(w)
+			total += w
 	if candidates.is_empty():
 		return -1
-	return candidates[randi() % candidates.size()]
+	var r: float = randf() * total
+	var cum: float = 0.0
+	for idx: int in range(candidates.size()):
+		cum += weights[idx]
+		if r <= cum:
+			return candidates[idx]
+	return candidates[0]
 
 
 static func _generate_discipline_events(
@@ -873,7 +1000,9 @@ static func _generate_discipline_events(
 	h_lineup: Array[int],
 	a_lineup: Array[int],
 	events_map: Dictionary[int, PlayerRatingCalculator.PlayerMatchEvents],
-	events_list: Array[MatchEventRecord]
+	events_list: Array[MatchEventRecord],
+	home_shadowing: Dictionary = {},
+	away_shadowing: Dictionary = {}
 ) -> void:
 	var strict: float = referee.strictness if referee != null else 0.5
 	var base_fouls_per_team: int = int(roundf(5.0 + strict * 9.0 + randf_range(-2.0, 2.0)))
@@ -882,10 +1011,27 @@ static func _generate_discipline_events(
 		var t_data: TeamData = home_team if team_id == GameManager.TEAM_A else away_team
 		var lineup: Array[int] = h_lineup if team_id == GameManager.TEAM_A else a_lineup
 		var team_fouls: int = maxi(base_fouls_per_team + randi_range(-2, 3), 2)
+		var marker_slot: int = int(away_shadowing.get("marker_slot", -1)) if team_id == GameManager.TEAM_A else int(home_shadowing.get("marker_slot", -1))
+
+		var foul_slots: Array[int] = []
+		var foul_weights: Array[float] = []
+		var total_foul_weight: float = 0.0
+		for s: int in range(1, mini(9, lineup.size())):
+			foul_slots.append(s)
+			var w: float = 1.15 if s == marker_slot else 1.0
+			foul_weights.append(w)
+			total_foul_weight += w
 
 		for _f in range(team_fouls):
-			# Distribute fouls to defensive / midfield aggressive players
-			var foul_slot: int = randi_range(1, 8)
+			var foul_slot: int = 1
+			if not foul_slots.is_empty():
+				var r: float = randf() * total_foul_weight
+				var cum: float = 0.0
+				for idx: int in range(foul_slots.size()):
+					cum += foul_weights[idx]
+					if r <= cum:
+						foul_slot = foul_slots[idx]
+						break
 			if foul_slot < lineup.size():
 				var foul_sq_idx: int = lineup[foul_slot]
 				var foul_key: int = team_id * 1000 + foul_sq_idx
@@ -940,7 +1086,8 @@ static func _distribute_player_match_stats(
 	team_adv_stats: Dictionary,
 	team_goals: int,
 	opp_goals: int,
-	events_map: Dictionary[int, PlayerRatingCalculator.PlayerMatchEvents]
+	events_map: Dictionary[int, PlayerRatingCalculator.PlayerMatchEvents],
+	shadowing: Dictionary = {}
 ) -> void:
 	var passes_comp: int = int(team_stats.get("passes_attempted", 400)) * int(team_stats.get("pass_completion_pct", 80)) / 100
 	var passes_fail: int = int(team_stats.get("passes_attempted", 400)) - passes_comp
@@ -955,10 +1102,13 @@ static func _distribute_player_match_stats(
 	var team_xt: float = team_adv_stats.get("xt_delta", 1.2)
 	var team_vaep: float = team_adv_stats.get("vaep_total", 2.0)
 
+	var star_slot: int = int(shadowing.get("star_slot", -1))
+	var sec_slot: int = int(shadowing.get("secondary_slot", -1))
+
 	for slot: int in range(mini(11, lineup.size())):
 		var sq_idx: int = lineup[slot]
 		var key: int = team_id * 1000 + sq_idx
-		var _p_data: PlayerData = team_data.squad[sq_idx]
+		var p_data: PlayerData = team_data.squad[sq_idx]
 		var ev: PlayerRatingCalculator.PlayerMatchEvents = events_map.get(key)
 		if ev == null:
 			continue
@@ -994,11 +1144,27 @@ static func _distribute_player_match_stats(
 			ev.progressive_carries = int(roundf(float(team_prog_carries) * 0.16))
 			ev.xt_delta = team_xt * 0.18
 			ev.vaep = team_vaep * 0.14
-			if ev.shots_on_target == 0 and randf() < 0.4:
+			var mid_shot_chance: float = 0.40
+			if slot == star_slot:
+				mid_shot_chance *= 0.60
+				ev.xg *= 0.60
+				ev.passes_completed = int(roundf(float(ev.passes_completed) * 0.65))
+				ev.passes_failed = int(roundf(float(ev.passes_failed) * 0.75))
+			elif slot == sec_slot:
+				mid_shot_chance *= 1.20
+				ev.xg *= 1.20
+				ev.passes_completed = int(roundf(float(ev.passes_completed) * 1.20))
+			elif p_data != null and p_data.player_reputation > 0.60:
+				var catering: float = lerpf(1.0, 1.30, clampf((p_data.player_reputation - 0.60) / 0.40, 0.0, 1.0))
+				ev.passes_completed = int(roundf(float(ev.passes_completed) * catering))
+			if ev.shots_on_target == 0 and randf() < mid_shot_chance:
 				ev.shots_off_target = 1
 		else:
 			# Forwards / Attackers
-			ev.passes_completed = int(roundf(float(passes_comp) * 0.06))
+			var fwd_pass_factor: float = 0.06
+			if p_data != null and slot != star_slot:
+				fwd_pass_factor = lerpf(0.06, 0.14, clampf(p_data.player_reputation, 0.0, 1.0))
+			ev.passes_completed = int(roundf(float(passes_comp) * fwd_pass_factor))
 			ev.passes_failed = int(roundf(float(passes_fail) * 0.08))
 			ev.tackles_won = randi_range(0, 2)
 			ev.interceptions = randi_range(0, 2)
@@ -1006,6 +1172,32 @@ static func _distribute_player_match_stats(
 			ev.progressive_carries = int(roundf(float(team_prog_carries) * 0.14))
 			ev.xt_delta = team_xt * 0.14
 			ev.vaep = team_vaep * 0.16
-			if ev.shots_on_target == 0 and randf() < 0.6:
+			var fwd_shot_chance: float = 0.60
+			if slot == star_slot:
+				fwd_shot_chance *= 0.60
+				ev.xg *= 0.60
+				ev.passes_completed = int(roundf(float(ev.passes_completed) * 0.50))
+				ev.passes_failed = int(roundf(float(ev.passes_failed) * 0.70))
+			elif slot == sec_slot:
+				fwd_shot_chance *= 1.20
+				ev.xg *= 1.20
+				ev.passes_completed = int(roundf(float(ev.passes_completed) * 1.25))
+			if ev.shots_on_target == 0 and randf() < fwd_shot_chance:
 				ev.shots_on_target = 1
-				ev.shots_off_target = randi_range(0, 2)
+		ev.touches = ev.passes_completed + ev.passes_failed + ev.shots_on_target + ev.shots_off_target + ev.tackles_won + ev.interceptions
+
+	# Distribute passing teammate interactions across the starting lineup
+	var lineup_size: int = mini(11, lineup.size())
+	for slot: int in range(lineup_size):
+		var passer_sq_idx: int = lineup[slot]
+		var passer_key: int = team_id * 1000 + passer_sq_idx
+		var passer_ev: PlayerRatingCalculator.PlayerMatchEvents = events_map.get(passer_key)
+		if passer_ev == null or passer_ev.passes_completed <= 0:
+			continue
+		var other_count: int = maxi(1, lineup_size - 1)
+		var base_passes_per_peer: int = maxi(1, passer_ev.passes_completed / other_count)
+		for other_slot: int in range(lineup_size):
+			if slot == other_slot:
+				continue
+			var peer_sq_idx: int = lineup[other_slot]
+			passer_ev.teammate_interactions[peer_sq_idx] = passer_ev.teammate_interactions.get(peer_sq_idx, 0) + base_passes_per_peer

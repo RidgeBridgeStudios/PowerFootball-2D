@@ -271,6 +271,8 @@ func _seed_initial_relationships() -> void:
 				# A locker-room cancer (32) starts with friction already.
 				if player_b.has_trait(32):
 					rel.rivalry_score = clampf(_rng.randf_range(0.10, 0.35), 0.0, 1.0)
+			# Seed player-manager relationship edge (docs/SOCIAL_SIMULATION_ARCHITECTURE.md §2.3)
+			state_a.manager_relationship(team_index, ordinal)
 
 
 func _share_language(a: PlayerData, b: PlayerData) -> bool:
@@ -1327,6 +1329,9 @@ func _apply_fixture_result(
 	player_events: Dictionary = {},
 	player_ratings: Dictionary = {}
 ) -> void:
+	if career == null:
+		return
+
 	var comp: CompetitionData = _competition_of(fixture)
 	if comp != null:
 		comp.record_result(fixture, _rng)
@@ -1348,18 +1353,22 @@ func _apply_fixture_result(
 		player_events, player_ratings
 	)
 
-	_record_player_match_state(fixture.home_team_index, fixture, true, player_ratings)
-	_record_player_match_state(fixture.away_team_index, fixture, false, player_ratings)
+	_record_player_match_state(fixture.home_team_index, fixture, true, player_ratings, player_events)
+	_record_player_match_state(fixture.away_team_index, fixture, false, player_ratings, player_events)
+	_batch_match_relationships(fixture.home_team_index, true, player_events)
+	_batch_match_relationships(fixture.away_team_index, false, player_events)
 
 	if fixture.involves(career.user_team_index):
 		_apply_user_result(fixture)
+
 
 
 func _record_player_match_state(
 	team_index: int,
 	fixture: FixtureData,
 	is_home: bool,
-	player_ratings: Dictionary = {}
+	player_ratings: Dictionary = {},
+	player_events: Dictionary = {}
 ) -> void:
 	var team: TeamData = DataLoader.get_team(team_index)
 	if team == null:
@@ -1367,6 +1376,20 @@ func _record_player_match_state(
 	var scored: int = fixture.home_score if is_home else fixture.away_score
 	var conceded: int = fixture.away_score if is_home else fixture.home_score
 	var goal_diff: int = scored - conceded
+	var side: int = 0 if is_home else 1
+
+	# First calculate team touches across lineup for pass-starvation share
+	var team_touches: int = 0
+	if not player_events.is_empty():
+		for slot: int in range(team.lineup_indices.size()):
+			var sq_idx: int = team.lineup_indices[slot]
+			if sq_idx < 0 or sq_idx >= team.squad.size():
+				continue
+			var ev_key: int = side * 1000 + sq_idx
+			if player_events.has(ev_key):
+				var team_ev: PlayerRatingCalculator.PlayerMatchEvents = player_events[ev_key]
+				if team_ev != null:
+					team_touches += team_ev.get_touches()
 
 	for slot: int in range(team.lineup_indices.size()):
 		var squad_index: int = team.lineup_indices[slot]
@@ -1381,18 +1404,102 @@ func _record_player_match_state(
 		# QuickSimEngine keys ratings by the match SIDE (0/1), not the league
 		# team index, so the lookup has to use the side this fixture put the
 		# club on rather than team_index.
-		var side: int = 0 if is_home else 1
-		var rating: float = float(player_ratings.get(side * 1000 + squad_index, data.last_match_rating))
+		var key: int = side * 1000 + squad_index
+		var rating: float = float(player_ratings.get(key, data.last_match_rating))
 		state.record_appearance(90, rating, 0, 0)
 		MoraleEngine.apply_result_reaction(data, true, goal_diff, rating)
 		var age: int = data.get_age(career.today.year, career.today.month, career.today.day)
 		MoraleEngine.apply_reputation_drift(data, rating, age)
 
+		# Ego / catering pass-starvation morale penalty (docs/SOCIAL_SIMULATION_ARCHITECTURE.md §4.3)
+		if team_touches > 0 and player_events.has(key):
+			var p_ev: PlayerRatingCalculator.PlayerMatchEvents = player_events[key]
+			var player_touches: int = p_ev.get_touches() if p_ev != null else 0
+			MoraleEngine.apply_pass_starvation_penalty(data, player_touches, team_touches)
+
 	# Everyone who did not feature still reacts to the result.
 	for squad_index2: int in range(team.squad.size()):
 		if team.lineup_indices.has(squad_index2):
 			continue
-		MoraleEngine.apply_result_reaction(team.squad[squad_index2], false, goal_diff, 0.0)
+		var benched_player: PlayerData = team.squad[squad_index2]
+		MoraleEngine.apply_result_reaction(benched_player, false, goal_diff, 0.0)
+
+		# Benching resentment toward manager (docs/SOCIAL_SIMULATION_ARCHITECTURE.md §2.2, §2.3)
+		var benched_state: PlayerCareerState = career.state_for_squad(team_index, squad_index2)
+		if benched_state != null and benched_state.is_available():
+			var is_high_status: bool = benched_player.squad_status in ["Star Player", "Important"]
+			if not is_high_status and benched_state.contract != null:
+				is_high_status = (
+					benched_state.contract.promised_status == int(ContractData.Status.STAR_PLAYER)
+					or benched_state.contract.promised_status == int(ContractData.Status.IMPORTANT)
+				)
+			if is_high_status:
+				var resentment_scale: float = clampf(1.0 - benched_player.loyalty, 0.0, 1.0)
+				var trust_loss: float = RelationshipData.BENCHING_RESENTMENT_BASE_TRUST_DELTA * resentment_scale
+				benched_state.adjust_manager_trust(
+					trust_loss, "left out of the squad", team_index, career.today.to_ordinal()
+				)
+
+
+func _batch_match_relationships(
+	team_index: int,
+	is_home: bool,
+	player_events: Dictionary = {}
+) -> void:
+	if career == null or player_events.is_empty():
+		return
+	var team: TeamData = DataLoader.get_team(team_index)
+	if team == null:
+		return
+	var side: int = 0 if is_home else 1
+	var ordinal: int = career.today.to_ordinal()
+	var lineup_size: int = mini(11, team.lineup_indices.size())
+
+	for i: int in range(lineup_size):
+		var sq_a: int = team.lineup_indices[i]
+		if sq_a < 0 or sq_a >= team.squad.size():
+			continue
+		var state_a: PlayerCareerState = career.state_for_squad(team_index, sq_a)
+		if state_a == null:
+			continue
+		var key_a: int = side * 1000 + sq_a
+		var ev_a: PlayerRatingCalculator.PlayerMatchEvents = player_events.get(key_a, null) as PlayerRatingCalculator.PlayerMatchEvents
+		if ev_a == null:
+			continue
+
+		for j: int in range(lineup_size):
+			if i == j:
+				continue
+			var sq_b: int = team.lineup_indices[j]
+			if sq_b < 0 or sq_b >= team.squad.size():
+				continue
+			var key_b: int = side * 1000 + sq_b
+			var ev_b: PlayerRatingCalculator.PlayerMatchEvents = player_events.get(key_b, null) as PlayerRatingCalculator.PlayerMatchEvents
+
+			var rel_ab: RelationshipData = state_a.relationship_with(team_index * 1000 + sq_b, ordinal)
+			if rel_ab == null:
+				continue
+
+			var completions: int = ev_a.teammate_interactions.get(sq_b, 0)
+			var failures: int = 1 if (ev_a.passes_failed > 3 and completions > 0) else 0
+			var assists_to_b: int = ev_a.teammate_assists.get(sq_b, 0)
+			var assists_from_b: int = ev_b.teammate_assists.get(sq_a, 0) if ev_b != null else 0
+			var b_red: bool = (ev_b != null and ev_b.red_cards > 0)
+			var b_og: bool = (ev_b != null and ev_b.own_goals > 0)
+			var both_defenders: bool = (i in [0, 1, 2, 3, 4]) and (j in [0, 1, 2, 3, 4])
+			var clean_sheet: bool = both_defenders and (ev_a.kept_clean_sheet or (ev_b != null and ev_b.kept_clean_sheet))
+
+			rel_ab.batch_match_micro_events(
+				completions,
+				failures,
+				assists_to_b,
+				assists_from_b,
+				b_red,
+				b_og,
+				clean_sheet,
+				ordinal
+			)
+
 
 
 func _apply_user_result(fixture: FixtureData) -> void:
@@ -1857,6 +1964,10 @@ func _rehydrate_inbox() -> void:
 					elif kind_str == "confrontation":
 						rebuilt = InboxEngine.build_dressing_room_confrontation_item(
 							club.squad[state.squad_index], state, null, item.received
+						)
+					elif kind_str == "sounding_board":
+						rebuilt = InboxEngine.build_captain_sounding_board(
+							club.squad[state.squad_index], state, club, item.received
 						)
 					else:
 						rebuilt = InboxEngine.build_playing_time_complaint(

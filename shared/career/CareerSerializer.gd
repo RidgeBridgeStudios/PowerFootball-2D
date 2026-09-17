@@ -46,6 +46,10 @@ static func league_path(slot: int) -> String:
 	return "%s/%s" % [slot_dir(slot), LEAGUE_FILE]
 
 
+static func managers_path(slot: int) -> String:
+	return "%s/%s" % [slot_dir(slot), MANAGERS_FILE]
+
+
 static func slot_exists(slot: int) -> bool:
 	return FileAccess.file_exists(career_path(slot))
 
@@ -82,8 +86,9 @@ static func save_to_slot(career: CareerSaveData, slot: int) -> bool:
 	file.store_string(JSON.stringify(to_dict(career), "\t"))
 	file.close()
 
-	# The league (squads/staff/attributes) rides along in the same slot.
+	# The league (squads/staff/attributes) and managers ride along in the same slot.
 	DataLoader.save_league(league_path(slot))
+	ManagerLoader.save_managers_to(managers_path(slot))
 	return true
 
 
@@ -185,10 +190,12 @@ static func load_from_slot(slot: int) -> CareerSaveData:
 	if version < CareerSaveData.SAVE_VERSION:
 		d = migrate(d, version)
 
-	# The squads must be restored BEFORE the career state that indexes into
+	# The squads and managers must be restored BEFORE the career state that indexes into
 	# them, or every player_state would point at the wrong PlayerData.
 	if FileAccess.file_exists(league_path(slot)):
 		DataLoader.load_league_from(league_path(slot))
+	if FileAccess.file_exists(managers_path(slot)):
+		ManagerLoader.load_managers_from(managers_path(slot))
 
 	return from_dict(d)
 
@@ -691,6 +698,7 @@ static func _board_to_dict(b: BoardState) -> Dictionary:
 		"takeover_cash_injection": b.takeover_cash_injection,
 		"transfer_embargo": b.transfer_embargo,
 		"owner_name": b.owner_name,
+		"board_intervention_active": b.board_intervention_active,
 	}
 
 
@@ -729,6 +737,7 @@ static func _board_from_dict(raw: Variant) -> BoardState:
 	b.takeover_cash_injection = int(d.get("takeover_cash_injection", 0))
 	b.transfer_embargo = bool(d.get("transfer_embargo", false))
 	b.owner_name = String(d.get("owner_name", "The Board"))
+	b.board_intervention_active = bool(d.get("board_intervention_active", false))
 	return b
 
 

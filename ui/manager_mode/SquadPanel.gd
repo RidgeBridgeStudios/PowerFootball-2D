@@ -363,6 +363,8 @@ func _player_profile(
 		for other_key: int in state.relationships:
 			if notable >= 4:
 				break
+			if RelationshipData.is_manager_key(other_key):
+				continue
 			var rel: RelationshipData = state.relationships[other_key] as RelationshipData
 			if rel == null:
 				continue
