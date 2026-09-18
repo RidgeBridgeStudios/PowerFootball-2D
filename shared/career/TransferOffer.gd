@@ -152,6 +152,18 @@ func is_awaiting_user() -> bool:
 	return state == State.CLUB_COUNTERED or state == State.TERMS_COUNTERED or state == State.CLUB_ACCEPTED
 
 
+func is_loan() -> bool:
+	return kind == Kind.LOAN
+
+
+func is_permanent() -> bool:
+	return kind == Kind.PERMANENT
+
+
+func is_free_agent() -> bool:
+	return kind == Kind.FREE_AGENT
+
+
 func state_name() -> String:
 	return STATE_NAMES[clampi(int(state), 0, STATE_NAMES.size() - 1)]
 

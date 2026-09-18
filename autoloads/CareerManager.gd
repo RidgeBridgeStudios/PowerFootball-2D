@@ -32,6 +32,8 @@ enum HaltReason { NONE, MATCH_DAY, INBOX_DECISION, SEASON_END, SACKED, TRANSFER_
 ## Hard cap on days a single Continue can burn through, so a career with no
 ## pending events can never spin forever.
 const MAX_CONTINUE_DAYS: int = 120
+@export_range(0.05, 2.0, 0.01) var day_tick_seconds: float = 0.18
+@export_range(1, 8, 1) var continue_speed: int = 1
 ## Season boundaries.
 const SEASON_START_MONTH: int = 7
 const SEASON_START_DAY: int = 1
@@ -67,6 +69,9 @@ var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
 ## Last reason continue_until_event() stopped.
 var _halt_reason: HaltReason = HaltReason.NONE
 var _halt_message: String = ""
+var _continue_running: bool = false
+var _continue_cancelled: bool = false
+var _target_ordinal: int = -1
 
 
 func _ready() -> void:
@@ -237,6 +242,30 @@ func _build_player_states() -> void:
 			state.sharpness = _rng.randf_range(0.45, 0.70)
 			career.player_states[state.player_key] = state
 	_seed_initial_relationships()
+
+
+func _ensure_player_states_for_team(team_index: int) -> void:
+	if DataLoader.league == null or career == null:
+		return
+	if team_index < 0 or team_index >= DataLoader.league.teams.size():
+		return
+	var team: TeamData = DataLoader.league.teams[team_index]
+	for squad_index: int in range(team.squad.size()):
+		var key: int = team_index * 1000 + squad_index
+		if career.player_states.has(key):
+			continue
+		var data: PlayerData = team.squad[squad_index]
+		var age: int = data.get_age(career.today.year, career.today.month, career.today.day)
+		var potential: int = PlayerDevelopmentEngine.roll_potential(data, age, _rng)
+		var state: PlayerCareerState = PlayerCareerState.make_for(
+			data, team_index, squad_index, potential, career.today
+		)
+		state.contract.club_name = team.team_name
+		state.contract.expiry = CareerDate.make(
+			career.today.year + _rng.randi_range(1, 4), 6, 30
+		)
+		state.sharpness = _rng.randf_range(0.45, 0.70)
+		career.player_states[key] = state
 
 
 ## Gives every squad a starting social graph. Relationships are seeded from
@@ -634,14 +663,87 @@ func continue_until_event() -> HaltReason:
 		return HaltReason.SACKED
 	_halt_reason = HaltReason.NONE
 	_halt_message = ""
+	_continue_running = true
+	_continue_cancelled = false
+	GameEvents.career_continue_started.emit()
+
 	for _day: int in range(MAX_CONTINUE_DAYS):
+		if _continue_cancelled:
+			_halt_message = "Paused."
+			_continue_running = false
+			_continue_cancelled = false
+			_target_ordinal = -1
+			GameEvents.career_advance_halted.emit(_halt_message)
+			GameEvents.career_continue_stopped.emit(_halt_message)
+			return _halt_reason
+
+		if _target_ordinal > 0 and career.today.to_ordinal() >= _target_ordinal:
+			_halt_message = "Reached target date."
+			_continue_running = false
+			_continue_cancelled = false
+			_target_ordinal = -1
+			GameEvents.career_advance_halted.emit(_halt_message)
+			GameEvents.career_continue_stopped.emit(_halt_message)
+			return HaltReason.NONE
+
 		var reason: HaltReason = advance_day()
 		if reason != HaltReason.NONE:
+			_halt_reason = reason
+			_continue_running = false
+			_continue_cancelled = false
+			_target_ordinal = -1
 			GameEvents.career_advance_halted.emit(_halt_message)
+			GameEvents.career_continue_stopped.emit(_halt_message)
 			return reason
+
+		await get_tree().create_timer(day_tick_seconds / continue_speed).timeout
+
+		if _continue_cancelled:
+			_halt_message = "Paused."
+			_continue_running = false
+			_continue_cancelled = false
+			_target_ordinal = -1
+			GameEvents.career_advance_halted.emit(_halt_message)
+			GameEvents.career_continue_stopped.emit(_halt_message)
+			return _halt_reason
+
 	_halt_message = "Nothing scheduled for the next %d days." % MAX_CONTINUE_DAYS
+	_continue_running = false
+	_continue_cancelled = false
+	_target_ordinal = -1
 	GameEvents.career_advance_halted.emit(_halt_message)
+	GameEvents.career_continue_stopped.emit(_halt_message)
 	return HaltReason.NONE
+
+
+func set_target_date(target: CareerDate) -> void:
+	if target == null:
+		_target_ordinal = -1
+	else:
+		_target_ordinal = target.to_ordinal()
+
+
+func clear_target_date() -> void:
+	_target_ordinal = -1
+
+
+func cancel_continue() -> void:
+	_continue_cancelled = true
+
+
+func is_continue_running() -> bool:
+	return _continue_running
+
+
+func get_continue_speed() -> int:
+	return continue_speed
+
+
+func set_continue_speed(speed: int) -> void:
+	var clamped: int = clampi(speed, 1, 8)
+	if clamped != continue_speed:
+		continue_speed = clamped
+		GameEvents.career_speed_changed.emit(continue_speed)
 
 
 func _halt(reason: HaltReason, message: String) -> HaltReason:
@@ -850,8 +952,19 @@ func _process_transfer_negotiations() -> void:
 		if offer.is_terminal():
 			continue
 		var target_team: TeamData = DataLoader.get_team(offer.player_team_index)
-		if target_team == null or offer.player_squad_index >= target_team.squad.size():
+		if target_team == null or target_team.squad.is_empty():
 			continue
+		if offer.player_squad_index >= target_team.squad.size() or target_team.squad[offer.player_squad_index].player_name != offer.player_name:
+			var found_idx: int = -1
+			for s_i: int in range(target_team.squad.size()):
+				if target_team.squad[s_i].player_name == offer.player_name:
+					found_idx = s_i
+					break
+			if found_idx >= 0:
+				offer.player_squad_index = found_idx
+			else:
+				offer.advance_to(TransferOffer.State.WITHDRAWN, career.today, "%s is no longer at %s." % [offer.player_name, target_team.team_name])
+				continue
 		var data: PlayerData = target_team.squad[offer.player_squad_index]
 		var state: PlayerCareerState = career.state_for(offer.player_key())
 
@@ -1052,6 +1165,10 @@ func _rekey_states_after_removal(team_index: int, removed_index: int) -> void:
 			st.player_key = team_index * 1000 + st.squad_index
 		rebuilt[st.player_key] = st
 	career.player_states = rebuilt
+
+	for offer: TransferOffer in career.active_offers:
+		if offer.player_team_index == team_index and offer.player_squad_index > removed_index:
+			offer.player_squad_index -= 1
 
 
 func _execute_transfer(offer: TransferOffer) -> void:
@@ -1311,6 +1428,19 @@ func simulate_next_fixture() -> FixtureData:
 	return fixture
 
 
+## Applies a QuickSimResult resolved interactively by the user (e.g. in QuickSimModal).
+func apply_user_match_result(fixture: FixtureData, result: QuickSimEngine.QuickSimResult) -> void:
+	if fixture == null or result == null or career == null:
+		return
+	fixture.played = true
+	fixture.home_score = result.home_score
+	fixture.away_score = result.away_score
+	_apply_fixture_result(fixture, result.player_events, result.player_ratings)
+	_advance_cup_rounds()
+	save_career()
+	GameEvents.career_result_recorded.emit(result.home_score, result.away_score)
+
+
 func _simulate_ai_fixture(fixture: FixtureData) -> void:
 	_simulate_fixture(fixture, false)
 
@@ -1320,6 +1450,8 @@ func _simulate_fixture(fixture: FixtureData, is_user: bool) -> void:
 	var away: TeamData = DataLoader.get_team(fixture.away_team_index)
 	if home == null or away == null:
 		return
+	_ensure_player_states_for_team(fixture.home_team_index)
+	_ensure_player_states_for_team(fixture.away_team_index)
 	var home_mgr: ManagerData = ManagerLoader.get_or_assign_manager(home.team_name)
 	var away_mgr: ManagerData = ManagerLoader.get_or_assign_manager(away.team_name)
 	var ref: RefereeData = RefereeLoader.get_or_assign_referee(home.team_name, away.team_name)
@@ -2002,6 +2134,10 @@ func _rehydrate_inbox() -> void:
 						)
 					item.options = rebuilt.options
 					item.escalation_option = rebuilt.escalation_option
+				elif club != null and String(item.payload.get("kind", "")) == "mutiny_warning":
+					var rebuilt_warn: InboxItem = InboxEngine.build_mutiny_warning(club, item.received)
+					item.options = rebuilt_warn.options
+					item.escalation_option = rebuilt_warn.escalation_option
 			InboxItem.Category.TRAINING:
 				if state != null and club != null \
 						and state.squad_index >= 0 and state.squad_index < club.squad.size():
@@ -2043,16 +2179,29 @@ func _rehydrate_inbox() -> void:
 					item.escalation_option = rebuilt2.escalation_option
 			InboxItem.Category.BOARD:
 				if career.board != null:
-					var league: CompetitionData = career.league_competition()
-					var pos: int = league.position_of(career.user_team_index) if league != null else 1
-					var rebuilt3: InboxItem = InboxEngine.build_board_warning(
-						career.board, club.team_name if club != null else "", pos, item.received
-					)
-					item.options = rebuilt3.options
-					item.escalation_option = rebuilt3.escalation_option
+					var kind_b: String = String(item.payload.get("kind", ""))
+					if kind_b == "dressing_room_mutiny":
+						var rebuilt_ultimatum: InboxItem = InboxEngine.build_mutiny_board_ultimatum(club, career.board, item.received)
+						item.options = rebuilt_ultimatum.options
+						item.escalation_option = rebuilt_ultimatum.escalation_option
+					else:
+						var league: CompetitionData = career.league_competition()
+						var pos: int = league.position_of(career.user_team_index) if league != null else 1
+						var rebuilt3: InboxItem = InboxEngine.build_board_warning(
+							career.board, club.team_name if club != null else "", pos, item.received
+						)
+						item.options = rebuilt3.options
+						item.escalation_option = rebuilt3.escalation_option
 			_:
 				# A notification with no options needs nothing rebuilt.
 				pass
+	_emit_inbox_changed()
+
+
+func mark_inbox_read(item: InboxItem) -> void:
+	if item == null or item.is_read:
+		return
+	item.is_read = true
 	_emit_inbox_changed()
 
 

@@ -24,6 +24,7 @@ const TEXT_COLOR: Color = Color(0.909804, 0.941176, 0.913725)
 @onready var menu_list: VBoxContainer = $MenuList
 @onready var btn_manager: Button = $MenuList/ManagerButton
 @onready var btn_quick_match: Button = $MenuList/QuickMatchButton
+@onready var btn_jukebox: Button = $MenuList/JukeboxButton
 @onready var btn_options: Button = $MenuList/OptionsButton
 @onready var btn_quit: Button = $MenuList/QuitButton
 
@@ -31,6 +32,8 @@ const TEXT_COLOR: Color = Color(0.909804, 0.941176, 0.913725)
 @onready var menu_music: AudioStreamPlayer = $MenuMusic
 
 @onready var quit_dialog: ConfirmationDialog = $QuitDialog
+@onready var jukebox_dialog: AcceptDialog = $JukeboxDialog
+@onready var jukebox: Jukebox = $JukeboxDialog/Jukebox
 
 var _last_focused_button: Button = null
 var _quick_match_overlay: Control = null
@@ -40,12 +43,16 @@ var _qm_away_opt: OptionButton = null
 var _qm_result_label: Label = null
 var _qm_events_label: Label = null
 var _qm_stats_label: Label = null
+var _music_playlist: Array[AudioStream] = []
+var _current_track_index: int = 0
 
 
 func _ready() -> void:
 	btn_manager.pressed.connect(_on_manager_pressed)
 	if btn_quick_match != null:
 		btn_quick_match.pressed.connect(_on_quick_match_pressed)
+	if btn_jukebox != null:
+		btn_jukebox.pressed.connect(_on_jukebox_pressed)
 	btn_options.pressed.connect(_on_options_pressed)
 	btn_quit.pressed.connect(_on_quit_pressed)
 
@@ -53,6 +60,12 @@ func _ready() -> void:
 
 	quit_dialog.confirmed.connect(_on_quit_confirmed)
 	quit_dialog.visibility_changed.connect(_on_quit_visibility_changed)
+	if jukebox_dialog != null:
+		jukebox_dialog.visibility_changed.connect(_on_jukebox_visibility_changed)
+	if jukebox != null:
+		jukebox.playlist_changed.connect(_on_jukebox_playlist_changed)
+	if menu_music != null:
+		menu_music.finished.connect(_on_menu_music_finished)
 
 	_style_menu_buttons()
 	_start_menu_music()
@@ -65,6 +78,17 @@ func _on_manager_pressed() -> void:
 	# to load an existing slot or start a new career, and only then hands off
 	# to ManagerModeRoot with CareerManager already populated.
 	get_tree().change_scene_to_file("res://ui/manager_mode/ManagerCreationScreen.tscn")
+
+
+func _on_jukebox_pressed() -> void:
+	_last_focused_button = btn_jukebox
+	if jukebox_dialog != null:
+		jukebox_dialog.popup_centered()
+
+
+func _on_jukebox_visibility_changed() -> void:
+	if jukebox_dialog != null and not jukebox_dialog.visible and is_instance_valid(_last_focused_button):
+		_last_focused_button.grab_focus()
 
 
 func _on_options_pressed() -> void:
@@ -103,6 +127,8 @@ func _style_menu_buttons() -> void:
 	var buttons: Array[Button] = [btn_manager, btn_options, btn_quit]
 	if btn_quick_match != null:
 		buttons.insert(1, btn_quick_match)
+	if btn_jukebox != null:
+		buttons.insert(buttons.size() - 2, btn_jukebox)
 	for button: Button in buttons:
 		button.add_theme_font_size_override("font_size", MENU_FONT_SIZE)
 		button.add_theme_color_override("font_color", TEXT_COLOR)
@@ -318,10 +344,69 @@ func _on_qm_back_pressed() -> void:
 ## above), so this single player already covers both the main menu list and the
 ## options screen with no extra wiring.
 func _start_menu_music() -> void:
-	var stream: AudioStream = menu_music.stream
+	if jukebox != null and not jukebox.get_active_playlist().is_empty():
+		_music_playlist = jukebox.get_active_playlist().duplicate()
+	elif menu_music != null and menu_music.stream != null:
+		_music_playlist = [menu_music.stream]
+	_current_track_index = 0
+	_play_current_track()
+
+
+func _play_current_track() -> void:
+	if menu_music == null:
+		return
+	if _music_playlist.is_empty():
+		menu_music.stop()
+		return
+
+	if _current_track_index >= _music_playlist.size() or _current_track_index < 0:
+		_current_track_index = 0
+
+	var stream: AudioStream = _music_playlist[_current_track_index]
+	if stream == null:
+		return
+
 	if stream is AudioStreamWAV:
-		(stream as AudioStreamWAV).loop_mode = AudioStreamWAV.LOOP_FORWARD
+		(stream as AudioStreamWAV).loop_mode = (
+			AudioStreamWAV.LOOP_FORWARD if _music_playlist.size() == 1 else AudioStreamWAV.LOOP_DISABLED
+		)
+	elif stream is AudioStreamOggVorbis:
+		(stream as AudioStreamOggVorbis).loop = (_music_playlist.size() == 1)
+
+	menu_music.stream = stream
+	menu_music.bus = &"Music"
 	menu_music.play()
+
+
+func _on_menu_music_finished() -> void:
+	if _music_playlist.is_empty():
+		return
+	_current_track_index = (_current_track_index + 1) % _music_playlist.size()
+	_play_current_track()
+
+
+func _on_jukebox_playlist_changed(active_playlist: Array[AudioStream]) -> void:
+	_music_playlist = active_playlist.duplicate()
+	if _music_playlist.is_empty():
+		if menu_music != null:
+			menu_music.stop()
+		return
+
+	var current_stream: AudioStream = menu_music.stream if menu_music != null else null
+	var found_idx: int = _music_playlist.find(current_stream)
+	if found_idx != -1:
+		_current_track_index = found_idx
+		if current_stream is AudioStreamWAV:
+			(current_stream as AudioStreamWAV).loop_mode = (
+				AudioStreamWAV.LOOP_FORWARD if _music_playlist.size() == 1 else AudioStreamWAV.LOOP_DISABLED
+			)
+		elif current_stream is AudioStreamOggVorbis:
+			(current_stream as AudioStreamOggVorbis).loop = (_music_playlist.size() == 1)
+		if menu_music != null and not menu_music.playing:
+			menu_music.play()
+	else:
+		_current_track_index = 0
+		_play_current_track()
 
 
 func _make_stylebox(bg_color: Color, left_border: int) -> StyleBoxFlat:

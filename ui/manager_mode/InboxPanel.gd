@@ -79,7 +79,7 @@ func _build_item(item: InboxItem, index: int, career: CareerSaveData, p: CareerT
 	)
 	header.pressed.connect(func() -> void:
 		_selected_index = -1 if is_open else index
-		item.is_read = true
+		CareerManager.mark_inbox_read(item)
 		refresh()
 	)
 	column.add_child(header)

@@ -45,6 +45,12 @@ signal career_day_advanced(iso_date: String)
 ## Fired when the Continue loop stops early because something needs the
 ## manager's attention. reason is a short display string.
 signal career_advance_halted(reason: String)
+## Fired when the async Continue loop starts.
+signal career_continue_started()
+## Fired when the async Continue loop stops (cancelled or reached event).
+signal career_continue_stopped(reason: String)
+## Fired when the continue simulation speed multiplier changes.
+signal career_speed_changed(speed: int)
 ## Fired for each item pushed into the inbox, so an open inbox screen can
 ## refresh without polling.
 signal career_inbox_changed(unread_count: int, pending_decisions: int)

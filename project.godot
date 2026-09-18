@@ -11,12 +11,26 @@ config_version=5
 [application]
 
 config/name="PowerFootball 2D"
-run/main_scene="res://ui/SplashScreen.tscn"
+run/main_scene="res://ui/MainMenu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
-boot_splash/bg_color=Color(0.960784, 0.929412, 0.886275, 1)
-boot_splash/stretch_mode=0
-boot_splash/image="res://art/studio_logo.png"
+boot_splash/show_image=true
 config/icon="res://art/player.png"
+boot_splash+/general/enabled=true
+boot_splash+/general/run_in_editor_playtest=true
+boot_splash+/general/wait_for_scene_load=true
+boot_splash+/native_splash/disable_native_boot_splash_not_completely=false
+boot_splash+/timing/minimum_display_time_seconds=2.0
+boot_splash+/timing/fade_in_time=0.4
+boot_splash+/timing/fade_out_time=0.4
+boot_splash+/background/mode=1
+boot_splash+/background/image="res://art/ridge_bridge_studios.png"
+boot_splash+/background/fit=1
+boot_splash+/background/color=Color(0.08235, 0.07843, 0.07843, 1)
+boot_splash+/background/animation=0
+boot_splash+/logo/logo_type=0
+boot_splash+/logo/image=""
+boot_splash+/logo/show_fallback_logo=false
+boot_splash+/progress_bar/show=false
 
 [autoload]
 
@@ -29,6 +43,7 @@ ManagerLoader="*res://autoloads/ManagerLoader.gd"
 StaffLoader="*res://autoloads/StaffLoader.gd"
 WorldEventLog="*res://autoloads/WorldEventLog.gd"
 CareerManager="*res://autoloads/CareerManager.gd"
+BootSplashPlus="*res://addons/boot_splash_plus/boot_splash_plus_runtime.gd"
 
 [display]
 
@@ -40,6 +55,10 @@ window/stretch/aspect="expand"
 [dotnet]
 
 project/assembly_name="PowerFootball 2D"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/audio_service/plugin.cfg", "res://addons/boot_splash_plus/plugin.cfg", "res://addons/gloot/plugin.cfg", "res://addons/godot_mcp/plugin.cfg")
 
 [input]
 

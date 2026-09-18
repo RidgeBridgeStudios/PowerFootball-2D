@@ -28,6 +28,8 @@ func _ready() -> void:
 	_test_squad_cliques_and_faction_dynamics()
 	_test_incident_press_conference_pipeline()
 	_test_stadium_expansion_and_infrastructure()
+	_test_transfer_offers_and_inbox_signals()
+	_test_grounded_controversy_system()
 
 	print("------------------------------------------------------------------")
 
@@ -922,6 +924,105 @@ func _test_stadium_expansion_and_infrastructure() -> void:
 	_assert_true(d_fin.facility_upgrade_cost == 3_750_000, "Serializer: facility_upgrade_cost roundtripped")
 	_assert_true(d_fin.facility_upgrade_completion_date != null and d_fin.facility_upgrade_completion_date.to_iso() == "2027-02-20", "Serializer: facility_upgrade_completion_date roundtripped")
 	_assert_true(deserialized.board.medical_facility == 4, "Serializer: medical_facility roundtripped")
+
+
+func _test_transfer_offers_and_inbox_signals() -> void:
+	var today: CareerDate = CareerDate.make(2026, 8, 1)
+	var perm_offer: TransferOffer = TransferOffer.make("Club A", "Club B", "Player X", 1, 0, TransferOffer.Kind.PERMANENT, today)
+	_assert_true(not perm_offer.is_loan(), "TransferOffer: permanent offer is not a loan")
+	_assert_true(perm_offer.is_permanent(), "TransferOffer: permanent offer is permanent")
+	_assert_true(not perm_offer.is_free_agent(), "TransferOffer: permanent offer is not a free agent")
+
+	var loan_offer: TransferOffer = TransferOffer.make_loan("Club A", 0, "Club B", 1, 0, "Player Y", 0.5, today)
+	_assert_true(loan_offer.is_loan(), "TransferOffer: loan offer is a loan")
+	_assert_true(not loan_offer.is_permanent(), "TransferOffer: loan offer is not permanent")
+
+	var career: CareerSaveData = CareerSaveData.make_new(null, 0, today, 1)
+	career.today = today
+	var item: InboxItem = InboxItem.make("Test Subject", "Test Body", InboxItem.Category.PLAYER, today)
+	WorldEventGenerator._push_inbox_item(career, item)
+	_assert_true(career.inbox.size() == 1, "WorldEventGenerator: _push_inbox_item appends item")
+	_assert_true(career.unread_inbox_count() == 1, "WorldEventGenerator: unread count matches")
+
+	var warn_item: InboxItem = InboxEngine.build_mutiny_warning(TeamData.new(), today)
+	warn_item.options.clear()
+	career.inbox.append(warn_item)
+	CareerManager.career = career
+	CareerManager._rehydrate_inbox()
+	_assert_true(warn_item.option_count() == 3, "CareerManager: _rehydrate_inbox rebuilds mutiny_warning options")
+
+
+func _test_grounded_controversy_system() -> void:
+	var start_date := CareerDate.make(2026, 8, 1)
+	var profile := ManagerCareerProfile.new()
+	profile.contract = ContractData.make_default("Test FC", 20000, 3, start_date)
+
+	var p1 := PlayerData.new()
+	p1.player_name = "Star Striker"
+	p1.morale = 0.70
+	p1.player_reputation = 0.80
+
+	var p2 := PlayerData.new()
+	p2.player_name = "Discontent Midfielder"
+	p2.morale = 0.35
+	p2.player_reputation = 0.70
+	p2.traits = WorldEventGenerator.TRAIT_LOCKER_ROOM_CANCER
+
+	var team := TeamData.new()
+	team.team_name = "Test FC"
+	team.squad = [p1, p2]
+
+	var career := CareerSaveData.make_new(profile, 0, start_date, 42)
+	career.phase = CareerSaveData.Phase.PRE_SEASON
+
+	var st1 := PlayerCareerState.new()
+	st1.player_key = 0
+	st1.manager_trust = 0.70
+	career.player_states[0] = st1
+
+	var st2 := PlayerCareerState.new()
+	st2.player_key = 1
+	st2.manager_trust = 0.25
+	career.player_states[1] = st2
+
+	# 1. Honeymoon Period
+	_assert_true(WorldEventGenerator.is_in_honeymoon_period(career), "Honeymoon: Pre-season is inside honeymoon period")
+
+	career.phase = CareerSaveData.Phase.REGULAR_SEASON
+	career.today = CareerDate.make(2026, 8, 20)
+	_assert_true(WorldEventGenerator.is_in_honeymoon_period(career), "Honeymoon: 19 days & 0 matches is inside honeymoon period")
+
+	career.today = CareerDate.make(2026, 10, 1)
+	_assert_true(WorldEventGenerator.is_in_honeymoon_period(career), "Honeymoon: < 5 matches remains inside honeymoon period")
+
+	# 2. Incident Cooldown
+	var ev_clash := WorldEvent.make(&"training_incident", WorldEvent.Category.TRAINING, career.today, "Clash in training", -0.3, 0.6)
+	career.world_events.append(ev_clash)
+	_assert_true(WorldEventGenerator.has_recent_incident(career, 21), "Cooldown: Incident logged today is within 21-day cooldown")
+
+	career.today = CareerDate.make(2026, 10, 25)
+	_assert_true(not WorldEventGenerator.has_recent_incident(career, 21), "Cooldown: 24 days later has passed cooldown")
+
+	# 3. Squad Volatility Scaling
+	p1.morale = 0.85
+	p2.morale = 0.80
+	var vol_happy: float = WorldEventGenerator.calculate_squad_volatility(career, team)
+	_assert_true(vol_happy < 0.0005, "Volatility: High morale and no losses yields near-zero volatility")
+
+	p1.morale = 0.30
+	p2.morale = 0.25
+	st1.manager_trust = 0.20
+	st2.manager_trust = 0.15
+	var vol_crisis: float = WorldEventGenerator.calculate_squad_volatility(career, team)
+	_assert_true(vol_crisis > vol_happy * 5.0, "Volatility: Low morale and trust significantly elevates volatility")
+
+	# 4. Unresolved Inbox Item
+	_assert_true(not WorldEventGenerator.has_unresolved_incident_inbox_item(career), "Inbox: No unresolved items initially")
+	var inc_item := InboxItem.make("Row", "Body", InboxItem.Category.PLAYER, career.today)
+	inc_item.payload = {"kind": "confrontation"}
+	career.inbox.append(inc_item)
+	_assert_true(WorldEventGenerator.has_unresolved_incident_inbox_item(career), "Inbox: Pending confrontation recognized as unresolved incident")
+
 
 
 

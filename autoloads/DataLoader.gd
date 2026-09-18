@@ -41,15 +41,24 @@ func get_team(index: int) -> TeamData:
 	if league == null or index < 0 or index >= league.teams.size():
 		push_warning("DataLoader.get_team: index %d out of bounds; using a fallback team." % index)
 		return _make_fallback_team(index)
-	return league.teams[index]
+	_ensure_division_shard_loaded_for_team(index)
+	var team: TeamData = league.teams[index]
+	if team.squad.size() < 11:
+		_populate_squad_if_needed(team, index)
+	return team
 
 
 ## Returns the TeamData matching team_name, or null if not found.
 func get_team_by_name(team_name: String) -> TeamData:
 	if league == null:
 		return null
-	for t: TeamData in league.teams:
+	for i: int in range(league.teams.size()):
+		var t: TeamData = league.teams[i]
 		if t.team_name == team_name:
+			_ensure_division_shard_loaded_for_team(i)
+			t = league.teams[i]
+			if t.squad.size() < 11:
+				_populate_squad_if_needed(t, i)
 			return t
 	return null
 
@@ -311,6 +320,39 @@ func _get_division_start_team_index(descriptor: Dictionary) -> int:
 			break
 		start_idx += int(d.get("team_count", 0))
 	return start_idx
+
+
+func _ensure_division_shard_loaded_for_team(team_index: int) -> void:
+	if not manifest_mode or divisions.is_empty():
+		return
+	var offset: int = 0
+	for d: Dictionary in divisions:
+		var count: int = int(d.get("team_count", 0))
+		if team_index >= offset and team_index < offset + count:
+			var shard_rel: String = str(d.get("shard", ""))
+			if not shard_rel.is_empty() and not loaded_shards.get(shard_rel, false):
+				load_division_shard(d)
+			return
+		offset += count
+
+
+func _populate_squad_if_needed(team: TeamData, _index: int) -> void:
+	if team == null:
+		return
+	var roles: Array[String] = ["GK", "LB", "CB", "CB", "RB", "LM", "CM", "DM", "RM", "ST", "ST", "GK", "CB", "RB", "CM", "AM", "ST", "CB"]
+	while team.squad.size() < 11:
+		var i: int = team.squad.size()
+		var role: String = roles[i] if i < roles.size() else "CM"
+		var p: PlayerData = _make_fallback_player(i, role)
+		p.player_name = "%s Player %d" % [team.team_name, i + 1]
+		if i == 2:
+			p.is_captain = true
+		team.squad.append(p)
+	if team.lineup_indices.size() < 11:
+		var default_lineup: Array[int] = []
+		for i in range(11):
+			default_lineup.append(i % team.squad.size())
+		team.lineup_indices = default_lineup
 
 
 func mark_shard_dirty(shard_path: String) -> void:

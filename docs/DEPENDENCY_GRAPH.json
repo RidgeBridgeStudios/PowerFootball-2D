@@ -1,13 +1,269 @@
 {
-  "total_nodes": 74,
+  "total_nodes": 89,
   "layer_summary": {
-    "Layer 1 - Physics & Kinematics": 1,
+    "Layer 1 - Physics & Kinematics": 15,
     "Layer 2 - Match AI & Spatial Navigation": 33,
     "Layer 3 - Match Social & Dynamic Psychology": 2,
     "Layer 4 - Club World & Persistent Entities": 9,
-    "Layer 5 - Narrative, Presentation & UI": 29
+    "Layer 5 - Narrative, Presentation & UI": 30
   },
   "nodes": {
+    "_archive/chat_gen/scripts/career/CareerScreen.gd": {
+      "class_name": "CareerScreen",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "Control",
+      "direct_dependencies": [
+        "_archive/chat_gen/scripts/career/ScheduleRow.gd",
+        "_archive/chat_gen/scripts/events/BoardMeetingEvent.gd",
+        "_archive/chat_gen/scripts/events/InjuryEvent.gd",
+        "_archive/chat_gen/scripts/events/MatchEvent.gd",
+        "_archive/chat_gen/scripts/events/TransferOfferEvent.gd",
+        "_archive/chat_gen/scripts/inbox/InboxButton.gd",
+        "_archive/chat_gen/scripts/inbox/InboxUI.gd",
+        "_archive/chat_gen/scripts/sim/Priority.gd",
+        "_archive/chat_gen/scripts/sim/SimEvent.gd",
+        "_archive/chat_gen/scripts/sim/SimState.gd",
+        "_archive/chat_gen/scripts/sim/SimulationManager.gd",
+        "_archive/chat_gen/scripts/ui/DatePicker.gd"
+      ],
+      "direct_dependents": [],
+      "signals_declared": [
+        "day_advanced",
+        "simulation_stopped"
+      ],
+      "signals_emitted": [
+        "day_advanced",
+        "simulation_stopped"
+      ],
+      "signals_connected": [
+        "date_selected",
+        "day_processed",
+        "id_pressed",
+        "inbox_updated",
+        "pressed",
+        "simulation_halted",
+        "state_changed"
+      ]
+    },
+    "_archive/chat_gen/scripts/career/ScheduleRow.gd": {
+      "class_name": "ScheduleRow",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "HBoxContainer",
+      "direct_dependencies": [
+        "_archive/chat_gen/scripts/sim/Priority.gd",
+        "_archive/chat_gen/scripts/sim/SimEvent.gd"
+      ],
+      "direct_dependents": [
+        "_archive/chat_gen/scripts/career/CareerScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "_archive/chat_gen/scripts/events/BoardMeetingEvent.gd": {
+      "class_name": "BoardMeetingEvent",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "SimEvent",
+      "direct_dependencies": [
+        "_archive/chat_gen/scripts/sim/Priority.gd",
+        "_archive/chat_gen/scripts/sim/SimEvent.gd"
+      ],
+      "direct_dependents": [
+        "_archive/chat_gen/scripts/career/CareerScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "_archive/chat_gen/scripts/events/InjuryEvent.gd": {
+      "class_name": "InjuryEvent",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "SimEvent",
+      "direct_dependencies": [
+        "_archive/chat_gen/scripts/sim/Priority.gd",
+        "_archive/chat_gen/scripts/sim/SimEvent.gd"
+      ],
+      "direct_dependents": [
+        "_archive/chat_gen/scripts/career/CareerScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "_archive/chat_gen/scripts/events/MatchEvent.gd": {
+      "class_name": "MatchEvent",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "SimEvent",
+      "direct_dependencies": [
+        "_archive/chat_gen/scripts/sim/Priority.gd",
+        "_archive/chat_gen/scripts/sim/SimEvent.gd"
+      ],
+      "direct_dependents": [
+        "_archive/chat_gen/scripts/career/CareerScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "_archive/chat_gen/scripts/events/TransferOfferEvent.gd": {
+      "class_name": "TransferOfferEvent",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "SimEvent",
+      "direct_dependencies": [
+        "_archive/chat_gen/scripts/sim/Priority.gd",
+        "_archive/chat_gen/scripts/sim/SimEvent.gd"
+      ],
+      "direct_dependents": [
+        "_archive/chat_gen/scripts/career/CareerScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "_archive/chat_gen/scripts/inbox/InboxButton.gd": {
+      "class_name": "InboxButton",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "Button",
+      "direct_dependencies": [],
+      "direct_dependents": [
+        "_archive/chat_gen/scripts/career/CareerScreen.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "_archive/chat_gen/scripts/inbox/InboxUI.gd": {
+      "class_name": "InboxUI",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "Panel",
+      "direct_dependencies": [
+        "_archive/chat_gen/scripts/sim/Priority.gd",
+        "_archive/chat_gen/scripts/sim/SimEvent.gd"
+      ],
+      "direct_dependents": [
+        "_archive/chat_gen/scripts/career/CareerScreen.gd"
+      ],
+      "signals_declared": [
+        "item_selected"
+      ],
+      "signals_emitted": [
+        "item_selected"
+      ],
+      "signals_connected": [
+        "item_selected",
+        "pressed"
+      ]
+    },
+    "_archive/chat_gen/scripts/sim/Priority.gd": {
+      "class_name": "Priority",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "RefCounted",
+      "direct_dependencies": [],
+      "direct_dependents": [
+        "_archive/chat_gen/scripts/career/CareerScreen.gd",
+        "_archive/chat_gen/scripts/career/ScheduleRow.gd",
+        "_archive/chat_gen/scripts/events/BoardMeetingEvent.gd",
+        "_archive/chat_gen/scripts/events/InjuryEvent.gd",
+        "_archive/chat_gen/scripts/events/MatchEvent.gd",
+        "_archive/chat_gen/scripts/events/TransferOfferEvent.gd",
+        "_archive/chat_gen/scripts/inbox/InboxUI.gd",
+        "_archive/chat_gen/scripts/sim/SimEvent.gd",
+        "shared/career/WorldEventGenerator.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "_archive/chat_gen/scripts/sim/SimEvent.gd": {
+      "class_name": "SimEvent",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "_archive/chat_gen/scripts/sim/Priority.gd"
+      ],
+      "direct_dependents": [
+        "_archive/chat_gen/scripts/career/CareerScreen.gd",
+        "_archive/chat_gen/scripts/career/ScheduleRow.gd",
+        "_archive/chat_gen/scripts/events/BoardMeetingEvent.gd",
+        "_archive/chat_gen/scripts/events/InjuryEvent.gd",
+        "_archive/chat_gen/scripts/events/MatchEvent.gd",
+        "_archive/chat_gen/scripts/events/TransferOfferEvent.gd",
+        "_archive/chat_gen/scripts/inbox/InboxUI.gd",
+        "_archive/chat_gen/scripts/sim/SimulationManager.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "_archive/chat_gen/scripts/sim/SimState.gd": {
+      "class_name": "SimState",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "RefCounted",
+      "direct_dependencies": [],
+      "direct_dependents": [
+        "_archive/chat_gen/scripts/career/CareerScreen.gd",
+        "_archive/chat_gen/scripts/sim/SimulationManager.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "_archive/chat_gen/scripts/sim/SimulationManager.gd": {
+      "class_name": "SimulationManager",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "Node",
+      "direct_dependencies": [
+        "_archive/chat_gen/scripts/sim/SimEvent.gd",
+        "_archive/chat_gen/scripts/sim/SimState.gd"
+      ],
+      "direct_dependents": [
+        "_archive/chat_gen/scripts/career/CareerScreen.gd"
+      ],
+      "signals_declared": [
+        "day_processed",
+        "simulation_halted",
+        "state_changed",
+        "inbox_updated"
+      ],
+      "signals_emitted": [
+        "day_processed",
+        "inbox_updated",
+        "simulation_halted",
+        "state_changed"
+      ],
+      "signals_connected": []
+    },
+    "_archive/chat_gen/scripts/ui/DatePicker.gd": {
+      "class_name": "DatePicker",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "PopupPanel",
+      "direct_dependencies": [],
+      "direct_dependents": [
+        "_archive/chat_gen/scripts/career/CareerScreen.gd"
+      ],
+      "signals_declared": [
+        "date_selected"
+      ],
+      "signals_emitted": [
+        "date_selected"
+      ],
+      "signals_connected": [
+        "pressed"
+      ]
+    },
     "autoloads/CareerManager.gd": {
       "class_name": null,
       "layer": 5,
@@ -56,11 +312,14 @@
       "signals_declared": [],
       "signals_emitted": [
         "career_advance_halted",
+        "career_continue_started",
+        "career_continue_stopped",
         "career_day_advanced",
         "career_inbox_changed",
         "career_manager_sacked",
         "career_result_recorded",
         "career_season_ended",
+        "career_speed_changed",
         "career_started"
       ],
       "signals_connected": []
@@ -135,6 +394,9 @@
         "career_started",
         "career_day_advanced",
         "career_advance_halted",
+        "career_continue_started",
+        "career_continue_stopped",
+        "career_speed_changed",
         "career_inbox_changed",
         "career_match_ready",
         "career_result_recorded",
@@ -164,7 +426,6 @@
         "ui/MatchStatsUI.gd",
         "ui/OptionsMenu.gd",
         "ui/QuickSimModal.gd",
-        "ui/SplashScreen.gd",
         "ui/manager_mode/TacticsPanel.gd"
       ],
       "signals_declared": [],
@@ -290,6 +551,21 @@
         "shared/career/ManagerCareerProfile.gd",
         "shared/career/WorldEvent.gd",
         "tests/run_all.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "globals/MusicLibrary.gd": {
+      "class_name": "MusicLibrary",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "RefCounted",
+      "direct_dependencies": [
+        "ui/Jukebox.gd"
+      ],
+      "direct_dependents": [
+        "ui/Jukebox.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -529,7 +805,6 @@
         "tests/run_all.gd",
         "ui/MainMenu.gd",
         "ui/QuickSimModal.gd",
-        "ui/manager_mode/ManagerModeRoot.gd",
         "ui/manager_mode/TacticsPanel.gd"
       ],
       "signals_declared": [],
@@ -692,6 +967,7 @@
         "shared/career/YouthAcademy.gd",
         "tests/run_all.gd",
         "ui/manager_mode/BoardPanel.gd",
+        "ui/manager_mode/FinancesPanel.gd",
         "ui/manager_mode/ManagerCreationScreen.gd"
       ],
       "signals_declared": [],
@@ -725,10 +1001,13 @@
         "shared/career/TransferMarket.gd",
         "shared/career/TransferOffer.gd",
         "shared/career/WorldEvent.gd",
+        "shared/career/WorldEventGenerator.gd",
         "shared/career/YouthAcademy.gd",
         "tests/run_all.gd",
+        "ui/manager_mode/AdvanceToDateDialog.gd",
         "ui/manager_mode/CalendarPanel.gd",
-        "ui/manager_mode/ContractNegotiationModal.gd"
+        "ui/manager_mode/ContractNegotiationModal.gd",
+        "ui/manager_mode/ManagerModeRoot.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -872,6 +1151,8 @@
         "shared/career/CareerSaveData.gd",
         "shared/career/CareerSerializer.gd",
         "shared/career/InboxEngine.gd",
+        "tests/run_all.gd",
+        "ui/manager_mode/BoardPanel.gd",
         "ui/manager_mode/FinancesPanel.gd",
         "ui/manager_mode/ManagerModeRoot.gd",
         "ui/manager_mode/TransfersPanel.gd"
@@ -897,6 +1178,7 @@
         "autoloads/CareerManager.gd",
         "shared/career/CareerSaveData.gd",
         "shared/career/CareerSerializer.gd",
+        "shared/career/WorldEventGenerator.gd",
         "tests/run_all.gd",
         "ui/manager_mode/BoardPanel.gd",
         "ui/manager_mode/FixturesPanel.gd",
@@ -926,6 +1208,8 @@
         "shared/career/PlayerCareerState.gd",
         "shared/career/TransferMarket.gd",
         "shared/career/TransferOffer.gd",
+        "shared/career/WorldEventGenerator.gd",
+        "tests/run_all.gd",
         "ui/manager_mode/ContractNegotiationModal.gd",
         "ui/manager_mode/FinancesPanel.gd",
         "ui/manager_mode/SquadPanel.gd",
@@ -948,6 +1232,7 @@
         "shared/career/CareerSaveData.gd",
         "shared/career/CareerSerializer.gd",
         "shared/career/CompetitionData.gd",
+        "shared/career/WorldEventGenerator.gd",
         "tests/run_all.gd",
         "ui/manager_mode/CalendarPanel.gd",
         "ui/manager_mode/FixturesPanel.gd",
@@ -1031,6 +1316,7 @@
         "shared/career/CareerSerializer.gd",
         "shared/career/CompetitionData.gd",
         "shared/career/ScoutingNetwork.gd",
+        "shared/career/WorldEventGenerator.gd",
         "tests/run_all.gd",
         "ui/manager_mode/LeaguePanel.gd",
         "ui/manager_mode/OverviewPanel.gd"
@@ -1167,6 +1453,7 @@
         "shared/career/CareerSerializer.gd",
         "shared/career/MoraleEngine.gd",
         "shared/career/PlayerCareerState.gd",
+        "shared/career/WorldEventGenerator.gd",
         "tests/run_all.gd",
         "ui/manager_mode/SquadPanel.gd"
       ],
@@ -1289,6 +1576,7 @@
         "shared/career/CareerSerializer.gd",
         "shared/career/InboxEngine.gd",
         "shared/career/TransferMarket.gd",
+        "tests/run_all.gd",
         "ui/manager_mode/ContractNegotiationModal.gd",
         "ui/manager_mode/TransfersPanel.gd"
       ],
@@ -1331,14 +1619,21 @@
       "layer_name": "Layer 2 - Match AI & Spatial Navigation",
       "extends": "RefCounted",
       "direct_dependencies": [
+        "_archive/chat_gen/scripts/sim/Priority.gd",
         "autoloads/DataLoader.gd",
         "autoloads/GameEvents.gd",
         "shared/PlayerData.gd",
         "shared/TeamData.gd",
+        "shared/career/CareerDate.gd",
         "shared/career/CareerSaveData.gd",
+        "shared/career/CompetitionData.gd",
+        "shared/career/ContractData.gd",
+        "shared/career/FixtureData.gd",
         "shared/career/InboxEngine.gd",
         "shared/career/InboxItem.gd",
+        "shared/career/LeagueTableRow.gd",
         "shared/career/PlayerCareerState.gd",
+        "shared/career/RelationshipData.gd",
         "shared/career/WorldEvent.gd"
       ],
       "direct_dependents": [
@@ -1394,7 +1689,9 @@
         "shared/career/CareerDate.gd",
         "shared/career/CareerSaveData.gd",
         "shared/career/CareerSerializer.gd",
+        "shared/career/ClubFinances.gd",
         "shared/career/CompetitionData.gd",
+        "shared/career/ContractData.gd",
         "shared/career/FixtureData.gd",
         "shared/career/InboxEngine.gd",
         "shared/career/InboxItem.gd",
@@ -1403,6 +1700,7 @@
         "shared/career/MoraleEngine.gd",
         "shared/career/PlayerCareerState.gd",
         "shared/career/RelationshipData.gd",
+        "shared/career/TransferOffer.gd",
         "shared/career/WorldEvent.gd",
         "shared/career/WorldEventGenerator.gd"
       ],
@@ -1410,6 +1708,28 @@
       "signals_declared": [],
       "signals_emitted": [],
       "signals_connected": []
+    },
+    "ui/Jukebox.gd": {
+      "class_name": "Jukebox",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "VBoxContainer",
+      "direct_dependencies": [
+        "globals/MusicLibrary.gd"
+      ],
+      "direct_dependents": [
+        "globals/MusicLibrary.gd",
+        "ui/MainMenu.gd"
+      ],
+      "signals_declared": [
+        "playlist_changed"
+      ],
+      "signals_emitted": [
+        "playlist_changed"
+      ],
+      "signals_connected": [
+        "toggled"
+      ]
     },
     "ui/MainMenu.gd": {
       "class_name": null,
@@ -1424,15 +1744,17 @@
         "shared/QuickSimEngine.gd",
         "shared/RefereeData.gd",
         "shared/TeamData.gd",
-        "ui/SplashScreen.gd"
+        "ui/Jukebox.gd"
       ],
       "direct_dependents": [],
       "signals_declared": [],
       "signals_emitted": [],
       "signals_connected": [
         "confirmed",
+        "finished",
         "item_selected",
         "menu_closed",
+        "playlist_changed",
         "pressed",
         "visibility_changed"
       ]
@@ -1516,20 +1838,28 @@
         "stats_dismissed"
       ]
     },
-    "ui/SplashScreen.gd": {
-      "class_name": "SplashScreen",
+    "ui/manager_mode/AdvanceToDateDialog.gd": {
+      "class_name": "AdvanceToDateDialog",
       "layer": 5,
       "layer_name": "Layer 5 - Narrative, Presentation & UI",
-      "extends": "Control",
+      "extends": "PopupPanel",
       "direct_dependencies": [
-        "autoloads/GameManager.gd"
+        "shared/career/CareerDate.gd",
+        "ui/manager_mode/CareerTheme.gd"
       ],
       "direct_dependents": [
-        "ui/MainMenu.gd"
+        "ui/manager_mode/ManagerModeRoot.gd"
       ],
-      "signals_declared": [],
-      "signals_emitted": [],
-      "signals_connected": []
+      "signals_declared": [
+        "date_confirmed"
+      ],
+      "signals_emitted": [
+        "date_confirmed"
+      ],
+      "signals_connected": [
+        "pressed",
+        "value_changed"
+      ]
     },
     "ui/manager_mode/BoardPanel.gd": {
       "class_name": "BoardPanel",
@@ -1540,6 +1870,7 @@
         "shared/career/BoardState.gd",
         "shared/career/CareerSaveData.gd",
         "shared/career/CareerThemePalette.gd",
+        "shared/career/ClubFinances.gd",
         "shared/career/CompetitionData.gd",
         "ui/manager_mode/CareerPanel.gd",
         "ui/manager_mode/CareerTheme.gd"
@@ -1620,6 +1951,7 @@
       ],
       "direct_dependents": [
         "shared/career/CareerThemePalette.gd",
+        "ui/manager_mode/AdvanceToDateDialog.gd",
         "ui/manager_mode/BoardPanel.gd",
         "ui/manager_mode/CalendarPanel.gd",
         "ui/manager_mode/CareerPanel.gd",
@@ -1681,6 +2013,7 @@
         "shared/PlayerData.gd",
         "shared/StaffData.gd",
         "shared/TeamData.gd",
+        "shared/career/BoardState.gd",
         "shared/career/CareerSaveData.gd",
         "shared/career/CareerThemePalette.gd",
         "shared/career/ClubFinances.gd",
@@ -1798,12 +2131,13 @@
       "direct_dependencies": [
         "autoloads/DataLoader.gd",
         "autoloads/GameEvents.gd",
-        "shared/QuickSimEngine.gd",
         "shared/TeamData.gd",
+        "shared/career/CareerDate.gd",
         "shared/career/CareerSaveData.gd",
         "shared/career/CareerThemePalette.gd",
         "shared/career/ClubFinances.gd",
         "shared/career/FixtureData.gd",
+        "ui/manager_mode/AdvanceToDateDialog.gd",
         "ui/manager_mode/BoardPanel.gd",
         "ui/manager_mode/CalendarPanel.gd",
         "ui/manager_mode/CareerPanel.gd",
@@ -1825,8 +2159,13 @@
       "signals_emitted": [],
       "signals_connected": [
         "career_advance_halted",
+        "career_continue_started",
+        "career_continue_stopped",
+        "career_day_advanced",
         "career_inbox_changed",
         "career_manager_sacked",
+        "career_speed_changed",
+        "date_confirmed",
         "pressed"
       ]
     },

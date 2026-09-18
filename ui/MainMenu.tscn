@@ -1,9 +1,10 @@
-[gd_scene load_steps=5 format=3]
+[gd_scene load_steps=6 format=3]
 
 [ext_resource type="Script" path="res://ui/MainMenu.gd" id="1_mainmenu"]
 [ext_resource type="Texture2D" path="res://art/logo.png" id="2_logo"]
 [ext_resource type="PackedScene" path="res://ui/OptionsMenu.tscn" id="4_options"]
 [ext_resource type="AudioStream" path="res://audio/menu_theme.wav" id="5_menu_theme"]
+[ext_resource type="PackedScene" path="res://ui/Jukebox.tscn" id="6_jukebox"]
 
 [node name="MainMenu" type="Control"]
 layout_mode = 3
@@ -64,6 +65,12 @@ custom_minimum_size = Vector2(0, 44)
 alignment = 0
 text = "⚡ Quick Match"
 
+[node name="JukeboxButton" type="Button" parent="MenuList"]
+layout_mode = 2
+custom_minimum_size = Vector2(0, 44)
+alignment = 0
+text = "🎵 Jukebox"
+
 [node name="OptionsButton" type="Button" parent="MenuList"]
 layout_mode = 2
 custom_minimum_size = Vector2(0, 44)
@@ -78,7 +85,7 @@ text = "✖ Quit Game"
 
 [node name="MenuMusic" type="AudioStreamPlayer" parent="."]
 stream = ExtResource("5_menu_theme")
-bus = &"Master"
+bus = &"Music"
 
 [node name="OptionsMenu" parent="." instance=ExtResource("4_options")]
 layout_mode = 1
@@ -87,3 +94,10 @@ layout_mode = 1
 title = "Quit Game"
 size = Vector2i(360, 120)
 dialog_text = "Are you sure you want to quit?"
+
+[node name="JukeboxDialog" type="AcceptDialog" parent="."]
+title = "Jukebox"
+size = Vector2i(380, 260)
+
+[node name="Jukebox" parent="JukeboxDialog" instance=ExtResource("6_jukebox")]
+

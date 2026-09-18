@@ -104,6 +104,9 @@ static func calculate_probabilities(
 ) -> MatchProbabilities:
 	var probs := MatchProbabilities.new()
 
+	_ensure_minimum_squad(home_team)
+	_ensure_minimum_squad(away_team)
+
 	var h_lineup: Array[int] = home_lineup_indices if home_lineup_indices.size() == 11 else home_team.lineup_indices
 	var a_lineup: Array[int] = away_lineup_indices if away_lineup_indices.size() == 11 else away_team.lineup_indices
 
@@ -285,6 +288,9 @@ static func simulate_match(
 	)
 	result.probabilities = probs
 
+	_ensure_minimum_squad(home_team)
+	_ensure_minimum_squad(away_team)
+
 	var h_lineup: Array[int] = home_lineup_indices if home_lineup_indices.size() == 11 else home_team.lineup_indices
 	var a_lineup: Array[int] = away_lineup_indices if away_lineup_indices.size() == 11 else away_team.lineup_indices
 	if h_lineup.size() < 11:
@@ -306,11 +312,12 @@ static func simulate_match(
 
 	# 2. Generate per-player event containers
 	var all_player_events: Dictionary[int, PlayerRatingCalculator.PlayerMatchEvents] = {}
-	for slot: int in range(11):
+	for slot: int in range(mini(11, h_lineup.size())):
 		var h_idx: int = h_lineup[slot]
 		var h_key: int = GameManager.TEAM_A * 1000 + h_idx
 		all_player_events[h_key] = PlayerRatingCalculator.PlayerMatchEvents.new()
 
+	for slot: int in range(mini(11, a_lineup.size())):
 		var a_idx: int = a_lineup[slot]
 		var a_key: int = GameManager.TEAM_B * 1000 + a_idx
 		all_player_events[a_key] = PlayerRatingCalculator.PlayerMatchEvents.new()
@@ -329,12 +336,6 @@ static func simulate_match(
 	# 5. Simulate fouls, yellow cards, red cards based on referee & player aggression
 	_generate_discipline_events(referee, home_team, away_team, h_lineup, a_lineup, all_player_events, match_events, home_shadowing, away_shadowing)
 
-	# Sort chronological events
-	match_events.sort_custom(func(a: MatchEventRecord, b: MatchEventRecord) -> bool:
-		return a.minute < b.minute
-	)
-	result.events = match_events
-
 	# 5. Synthesize team traditional & advanced stats
 	var possession_home: float = clampf(50.0 + (float(probs.home_unit_ratings["mid"]) - float(probs.away_unit_ratings["mid"])) * 0.35 + (HOME_POSSESSION_BIAS if not is_neutral_venue else 0.0), 32.0, 68.0)
 	var possession_away: float = 100.0 - possession_home
@@ -352,6 +353,19 @@ static func simulate_match(
 	var a_shots_on_target: int = int(roundf(result.away_score + float(a_shots_total - result.away_score) * 0.38))
 	h_shots_on_target = clampi(h_shots_on_target, result.home_score, h_shots_total)
 	a_shots_on_target = clampi(a_shots_on_target, result.away_score, a_shots_total)
+
+	# 6. Generate match commentary flow (kickoff, saves, misses, woodwork, halftime, fulltime)
+	_generate_commentary_flow(
+		home_team, away_team, h_lineup, a_lineup, all_player_events, match_events,
+		h_shots_total, a_shots_total, h_shots_on_target, a_shots_on_target,
+		result.home_score, result.away_score
+	)
+
+	# Sort chronological events
+	match_events.sort_custom(func(a: MatchEventRecord, b: MatchEventRecord) -> bool:
+		return a.minute < b.minute
+	)
+	result.events = match_events
 
 	var base_passes: float = 480.0 * match_tempo_mult
 	var h_passes_attempted: int = int(roundf(base_passes * (possession_home / 50.0)))
@@ -758,10 +772,32 @@ static func _calculate_team_units(team: TeamData, lineup_indices: Array[int]) ->
 	}
 
 
+static func _ensure_minimum_squad(team: TeamData) -> void:
+	if team == null:
+		return
+	var default_roles: Array[String] = ["GK", "LB", "CB", "CB", "RB", "LM", "CM", "DM", "RM", "ST", "ST"]
+	while team.squad.size() < 11:
+		var i: int = team.squad.size()
+		var role: String = default_roles[i] if i < default_roles.size() else "CM"
+		var p: PlayerData = PlayerData.make_default("%s Player %d" % [team.team_name, i + 1], i + 1, role)
+		if i == 2 and not team.squad.is_empty():
+			p.is_captain = true
+		team.squad.append(p)
+	if team.lineup_indices.size() < 11:
+		var lineup: Array[int] = []
+		for i: int in range(11):
+			lineup.append(i % team.squad.size())
+		team.lineup_indices = lineup
+
+
 static func _make_default_lineup(squad_size: int) -> Array[int]:
 	var arr: Array[int] = []
-	for i in range(mini(11, squad_size)):
-		arr.append(i)
+	if squad_size <= 0:
+		for i: int in range(11):
+			arr.append(0)
+		return arr
+	for i in range(11):
+		arr.append(i % squad_size)
 	return arr
 
 
@@ -900,7 +936,11 @@ static func _generate_goals(
 	# Weight player goal candidates based on slot and attributes
 	for _g: int in range(num_goals):
 		var scorer_slot: int = _pick_scorer_slot(team_data, lineup, shadowing)
+		if scorer_slot < 0 or scorer_slot >= lineup.size():
+			continue
 		var scorer_squad_idx: int = lineup[scorer_slot]
+		if scorer_squad_idx < 0 or scorer_squad_idx >= team_data.squad.size():
+			continue
 		var scorer_p: PlayerData = team_data.squad[scorer_squad_idx]
 		var scorer_key: int = team_id * 1000 + scorer_squad_idx
 
@@ -910,17 +950,18 @@ static func _generate_goals(
 		var assist_name: String = ""
 		if randf() < 0.78: # 78% of goals assisted
 			assist_slot = _pick_assist_slot(scorer_slot, lineup, shadowing)
-			if assist_slot >= 0:
+			if assist_slot >= 0 and assist_slot < lineup.size():
 				assist_squad_idx = lineup[assist_slot]
-				assist_name = team_data.squad[assist_squad_idx].player_name
-				var a_key: int = team_id * 1000 + assist_squad_idx
-				if events_map.has(a_key):
-					events_map[a_key].assists += 1
-					events_map[a_key].xa += 0.55
-					events_map[a_key].teammate_assists[scorer_squad_idx] = events_map[a_key].teammate_assists.get(scorer_squad_idx, 0) + 1
-					events_map[a_key].teammate_interactions[scorer_squad_idx] = events_map[a_key].teammate_interactions.get(scorer_squad_idx, 0) + 1
-				if events_map.has(scorer_key):
-					events_map[scorer_key].teammate_interactions[assist_squad_idx] = events_map[scorer_key].teammate_interactions.get(assist_squad_idx, 0) + 1
+				if assist_squad_idx >= 0 and assist_squad_idx < team_data.squad.size():
+					assist_name = team_data.squad[assist_squad_idx].player_name
+					var a_key: int = team_id * 1000 + assist_squad_idx
+					if events_map.has(a_key):
+						events_map[a_key].assists += 1
+						events_map[a_key].xa += 0.55
+						events_map[a_key].teammate_assists[scorer_squad_idx] = events_map[a_key].teammate_assists.get(scorer_squad_idx, 0) + 1
+						events_map[a_key].teammate_interactions[scorer_squad_idx] = events_map[a_key].teammate_interactions.get(scorer_squad_idx, 0) + 1
+					if events_map.has(scorer_key):
+						events_map[scorer_key].teammate_interactions[assist_squad_idx] = events_map[scorer_key].teammate_interactions.get(assist_squad_idx, 0) + 1
 
 		if events_map.has(scorer_key):
 			events_map[scorer_key].goals += 1
@@ -949,6 +990,8 @@ static func _pick_scorer_slot(team: TeamData, lineup: Array[int], shadowing: Dic
 	var total: float = 0.0
 	for i in range(mini(weights.size(), lineup.size())):
 		var sq_idx: int = lineup[i]
+		if sq_idx < 0 or sq_idx >= team.squad.size():
+			continue
 		var p: PlayerData = team.squad[sq_idx]
 		weights[i] *= (p.close_control * 1.5 + p.composure * 1.2 + 0.2)
 		if i == star_slot:
@@ -956,6 +999,9 @@ static func _pick_scorer_slot(team: TeamData, lineup: Array[int], shadowing: Dic
 		elif i == sec_slot:
 			weights[i] *= 1.20
 		total += weights[i]
+
+	if total <= 0.0:
+		return mini(8, maxi(0, lineup.size() - 1))
 
 	var r: float = randf() * total
 	var cum: float = 0.0
@@ -1078,6 +1124,133 @@ static func _generate_discipline_events(
 			events_list.append(r_rec)
 
 
+static func _generate_commentary_flow(
+	home_team: TeamData,
+	away_team: TeamData,
+	h_lineup: Array[int],
+	a_lineup: Array[int],
+	events_map: Dictionary[int, PlayerRatingCalculator.PlayerMatchEvents],
+	events_list: Array[MatchEventRecord],
+	h_shots: int,
+	a_shots: int,
+	h_target: int,
+	a_target: int,
+	h_score: int,
+	a_score: int
+) -> void:
+	# Kickoff
+	var ev_ko := MatchEventRecord.new()
+	ev_ko.minute = 1
+	ev_ko.event_type = "kickoff"
+	ev_ko.description = "Kick-off! The referee blows the whistle and the match is underway."
+	events_list.append(ev_ko)
+
+	# Halftime
+	var ev_ht := MatchEventRecord.new()
+	ev_ht.minute = 45
+	ev_ht.event_type = "halftime"
+	ev_ht.description = "Half-Time! The referee signals the end of the first half."
+	events_list.append(ev_ht)
+
+	# Second half start
+	var ev_sh := MatchEventRecord.new()
+	ev_sh.minute = 46
+	ev_sh.event_type = "secondhalf"
+	ev_sh.description = "Second half begins! Players return to the pitch."
+	events_list.append(ev_sh)
+
+	# Full-time
+	var ev_ft := MatchEventRecord.new()
+	ev_ft.minute = 90
+	ev_ft.event_type = "fulltime"
+	ev_ft.description = "Full-Time! The referee blows the final whistle."
+	events_list.append(ev_ft)
+
+	# Shot chances and saves
+	var h_saves: int = clampi(h_target - h_score, 0, 4)
+	var h_misses: int = clampi(h_shots - h_target, 0, 4)
+	_add_shot_events(GameManager.TEAM_A, home_team, h_lineup, away_team, a_lineup, events_map, events_list, h_saves, h_misses)
+
+	var a_saves: int = clampi(a_target - a_score, 0, 4)
+	var a_misses: int = clampi(a_shots - a_target, 0, 4)
+	_add_shot_events(GameManager.TEAM_B, away_team, a_lineup, home_team, h_lineup, events_map, events_list, a_saves, a_misses)
+
+
+static func _add_shot_events(
+	att_team_id: int,
+	att_team: TeamData,
+	att_lineup: Array[int],
+	def_team: TeamData,
+	def_lineup: Array[int],
+	events_map: Dictionary[int, PlayerRatingCalculator.PlayerMatchEvents],
+	events_list: Array[MatchEventRecord],
+	num_saves: int,
+	num_misses: int
+) -> void:
+	var def_gk_name: String = "the goalkeeper"
+	var def_gk_key: int = -1
+	if not def_lineup.is_empty() and def_lineup[0] < def_team.squad.size():
+		var gk_p: PlayerData = def_team.squad[def_lineup[0]]
+		if gk_p != null:
+			def_gk_name = gk_p.player_name
+			def_gk_key = (1 - att_team_id) * 1000 + def_lineup[0]
+
+	var slot: int = 0
+	var shooter: PlayerData = null
+	var shooter_key: int = 0
+	var ev: MatchEventRecord = null
+
+	for _s: int in range(num_saves):
+		slot = _pick_scorer_slot(att_team, att_lineup)
+		if slot < 0 or slot >= att_lineup.size() or att_lineup[slot] >= att_team.squad.size():
+			continue
+		shooter = att_team.squad[att_lineup[slot]]
+		shooter_key = att_team_id * 1000 + att_lineup[slot]
+		if events_map.has(shooter_key):
+			events_map[shooter_key].shots_on_target += 1
+		if def_gk_key >= 0 and events_map.has(def_gk_key):
+			events_map[def_gk_key].goals_prevented += 0.3
+
+		ev = MatchEventRecord.new()
+		ev.minute = randi_range(3, 88)
+		if ev.minute == 45:
+			ev.minute = 44
+		elif ev.minute == 46:
+			ev.minute = 47
+		ev.event_type = "save"
+		ev.team = att_team_id
+		ev.player_name = shooter.player_name
+		ev.squad_index = att_lineup[slot]
+		ev.description = "Save! %s tests the target, but %s parries it away for %s." % [shooter.player_name, def_gk_name, def_team.team_name]
+		events_list.append(ev)
+
+	for _m: int in range(num_misses):
+		slot = _pick_scorer_slot(att_team, att_lineup)
+		if slot < 0 or slot >= att_lineup.size() or att_lineup[slot] >= att_team.squad.size():
+			continue
+		shooter = att_team.squad[att_lineup[slot]]
+		shooter_key = att_team_id * 1000 + att_lineup[slot]
+		if events_map.has(shooter_key):
+			events_map[shooter_key].shots_off_target += 1
+
+		var is_woodwork: bool = randf() < 0.20
+		ev = MatchEventRecord.new()
+		ev.minute = randi_range(3, 88)
+		if ev.minute == 45:
+			ev.minute = 43
+		elif ev.minute == 46:
+			ev.minute = 48
+		ev.event_type = "woodwork" if is_woodwork else "miss"
+		ev.team = att_team_id
+		ev.player_name = shooter.player_name
+		ev.squad_index = att_lineup[slot]
+		if is_woodwork:
+			ev.description = "Off the woodwork! %s rattles the frame of the goal for %s!" % [shooter.player_name, att_team.team_name]
+		else:
+			ev.description = "Chance! %s unleashes a shot for %s, but it flies wide of the upright." % [shooter.player_name, att_team.team_name]
+		events_list.append(ev)
+
+
 static func _distribute_player_match_stats(
 	team_id: int,
 	team_data: TeamData,
@@ -1107,6 +1280,8 @@ static func _distribute_player_match_stats(
 
 	for slot: int in range(mini(11, lineup.size())):
 		var sq_idx: int = lineup[slot]
+		if sq_idx < 0 or sq_idx >= team_data.squad.size():
+			continue
 		var key: int = team_id * 1000 + sq_idx
 		var p_data: PlayerData = team_data.squad[sq_idx]
 		var ev: PlayerRatingCalculator.PlayerMatchEvents = events_map.get(key)

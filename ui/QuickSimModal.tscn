@@ -21,7 +21,7 @@ anchor_right = 1.0
 anchor_bottom = 1.0
 grow_horizontal = 2
 grow_vertical = 2
-color = Color(0, 0, 0, 0.88)
+color = Color(0, 0, 0, 0.9)
 
 [node name="Panel" type="PanelContainer" parent="Root"]
 layout_mode = 1
@@ -30,66 +30,111 @@ anchor_left = 0.5
 anchor_top = 0.5
 anchor_right = 0.5
 anchor_bottom = 0.5
-offset_left = -420.0
-offset_top = -310.0
-offset_right = 420.0
-offset_bottom = 310.0
+offset_left = -480.0
+offset_top = -330.0
+offset_right = 480.0
+offset_bottom = 330.0
 grow_horizontal = 2
 grow_vertical = 2
 
 [node name="VBoxContainer" type="VBoxContainer" parent="Root/Panel"]
 layout_mode = 2
-theme_override_constants/separation = 12
+theme_override_constants/separation = 10
 
 [node name="Header" type="VBoxContainer" parent="Root/Panel/VBoxContainer"]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 2
 
 [node name="TitleLabel" type="Label" parent="Root/Panel/VBoxContainer/Header"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 18
+theme_override_font_sizes/font_size = 16
 theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
-text = "QUICK MATCH SIMULATION"
+text = "MATCHDAY BROADCAST"
 horizontal_alignment = 1
 
 [node name="MatchTitleLabel" type="Label" parent="Root/Panel/VBoxContainer/Header"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 22
+theme_override_font_sizes/font_size = 20
 text = "Team A vs Team B"
 horizontal_alignment = 1
 
 [node name="PreSimBox" type="VBoxContainer" parent="Root/Panel/VBoxContainer"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 10
+theme_override_constants/separation = 8
+
+[node name="PressBox" type="VBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="PressTitleLabel" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/PressBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+theme_override_colors/font_color = Color(0.9, 0.8, 0.3, 1)
+text = "PRE-MATCH PRESS CONFERENCE"
+
+[node name="PressQuestionLabel" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/PressBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Press: 'How do you view today's match?'"
+autowrap_mode = 2
+
+[node name="PressButtonsRow" type="HBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox/PressBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="PressBtn1" type="Button" parent="Root/Panel/VBoxContainer/PreSimBox/PressBox/PressButtonsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "1. 'We're going out to win.'"
+
+[node name="PressBtn2" type="Button" parent="Root/Panel/VBoxContainer/PreSimBox/PressBox/PressButtonsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "2. 'Discipline is key.'"
+
+[node name="PressBtn3" type="Button" parent="Root/Panel/VBoxContainer/PreSimBox/PressBox/PressButtonsRow"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 12
+text = "3. 'Talking on the pitch.'"
+
+[node name="PressQuoteLabel" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/PressBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+theme_override_colors/font_color = Color(0.8, 0.9, 0.8, 1)
+text = "Select a press response above to address the media."
+autowrap_mode = 2
+
+[node name="HSeparator" type="HSeparator" parent="Root/Panel/VBoxContainer/PreSimBox"]
+layout_mode = 2
 
 [node name="ProbRow" type="HBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox"]
 layout_mode = 2
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 alignment = 1
 
 [node name="HomeWinLabel" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/ProbRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 16
-text = "Home Win
-45.0%"
+theme_override_font_sizes/font_size = 14
+text = "Home Win\n45.0%"
 horizontal_alignment = 1
 
 [node name="DrawLabel" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/ProbRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 16
-text = "Draw
-28.0%"
+theme_override_font_sizes/font_size = 14
+text = "Draw\n28.0%"
 horizontal_alignment = 1
 
 [node name="AwayWinLabel" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/ProbRow"]
 layout_mode = 2
 size_flags_horizontal = 3
-theme_override_font_sizes/font_size = 16
-text = "Away Win
-27.0%"
+theme_override_font_sizes/font_size = 14
+text = "Away Win\n27.0%"
 horizontal_alignment = 1
 
 [node name="MetricsGrid" type="HBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox"]
@@ -100,25 +145,28 @@ alignment = 1
 [node name="XGValueLabel" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/MetricsGrid"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
 text = "xG: 1.45 - 0.98"
 horizontal_alignment = 1
 
 [node name="CSValueLabel" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/MetricsGrid"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
 text = "Clean Sheet: 38% - 24%"
 horizontal_alignment = 1
 
 [node name="OverBTTSValueLabel" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/MetricsGrid"]
 layout_mode = 2
 size_flags_horizontal = 3
+theme_override_font_sizes/font_size = 13
 text = "Over 2.5: 48%  |  BTTS: 52%"
 horizontal_alignment = 1
 
 [node name="Columns" type="HBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox"]
 layout_mode = 2
 size_flags_vertical = 3
-theme_override_constants/separation = 16
+theme_override_constants/separation = 12
 
 [node name="ScorelinesColumn" type="VBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox/Columns"]
 layout_mode = 2
@@ -126,9 +174,9 @@ size_flags_horizontal = 3
 
 [node name="ScorelinesTitle" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/Columns/ScorelinesColumn"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.7, 0.8, 0.7, 1)
-text = "Most Likely Scorelines"
+text = "Projected Scorelines"
 
 [node name="ScorelinesList" type="VBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox/Columns/ScorelinesColumn"]
 layout_mode = 2
@@ -139,25 +187,50 @@ size_flags_horizontal = 3
 
 [node name="UnitsTitle" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/Columns/UnitsColumn"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.7, 0.8, 0.7, 1)
-text = "Unit Strength Comparison"
+text = "Unit Comparison"
 
 [node name="UnitsList" type="VBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox/Columns/UnitsColumn"]
 layout_mode = 2
 
 [node name="InsightsBox" type="VBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox"]
 layout_mode = 2
-theme_override_constants/separation = 4
+theme_override_constants/separation = 2
 
 [node name="InsightsTitle" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/InsightsBox"]
 layout_mode = 2
-theme_override_font_sizes/font_size = 14
+theme_override_font_sizes/font_size = 13
 theme_override_colors/font_color = Color(0.7, 0.8, 0.7, 1)
-text = "Tactical & Personnel Matchup Insights"
+text = "Tactical Matchup Insights"
 
 [node name="InsightsList" type="VBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox/InsightsBox"]
 layout_mode = 2
+
+[node name="MentalityRow" type="HBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="MentalityLabel" type="Label" parent="Root/Panel/VBoxContainer/PreSimBox/MentalityRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 13
+text = "Game Plan Mentality:"
+
+[node name="MentalityDefensive" type="Button" parent="Root/Panel/VBoxContainer/PreSimBox/MentalityRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Cautious"
+
+[node name="MentalityBalanced" type="Button" parent="Root/Panel/VBoxContainer/PreSimBox/MentalityRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Balanced"
+
+[node name="MentalityAttacking" type="Button" parent="Root/Panel/VBoxContainer/PreSimBox/MentalityRow"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 12
+text = "Attacking"
 
 [node name="ButtonRow" type="HBoxContainer" parent="Root/Panel/VBoxContainer/PreSimBox"]
 layout_mode = 2
@@ -165,15 +238,121 @@ theme_override_constants/separation = 16
 alignment = 1
 
 [node name="CancelButton" type="Button" parent="Root/Panel/VBoxContainer/PreSimBox/ButtonRow"]
-custom_minimum_size = Vector2(130, 36)
+custom_minimum_size = Vector2(120, 34)
 layout_mode = 2
 text = "Cancel"
 
 [node name="SimulateButton" type="Button" parent="Root/Panel/VBoxContainer/PreSimBox/ButtonRow"]
-custom_minimum_size = Vector2(200, 36)
+custom_minimum_size = Vector2(220, 34)
 layout_mode = 2
 theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
-text = "Simulate Match →"
+text = "Kick Off Match →"
+
+[node name="MatchBox" type="VBoxContainer" parent="Root/Panel/VBoxContainer"]
+visible = false
+layout_mode = 2
+size_flags_vertical = 3
+theme_override_constants/separation = 10
+
+[node name="ScoreBanner" type="VBoxContainer" parent="Root/Panel/VBoxContainer/MatchBox"]
+layout_mode = 2
+theme_override_constants/separation = 4
+
+[node name="LiveScoreLabel" type="Label" parent="Root/Panel/VBoxContainer/MatchBox/ScoreBanner"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 28
+text = "Home  0 - 0  Away"
+horizontal_alignment = 1
+
+[node name="ClockRow" type="HBoxContainer" parent="Root/Panel/VBoxContainer/MatchBox/ScoreBanner"]
+layout_mode = 2
+theme_override_constants/separation = 10
+alignment = 1
+
+[node name="ClockLabel" type="Label" parent="Root/Panel/VBoxContainer/MatchBox/ScoreBanner/ClockRow"]
+custom_minimum_size = Vector2(60, 0)
+layout_mode = 2
+theme_override_font_sizes/font_size = 16
+theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+text = "1'"
+horizontal_alignment = 1
+
+[node name="MatchProgressBar" type="ProgressBar" parent="Root/Panel/VBoxContainer/MatchBox/ScoreBanner/ClockRow"]
+custom_minimum_size = Vector2(300, 16)
+layout_mode = 2
+size_flags_vertical = 4
+max_value = 90.0
+step = 1.0
+value = 1.0
+show_percentage = false
+
+[node name="LatestActionLabel" type="Label" parent="Root/Panel/VBoxContainer/MatchBox"]
+custom_minimum_size = Vector2(0, 28)
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.9, 0.9, 0.3, 1)
+text = "Kick-off! Match is underway."
+horizontal_alignment = 1
+autowrap_mode = 2
+
+[node name="CommentaryScroll" type="ScrollContainer" parent="Root/Panel/VBoxContainer/MatchBox"]
+custom_minimum_size = Vector2(0, 260)
+layout_mode = 2
+size_flags_vertical = 3
+
+[node name="CommentaryList" type="VBoxContainer" parent="Root/Panel/VBoxContainer/MatchBox/CommentaryScroll"]
+layout_mode = 2
+size_flags_horizontal = 3
+theme_override_constants/separation = 4
+
+[node name="HalfTimeBox" type="HBoxContainer" parent="Root/Panel/VBoxContainer/MatchBox"]
+visible = false
+layout_mode = 2
+theme_override_constants/separation = 12
+alignment = 1
+
+[node name="HalfTimeNotice" type="Label" parent="Root/Panel/VBoxContainer/MatchBox/HalfTimeBox"]
+layout_mode = 2
+theme_override_font_sizes/font_size = 14
+theme_override_colors/font_color = Color(0.9, 0.8, 0.2, 1)
+text = "HALF TIME — Tactical breather"
+
+[node name="Resume2ndHalfButton" type="Button" parent="Root/Panel/VBoxContainer/MatchBox/HalfTimeBox"]
+custom_minimum_size = Vector2(160, 32)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.24, 0.86, 0.41, 1)
+text = "Start 2nd Half →"
+
+[node name="MatchControls" type="HBoxContainer" parent="Root/Panel/VBoxContainer/MatchBox"]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="PauseButton" type="Button" parent="Root/Panel/VBoxContainer/MatchBox/MatchControls"]
+custom_minimum_size = Vector2(90, 32)
+layout_mode = 2
+text = "Pause"
+
+[node name="Speed1Button" type="Button" parent="Root/Panel/VBoxContainer/MatchBox/MatchControls"]
+custom_minimum_size = Vector2(50, 32)
+layout_mode = 2
+text = "1x"
+
+[node name="Speed2Button" type="Button" parent="Root/Panel/VBoxContainer/MatchBox/MatchControls"]
+custom_minimum_size = Vector2(50, 32)
+layout_mode = 2
+text = "2x"
+
+[node name="Speed5Button" type="Button" parent="Root/Panel/VBoxContainer/MatchBox/MatchControls"]
+custom_minimum_size = Vector2(50, 32)
+layout_mode = 2
+text = "5x"
+
+[node name="SkipButton" type="Button" parent="Root/Panel/VBoxContainer/MatchBox/MatchControls"]
+custom_minimum_size = Vector2(180, 32)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.8, 0.8, 0.8, 1)
+text = "Skip to Full Time >>"
 
 [node name="PostSimBox" type="VBoxContainer" parent="Root/Panel/VBoxContainer"]
 visible = false

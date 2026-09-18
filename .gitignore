@@ -24,3 +24,7 @@ legacy/
 
 # Generated fictional databases
 data/generated/
+
+# Godot MCP temporary cache
+addons/godot_mcp/cache/
+

@@ -27,7 +27,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 def find_gd_files(root_dir: str) -> list[str]:
     gd_files: list[str] = []
     for dirpath, dirnames, filenames in os.walk(root_dir):
-        dirnames[:] = [d for d in dirnames if d != "legacy" and not d.startswith(".")]
+        dirnames[:] = [d for d in dirnames if d not in ("legacy", "addons") and not d.startswith(".")]
         for f in filenames:
             if f.endswith(".gd"):
                 gd_files.append(os.path.join(dirpath, f))

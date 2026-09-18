@@ -43,6 +43,12 @@ var _nav_list: VBoxContainer = null
 var _content_host: VBoxContainer = null
 var _topbar_host: HBoxContainer = null
 var _status_label: Label = null
+var _continue_button: Button = null
+var _topbar_date_value: Label = null
+var _date_tween: Tween = null
+var _button_pulse_tween: Tween = null
+var _speed_buttons: Array[Button] = []
+var _advance_dialog: AdvanceToDateDialog = null
 
 
 func _ready() -> void:
@@ -52,6 +58,10 @@ func _ready() -> void:
 
 	GameEvents.career_inbox_changed.connect(_on_inbox_changed)
 	GameEvents.career_advance_halted.connect(_on_advance_halted)
+	GameEvents.career_continue_started.connect(_on_continue_started)
+	GameEvents.career_continue_stopped.connect(_on_continue_stopped)
+	GameEvents.career_speed_changed.connect(_on_speed_changed)
+	GameEvents.career_day_advanced.connect(_on_day_advanced)
 	GameEvents.career_manager_sacked.connect(_on_sacked)
 
 	if not CareerManager.is_career_active():
@@ -223,6 +233,7 @@ func _rebuild_nav() -> void:
 
 
 func _rebuild_topbar() -> void:
+	_speed_buttons.clear()
 	CareerTheme.clear(_topbar_host)
 	var p: CareerThemePalette = CareerTheme.palette()
 	var career: CareerSaveData = CareerManager.career
@@ -233,9 +244,11 @@ func _rebuild_topbar() -> void:
 		team.team_name if team != null else "—",
 		career.profile.manager_name if career.profile != null else "", p.accent
 	))
-	_topbar_host.add_child(_topbar_stat(
+	var date_box: VBoxContainer = _topbar_stat(
 		career.today.to_display(), career.season_label(), p.text_primary
-	))
+	)
+	_topbar_date_value = date_box.get_child(0) as Label
+	_topbar_host.add_child(date_box)
 
 	var fixture: FixtureData = career.next_user_fixture()
 	if fixture != null:
@@ -272,12 +285,42 @@ func _rebuild_topbar() -> void:
 	_status_label = CareerTheme.muted("")
 	_topbar_host.add_child(_status_label)
 
-	var continue_button: Button = CareerTheme.button(_continue_label(), true)
-	continue_button.pressed.connect(_on_continue_pressed)
-	_topbar_host.add_child(continue_button)
+	var advance_to_btn: Button = CareerTheme.button("Advance to...", false)
+	advance_to_btn.pressed.connect(_on_advance_to_date_pressed)
+	_topbar_host.add_child(advance_to_btn)
+
+	var speed_box := HBoxContainer.new()
+	speed_box.add_theme_constant_override("separation", 0)
+	var speed_group := ButtonGroup.new()
+	var current_speed: int = CareerManager.get_continue_speed()
+
+	var active_box: StyleBoxFlat = CareerTheme.style_box(p.accent_dim, p.corner_radius)
+	var inactive_box: StyleBoxFlat = CareerTheme.style_box(p.panel, p.corner_radius)
+
+	for s: int in [1, 2, 3]:
+		var speed_val: int = s
+		var btn: Button = CareerTheme.button("%dx" % speed_val, false)
+		btn.toggle_mode = true
+		btn.button_group = speed_group
+		btn.custom_minimum_size = Vector2(34.0, 24.0)
+		btn.add_theme_stylebox_override("pressed", active_box)
+		btn.add_theme_stylebox_override("normal", inactive_box)
+		btn.button_pressed = (speed_val == current_speed)
+		btn.pressed.connect(func() -> void:
+			CareerManager.set_continue_speed(speed_val)
+		)
+		speed_box.add_child(btn)
+		_speed_buttons.append(btn)
+	_topbar_host.add_child(speed_box)
+
+	_continue_button = CareerTheme.button(_continue_label(), true)
+	_continue_button.pressed.connect(_on_continue_pressed)
+	_topbar_host.add_child(_continue_button)
 
 
 func _continue_label() -> String:
+	if CareerManager.is_continue_running():
+		return "Stop"
 	var career: CareerSaveData = CareerManager.career
 	if career.days_until_next_fixture() == 0:
 		return "Play Match"
@@ -286,7 +329,7 @@ func _continue_label() -> String:
 	return "Continue"
 
 
-func _topbar_stat(value: String, caption: String, color: Color) -> Control:
+func _topbar_stat(value: String, caption: String, color: Color) -> VBoxContainer:
 	var p: CareerThemePalette = CareerTheme.palette()
 	var box := VBoxContainer.new()
 	box.add_theme_constant_override("separation", 0)
@@ -311,29 +354,141 @@ func _rebuild_content() -> void:
 ## --- Actions ----------------------------------------------------------------------
 
 func _on_continue_pressed() -> void:
+	if CareerManager.is_continue_running():
+		CareerManager.cancel_continue()
+		return
 	var career: CareerSaveData = CareerManager.career
-	# A pending decision blocks Continue outright, the way FM does — otherwise
-	# the deadline would silently expire while the player advanced past it.
 	if career.pending_decision_count() > 0:
 		show_section(Section.INBOX)
 		return
-
 	if career.days_until_next_fixture() == 0:
-		# Manager-only pivot: the fixture is resolved statistically by
-		# QuickSimEngine instead of being handed to a real-time match scene.
-		# CareerManager owns the whole result pipeline (table, finances,
-		# morale, board confidence, player records and cup advancement).
-		if CareerManager.simulate_next_fixture() != null:
-			refresh()
+		_open_matchday_modal()
+		return
+	CareerManager.continue_until_event()
+
+
+func _open_matchday_modal() -> void:
+	var career: CareerSaveData = CareerManager.career
+	if career == null:
+		return
+	var fixture: FixtureData = career.next_user_fixture()
+	if fixture == null:
+		return
+	var home: TeamData = DataLoader.get_team(fixture.home_team_index)
+	var away: TeamData = DataLoader.get_team(fixture.away_team_index)
+	if home == null or away == null:
 		return
 
-	var reason: int = CareerManager.continue_until_event()
-	if reason == CareerManager.HaltReason.MATCH_DAY:
-		show_section(Section.OVERVIEW)
-	elif reason == CareerManager.HaltReason.INBOX_DECISION:
-		show_section(Section.INBOX)
-	else:
-		refresh()
+	var home_mgr: ManagerData = ManagerLoader.get_or_assign_manager(home.team_name)
+	var away_mgr: ManagerData = ManagerLoader.get_or_assign_manager(away.team_name)
+	var ref: RefereeData = RefereeLoader.get_or_assign_referee(home.team_name, away.team_name)
+	var is_neutral: bool = (fixture.leg == 0 and fixture.round_label == "Final")
+
+	var modal_scene: PackedScene = preload("res://ui/QuickSimModal.tscn")
+	var modal: QuickSimModal = modal_scene.instantiate() as QuickSimModal
+	add_child(modal)
+	modal.setup_match(
+		home, away, home_mgr, away_mgr, ref,
+		home.lineup_indices, away.lineup_indices, is_neutral
+	)
+	modal.match_completed.connect(_on_matchday_modal_completed.bind(fixture))
+	modal.modal_closed.connect(_on_matchday_modal_closed.bind(modal))
+	modal.open()
+
+
+func _on_matchday_modal_completed(sim_result: QuickSimEngine.QuickSimResult, fixture: FixtureData) -> void:
+	CareerManager.apply_user_match_result(fixture, sim_result)
+	refresh()
+
+
+func _on_matchday_modal_closed(modal: QuickSimModal) -> void:
+	refresh()
+	if modal != null and is_instance_valid(modal):
+		modal.queue_free()
+
+
+func _on_advance_to_date_pressed() -> void:
+	if CareerManager.is_continue_running():
+		return
+	if _advance_dialog == null:
+		_advance_dialog = AdvanceToDateDialog.new()
+		add_child(_advance_dialog)
+		_advance_dialog.date_confirmed.connect(_on_advance_date_confirmed)
+	_advance_dialog.popup_centered()
+
+
+func _on_advance_date_confirmed(target: CareerDate) -> void:
+	if target == null:
+		return
+	CareerManager.set_target_date(target)
+	CareerManager.continue_until_event()
+
+
+func _on_continue_started() -> void:
+	if _continue_button != null and is_instance_valid(_continue_button):
+		_continue_button.text = "Stop"
+		_continue_button.modulate = Color(0.85, 0.85, 0.85, 1.0)
+	_start_button_pulse()
+
+
+func _on_continue_stopped(reason: String) -> void:
+	if _continue_button != null and is_instance_valid(_continue_button):
+		_continue_button.text = _continue_label()
+		_continue_button.modulate = Color.WHITE
+	_stop_button_pulse()
+	if _status_label != null and is_instance_valid(_status_label):
+		_status_label.text = reason
+	refresh()
+
+
+func _on_speed_changed(speed: int) -> void:
+	for i: int in range(_speed_buttons.size()):
+		var b: Button = _speed_buttons[i]
+		if is_instance_valid(b):
+			b.button_pressed = (i + 1) == speed
+
+
+func _on_day_advanced(_iso_date: String) -> void:
+	_animate_topbar_date()
+	if _current_section == Section.CALENDAR and is_inside_tree():
+		_rebuild_content()
+
+
+func _animate_topbar_date() -> void:
+	if _topbar_date_value == null or not is_instance_valid(_topbar_date_value):
+		return
+	if _date_tween != null and _date_tween.is_valid():
+		_date_tween.kill()
+
+	var new_display: String = CareerManager.career.today.to_display()
+	var start_y: float = _topbar_date_value.position.y
+
+	_date_tween = create_tween()
+	_date_tween.tween_property(_topbar_date_value, ^"position:y", start_y - 8.0, 0.08)
+	_date_tween.parallel().tween_property(_topbar_date_value, ^"modulate:a", 0.4, 0.08)
+	_date_tween.tween_callback(func() -> void:
+		_topbar_date_value.text = new_display
+		_topbar_date_value.position.y = start_y + 8.0
+	)
+	_date_tween.tween_property(_topbar_date_value, ^"position:y", start_y, 0.08)
+	_date_tween.parallel().tween_property(_topbar_date_value, ^"modulate:a", 1.0, 0.08)
+
+
+func _start_button_pulse() -> void:
+	if _continue_button == null or not is_instance_valid(_continue_button):
+		return
+	_stop_button_pulse()
+	_continue_button.pivot_offset = _continue_button.size * 0.5
+	_button_pulse_tween = create_tween().set_loops()
+	_button_pulse_tween.tween_property(_continue_button, ^"scale", Vector2(1.04, 1.04), 0.25).set_trans(Tween.TRANS_SINE)
+	_button_pulse_tween.tween_property(_continue_button, ^"scale", Vector2.ONE, 0.25).set_trans(Tween.TRANS_SINE)
+
+
+func _stop_button_pulse() -> void:
+	if _button_pulse_tween != null and _button_pulse_tween.is_valid():
+		_button_pulse_tween.kill()
+	if _continue_button != null and is_instance_valid(_continue_button):
+		_continue_button.scale = Vector2.ONE
 
 
 func _on_inbox_changed(_unread: int, _pending: int) -> void:

@@ -19,7 +19,18 @@ func title() -> String:
 	return "Calendar"
 
 
+func _clamp_offset_to_view(career: CareerSaveData) -> void:
+	var target: CareerDate = career.today
+	var viewed: CareerDate = _viewed_month(career)
+	if viewed.year == target.year and viewed.month == target.month:
+		return
+	# Only snap back to today if the viewed month is now in the past.
+	if viewed.is_before(CareerDate.make(target.year, target.month, 1)):
+		_month_offset = 0
+
+
 func build(host: VBoxContainer, career: CareerSaveData) -> void:
+	_clamp_offset_to_view(career)
 	var p: CareerThemePalette = CareerTheme.palette()
 	var anchor: CareerDate = _viewed_month(career)
 

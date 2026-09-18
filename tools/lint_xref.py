@@ -31,7 +31,7 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-SKIP_DIRS = (".git", ".godot", "docs/archive", "addons", "legacy")
+SKIP_DIRS = (".git", ".godot", "docs/archive", "addons", "legacy", ".claude")
 
 # Inherited engine surface: real, but declared nowhere in project source.
 UNIVERSAL = {

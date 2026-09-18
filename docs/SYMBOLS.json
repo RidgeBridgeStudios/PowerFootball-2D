@@ -1,4 +1,1140 @@
 {
+  "CareerScreen": {
+    "path": "_archive/chat_gen/scripts/career/CareerScreen.gd",
+    "line": 1,
+    "signals": {
+      "day_advanced": {
+        "line": 4,
+        "args": [
+          "new_date: Dictionary"
+        ]
+      },
+      "simulation_stopped": {
+        "line": 5,
+        "args": [
+          "reason: String"
+        ]
+      }
+    },
+    "enums": {},
+    "properties": {
+      "date_slide_offset": {
+        "line": 7,
+        "type": "float",
+        "is_export": true,
+        "is_onready": false
+      },
+      "active_button_color": {
+        "line": 8,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "vignette_flash_duration": {
+        "line": 9,
+        "type": "float",
+        "is_export": true,
+        "is_onready": false
+      },
+      "continue_button": {
+        "line": 11,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": true
+      },
+      "date_slot": {
+        "line": 12,
+        "type": "Control",
+        "is_export": false,
+        "is_onready": true
+      },
+      "date_label": {
+        "line": 13,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": true
+      },
+      "speed_label": {
+        "line": 14,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": true
+      },
+      "inbox_button": {
+        "line": 15,
+        "type": "InboxButton",
+        "is_export": false,
+        "is_onready": true
+      },
+      "schedule_container": {
+        "line": 16,
+        "type": "VBoxContainer",
+        "is_export": false,
+        "is_onready": true
+      },
+      "sim_manager": {
+        "line": 17,
+        "type": "SimulationManager",
+        "is_export": false,
+        "is_onready": true
+      },
+      "mail_popup": {
+        "line": 18,
+        "type": "Panel",
+        "is_export": false,
+        "is_onready": true
+      },
+      "mail_title": {
+        "line": 19,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": true
+      },
+      "mail_body": {
+        "line": 20,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": true
+      },
+      "mail_ok_button": {
+        "line": 21,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": true
+      },
+      "inbox_ui": {
+        "line": 22,
+        "type": "InboxUI",
+        "is_export": false,
+        "is_onready": true
+      },
+      "vignette_rect": {
+        "line": 23,
+        "type": "ColorRect",
+        "is_export": false,
+        "is_onready": true
+      },
+      "date_picker": {
+        "line": 24,
+        "type": "DatePicker",
+        "is_export": false,
+        "is_onready": true
+      },
+      "button_pulse_tween": {
+        "line": 26,
+        "type": "Tween",
+        "is_export": false,
+        "is_onready": false
+      },
+      "date_anim_tween": {
+        "line": 27,
+        "type": "Tween",
+        "is_export": false,
+        "is_onready": false
+      },
+      "schedule_rows": {
+        "line": 28,
+        "type": "Array[ScheduleRow]",
+        "is_export": false,
+        "is_onready": false
+      },
+      "ellipsis_step": {
+        "line": 30,
+        "type": "int",
+        "is_export": false,
+        "is_onready": false
+      },
+      "ellipsis_timer": {
+        "line": 31,
+        "type": "float",
+        "is_export": false,
+        "is_onready": false
+      },
+      "MONTH_NAMES": {
+        "line": 33,
+        "type": "Array[String]",
+        "is_const": true
+      }
+    },
+    "methods": {
+      "_ready": {
+        "line": 38,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_setup_continue_menu": {
+        "line": 83,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_process": {
+        "line": 94,
+        "args": [
+          "delta: float"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_animate_ellipsis": {
+        "line": 98,
+        "args": [
+          "delta: float"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_continue_button_pressed": {
+        "line": 106,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_continue_menu_id_pressed": {
+        "line": 112,
+        "args": [
+          "id: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_target_date_selected": {
+        "line": 119,
+        "args": [
+          "target_date: Dictionary"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_sim_state_changed": {
+        "line": 122,
+        "args": [
+          "state: SimState.State"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_day_processed": {
+        "line": 133,
+        "args": [
+          "new_date: Dictionary"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_simulation_halted": {
+        "line": 137,
+        "args": [
+          "reason: String",
+          "event: SimEvent"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_inbox_updated": {
+        "line": 149,
+        "args": [
+          "inbox: Array[SimEvent]",
+          "unread_count: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_inbox_button_pressed": {
+        "line": 153,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_format_date": {
+        "line": 157,
+        "args": [
+          "date: Dictionary"
+        ],
+        "return": "String",
+        "is_static": false
+      },
+      "_update_date_label_instant": {
+        "line": 160,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_update_speed_label": {
+        "line": 163,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_animate_date_transition": {
+        "line": 169,
+        "args": [
+          "new_date: Dictionary"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_finish_date_animation": {
+        "line": 185,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_play_vignette_flash": {
+        "line": 192,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_start_button_pulse": {
+        "line": 197,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_stop_button_pulse": {
+        "line": 205,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_populate_schedule": {
+        "line": 210,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_highlight_event_row": {
+        "line": 220,
+        "args": [
+          "ev: SimEvent"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_show_mail_popup": {
+        "line": 226,
+        "args": [
+          "ev: SimEvent"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_mail_ok_pressed": {
+        "line": 232,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_seed_default_events": {
+        "line": 236,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      }
+    }
+  },
+  "ScheduleRow": {
+    "path": "_archive/chat_gen/scripts/career/ScheduleRow.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "color_info": {
+        "line": 4,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "color_notable": {
+        "line": 5,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "color_urgent": {
+        "line": 6,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "color_blocking": {
+        "line": 7,
+        "type": "Color",
+        "is_export": true,
+        "is_onready": false
+      },
+      "indicator": {
+        "line": 9,
+        "type": "ColorRect",
+        "is_export": false,
+        "is_onready": false
+      },
+      "label": {
+        "line": 10,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": false
+      },
+      "event_id": {
+        "line": 11,
+        "type": "String",
+        "is_export": false,
+        "is_onready": false
+      },
+      "event_data": {
+        "line": 12,
+        "type": "Dictionary",
+        "is_export": false,
+        "is_onready": false
+      },
+      "event_ref": {
+        "line": 13,
+        "type": "SimEvent",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_flashing": {
+        "line": 14,
+        "type": "bool",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "_init": {
+        "line": 16,
+        "args": [
+          "data_or_event: Variant = null"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_ready": {
+        "line": 31,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "get_priority_color": {
+        "line": 51,
+        "args": [],
+        "return": "Color",
+        "is_static": false
+      },
+      "flash": {
+        "line": 60,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      }
+    }
+  },
+  "BoardMeetingEvent": {
+    "path": "_archive/chat_gen/scripts/events/BoardMeetingEvent.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "agenda": {
+        "line": 4,
+        "type": "String",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "_init": {
+        "line": 6,
+        "args": [
+          "p_date: Dictionary = {}",
+          "p_agenda: String = \"Financial & Performance Review\""
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "serialize": {
+        "line": 12,
+        "args": [],
+        "return": "Dictionary",
+        "is_static": false
+      },
+      "deserialize": {
+        "line": 17,
+        "args": [
+          "data: Dictionary"
+        ],
+        "return": "void",
+        "is_static": false
+      }
+    }
+  },
+  "InjuryEvent": {
+    "path": "_archive/chat_gen/scripts/events/InjuryEvent.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "player_name": {
+        "line": 4,
+        "type": "String",
+        "is_export": false,
+        "is_onready": false
+      },
+      "injury_type": {
+        "line": 5,
+        "type": "String",
+        "is_export": false,
+        "is_onready": false
+      },
+      "days_out": {
+        "line": 6,
+        "type": "int",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "_init": {
+        "line": 8,
+        "args": [
+          "p_date: Dictionary = {}",
+          "p_player_name: String = \"Player\"",
+          "p_injury: String = \"Hamstring Strain\"",
+          "p_days: int = 14"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "serialize": {
+        "line": 16,
+        "args": [],
+        "return": "Dictionary",
+        "is_static": false
+      },
+      "deserialize": {
+        "line": 23,
+        "args": [
+          "data: Dictionary"
+        ],
+        "return": "void",
+        "is_static": false
+      }
+    }
+  },
+  "MatchEvent": {
+    "path": "_archive/chat_gen/scripts/events/MatchEvent.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "opponent": {
+        "line": 4,
+        "type": "String",
+        "is_export": false,
+        "is_onready": false
+      },
+      "home_match": {
+        "line": 5,
+        "type": "bool",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "_init": {
+        "line": 7,
+        "args": [
+          "p_date: Dictionary = {}",
+          "p_opponent: String = \"Opponent FC\"",
+          "p_home: bool = true",
+          "p_title: String = \"\"",
+          "p_desc: String = \"\""
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "get_screen": {
+        "line": 14,
+        "args": [],
+        "return": "PackedScene",
+        "is_static": false
+      },
+      "serialize": {
+        "line": 17,
+        "args": [],
+        "return": "Dictionary",
+        "is_static": false
+      },
+      "deserialize": {
+        "line": 23,
+        "args": [
+          "data: Dictionary"
+        ],
+        "return": "void",
+        "is_static": false
+      }
+    }
+  },
+  "TransferOfferEvent": {
+    "path": "_archive/chat_gen/scripts/events/TransferOfferEvent.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "player_name": {
+        "line": 4,
+        "type": "String",
+        "is_export": false,
+        "is_onready": false
+      },
+      "bidding_club": {
+        "line": 5,
+        "type": "String",
+        "is_export": false,
+        "is_onready": false
+      },
+      "offer_amount": {
+        "line": 6,
+        "type": "int",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "_init": {
+        "line": 8,
+        "args": [
+          "p_date: Dictionary = {}",
+          "p_player_name: String = \"Player\"",
+          "p_bidding_club: String = \"Club\"",
+          "p_amount: int = 5000000"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "serialize": {
+        "line": 16,
+        "args": [],
+        "return": "Dictionary",
+        "is_static": false
+      },
+      "deserialize": {
+        "line": 23,
+        "args": [
+          "data: Dictionary"
+        ],
+        "return": "void",
+        "is_static": false
+      }
+    }
+  },
+  "InboxButton": {
+    "path": "_archive/chat_gen/scripts/inbox/InboxButton.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "badge": {
+        "line": 4,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "_ready": {
+        "line": 6,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "set_unread_count": {
+        "line": 21,
+        "args": [
+          "count: int"
+        ],
+        "return": "void",
+        "is_static": false
+      }
+    }
+  },
+  "InboxUI": {
+    "path": "_archive/chat_gen/scripts/inbox/InboxUI.gd",
+    "line": 1,
+    "signals": {
+      "item_selected": {
+        "line": 4,
+        "args": [
+          "event: SimEvent"
+        ]
+      }
+    },
+    "enums": {},
+    "properties": {
+      "item_list": {
+        "line": 6,
+        "type": "ItemList",
+        "is_export": false,
+        "is_onready": false
+      },
+      "close_button": {
+        "line": 7,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": false
+      },
+      "messages": {
+        "line": 8,
+        "type": "Array[SimEvent]",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "_ready": {
+        "line": 10,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "refresh": {
+        "line": 42,
+        "args": [
+          "inbox_events: Array[SimEvent]"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_item_selected": {
+        "line": 59,
+        "args": [
+          "index: int"
+        ],
+        "return": "void",
+        "is_static": false
+      }
+    }
+  },
+  "Priority": {
+    "path": "_archive/chat_gen/scripts/sim/Priority.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "Type": {
+        "line": 4,
+        "values": [
+          "INFO",
+          "NOTABLE",
+          "URGENT",
+          "BLOCKING"
+        ]
+      }
+    },
+    "properties": {},
+    "methods": {}
+  },
+  "SimEvent": {
+    "path": "_archive/chat_gen/scripts/sim/SimEvent.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "date": {
+        "line": 4,
+        "type": "Dictionary",
+        "is_export": false,
+        "is_onready": false
+      },
+      "priority": {
+        "line": 5,
+        "type": "Priority.Type",
+        "is_export": false,
+        "is_onready": false
+      },
+      "title": {
+        "line": 6,
+        "type": "String",
+        "is_export": false,
+        "is_onready": false
+      },
+      "description": {
+        "line": 7,
+        "type": "String",
+        "is_export": false,
+        "is_onready": false
+      },
+      "id": {
+        "line": 8,
+        "type": "String",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "_init": {
+        "line": 10,
+        "args": [
+          "p_date: Dictionary = {}",
+          "p_priority: Priority.Type = Priority.Type.INFO",
+          "p_title: String = \"\"",
+          "p_description: String = \"\"",
+          "p_id: String = \"\""
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "should_block": {
+        "line": 17,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "get_screen": {
+        "line": 20,
+        "args": [],
+        "return": "PackedScene",
+        "is_static": false
+      },
+      "resolve": {
+        "line": 23,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "serialize": {
+        "line": 26,
+        "args": [],
+        "return": "Dictionary",
+        "is_static": false
+      },
+      "deserialize": {
+        "line": 36,
+        "args": [
+          "data: Dictionary"
+        ],
+        "return": "void",
+        "is_static": false
+      }
+    }
+  },
+  "SimState": {
+    "path": "_archive/chat_gen/scripts/sim/SimState.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {
+      "State": {
+        "line": 4,
+        "values": [
+          "IDLE",
+          "RUNNING",
+          "PAUSED_FOR_EVENT",
+          "ADVANCING_TO_DATE"
+        ]
+      }
+    },
+    "properties": {},
+    "methods": {}
+  },
+  "SimulationManager": {
+    "path": "_archive/chat_gen/scripts/sim/SimulationManager.gd",
+    "line": 1,
+    "signals": {
+      "day_processed": {
+        "line": 4,
+        "args": [
+          "date: Dictionary"
+        ]
+      },
+      "simulation_halted": {
+        "line": 5,
+        "args": [
+          "reason: String",
+          "event: SimEvent"
+        ]
+      },
+      "state_changed": {
+        "line": 6,
+        "args": [
+          "new_state: SimState.State"
+        ]
+      },
+      "inbox_updated": {
+        "line": 7,
+        "args": [
+          "inbox: Array[SimEvent]",
+          "unread_count: int"
+        ]
+      }
+    },
+    "enums": {},
+    "properties": {
+      "tick_interval": {
+        "line": 9,
+        "type": "float",
+        "is_export": true,
+        "is_onready": false
+      },
+      "speed_multiplier": {
+        "line": 10,
+        "type": "float",
+        "is_export": true,
+        "is_onready": false
+      },
+      "sim_state": {
+        "line": 12,
+        "type": "SimState.State",
+        "is_export": false,
+        "is_onready": false
+      },
+      "target_advance_date": {
+        "line": 13,
+        "type": "Dictionary",
+        "is_export": false,
+        "is_onready": false
+      },
+      "accumulator": {
+        "line": 14,
+        "type": "float",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_run_id": {
+        "line": 15,
+        "type": "int",
+        "is_export": false,
+        "is_onready": false
+      },
+      "current_date": {
+        "line": 17,
+        "type": "Dictionary",
+        "is_export": false,
+        "is_onready": false
+      },
+      "event_queue": {
+        "line": 23,
+        "type": "Array[SimEvent]",
+        "is_export": false,
+        "is_onready": false
+      },
+      "inbox": {
+        "line": 24,
+        "type": "Array[SimEvent]",
+        "is_export": false,
+        "is_onready": false
+      },
+      "unread_inbox_count": {
+        "line": 25,
+        "type": "int",
+        "is_export": false,
+        "is_onready": false
+      },
+      "DAYS_IN_MONTH": {
+        "line": 27,
+        "type": "Array[int]",
+        "is_const": true
+      }
+    },
+    "methods": {
+      "_process": {
+        "line": 29,
+        "args": [
+          "delta: float"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_step_day_pipeline": {
+        "line": 46,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_advance_date": {
+        "line": 68,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_process_scheduled_events": {
+        "line": 81,
+        "args": [],
+        "return": "SimEvent",
+        "is_static": false
+      },
+      "_process_inbox": {
+        "line": 98,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_is_leap_year": {
+        "line": 101,
+        "args": [
+          "year: int"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "_dates_equal": {
+        "line": 104,
+        "args": [
+          "a: Dictionary",
+          "b: Dictionary"
+        ],
+        "return": "bool",
+        "is_static": false
+      },
+      "start_simulation": {
+        "line": 109,
+        "args": [
+          "speed: float = 1.0"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "advance_to_date": {
+        "line": 115,
+        "args": [
+          "target: Dictionary",
+          "speed: float = 2.0"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "stop_simulation": {
+        "line": 122,
+        "args": [
+          "reason: String = \"manual\""
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "mark_inbox_read": {
+        "line": 128,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "queue_event": {
+        "line": 132,
+        "args": [
+          "event: SimEvent"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "clear_queue": {
+        "line": 135,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_set_state": {
+        "line": 138,
+        "args": [
+          "new_state: SimState.State"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "serialize": {
+        "line": 145,
+        "args": [],
+        "return": "Dictionary",
+        "is_static": false
+      },
+      "deserialize": {
+        "line": 163,
+        "args": [
+          "data: Dictionary"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_instantiate_event_from_dict": {
+        "line": 185,
+        "args": [
+          "dict: Dictionary"
+        ],
+        "return": "SimEvent",
+        "is_static": false
+      }
+    }
+  },
+  "DatePicker": {
+    "path": "_archive/chat_gen/scripts/ui/DatePicker.gd",
+    "line": 1,
+    "signals": {
+      "date_selected": {
+        "line": 4,
+        "args": [
+          "target_date: Dictionary"
+        ]
+      }
+    },
+    "enums": {},
+    "properties": {
+      "spin_day": {
+        "line": 6,
+        "type": "SpinBox",
+        "is_export": false,
+        "is_onready": false
+      },
+      "spin_month": {
+        "line": 7,
+        "type": "SpinBox",
+        "is_export": false,
+        "is_onready": false
+      },
+      "spin_year": {
+        "line": 8,
+        "type": "SpinBox",
+        "is_export": false,
+        "is_onready": false
+      },
+      "btn_confirm": {
+        "line": 9,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "_ready": {
+        "line": 11,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_create_spin": {
+        "line": 30,
+        "args": [
+          "p_min: int",
+          "p_max: int",
+          "p_val: int",
+          "p_prefix: String"
+        ],
+        "return": "SpinBox",
+        "is_static": false
+      },
+      "open": {
+        "line": 38,
+        "args": [
+          "initial_date: Dictionary"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_confirm": {
+        "line": 44,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      }
+    }
+  },
   "CareerManager": {
     "path": "autoloads/CareerManager.gd",
     "line": 1,
@@ -23,124 +1159,142 @@
         "is_const": true
       },
       "SEASON_START_MONTH": {
-        "line": 36,
-        "type": "int",
-        "is_const": true
-      },
-      "SEASON_START_DAY": {
-        "line": 37,
-        "type": "int",
-        "is_const": true
-      },
-      "FIRST_MATCHDAY_MONTH": {
         "line": 38,
         "type": "int",
         "is_const": true
       },
-      "FIRST_MATCHDAY_DAY": {
+      "SEASON_START_DAY": {
         "line": 39,
         "type": "int",
         "is_const": true
       },
+      "FIRST_MATCHDAY_MONTH": {
+        "line": 40,
+        "type": "int",
+        "is_const": true
+      },
+      "FIRST_MATCHDAY_DAY": {
+        "line": 41,
+        "type": "int",
+        "is_const": true
+      },
       "LAST_MATCHDAY_MONTH": {
-        "line": 44,
+        "line": 46,
         "type": "int",
         "is_const": true
       },
       "LAST_MATCHDAY_DAY": {
-        "line": 45,
-        "type": "int",
-        "is_const": true
-      },
-      "MIN_MATCHDAY_SPACING_DAYS": {
         "line": 47,
         "type": "int",
         "is_const": true
       },
-      "SEASON_END_MONTH": {
+      "MIN_MATCHDAY_SPACING_DAYS": {
         "line": 49,
         "type": "int",
         "is_const": true
       },
+      "SEASON_END_MONTH": {
+        "line": 51,
+        "type": "int",
+        "is_const": true
+      },
       "SEASON_END_DAY": {
-        "line": 50,
+        "line": 52,
         "type": "int",
         "is_const": true
       },
       "SUMMER_WINDOW_MONTHS": {
-        "line": 52,
+        "line": 54,
         "type": "Array[int]",
         "is_const": true
       },
       "WINTER_WINDOW_MONTH": {
-        "line": 53,
+        "line": 55,
         "type": "int",
         "is_const": true
       },
       "career": {
-        "line": 57,
+        "line": 59,
         "type": "CareerSaveData",
         "is_export": false,
         "is_onready": false
       },
       "_rng": {
-        "line": 66,
+        "line": 68,
         "type": "RandomNumberGenerator",
         "is_export": false,
         "is_onready": false
       },
       "_halt_reason": {
-        "line": 68,
+        "line": 70,
         "type": "HaltReason",
         "is_export": false,
         "is_onready": false
       },
       "_halt_message": {
-        "line": 69,
+        "line": 71,
         "type": "String",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_continue_running": {
+        "line": 72,
+        "type": "bool",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_continue_cancelled": {
+        "line": 73,
+        "type": "bool",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_target_ordinal": {
+        "line": 74,
+        "type": "int",
         "is_export": false,
         "is_onready": false
       }
     },
     "methods": {
       "_ready": {
-        "line": 72,
+        "line": 77,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "is_career_active": {
-        "line": 76,
+        "line": 81,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "user_team": {
-        "line": 80,
+        "line": 85,
         "args": [],
         "return": "TeamData",
         "is_static": false
       },
       "user_manager_data": {
-        "line": 86,
+        "line": 91,
         "args": [],
         "return": "ManagerData",
         "is_static": false
       },
       "halt_reason": {
-        "line": 92,
+        "line": 97,
         "args": [],
         "return": "HaltReason",
         "is_static": false
       },
       "halt_message": {
-        "line": 96,
+        "line": 101,
         "args": [],
         "return": "String",
         "is_static": false
       },
       "start_new_career": {
-        "line": 103,
+        "line": 108,
         "args": [
           "profile: ManagerCareerProfile",
           "team_index: int",
@@ -150,7 +1304,7 @@
         "is_static": false
       },
       "load_career": {
-        "line": 149,
+        "line": 154,
         "args": [
           "slot: int"
         ],
@@ -158,19 +1312,19 @@
         "is_static": false
       },
       "save_career": {
-        "line": 171,
+        "line": 176,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "close_career": {
-        "line": 180,
+        "line": 185,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_install_user_manager": {
-        "line": 187,
+        "line": 192,
         "args": [
           "club: TeamData",
           "profile: ManagerCareerProfile"
@@ -179,13 +1333,13 @@
         "is_static": false
       },
       "_default_start_year": {
-        "line": 196,
+        "line": 201,
         "args": [],
         "return": "int",
         "is_static": false
       },
       "_default_capacity": {
-        "line": 201,
+        "line": 206,
         "args": [
           "club: TeamData"
         ],
@@ -193,7 +1347,7 @@
         "is_static": false
       },
       "_starting_manager_wage": {
-        "line": 207,
+        "line": 212,
         "args": [
           "club: TeamData",
           "profile: ManagerCareerProfile"
@@ -202,19 +1356,27 @@
         "is_static": false
       },
       "_build_player_states": {
-        "line": 218,
+        "line": 223,
         "args": [],
         "return": "void",
         "is_static": false
       },
+      "_ensure_player_states_for_team": {
+        "line": 247,
+        "args": [
+          "team_index: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
       "_seed_initial_relationships": {
-        "line": 245,
+        "line": 274,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_share_language": {
-        "line": 278,
+        "line": 307,
         "args": [
           "a: PlayerData",
           "b: PlayerData"
@@ -223,19 +1385,19 @@
         "is_static": false
       },
       "_build_finances": {
-        "line": 285,
+        "line": 314,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_build_competitions": {
-        "line": 294,
+        "line": 323,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_build_divisions_competitions": {
-        "line": 401,
+        "line": 430,
         "args": [
           "first_matchday: CareerDate"
         ],
@@ -243,7 +1405,7 @@
         "is_static": false
       },
       "_build_flat_competitions": {
-        "line": 444,
+        "line": 473,
         "args": [
           "first_matchday: CareerDate",
           "total_teams: int"
@@ -252,7 +1414,7 @@
         "is_static": false
       },
       "_get_tier_team_indices": {
-        "line": 485,
+        "line": 514,
         "args": [
           "tier_num: int"
         ],
@@ -260,7 +1422,7 @@
         "is_static": false
       },
       "_schedule_league_competition": {
-        "line": 499,
+        "line": 528,
         "args": [
           "comp: CompetitionData",
           "first_matchday: CareerDate"
@@ -269,7 +1431,7 @@
         "is_static": false
       },
       "_matchday_spacing": {
-        "line": 537,
+        "line": 566,
         "args": [
           "team_count: int",
           "repeat_cycles: int = 1"
@@ -278,25 +1440,65 @@
         "is_static": false
       },
       "_tag_user_fixtures": {
-        "line": 557,
+        "line": 586,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "advance_day": {
-        "line": 567,
+        "line": 596,
         "args": [],
         "return": "HaltReason",
         "is_static": false
       },
       "continue_until_event": {
-        "line": 632,
+        "line": 661,
         "args": [],
         "return": "HaltReason",
         "is_static": false
       },
+      "set_target_date": {
+        "line": 719,
+        "args": [
+          "target: CareerDate"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "clear_target_date": {
+        "line": 726,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "cancel_continue": {
+        "line": 730,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "is_continue_running": {
+        "line": 734,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "get_continue_speed": {
+        "line": 738,
+        "args": [],
+        "return": "int",
+        "is_static": false
+      },
+      "set_continue_speed": {
+        "line": 742,
+        "args": [
+          "speed: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
       "_halt": {
-        "line": 647,
+        "line": 749,
         "args": [
           "reason: HaltReason",
           "message: String"
@@ -305,25 +1507,25 @@
         "is_static": false
       },
       "_update_season_phase": {
-        "line": 658,
+        "line": 760,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_update_transfer_window": {
-        "line": 674,
+        "line": 776,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_process_recovery_and_training": {
-        "line": 680,
+        "line": 782,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_has_pending_nightlife_incident": {
-        "line": 788,
+        "line": 890,
         "args": [
           "player_key: int"
         ],
@@ -331,7 +1533,7 @@
         "is_static": false
       },
       "_staff_quality": {
-        "line": 797,
+        "line": 899,
         "args": [
           "team: TeamData",
           "kind: String"
@@ -340,25 +1542,25 @@
         "is_static": false
       },
       "_process_scouting": {
-        "line": 815,
+        "line": 917,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_process_transfer_negotiations": {
-        "line": 845,
+        "line": 947,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_process_ai_transfer_activity": {
-        "line": 879,
+        "line": 992,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_push_bid_received": {
-        "line": 928,
+        "line": 1041,
         "args": [
           "buyer: TeamData",
           "target: PlayerData",
@@ -369,7 +1571,7 @@
         "is_static": false
       },
       "_transfer_between_ai": {
-        "line": 955,
+        "line": 1068,
         "args": [
           "buyer_index: int",
           "seller_index: int",
@@ -380,7 +1582,7 @@
         "is_static": false
       },
       "_move_player": {
-        "line": 985,
+        "line": 1098,
         "args": [
           "from_team: int",
           "from_squad_index: int",
@@ -390,7 +1592,7 @@
         "is_static": false
       },
       "_repair_lineup_after_removal": {
-        "line": 1017,
+        "line": 1130,
         "args": [
           "team: TeamData",
           "removed_index: int"
@@ -399,7 +1601,7 @@
         "is_static": false
       },
       "_rekey_states_after_removal": {
-        "line": 1036,
+        "line": 1149,
         "args": [
           "team_index: int",
           "removed_index: int"
@@ -408,7 +1610,7 @@
         "is_static": false
       },
       "_execute_transfer": {
-        "line": 1057,
+        "line": 1174,
         "args": [
           "offer: TransferOffer"
         ],
@@ -416,13 +1618,13 @@
         "is_static": false
       },
       "_process_loan_expiries": {
-        "line": 1114,
+        "line": 1231,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_return_loan_player": {
-        "line": 1127,
+        "line": 1244,
         "args": [
           "current_team_index: int",
           "squad_index: int",
@@ -433,19 +1635,19 @@
         "is_static": false
       },
       "_review_promises": {
-        "line": 1166,
+        "line": 1283,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_run_weekly_cycle": {
-        "line": 1211,
+        "line": 1328,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_run_weekly_morale_pass": {
-        "line": 1242,
+        "line": 1359,
         "args": [
           "club: TeamData"
         ],
@@ -453,7 +1655,7 @@
         "is_static": false
       },
       "_median_wage": {
-        "line": 1276,
+        "line": 1393,
         "args": [
           "club: TeamData"
         ],
@@ -461,7 +1663,7 @@
         "is_static": false
       },
       "_check_expiring_contracts": {
-        "line": 1286,
+        "line": 1403,
         "args": [
           "club: TeamData"
         ],
@@ -469,13 +1671,22 @@
         "is_static": false
       },
       "simulate_next_fixture": {
-        "line": 1304,
+        "line": 1421,
         "args": [],
         "return": "FixtureData",
         "is_static": false
       },
+      "apply_user_match_result": {
+        "line": 1432,
+        "args": [
+          "fixture: FixtureData",
+          "result: QuickSimEngine.QuickSimResult"
+        ],
+        "return": "void",
+        "is_static": false
+      },
       "_simulate_ai_fixture": {
-        "line": 1314,
+        "line": 1444,
         "args": [
           "fixture: FixtureData"
         ],
@@ -483,7 +1694,7 @@
         "is_static": false
       },
       "_simulate_fixture": {
-        "line": 1318,
+        "line": 1448,
         "args": [
           "fixture: FixtureData",
           "is_user: bool"
@@ -492,7 +1703,7 @@
         "is_static": false
       },
       "_apply_user_result": {
-        "line": 1523,
+        "line": 1655,
         "args": [
           "fixture: FixtureData"
         ],
@@ -500,7 +1711,7 @@
         "is_static": false
       },
       "_competition_of": {
-        "line": 1581,
+        "line": 1713,
         "args": [
           "fixture: FixtureData"
         ],
@@ -508,61 +1719,61 @@
         "is_static": false
       },
       "_advance_cup_rounds": {
-        "line": 1589,
+        "line": 1721,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_get_user_division_dict": {
-        "line": 1607,
+        "line": 1739,
         "args": [],
         "return": "Dictionary",
         "is_static": false
       },
       "_check_season_rollover": {
-        "line": 1622,
+        "line": 1754,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "_season_end_year": {
-        "line": 1642,
+        "line": 1774,
         "args": [],
         "return": "int",
         "is_static": false
       },
       "_run_season_end": {
-        "line": 1646,
+        "line": 1778,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_apply_promotion_relegation": {
-        "line": 1704,
+        "line": 1836,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_start_new_season": {
-        "line": 1795,
+        "line": 1927,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_run_youth_intake": {
-        "line": 1839,
+        "line": 1971,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_execute_sacking": {
-        "line": 1872,
+        "line": 2004,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_push_inbox": {
-        "line": 1897,
+        "line": 2029,
         "args": [
           "item: InboxItem"
         ],
@@ -570,13 +1781,13 @@
         "is_static": false
       },
       "_emit_inbox_changed": {
-        "line": 1906,
+        "line": 2038,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "resolve_inbox_item": {
-        "line": 1916,
+        "line": 2048,
         "args": [
           "item: InboxItem",
           "option_index: int"
@@ -585,7 +1796,7 @@
         "is_static": false
       },
       "_handle_structural_inbox_action": {
-        "line": 1928,
+        "line": 2060,
         "args": [
           "item: InboxItem",
           "option_index: int"
@@ -594,7 +1805,7 @@
         "is_static": false
       },
       "_release_player": {
-        "line": 1950,
+        "line": 2082,
         "args": [
           "state: PlayerCareerState"
         ],
@@ -602,13 +1813,21 @@
         "is_static": false
       },
       "_rehydrate_inbox": {
-        "line": 1973,
+        "line": 2105,
         "args": [],
         "return": "void",
         "is_static": false
       },
+      "mark_inbox_read": {
+        "line": 2201,
+        "args": [
+          "item: InboxItem"
+        ],
+        "return": "void",
+        "is_static": false
+      },
       "toggle_shortlist": {
-        "line": 2062,
+        "line": 2211,
         "args": [
           "player_key: int"
         ],
@@ -616,7 +1835,7 @@
         "is_static": false
       },
       "scout_player": {
-        "line": 2074,
+        "line": 2223,
         "args": [
           "team_index: int",
           "squad_index: int"
@@ -625,7 +1844,7 @@
         "is_static": false
       },
       "submit_transfer_bid": {
-        "line": 2106,
+        "line": 2255,
         "args": [
           "team_index: int",
           "squad_index: int",
@@ -635,7 +1854,7 @@
         "is_static": false
       },
       "raise_transfer_bid": {
-        "line": 2139,
+        "line": 2288,
         "args": [
           "offer: TransferOffer",
           "new_fee: int"
@@ -644,7 +1863,7 @@
         "is_static": false
       },
       "offer_personal_terms": {
-        "line": 2158,
+        "line": 2307,
         "args": [
           "offer: TransferOffer",
           "wage: int = -1"
@@ -653,7 +1872,7 @@
         "is_static": false
       },
       "withdraw_offer": {
-        "line": 2193,
+        "line": 2342,
         "args": [
           "offer: TransferOffer"
         ],
@@ -661,7 +1880,7 @@
         "is_static": false
       },
       "file_board_request": {
-        "line": 2203,
+        "line": 2352,
         "args": [
           "kind: BoardState.RequestKind"
         ],
@@ -669,7 +1888,7 @@
         "is_static": false
       },
       "_request_amount": {
-        "line": 2240,
+        "line": 2389,
         "args": [
           "kind: BoardState.RequestKind",
           "finances: ClubFinances"
@@ -678,13 +1897,13 @@
         "is_static": false
       },
       "_process_infrastructure_construction": {
-        "line": 2376,
+        "line": 2525,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_fixture_label": {
-        "line": 2442,
+        "line": 2591,
         "args": [
           "fixture: FixtureData"
         ],
@@ -692,7 +1911,7 @@
         "is_static": false
       },
       "_ordinal": {
-        "line": 2451,
+        "line": 2600,
         "args": [
           "n: int"
         ],
@@ -700,13 +1919,13 @@
         "is_static": false
       },
       "_process_takeover_tick": {
-        "line": 2468,
+        "line": 2617,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "is_international_break": {
-        "line": 2522,
+        "line": 2671,
         "args": [
           "date: CareerDate"
         ],
@@ -714,19 +1933,19 @@
         "is_static": false
       },
       "_process_international_duty": {
-        "line": 2538,
+        "line": 2687,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_simulate_u23_fixtures": {
-        "line": 2584,
+        "line": 2733,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "move_player_to_u23": {
-        "line": 2599,
+        "line": 2748,
         "args": [
           "player_key: int"
         ],
@@ -734,7 +1953,7 @@
         "is_static": false
       },
       "move_player_to_senior": {
-        "line": 2605,
+        "line": 2754,
         "args": [
           "player_key: int"
         ],
@@ -742,7 +1961,7 @@
         "is_static": false
       },
       "submit_loan_bid": {
-        "line": 2613,
+        "line": 2762,
         "args": [
           "player_key: int",
           "wage_share: float"
@@ -751,7 +1970,7 @@
         "is_static": false
       },
       "sign_free_agent": {
-        "line": 2631,
+        "line": 2780,
         "args": [
           "player: PlayerData",
           "contract: ContractData"
@@ -760,7 +1979,7 @@
         "is_static": false
       },
       "hire_staff_member": {
-        "line": 2668,
+        "line": 2817,
         "args": [
           "staff: StaffData",
           "weekly_salary: int",
@@ -770,7 +1989,7 @@
         "is_static": false
       },
       "sack_staff_member": {
-        "line": 2675,
+        "line": 2824,
         "args": [
           "staff: StaffData"
         ],
@@ -778,7 +1997,7 @@
         "is_static": false
       },
       "assign_scout_to_region": {
-        "line": 2681,
+        "line": 2830,
         "args": [
           "scout_name: String",
           "region: String"
@@ -787,7 +2006,7 @@
         "is_static": false
       },
       "get_scout_region": {
-        "line": 2685,
+        "line": 2834,
         "args": [
           "scout_name: String"
         ],
@@ -795,7 +2014,7 @@
         "is_static": false
       },
       "get_tactical_preset": {
-        "line": 2691,
+        "line": 2840,
         "args": [
           "slot_index: int"
         ],
@@ -803,7 +2022,7 @@
         "is_static": false
       },
       "check_and_dispatch_incident_press_conferences": {
-        "line": 2718,
+        "line": 2867,
         "args": [
           "is_post_match: bool",
           "opponent_name: String = \"\""
@@ -887,7 +2106,7 @@
         "is_static": false
       },
       "get_team_by_name": {
-        "line": 48,
+        "line": 52,
         "args": [
           "team_name: String"
         ],
@@ -895,7 +2114,7 @@
         "is_static": false
       },
       "get_match_team": {
-        "line": 59,
+        "line": 68,
         "args": [
           "match_side: int"
         ],
@@ -903,7 +2122,7 @@
         "is_static": false
       },
       "get_player": {
-        "line": 69,
+        "line": 78,
         "args": [
           "team_index: int",
           "squad_index: int"
@@ -912,7 +2131,7 @@
         "is_static": false
       },
       "_make_fallback_team": {
-        "line": 85,
+        "line": 94,
         "args": [
           "index: int"
         ],
@@ -920,7 +2139,7 @@
         "is_static": false
       },
       "_make_fallback_player": {
-        "line": 109,
+        "line": 118,
         "args": [
           "index: int",
           "role: String = \"CM\""
@@ -929,7 +2148,7 @@
         "is_static": false
       },
       "load_league_from": {
-        "line": 144,
+        "line": 153,
         "args": [
           "path: String"
         ],
@@ -937,25 +2156,25 @@
         "is_static": false
       },
       "load_world_database": {
-        "line": 152,
+        "line": 161,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "load_default_database": {
-        "line": 159,
+        "line": 168,
         "args": [],
         "return": "bool",
         "is_static": false
       },
       "_load_league": {
-        "line": 165,
+        "line": 174,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_parse_json_league": {
-        "line": 180,
+        "line": 189,
         "args": [
           "path: String"
         ],
@@ -963,7 +2182,7 @@
         "is_static": false
       },
       "load_division_shard": {
-        "line": 257,
+        "line": 266,
         "args": [
           "descriptor: Dictionary"
         ],
@@ -971,15 +2190,32 @@
         "is_static": false
       },
       "_get_division_start_team_index": {
-        "line": 307,
+        "line": 316,
         "args": [
           "descriptor: Dictionary"
         ],
         "return": "int",
         "is_static": false
       },
+      "_ensure_division_shard_loaded_for_team": {
+        "line": 325,
+        "args": [
+          "team_index: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_populate_squad_if_needed": {
+        "line": 339,
+        "args": [
+          "team: TeamData",
+          "_index: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
       "mark_shard_dirty": {
-        "line": 316,
+        "line": 358,
         "args": [
           "shard_path: String"
         ],
@@ -987,7 +2223,7 @@
         "is_static": false
       },
       "_team_from_dict": {
-        "line": 320,
+        "line": 362,
         "args": [
           "team_dict: Dictionary"
         ],
@@ -995,7 +2231,7 @@
         "is_static": false
       },
       "_generate_contrasting_gk_color": {
-        "line": 422,
+        "line": 464,
         "args": [
           "team_col: Color"
         ],
@@ -1003,7 +2239,7 @@
         "is_static": false
       },
       "_player_from_dict": {
-        "line": 433,
+        "line": 475,
         "args": [
           "player_dict: Dictionary"
         ],
@@ -1011,7 +2247,7 @@
         "is_static": false
       },
       "_player_to_dict": {
-        "line": 511,
+        "line": 553,
         "args": [
           "p: PlayerData"
         ],
@@ -1019,7 +2255,7 @@
         "is_static": false
       },
       "_team_to_dict": {
-        "line": 561,
+        "line": 603,
         "args": [
           "t: TeamData"
         ],
@@ -1027,7 +2263,7 @@
         "is_static": false
       },
       "save_league": {
-        "line": 589,
+        "line": 631,
         "args": [
           "path: String = CUSTOM_LEAGUE_PATH"
         ],
@@ -1035,7 +2271,7 @@
         "is_static": false
       },
       "_save_single_shard": {
-        "line": 632,
+        "line": 674,
         "args": [
           "div_desc: Dictionary",
           "full_path: String"
@@ -1044,19 +2280,19 @@
         "is_static": false
       },
       "_build_default_league": {
-        "line": 658,
+        "line": 700,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_build_nordvik": {
-        "line": 667,
+        "line": 709,
         "args": [],
         "return": "TeamData",
         "is_static": false
       },
       "_build_solano": {
-        "line": 701,
+        "line": 743,
         "args": [],
         "return": "TeamData",
         "is_static": false
@@ -1099,43 +2335,59 @@
           "reason: String"
         ]
       },
+      "career_continue_started": {
+        "line": 49,
+        "args": []
+      },
+      "career_continue_stopped": {
+        "line": 51,
+        "args": [
+          "reason: String"
+        ]
+      },
+      "career_speed_changed": {
+        "line": 53,
+        "args": [
+          "speed: int"
+        ]
+      },
       "career_inbox_changed": {
-        "line": 50,
+        "line": 56,
         "args": [
           "unread_count: int",
           "pending_decisions: int"
         ]
       },
       "career_match_ready": {
-        "line": 52,
+        "line": 58,
         "args": [
           "home_team_index: int",
           "away_team_index: int"
         ]
       },
       "career_result_recorded": {
-        "line": 54,
+        "line": 60,
         "args": [
           "home_score: int",
           "away_score: int"
         ]
       },
       "career_season_ended": {
-        "line": 56,
+        "line": 62,
         "args": [
           "season_year: int",
           "final_position: int"
         ]
       },
       "career_manager_sacked": {
-        "line": 58,
+        "line": 64,
         "args": [
           "club_name: String",
           "reason: String"
         ]
       },
       "world_event_logged": {
-        "line": 61,
+        "line": 67,
         "args": [
           "event: WorldEvent"
         ]
@@ -2408,6 +3660,20 @@
       }
     }
   },
+  "MusicLibrary": {
+    "path": "globals/MusicLibrary.gd",
+    "line": 1,
+    "signals": {},
+    "enums": {},
+    "properties": {
+      "TRACKS": {
+        "line": 7,
+        "type": "Array[Dictionary]",
+        "is_const": true
+      }
+    },
+    "methods": {}
+  },
   "CareerProgressionEngine": {
     "path": "shared/CareerProgressionEngine.gd",
     "line": 1,
@@ -3524,7 +4790,7 @@
     },
     "methods": {
       "calculate_team_units": {
-        "line": 660,
+        "line": 674,
         "args": [
           "team: TeamData",
           "lineup_indices: Array[int] = []"
@@ -3533,7 +4799,7 @@
         "is_static": true
       },
       "get_star_rating_value": {
-        "line": 673,
+        "line": 687,
         "args": [
           "overall: float"
         ],
@@ -3541,7 +4807,7 @@
         "is_static": true
       },
       "get_star_rating_string": {
-        "line": 693,
+        "line": 707,
         "args": [
           "overall: float"
         ],
@@ -3549,7 +4815,7 @@
         "is_static": true
       },
       "_calculate_team_units": {
-        "line": 715,
+        "line": 729,
         "args": [
           "team: TeamData",
           "lineup_indices: Array[int]"
@@ -3557,8 +4823,16 @@
         "return": "Dictionary",
         "is_static": true
       },
+      "_ensure_minimum_squad": {
+        "line": 775,
+        "args": [
+          "team: TeamData"
+        ],
+        "return": "void",
+        "is_static": true
+      },
       "_make_default_lineup": {
-        "line": 761,
+        "line": 793,
         "args": [
           "squad_size: int"
         ],
@@ -3566,7 +4840,7 @@
         "is_static": true
       },
       "_poisson_pmf": {
-        "line": 768,
+        "line": 804,
         "args": [
           "lambda_val: float",
           "k: int"
@@ -3575,7 +4849,7 @@
         "is_static": true
       },
       "_dixon_coles_tau": {
-        "line": 777,
+        "line": 813,
         "args": [
           "x: int",
           "y: int",
@@ -3587,7 +4861,7 @@
         "is_static": true
       },
       "_sample_scoreline": {
-        "line": 789,
+        "line": 825,
         "args": [
           "lambda_h: float",
           "lambda_a: float"
@@ -3596,7 +4870,7 @@
         "is_static": true
       },
       "_sample_poisson": {
-        "line": 795,
+        "line": 831,
         "args": [
           "lambda_val: float"
         ],
@@ -3604,7 +4878,7 @@
         "is_static": true
       },
       "_pick_scorer_slot": {
-        "line": 945,
+        "line": 986,
         "args": [
           "team: TeamData",
           "lineup: Array[int]",
@@ -3614,7 +4888,7 @@
         "is_static": true
       },
       "_pick_assist_slot": {
-        "line": 969,
+        "line": 1015,
         "args": [
           "scorer_slot: int",
           "lineup: Array[int]",
@@ -9207,26 +10481,44 @@
         "return": "bool",
         "is_static": false
       },
-      "state_name": {
+      "is_loan": {
         "line": 155,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "is_permanent": {
+        "line": 159,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "is_free_agent": {
+        "line": 163,
+        "args": [],
+        "return": "bool",
+        "is_static": false
+      },
+      "state_name": {
+        "line": 167,
         "args": [],
         "return": "String",
         "is_static": false
       },
       "kind_name": {
-        "line": 159,
+        "line": 171,
         "args": [],
         "return": "String",
         "is_static": false
       },
       "total_outlay": {
-        "line": 165,
+        "line": 177,
         "args": [],
         "return": "int",
         "is_static": false
       },
       "first_season_cost": {
-        "line": 171,
+        "line": 183,
         "args": [],
         "return": "int",
         "is_static": false
@@ -9465,11 +10757,73 @@
         "line": 32,
         "type": "float",
         "is_const": true
+      },
+      "HONEYMOON_DAYS_THRESHOLD": {
+        "line": 35,
+        "type": "int",
+        "is_const": true
+      },
+      "HONEYMOON_MIN_MATCHES": {
+        "line": 36,
+        "type": "int",
+        "is_const": true
+      },
+      "INCIDENT_COOLDOWN_DAYS": {
+        "line": 39,
+        "type": "int",
+        "is_const": true
+      },
+      "CAPTAIN_CONSULTATION_COOLDOWN_DAYS": {
+        "line": 42,
+        "type": "int",
+        "is_const": true
       }
     },
     "methods": {
+      "is_in_honeymoon_period": {
+        "line": 45,
+        "args": [
+          "career: CareerSaveData"
+        ],
+        "return": "bool",
+        "is_static": true
+      },
+      "has_recent_incident": {
+        "line": 60,
+        "args": [
+          "career: CareerSaveData",
+          "days: int = INCIDENT_COOLDOWN_DAYS"
+        ],
+        "return": "bool",
+        "is_static": true
+      },
+      "has_unresolved_incident_inbox_item": {
+        "line": 83,
+        "args": [
+          "career: CareerSaveData"
+        ],
+        "return": "bool",
+        "is_static": true
+      },
+      "_get_recent_performance": {
+        "line": 101,
+        "args": [
+          "career: CareerSaveData"
+        ],
+        "return": "Dictionary",
+        "is_static": true
+      },
+      "calculate_squad_volatility": {
+        "line": 158,
+        "args": [
+          "career: CareerSaveData",
+          "team: TeamData"
+        ],
+        "return": "float",
+        "is_static": true
+      },
       "roll_for_day": {
-        "line": 35,
+        "line": 210,
         "args": [
           "career: CareerSaveData",
           "rng: RandomNumberGenerator"
@@ -9477,8 +10831,90 @@
         "return": "void",
         "is_static": true
       },
+      "_evaluate_deliberate_incident": {
+        "line": 253,
+        "args": [
+          "career: CareerSaveData",
+          "team: TeamData",
+          "rng: RandomNumberGenerator"
+        ],
+        "return": "void",
+        "is_static": true
+      },
+      "_find_media_controversy_candidate": {
+        "line": 304,
+        "args": [
+          "team: TeamData",
+          "career: CareerSaveData"
+        ],
+        "return": "int",
+        "is_static": true
+      },
+      "_find_confrontation_pair": {
+        "line": 338,
+        "args": [
+          "team: TeamData",
+          "career: CareerSaveData",
+          "rng: RandomNumberGenerator"
+        ],
+        "return": "Array[int]",
+        "is_static": true
+      },
+      "_find_training_incident_pair": {
+        "line": 375,
+        "args": [
+          "team: TeamData",
+          "_career: CareerSaveData",
+          "rng: RandomNumberGenerator"
+        ],
+        "return": "Array[int]",
+        "is_static": true
+      },
+      "_find_nightlife_candidate": {
+        "line": 391,
+        "args": [
+          "team: TeamData",
+          "rng: RandomNumberGenerator"
+        ],
+        "return": "int",
+        "is_static": true
+      },
+      "_check_honeymoon_captain_welcome": {
+        "line": 404,
+        "args": [
+          "career: CareerSaveData",
+          "team: TeamData"
+        ],
+        "return": "void",
+        "is_static": true
+      },
+      "_check_captain_sounding_board_due": {
+        "line": 422,
+        "args": [
+          "career: CareerSaveData",
+          "team: TeamData"
+        ],
+        "return": "bool",
+        "is_static": true
+      },
+      "_has_past_captain_consultation": {
+        "line": 446,
+        "args": [
+          "career: CareerSaveData"
+        ],
+        "return": "bool",
+        "is_static": true
+      },
+      "_find_captain_index": {
+        "line": 455,
+        "args": [
+          "team: TeamData"
+        ],
+        "return": "int",
+        "is_static": true
+      },
       "_trait_weight": {
-        "line": 64,
+        "line": 469,
         "args": [
           "data: PlayerData",
           "state: PlayerCareerState"
@@ -9487,7 +10923,7 @@
         "is_static": true
       },
       "_pick_teammate": {
-        "line": 231,
+        "line": 662,
         "args": [
           "team: TeamData",
           "exclude_idx: int",
@@ -9497,7 +10933,7 @@
         "is_static": true
       },
       "_has_pending_item_with_tag": {
-        "line": 243,
+        "line": 674,
         "args": [
           "career: CareerSaveData",
           "player_key: int",
@@ -9506,8 +10942,17 @@
         "return": "bool",
         "is_static": true
       },
+      "_push_inbox_item": {
+        "line": 683,
+        "args": [
+          "career: CareerSaveData",
+          "item: InboxItem"
+        ],
+        "return": "void",
+        "is_static": true
+      },
       "check_mutiny_threshold": {
-        "line": 255,
+        "line": 697,
         "args": [
           "team: TeamData",
           "career: CareerSaveData"
@@ -9516,7 +10961,7 @@
         "is_static": true
       },
       "get_mean_squad_morale": {
-        "line": 267,
+        "line": 709,
         "args": [
           "team: TeamData"
         ],
@@ -9524,7 +10969,7 @@
         "is_static": true
       },
       "get_mean_leader_trust": {
-        "line": 276,
+        "line": 718,
         "args": [
           "team: TeamData",
           "career: CareerSaveData"
@@ -9533,7 +10978,7 @@
         "is_static": true
       },
       "get_squad_leaders": {
-        "line": 314,
+        "line": 756,
         "args": [
           "team: TeamData"
         ],
@@ -9541,7 +10986,7 @@
         "is_static": true
       },
       "_has_pending_mutiny": {
-        "line": 329,
+        "line": 771,
         "args": [
           "career: CareerSaveData"
         ],
@@ -9653,7 +11098,7 @@
         "is_static": false
       },
       "_assert_true": {
-        "line": 42,
+        "line": 44,
         "args": [
           "cond: bool",
           "msg: String"
@@ -9662,87 +11107,155 @@
         "is_static": false
       },
       "_test_p3_no_legacy_references": {
-        "line": 51,
+        "line": 53,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_p1_cup_byes": {
-        "line": 56,
+        "line": 58,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_p1_synthetic_leagues": {
-        "line": 90,
+        "line": 92,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_p1_matchday_spacing_and_capping": {
-        "line": 137,
+        "line": 139,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_p1_promotion_relegation_multitier": {
-        "line": 151,
+        "line": 153,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_p2_sharded_league_loading": {
-        "line": 195,
+        "line": 197,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_p4_quick_match_isolation": {
-        "line": 245,
+        "line": 247,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_world_database_and_continental": {
-        "line": 261,
+        "line": 263,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_relationship_batching": {
-        "line": 326,
+        "line": 328,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_player_manager_relationships_and_sounding_board": {
-        "line": 380,
+        "line": 382,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_mutiny_and_crisis_escalation": {
-        "line": 443,
+        "line": 445,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_squad_cliques_and_faction_dynamics": {
-        "line": 540,
+        "line": 542,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_incident_press_conference_pipeline": {
-        "line": 717,
+        "line": 719,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_test_stadium_expansion_and_infrastructure": {
-        "line": 815,
+        "line": 817,
         "args": [],
         "return": "void",
+        "is_static": false
+      },
+      "_test_transfer_offers_and_inbox_signals": {
+        "line": 929,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_test_grounded_controversy_system": {
+        "line": 955,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      }
+    }
+  },
+  "Jukebox": {
+    "path": "ui/Jukebox.gd",
+    "line": 1,
+    "signals": {
+      "playlist_changed": {
+        "line": 12,
+        "args": [
+          "active_playlist: Array[AudioStream]"
+        ]
+      }
+    },
+    "enums": {},
+    "properties": {
+      "_active_playlist": {
+        "line": 14,
+        "type": "Array[AudioStream]",
+        "is_export": false,
+        "is_onready": false
+      }
+    },
+    "methods": {
+      "_ready": {
+        "line": 17,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_populate_tracks": {
+        "line": 22,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_track_toggled": {
+        "line": 36,
+        "args": [
+          "button_pressed: bool",
+          "stream: AudioStream"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_log_active_playlist": {
+        "line": 52,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "get_active_playlist": {
+        "line": 63,
+        "args": [],
+        "return": "Array[AudioStream]",
         "is_static": false
       }
     }
@@ -9786,154 +11299,196 @@
         "is_export": false,
         "is_onready": true
       },
-      "btn_options": {
+      "btn_jukebox": {
         "line": 27,
         "type": "Button",
         "is_export": false,
         "is_onready": true
       },
-      "btn_quit": {
+      "btn_options": {
         "line": 28,
         "type": "Button",
         "is_export": false,
         "is_onready": true
       },
+      "btn_quit": {
+        "line": 29,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": true
+      },
       "options_menu": {
-        "line": 30,
+        "line": 31,
         "type": "Control",
         "is_export": false,
         "is_onready": true
       },
       "menu_music": {
-        "line": 31,
+        "line": 32,
         "type": "AudioStreamPlayer",
         "is_export": false,
         "is_onready": true
       },
       "quit_dialog": {
-        "line": 33,
+        "line": 34,
         "type": "ConfirmationDialog",
         "is_export": false,
         "is_onready": true
       },
-      "_last_focused_button": {
+      "jukebox_dialog": {
         "line": 35,
+        "type": "AcceptDialog",
+        "is_export": false,
+        "is_onready": true
+      },
+      "jukebox": {
+        "line": 36,
+        "type": "Jukebox",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_last_focused_button": {
+        "line": 38,
         "type": "Button",
         "is_export": false,
         "is_onready": false
       },
       "_quick_match_overlay": {
-        "line": 36,
+        "line": 39,
         "type": "Control",
         "is_export": false,
         "is_onready": false
       },
       "_qm_division_opt": {
-        "line": 37,
+        "line": 40,
         "type": "OptionButton",
         "is_export": false,
         "is_onready": false
       },
       "_qm_home_opt": {
-        "line": 38,
+        "line": 41,
         "type": "OptionButton",
         "is_export": false,
         "is_onready": false
       },
       "_qm_away_opt": {
-        "line": 39,
+        "line": 42,
         "type": "OptionButton",
         "is_export": false,
         "is_onready": false
       },
       "_qm_result_label": {
-        "line": 40,
+        "line": 43,
         "type": "Label",
         "is_export": false,
         "is_onready": false
       },
       "_qm_events_label": {
-        "line": 41,
+        "line": 44,
         "type": "Label",
         "is_export": false,
         "is_onready": false
       },
       "_qm_stats_label": {
-        "line": 42,
+        "line": 45,
         "type": "Label",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_music_playlist": {
+        "line": 46,
+        "type": "Array[AudioStream]",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_current_track_index": {
+        "line": 47,
+        "type": "int",
         "is_export": false,
         "is_onready": false
       }
     },
     "methods": {
       "_ready": {
-        "line": 45,
+        "line": 50,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_manager_pressed": {
-        "line": 63,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_on_options_pressed": {
-        "line": 70,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_on_quit_pressed": {
         "line": 76,
         "args": [],
         "return": "void",
         "is_static": false
       },
+      "_on_jukebox_pressed": {
+        "line": 83,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_jukebox_visibility_changed": {
+        "line": 89,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_options_pressed": {
+        "line": 94,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_quit_pressed": {
+        "line": 100,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
       "_on_quit_confirmed": {
-        "line": 81,
+        "line": 105,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_quit_visibility_changed": {
-        "line": 85,
+        "line": 109,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_return_to_main_menu": {
-        "line": 90,
+        "line": 114,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_style_menu_buttons": {
-        "line": 102,
+        "line": 126,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_quick_match_pressed": {
-        "line": 118,
+        "line": 144,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_build_quick_match_overlay": {
-        "line": 125,
+        "line": 151,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_populate_quick_match_teams": {
-        "line": 220,
+        "line": 246,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_qm_division_selected": {
-        "line": 233,
+        "line": 259,
         "args": [
           "idx: int"
         ],
@@ -9941,31 +11496,51 @@
         "is_static": false
       },
       "_refresh_team_options": {
-        "line": 239,
+        "line": 265,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_qm_simulate_pressed": {
-        "line": 269,
+        "line": 295,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_qm_back_pressed": {
-        "line": 308,
+        "line": 334,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_start_menu_music": {
-        "line": 320,
+        "line": 346,
         "args": [],
         "return": "void",
         "is_static": false
       },
+      "_play_current_track": {
+        "line": 355,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_menu_music_finished": {
+        "line": 381,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_jukebox_playlist_changed": {
+        "line": 388,
+        "args": [
+          "active_playlist: Array[AudioStream]"
+        ],
+        "return": "void",
+        "is_static": false
+      },
       "_make_stylebox": {
-        "line": 327,
+        "line": 412,
         "args": [
           "bg_color: Color",
           "left_border: int"
@@ -10561,198 +12136,384 @@
     "line": 1,
     "signals": {
       "match_completed": {
-        "line": 20,
+        "line": 22,
         "args": [
           "result: QuickSimEngine.QuickSimResult"
         ]
       },
       "modal_closed": {
-        "line": 21,
+        "line": 23,
         "args": []
       }
     },
     "enums": {},
     "properties": {
       "MatchStatsScene": {
-        "line": 23,
+        "line": 25,
         "type": "PackedScene",
         "is_const": true
       },
       "ACCENT_COLOR": {
-        "line": 24,
+        "line": 26,
         "type": "Color",
         "is_const": true
       },
       "_home_team": {
-        "line": 26,
+        "line": 28,
         "type": "TeamData",
         "is_export": false,
         "is_onready": false
       },
       "_away_team": {
-        "line": 27,
+        "line": 29,
         "type": "TeamData",
         "is_export": false,
         "is_onready": false
       },
       "_home_manager": {
-        "line": 28,
+        "line": 30,
         "type": "ManagerData",
         "is_export": false,
         "is_onready": false
       },
       "_away_manager": {
-        "line": 29,
+        "line": 31,
         "type": "ManagerData",
         "is_export": false,
         "is_onready": false
       },
       "_referee": {
-        "line": 30,
+        "line": 32,
         "type": "RefereeData",
         "is_export": false,
         "is_onready": false
       },
       "_home_lineup": {
-        "line": 31,
+        "line": 33,
         "type": "Array[int]",
         "is_export": false,
         "is_onready": false
       },
       "_away_lineup": {
-        "line": 32,
+        "line": 34,
         "type": "Array[int]",
         "is_export": false,
         "is_onready": false
       },
       "_is_neutral": {
-        "line": 33,
+        "line": 35,
         "type": "bool",
         "is_export": false,
         "is_onready": false
       },
       "_probabilities": {
-        "line": 35,
+        "line": 37,
         "type": "QuickSimEngine.MatchProbabilities",
         "is_export": false,
         "is_onready": false
       },
       "_sim_result": {
-        "line": 36,
+        "line": 38,
         "type": "QuickSimEngine.QuickSimResult",
         "is_export": false,
         "is_onready": false
       },
-      "_pre_sim_box": {
-        "line": 38,
-        "type": "VBoxContainer",
-        "is_export": false,
-        "is_onready": true
-      },
-      "_post_sim_box": {
-        "line": 39,
-        "type": "VBoxContainer",
-        "is_export": false,
-        "is_onready": true
-      },
-      "_match_title_label": {
+      "_in_match": {
         "line": 41,
-        "type": "Label",
+        "type": "bool",
         "is_export": false,
-        "is_onready": true
+        "is_onready": false
       },
-      "_home_win_prob_label": {
+      "_is_paused": {
+        "line": 42,
+        "type": "bool",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_speed_mult": {
+        "line": 43,
+        "type": "float",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_tick_timer": {
         "line": 44,
-        "type": "Label",
+        "type": "float",
         "is_export": false,
-        "is_onready": true
+        "is_onready": false
       },
-      "_draw_prob_label": {
+      "_current_minute": {
         "line": 45,
-        "type": "Label",
+        "type": "int",
         "is_export": false,
-        "is_onready": true
+        "is_onready": false
       },
-      "_away_win_prob_label": {
+      "_live_home_score": {
         "line": 46,
-        "type": "Label",
+        "type": "int",
         "is_export": false,
-        "is_onready": true
+        "is_onready": false
       },
-      "_xg_label": {
+      "_live_away_score": {
         "line": 47,
-        "type": "Label",
+        "type": "int",
         "is_export": false,
-        "is_onready": true
+        "is_onready": false
       },
-      "_cs_label": {
+      "_event_index": {
         "line": 48,
-        "type": "Label",
+        "type": "int",
         "is_export": false,
-        "is_onready": true
+        "is_onready": false
       },
-      "_over_btts_label": {
+      "_mentality_choice": {
         "line": 49,
-        "type": "Label",
+        "type": "int",
         "is_export": false,
-        "is_onready": true
+        "is_onready": false
       },
-      "_scorelines_vbox": {
-        "line": 50,
-        "type": "VBoxContainer",
-        "is_export": false,
-        "is_onready": true
-      },
-      "_units_vbox": {
+      "_pre_sim_box": {
         "line": 51,
         "type": "VBoxContainer",
         "is_export": false,
         "is_onready": true
       },
-      "_insights_vbox": {
+      "_match_box": {
         "line": 52,
         "type": "VBoxContainer",
         "is_export": false,
         "is_onready": true
       },
-      "_btn_simulate": {
-        "line": 54,
-        "type": "Button",
+      "_post_sim_box": {
+        "line": 53,
+        "type": "VBoxContainer",
         "is_export": false,
         "is_onready": true
       },
-      "_btn_cancel": {
+      "_match_title_label": {
         "line": 55,
-        "type": "Button",
+        "type": "Label",
         "is_export": false,
         "is_onready": true
       },
-      "_final_score_label": {
+      "_press_question_label": {
         "line": 58,
         "type": "Label",
         "is_export": false,
         "is_onready": true
       },
-      "_result_headline_label": {
+      "_press_btn_1": {
         "line": 59,
-        "type": "Label",
+        "type": "Button",
         "is_export": false,
         "is_onready": true
       },
-      "_events_list": {
+      "_press_btn_2": {
         "line": 60,
-        "type": "VBoxContainer",
+        "type": "Button",
         "is_export": false,
         "is_onready": true
       },
-      "_btn_view_stats": {
+      "_press_btn_3": {
         "line": 61,
         "type": "Button",
         "is_export": false,
         "is_onready": true
       },
-      "_btn_done": {
+      "_press_quote_label": {
         "line": 62,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_home_win_prob_label": {
+        "line": 64,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_draw_prob_label": {
+        "line": 65,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_away_win_prob_label": {
+        "line": 66,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_xg_label": {
+        "line": 67,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_cs_label": {
+        "line": 68,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_over_btts_label": {
+        "line": 69,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_scorelines_vbox": {
+        "line": 70,
+        "type": "VBoxContainer",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_units_vbox": {
+        "line": 71,
+        "type": "VBoxContainer",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_insights_vbox": {
+        "line": 72,
+        "type": "VBoxContainer",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_mentality_defensive": {
+        "line": 74,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_mentality_balanced": {
+        "line": 75,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_mentality_attacking": {
+        "line": 76,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_btn_simulate": {
+        "line": 78,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_btn_cancel": {
+        "line": 79,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_live_score_label": {
+        "line": 82,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_clock_label": {
+        "line": 83,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_progress_bar": {
+        "line": 84,
+        "type": "ProgressBar",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_latest_action_label": {
+        "line": 85,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_commentary_scroll": {
+        "line": 86,
+        "type": "ScrollContainer",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_commentary_list": {
+        "line": 87,
+        "type": "VBoxContainer",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_half_time_box": {
+        "line": 88,
+        "type": "HBoxContainer",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_btn_resume_2nd_half": {
+        "line": 89,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_btn_pause": {
+        "line": 91,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_btn_speed_1": {
+        "line": 92,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_btn_speed_2": {
+        "line": 93,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_btn_speed_5": {
+        "line": 94,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_btn_skip": {
+        "line": 95,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_final_score_label": {
+        "line": 98,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_result_headline_label": {
+        "line": 99,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_events_list": {
+        "line": 100,
+        "type": "VBoxContainer",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_btn_view_stats": {
+        "line": 101,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": true
+      },
+      "_btn_done": {
+        "line": 102,
         "type": "Button",
         "is_export": false,
         "is_onready": true
@@ -10760,150 +12521,210 @@
     },
     "methods": {
       "_ready": {
-        "line": 65,
+        "line": 105,
         "args": [],
         "return": "void",
         "is_static": false
       },
+      "_process": {
+        "line": 128,
+        "args": [
+          "delta: float"
+        ],
+        "return": "void",
+        "is_static": false
+      },
       "open": {
-        "line": 101,
+        "line": 173,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_populate_pre_sim_ui": {
-        "line": 108,
+        "line": 182,
         "args": [],
         "return": "void",
         "is_static": false
       },
+      "_on_press_choice": {
+        "line": 243,
+        "args": [
+          "choice: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_set_mentality": {
+        "line": 256,
+        "args": [
+          "m: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
       "_on_simulate_pressed": {
-        "line": 162,
+        "line": 263,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_step_minute": {
+        "line": 310,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_append_commentary_event": {
+        "line": 335,
+        "args": [
+          "ev: QuickSimEngine.MatchEventRecord"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_scroll_to_bottom": {
+        "line": 393,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_pause_toggle": {
+        "line": 400,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_set_speed": {
+        "line": 405,
+        "args": [
+          "s: float"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_resume_2nd_half": {
+        "line": 412,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_skip_pressed": {
+        "line": 418,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_finish_match": {
+        "line": 429,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_populate_post_sim_ui": {
-        "line": 181,
+        "line": 439,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_view_stats_pressed": {
-        "line": 211,
+        "line": 470,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_done_pressed": {
-        "line": 223,
+        "line": 481,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_cancel_pressed": {
-        "line": 228,
+        "line": 486,
         "args": [],
         "return": "void",
         "is_static": false
       }
     }
   },
-  "SplashScreen": {
-    "path": "ui/SplashScreen.gd",
+  "AdvanceToDateDialog": {
+    "path": "ui/manager_mode/AdvanceToDateDialog.gd",
     "line": 1,
-    "signals": {},
+    "signals": {
+      "date_confirmed": {
+        "line": 4,
+        "args": [
+          "target: CareerDate"
+        ]
+      }
+    },
     "enums": {},
     "properties": {
-      "MAIN_MENU_SCENE": {
-        "line": 15,
-        "type": "String",
-        "is_const": true
-      },
-      "FADE_IN_DURATION": {
-        "line": 16,
-        "type": "float",
-        "is_const": true
-      },
-      "DISPLAY_DURATION": {
-        "line": 17,
-        "type": "float",
-        "is_const": true
-      },
-      "FADE_OUT_DURATION": {
-        "line": 18,
-        "type": "float",
-        "is_const": true
-      },
-      "background_rect": {
-        "line": 20,
-        "type": "ColorRect",
-        "is_export": false,
-        "is_onready": true
-      },
-      "logo_rect": {
-        "line": 21,
-        "type": "TextureRect",
-        "is_export": false,
-        "is_onready": true
-      },
-      "prompt_label": {
-        "line": 22,
-        "type": "Label",
-        "is_export": false,
-        "is_onready": true
-      },
-      "_tween": {
-        "line": 24,
-        "type": "Tween",
+      "_spin_year": {
+        "line": 6,
+        "type": "SpinBox",
         "is_export": false,
         "is_onready": false
       },
-      "_is_transitioning": {
-        "line": 25,
-        "type": "bool",
+      "_spin_month": {
+        "line": 7,
+        "type": "SpinBox",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_spin_day": {
+        "line": 8,
+        "type": "SpinBox",
         "is_export": false,
         "is_onready": false
       }
     },
     "methods": {
       "_ready": {
-        "line": 28,
+        "line": 10,
         "args": [],
         "return": "void",
         "is_static": false
       },
-      "_start_splash_sequence": {
-        "line": 35,
+      "_init_default_date": {
+        "line": 97,
         "args": [],
         "return": "void",
         "is_static": false
       },
-      "_transition_to_main_menu": {
-        "line": 52,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_skip_splash": {
-        "line": 65,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_unhandled_input": {
-        "line": 78,
+      "_set_from_date": {
+        "line": 104,
         "args": [
-          "event: InputEvent"
+          "base: CareerDate"
         ],
         "return": "void",
         "is_static": false
       },
-      "_gui_input": {
-        "line": 99,
+      "_apply_quick_set": {
+        "line": 113,
         "args": [
-          "event: InputEvent"
+          "add_days: int",
+          "add_months: int"
         ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_month_or_year_changed": {
+        "line": 129,
+        "args": [
+          "_val: float"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_update_day_max": {
+        "line": 133,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_advance_pressed": {
+        "line": 142,
+        "args": [],
         "return": "void",
         "is_static": false
       }
@@ -11000,8 +12821,16 @@
         "return": "String",
         "is_static": false
       },
-      "build": {
+      "_clamp_offset_to_view": {
         "line": 22,
+        "args": [
+          "career: CareerSaveData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "build": {
+        "line": 32,
         "args": [
           "host: VBoxContainer",
           "career: CareerSaveData"
@@ -11010,7 +12839,7 @@
         "is_static": false
       },
       "_viewed_month": {
-        "line": 87,
+        "line": 98,
         "args": [
           "career: CareerSaveData"
         ],
@@ -11018,13 +12847,13 @@
         "is_static": false
       },
       "_empty_cell": {
-        "line": 99,
+        "line": 110,
         "args": [],
         "return": "Control",
         "is_static": false
       },
       "_day_cell": {
-        "line": 106,
+        "line": 117,
         "args": [
           "date: CareerDate",
           "career: CareerSaveData",
@@ -11954,29 +13783,65 @@
         "type": "Label",
         "is_export": false,
         "is_onready": false
+      },
+      "_continue_button": {
+        "line": 46,
+        "type": "Button",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_topbar_date_value": {
+        "line": 47,
+        "type": "Label",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_date_tween": {
+        "line": 48,
+        "type": "Tween",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_button_pulse_tween": {
+        "line": 49,
+        "type": "Tween",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_speed_buttons": {
+        "line": 50,
+        "type": "Array[Button]",
+        "is_export": false,
+        "is_onready": false
+      },
+      "_advance_dialog": {
+        "line": 51,
+        "type": "AdvanceToDateDialog",
+        "is_export": false,
+        "is_onready": false
       }
     },
     "methods": {
       "_ready": {
-        "line": 48,
+        "line": 54,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_build_panels": {
-        "line": 65,
+        "line": 75,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_build_shell": {
-        "line": 88,
+        "line": 98,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_build_sidebar": {
-        "line": 137,
+        "line": 147,
         "args": [
           "p: CareerThemePalette"
         ],
@@ -11984,7 +13849,7 @@
         "is_static": false
       },
       "_build_topbar": {
-        "line": 176,
+        "line": 186,
         "args": [
           "p: CareerThemePalette"
         ],
@@ -11992,7 +13857,7 @@
         "is_static": false
       },
       "show_section": {
-        "line": 195,
+        "line": 205,
         "args": [
           "section: Section"
         ],
@@ -12000,53 +13865,138 @@
         "is_static": false
       },
       "refresh": {
-        "line": 200,
+        "line": 210,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_rebuild_nav": {
-        "line": 208,
+        "line": 218,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_rebuild_topbar": {
-        "line": 225,
+        "line": 235,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_continue_label": {
-        "line": 280,
+        "line": 321,
         "args": [],
         "return": "String",
         "is_static": false
       },
       "_topbar_stat": {
-        "line": 289,
+        "line": 332,
         "args": [
           "value: String",
           "caption: String",
           "color: Color"
         ],
-        "return": "Control",
+        "return": "VBoxContainer",
         "is_static": false
       },
       "_rebuild_content": {
-        "line": 298,
+        "line": 341,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_continue_pressed": {
-        "line": 313,
+        "line": 356,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_open_matchday_modal": {
+        "line": 370,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_matchday_modal_completed": {
+        "line": 399,
+        "args": [
+          "sim_result: QuickSimEngine.QuickSimResult",
+          "fixture: FixtureData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_matchday_modal_closed": {
+        "line": 404,
+        "args": [
+          "modal: QuickSimModal"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_advance_to_date_pressed": {
+        "line": 410,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_advance_date_confirmed": {
+        "line": 420,
+        "args": [
+          "target: CareerDate"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_continue_started": {
+        "line": 427,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_continue_stopped": {
+        "line": 434,
+        "args": [
+          "reason: String"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_speed_changed": {
+        "line": 444,
+        "args": [
+          "speed: int"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_on_day_advanced": {
+        "line": 451,
+        "args": [
+          "_iso_date: String"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_animate_topbar_date": {
+        "line": 457,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_start_button_pulse": {
+        "line": 477,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_stop_button_pulse": {
+        "line": 487,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_inbox_changed": {
-        "line": 339,
+        "line": 494,
         "args": [
           "_unread: int",
           "_pending: int"
@@ -12055,7 +14005,7 @@
         "is_static": false
       },
       "_on_advance_halted": {
-        "line": 344,
+        "line": 499,
         "args": [
           "reason: String"
         ],
@@ -12063,7 +14013,7 @@
         "is_static": false
       },
       "_on_sacked": {
-        "line": 349,
+        "line": 504,
         "args": [
           "club_name: String",
           "reason: String"
@@ -12072,13 +14022,13 @@
         "is_static": false
       },
       "_on_save_pressed": {
-        "line": 360,
+        "line": 515,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_main_menu_pressed": {
-        "line": 365,
+        "line": 520,
         "args": [],
         "return": "void",
         "is_static": false

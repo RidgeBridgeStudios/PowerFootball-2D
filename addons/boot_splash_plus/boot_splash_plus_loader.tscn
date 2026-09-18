@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://clvtflydhd05p"]
+
+[ext_resource type="Script" uid="uid://b4cpp43cge8t1" path="res://addons/boot_splash_plus/boot_splash_plus_scene_loader.gd" id="1_loader"]
+
+[node name="BootSplashPlusSceneLoader" type="CanvasLayer" unique_id=2127101365]
+script = ExtResource("1_loader")
