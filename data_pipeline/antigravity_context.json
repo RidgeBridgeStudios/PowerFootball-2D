@@ -1,0 +1,703 @@
+{
+  "project_name": "PowerFootball-2D",
+  "engine": "Godot 4.7 (GDScript 2.0 / GDExtension godot-sqlite)",
+  "database_file": "powerfootball_master.db",
+  "architecture_pattern": "Repository / Data Access Object (DAO) via Singleton",
+  "metrics": {
+    "leagues_gender_split": {
+      "men": 279,
+      "women": 14
+    },
+    "teams_gender_split": {
+      "men": 5708,
+      "women": 239
+    },
+    "players_gender_split": {
+      "men": 90070,
+      "women": 5305
+    },
+    "competition_types": {
+      "CONTINENTAL_CUP": 33,
+      "DOMESTIC_CUP": 77,
+      "DOMESTIC_LEAGUE": 183
+    }
+  },
+  "schema": {
+    "leagues": {
+      "row_count": 293,
+      "columns": [
+        {
+          "cid": 0,
+          "name": "league_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": true
+        },
+        {
+          "cid": 1,
+          "name": "name",
+          "type": "TEXT",
+          "notnull": true,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 2,
+          "name": "country_code",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 3,
+          "name": "sub_type",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 4,
+          "name": "logo_url",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 5,
+          "name": "competition_type",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": "'DOMESTIC_LEAGUE'",
+          "primary_key": false
+        },
+        {
+          "cid": 6,
+          "name": "gender",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": "'men'",
+          "primary_key": false
+        }
+      ],
+      "foreign_keys": []
+    },
+    "seasons": {
+      "row_count": 226,
+      "columns": [
+        {
+          "cid": 0,
+          "name": "season_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": true
+        },
+        {
+          "cid": 1,
+          "name": "league_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 2,
+          "name": "name",
+          "type": "TEXT",
+          "notnull": true,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 3,
+          "name": "is_current",
+          "type": "INTEGER",
+          "notnull": false,
+          "default_value": "1",
+          "primary_key": false
+        },
+        {
+          "cid": 4,
+          "name": "start_date",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 5,
+          "name": "end_date",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        }
+      ],
+      "foreign_keys": []
+    },
+    "venues": {
+      "row_count": 3653,
+      "columns": [
+        {
+          "cid": 0,
+          "name": "venue_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": true
+        },
+        {
+          "cid": 1,
+          "name": "name",
+          "type": "TEXT",
+          "notnull": true,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 2,
+          "name": "city",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 3,
+          "name": "capacity",
+          "type": "INTEGER",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 4,
+          "name": "surface_type",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 5,
+          "name": "image_url",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        }
+      ],
+      "foreign_keys": []
+    },
+    "teams": {
+      "row_count": 5947,
+      "columns": [
+        {
+          "cid": 0,
+          "name": "team_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": true
+        },
+        {
+          "cid": 1,
+          "name": "venue_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 2,
+          "name": "league_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 3,
+          "name": "name",
+          "type": "TEXT",
+          "notnull": true,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 4,
+          "name": "short_code",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 5,
+          "name": "founded_year",
+          "type": "INTEGER",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 6,
+          "name": "official_website",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 7,
+          "name": "logo_url",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 8,
+          "name": "wikipedia_extract",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 9,
+          "name": "wikidata_qid",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 10,
+          "name": "gender",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": "'men'",
+          "primary_key": false
+        }
+      ],
+      "foreign_keys": []
+    },
+    "coaches": {
+      "row_count": 10907,
+      "columns": [
+        {
+          "cid": 0,
+          "name": "coach_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": true
+        },
+        {
+          "cid": 1,
+          "name": "team_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 2,
+          "name": "common_name",
+          "type": "TEXT",
+          "notnull": true,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 3,
+          "name": "first_name",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 4,
+          "name": "last_name",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 5,
+          "name": "nationality",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 6,
+          "name": "date_of_birth",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 7,
+          "name": "image_url",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        }
+      ],
+      "foreign_keys": []
+    },
+    "team_rivals": {
+      "row_count": 1223,
+      "columns": [
+        {
+          "cid": 0,
+          "name": "team_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "default_value": null,
+          "primary_key": true
+        },
+        {
+          "cid": 1,
+          "name": "rival_team_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "default_value": null,
+          "primary_key": true
+        }
+      ],
+      "foreign_keys": []
+    },
+    "players": {
+      "row_count": 95375,
+      "columns": [
+        {
+          "cid": 0,
+          "name": "player_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": true
+        },
+        {
+          "cid": 1,
+          "name": "player_name",
+          "type": "TEXT",
+          "notnull": true,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 2,
+          "name": "first_name",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 3,
+          "name": "last_name",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 4,
+          "name": "position_role",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 5,
+          "name": "nationality",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 6,
+          "name": "date_of_birth",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 7,
+          "name": "height_cm",
+          "type": "INTEGER",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 8,
+          "name": "weight_kg",
+          "type": "REAL",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 9,
+          "name": "image_url",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 10,
+          "name": "mass",
+          "type": "REAL",
+          "notnull": false,
+          "default_value": "75.0",
+          "primary_key": false
+        },
+        {
+          "cid": 11,
+          "name": "top_speed",
+          "type": "REAL",
+          "notnull": false,
+          "default_value": "210.0",
+          "primary_key": false
+        },
+        {
+          "cid": 12,
+          "name": "stamina_max",
+          "type": "REAL",
+          "notnull": false,
+          "default_value": "100.0",
+          "primary_key": false
+        },
+        {
+          "cid": 13,
+          "name": "vision",
+          "type": "REAL",
+          "notnull": false,
+          "default_value": "0.65",
+          "primary_key": false
+        },
+        {
+          "cid": 14,
+          "name": "composure",
+          "type": "REAL",
+          "notnull": false,
+          "default_value": "0.60",
+          "primary_key": false
+        },
+        {
+          "cid": 15,
+          "name": "aggression",
+          "type": "REAL",
+          "notnull": false,
+          "default_value": "0.60",
+          "primary_key": false
+        },
+        {
+          "cid": 16,
+          "name": "close_control",
+          "type": "REAL",
+          "notnull": false,
+          "default_value": "0.65",
+          "primary_key": false
+        },
+        {
+          "cid": 17,
+          "name": "reflexes",
+          "type": "REAL",
+          "notnull": false,
+          "default_value": "0.60",
+          "primary_key": false
+        },
+        {
+          "cid": 18,
+          "name": "determination",
+          "type": "REAL",
+          "notnull": false,
+          "default_value": "0.65",
+          "primary_key": false
+        },
+        {
+          "cid": 19,
+          "name": "work_rate",
+          "type": "REAL",
+          "notnull": false,
+          "default_value": "0.65",
+          "primary_key": false
+        },
+        {
+          "cid": 20,
+          "name": "gender",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": "'men'",
+          "primary_key": false
+        }
+      ],
+      "foreign_keys": []
+    },
+    "contracts": {
+      "row_count": 198158,
+      "columns": [
+        {
+          "cid": 0,
+          "name": "contract_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": true
+        },
+        {
+          "cid": 1,
+          "name": "player_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 2,
+          "name": "team_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 3,
+          "name": "season_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 4,
+          "name": "jersey_number",
+          "type": "INTEGER",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 5,
+          "name": "position_name",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 6,
+          "name": "contract_start",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 7,
+          "name": "contract_end",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": false
+        }
+      ],
+      "foreign_keys": []
+    },
+    "tournament_participants": {
+      "row_count": 2643,
+      "columns": [
+        {
+          "cid": 0,
+          "name": "participant_id",
+          "type": "INTEGER",
+          "notnull": false,
+          "default_value": null,
+          "primary_key": true
+        },
+        {
+          "cid": 1,
+          "name": "season_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 2,
+          "name": "competition_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 3,
+          "name": "team_id",
+          "type": "INTEGER",
+          "notnull": true,
+          "default_value": null,
+          "primary_key": false
+        },
+        {
+          "cid": 4,
+          "name": "seed_status",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": "'QUALIFIED'",
+          "primary_key": false
+        },
+        {
+          "cid": 5,
+          "name": "stage_reached",
+          "type": "TEXT",
+          "notnull": false,
+          "default_value": "'GROUP_STAGE'",
+          "primary_key": false
+        }
+      ],
+      "foreign_keys": [
+        {
+          "from": "team_id",
+          "target_table": "teams",
+          "to": "team_id"
+        },
+        {
+          "from": "competition_id",
+          "target_table": "leagues",
+          "to": "league_id"
+        },
+        {
+          "from": "season_id",
+          "target_table": "seasons",
+          "to": "season_id"
+        }
+      ]
+    }
+  },
+  "sqlite_to_gdscript_type_mapping": {
+    "INTEGER": "int",
+    "REAL": "float",
+    "TEXT": "String",
+    "BLOB": "PackedByteArray"
+  }
+}

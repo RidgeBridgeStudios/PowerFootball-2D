@@ -79,6 +79,7 @@ All entries originally housed in this file have been migrated to their canonical
 - `Non-ASCII identifiers parse here but not in Godot` → [docs/agent-errata/scene-and-node-paths.md#non-ascii-identifiers-parse-here-but-not-in-godot](docs/agent-errata/scene-and-node-paths.md#non-ascii-identifiers-parse-here-but-not-in-godot)
 - `Calibration is not optional, and the first guess was wrong twice` → [docs/agent-errata/data-and-persistence.md#calibration-is-not-optional-and-the-first-guess-was-wrong-twice](docs/agent-errata/data-and-persistence.md#calibration-is-not-optional-and-the-first-guess-was-wrong-twice)
 - `The season calendar cannot be a fixed weekly rhythm` → [docs/agent-errata/data-and-persistence.md#the-season-calendar-cannot-be-a-fixed-weekly-rhythm](docs/agent-errata/data-and-persistence.md#the-season-calendar-cannot-be-a-fixed-weekly-rhythm)
+- `Promotion/relegation bookkeeping never reaches next season` → [docs/agent-errata/data-and-persistence.md#promotionrelegation-bookkeeping-never-reaches-next-season](docs/agent-errata/data-and-persistence.md#promotionrelegation-bookkeeping-never-reaches-next-season)
 
 ### Session State
 - `## Session State` → [docs/agent-errata/session-history.md#recent-session-state-archive](docs/agent-errata/session-history.md#recent-session-state-archive)

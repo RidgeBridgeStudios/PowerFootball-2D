@@ -24,11 +24,13 @@ const TEXT_COLOR: Color = Color(0.909804, 0.941176, 0.913725)
 @onready var menu_list: VBoxContainer = $MenuList
 @onready var btn_manager: Button = $MenuList/ManagerButton
 @onready var btn_quick_match: Button = $MenuList/QuickMatchButton
+@onready var btn_database_viewer: Button = $MenuList/DatabaseViewerButton
 @onready var btn_jukebox: Button = $MenuList/JukeboxButton
 @onready var btn_options: Button = $MenuList/OptionsButton
 @onready var btn_quit: Button = $MenuList/QuitButton
 
 @onready var options_menu: Control = $OptionsMenu
+@onready var database_viewer: Control = $DatabaseViewer
 @onready var menu_music: AudioStreamPlayer = $MenuMusic
 
 @onready var quit_dialog: ConfirmationDialog = $QuitDialog
@@ -51,12 +53,16 @@ func _ready() -> void:
 	btn_manager.pressed.connect(_on_manager_pressed)
 	if btn_quick_match != null:
 		btn_quick_match.pressed.connect(_on_quick_match_pressed)
+	if btn_database_viewer != null:
+		btn_database_viewer.pressed.connect(_on_database_viewer_pressed)
 	if btn_jukebox != null:
 		btn_jukebox.pressed.connect(_on_jukebox_pressed)
 	btn_options.pressed.connect(_on_options_pressed)
 	btn_quit.pressed.connect(_on_quit_pressed)
 
 	options_menu.menu_closed.connect(_return_to_main_menu)
+	if database_viewer != null:
+		database_viewer.viewer_closed.connect(_return_to_main_menu)
 
 	quit_dialog.confirmed.connect(_on_quit_confirmed)
 	quit_dialog.visibility_changed.connect(_on_quit_visibility_changed)
@@ -113,11 +119,20 @@ func _on_quit_visibility_changed() -> void:
 
 func _return_to_main_menu() -> void:
 	options_menu.hide()
+	if database_viewer != null:
+		database_viewer.hide()
 	menu_list.show()
 	if is_instance_valid(_last_focused_button):
 		_last_focused_button.grab_focus()
 	else:
 		btn_manager.grab_focus()
+
+
+func _on_database_viewer_pressed() -> void:
+	_last_focused_button = btn_database_viewer
+	menu_list.hide()
+	if database_viewer != null:
+		database_viewer.open()
 
 
 ## Every button left here is a real, focusable destination — the pivot removed
@@ -127,6 +142,8 @@ func _style_menu_buttons() -> void:
 	var buttons: Array[Button] = [btn_manager, btn_options, btn_quit]
 	if btn_quick_match != null:
 		buttons.insert(1, btn_quick_match)
+	if btn_database_viewer != null:
+		buttons.insert(2, btn_database_viewer)
 	if btn_jukebox != null:
 		buttons.insert(buttons.size() - 2, btn_jukebox)
 	for button: Button in buttons:

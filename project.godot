@@ -13,7 +13,6 @@ config_version=5
 config/name="PowerFootball 2D"
 run/main_scene="res://ui/MainMenu.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
-boot_splash/show_image=true
 config/icon="res://art/player.png"
 boot_splash+/general/enabled=true
 boot_splash+/general/run_in_editor_playtest=true
@@ -37,6 +36,7 @@ boot_splash+/progress_bar/show=false
 GameEvents="*res://autoloads/GameEvents.gd"
 GameManager="*res://autoloads/GameManager.gd"
 MatchStatsTracker="*res://autoloads/MatchStatsTracker.gd"
+DatabaseManager="*res://autoloads/DatabaseManager.gd"
 DataLoader="*res://autoloads/DataLoader.gd"
 RefereeLoader="*res://autoloads/RefereeLoader.gd"
 ManagerLoader="*res://autoloads/ManagerLoader.gd"
@@ -44,6 +44,7 @@ StaffLoader="*res://autoloads/StaffLoader.gd"
 WorldEventLog="*res://autoloads/WorldEventLog.gd"
 CareerManager="*res://autoloads/CareerManager.gd"
 BootSplashPlus="*res://addons/boot_splash_plus/boot_splash_plus_runtime.gd"
+McpInteractionServer="*res://autoload/mcp_interaction_server.gd"
 
 [display]
 
@@ -58,7 +59,7 @@ project/assembly_name="PowerFootball 2D"
 
 [editor_plugins]
 
-enabled=PackedStringArray("res://addons/audio_service/plugin.cfg", "res://addons/boot_splash_plus/plugin.cfg", "res://addons/gloot/plugin.cfg", "res://addons/godot_mcp/plugin.cfg")
+enabled=PackedStringArray("res://addons/audio_service/plugin.cfg", "res://addons/boot_splash_plus/plugin.cfg", "res://addons/gloot/plugin.cfg", "res://addons/godot_mcp/plugin.cfg", "res://addons/godot-sqlite/plugin.cfg")
 
 [input]
 

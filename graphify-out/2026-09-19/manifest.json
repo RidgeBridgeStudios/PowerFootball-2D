@@ -1,0 +1,2906 @@
+{
+  ".agents/commands.json": {
+    "mtime": 1789047592.1244497,
+    "seen": 1789730469.67021,
+    "ast_hash": "2e75a8a71160bc9bd4ee67272c60d5de",
+    "semantic_hash": ""
+  },
+  ".agents/hooks.json": {
+    "mtime": 1789049624.9675095,
+    "seen": 1789730469.6702178,
+    "ast_hash": "7f9833127cded99e6bffbacafc00d7ca",
+    "semantic_hash": ""
+  },
+  ".agents/mcp.json": {
+    "mtime": 1789047208.200392,
+    "seen": 1789730469.670219,
+    "ast_hash": "938cf399407ee14470e963bed9c76b24",
+    "semantic_hash": ""
+  },
+  ".antigravity/commands.json": {
+    "mtime": 1789047592.1782944,
+    "seen": 1789730469.6702228,
+    "ast_hash": "b6485ec81ebb044360c53da985baa4e6",
+    "semantic_hash": ""
+  },
+  ".antigravity/hooks.json": {
+    "mtime": 1788899424.4923775,
+    "seen": 1789730469.670224,
+    "ast_hash": "82ae2a81635c1e6804e9ee56c67ca006",
+    "semantic_hash": ""
+  },
+  ".antigravity/mcp.json": {
+    "mtime": 1789729748.2731543,
+    "seen": 1789730469.670225,
+    "ast_hash": "938cf399407ee14470e963bed9c76b24",
+    "semantic_hash": ""
+  },
+  ".claude/settings.json": {
+    "mtime": 1789047912.5325675,
+    "seen": 1789730469.6702259,
+    "ast_hash": "f6eecb2c4016b3c4a7c209e3edb9e284",
+    "semantic_hash": ""
+  },
+  "data/league.json": {
+    "mtime": 1789729748.280028,
+    "seen": 1789730469.6702278,
+    "ast_hash": "340789d974de48de2dcca75a586a9fe8",
+    "semantic_hash": ""
+  },
+  "data/managers.json": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702287,
+    "ast_hash": "3e08c0e2df6034b4a34b6c8cd17ff546",
+    "semantic_hash": "3e08c0e2df6034b4a34b6c8cd17ff546"
+  },
+  "data/players.json": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702294,
+    "ast_hash": "a420310a09cf860fb8d847c13f98e2de",
+    "semantic_hash": "a420310a09cf860fb8d847c13f98e2de"
+  },
+  "data/referees.json": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702306,
+    "ast_hash": "dd2842e1560bba50387b771392d8909e",
+    "semantic_hash": "dd2842e1560bba50387b771392d8909e"
+  },
+  "data/staff.json": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702507,
+    "ast_hash": "33201e96546167a2fd3ec9cfa5996376",
+    "semantic_hash": "33201e96546167a2fd3ec9cfa5996376"
+  },
+  "docs/DEPENDENCY_GRAPH.json": {
+    "mtime": 1789764314.7549944,
+    "seen": 1789764598.1906285,
+    "ast_hash": "5fcdf6ddb2e19ffcc983e9a8ae91d8cd",
+    "semantic_hash": ""
+  },
+  "docs/SYMBOLS.json": {
+    "mtime": 1789781307.1418996,
+    "seen": 1789781314.3141575,
+    "ast_hash": "da427f49bf8c7fa1c3e6ed70966643ce",
+    "semantic_hash": ""
+  },
+  "tools/audit_process_modes.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702588,
+    "ast_hash": "ddc7c265fb2be56a58715f69d15ee0c0",
+    "semantic_hash": "ddc7c265fb2be56a58715f69d15ee0c0"
+  },
+  "tools/benchmark_math.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702597,
+    "ast_hash": "4513d708b67421f6c8b22a79f77bda3e",
+    "semantic_hash": "4513d708b67421f6c8b22a79f77bda3e"
+  },
+  "tools/codebase_slice.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702604,
+    "ast_hash": "ed6e8809f63538b7353c2e938fb36fb7",
+    "semantic_hash": "ed6e8809f63538b7353c2e938fb36fb7"
+  },
+  "tools/compact_errata.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702616,
+    "ast_hash": "7a4331bba72be7fe77e800eb2ca9b62d",
+    "semantic_hash": "7a4331bba72be7fe77e800eb2ca9b62d"
+  },
+  "tools/dump_api.py": {
+    "mtime": 1789764513.3347335,
+    "seen": 1789764598.1906388,
+    "ast_hash": "49c166facadabeec96919292c5621009",
+    "semantic_hash": ""
+  },
+  "tools/dump_dep_graph.py": {
+    "mtime": 1789764511.6154573,
+    "seen": 1789764598.1906402,
+    "ast_hash": "9b575e1dab1851b894a18278aff3b97a",
+    "semantic_hash": ""
+  },
+  "tools/dump_match_frames.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.670264,
+    "ast_hash": "825fa8b895475c723a75b1c71ff579bc",
+    "semantic_hash": "825fa8b895475c723a75b1c71ff579bc"
+  },
+  "tools/eval_simulation.py": {
+    "mtime": 1789045870.927538,
+    "seen": 1789730469.6702652,
+    "ast_hash": "f6ddb16183e2d36d421ef972cb99084c",
+    "semantic_hash": ""
+  },
+  "tools/expand_database.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.670266,
+    "ast_hash": "0b12a42e1bece55114dd85f25a08d8e0",
+    "semantic_hash": "0b12a42e1bece55114dd85f25a08d8e0"
+  },
+  "tools/fix_indent.py": {
+    "mtime": 1789049642.7874641,
+    "seen": 1789730469.6702669,
+    "ast_hash": "ce2ad7ebfc8100da3652e5562c0d9457",
+    "semantic_hash": ""
+  },
+  "tools/formation_ascii.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702688,
+    "ast_hash": "3e6c14f94ef1c4c7eaabe5132be8d8e0",
+    "semantic_hash": "3e6c14f94ef1c4c7eaabe5132be8d8e0"
+  },
+  "tools/fuzz_formations.py": {
+    "mtime": 1789045870.9285352,
+    "seen": 1789730469.6702697,
+    "ast_hash": "708d19374f04e26bb6b22c131a78a73c",
+    "semantic_hash": ""
+  },
+  "tools/fuzz_solvers.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702704,
+    "ast_hash": "e9c59c44a4d273bf914b8915d2f4526d",
+    "semantic_hash": "e9c59c44a4d273bf914b8915d2f4526d"
+  },
+  "tools/fuzz_utility_scorer.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702712,
+    "ast_hash": "2fe48893911c8fe73851a5f992ef4895",
+    "semantic_hash": "2fe48893911c8fe73851a5f992ef4895"
+  },
+  "tools/gdcheck.py": {
+    "mtime": 1789740602.1234872,
+    "seen": 1789740743.4805999,
+    "ast_hash": "4d92972d60dd1e25194f7b36ada2d82a",
+    "semantic_hash": ""
+  },
+  "tools/generate_db.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.670273,
+    "ast_hash": "7b2d30301b6d407db5b3e2a074ded24f",
+    "semantic_hash": "7b2d30301b6d407db5b3e2a074ded24f"
+  },
+  "tools/generate_symbols.py": {
+    "mtime": 1789740637.0518918,
+    "seen": 1789740743.480603,
+    "ast_hash": "4e074bcaced2084dfd3ef5c4dc831add",
+    "semantic_hash": ""
+  },
+  "tools/git_pre_commit.py": {
+    "mtime": 1789039901.65119,
+    "seen": 1789730469.6702757,
+    "ast_hash": "1209b70087aa7e7e010cbb88dd3b9b48",
+    "semantic_hash": "1209b70087aa7e7e010cbb88dd3b9b48"
+  },
+  "tools/hook_gdcheck.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702774,
+    "ast_hash": "233d215d174c9ace884d1d292f4a8128",
+    "semantic_hash": "233d215d174c9ace884d1d292f4a8128"
+  },
+  "tools/layer_context.py": {
+    "mtime": 1789729756.4728405,
+    "seen": 1789730469.6702783,
+    "ast_hash": "0c08f02b0a2d60f4ae203495c2efa8e2",
+    "semantic_hash": ""
+  },
+  "tools/lint_allocations.py": {
+    "mtime": 1789740637.0534253,
+    "seen": 1789740743.4806077,
+    "ast_hash": "097146088af151fa5292804447f10a1f",
+    "semantic_hash": ""
+  },
+  "tools/lint_invariants.py": {
+    "mtime": 1789740613.3889234,
+    "seen": 1789740743.4806087,
+    "ast_hash": "4a772b3e723ea0b4b9aa15fa4bef9616",
+    "semantic_hash": ""
+  },
+  "tools/lint_scope.py": {
+    "mtime": 1789740637.0539396,
+    "seen": 1789740743.48061,
+    "ast_hash": "d9af72db1f9031b44929cb89989d6532",
+    "semantic_hash": ""
+  },
+  "tools/lint_shadowing.py": {
+    "mtime": 1789740637.0539396,
+    "seen": 1789740743.4806106,
+    "ast_hash": "6a75b0666d4b5a39b15c58c0f0a35cb9",
+    "semantic_hash": ""
+  },
+  "tools/lint_signal_races.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702828,
+    "ast_hash": "3584536aa13c0d65cf3feff97038ec80",
+    "semantic_hash": "3584536aa13c0d65cf3feff97038ec80"
+  },
+  "tools/lint_stringnames.py": {
+    "mtime": 1789740637.0539396,
+    "seen": 1789740743.4806125,
+    "ast_hash": "fb1ea3a66f2483bfa75a5a095b9c8f41",
+    "semantic_hash": ""
+  },
+  "tools/lint_type_comparisons.py": {
+    "mtime": 1789740637.0549445,
+    "seen": 1789740743.4806135,
+    "ast_hash": "69aea8ec0715f1ad681ef5b4b05a58e1",
+    "semantic_hash": ""
+  },
+  "tools/lint_xref.py": {
+    "mtime": 1789740637.0549445,
+    "seen": 1789740743.4806144,
+    "ast_hash": "0dffcdbd5a98d759d2e34d112718d684",
+    "semantic_hash": ""
+  },
+  "tools/lsp_client.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702862,
+    "ast_hash": "be829ff7af9990e5ecfc5ae3020ea2e5",
+    "semantic_hash": "be829ff7af9990e5ecfc5ae3020ea2e5"
+  },
+  "tools/mcp_server.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702878,
+    "ast_hash": "b94f7da6f9644d0ef06ffc80e44675d9",
+    "semantic_hash": "b94f7da6f9644d0ef06ffc80e44675d9"
+  },
+  "tools/next_task.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702888,
+    "ast_hash": "939b9b879e1b68f204a064d260c91126",
+    "semantic_hash": "939b9b879e1b68f204a064d260c91126"
+  },
+  "tools/refactor_brain.py": {
+    "mtime": 1789049642.7880125,
+    "seen": 1789730469.67029,
+    "ast_hash": "c75fdd417674346d671e87baaea880b3",
+    "semantic_hash": ""
+  },
+  "tools/refactor_brain_2.py": {
+    "mtime": 1789049642.7880125,
+    "seen": 1789730469.6702907,
+    "ast_hash": "6b72b1f027e4dcbf5756ef90a29cb16b",
+    "semantic_hash": ""
+  },
+  "tools/refactor_brain_3.py": {
+    "mtime": 1789049642.7885358,
+    "seen": 1789730469.6702917,
+    "ast_hash": "0a4fc0a8c410c9f3c034e180afbfc4b5",
+    "semantic_hash": ""
+  },
+  "tools/refactor_brain_4.py": {
+    "mtime": 1789049642.7890563,
+    "seen": 1789730469.6702924,
+    "ast_hash": "8a94da0ba864a8f91d8db5a673dcbb63",
+    "semantic_hash": ""
+  },
+  "tools/refactor_brain_5.py": {
+    "mtime": 1789049642.7895792,
+    "seen": 1789730469.6702933,
+    "ast_hash": "46e188d5f8f75d9e21b52bf4dfef1dcd",
+    "semantic_hash": ""
+  },
+  "tools/refactor_game_events.py": {
+    "mtime": 1789049642.7895792,
+    "seen": 1789730469.670294,
+    "ast_hash": "42bf0b0e78dff08ff4579c3ef3bc1ff2",
+    "semantic_hash": ""
+  },
+  "tools/refactor_mwm_press.py": {
+    "mtime": 1789049642.7901266,
+    "seen": 1789730469.670295,
+    "ast_hash": "836d6176ce43950b53665092c14f3187",
+    "semantic_hash": ""
+  },
+  "tools/refactor_mwm_turnover.py": {
+    "mtime": 1789049642.7906456,
+    "seen": 1789730469.670296,
+    "ast_hash": "ab9b563f43f614c01f2bf7221a6c74cf",
+    "semantic_hash": ""
+  },
+  "tools/replay_test.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.670297,
+    "ast_hash": "13a44d7a50a8e182e4cb1d79b4d8877d",
+    "semantic_hash": "13a44d7a50a8e182e4cb1d79b4d8877d"
+  },
+  "tools/semantic_search.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702979,
+    "ast_hash": "47b5d4ab972aaa381ef5be653a8039f4",
+    "semantic_hash": "47b5d4ab972aaa381ef5be653a8039f4"
+  },
+  "tools/spatial_grid_bench.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702986,
+    "ast_hash": "eb0fce708031b45d3204622d7f5bbe60",
+    "semantic_hash": "eb0fce708031b45d3204622d7f5bbe60"
+  },
+  "tools/sync_rules.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6702995,
+    "ast_hash": "719e9dc9bdc43a2e3a6b7e0daeea249a",
+    "semantic_hash": "719e9dc9bdc43a2e3a6b7e0daeea249a"
+  },
+  "tools/test_quick_sim.py": {
+    "mtime": 1789729756.477059,
+    "seen": 1789730469.6703017,
+    "ast_hash": "f9982407d603d11237f21110f287ecad",
+    "semantic_hash": ""
+  },
+  "tools/tscn_linter.py": {
+    "mtime": 1789740637.055449,
+    "seen": 1789740743.480634,
+    "ast_hash": "2eca4b213384300307efb9a442f37f2f",
+    "semantic_hash": ""
+  },
+  "tools/update_db_all.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6703036,
+    "ast_hash": "e799925f36be359d4212cd1efd1284c5",
+    "semantic_hash": "e799925f36be359d4212cd1efd1284c5"
+  },
+  "tools/validate_schemas.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6703043,
+    "ast_hash": "00bd5c64b76ba7789e2cfa89fc1a43da",
+    "semantic_hash": "00bd5c64b76ba7789e2cfa89fc1a43da"
+  },
+  "tools/verify_db.py": {
+    "mtime": 1789766500.3107677,
+    "seen": 1789766535.4133828,
+    "ast_hash": "727656493d8e316127346be04c18da0a",
+    "semantic_hash": ""
+  },
+  "tools/verify_gate.py": {
+    "mtime": 1789729756.4780993,
+    "seen": 1789730469.670306,
+    "ast_hash": "eadf9cb8137551e5ebf4df9c7ede42d8",
+    "semantic_hash": ""
+  },
+  "tools/worktree_manager.py": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6703079,
+    "ast_hash": "3c1cacccb339bf2794630a938e3e8ed1",
+    "semantic_hash": "3c1cacccb339bf2794630a938e3e8ed1"
+  },
+  ".agents/rules/ai-architect.md": {
+    "mtime": 1789729756.306802,
+    "seen": 1789730469.6703088,
+    "ast_hash": "002860c941bc058abd0f843b07ea6158",
+    "semantic_hash": ""
+  },
+  ".agents/rules/context-hygiene.md": {
+    "mtime": 1789729756.3098218,
+    "seen": 1789730469.6703105,
+    "ast_hash": "4d22decc9e4c0c3d473272389db57dba",
+    "semantic_hash": ""
+  },
+  ".agents/rules/gdscript-antipatterns.md": {
+    "mtime": 1789729756.3108652,
+    "seen": 1789730469.6703122,
+    "ast_hash": "bfddca9c5e5c353266fa7977b52b4e35",
+    "semantic_hash": ""
+  },
+  ".agents/rules/godot-47-core.md": {
+    "mtime": 1789729756.3119183,
+    "seen": 1789730469.670314,
+    "ast_hash": "ac03dad499f32a7a008d8a3f4243155e",
+    "semantic_hash": ""
+  },
+  ".agents/rules/graphify.md": {
+    "mtime": 1789729756.312951,
+    "seen": 1789730469.6703155,
+    "ast_hash": "a0e4d192b9e2e17256124dbfc8e24e6a",
+    "semantic_hash": ""
+  },
+  ".agents/rules/research-index.md": {
+    "mtime": 1789729756.313469,
+    "seen": 1789730469.6703174,
+    "ast_hash": "a3e423d075daf07665ba5db6bd93ede0",
+    "semantic_hash": ""
+  },
+  ".agents/rules/soccer-physics.md": {
+    "mtime": 1789729756.314474,
+    "seen": 1789730469.6703181,
+    "ast_hash": "91ac2cb23bcc76b2147c6d241d3ca8f5",
+    "semantic_hash": ""
+  },
+  ".agents/skills/ast-refactor/SKILL.md": {
+    "mtime": 1789729756.314474,
+    "seen": 1789730469.6703186,
+    "ast_hash": "a3efbfb55e2d57844706ce3554a832e4",
+    "semantic_hash": ""
+  },
+  ".agents/skills/eval-sim/SKILL.md": {
+    "mtime": 1789729756.317477,
+    "seen": 1789730469.6703236,
+    "ast_hash": "3fc7f277c048db6d2a799f59801874c5",
+    "semantic_hash": ""
+  },
+  ".agents/skills/formation-audit/SKILL.md": {
+    "mtime": 1789729756.318477,
+    "seen": 1789730469.6703246,
+    "ast_hash": "6acbcccf5f8ceadbdd3765996078a0ba",
+    "semantic_hash": ""
+  },
+  ".agents/skills/formation-fuzzer/SKILL.md": {
+    "mtime": 1789729756.318477,
+    "seen": 1789730469.6703255,
+    "ast_hash": "c5bc1cc7c9c0d467133e59dc76988e32",
+    "semantic_hash": ""
+  },
+  ".agents/skills/perf-benchmark/SKILL.md": {
+    "mtime": 1789729756.318477,
+    "seen": 1789730469.6703262,
+    "ast_hash": "cb48bbbdee0286a45f6187875e512617",
+    "semantic_hash": ""
+  },
+  ".agents/workflows/graphify.md": {
+    "mtime": 1789729748.2720544,
+    "seen": 1789730469.670332,
+    "ast_hash": "a831cf3669f1e6ab85d8a80ebe655f99",
+    "semantic_hash": ""
+  },
+  ".antigravity/scratchpad.md": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6703355,
+    "ast_hash": "b9e342e3477fe65f23bf2d98407a6682",
+    "semantic_hash": ""
+  },
+  ".claude/CLAUDE.md": {
+    "mtime": 1788899385.726414,
+    "seen": 1789730469.6703365,
+    "ast_hash": "c232166e6492ba1ed955030b16979b05",
+    "semantic_hash": ""
+  },
+  ".claude/rules/ai-architect.md": {
+    "mtime": 1789729756.3199825,
+    "seen": 1789730469.6703372,
+    "ast_hash": "002860c941bc058abd0f843b07ea6158",
+    "semantic_hash": ""
+  },
+  ".claude/rules/career-mode.md": {
+    "mtime": 1789729756.3210084,
+    "seen": 1789730469.6703382,
+    "ast_hash": "a9f8be5d41e21389334b661bbf781753",
+    "semantic_hash": ""
+  },
+  ".claude/rules/context-hygiene.md": {
+    "mtime": 1789729756.3210084,
+    "seen": 1789730469.670339,
+    "ast_hash": "4d22decc9e4c0c3d473272389db57dba",
+    "semantic_hash": ""
+  },
+  ".claude/rules/gdscript-antipatterns.md": {
+    "mtime": 1789729756.3215203,
+    "seen": 1789730469.6703408,
+    "ast_hash": "bfddca9c5e5c353266fa7977b52b4e35",
+    "semantic_hash": ""
+  },
+  ".claude/rules/godot-47-core.md": {
+    "mtime": 1789729756.3225265,
+    "seen": 1789730469.6703417,
+    "ast_hash": "ac03dad499f32a7a008d8a3f4243155e",
+    "semantic_hash": ""
+  },
+  ".claude/rules/research-index.md": {
+    "mtime": 1789729756.3235686,
+    "seen": 1789730469.6703439,
+    "ast_hash": "a3e423d075daf07665ba5db6bd93ede0",
+    "semantic_hash": ""
+  },
+  ".claude/rules/soccer-physics.md": {
+    "mtime": 1789729756.3246455,
+    "seen": 1789730469.6703446,
+    "ast_hash": "91ac2cb23bcc76b2147c6d241d3ca8f5",
+    "semantic_hash": ""
+  },
+  ".claude/skills/godot-verify/SKILL.md": {
+    "mtime": 1789729756.3256483,
+    "seen": 1789730469.6703458,
+    "ast_hash": "0c3f6e7b1dae4398c17efbe5de33d8b4",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/SKILL.md": {
+    "mtime": 1789729756.3266535,
+    "seen": 1789730469.6703463,
+    "ast_hash": "1c2c7fa3d5ce3726f222b81e98ddbd73",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/add-watch.md": {
+    "mtime": 1789729756.3266535,
+    "seen": 1789730469.6703472,
+    "ast_hash": "88c34f4bc25d0d603b453fdedf517353",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/exports.md": {
+    "mtime": 1789729756.3276534,
+    "seen": 1789730469.6703508,
+    "ast_hash": "14b7d1bacee5635080d22d5e876a1a3a",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/extraction-spec.md": {
+    "mtime": 1789729756.3286538,
+    "seen": 1789730469.6703515,
+    "ast_hash": "e7ca9f3df8ee742faef4b3441343f5a0",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/github-and-merge.md": {
+    "mtime": 1789729756.3286538,
+    "seen": 1789730469.6703525,
+    "ast_hash": "eb479c5edee081cd20c670b688635a08",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/hooks.md": {
+    "mtime": 1789729756.3286538,
+    "seen": 1789730469.6703534,
+    "ast_hash": "fc3d1649972fdc093cdc605bd14e6e3e",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/query.md": {
+    "mtime": 1789729756.3301587,
+    "seen": 1789730469.6703541,
+    "ast_hash": "6ff44ac73e6271756960edd5521ed169",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/transcribe.md": {
+    "mtime": 1789729756.3301587,
+    "seen": 1789730469.6703558,
+    "ast_hash": "171726fae5e2668d5df4baccfb885df2",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/update.md": {
+    "mtime": 1789729756.3311656,
+    "seen": 1789730469.6703568,
+    "ast_hash": "50f98099462f020303d79be9b94dba34",
+    "semantic_hash": ""
+  },
+  "AGENTS.md": {
+    "mtime": 1789729756.3322582,
+    "seen": 1789730469.6703584,
+    "ast_hash": "2781b031e02ef1b4bf33b4d43b499430",
+    "semantic_hash": ""
+  },
+  "AGENTS_ERRATA.md": {
+    "mtime": 1789740718.4180298,
+    "seen": 1789740743.4806995,
+    "ast_hash": "9bfde7ade4218642ca0ccf91c21123ae",
+    "semantic_hash": ""
+  },
+  "CLAUDE.md": {
+    "mtime": 1789729756.3337648,
+    "seen": 1789730469.67036,
+    "ast_hash": "d75c01c3ca8f0919494761be2151550d",
+    "semantic_hash": ""
+  },
+  "POWERFOOTBALL_MASTER_VISION.md": {
+    "mtime": 1789729756.3357713,
+    "seen": 1789730469.6703618,
+    "ast_hash": "61b6215d383690bbdcf374e006dc69cf",
+    "semantic_hash": ""
+  },
+  "README.md": {
+    "mtime": 1789729756.3357713,
+    "seen": 1789730469.6703627,
+    "ast_hash": "26015af28d34fc5f5f76f1aeb22d3a8f",
+    "semantic_hash": ""
+  },
+  "ROADMAP.md": {
+    "mtime": 1789739014.5777862,
+    "seen": 1789739036.2825005,
+    "ast_hash": "b3eef6892740a2372bc0cfe420d415a4",
+    "semantic_hash": ""
+  },
+  "autoloads/README.md": {
+    "mtime": 1789729756.3419,
+    "seen": 1789730469.6703644,
+    "ast_hash": "36d09d7e9f416c210c08d55bed0145e1",
+    "semantic_hash": ""
+  },
+  "docs/ANTI_PATTERNS.md": {
+    "mtime": 1789729756.4044652,
+    "seen": 1789730469.670365,
+    "ast_hash": "709da9a38d968b7b5520dc8d481a1fe1",
+    "semantic_hash": ""
+  },
+  "docs/API_SURFACE.md": {
+    "mtime": 1789781307.024068,
+    "seen": 1789781314.3143148,
+    "ast_hash": "a5cfa1ef1c690ac6a3e99c3c3d7ceee6",
+    "semantic_hash": ""
+  },
+  "docs/CORE_INVARIANTS.md": {
+    "mtime": 1789729756.4084637,
+    "seen": 1789730469.6703677,
+    "ast_hash": "1b7132a43381339e1b1e601e6267d2a6",
+    "semantic_hash": ""
+  },
+  "docs/MATH_SOLVERS.md": {
+    "mtime": 1789729756.4160533,
+    "seen": 1789730469.6703763,
+    "ast_hash": "640d36ee6e849e7d9120aeabc458f7ae",
+    "semantic_hash": ""
+  },
+  "docs/archive/errata_history.md": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.670398,
+    "ast_hash": "c336e04db05282d8019498c83d58eabf",
+    "semantic_hash": ""
+  },
+  "docs/course_implementation_specification.md": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.670399,
+    "ast_hash": "36aa3ed38f10edc545729332f44e4a8c",
+    "semantic_hash": ""
+  },
+  "docs/json-schema.md": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6703997,
+    "ast_hash": "cc625383a0eb01c4e236c842dca8af7e",
+    "semantic_hash": ""
+  },
+  "docs/research/2D-Soccer-Game-Design-Guide.txt": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704009,
+    "ast_hash": "6f1cd4f8736d1d505cd06c52247609db",
+    "semantic_hash": ""
+  },
+  "docs/research/Godot-4-Football-AI-Overhaul-Optimization-Plan.txt": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704016,
+    "ast_hash": "06c10847f516325cd4f92fc650296759",
+    "semantic_hash": ""
+  },
+  "docs/research/Godot-Football-Games-Research.txt": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704023,
+    "ast_hash": "52bf7e6b7fa9129d719f96c12cb1fd24",
+    "semantic_hash": ""
+  },
+  "docs/research/Intuitive-Soccer-Controls-Research.txt": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704032,
+    "ast_hash": "8af7d231163202aab5cf83a76dd06e7b",
+    "semantic_hash": ""
+  },
+  "docs/research/PES-6-Gameplay-Physics-Research.txt": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704042,
+    "ast_hash": "92d0c2358c22d40d27b3cb1a672dd0f0",
+    "semantic_hash": ""
+  },
+  "llms.txt": {
+    "mtime": 1789729756.4575796,
+    "seen": 1789730469.6704051,
+    "ast_hash": "3d86920c112c284530dde669d236bb0a",
+    "semantic_hash": ""
+  },
+  "shared/README.md": {
+    "mtime": 1789729756.4615843,
+    "seen": 1789730469.6704059,
+    "ast_hash": "5db2ca6a1c56d4bf9916a6308c6eaa5d",
+    "semantic_hash": ""
+  },
+  "tools/README.md": {
+    "mtime": 1789047843.850875,
+    "seen": 1789730469.6704066,
+    "ast_hash": "4fc89cb25a9c07bbb6aab996316f90a8",
+    "semantic_hash": ""
+  },
+  "ui/README.md": {
+    "mtime": 1789729756.4796557,
+    "seen": 1789730469.6704082,
+    "ast_hash": "2776e57eb6c26ce780a50a695031ae2c",
+    "semantic_hash": ""
+  },
+  "art/ball.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704092,
+    "ast_hash": "577056be9b26a5e408b5e21d4b1c5d01",
+    "semantic_hash": "577056be9b26a5e408b5e21d4b1c5d01"
+  },
+  "art/ball_classic_texture.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704102,
+    "ast_hash": "3923cd4fd1ab9909a4b40cd267f0431d",
+    "semantic_hash": "3923cd4fd1ab9909a4b40cd267f0431d"
+  },
+  "art/flags/argentina.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.670411,
+    "ast_hash": "b7eff33216bc0f06b90906533574a9bc",
+    "semantic_hash": "b7eff33216bc0f06b90906533574a9bc"
+  },
+  "art/flags/argentine.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704118,
+    "ast_hash": "71abe9cb65e131e6bd2cbab5ac8248aa",
+    "semantic_hash": "71abe9cb65e131e6bd2cbab5ac8248aa"
+  },
+  "art/flags/austria.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704128,
+    "ast_hash": "16e79f2fe61f95a7b06fe250bfe61646",
+    "semantic_hash": "16e79f2fe61f95a7b06fe250bfe61646"
+  },
+  "art/flags/batavian.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704137,
+    "ast_hash": "6083c4b39da4ddebef20a802e3752767",
+    "semantic_hash": "6083c4b39da4ddebef20a802e3752767"
+  },
+  "art/flags/belgium.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704147,
+    "ast_hash": "5943f8370ed6889e9d016b8e117cbef4",
+    "semantic_hash": "5943f8370ed6889e9d016b8e117cbef4"
+  },
+  "art/flags/brasilian.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704154,
+    "ast_hash": "fab690ceb4dd2112433c27148081380e",
+    "semantic_hash": "fab690ceb4dd2112433c27148081380e"
+  },
+  "art/flags/brazil.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704164,
+    "ast_hash": "2bc5344bad15798b40427d72e5935b71",
+    "semantic_hash": "2bc5344bad15798b40427d72e5935b71"
+  },
+  "art/flags/britannic.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.670417,
+    "ast_hash": "c75395cc299a123d9d678d41d318524b",
+    "semantic_hash": "c75395cc299a123d9d678d41d318524b"
+  },
+  "art/flags/caledonian.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.670418,
+    "ast_hash": "aaee000fce091a0a2b35225e592d6013",
+    "semantic_hash": "aaee000fce091a0a2b35225e592d6013"
+  },
+  "art/flags/cisalpine.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704187,
+    "ast_hash": "f15a32af750d133d1c47f27123eac94c",
+    "semantic_hash": "f15a32af750d133d1c47f27123eac94c"
+  },
+  "art/flags/croatia.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704197,
+    "ast_hash": "ed92699ee046a905ad85db07d51e9493",
+    "semantic_hash": "ed92699ee046a905ad85db07d51e9493"
+  },
+  "art/flags/dalmatian.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704204,
+    "ast_hash": "11483ed3fa45fe6fd69240a7a59c719b",
+    "semantic_hash": "11483ed3fa45fe6fd69240a7a59c719b"
+  },
+  "art/flags/default.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704216,
+    "ast_hash": "aca58ea467f43993e125cd8b05fa1608",
+    "semantic_hash": "aca58ea467f43993e125cd8b05fa1608"
+  },
+  "art/flags/denmark.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704223,
+    "ast_hash": "085fb2e384fc7e9ac647f09248efb43e",
+    "semantic_hash": "085fb2e384fc7e9ac647f09248efb43e"
+  },
+  "art/flags/england.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704233,
+    "ast_hash": "1804ad80285da2d42360ef675a3b29b7",
+    "semantic_hash": "1804ad80285da2d42360ef675a3b29b7"
+  },
+  "art/flags/france.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.670424,
+    "ast_hash": "70ffc2f8760ec9f557fe0ee04f33c309",
+    "semantic_hash": "70ffc2f8760ec9f557fe0ee04f33c309"
+  },
+  "art/flags/gallic.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.670425,
+    "ast_hash": "9ae16b562aa2970acdbbf93ba256b949",
+    "semantic_hash": "9ae16b562aa2970acdbbf93ba256b949"
+  },
+  "art/flags/germany.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.670426,
+    "ast_hash": "cf2cd9a93b3ed17b220c8c1002aec0ec",
+    "semantic_hash": "cf2cd9a93b3ed17b220c8c1002aec0ec"
+  },
+  "art/flags/helvetian.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704268,
+    "ast_hash": "d63ec4623052e2a4916197226accba07",
+    "semantic_hash": "d63ec4623052e2a4916197226accba07"
+  },
+  "art/flags/iberian.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704276,
+    "ast_hash": "dde5b2c707a6143c0b887f0ebeb7006c",
+    "semantic_hash": "dde5b2c707a6143c0b887f0ebeb7006c"
+  },
+  "art/flags/ireland.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704288,
+    "ast_hash": "6299e1d76bae6287f272c125822a5004",
+    "semantic_hash": "6299e1d76bae6287f272c125822a5004"
+  },
+  "art/flags/italy.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704295,
+    "ast_hash": "fc86506bdfee5cf55ec222781b55e2fb",
+    "semantic_hash": "fc86506bdfee5cf55ec222781b55e2fb"
+  },
+  "art/flags/japan.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704302,
+    "ast_hash": "fcf3f1d5c0e37927a085bbe2b802c6f7",
+    "semantic_hash": "fcf3f1d5c0e37927a085bbe2b802c6f7"
+  },
+  "art/flags/lusitanian.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704311,
+    "ast_hash": "862af9e91c3f6da58602abc699255f13",
+    "semantic_hash": "862af9e91c3f6da58602abc699255f13"
+  },
+  "art/flags/netherlands.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.670432,
+    "ast_hash": "6c12664f21d9480f575e8bf68ae5186c",
+    "semantic_hash": "6c12664f21d9480f575e8bf68ae5186c"
+  },
+  "art/flags/nordlandic.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.670433,
+    "ast_hash": "b8eac6adb3bd760ae4877573440740dc",
+    "semantic_hash": "b8eac6adb3bd760ae4877573440740dc"
+  },
+  "art/flags/norway.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704338,
+    "ast_hash": "e42dc01abe9f3df006cf5ea992209fe9",
+    "semantic_hash": "e42dc01abe9f3df006cf5ea992209fe9"
+  },
+  "art/flags/poland.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704345,
+    "ast_hash": "41f129f0b0e85cdda05aece9d109b9e2",
+    "semantic_hash": "41f129f0b0e85cdda05aece9d109b9e2"
+  },
+  "art/flags/portugal.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704357,
+    "ast_hash": "b03c5942721426992b799e4fb90652ea",
+    "semantic_hash": "b03c5942721426992b799e4fb90652ea"
+  },
+  "art/flags/scotland.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704364,
+    "ast_hash": "90c255cdc6fb73574dff9046464704d6",
+    "semantic_hash": "90c255cdc6fb73574dff9046464704d6"
+  },
+  "art/flags/spain.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704373,
+    "ast_hash": "b6b7f4c571a7146dc15a4d4fe6cf90d8",
+    "semantic_hash": "b6b7f4c571a7146dc15a4d4fe6cf90d8"
+  },
+  "art/flags/sweden.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.670438,
+    "ast_hash": "a6ccd5a9b2c857e144748520cf65f8f4",
+    "semantic_hash": "a6ccd5a9b2c857e144748520cf65f8f4"
+  },
+  "art/flags/switzerland.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.670439,
+    "ast_hash": "ee3246b5afe30b2d8c6f38a58b1f1dfc",
+    "semantic_hash": "ee3246b5afe30b2d8c6f38a58b1f1dfc"
+  },
+  "art/flags/teutonic.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.67044,
+    "ast_hash": "697bc95653d1beff92ba9aa724257a9e",
+    "semantic_hash": "697bc95653d1beff92ba9aa724257a9e"
+  },
+  "art/flags/usa.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704407,
+    "ast_hash": "5dbe9659cb2e57f62bc5686a021fdf9d",
+    "semantic_hash": "5dbe9659cb2e57f62bc5686a021fdf9d"
+  },
+  "art/logo.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704414,
+    "ast_hash": "1c1875fff84d6522f5d1d0793a4a920e",
+    "semantic_hash": "1c1875fff84d6522f5d1d0793a4a920e"
+  },
+  "art/player.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704426,
+    "ast_hash": "89967ed6c65bbefa1b1d3a726d223283",
+    "semantic_hash": "89967ed6c65bbefa1b1d3a726d223283"
+  },
+  "art/shadow.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.6704435,
+    "ast_hash": "145778c58948e5b0fe0163dd2b88b85d",
+    "semantic_hash": "145778c58948e5b0fe0163dd2b88b85d"
+  },
+  "art/turf.png": {
+    "mtime": 1788391030.0,
+    "seen": 1789730469.670445,
+    "ast_hash": "6979a0a8e9bbb87fb9e1ffb90189cdec",
+    "semantic_hash": "6979a0a8e9bbb87fb9e1ffb90189cdec"
+  },
+  "audio/menu_theme.wav": {
+    "mtime": 1789736078.0204318,
+    "seen": 1789737180.2477977,
+    "ast_hash": "28c44a17c37134526aa1d0e3b6879ca8",
+    "semantic_hash": ""
+  },
+  ".agents/rules/career-mode.md": {
+    "mtime": 1789729756.3073287,
+    "seen": 1789730469.6703095,
+    "ast_hash": "a9f8be5d41e21389334b661bbf781753",
+    "semantic_hash": ""
+  },
+  ".claude/rules/graphify.md": {
+    "mtime": 1789729756.3225265,
+    "seen": 1789730469.6703424,
+    "ast_hash": "ecd1c5c386aa3149274379b4e64539c7",
+    "semantic_hash": ""
+  },
+  "docs/architecture/hubs/career-manager.md": {
+    "mtime": 1789729756.4296885,
+    "seen": 1789730469.6703928,
+    "ast_hash": "927b735479299060a744f5b2b4e1a557",
+    "semantic_hash": ""
+  },
+  "docs/architecture/hubs/heavy-player-controller.md": {
+    "mtime": 1789729756.4296885,
+    "seen": 1789730469.6703937,
+    "ast_hash": "ab1f4045a4912bc10b99f4793fc4e04c",
+    "semantic_hash": ""
+  },
+  "docs/architecture/hubs/match-world-model.md": {
+    "mtime": 1789729756.4296885,
+    "seen": 1789730469.6703947,
+    "ast_hash": "11603298b70ddf4ccb39cf2ecc8dad04",
+    "semantic_hash": ""
+  },
+  "docs/architecture/hubs/pitch-scene.md": {
+    "mtime": 1789729756.4296885,
+    "seen": 1789730469.6703954,
+    "ast_hash": "e65f9dfac78308ccd5df277c8c31f74d",
+    "semantic_hash": ""
+  },
+  "docs/architecture/hubs/player-brain.md": {
+    "mtime": 1789729756.4311922,
+    "seen": 1789730469.6703963,
+    "ast_hash": "f1dce0ba261ee215a27337b0980dbb9f",
+    "semantic_hash": ""
+  },
+  "docs/architecture/hubs/set-piece-coordinator.md": {
+    "mtime": 1789729756.4311922,
+    "seen": 1789730469.6703973,
+    "ast_hash": "2ebd5274b776cfacc0a1affe8b8007f9",
+    "semantic_hash": ""
+  },
+  "docs/agent-errata/README.md": {
+    "mtime": 1789729756.4241176,
+    "seen": 1789730469.6703837,
+    "ast_hash": "f2680f6118af2f2cf7fd902f2c01b485",
+    "semantic_hash": ""
+  },
+  "docs/agent-errata/data-and-persistence.md": {
+    "mtime": 1789740709.4690397,
+    "seen": 1789740743.4807556,
+    "ast_hash": "f4d814b5bb957ccd6ecb0977d3ee51cc",
+    "semantic_hash": ""
+  },
+  "docs/agent-errata/match-state.md": {
+    "mtime": 1789729756.4256825,
+    "seen": 1789730469.670386,
+    "ast_hash": "d5c6c89f5f5bcf7d5c49a8298cdffce6",
+    "semantic_hash": ""
+  },
+  "docs/agent-errata/physics-and-ball.md": {
+    "mtime": 1789729756.4266882,
+    "seen": 1789730469.670387,
+    "ast_hash": "2bdf716a08248194d624f5a43e3fae04",
+    "semantic_hash": ""
+  },
+  "docs/agent-errata/player-ai.md": {
+    "mtime": 1789729756.4266882,
+    "seen": 1789730469.6703877,
+    "ast_hash": "96386f616d91de8ab0727651044bbaee",
+    "semantic_hash": ""
+  },
+  "docs/agent-errata/scene-and-node-paths.md": {
+    "mtime": 1789729756.4276881,
+    "seen": 1789730469.6703887,
+    "ast_hash": "a35ab6004e598530bfd9bf477028df2a",
+    "semantic_hash": ""
+  },
+  "docs/agent-errata/session-history.md": {
+    "mtime": 1789729756.4276881,
+    "seen": 1789730469.6703894,
+    "ast_hash": "7e9e8dcc58af38811b14f25b2f6dd04c",
+    "semantic_hash": ""
+  },
+  "docs/agent-errata/set-pieces.md": {
+    "mtime": 1789729756.4286878,
+    "seen": 1789730469.6703904,
+    "ast_hash": "f0a0f7324d792327913c1ff1b8b1dbb6",
+    "semantic_hash": ""
+  },
+  "docs/agent-errata/telemetry-and-stats.md": {
+    "mtime": 1789729756.4286878,
+    "seen": 1789730469.6703913,
+    "ast_hash": "a19e799272673ce6fce82fb21a6444cb",
+    "semantic_hash": ""
+  },
+  "docs/agent-errata/ui-and-signals.md": {
+    "mtime": 1789729756.4286878,
+    "seen": 1789730469.670392,
+    "ast_hash": "09c9ac25a0d7c2a10e5bf7d1088d1157",
+    "semantic_hash": ""
+  },
+  "docs/GRAPHIFY_LIFECYCLE.md": {
+    "mtime": 1789729756.4144838,
+    "seen": 1789730469.6703734,
+    "ast_hash": "4c5f225a5c7b218fa49f1c467a4f2b17",
+    "semantic_hash": ""
+  },
+  ".agents/skills/cross-system-feature/SKILL.md": {
+    "mtime": 1789729756.317477,
+    "seen": 1789730469.6703227,
+    "ast_hash": "c1307b883291df66c386edff623feed1",
+    "semantic_hash": ""
+  },
+  ".agents/workflows/cross-system-feature.md": {
+    "mtime": 1789729748.2715356,
+    "seen": 1789730469.6703293,
+    "ast_hash": "94fcf57ddbc4f371ea208c4faf51205c",
+    "semantic_hash": ""
+  },
+  ".agents/workflows/bug-investigation.md": {
+    "mtime": 1789729748.271014,
+    "seen": 1789730469.6703284,
+    "ast_hash": "20b4fb50b381af25d003ed378efadd5f",
+    "semantic_hash": ""
+  },
+  ".agents/workflows/data-database.md": {
+    "mtime": 1789729748.2715356,
+    "seen": 1789730469.67033,
+    "ast_hash": "a12d476284e42cde3d1e5d789c7ba3a9",
+    "semantic_hash": ""
+  },
+  ".agents/workflows/feature-implementation.md": {
+    "mtime": 1789729748.2720544,
+    "seen": 1789730469.6703312,
+    "ast_hash": "e3442f2feb2d83f11ac16d159fe93e1a",
+    "semantic_hash": ""
+  },
+  ".agents/workflows/performance-work.md": {
+    "mtime": 1789729748.2720544,
+    "seen": 1789730469.670333,
+    "ast_hash": "98c5799745c5487a1cbb6615cd989719",
+    "semantic_hash": ""
+  },
+  ".agents/workflows/session-bootstrap.md": {
+    "mtime": 1789729748.2725806,
+    "seen": 1789730469.6703336,
+    "ast_hash": "3e76e474758f5830c64acb44adb1034a",
+    "semantic_hash": ""
+  },
+  ".agents/workflows/task-intake-routing.md": {
+    "mtime": 1789729748.2725806,
+    "seen": 1789730469.6703348,
+    "ast_hash": "a363735c88c733f51c09650db1dc3169",
+    "semantic_hash": ""
+  },
+  "docs/SOCIAL_SIMULATION_ARCHITECTURE.md": {
+    "mtime": 1789729756.4188137,
+    "seen": 1789730469.6703806,
+    "ast_hash": "a6e463e8b611a7909f9b307de04a4116",
+    "semantic_hash": ""
+  },
+  "tools/godot_verify.py": {
+    "mtime": 1789039601.7072334,
+    "seen": 1789730469.6702766,
+    "ast_hash": "ea7fead32fdbfb3fe17e89ab30ce03a6",
+    "semantic_hash": "ea7fead32fdbfb3fe17e89ab30ce03a6"
+  },
+  ".agents/config.json": {
+    "mtime": 1789041521.4283671,
+    "seen": 1789730469.6702154,
+    "ast_hash": "2c480932419dd1fd1d072de63a64bbc4",
+    "semantic_hash": "2c480932419dd1fd1d072de63a64bbc4"
+  },
+  ".agents/rules/godot_gdscript.md": {
+    "mtime": 1789729756.3124382,
+    "seen": 1789730469.6703148,
+    "ast_hash": "2c3656fbc4d23229c444fad0bb018061",
+    "semantic_hash": ""
+  },
+  "GEMINI.md": {
+    "mtime": 1789729756.3347745,
+    "seen": 1789730469.6703608,
+    "ast_hash": "b60a06c42b759c208cab0feeab02b56f",
+    "semantic_hash": ""
+  },
+  ".mcp.json": {
+    "mtime": 1789047084.8002977,
+    "seen": 1789730469.6702266,
+    "ast_hash": "60bee947ce64e1b90ad56e10449846ac",
+    "semantic_hash": "60bee947ce64e1b90ad56e10449846ac"
+  },
+  "scripts/build_football_kb.py": {
+    "mtime": 1789046909.6802711,
+    "seen": 1789730469.6702561,
+    "ast_hash": "eb6f41ad68e99df62ece191a7e3e7059",
+    "semantic_hash": "eb6f41ad68e99df62ece191a7e3e7059"
+  },
+  "tools/football_mcp.py": {
+    "mtime": 1789046979.2158556,
+    "seen": 1789730469.6702678,
+    "ast_hash": "80bbb18dee2a815115d7c6a821643f4a",
+    "semantic_hash": "80bbb18dee2a815115d7c6a821643f4a"
+  },
+  ".agents/rules/football-domain.md": {
+    "mtime": 1789729756.3103497,
+    "seen": 1789730469.6703115,
+    "ast_hash": "18fd874b8b33e3341c64040a08530c1d",
+    "semantic_hash": ""
+  },
+  ".agents/rules/ponytail.md": {
+    "mtime": 1789729756.313469,
+    "seen": 1789730469.6703165,
+    "ast_hash": "faebfce489f972466e9e98d0014462ca",
+    "semantic_hash": ""
+  },
+  ".claude/rules/football-domain.md": {
+    "mtime": 1789729756.3215203,
+    "seen": 1789730469.6703398,
+    "ast_hash": "18fd874b8b33e3341c64040a08530c1d",
+    "semantic_hash": ""
+  },
+  ".claude/rules/ponytail.md": {
+    "mtime": 1789729756.3235686,
+    "seen": 1789730469.6703432,
+    "ast_hash": "faebfce489f972466e9e98d0014462ca",
+    "semantic_hash": ""
+  },
+  ".agents/scripts/tool_gatekeeper.py": {
+    "mtime": 1789049376.0114276,
+    "seen": 1789730469.6702209,
+    "ast_hash": "28b7e49f748d420ad0329f580661f9ca",
+    "semantic_hash": "28b7e49f748d420ad0329f580661f9ca"
+  },
+  ".agents/scripts/tool_gatekeeper.sh": {
+    "mtime": 1789049376.0114276,
+    "seen": 1789730469.670222,
+    "ast_hash": "935a1335a54357f892a6b4628e8e0ee8",
+    "semantic_hash": "935a1335a54357f892a6b4628e8e0ee8"
+  },
+  "tools/agv_brain_pruner.py": {
+    "mtime": 1789729748.3146148,
+    "seen": 1789730469.6702569,
+    "ast_hash": "e42886012dcedbef1c7b5130cf84e5a9",
+    "semantic_hash": ""
+  },
+  "tools/agv_route.sh": {
+    "mtime": 1789049388.3101666,
+    "seen": 1789730469.6702578,
+    "ast_hash": "b918a83deb6354621fd133ba72ca21fe",
+    "semantic_hash": "b918a83deb6354621fd133ba72ca21fe"
+  },
+  "tools/mcp/gdscript_slice_server.py": {
+    "mtime": 1789049627.3666103,
+    "seen": 1789730469.6702871,
+    "ast_hash": "da16718f6ce1e56038fd407ce693844d",
+    "semantic_hash": ""
+  },
+  "tools/worktree_harness.sh": {
+    "mtime": 1789049430.7267644,
+    "seen": 1789730469.670307,
+    "ast_hash": "fb8ed3d1b229e3c240b42d110815f50f",
+    "semantic_hash": "fb8ed3d1b229e3c240b42d110815f50f"
+  },
+  ".agents/rules/gdscript_invariants.md": {
+    "mtime": 1789729756.3113937,
+    "seen": 1789730469.6703131,
+    "ast_hash": "05c33a662a0d74d695dce4f68c1c1435",
+    "semantic_hash": ""
+  },
+  ".agents/skills/check-blast-radius/SKILL.md": {
+    "mtime": 1789729756.3165064,
+    "seen": 1789730469.6703217,
+    "ast_hash": "32cbf9da0711ce81dcde966e3fa09312",
+    "semantic_hash": ""
+  },
+  "docs/GRAPHIFY_SETUP.md": {
+    "mtime": 1789049427.0579789,
+    "seen": 1789730469.6703744,
+    "ast_hash": "578b2e193440a297a572d8101c918b83",
+    "semantic_hash": ""
+  },
+  "docs/PROXY_SETUP.md": {
+    "mtime": 1789049627.050004,
+    "seen": 1789730469.670378,
+    "ast_hash": "abc6bf5ae02664f9e940dea45d9547b1",
+    "semantic_hash": ""
+  },
+  "docs/agent-errata/architecture-pivot.md": {
+    "mtime": 1789729756.4246368,
+    "seen": 1789730469.6703844,
+    "ast_hash": "3a512d5c2dc65968d1490d55d97907f5",
+    "semantic_hash": ""
+  },
+  "tools/mcp/requirements.txt": {
+    "mtime": 1789049627.3666103,
+    "seen": 1789730469.6704075,
+    "ast_hash": "e9279451336cf7a57a360f0b6f089b82",
+    "semantic_hash": ""
+  },
+  "docs/PHASE_0_FIXES.md": {
+    "mtime": 1789729756.4160533,
+    "seen": 1789730469.6703773,
+    "ast_hash": "d738a2af6b301d505605f344ded5b824",
+    "semantic_hash": ""
+  },
+  "docs/Bayesian Scouting & Attribute Weighting Implementation Plan.md": {
+    "mtime": 1789729756.4074643,
+    "seen": 1789730469.670367,
+    "ast_hash": "de39fe6c5e6b4189dd5028b5f27c65f3",
+    "semantic_hash": ""
+  },
+  "docs/Constructive League Scheduling & Break Minimization Optimization.md": {
+    "mtime": 1789729756.4094322,
+    "seen": 1789730469.6703687,
+    "ast_hash": "14ec664be877567f3594eb73df4b6bf8",
+    "semantic_hash": ""
+  },
+  "docs/Deep Football Simulation Database Source Audit & Artifact Reconnaissance v3.md": {
+    "mtime": 1789729756.4107969,
+    "seen": 1789730469.6703699,
+    "ast_hash": "f807b1030a1ca2224791d24b3f469e6a",
+    "semantic_hash": ""
+  },
+  "docs/Empirical Football Aging & Development Calibration.md": {
+    "mtime": 1789729756.4118333,
+    "seen": 1789730469.6703708,
+    "ast_hash": "71a5716be8a5f08851bf1be627d5b656",
+    "semantic_hash": ""
+  },
+  "docs/Empirical Transfer Valuation & Market Modelling.md": {
+    "mtime": 1789729756.4129274,
+    "seen": 1789730469.6703715,
+    "ast_hash": "a36e145feefebf0c76548fbb817f4010",
+    "semantic_hash": ""
+  },
+  "docs/Football Analytics Empirical Model Integration v2.md": {
+    "mtime": 1789729756.4144838,
+    "seen": 1789730469.6703727,
+    "ast_hash": "26b19a91c509ae4d8cfe826bf869e8d7",
+    "semantic_hash": ""
+  },
+  "docs/Godot 90-Tick Utility AI Simulation Engine.md": {
+    "mtime": 1789729756.415536,
+    "seen": 1789730469.6703753,
+    "ast_hash": "cc1a8e60e79cddb5c99f6a7f451c1321",
+    "semantic_hash": ""
+  },
+  "docs/PowerFootball-2D UI Architecture Plan.md": {
+    "mtime": 1789729756.4171097,
+    "seen": 1789730469.6703787,
+    "ast_hash": "b9bf3838ece128bda0eb9b3ef8eab417",
+    "semantic_hash": ""
+  },
+  "docs/PowerFootball-2D v3 Architectural & Algorithmic Research Plan.md": {
+    "mtime": 1789729756.418287,
+    "seen": 1789730469.6703799,
+    "ast_hash": "492c9080422121b0d9746a5faf4e87f0",
+    "semantic_hash": ""
+  },
+  "docs/Soccer Commentary Template Generation & PressOffice Integration.md": {
+    "mtime": 1789729756.4225302,
+    "seen": 1789730469.6703815,
+    "ast_hash": "ca71ad06b4abb10faf9f006b5bb10e37",
+    "semantic_hash": ""
+  },
+  "docs/Social Dynamics Simulation Engine Implementation.md": {
+    "mtime": 1789729756.4235854,
+    "seen": 1789730469.6703823,
+    "ast_hash": "459fcd98160547e4ea78fef9668ff060",
+    "semantic_hash": ""
+  },
+  "tools/test_pass_starvation.py": {
+    "mtime": 1789729756.4765368,
+    "seen": 1789730469.6703007,
+    "ast_hash": "a6b7de2e8c433a7fd8e206ed53b8f242",
+    "semantic_hash": ""
+  },
+  ".agents/skills/caveman/README.md": {
+    "mtime": 1789729756.315477,
+    "seen": 1789730469.6703196,
+    "ast_hash": "0bc62afc353fc8bd9880b162614da262",
+    "semantic_hash": ""
+  },
+  ".agents/skills/caveman/SKILL.md": {
+    "mtime": 1789729756.315477,
+    "seen": 1789730469.6703203,
+    "ast_hash": "b4f2aad74ebf75b3bdea1bcf90eaf68b",
+    "semantic_hash": ""
+  },
+  ".agents/skills/ponytail/SKILL.md": {
+    "mtime": 1789729756.3199825,
+    "seen": 1789730469.6703272,
+    "ast_hash": "33f013ce03c8c66a6002ef941a433b81",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/antigravity-integration.md": {
+    "mtime": 1789729756.3266535,
+    "seen": 1789730469.6703484,
+    "ast_hash": "6b8c249d52cd2853faae42c40140bd8f",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/architecture.md": {
+    "mtime": 1789729756.3276534,
+    "seen": 1789730469.6703491,
+    "ast_hash": "5f4e7e642e8527ee88d5e2f3b84550bf",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/commands.md": {
+    "mtime": 1789729756.3276534,
+    "seen": 1789730469.67035,
+    "ast_hash": "acae0c2dd898497e32674828573f52b6",
+    "semantic_hash": ""
+  },
+  ".claude/skills/graphify/references/setup.md": {
+    "mtime": 1789729756.3301587,
+    "seen": 1789730469.6703548,
+    "ast_hash": "5caa81829f841961f921fa77db97d9ea",
+    "semantic_hash": ""
+  },
+  ".kodus-readiness.yml": {
+    "mtime": 1789729756.3311656,
+    "seen": 1789730469.6703575,
+    "ast_hash": "79196018ab2a3c0fb8a51c00763d263f",
+    "semantic_hash": ""
+  },
+  "_archive/chat_gen/docs/career_screen_scene.md": {
+    "mtime": 1789731333.8325253,
+    "seen": 1789733447.690827,
+    "ast_hash": "355e7959e62e20f08493be616b3c891b",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/Plugin.cs": {
+    "mtime": 1789733984.667013,
+    "seen": 1789735191.5173724,
+    "ast_hash": "8d90fdf4d2f2e6b69017c0b7f2dd803f",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/adapters/IAudioPlayerAdapter.cs": {
+    "mtime": 1789733984.6837566,
+    "seen": 1789735191.5173745,
+    "ast_hash": "dbe95fc36a131ce9099363baadf3f941",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/adapters/Player1DAdapter.cs": {
+    "mtime": 1789733984.6998582,
+    "seen": 1789735191.5173755,
+    "ast_hash": "517f2f045295c59dfa0e44e0786064ae",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/adapters/Player2DAdapter.cs": {
+    "mtime": 1789733984.7165039,
+    "seen": 1789735191.5173764,
+    "ast_hash": "b2695b47a23400e0a6300eadb679dd6b",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/adapters/Player3DAdapter.cs": {
+    "mtime": 1789733984.7335877,
+    "seen": 1789735191.5173776,
+    "ast_hash": "f24d09840c88191bf35bddef7c8c5135",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/core/AudioHost.cs": {
+    "mtime": 1789733984.7499726,
+    "seen": 1789735191.5173786,
+    "ast_hash": "2f525fddc33d9e8af38b93aa76cf2738",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/core/AudioOptions.cs": {
+    "mtime": 1789733984.7667131,
+    "seen": 1789735191.51738,
+    "ast_hash": "2aac22dc107d03586ca8e605e2d59716",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/examples/CustomAdapterExample.cs": {
+    "mtime": 1789733984.7838633,
+    "seen": 1789735191.5173814,
+    "ast_hash": "dd3da309b6ddb375360558fca4e38ef4",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/examples/CustomBusExample.cs": {
+    "mtime": 1789733984.800247,
+    "seen": 1789735191.5173824,
+    "ast_hash": "db8f02dee74947f7568ba3f72763fd10",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/examples/CustomEvictionExample.cs": {
+    "mtime": 1789733984.8174224,
+    "seen": 1789735191.5173836,
+    "ast_hash": "dd6e25185e664d156e445ff4c2564606",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/examples/CustomPooledHandlerExample.cs": {
+    "mtime": 1789733984.8335347,
+    "seen": 1789735191.5173848,
+    "ast_hash": "49e476408becb6d024df00122bdfa28d",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/examples/DeterministicRngExample.cs": {
+    "mtime": 1789733984.850519,
+    "seen": 1789735191.5173855,
+    "ast_hash": "e534be656d0bcff7cdeea54caaffcc4f",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/examples/MusicExample.cs": {
+    "mtime": 1789733984.8673096,
+    "seen": 1789735191.5173864,
+    "ast_hash": "118e9408ae6a716aaf31c24f9769fe8b",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/examples/PositionalSfxExample.cs": {
+    "mtime": 1789733984.8832273,
+    "seen": 1789735191.5173876,
+    "ast_hash": "4ad90d99642c5665e191c2d95a7d4484",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/examples/SfxExample.cs": {
+    "mtime": 1789733984.9001513,
+    "seen": 1789735191.5173883,
+    "ast_hash": "6f0a691e80e0fd44b5761a58d340940a",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/examples/SfxOptionsExample.cs": {
+    "mtime": 1789733984.9168603,
+    "seen": 1789735191.5173893,
+    "ast_hash": "f193f08ffa3578fc6905b9dde9b53d71",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/extensions/AudioServiceExtensions.cs": {
+    "mtime": 1789733984.9337907,
+    "seen": 1789735191.5173903,
+    "ast_hash": "5e0d882fa47f6903529748bcf26f1b37",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/handlers/PooledBusHandler.cs": {
+    "mtime": 1789733984.9499857,
+    "seen": 1789735191.5173912,
+    "ast_hash": "540c71951035e5639cba48748e00a157",
+    "semantic_hash": ""
+  },
+  "addons/audio_service/handlers/StreamedBusHandler.cs": {
+    "mtime": 1789733984.9666805,
+    "seen": 1789735191.5173922,
+    "ast_hash": "31585dadacc598b4106bf95690ce115b",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/DialogueManager.cs": {
+    "mtime": 1789733909.210243,
+    "seen": 1789735191.517393,
+    "ast_hash": "9397084b41b0bc82d5af3689c1455013",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/example_balloon/ExampleBalloon.cs": {
+    "mtime": 1789733910.0017445,
+    "seen": 1789735191.5173938,
+    "ast_hash": "c2351a20ba9a9484acc0c244441b85a5",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/nodes/actionable/DialogueActionable2D.cs": {
+    "mtime": 1789733910.168339,
+    "seen": 1789735191.517395,
+    "ast_hash": "99ef7bdf23f37a44218507a9d02b0dbf",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/nodes/actionable/DialogueActionable3D.cs": {
+    "mtime": 1789733910.184883,
+    "seen": 1789735191.5173957,
+    "ast_hash": "3c352b7661e8cece909e379d0183be34",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/nodes/context/DialogueStateContext.cs": {
+    "mtime": 1789733910.26825,
+    "seen": 1789735191.5173965,
+    "ast_hash": "dc269c2500e47807d7995f2ef8170e26",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/nodes/dialogue_label/DialogueLabel.cs": {
+    "mtime": 1789733910.318443,
+    "seen": 1789735191.5173974,
+    "ast_hash": "d61d655d82c9b4eac7e68ceeecc897fb",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/nodes/marker/DialogueMarker2D.cs": {
+    "mtime": 1789733910.3848808,
+    "seen": 1789735191.5173984,
+    "ast_hash": "01e142855099c572f7f716f38603bf7b",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/nodes/marker/DialogueMarker3D.cs": {
+    "mtime": 1789733910.4020977,
+    "seen": 1789735191.5173988,
+    "ast_hash": "91eac37e328f4c06a40081b6ffe71ee2",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/nodes/responses_menu/DialogueResponsesMenu.cs": {
+    "mtime": 1789733910.4848418,
+    "seen": 1789735191.5173998,
+    "ast_hash": "9fdff4d1dcde73a61359ba46367bd874",
+    "semantic_hash": ""
+  },
+  "addons/boot_splash_plus/README.md": {
+    "mtime": 1789734342.0729797,
+    "seen": 1789735191.5175633,
+    "ast_hash": "9ae2ff83f48dddce703aebf9bb55aa67",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/ATTRIBUTIONS.md": {
+    "mtime": 1789733935.9316561,
+    "seen": 1789735191.517565,
+    "ast_hash": "27c0cd050b75f837ed67136b08fa0e2c",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/CompanionSkills/godot-mcp-toolkit/SKILL.md": {
+    "mtime": 1789733935.9899135,
+    "seen": 1789735191.5175657,
+    "ast_hash": "a56e0d1ffa1e130e7b0c489d6e883f75",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/CompanionSkills/godot-mcp-toolkit/references/input-events.md": {
+    "mtime": 1789733936.0072029,
+    "seen": 1789735191.5175667,
+    "ast_hash": "6facbc21bf28d8b428c24eb7dd63be0f",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/CompanionSkills/godot-mcp-toolkit/references/parallel-sessions.md": {
+    "mtime": 1789733936.0159397,
+    "seen": 1789735191.5175674,
+    "ast_hash": "8438f7d5853f367020a7a8287fb2f592",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/CompanionSkills/godot-mcp-toolkit/references/type-wrappers.md": {
+    "mtime": 1789733935.9990952,
+    "seen": 1789735191.5175686,
+    "ast_hash": "28bcc170fd3850b9e617c278fbb6f416",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/CompanionSkills/mcp-extension-creator/SKILL.md": {
+    "mtime": 1789733935.9396951,
+    "seen": 1789735191.5175693,
+    "ast_hash": "3e45a1ee121cce86bb6951711f4fc90c",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/CompanionSkills/mcp-extension-creator/references/cancellation.md": {
+    "mtime": 1789733935.9823692,
+    "seen": 1789735191.51757,
+    "ast_hash": "bda8d164434ab415f67087bacc3ad6be",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/CompanionSkills/mcp-extension-creator/references/csharp-extensions.md": {
+    "mtime": 1789733935.9656532,
+    "seen": 1789735191.5175707,
+    "ast_hash": "9e754ee949e3e4549078bd44cbebde48",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/CompanionSkills/mcp-extension-creator/references/exporting.md": {
+    "mtime": 1789733935.9575353,
+    "seen": 1789735191.5175717,
+    "ast_hash": "ddaccfe4e85b61db56db82f2602c359c",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/CompanionSkills/mcp-extension-creator/references/type-coercion.md": {
+    "mtime": 1789733935.9489584,
+    "seen": 1789735191.5175726,
+    "ast_hash": "55a0e63ff57e7513b7b939d7354d25d7",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/README.md": {
+    "mtime": 1789733937.9914052,
+    "seen": 1789735191.517573,
+    "ast_hash": "fa15f27557f39cc0d324e179f2e1ebfb",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/docs/advanced_configuration.md": {
+    "mtime": 1789733937.632921,
+    "seen": 1789735191.517574,
+    "ast_hash": "72b8eb8e4b9af1bba931c47a5addb2f2",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/docs/companion-skills.md": {
+    "mtime": 1789733937.6410291,
+    "seen": 1789735191.5175753,
+    "ast_hash": "2f2dd7fbabaf217282fdf7c912698cb9",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/docs/compatibility.md": {
+    "mtime": 1789733937.6660295,
+    "seen": 1789735191.517576,
+    "ast_hash": "631dff28d71d4c5318ed11d69b7f31e6",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/docs/extending.md": {
+    "mtime": 1789733937.6740594,
+    "seen": 1789735191.5175767,
+    "ast_hash": "44f1cd557dce1e3e2de2c4a211d81f57",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/docs/multi-instance.md": {
+    "mtime": 1789733937.649364,
+    "seen": 1789735191.51758,
+    "ast_hash": "ffd5ed720e8cce68693cbfe5cae386f7",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/docs/security-recommendations.md": {
+    "mtime": 1789733937.6568897,
+    "seen": 1789735191.517581,
+    "ast_hash": "086029ebca6978b91ecb2a60e5cc1e6a",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Royalty-Free License (Link).pdf": {
+    "mtime": 1789733945.017334,
+    "seen": 1789735191.517636,
+    "ast_hash": "56091aa50898e7166fa06d669ace3f42",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/- Thank You.png": {
+    "mtime": 1789733945.0006156,
+    "seen": 1789735191.5176382,
+    "ast_hash": "c91ad86f4b8b3974ed1ce4ece107b2df",
+    "semantic_hash": ""
+  },
+  "addons/GDQuest_GDScript_formatter/images/gdquest_logo.svg": {
+    "mtime": 1789733898.3496218,
+    "seen": 1789735191.5176399,
+    "ast_hash": "3ca166f4704d1f410b616c9ccb942cda",
+    "semantic_hash": ""
+  },
+  "addons/GDQuest_GDScript_formatter/images/icons/download.svg": {
+    "mtime": 1789733898.3155677,
+    "seen": 1789735191.5176406,
+    "ast_hash": "611496b96fcd658c7161ef86db08b8f5",
+    "semantic_hash": ""
+  },
+  "addons/GDQuest_GDScript_formatter/images/icons/link.svg": {
+    "mtime": 1789733898.307727,
+    "seen": 1789735191.5176415,
+    "ast_hash": "7bed7470d8adb9c8bf126e5c8f11e863",
+    "semantic_hash": ""
+  },
+  "addons/GDQuest_GDScript_formatter/images/icons/resources.svg": {
+    "mtime": 1789733898.2655952,
+    "seen": 1789735191.5176423,
+    "ast_hash": "e985222950fa3ef5c7baf31df4b8d0e6",
+    "semantic_hash": ""
+  },
+  "addons/GDQuest_GDScript_formatter/images/icons/settings.svg": {
+    "mtime": 1789733898.3411374,
+    "seen": 1789735191.5176432,
+    "ast_hash": "37fd20daff2ffbf3a31883e36c251e72",
+    "semantic_hash": ""
+  },
+  "addons/GDQuest_GDScript_formatter/images/icons/trash.svg": {
+    "mtime": 1789733898.2907088,
+    "seen": 1789735191.517644,
+    "ast_hash": "424f3f5e25f02cd9da8bf15cade8b6a8",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/assets/cue.svg": {
+    "mtime": 1789733909.2352662,
+    "seen": 1789735191.517645,
+    "ast_hash": "ab17eef2b20565beba5ca77c1393d8a3",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/assets/icon.svg": {
+    "mtime": 1789733909.2521985,
+    "seen": 1789735191.5176458,
+    "ast_hash": "836758827ba219577da18bcb389a4ed8",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/assets/logo.svg": {
+    "mtime": 1789733909.2679706,
+    "seen": 1789735191.5176466,
+    "ast_hash": "0f700e7cf149311ac470a6e3b967ef48",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/assets/region.svg": {
+    "mtime": 1789733909.2847118,
+    "seen": 1789735191.5176475,
+    "ast_hash": "d2c0feb98faf5692d57c324022280bbf",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/assets/resource.svg": {
+    "mtime": 1789733909.3019216,
+    "seen": 1789735191.5176485,
+    "ast_hash": "a114b31dc47a312fb92897a02d8a032c",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/assets/update.svg": {
+    "mtime": 1789733909.3184986,
+    "seen": 1789735191.5176494,
+    "ast_hash": "244057406f7243e41f7f2df1a60ebe26",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/nodes/actionable/dialogue_actionable_2d.svg": {
+    "mtime": 1789733910.2187662,
+    "seen": 1789735191.5176501,
+    "ast_hash": "4c21dae4b403fa32ddd1f679662b047f",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/nodes/actionable/dialogue_actionable_3d.svg": {
+    "mtime": 1789733910.2526197,
+    "seen": 1789735191.517651,
+    "ast_hash": "f76485d008f8ff6fa8fae62bb3378a01",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/nodes/context/dialogue_state_context.svg": {
+    "mtime": 1789733910.3018868,
+    "seen": 1789735191.5176523,
+    "ast_hash": "b39e1d721f040bf1516bc3882f9e6a45",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/nodes/dialogue_label/dialogue_label.svg": {
+    "mtime": 1789733910.3596892,
+    "seen": 1789735191.517653,
+    "ast_hash": "e855ffc79e08f93b1b220a38c8d4e6bd",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/nodes/marker/dialogue_marker_2d.svg": {
+    "mtime": 1789733910.4354787,
+    "seen": 1789735191.5176537,
+    "ast_hash": "298a0948835b37ea0ba811e7b356f102",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/nodes/marker/dialogue_marker_3d.svg": {
+    "mtime": 1789733910.4682522,
+    "seen": 1789735191.517655,
+    "ast_hash": "8f4e380cb42aca445b528030ba73e3f0",
+    "semantic_hash": ""
+  },
+  "addons/dialogue_manager/nodes/responses_menu/dialogue_responses_menu.svg": {
+    "mtime": 1789733910.5189307,
+    "seen": 1789735191.5176554,
+    "ast_hash": "652126c8037cc61d4a0acf404331a873",
+    "semantic_hash": ""
+  },
+  "addons/godot_mcp_toolkit/icon.svg": {
+    "mtime": 1789733937.1989074,
+    "seen": 1789735191.5176563,
+    "ast_hash": "b0979dcb7d96108bedfb852b7c71a0db",
+    "semantic_hash": ""
+  },
+  "art/ridge_bridge_studios.png": {
+    "mtime": 1789735068.8370214,
+    "seen": 1789735191.5176966,
+    "ast_hash": "328914d668a055c09d8b73d3c3130839",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Community Requests/Abacus.wav": {
+    "mtime": 1789733947.0676942,
+    "seen": 1789735191.5176995,
+    "ast_hash": "8325e69bb3acc0e5bfa8bfe8ff1f616d",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Community Requests/Air Raid Siren.wav": {
+    "mtime": 1789733946.8969102,
+    "seen": 1789735191.5177004,
+    "ast_hash": "cd4fd49d41916798aa2ddea0d85da59f",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Community Requests/Animal Pain.wav": {
+    "mtime": 1789733947.0256042,
+    "seen": 1789735191.5177014,
+    "ast_hash": "460cc0be4535aa7417548a143a55d8a2",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Community Requests/Dog Yap.wav": {
+    "mtime": 1789733946.9764173,
+    "seen": 1789735191.517702,
+    "ast_hash": "b4d1f9ea35c7314412aff7b2a1f82ac0",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Community Requests/Drill.wav": {
+    "mtime": 1789733946.992646,
+    "seen": 1789735191.5177028,
+    "ast_hash": "bf542abb170b751b49afdd1bd98f1eca",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Community Requests/Firework.wav": {
+    "mtime": 1789733946.9426372,
+    "seen": 1789735191.5177038,
+    "ast_hash": "f16451aa9117369402e0be9a10517d29",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Community Requests/Hammer Fall.wav": {
+    "mtime": 1789733946.959388,
+    "seen": 1789735191.5177047,
+    "ast_hash": "3a956ca170cb54ca92297f32fb39a69a",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Community Requests/Magic Effect Loop.wav": {
+    "mtime": 1789733947.0512059,
+    "seen": 1789735191.5177057,
+    "ast_hash": "772e82de2425469a70d6ad47d9367e53",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Community Requests/Molotov.wav": {
+    "mtime": 1789733947.0843012,
+    "seen": 1789735191.5177064,
+    "ast_hash": "60a3e9630aa21c3a274e4f3c3cffe86a",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Community Requests/Rolling Thunder.wav": {
+    "mtime": 1789733946.9139931,
+    "seen": 1789735191.5177076,
+    "ast_hash": "f265de2718ccf85ccfcc96cb5991b02b",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Community Requests/Stoke Coal Oven.wav": {
+    "mtime": 1789733946.926038,
+    "seen": 1789735191.5177155,
+    "ast_hash": "72e7730d18d24dd364ca4517bad5ef31",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Community Requests/Wood Lathe.wav": {
+    "mtime": 1789733947.009396,
+    "seen": 1789735191.5177162,
+    "ast_hash": "f7a8c404acc82babd8f06311bc805b5f",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Environment/Busy City Apartment Interior Loop.wav": {
+    "mtime": 1789733946.066657,
+    "seen": 1789735191.5177176,
+    "ast_hash": "72e8864854db1d411a532a99246a1c3d",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Environment/Busy City Apartment Kitchen Loop.wav": {
+    "mtime": 1789733945.8590941,
+    "seen": 1789735191.5177183,
+    "ast_hash": "ac4a29b757cb6b38a6819a7ddcf47bbf",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Environment/Dreamscape Loop.wav": {
+    "mtime": 1789733945.9975073,
+    "seen": 1789735191.5177193,
+    "ast_hash": "91c3575546a8947c9db7f2287974fec5",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Environment/Grassy Field Loop.wav": {
+    "mtime": 1789733945.7862062,
+    "seen": 1789735191.5177202,
+    "ast_hash": "1d0194fac7134de46ed783249c7a4e6c",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Environment/Hail Storm Loop.wav": {
+    "mtime": 1789733945.9325845,
+    "seen": 1789735191.5177212,
+    "ast_hash": "970cd2ae2cd96045559b40c302d136d4",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Environment/Nightmare Loop.wav": {
+    "mtime": 1789733945.719731,
+    "seen": 1789735191.517722,
+    "ast_hash": "35581c25610aa42a327ec6a28b40afe5",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Environment/Ocean Loop.wav": {
+    "mtime": 1789733945.6560915,
+    "seen": 1789735191.5177226,
+    "ast_hash": "89504cf3ecdb4111018bf8d08fc3d96e",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Environment/Rain Forest Loop.wav": {
+    "mtime": 1789733945.5817964,
+    "seen": 1789735191.5177233,
+    "ast_hash": "47c943b86c09134e94489264517944dc",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Environment/Rain Urban Loop.wav": {
+    "mtime": 1789733945.515218,
+    "seen": 1789735191.5177245,
+    "ast_hash": "0bdb9d8102f61f1a258878baee997dcb",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Environment/Rainy City Alley Loop.wav": {
+    "mtime": 1789733945.3783412,
+    "seen": 1789735191.5177252,
+    "ast_hash": "192dc47817e0063a67dcfff9f049be61",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Environment/Suburb Ext Distant Traffic Loop.wav": {
+    "mtime": 1789733945.4455297,
+    "seen": 1789735191.5177262,
+    "ast_hash": "1e35a6124736d4450e2e6bc8cd15d67f",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Environment/Wind Loop.wav": {
+    "mtime": 1789733945.313271,
+    "seen": 1789735191.517727,
+    "ast_hash": "a6792abf0f8bdabf1fb2192dacbc3360",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Hollywood/Bust Door Open.wav": {
+    "mtime": 1789733947.5589504,
+    "seen": 1789735191.5177279,
+    "ast_hash": "86a220e21ed369f07cfde88f8303fff4",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Hollywood/Deathpunch.wav": {
+    "mtime": 1789733947.6086094,
+    "seen": 1789735191.5177286,
+    "ast_hash": "47df3424e20cbad97872b9cbfd5890c7",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Hollywood/Earthquake Loop.wav": {
+    "mtime": 1789733947.545922,
+    "seen": 1789735191.5177293,
+    "ast_hash": "b1018260b8e12b42e2ac4987febd4665",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Hollywood/Heavy Gun Reload.wav": {
+    "mtime": 1789733947.676265,
+    "seen": 1789735191.51773,
+    "ast_hash": "382fca5b2c09368b6786a62c8a472e06",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Hollywood/Karate Punch.wav": {
+    "mtime": 1789733947.5930512,
+    "seen": 1789735191.5177307,
+    "ast_hash": "f5654ae7eecaf53f3f7d4c014dc172bd",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Hollywood/Knife Kills.wav": {
+    "mtime": 1789733947.7084947,
+    "seen": 1789735191.5177317,
+    "ast_hash": "4d712e9d46a567dc0975ee9183b163e0",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Hollywood/Mega Bomb.wav": {
+    "mtime": 1789733947.5764897,
+    "seen": 1789735191.5177326,
+    "ast_hash": "4ea4f682a2af0b80f1de068d9e14d42d",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Hollywood/Metal Glass Destruction.wav": {
+    "mtime": 1789733947.6257725,
+    "seen": 1789735191.5177333,
+    "ast_hash": "1b2e67b4b17c7edafb1157b21862d8f8",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Hollywood/Mini Rocket Shot.wav": {
+    "mtime": 1789733947.6585977,
+    "seen": 1789735191.517734,
+    "ast_hash": "bb94c7dd9d3a9200975fc6b8d4f1c055",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Hollywood/Reward.wav": {
+    "mtime": 1789733947.6429455,
+    "seen": 1789735191.517736,
+    "ast_hash": "6433052833acbdda3f2de7f69c017ba7",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Hollywood/Titan Handgun.wav": {
+    "mtime": 1789733947.692816,
+    "seen": 1789735191.5177367,
+    "ast_hash": "ba255c0a78e6778e3ed4643cdc926530",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Hollywood/Wooden Crate Destruction.wav": {
+    "mtime": 1789733947.7252767,
+    "seen": 1789735191.5177374,
+    "ast_hash": "817aaa92db7f422d5107f310d3640f19",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Horror/Bleak Moon Piano.wav": {
+    "mtime": 1789733947.3758311,
+    "seen": 1789735191.5177386,
+    "ast_hash": "3fd174b6019fbf87a10d8b200cc22d97",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Horror/Dissonance.wav": {
+    "mtime": 1789733947.4282737,
+    "seen": 1789735191.5177393,
+    "ast_hash": "b9302bccd0a8bd3fd6d74658a8498ef4",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Horror/Ghost Cantata.wav": {
+    "mtime": 1789733947.360826,
+    "seen": 1789735191.5177402,
+    "ast_hash": "9b6292ef12c1addcb5e058782234e34b",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Horror/Gore And Larvae Loop.wav": {
+    "mtime": 1789733947.310409,
+    "seen": 1789735191.517741,
+    "ast_hash": "7ce11214e4b4c8c3623c08046cd743b7",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Horror/It Laughs At You.wav": {
+    "mtime": 1789733947.442303,
+    "seen": 1789735191.517742,
+    "ast_hash": "b485f1a6eae3cc7e1c4bcfb9962b44f8",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Horror/Looney TV.wav": {
+    "mtime": 1789733947.4598272,
+    "seen": 1789735191.5177426,
+    "ast_hash": "8214d5be03893b6065358265577061d9",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Horror/Metallic Trembling.wav": {
+    "mtime": 1789733947.3311348,
+    "seen": 1789735191.5177433,
+    "ast_hash": "ffd9d70bf910f99587f789f3fc994508",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Horror/Noise Wave.wav": {
+    "mtime": 1789733947.3416924,
+    "seen": 1789735191.517744,
+    "ast_hash": "13f752dd195ccf2331706b900b77ce12",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Horror/Pain Glitch.wav": {
+    "mtime": 1789733947.4759274,
+    "seen": 1789735191.5177448,
+    "ast_hash": "24554653c4c80ab2bee314907a1cf53f",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Horror/Reality Rift.wav": {
+    "mtime": 1789733947.3920014,
+    "seen": 1789735191.5177457,
+    "ast_hash": "72c81a699031c0181e92d60d3b230b82",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Horror/Scrapemare.wav": {
+    "mtime": 1789733947.5140858,
+    "seen": 1789735191.5177462,
+    "ast_hash": "d21dd4752a7aa501cd1ff2e78c210d6f",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Horror/Wind Of Rotting.wav": {
+    "mtime": 1789733947.5261524,
+    "seen": 1789735191.5177472,
+    "ast_hash": "bef93f1367f1dae8d45566b748869855",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Jingles & Stingers/Area Discovered.wav": {
+    "mtime": 1789733946.8517656,
+    "seen": 1789735191.5177479,
+    "ast_hash": "21539ccfa2f8e654a21e775e14e3af2b",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Jingles & Stingers/Count Down.wav": {
+    "mtime": 1789733946.8668017,
+    "seen": 1789735191.5177488,
+    "ast_hash": "87c1af78f22e12d4b4194e4d9ca5d1e1",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Jingles & Stingers/Fail.wav": {
+    "mtime": 1789733946.7507963,
+    "seen": 1789735191.5177495,
+    "ast_hash": "54a71b38ca8ba40afa9688cc53612429",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Jingles & Stingers/Full Heal.wav": {
+    "mtime": 1789733946.734084,
+    "seen": 1789735191.5177503,
+    "ast_hash": "b1bdfdda9db8e7d0962ef6f59e008f44",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Jingles & Stingers/Game Over.wav": {
+    "mtime": 1789733946.7846472,
+    "seen": 1789735191.517751,
+    "ast_hash": "b3c69558a072706fb3b0b268c0e210e2",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Jingles & Stingers/Health Low.wav": {
+    "mtime": 1789733946.6842287,
+    "seen": 1789735191.5177522,
+    "ast_hash": "bd2eadd89bf99403687dc96ae2c4f202",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Jingles & Stingers/Level Up.wav": {
+    "mtime": 1789733946.7168174,
+    "seen": 1789735191.517753,
+    "ast_hash": "f00d9929f09bc0f882785e5f759c2a5a",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Jingles & Stingers/Load In.wav": {
+    "mtime": 1789733946.8165615,
+    "seen": 1789735191.5177536,
+    "ast_hash": "669388a3774efeddb1e983e6a515c8e7",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Jingles & Stingers/Log Off.wav": {
+    "mtime": 1789733946.8008819,
+    "seen": 1789735191.5177546,
+    "ast_hash": "504c7133cf7b17561fcaa018eb52e8d5",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Jingles & Stingers/Milestone.wav": {
+    "mtime": 1789733946.7673824,
+    "seen": 1789735191.5177555,
+    "ast_hash": "a99d46075beb29ef8ab8f34ed0f532a2",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Jingles & Stingers/Success.wav": {
+    "mtime": 1789733946.699999,
+    "seen": 1789735191.5177562,
+    "ast_hash": "0fff87a61a3bb2bdf0343550f563ff3f",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Jingles & Stingers/Welcome.wav": {
+    "mtime": 1789733946.8344948,
+    "seen": 1789735191.5177572,
+    "ast_hash": "2372d5de76d9cc3392ad2a27e24c6f4f",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Magic/Acid Attack.wav": {
+    "mtime": 1789733946.251039,
+    "seen": 1789735191.517758,
+    "ast_hash": "e61c133d2538f073f836e7eb2346e5e5",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Magic/Air Attack.wav": {
+    "mtime": 1789733946.2006528,
+    "seen": 1789735191.5177586,
+    "ast_hash": "e45127c73f5b6c5873d5c4f7850a000c",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Magic/Earth Attack.wav": {
+    "mtime": 1789733946.1671934,
+    "seen": 1789735191.5177596,
+    "ast_hash": "e674bf1dacc70e193ee8acd9f84e8187",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Magic/Fire Attack.wav": {
+    "mtime": 1789733946.2172487,
+    "seen": 1789735191.5177605,
+    "ast_hash": "1b1271c06a3ce1041f72c65b07063b1e",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Magic/Holy Healing.wav": {
+    "mtime": 1789733946.1508014,
+    "seen": 1789735191.5177612,
+    "ast_hash": "52c96d237ce7ca810c5cf45006b3d677",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Magic/Holy Missile.wav": {
+    "mtime": 1789733946.117942,
+    "seen": 1789735191.517762,
+    "ast_hash": "60dab7a80c03ee5863fff62049796261",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Magic/Ice Attack.wav": {
+    "mtime": 1789733946.0842218,
+    "seen": 1789735191.517763,
+    "ast_hash": "86fe8ea841595b2807b6cfd0e11b1be5",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Magic/Magic Seal.wav": {
+    "mtime": 1789733946.267071,
+    "seen": 1789735191.5177636,
+    "ast_hash": "e6c7210f708062594beb1948b0f6e312",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Magic/Necromantic Attack.wav": {
+    "mtime": 1789733946.2344618,
+    "seen": 1789735191.5177646,
+    "ast_hash": "ca7abbb1679af0b8cb525edad40c52ab",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Magic/Necromantic Healing.wav": {
+    "mtime": 1789733946.100824,
+    "seen": 1789735191.517765,
+    "ast_hash": "18bc042a4fab7edb68dfe82d37d732f5",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Magic/Resurrection.wav": {
+    "mtime": 1789733946.1844623,
+    "seen": 1789735191.517766,
+    "ast_hash": "bad51f9fe99e69125d13dd4490d31600",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Magic/Water Attack.wav": {
+    "mtime": 1789733946.1336856,
+    "seen": 1789735191.517767,
+    "ast_hash": "3cba5a459d81f9af70ffcb69dc96ba57",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Medieval/Arrow Hit.wav": {
+    "mtime": 1789733946.367365,
+    "seen": 1789735191.5177677,
+    "ast_hash": "8e63d6fac015216c6ec054bf59ef3f74",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Medieval/Bow Shoot.wav": {
+    "mtime": 1789733946.4171014,
+    "seen": 1789735191.5177684,
+    "ast_hash": "a91f8535876edb66044ba255f434eb0c",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Medieval/Channel Power Up Loop.wav": {
+    "mtime": 1789733946.2869372,
+    "seen": 1789735191.517769,
+    "ast_hash": "a361777884cf907f8141e2c4310a815c",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Medieval/Equip.wav": {
+    "mtime": 1789733946.4339614,
+    "seen": 1789735191.51777,
+    "ast_hash": "857e0454b9dd955c813b6ed78c05b793",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Medieval/Horse Gallop Loop.wav": {
+    "mtime": 1789733946.306612,
+    "seen": 1789735191.517771,
+    "ast_hash": "5baa74d48d66bd7f5b48cafef4f504c7",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Medieval/Loot Gold.wav": {
+    "mtime": 1789733946.450912,
+    "seen": 1789735191.5177717,
+    "ast_hash": "14e9e7ebbded754a04b310dcc1e29c96",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Medieval/Metal Twang.wav": {
+    "mtime": 1789733946.3510041,
+    "seen": 1789735191.517773,
+    "ast_hash": "7de0c478af6213354cebbc5c21f2e48a",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Medieval/Parry.wav": {
+    "mtime": 1789733946.333805,
+    "seen": 1789735191.5177736,
+    "ast_hash": "1e76635f477140bdfcfce89fb46335ed",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Medieval/Power Up.wav": {
+    "mtime": 1789733946.4677005,
+    "seen": 1789735191.5177743,
+    "ast_hash": "a2c8f9d32335754655122ffdcdd45b4d",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Medieval/Shield Block.wav": {
+    "mtime": 1789733946.383697,
+    "seen": 1789735191.5177753,
+    "ast_hash": "a85d02d61b90114c4b49ac86af8090ed",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Medieval/Weapon Upgrade.wav": {
+    "mtime": 1789733946.4008353,
+    "seen": 1789735191.517776,
+    "ast_hash": "125db092ae95b1f84a53c5801f948e34",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Medieval/Weapon Whoosh.wav": {
+    "mtime": 1789733946.3181696,
+    "seen": 1789735191.517777,
+    "ast_hash": "ca8a56b8a228228b192c6b3c69a9954d",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Motions and Impacts/Impact Axe Fall.wav": {
+    "mtime": 1789733948.1258948,
+    "seen": 1789735191.5177777,
+    "ast_hash": "9df7471b39ba9baec13b4b4b758df250",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Motions and Impacts/Impact Metal Hatch.wav": {
+    "mtime": 1789733948.0926027,
+    "seen": 1789735191.5177784,
+    "ast_hash": "0c1fd161b669a11ba28a960b3458feb5",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Motions and Impacts/Impact Redwood.wav": {
+    "mtime": 1789733948.0423124,
+    "seen": 1789735191.517779,
+    "ast_hash": "9571880f1d8ff20df2a5d1b49176f9ba",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Motions and Impacts/Impact Vox Hammer.wav": {
+    "mtime": 1789733948.0091126,
+    "seen": 1789735191.5177803,
+    "ast_hash": "0ba0fecc6d90d55d758980ca17b58095",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Motions and Impacts/Riser Distorted Wave.wav": {
+    "mtime": 1789733948.112324,
+    "seen": 1789735191.517781,
+    "ast_hash": "5810e5c350208b7aa612c24948c713bd",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Motions and Impacts/Swoosh Machines.wav": {
+    "mtime": 1789733948.0760405,
+    "seen": 1789735191.5177817,
+    "ast_hash": "7bf554ae99a5d536e71ca8a0248d06e7",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Motions and Impacts/Swoosh Pirate Ship.wav": {
+    "mtime": 1789733948.1597235,
+    "seen": 1789735191.5177827,
+    "ast_hash": "22d400204392ee2d738ea6e6a4182531",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Motions and Impacts/Swoosh Thunder.wav": {
+    "mtime": 1789733948.0262365,
+    "seen": 1789735191.5177836,
+    "ast_hash": "7a98de66d3677079aa1a888a4b8864b9",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Motions and Impacts/Transition Solemn.wav": {
+    "mtime": 1789733948.0634365,
+    "seen": 1789735191.5177844,
+    "ast_hash": "07ffd704b283f8ec6b372e6adda51b92",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Motions and Impacts/Whoosh Cyberwave.wav": {
+    "mtime": 1789733947.976009,
+    "seen": 1789735191.517785,
+    "ast_hash": "616c71fbd44c39ab4ca5dbcbd5cdbff2",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Motions and Impacts/Whoosh Gong.wav": {
+    "mtime": 1789733947.9930608,
+    "seen": 1789735191.5177858,
+    "ast_hash": "0e736b0808214106570709682e442708",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Motions and Impacts/Whoosh Medieval.wav": {
+    "mtime": 1789733948.1431122,
+    "seen": 1789735191.5177867,
+    "ast_hash": "92ff66f38a39c69d61dde7d38535948c",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Retro/Attack.wav": {
+    "mtime": 1789733946.484012,
+    "seen": 1789735191.5177877,
+    "ast_hash": "e50a241006319957697adfc83558cb67",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Retro/Charge.wav": {
+    "mtime": 1789733946.6175408,
+    "seen": 1789735191.5177884,
+    "ast_hash": "43c6f4893f33a4e24a2df32ae2575c3a",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Retro/Combo.wav": {
+    "mtime": 1789733946.633916,
+    "seen": 1789735191.5177891,
+    "ast_hash": "95e6dd323f3d460b1fe2b1dd28cb3169",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Retro/Damage.wav": {
+    "mtime": 1789733946.5174353,
+    "seen": 1789735191.5177898,
+    "ast_hash": "1836ed51202934b5ec74c8e8b9ee0188",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Retro/Fail.wav": {
+    "mtime": 1789733946.5851455,
+    "seen": 1789735191.5177908,
+    "ast_hash": "1eebe80b493b791efd14655ec8728d3b",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Retro/Heal.wav": {
+    "mtime": 1789733946.667387,
+    "seen": 1789735191.5177915,
+    "ast_hash": "2c91759c4b54d2137d3030d7971e12ed",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Retro/Jump.wav": {
+    "mtime": 1789733946.6510994,
+    "seen": 1789735191.5177925,
+    "ast_hash": "fa12b7b7db7239eb257527f0c0938262",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Retro/Path Blocked.wav": {
+    "mtime": 1789733946.6008465,
+    "seen": 1789735191.5177932,
+    "ast_hash": "9439ea33161e94b96560f56717f62b3a",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Retro/Power Up.wav": {
+    "mtime": 1789733946.5680156,
+    "seen": 1789735191.517794,
+    "ast_hash": "91ed169d9ded57281460528377c94bb4",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Retro/Slide.wav": {
+    "mtime": 1789733946.5344977,
+    "seen": 1789735191.5177946,
+    "ast_hash": "f84298d434d31f133f672b3fa3dfb0eb",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Retro/Start.wav": {
+    "mtime": 1789733946.5506935,
+    "seen": 1789735191.5177953,
+    "ast_hash": "72a160c69932b7179a9a213bd66137e0",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Retro/Success.wav": {
+    "mtime": 1789733946.5005727,
+    "seen": 1789735191.517796,
+    "ast_hash": "9d7ae36b48967c57c78153ea34184ea4",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Sci-Fi/Alien Speech.wav": {
+    "mtime": 1789733947.7846198,
+    "seen": 1789735191.5177968,
+    "ast_hash": "98943d9a0de5abd31afd8285a4b8a6a0",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Sci-Fi/Analog Shield Gen Loop.wav": {
+    "mtime": 1789733947.8415272,
+    "seen": 1789735191.5177977,
+    "ast_hash": "3549619687804726caea5cec0d41b862",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Sci-Fi/Biobot Move.wav": {
+    "mtime": 1789733947.893085,
+    "seen": 1789735191.5177987,
+    "ast_hash": "c8d3c24d7d87adac59116c56ff79a87d",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Sci-Fi/Force Armor.wav": {
+    "mtime": 1789733947.942929,
+    "seen": 1789735191.5177994,
+    "ast_hash": "f70ea71d8361d409c707392433d50565",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Sci-Fi/Gravipanzer.wav": {
+    "mtime": 1789733947.876076,
+    "seen": 1789735191.5178,
+    "ast_hash": "e64e5e8e39c1948b7cfb2b27f5d45bd2",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Sci-Fi/Matrix Flow Loop.wav": {
+    "mtime": 1789733947.7519965,
+    "seen": 1789735191.517801,
+    "ast_hash": "13590de07d18408a1e6e5b24e3dd4334",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Sci-Fi/Outer Space Scanner Loop.wav": {
+    "mtime": 1789733947.810171,
+    "seen": 1789735191.5178018,
+    "ast_hash": "932f156ca30d7bd76c0c176b8079e0db",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Sci-Fi/Phase Missile.wav": {
+    "mtime": 1789733947.859935,
+    "seen": 1789735191.5178025,
+    "ast_hash": "4960b87e9c72eb88a1a6ee4cd3f0cd69",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Sci-Fi/Pulse Sniper.wav": {
+    "mtime": 1789733947.9096656,
+    "seen": 1789735191.5178034,
+    "ast_hash": "95777924bbf356635757610207bec7e7",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Sci-Fi/Turret Reload.wav": {
+    "mtime": 1789733947.9261253,
+    "seen": 1789735191.5178044,
+    "ast_hash": "a363481a9aa0d8b52ffddb7ad55d956a",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Sci-Fi/Winged Chaser.wav": {
+    "mtime": 1789733947.767526,
+    "seen": 1789735191.517805,
+    "ast_hash": "4d0bc2c64b62a6a418733e59ad5ab5d9",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Sci-Fi/Wormhole Drive.wav": {
+    "mtime": 1789733947.959982,
+    "seen": 1789735191.5178058,
+    "ast_hash": "821d6966385b19b491d70a7009f0e6a6",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Steampunk/Automaton Activate.wav": {
+    "mtime": 1789733945.1745875,
+    "seen": 1789735191.5178065,
+    "ast_hash": "fe89662ab8643047542a83a89c42027d",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Steampunk/Automaton Move.wav": {
+    "mtime": 1789733945.0937626,
+    "seen": 1789735191.5178072,
+    "ast_hash": "ce166a2b8c9e8c4ad90bc689db2f8498",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Steampunk/Crack Turn.wav": {
+    "mtime": 1789733945.1081574,
+    "seen": 1789735191.5178082,
+    "ast_hash": "28ca68eff36d02f1d37e53b75e7226cd",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Steampunk/Engine Loop.wav": {
+    "mtime": 1789733945.0746071,
+    "seen": 1789735191.517809,
+    "ast_hash": "e9929d955882cc5763785707ff9c4fcc",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Steampunk/Giant Clock Interior Loop.wav": {
+    "mtime": 1789733945.0442035,
+    "seen": 1789735191.5178099,
+    "ast_hash": "39633c3c9d00023a4fbcc8a6e11037c8",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Steampunk/Mechanism Loop.wav": {
+    "mtime": 1789733945.1260417,
+    "seen": 1789735191.5178106,
+    "ast_hash": "c6c7cd63618ba11d5b8637418abe6ff9",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Steampunk/Mechanism Open Close.wav": {
+    "mtime": 1789733945.1422617,
+    "seen": 1789735191.5178115,
+    "ast_hash": "6405ae790137a24d90608adb484c2be5",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Steampunk/Rails Loop.wav": {
+    "mtime": 1789733945.2254457,
+    "seen": 1789735191.5178123,
+    "ast_hash": "558b0fc453ac9ea7f6fb5c7f7668b5c7",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Steampunk/Steampunk Drill.wav": {
+    "mtime": 1789733945.2087524,
+    "seen": 1789735191.517813,
+    "ast_hash": "bc75a19a932e9c120057543c4d23e59a",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Steampunk/Steampunk Gas Ignite.wav": {
+    "mtime": 1789733945.1589785,
+    "seen": 1789735191.5178137,
+    "ast_hash": "f0d7380fd2bcb03ec31d418d518f2e11",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Steampunk/Steampunk Gun.wav": {
+    "mtime": 1789733945.1922264,
+    "seen": 1789735191.5178146,
+    "ast_hash": "6ccd24444cb7436f03de4fc84158266a",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/Steampunk/Steampunk Wheel Activate.wav": {
+    "mtime": 1789733945.2425933,
+    "seen": 1789735191.5178154,
+    "ast_hash": "91c6786e053dbe82c2611bcc9e83db83",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/UI & Menus/Achievement.wav": {
+    "mtime": 1789733947.1342745,
+    "seen": 1789735191.5178163,
+    "ast_hash": "5842700e9c52d8c2ab08ff2d9f2f5579",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/UI & Menus/Click Bounce.wav": {
+    "mtime": 1789733947.2181847,
+    "seen": 1789735191.517817,
+    "ast_hash": "db69d6259fd223633021e1276e5ae256",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/UI & Menus/Equip.wav": {
+    "mtime": 1789733947.2676964,
+    "seen": 1789735191.517818,
+    "ast_hash": "b72de5631c839e405b1a12b9c9bebd22",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/UI & Menus/Error.wav": {
+    "mtime": 1789733947.1499715,
+    "seen": 1789735191.5178187,
+    "ast_hash": "2a6136acd25e88282fa3e3b11b8f1d27",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/UI & Menus/Hover Over.wav": {
+    "mtime": 1789733947.117747,
+    "seen": 1789735191.5178194,
+    "ast_hash": "c8f7ac3d890732cd649cdbad6c45d0f3",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/UI & Menus/Inventory.wav": {
+    "mtime": 1789733947.2343729,
+    "seen": 1789735191.5178204,
+    "ast_hash": "84b603718be8fe56d57ab473d1e5f315",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/UI & Menus/Map.wav": {
+    "mtime": 1789733947.2841394,
+    "seen": 1789735191.517821,
+    "ast_hash": "a8440657679d9a789cff883c8736b18e",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/UI & Menus/Notification.wav": {
+    "mtime": 1789733947.1840858,
+    "seen": 1789735191.517822,
+    "ast_hash": "592ad5d3ec7e4b7c271aeb7bb70ceea7",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/UI & Menus/Quit Out.wav": {
+    "mtime": 1789733947.1010897,
+    "seen": 1789735191.5178227,
+    "ast_hash": "1466e969bba01a15ade3ac492dc3a692",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/UI & Menus/Scroll.wav": {
+    "mtime": 1789733947.1680458,
+    "seen": 1789735191.5178235,
+    "ast_hash": "d667fc7bb50c0febda062045124c2fe6",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/UI & Menus/Select.wav": {
+    "mtime": 1789733947.25115,
+    "seen": 1789735191.5178242,
+    "ast_hash": "529f6582cafc4a6c969c92951019c6f9",
+    "semantic_hash": ""
+  },
+  "Sound FX Starter Pack Vol. 1/UI & Menus/Start.wav": {
+    "mtime": 1789733947.2005167,
+    "seen": 1789735191.5178251,
+    "ast_hash": "acf8b7e51aeae2e394074b5d953acd37",
+    "semantic_hash": ""
+  },
+  "audio/music/track_1.ogg": {
+    "mtime": 1718805554.0,
+    "seen": 1789735191.5179424,
+    "ast_hash": "2653e3a8845fb125f92efb9f5ef31281",
+    "semantic_hash": ""
+  },
+  "audio/music/track_2.ogg": {
+    "mtime": 1718805554.0,
+    "seen": 1789735191.5179436,
+    "ast_hash": "72f8148e4b7bb81ba3b780a427ac93c2",
+    "semantic_hash": ""
+  },
+  "audio/music/track_3.ogg": {
+    "mtime": 1718805554.0,
+    "seen": 1789735191.5179443,
+    "ast_hash": "8f7cb3a71c64a963693f96bce582084a",
+    "semantic_hash": ""
+  },
+  "addons/gloot/README.md": {
+    "mtime": 1789735295.85445,
+    "seen": 1789737180.2474947,
+    "ast_hash": "23ed15f3cef846dd5e3a6319901d783e",
+    "semantic_hash": ""
+  },
+  "addons/gloot/core/README.md": {
+    "mtime": 1789735296.580453,
+    "seen": 1789737180.247496,
+    "ast_hash": "1845d0978b8ebeedbd58c45ecd7eb145",
+    "semantic_hash": ""
+  },
+  "addons/gloot/core/constraints/README.md": {
+    "mtime": 1789735296.754881,
+    "seen": 1789737180.2474966,
+    "ast_hash": "812a6702b49b7d4fae70ae8b2ada009d",
+    "semantic_hash": ""
+  },
+  "addons/gloot/editor/README.md": {
+    "mtime": 1789735295.9053986,
+    "seen": 1789737180.2474978,
+    "ast_hash": "0e2d10c361747f0e8c9518fcbb955706",
+    "semantic_hash": ""
+  },
+  "addons/gloot/ui/README.md": {
+    "mtime": 1789735296.464358,
+    "seen": 1789737180.2474985,
+    "ast_hash": "dd28d24bff0602874909557ac2ad8bfe",
+    "semantic_hash": ""
+  },
+  "addons/gloot/images/icon_ctrl_capacity.svg": {
+    "mtime": 1789735296.2975776,
+    "seen": 1789737180.2475939,
+    "ast_hash": "419b7785c39a004f0ec1ea65e6f20d40",
+    "semantic_hash": ""
+  },
+  "addons/gloot/images/icon_ctrl_inventory.svg": {
+    "mtime": 1789735296.1880648,
+    "seen": 1789737180.2475955,
+    "ast_hash": "f9ae0c59353bfb3930f63b6916776e32",
+    "semantic_hash": ""
+  },
+  "addons/gloot/images/icon_ctrl_inventory_grid.svg": {
+    "mtime": 1789735296.1805046,
+    "seen": 1789737180.2475963,
+    "ast_hash": "b593ee96ddf903dd952dc2fafad184b0",
+    "semantic_hash": ""
+  },
+  "addons/gloot/images/icon_ctrl_inventory_item.svg": {
+    "mtime": 1789735296.2300696,
+    "seen": 1789737180.2475975,
+    "ast_hash": "e99ab758033403b5029af2824634cdb3",
+    "semantic_hash": ""
+  },
+  "addons/gloot/images/icon_ctrl_item_slot.svg": {
+    "mtime": 1789735296.1389058,
+    "seen": 1789737180.2475986,
+    "ast_hash": "908f5d2f8132944a57933d34befc7034",
+    "semantic_hash": ""
+  },
+  "addons/gloot/images/icon_grid_constraint.svg": {
+    "mtime": 1789735296.2551844,
+    "seen": 1789737180.2475996,
+    "ast_hash": "6bd2ccbbc16ce595c84e8a30ce697659",
+    "semantic_hash": ""
+  },
+  "addons/gloot/images/icon_inventory.svg": {
+    "mtime": 1789735296.2714176,
+    "seen": 1789737180.2476003,
+    "ast_hash": "29ac683800cfbfba236f15778e6a43e5",
+    "semantic_hash": ""
+  },
+  "addons/gloot/images/icon_item_count_constraint.svg": {
+    "mtime": 1789735296.2386138,
+    "seen": 1789737180.2476015,
+    "ast_hash": "680ac1487919f0d24786259dd7c1d1a3",
+    "semantic_hash": ""
+  },
+  "addons/gloot/images/icon_item_slot.svg": {
+    "mtime": 1789735296.1471083,
+    "seen": 1789737180.2476022,
+    "ast_hash": "219d58d772ade24fdf79a1e1b4821755",
+    "semantic_hash": ""
+  },
+  "addons/gloot/images/icon_weight_constraint.svg": {
+    "mtime": 1789735296.1632028,
+    "seen": 1789737180.2476032,
+    "ast_hash": "b5d2e132c6c1bcb3b4b692330d716686",
+    "semantic_hash": ""
+  },
+  "data_pipeline/antigravity_context.json": {
+    "mtime": 1789764053.7981281,
+    "seen": 1789764598.1906145,
+    "ast_hash": "4e90fa24dcf8e7f8c5e7c463a6f1b8e8",
+    "semantic_hash": ""
+  },
+  "data_pipeline/clients.py": {
+    "mtime": 1789741855.7191868,
+    "seen": 1789764598.190617,
+    "ast_hash": "65ac1fd3e701101950fb8887534be75f",
+    "semantic_hash": ""
+  },
+  "data_pipeline/data_lake_2026/build_master_database.py": {
+    "mtime": 1789760812.4027221,
+    "seen": 1789764598.1906178,
+    "ast_hash": "92a13f4dcde508d5a2059c688633411d",
+    "semantic_hash": ""
+  },
+  "data_pipeline/database-merge-optimized.py": {
+    "mtime": 1789744876.5005667,
+    "seen": 1789764598.1906185,
+    "ast_hash": "69eaad405d6b8353a2957bc2aaa0cf2e",
+    "semantic_hash": ""
+  },
+  "data_pipeline/database-merge.py": {
+    "mtime": 1789744541.0591044,
+    "seen": 1789764598.1906197,
+    "ast_hash": "88230451883e3b1e7bec9ba0215f9456",
+    "semantic_hash": ""
+  },
+  "data_pipeline/enrich_datalake_wiki.py": {
+    "mtime": 1789780617.982,
+    "seen": 1789781314.314143,
+    "ast_hash": "8208fcc8cbc7bdebabeeb25358754a26",
+    "semantic_hash": ""
+  },
+  "data_pipeline/generate_antigravity_context.py": {
+    "mtime": 1789764037.0379612,
+    "seen": 1789764598.1906214,
+    "ast_hash": "baabab5718cf419ff7adf374f4b2b505",
+    "semantic_hash": ""
+  },
+  "data_pipeline/hydrate_top_leagues.py": {
+    "mtime": 1789760970.5642917,
+    "seen": 1789764598.190622,
+    "ast_hash": "633510e7b6ec4dd458a02a1fade4c7a4",
+    "semantic_hash": ""
+  },
+  "data_pipeline/mass_pyramid_populator.py": {
+    "mtime": 1789761219.3071904,
+    "seen": 1789764598.190623,
+    "ast_hash": "7284c7a7cb3b1358f97b7de771017a25",
+    "semantic_hash": ""
+  },
+  "data_pipeline/populate_lower_league_ratings.py": {
+    "mtime": 1789761069.2527587,
+    "seen": 1789764598.1906238,
+    "ast_hash": "83ace1b34334acbb1c4449ee326606fd",
+    "semantic_hash": ""
+  },
+  "data_pipeline/powerfootball_database_builder.py": {
+    "mtime": 1789746691.3769143,
+    "seen": 1789764598.1906245,
+    "ast_hash": "f7e67f3a9baf5416aedaa85ab1df729e",
+    "semantic_hash": ""
+  },
+  "data_pipeline/refactor_competitions.py": {
+    "mtime": 1789763206.2381606,
+    "seen": 1789764598.1906252,
+    "ast_hash": "761ff0b684bc86a93da18003783921fb",
+    "semantic_hash": ""
+  },
+  "data_pipeline/separate_gender_modes.py": {
+    "mtime": 1789763384.1651466,
+    "seen": 1789764598.1906264,
+    "ast_hash": "936536bd255e41b7bedd9c750d981b91",
+    "semantic_hash": ""
+  },
+  "data_pipeline/waterfall_pyramid_populator.py": {
+    "mtime": 1789761507.8760362,
+    "seen": 1789764598.1906273,
+    "ast_hash": "44fd057aa003b0348786859009c6abd8",
+    "semantic_hash": ""
+  },
+  "addons/godot-sqlite/LICENSE.md": {
+    "mtime": 1786273868.0,
+    "seen": 1789764598.1907713,
+    "ast_hash": "8a1999da3554d1e4a8233fa7f72367a3",
+    "semantic_hash": ""
+  },
+  "addons/godot-sqlite/bin/binaries_here.txt": {
+    "mtime": 1786273864.0,
+    "seen": 1789764598.1907725,
+    "ast_hash": "0e5e517a24031fbc0b20f77465a6a368",
+    "semantic_hash": ""
+  },
+  "data_pipeline/ANTIGRAVITY_CONTEXT.md": {
+    "mtime": 1789764053.7981281,
+    "seen": 1789764598.1907928,
+    "ast_hash": "f47f54872ae2a9a3cf1b0a72176db858",
+    "semantic_hash": ""
+  },
+  "data_pipeline/fix_database_integrity.py": {
+    "mtime": 1789765393.6923203,
+    "seen": 1789765591.4922934,
+    "ast_hash": "31c8eeb607b2b5a9033c0cc8c4eb6d12",
+    "semantic_hash": ""
+  },
+  "data_pipeline/rehydrate_ratings_v2.py": {
+    "mtime": 1789768519.1341798,
+    "seen": 1789781314.3141527,
+    "ast_hash": "68c278f461da96522a2108dfb14d5aeb",
+    "semantic_hash": ""
+  }
+}

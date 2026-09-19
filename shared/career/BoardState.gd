@@ -144,13 +144,18 @@ static func make_for_club(club: TeamData, capacity: int) -> BoardState:
 	b.stadium_capacity = capacity
 	b.confidence = 0.65
 	b.expectation = expectation_from_reputation(club.reputation)
-	# Facilities track club stature — a Continental Giant does not train on a
-	# public park.
-	var facility_level: int = clampi(int(round(club.reputation * 5.0)) + 1, 1, 5)
-	b.training_facilities = facility_level
-	b.youth_facilities = clampi(facility_level - 1, 1, 5)
-	b.scouting_range = clampi(facility_level - 1, 1, 5)
-	b.medical_facility = clampi(facility_level - 1, 1, 5)
+	# Facilities track club stature and authentic infrastructure
+	if club.training_facilities > 0:
+		b.training_facilities = club.training_facilities
+		b.youth_facilities = club.youth_facilities
+		b.scouting_range = clampi(club.training_facilities - 1, 1, 5)
+		b.medical_facility = club.medical_facilities
+	else:
+		var facility_level: int = clampi(int(round(club.reputation * 5.0)) + 1, 1, 5)
+		b.training_facilities = facility_level
+		b.youth_facilities = clampi(facility_level - 1, 1, 5)
+		b.scouting_range = clampi(facility_level - 1, 1, 5)
+		b.medical_facility = clampi(facility_level - 1, 1, 5)
 	return b
 
 

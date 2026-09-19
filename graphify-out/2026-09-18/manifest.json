@@ -72,15 +72,15 @@
     "semantic_hash": "33201e96546167a2fd3ec9cfa5996376"
   },
   "docs/DEPENDENCY_GRAPH.json": {
-    "mtime": 1789738053.8512757,
-    "seen": 1789738400.091168,
-    "ast_hash": "6ef44e140f49ffd4cb85e97213775bba",
+    "mtime": 1789764314.7549944,
+    "seen": 1789764598.1906285,
+    "ast_hash": "5fcdf6ddb2e19ffcc983e9a8ae91d8cd",
     "semantic_hash": ""
   },
   "docs/SYMBOLS.json": {
-    "mtime": 1789738394.1027775,
-    "seen": 1789738400.0911696,
-    "ast_hash": "f9e58ed6b8044b81770d0c4374d9e8fd",
+    "mtime": 1789765581.216724,
+    "seen": 1789765591.492305,
+    "ast_hash": "2d3578fee7e07e43a5b35952cd782e55",
     "semantic_hash": ""
   },
   "tools/audit_process_modes.py": {
@@ -108,15 +108,15 @@
     "semantic_hash": "7a4331bba72be7fe77e800eb2ca9b62d"
   },
   "tools/dump_api.py": {
-    "mtime": 1789729756.4707718,
-    "seen": 1789730469.6702623,
-    "ast_hash": "1c62b065dd7a6b2a7badb4abd6241426",
+    "mtime": 1789764513.3347335,
+    "seen": 1789764598.1906388,
+    "ast_hash": "49c166facadabeec96919292c5621009",
     "semantic_hash": ""
   },
   "tools/dump_dep_graph.py": {
-    "mtime": 1789729756.471289,
-    "seen": 1789730469.6702633,
-    "ast_hash": "370418d8bdd0371e5701fd8dd2db026d",
+    "mtime": 1789764511.6154573,
+    "seen": 1789764598.1906402,
+    "ast_hash": "9b575e1dab1851b894a18278aff3b97a",
     "semantic_hash": ""
   },
   "tools/dump_match_frames.py": {
@@ -168,9 +168,9 @@
     "semantic_hash": "2fe48893911c8fe73851a5f992ef4895"
   },
   "tools/gdcheck.py": {
-    "mtime": 1789729756.4717982,
-    "seen": 1789730469.670272,
-    "ast_hash": "87dfa43bb74e79426a917f6df9ea2e22",
+    "mtime": 1789740602.1234872,
+    "seen": 1789740743.4805999,
+    "ast_hash": "4d92972d60dd1e25194f7b36ada2d82a",
     "semantic_hash": ""
   },
   "tools/generate_db.py": {
@@ -180,9 +180,9 @@
     "semantic_hash": "7b2d30301b6d407db5b3e2a074ded24f"
   },
   "tools/generate_symbols.py": {
-    "mtime": 1789734252.5918338,
-    "seen": 1789735191.517458,
-    "ast_hash": "bd86d15a015ee6d0ad8f40b2b8de2de5",
+    "mtime": 1789740637.0518918,
+    "seen": 1789740743.480603,
+    "ast_hash": "4e074bcaced2084dfd3ef5c4dc831add",
     "semantic_hash": ""
   },
   "tools/git_pre_commit.py": {
@@ -204,27 +204,27 @@
     "semantic_hash": ""
   },
   "tools/lint_allocations.py": {
-    "mtime": 1789734250.9762533,
-    "seen": 1789735191.5174632,
-    "ast_hash": "1ba7de5fb64f15dac1ff4ba2f676cb66",
+    "mtime": 1789740637.0534253,
+    "seen": 1789740743.4806077,
+    "ast_hash": "097146088af151fa5292804447f10a1f",
     "semantic_hash": ""
   },
   "tools/lint_invariants.py": {
-    "mtime": 1789732738.988875,
-    "seen": 1789733447.6907287,
-    "ast_hash": "08bee0fcb3b9fed7ab11beb6240851c7",
+    "mtime": 1789740613.3889234,
+    "seen": 1789740743.4806087,
+    "ast_hash": "4a772b3e723ea0b4b9aa15fa4bef9616",
     "semantic_hash": ""
   },
   "tools/lint_scope.py": {
-    "mtime": 1789729756.4738793,
-    "seen": 1789730469.670281,
-    "ast_hash": "dad2121ef43f300ecb84e45efedf1248",
+    "mtime": 1789740637.0539396,
+    "seen": 1789740743.48061,
+    "ast_hash": "d9af72db1f9031b44929cb89989d6532",
     "semantic_hash": ""
   },
   "tools/lint_shadowing.py": {
-    "mtime": 1789734249.0913737,
-    "seen": 1789735191.5174665,
-    "ast_hash": "e726ab9b7a28d0e076a325486aa3645d",
+    "mtime": 1789740637.0539396,
+    "seen": 1789740743.4806106,
+    "ast_hash": "6a75b0666d4b5a39b15c58c0f0a35cb9",
     "semantic_hash": ""
   },
   "tools/lint_signal_races.py": {
@@ -234,21 +234,21 @@
     "semantic_hash": "3584536aa13c0d65cf3feff97038ec80"
   },
   "tools/lint_stringnames.py": {
-    "mtime": 1789734238.2550523,
-    "seen": 1789735191.5174685,
-    "ast_hash": "c187b6d745e2c1d22c1caf1710c1b4e4",
+    "mtime": 1789740637.0539396,
+    "seen": 1789740743.4806125,
+    "ast_hash": "fb1ea3a66f2483bfa75a5a095b9c8f41",
     "semantic_hash": ""
   },
   "tools/lint_type_comparisons.py": {
-    "mtime": 1789729756.4754457,
-    "seen": 1789730469.6702845,
-    "ast_hash": "033209f4e8345abafe953f460f57668e",
+    "mtime": 1789740637.0549445,
+    "seen": 1789740743.4806135,
+    "ast_hash": "69aea8ec0715f1ad681ef5b4b05a58e1",
     "semantic_hash": ""
   },
   "tools/lint_xref.py": {
-    "mtime": 1789730245.8179924,
-    "seen": 1789730469.6702852,
-    "ast_hash": "c7e01af29e3bdea2b3a420ff43cc00ba",
+    "mtime": 1789740637.0549445,
+    "seen": 1789740743.4806144,
+    "ast_hash": "0dffcdbd5a98d759d2e34d112718d684",
     "semantic_hash": ""
   },
   "tools/lsp_client.py": {
@@ -348,9 +348,9 @@
     "semantic_hash": ""
   },
   "tools/tscn_linter.py": {
-    "mtime": 1789729756.477059,
-    "seen": 1789730469.6703024,
-    "ast_hash": "e5be211a05e86f42c6e3f584ef23619b",
+    "mtime": 1789740637.055449,
+    "seen": 1789740743.480634,
+    "ast_hash": "2eca4b213384300307efb9a442f37f2f",
     "semantic_hash": ""
   },
   "tools/update_db_all.py": {
@@ -366,9 +366,9 @@
     "semantic_hash": "00bd5c64b76ba7789e2cfa89fc1a43da"
   },
   "tools/verify_db.py": {
-    "mtime": 1789729756.4775765,
-    "seen": 1789730469.670305,
-    "ast_hash": "ea24b7adf374a567492e751f1ec2f697",
+    "mtime": 1789740653.180606,
+    "seen": 1789740743.4806366,
+    "ast_hash": "cd898ef32edceb32aa0c49f5582b33c4",
     "semantic_hash": ""
   },
   "tools/verify_gate.py": {
@@ -582,9 +582,9 @@
     "semantic_hash": ""
   },
   "AGENTS_ERRATA.md": {
-    "mtime": 1789729756.3322582,
-    "seen": 1789730469.6703594,
-    "ast_hash": "0c8f7b9d4096e47122ad0bc9b8b0053b",
+    "mtime": 1789740718.4180298,
+    "seen": 1789740743.4806995,
+    "ast_hash": "9bfde7ade4218642ca0ccf91c21123ae",
     "semantic_hash": ""
   },
   "CLAUDE.md": {
@@ -606,9 +606,9 @@
     "semantic_hash": ""
   },
   "ROADMAP.md": {
-    "mtime": 1789729756.3357713,
-    "seen": 1789730469.6703634,
-    "ast_hash": "3ba2c1ebdf6579d36dc7e28958128559",
+    "mtime": 1789739014.5777862,
+    "seen": 1789739036.2825005,
+    "ast_hash": "b3eef6892740a2372bc0cfe420d415a4",
     "semantic_hash": ""
   },
   "autoloads/README.md": {
@@ -624,9 +624,9 @@
     "semantic_hash": ""
   },
   "docs/API_SURFACE.md": {
-    "mtime": 1789738393.9529817,
-    "seen": 1789738400.091334,
-    "ast_hash": "b76a97027eef4fc8f24059dc69ec1b44",
+    "mtime": 1789765581.0536008,
+    "seen": 1789765591.4924648,
+    "ast_hash": "ae4991715033afaa474d8dbbc77e1b34",
     "semantic_hash": ""
   },
   "docs/CORE_INVARIANTS.md": {
@@ -1020,9 +1020,9 @@
     "semantic_hash": ""
   },
   "docs/agent-errata/data-and-persistence.md": {
-    "mtime": 1789729756.425169,
-    "seen": 1789730469.6703854,
-    "ast_hash": "aef3494a2443f6358255bad892f9189c",
+    "mtime": 1789740709.4690397,
+    "seen": 1789740743.4807556,
+    "ast_hash": "f4d814b5bb957ccd6ecb0977d3ee51cc",
     "semantic_hash": ""
   },
   "docs/agent-errata/match-state.md": {
@@ -1278,147 +1278,147 @@
     "semantic_hash": ""
   },
   "data/shards/argentina_t1.json": {
-    "mtime": 1789729756.3481798,
-    "seen": 1789730469.6702325,
+    "mtime": 1789740573.8456912,
+    "seen": 1789740743.4805346,
     "ast_hash": "21f9ea75340ea71d358810b0ba6e542b",
     "semantic_hash": ""
   },
   "data/shards/belgium_t1.json": {
-    "mtime": 1789729756.3524792,
-    "seen": 1789730469.6702335,
+    "mtime": 1789740573.9796486,
+    "seen": 1789740743.4805381,
     "ast_hash": "202b0e8b5448cec0fe38b2840221fc6d",
     "semantic_hash": ""
   },
   "data/shards/brazil_t1.json": {
-    "mtime": 1789729756.355145,
-    "seen": 1789730469.6702344,
+    "mtime": 1789740573.8036983,
+    "seen": 1789740743.4805398,
     "ast_hash": "1f933f598d6455d97ef9a695dabb5351",
     "semantic_hash": ""
   },
   "data/shards/denmark_t1.json": {
-    "mtime": 1789729756.3574505,
-    "seen": 1789730469.6702352,
+    "mtime": 1789740573.9293673,
+    "seen": 1789740743.480542,
     "ast_hash": "c5912c7592eafae658e4bab6f218e5f1",
     "semantic_hash": ""
   },
   "data/shards/england_t1.json": {
-    "mtime": 1789729756.358976,
-    "seen": 1789730469.6702359,
+    "mtime": 1789740573.6084535,
+    "seen": 1789740743.4805434,
     "ast_hash": "7ab60d91375ea9feae855be1a5665063",
     "semantic_hash": ""
   },
   "data/shards/france_t1.json": {
-    "mtime": 1789729756.3620093,
-    "seen": 1789730469.6702366,
+    "mtime": 1789740573.720875,
+    "seen": 1789740743.4805455,
     "ast_hash": "eb427513dd96a4d8277cea5e7375b3b6",
     "semantic_hash": ""
   },
   "data/shards/germany_t1.json": {
-    "mtime": 1789729756.364539,
-    "seen": 1789730469.6702378,
+    "mtime": 1789740573.6646016,
+    "seen": 1789740743.4805474,
     "ast_hash": "2f6669728261dd723a9f47f68b77a63c",
     "semantic_hash": ""
   },
   "data/shards/italy_t1.json": {
-    "mtime": 1789729756.3675883,
-    "seen": 1789730469.670239,
+    "mtime": 1789740573.6946292,
+    "seen": 1789740743.4805493,
     "ast_hash": "8ac2dbd0aef5283f037924fa07c628d9",
     "semantic_hash": ""
   },
   "data/shards/japan_t1.json": {
-    "mtime": 1789729756.371833,
-    "seen": 1789730469.6702397,
+    "mtime": 1789740574.1271975,
+    "seen": 1789740743.4805515,
     "ast_hash": "2655d1a690fb98bb1a5bbb1d84463826",
     "semantic_hash": ""
   },
   "data/shards/mexico_t1.json": {
-    "mtime": 1789729756.3741708,
-    "seen": 1789730469.6702404,
+    "mtime": 1789740574.057814,
+    "seen": 1789740743.4805532,
     "ast_hash": "733a8101d268aec32cabf0f97431cffa",
     "semantic_hash": ""
   },
   "data/shards/netherlands_t1.json": {
-    "mtime": 1789729756.376056,
-    "seen": 1789730469.6702418,
+    "mtime": 1789740573.74675,
+    "seen": 1789740743.480555,
     "ast_hash": "19aea2e724b3a83ac19a37b6ea0e2a67",
     "semantic_hash": ""
   },
   "data/shards/norway_t1.json": {
-    "mtime": 1789729756.3781984,
-    "seen": 1789730469.6702425,
+    "mtime": 1789740573.887533,
+    "seen": 1789740743.4805567,
     "ast_hash": "aa7ba31c18fdeea32ebcfcb31c5b3097",
     "semantic_hash": ""
   },
   "data/shards/poland_t1.json": {
-    "mtime": 1789729756.3813894,
-    "seen": 1789730469.6702433,
+    "mtime": 1789740573.9559166,
+    "seen": 1789740743.4805586,
     "ast_hash": "8717c069497fb5b124613b2828b1ee1e",
     "semantic_hash": ""
   },
   "data/shards/portugal_t1.json": {
-    "mtime": 1789729756.3834658,
-    "seen": 1789730469.670244,
+    "mtime": 1789740573.7733612,
+    "seen": 1789740743.4805603,
     "ast_hash": "ceb594edbab7946a7fa27d8f54f7f3b2",
     "semantic_hash": ""
   },
   "data/shards/russia_t1.json": {
-    "mtime": 1789729756.3871944,
-    "seen": 1789730469.6702452,
+    "mtime": 1789740574.0309663,
+    "seen": 1789740743.4805622,
     "ast_hash": "9cc45cd4c8e7df24760e5387681bec03",
     "semantic_hash": ""
   },
   "data/shards/scotland_t1.json": {
-    "mtime": 1789729756.389787,
-    "seen": 1789730469.670246,
+    "mtime": 1789740573.8618126,
+    "seen": 1789740743.480564,
     "ast_hash": "0908f00d561d883f2eee66e44b095ec9",
     "semantic_hash": ""
   },
   "data/shards/spain_t1.json": {
-    "mtime": 1789729756.3918364,
-    "seen": 1789730469.6702468,
+    "mtime": 1789740573.638234,
+    "seen": 1789740743.4805663,
     "ast_hash": "47f424ba27dfca60d8529f9aadd53b14",
     "semantic_hash": ""
   },
   "data/shards/sweden_t1.json": {
-    "mtime": 1789729756.3938708,
-    "seen": 1789730469.6702478,
+    "mtime": 1789740573.9117396,
+    "seen": 1789740743.4805677,
     "ast_hash": "89d40af7de9d54535717ef2eac680c84",
     "semantic_hash": ""
   },
   "data/shards/turkey_t1.json": {
-    "mtime": 1789729756.3968773,
-    "seen": 1789730469.670249,
+    "mtime": 1789740574.0076656,
+    "seen": 1789740743.48057,
     "ast_hash": "67d4b811f343095fdee2601d9e5a1e2d",
     "semantic_hash": ""
   },
   "data/shards/usa_t1.json": {
-    "mtime": 1789729756.400384,
-    "seen": 1789730469.6702497,
+    "mtime": 1789740574.096542,
+    "seen": 1789740743.4805722,
     "ast_hash": "b7de33ef639504300009abe6771bdc29",
     "semantic_hash": ""
   },
   "data/world_managers.json": {
-    "mtime": 1789729756.4029493,
-    "seen": 1789730469.6702518,
-    "ast_hash": "395c7e77350ee7f87506547b5144b973",
+    "mtime": 1789740574.7252226,
+    "seen": 1789740743.4805756,
+    "ast_hash": "afba0f2b7a6990737a252ee3f749ca70",
     "semantic_hash": ""
   },
   "data/world_manifest.json": {
-    "mtime": 1789729756.4034576,
-    "seen": 1789730469.6702528,
-    "ast_hash": "ef25f34e200b7f04dfe923dae0d00d84",
+    "mtime": 1789740574.693778,
+    "seen": 1789740743.4805763,
+    "ast_hash": "2a871085db181ffe01622459aa05cd1b",
     "semantic_hash": ""
   },
   "data/world_referees.json": {
-    "mtime": 1789729756.4044652,
-    "seen": 1789730469.6702538,
-    "ast_hash": "38417b59088f28cae0407f3d70ddcd2a",
+    "mtime": 1789740574.726235,
+    "seen": 1789740743.4805772,
+    "ast_hash": "95fbe1e4deb10200365b81d5414b5607",
     "semantic_hash": ""
   },
   "tools/generate_phony_db.py": {
-    "mtime": 1789729756.4717982,
-    "seen": 1789730469.6702738,
-    "ast_hash": "89cc277533e919a50217e56fc53a18ea",
+    "mtime": 1789740790.3734467,
+    "seen": 1789764598.190652,
+    "ast_hash": "793a07dcf96dd4598a44779eebf95b86",
     "semantic_hash": ""
   },
   "docs/Bayesian Scouting & Attribute Weighting Implementation Plan.md": {
@@ -1713,24 +1713,6 @@
     "mtime": 1789733910.4848418,
     "seen": 1789735191.5173998,
     "ast_hash": "9fdff4d1dcde73a61359ba46367bd874",
-    "semantic_hash": ""
-  },
-  "addons/godot_mcp/cache/undo/entry_000001/manifest.json": {
-    "mtime": 1789735103.88209,
-    "seen": 1789735191.5174005,
-    "ast_hash": "c4e1826f6267f9f366ffc2f7d2d3b5ef",
-    "semantic_hash": ""
-  },
-  "addons/godot_mcp/cache/undo/entry_000002/manifest.json": {
-    "mtime": 1789735106.7873695,
-    "seen": 1789735191.5174017,
-    "ast_hash": "8700c735d0490f5c28c2486cc8ffd838",
-    "semantic_hash": ""
-  },
-  "addons/godot_mcp/cache/undo/stack.json": {
-    "mtime": 1789735106.8029203,
-    "seen": 1789735191.5174026,
-    "ast_hash": "03521e35271873decb2d199cbd08939a",
     "semantic_hash": ""
   },
   "addons/boot_splash_plus/README.md": {
@@ -2949,6 +2931,240 @@
     "mtime": 1789735296.1632028,
     "seen": 1789737180.2476032,
     "ast_hash": "b5d2e132c6c1bcb3b4b692330d716686",
+    "semantic_hash": ""
+  },
+  "data/shards/argentina_t2.json": {
+    "mtime": 1789740574.3988543,
+    "seen": 1789740743.4805365,
+    "ast_hash": "895777d6d76d1b04961d07422c97197b",
+    "semantic_hash": ""
+  },
+  "data/shards/belgium_t2.json": {
+    "mtime": 1789740574.5357554,
+    "seen": 1789740743.480539,
+    "ast_hash": "d0628f54279b680f369deace0b0cc29a",
+    "semantic_hash": ""
+  },
+  "data/shards/brazil_t2.json": {
+    "mtime": 1789740574.3567185,
+    "seen": 1789740743.4805408,
+    "ast_hash": "eff97128a0d3763bc2b499e5f80f2960",
+    "semantic_hash": ""
+  },
+  "data/shards/denmark_t2.json": {
+    "mtime": 1789740574.4816315,
+    "seen": 1789740743.4805427,
+    "ast_hash": "e3c8eab29195bc39b6c3b0d75ca028ad",
+    "semantic_hash": ""
+  },
+  "data/shards/england_t2.json": {
+    "mtime": 1789740574.15491,
+    "seen": 1789740743.4805446,
+    "ast_hash": "a7568f169e305dd96312010e946f7a95",
+    "semantic_hash": ""
+  },
+  "data/shards/france_t2.json": {
+    "mtime": 1789740574.2726293,
+    "seen": 1789740743.4805462,
+    "ast_hash": "7f531e560e556d3df7313f534d52dbe1",
+    "semantic_hash": ""
+  },
+  "data/shards/germany_t2.json": {
+    "mtime": 1789740574.2138164,
+    "seen": 1789740743.4805484,
+    "ast_hash": "3b576330e9c330c1cda5bbc05b104ae1",
+    "semantic_hash": ""
+  },
+  "data/shards/italy_t2.json": {
+    "mtime": 1789740574.2451067,
+    "seen": 1789740743.4805503,
+    "ast_hash": "04829ca200e2418adaafa0b076914553",
+    "semantic_hash": ""
+  },
+  "data/shards/japan_t2.json": {
+    "mtime": 1789740574.6860273,
+    "seen": 1789740743.4805522,
+    "ast_hash": "c7583dd9bf86775424b01c05d681258c",
+    "semantic_hash": ""
+  },
+  "data/shards/mexico_t2.json": {
+    "mtime": 1789740574.6167467,
+    "seen": 1789740743.4805539,
+    "ast_hash": "5ede8f5746506c546ce68ce129a80225",
+    "semantic_hash": ""
+  },
+  "data/shards/netherlands_t2.json": {
+    "mtime": 1789740574.299188,
+    "seen": 1789740743.4805558,
+    "ast_hash": "a6484aabb8fc7d78b4f5d27f52f2361d",
+    "semantic_hash": ""
+  },
+  "data/shards/norway_t2.json": {
+    "mtime": 1789740574.4407353,
+    "seen": 1789740743.4805577,
+    "ast_hash": "acdf1e2aa5d4a42ec821969a9d95d1f9",
+    "semantic_hash": ""
+  },
+  "data/shards/poland_t2.json": {
+    "mtime": 1789740574.5109792,
+    "seen": 1789740743.4805593,
+    "ast_hash": "7f2f43fcda0f9343984e7841224c97b6",
+    "semantic_hash": ""
+  },
+  "data/shards/portugal_t2.json": {
+    "mtime": 1789740574.3259692,
+    "seen": 1789740743.4805615,
+    "ast_hash": "80874993d72cc37a435de0a2b21c8b31",
+    "semantic_hash": ""
+  },
+  "data/shards/russia_t2.json": {
+    "mtime": 1789740574.5906353,
+    "seen": 1789740743.4805632,
+    "ast_hash": "04cece6efbf49ed494e306d928949ba0",
+    "semantic_hash": ""
+  },
+  "data/shards/scotland_t2.json": {
+    "mtime": 1789740574.4169304,
+    "seen": 1789740743.480565,
+    "ast_hash": "426cbb8fadca844828ff3f17809f145c",
+    "semantic_hash": ""
+  },
+  "data/shards/spain_t2.json": {
+    "mtime": 1789740574.1855426,
+    "seen": 1789740743.480567,
+    "ast_hash": "fc8d7a65fe0c4f019a30c39b078c6c3f",
+    "semantic_hash": ""
+  },
+  "data/shards/sweden_t2.json": {
+    "mtime": 1789740574.4645905,
+    "seen": 1789740743.4805686,
+    "ast_hash": "fae6a3ae8f34fa8a5cf03d2d2f10c417",
+    "semantic_hash": ""
+  },
+  "data/shards/turkey_t2.json": {
+    "mtime": 1789740574.564988,
+    "seen": 1789740743.4805708,
+    "ast_hash": "77c447b212dc27b6ff50abefb122fe91",
+    "semantic_hash": ""
+  },
+  "data/shards/usa_t2.json": {
+    "mtime": 1789740574.6553042,
+    "seen": 1789740743.4805732,
+    "ast_hash": "0680cfda47715eaaf821d3dad2135f5a",
+    "semantic_hash": ""
+  },
+  "data_pipeline/antigravity_context.json": {
+    "mtime": 1789764053.7981281,
+    "seen": 1789764598.1906145,
+    "ast_hash": "4e90fa24dcf8e7f8c5e7c463a6f1b8e8",
+    "semantic_hash": ""
+  },
+  "data_pipeline/autonomous_football_datalake.py": {
+    "mtime": 1789751904.0373862,
+    "seen": 1789764598.1906161,
+    "ast_hash": "51767a6f3d80c72540029a6aca05ad6b",
+    "semantic_hash": ""
+  },
+  "data_pipeline/clients.py": {
+    "mtime": 1789741855.7191868,
+    "seen": 1789764598.190617,
+    "ast_hash": "65ac1fd3e701101950fb8887534be75f",
+    "semantic_hash": ""
+  },
+  "data_pipeline/data_lake_2026/build_master_database.py": {
+    "mtime": 1789760812.4027221,
+    "seen": 1789764598.1906178,
+    "ast_hash": "92a13f4dcde508d5a2059c688633411d",
+    "semantic_hash": ""
+  },
+  "data_pipeline/database-merge-optimized.py": {
+    "mtime": 1789744876.5005667,
+    "seen": 1789764598.1906185,
+    "ast_hash": "69eaad405d6b8353a2957bc2aaa0cf2e",
+    "semantic_hash": ""
+  },
+  "data_pipeline/database-merge.py": {
+    "mtime": 1789744541.0591044,
+    "seen": 1789764598.1906197,
+    "ast_hash": "88230451883e3b1e7bec9ba0215f9456",
+    "semantic_hash": ""
+  },
+  "data_pipeline/enrich_datalake_wiki.py": {
+    "mtime": 1789757984.3557837,
+    "seen": 1789764598.1906207,
+    "ast_hash": "3a03c1a6c67b74d65b4408b3aaf81d3c",
+    "semantic_hash": ""
+  },
+  "data_pipeline/generate_antigravity_context.py": {
+    "mtime": 1789764037.0379612,
+    "seen": 1789764598.1906214,
+    "ast_hash": "baabab5718cf419ff7adf374f4b2b505",
+    "semantic_hash": ""
+  },
+  "data_pipeline/hydrate_top_leagues.py": {
+    "mtime": 1789760970.5642917,
+    "seen": 1789764598.190622,
+    "ast_hash": "633510e7b6ec4dd458a02a1fade4c7a4",
+    "semantic_hash": ""
+  },
+  "data_pipeline/mass_pyramid_populator.py": {
+    "mtime": 1789761219.3071904,
+    "seen": 1789764598.190623,
+    "ast_hash": "7284c7a7cb3b1358f97b7de771017a25",
+    "semantic_hash": ""
+  },
+  "data_pipeline/populate_lower_league_ratings.py": {
+    "mtime": 1789761069.2527587,
+    "seen": 1789764598.1906238,
+    "ast_hash": "83ace1b34334acbb1c4449ee326606fd",
+    "semantic_hash": ""
+  },
+  "data_pipeline/powerfootball_database_builder.py": {
+    "mtime": 1789746691.3769143,
+    "seen": 1789764598.1906245,
+    "ast_hash": "f7e67f3a9baf5416aedaa85ab1df729e",
+    "semantic_hash": ""
+  },
+  "data_pipeline/refactor_competitions.py": {
+    "mtime": 1789763206.2381606,
+    "seen": 1789764598.1906252,
+    "ast_hash": "761ff0b684bc86a93da18003783921fb",
+    "semantic_hash": ""
+  },
+  "data_pipeline/separate_gender_modes.py": {
+    "mtime": 1789763384.1651466,
+    "seen": 1789764598.1906264,
+    "ast_hash": "936536bd255e41b7bedd9c750d981b91",
+    "semantic_hash": ""
+  },
+  "data_pipeline/waterfall_pyramid_populator.py": {
+    "mtime": 1789761507.8760362,
+    "seen": 1789764598.1906273,
+    "ast_hash": "44fd057aa003b0348786859009c6abd8",
+    "semantic_hash": ""
+  },
+  "addons/godot-sqlite/LICENSE.md": {
+    "mtime": 1786273868.0,
+    "seen": 1789764598.1907713,
+    "ast_hash": "8a1999da3554d1e4a8233fa7f72367a3",
+    "semantic_hash": ""
+  },
+  "addons/godot-sqlite/bin/binaries_here.txt": {
+    "mtime": 1786273864.0,
+    "seen": 1789764598.1907725,
+    "ast_hash": "0e5e517a24031fbc0b20f77465a6a368",
+    "semantic_hash": ""
+  },
+  "data_pipeline/ANTIGRAVITY_CONTEXT.md": {
+    "mtime": 1789764053.7981281,
+    "seen": 1789764598.1907928,
+    "ast_hash": "f47f54872ae2a9a3cf1b0a72176db858",
+    "semantic_hash": ""
+  },
+  "data_pipeline/fix_database_integrity.py": {
+    "mtime": 1789765393.6923203,
+    "seen": 1789765591.4922934,
+    "ast_hash": "31c8eeb607b2b5a9033c0cc8c4eb6d12",
     "semantic_hash": ""
   }
 }

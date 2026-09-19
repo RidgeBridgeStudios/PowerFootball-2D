@@ -21,7 +21,6 @@ extends Node
 
 const CUSTOM_LEAGUE_PATH: String = "user://custom_league.json"
 const DEFAULT_LEAGUE_PATH: String = "res://data/league.json"
-const WORLD_MANIFEST_PATH: String = "res://data/world_manifest.json"
 
 var league: LeagueData = null
 var divisions: Array[Dictionary] = []
@@ -44,7 +43,11 @@ func get_team(index: int) -> TeamData:
 	_ensure_division_shard_loaded_for_team(index)
 	var team: TeamData = league.teams[index]
 	if team.squad.size() < 11:
-		_populate_squad_if_needed(team, index)
+		if team.team_id > 0 and DatabaseManager.is_connected_to_db:
+			team.squad = DatabaseManager.fetch_squad_roster(team.team_id)
+		if team.squad.size() < 11:
+			_populate_squad_if_needed(team, index)
+		_ensure_valid_lineup(team)
 	return team
 
 
@@ -58,7 +61,11 @@ func get_team_by_name(team_name: String) -> TeamData:
 			_ensure_division_shard_loaded_for_team(i)
 			t = league.teams[i]
 			if t.squad.size() < 11:
-				_populate_squad_if_needed(t, i)
+				if t.team_id > 0 and DatabaseManager.is_connected_to_db:
+					t.squad = DatabaseManager.fetch_squad_roster(t.team_id)
+				if t.squad.size() < 11:
+					_populate_squad_if_needed(t, i)
+				_ensure_valid_lineup(t)
 			return t
 	return null
 
@@ -157,11 +164,122 @@ func load_league_from(path: String) -> bool:
 	return _parse_json_league(path)
 
 
-## Switches the active league database to the 20-league world database.
+## Switches the active league database to the 40-division world database from DatabaseManager.
 func load_world_database() -> bool:
-	if FileAccess.file_exists(WORLD_MANIFEST_PATH):
-		return _parse_json_league(WORLD_MANIFEST_PATH)
-	return false
+	if not DatabaseManager.is_connected_to_db:
+		if not DatabaseManager.initialize_database():
+			return false
+
+	var parsed_league := LeagueData.new()
+	parsed_league.league_name = "World Championship"
+
+	divisions.clear()
+	loaded_shards.clear()
+	dirty_shards.clear()
+	manifest_mode = true
+
+	var pairs: Array[Dictionary] = [
+		{"t1": 8, "t2": 9, "nation": "England", "conf": "UEFA", "slots": 3},
+		{"t1": 564, "t2": 567, "nation": "Spain", "conf": "UEFA", "slots": 3},
+		{"t1": 82, "t2": 85, "nation": "Germany", "conf": "UEFA", "slots": 2},
+		{"t1": 384, "t2": 387, "nation": "Italy", "conf": "UEFA", "slots": 3},
+		{"t1": 301, "t2": 304, "nation": "France", "conf": "UEFA", "slots": 2},
+		{"t1": 72, "t2": 74, "nation": "Netherlands", "conf": "UEFA", "slots": 2},
+		{"t1": 462, "t2": 465, "nation": "Portugal", "conf": "UEFA", "slots": 2},
+		{"t1": 501, "t2": 504, "nation": "Scotland", "conf": "UEFA", "slots": 1},
+		{"t1": 444, "t2": 447, "nation": "Norway", "conf": "UEFA", "slots": 2},
+		{"t1": 573, "t2": 579, "nation": "Sweden", "conf": "UEFA", "slots": 2},
+		{"t1": 453, "t2": 456, "nation": "Poland", "conf": "UEFA", "slots": 3},
+		{"t1": 181, "t2": 184, "nation": "Austria", "conf": "UEFA", "slots": 1},
+		{"t1": 591, "t2": 594, "nation": "Switzerland", "conf": "UEFA", "slots": 1},
+		{"t1": 600, "t2": 603, "nation": "Turkey", "conf": "UEFA", "slots": 3},
+		{"t1": 208, "t2": 211, "nation": "Belgium", "conf": "UEFA", "slots": 2},
+		{"t1": 648, "t2": 651, "nation": "Brazil", "conf": "CONMEBOL", "slots": 4},
+		{"t1": 636, "t2": 645, "nation": "Argentina", "conf": "CONMEBOL", "slots": 2},
+		{"t1": 779, "t2": 791, "nation": "USA", "conf": "CONCACAF", "slots": 0},
+		{"t1": 743, "t2": 749, "nation": "Mexico", "conf": "CONCACAF", "slots": 0},
+		{"t1": 968, "t2": 1022, "nation": "Japan", "conf": "AFC", "slots": 3},
+	]
+
+	var all_teams: Array[TeamData] = []
+	for p: Dictionary in pairs:
+		var t1_id: int = int(p["t1"])
+		var t2_id: int = int(p["t2"])
+		var nation: String = str(p["nation"])
+		var conf: String = str(p["conf"])
+		var slots: int = int(p["slots"])
+
+		var t1_row: Dictionary = DatabaseManager.fetch_league_by_id(t1_id)
+		var t1_name: String = str(t1_row.get("name", "%s League" % nation))
+		var t1_teams: Array[TeamData] = DatabaseManager.fetch_teams_in_league(t1_id)
+
+		var t2_row: Dictionary = DatabaseManager.fetch_league_by_id(t2_id)
+		var t2_name: String = str(t2_row.get("name", "%s Division 2" % nation))
+		var t2_teams: Array[TeamData] = DatabaseManager.fetch_teams_in_league(t2_id)
+
+		var div1: Dictionary = {
+			"name": t1_name,
+			"league_id": t1_id,
+			"tier_index": 1,
+			"nation": nation,
+			"confederation": conf,
+			"team_count": t1_teams.size(),
+			"promotion_slots": 0,
+			"relegation_slots": slots,
+		}
+		divisions.append(div1)
+		for t: TeamData in t1_teams:
+			all_teams.append(t)
+
+		var div2: Dictionary = {
+			"name": t2_name,
+			"league_id": t2_id,
+			"tier_index": 2,
+			"nation": nation,
+			"confederation": conf,
+			"team_count": t2_teams.size(),
+			"promotion_slots": slots,
+			"relegation_slots": 0,
+		}
+		divisions.append(div2)
+		for t: TeamData in t2_teams:
+			all_teams.append(t)
+
+	parsed_league.teams = all_teams
+	league = parsed_league
+	active_division_index = 0
+	if not divisions.is_empty():
+		load_division_shard(divisions[0])
+	return true
+
+
+## Switches the active league database to a single domestic league from the database.
+func load_database_league(league_id: int = 8) -> bool:
+	if not DatabaseManager.is_connected_to_db:
+		if not DatabaseManager.initialize_database():
+			return false
+
+	var l_row: Dictionary = DatabaseManager.fetch_league_by_id(league_id)
+	var l_name: String = str(l_row.get("name", "Premier League"))
+	var teams: Array[TeamData] = DatabaseManager.fetch_teams_in_league(league_id)
+	if teams.is_empty():
+		push_warning("DataLoader.load_database_league: No teams found for league %d." % league_id)
+		return false
+
+	var parsed_league := LeagueData.new()
+	parsed_league.league_name = l_name
+	for t: TeamData in teams:
+		if t.team_id > 0:
+			t.squad = DatabaseManager.fetch_squad_roster(t.team_id)
+		if t.squad.size() < 11:
+			_populate_squad_if_needed(t, 0)
+		_ensure_valid_lineup(t)
+
+	parsed_league.teams = teams
+	league = parsed_league
+	divisions.clear()
+	manifest_mode = false
+	return true
 
 
 ## Switches the active league database to the default 16-team testing database.
@@ -175,8 +293,8 @@ func _load_league() -> void:
 	if FileAccess.file_exists(CUSTOM_LEAGUE_PATH):
 		if _parse_json_league(CUSTOM_LEAGUE_PATH):
 			return
-	if FileAccess.file_exists(WORLD_MANIFEST_PATH):
-		if _parse_json_league(WORLD_MANIFEST_PATH):
+	if DatabaseManager.is_connected_to_db or FileAccess.file_exists(DatabaseManager.TEMPLATE_DB_PATH):
+		if load_world_database():
 			return
 	if FileAccess.file_exists(DEFAULT_LEAGUE_PATH):
 		if _parse_json_league(DEFAULT_LEAGUE_PATH):
@@ -264,6 +382,28 @@ func _parse_json_league(path: String) -> bool:
 
 ## Loads and caches one division shard on demand.
 func load_division_shard(descriptor: Dictionary) -> bool:
+	var shard_key: String = str(descriptor.get("name", descriptor.get("shard", "")))
+	if shard_key.is_empty():
+		return false
+	if loaded_shards.get(shard_key, false):
+		return true
+
+	# If division has a league_id or SQLite database is active
+	if descriptor.has("league_id") or DatabaseManager.is_connected_to_db:
+		var start_idx: int = _get_division_start_team_index(descriptor)
+		var count: int = int(descriptor.get("team_count", 0))
+		for i: int in range(count):
+			var target_idx: int = start_idx + i
+			if target_idx < league.teams.size():
+				var t: TeamData = league.teams[target_idx]
+				if t.squad.size() < 11 and t.team_id > 0:
+					t.squad = DatabaseManager.fetch_squad_roster(t.team_id)
+				if t.squad.size() < 11:
+					_populate_squad_if_needed(t, target_idx)
+				_ensure_valid_lineup(t)
+		loaded_shards[shard_key] = true
+		return true
+
 	var shard_rel: String = str(descriptor.get("shard", ""))
 	if shard_rel.is_empty():
 		return false
@@ -301,11 +441,11 @@ func load_division_shard(descriptor: Dictionary) -> bool:
 	var div_start_idx: int = _get_division_start_team_index(descriptor)
 
 	for i: int in range(raw_teams.size()):
-		var target_idx: int = div_start_idx + i
+		var dest_idx: int = div_start_idx + i
 		if typeof(raw_teams[i]) == TYPE_DICTIONARY:
 			var loaded_team: TeamData = _team_from_dict(raw_teams[i] as Dictionary)
-			if target_idx < league.teams.size():
-				league.teams[target_idx] = loaded_team
+			if dest_idx < league.teams.size():
+				league.teams[dest_idx] = loaded_team
 			else:
 				league.teams.append(loaded_team)
 
@@ -329,11 +469,39 @@ func _ensure_division_shard_loaded_for_team(team_index: int) -> void:
 	for d: Dictionary in divisions:
 		var count: int = int(d.get("team_count", 0))
 		if team_index >= offset and team_index < offset + count:
-			var shard_rel: String = str(d.get("shard", ""))
-			if not shard_rel.is_empty() and not loaded_shards.get(shard_rel, false):
+			var shard_key: String = str(d.get("name", d.get("shard", "")))
+			if not shard_key.is_empty() and not loaded_shards.get(shard_key, false):
 				load_division_shard(d)
 			return
 		offset += count
+
+
+func _ensure_valid_lineup(team: TeamData) -> void:
+	if team == null or team.squad.is_empty():
+		return
+	if team.lineup_indices.size() == 11:
+		if team.lineup_indices[0] >= 0 and team.lineup_indices[0] < team.squad.size():
+			if team.squad[team.lineup_indices[0]].position_role == "GK":
+				return
+
+	var gk_idx: int = -1
+	for i: int in range(team.squad.size()):
+		if team.squad[i].position_role == "GK":
+			gk_idx = i
+			break
+	if gk_idx == -1:
+		team.squad[0].position_role = "GK"
+		gk_idx = 0
+
+	var lineup: Array[int] = [gk_idx]
+	for i: int in range(team.squad.size()):
+		if i != gk_idx:
+			lineup.append(i)
+			if lineup.size() == 11:
+				break
+	while lineup.size() < 11:
+		lineup.append(lineup.size() % team.squad.size())
+	team.lineup_indices = lineup
 
 
 func _populate_squad_if_needed(team: TeamData, _index: int) -> void:
@@ -420,6 +588,9 @@ func _team_from_dict(team_dict: Dictionary) -> TeamData:
 	team.stature = str(team_dict.get("stature", team.get_stature_from_reputation()))
 	team.transfer_budget = int(team_dict.get("transfer_budget", team.transfer_budget))
 	team.wage_budget_weekly = int(team_dict.get("wage_budget_weekly", team.wage_budget_weekly))
+	team.training_facilities = int(team_dict.get("training_facilities", team.training_facilities))
+	team.youth_facilities = int(team_dict.get("youth_facilities", team.youth_facilities))
+	team.medical_facilities = int(team_dict.get("medical_facilities", team.medical_facilities))
 
 	var squad: Array[PlayerData] = []
 	var has_captain: bool = false
@@ -621,6 +792,9 @@ func _team_to_dict(t: TeamData) -> Dictionary:
 		"stature": t.stature,
 		"transfer_budget": t.transfer_budget,
 		"wage_budget_weekly": t.wage_budget_weekly,
+		"training_facilities": t.training_facilities,
+		"youth_facilities": t.youth_facilities,
+		"medical_facilities": t.medical_facilities,
 		"squad": squad_list,
 		"staff": staff_list
 	}

@@ -17,7 +17,6 @@ extends Node
 
 const CUSTOM_MANAGERS_PATH: String = "user://custom_managers.json"
 const DEFAULT_MANAGERS_PATH: String = "res://data/managers.json"
-const WORLD_MANAGERS_PATH: String = "res://data/world_managers.json"
 
 var manager_pool: Array[ManagerData] = []
 
@@ -95,9 +94,6 @@ func load_managers_from(path: String) -> bool:
 func _load_managers() -> void:
 	if FileAccess.file_exists(CUSTOM_MANAGERS_PATH):
 		if _parse_json_managers(CUSTOM_MANAGERS_PATH):
-			return
-	if FileAccess.file_exists(WORLD_MANAGERS_PATH):
-		if _parse_json_managers(WORLD_MANAGERS_PATH):
 			return
 	if FileAccess.file_exists(DEFAULT_MANAGERS_PATH):
 		if _parse_json_managers(DEFAULT_MANAGERS_PATH):

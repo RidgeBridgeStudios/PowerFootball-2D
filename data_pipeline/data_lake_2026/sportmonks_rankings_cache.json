@@ -1,0 +1,2998 @@
+{
+  "season_28155": [
+    {
+      "team_id": 6131,
+      "name": "Petrocub",
+      "ranking_points": 8500,
+      "ranking_position": 172,
+      "trophies_count": 7,
+      "venue_capacity": 14000
+    },
+    {
+      "team_id": 58,
+      "name": "Sporting CP",
+      "ranking_points": 57500,
+      "ranking_position": 33,
+      "trophies_count": 32,
+      "venue_capacity": 52095
+    },
+    {
+      "team_id": 3468,
+      "name": "Real Madrid",
+      "ranking_points": 133000,
+      "ranking_position": 2,
+      "trophies_count": 53,
+      "venue_capacity": 84744
+    },
+    {
+      "team_id": 8,
+      "name": "Liverpool",
+      "ranking_points": 116000,
+      "ranking_position": 4,
+      "trophies_count": 32,
+      "venue_capacity": 61276
+    },
+    {
+      "team_id": 485,
+      "name": "Real Betis",
+      "ranking_points": 40000,
+      "ranking_position": 50,
+      "trophies_count": 5,
+      "venue_capacity": 70000
+    },
+    {
+      "team_id": 652,
+      "name": "Porto",
+      "ranking_points": 76000,
+      "ranking_position": 19,
+      "trophies_count": 46,
+      "venue_capacity": 50033
+    },
+    {
+      "team_id": 68,
+      "name": "Borussia Dortmund",
+      "ranking_points": 93000,
+      "ranking_position": 9,
+      "trophies_count": 29,
+      "venue_capacity": 81365
+    },
+    {
+      "team_id": 34,
+      "name": "Galatasaray",
+      "ranking_points": 35500,
+      "ranking_position": 56,
+      "trophies_count": 20,
+      "venue_capacity": 53978
+    },
+    {
+      "team_id": 781,
+      "name": "AEK Athens",
+      "ranking_points": 9500,
+      "ranking_position": 158,
+      "trophies_count": 16,
+      "venue_capacity": 32500
+    },
+    {
+      "team_id": 321,
+      "name": "Viking",
+      "ranking_points": 4000,
+      "ranking_position": 211,
+      "trophies_count": 3,
+      "venue_capacity": 15900
+    },
+    {
+      "team_id": 83,
+      "name": "FC Barcelona",
+      "ranking_points": 85000,
+      "ranking_position": 11,
+      "trophies_count": 64,
+      "venue_capacity": 6000
+    },
+    {
+      "team_id": 5492,
+      "name": "Vardar",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 9,
+      "venue_capacity": 33011
+    },
+    {
+      "team_id": 314,
+      "name": "Hearts",
+      "ranking_points": 11500,
+      "ranking_position": 135,
+      "trophies_count": 10,
+      "venue_capacity": 19852
+    },
+    {
+      "team_id": 3319,
+      "name": "VfB Stuttgart",
+      "ranking_points": 13000,
+      "ranking_position": 104,
+      "trophies_count": 10,
+      "venue_capacity": 60449
+    },
+    {
+      "team_id": 516,
+      "name": "Hapoel Be'er Sheva",
+      "ranking_points": 16500,
+      "ranking_position": 95,
+      "trophies_count": 19,
+      "venue_capacity": 16126
+    },
+    {
+      "team_id": 216,
+      "name": "Slavia Praha",
+      "ranking_points": 50000,
+      "ranking_position": 39,
+      "trophies_count": 20,
+      "venue_capacity": 19370
+    },
+    {
+      "team_id": 3877,
+      "name": "Borac Banja Luka",
+      "ranking_points": 11500,
+      "ranking_position": 134,
+      "trophies_count": 11,
+      "venue_capacity": 10030
+    },
+    {
+      "team_id": 3223,
+      "name": "Levski Sofia",
+      "ranking_points": 4500,
+      "ranking_position": 298,
+      "trophies_count": 12,
+      "venue_capacity": 17688
+    },
+    {
+      "team_id": 1114,
+      "name": "Celje",
+      "ranking_points": 9500,
+      "ranking_position": 156,
+      "trophies_count": 11,
+      "venue_capacity": 13059
+    },
+    {
+      "team_id": 762,
+      "name": "Floriana",
+      "ranking_points": 4500,
+      "ranking_position": 295,
+      "trophies_count": 7,
+      "venue_capacity": null
+    },
+    {
+      "team_id": 3477,
+      "name": "Villarreal",
+      "ranking_points": 82000,
+      "ranking_position": 14,
+      "trophies_count": 4,
+      "venue_capacity": 23500
+    },
+    {
+      "team_id": 690,
+      "name": "LOSC Lille",
+      "ranking_points": 57000,
+      "ranking_position": 34,
+      "trophies_count": 7,
+      "venue_capacity": 50186
+    },
+    {
+      "team_id": 266472,
+      "name": "Atert Bissen",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": null
+    },
+    {
+      "team_id": 10655,
+      "name": "Thun",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 7,
+      "venue_capacity": 10398
+    },
+    {
+      "team_id": 6641,
+      "name": "ML Vitebsk",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 250
+    },
+    {
+      "team_id": 5284,
+      "name": "KÍ",
+      "ranking_points": 11000,
+      "ranking_position": 140,
+      "trophies_count": 12,
+      "venue_capacity": 6000
+    },
+    {
+      "team_id": 2417,
+      "name": "Slovan Bratislava",
+      "ranking_points": 33500,
+      "ranking_position": 61,
+      "trophies_count": 25,
+      "venue_capacity": 22500
+    },
+    {
+      "team_id": 2688,
+      "name": "Víkingur Reykjavík",
+      "ranking_points": 10000,
+      "ranking_position": 148,
+      "trophies_count": 20,
+      "venue_capacity": 1500
+    },
+    {
+      "team_id": 14,
+      "name": "Manchester United",
+      "ranking_points": 81000,
+      "ranking_position": 15,
+      "trophies_count": 38,
+      "venue_capacity": 74879
+    },
+    {
+      "team_id": 6392,
+      "name": "FC Iberia 1999",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 9,
+      "venue_capacity": 27223
+    },
+    {
+      "team_id": 340,
+      "name": "Club Brugge",
+      "ranking_points": 70000,
+      "ranking_position": 22,
+      "trophies_count": 28,
+      "venue_capacity": 29975
+    },
+    {
+      "team_id": 11676,
+      "name": "Universitatea Craiova",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 7,
+      "venue_capacity": 30983
+    },
+    {
+      "team_id": 271,
+      "name": "Lens",
+      "ranking_points": 12500,
+      "ranking_position": 114,
+      "trophies_count": 6,
+      "venue_capacity": 38223
+    },
+    {
+      "team_id": 277,
+      "name": "RB Leipzig",
+      "ranking_points": 78000,
+      "ranking_position": 17,
+      "trophies_count": 11,
+      "venue_capacity": 47069
+    },
+    {
+      "team_id": 494,
+      "name": "NEC Nijmegen",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 12500
+    },
+    {
+      "team_id": 268,
+      "name": "Como",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 12064
+    },
+    {
+      "team_id": 3546,
+      "name": "Riga",
+      "ranking_points": 10000,
+      "ranking_position": 152,
+      "trophies_count": 12,
+      "venue_capacity": 1000
+    },
+    {
+      "team_id": 138649,
+      "name": "Sabah",
+      "ranking_points": 4000,
+      "ranking_position": 311,
+      "trophies_count": 3,
+      "venue_capacity": 13000
+    },
+    {
+      "team_id": 10068,
+      "name": "Lincoln Red Imps",
+      "ranking_points": 10000,
+      "ranking_position": 150,
+      "trophies_count": 12,
+      "venue_capacity": null
+    },
+    {
+      "team_id": 207,
+      "name": "Shamrock Rovers",
+      "ranking_points": 16000,
+      "ranking_position": 101,
+      "trophies_count": 21,
+      "venue_capacity": 5500
+    },
+    {
+      "team_id": 368,
+      "name": "Omonia Nicosia",
+      "ranking_points": 17000,
+      "ranking_position": 93,
+      "trophies_count": 14,
+      "venue_capacity": 22859
+    },
+    {
+      "team_id": 1668,
+      "name": "Bodø / Glimt",
+      "ranking_points": 37000,
+      "ranking_position": 55,
+      "trophies_count": 11,
+      "venue_capacity": 8270
+    },
+    {
+      "team_id": 2673,
+      "name": "Crvena Zvezda",
+      "ranking_points": 42000,
+      "ranking_position": 47,
+      "trophies_count": 23,
+      "venue_capacity": 51755
+    },
+    {
+      "team_id": 17303,
+      "name": "Inter Club d'Escaldes",
+      "ranking_points": 7500,
+      "ranking_position": 192,
+      "trophies_count": 16,
+      "venue_capacity": 2000
+    },
+    {
+      "team_id": 682,
+      "name": "PSV",
+      "ranking_points": 62000,
+      "ranking_position": 26,
+      "trophies_count": 28,
+      "venue_capacity": 36500
+    },
+    {
+      "team_id": 674,
+      "name": "Dinamo Zagreb",
+      "ranking_points": 54000,
+      "ranking_position": 35,
+      "trophies_count": 36,
+      "venue_capacity": 24851
+    },
+    {
+      "team_id": 73,
+      "name": "Feyenoord",
+      "ranking_points": 68000,
+      "ranking_position": 24,
+      "trophies_count": 19,
+      "venue_capacity": 3531
+    },
+    {
+      "team_id": 4323,
+      "name": "KuPS",
+      "ranking_points": 10000,
+      "ranking_position": 153,
+      "trophies_count": 13,
+      "venue_capacity": 5300
+    },
+    {
+      "team_id": 11833,
+      "name": "Larne",
+      "ranking_points": 7000,
+      "ranking_position": 200,
+      "trophies_count": 9,
+      "venue_capacity": 6000
+    },
+    {
+      "team_id": 88,
+      "name": "Fenerbahçe",
+      "ranking_points": 43000,
+      "ranking_position": 46,
+      "trophies_count": 23,
+      "venue_capacity": 50530
+    },
+    {
+      "team_id": 63383,
+      "name": "Egnatia Rrogozhinë",
+      "ranking_points": 2500,
+      "ranking_position": 366,
+      "trophies_count": 7,
+      "venue_capacity": 4000
+    },
+    {
+      "team_id": 591,
+      "name": "Paris Saint Germain",
+      "ranking_points": 98000,
+      "ranking_position": 5,
+      "trophies_count": 53,
+      "venue_capacity": 48583
+    },
+    {
+      "team_id": 53,
+      "name": "Celtic",
+      "ranking_points": 37000,
+      "ranking_position": 54,
+      "trophies_count": 41,
+      "venue_capacity": 60411
+    },
+    {
+      "team_id": 9,
+      "name": "Manchester City",
+      "ranking_points": 135000,
+      "ranking_position": 1,
+      "trophies_count": 40,
+      "venue_capacity": 52900
+    },
+    {
+      "team_id": 15,
+      "name": "Aston Villa",
+      "ranking_points": 32000,
+      "ranking_position": 63,
+      "trophies_count": 5,
+      "venue_capacity": 42640
+    },
+    {
+      "team_id": 597,
+      "name": "Napoli",
+      "ranking_points": 61000,
+      "ranking_position": 29,
+      "trophies_count": 15,
+      "venue_capacity": 54726
+    },
+    {
+      "team_id": 79,
+      "name": "Olympique Lyonnais",
+      "ranking_points": 31000,
+      "ranking_position": 64,
+      "trophies_count": 20,
+      "venue_capacity": 59186
+    },
+    {
+      "team_id": 3781,
+      "name": "Górnik Zabrze",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 28236
+    },
+    {
+      "team_id": 3958,
+      "name": "Union Saint-Gilloise",
+      "ranking_points": 35000,
+      "ranking_position": 58,
+      "trophies_count": 8,
+      "venue_capacity": 8432
+    },
+    {
+      "team_id": 2930,
+      "name": "Inter",
+      "ranking_points": 93000,
+      "ranking_position": 8,
+      "trophies_count": 36,
+      "venue_capacity": 75817
+    },
+    {
+      "team_id": 503,
+      "name": "FC Bayern München",
+      "ranking_points": 122000,
+      "ranking_position": 3,
+      "trophies_count": 52,
+      "venue_capacity": 75024
+    },
+    {
+      "team_id": 411,
+      "name": "Mjällby",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 7,
+      "venue_capacity": 6500
+    },
+    {
+      "team_id": 2905,
+      "name": "AGF",
+      "ranking_points": 4500,
+      "ranking_position": 227,
+      "trophies_count": 6,
+      "venue_capacity": 19433
+    },
+    {
+      "team_id": 579,
+      "name": "The New Saints",
+      "ranking_points": 9000,
+      "ranking_position": 161,
+      "trophies_count": 32,
+      "venue_capacity": 2000
+    },
+    {
+      "team_id": 19,
+      "name": "Arsenal",
+      "ranking_points": 79000,
+      "ranking_position": 16,
+      "trophies_count": 34,
+      "venue_capacity": 60704
+    },
+    {
+      "team_id": 3369,
+      "name": "LASK",
+      "ranking_points": 28000,
+      "ranking_position": 69,
+      "trophies_count": 8,
+      "venue_capacity": 19080
+    },
+    {
+      "team_id": 3357,
+      "name": "Sturm Graz",
+      "ranking_points": 21000,
+      "ranking_position": 81,
+      "trophies_count": 10,
+      "venue_capacity": 16764
+    },
+    {
+      "team_id": 602,
+      "name": "Olympiacos F.C.",
+      "ranking_points": 47000,
+      "ranking_position": 43,
+      "trophies_count": 28,
+      "venue_capacity": 33334
+    },
+    {
+      "team_id": 302,
+      "name": "Lech Poznań",
+      "ranking_points": 19000,
+      "ranking_position": 88,
+      "trophies_count": 14,
+      "venue_capacity": 42837
+    },
+    {
+      "team_id": 2727,
+      "name": "Sparta Praha",
+      "ranking_points": 29500,
+      "ranking_position": 68,
+      "trophies_count": 24,
+      "venue_capacity": 16000
+    },
+    {
+      "team_id": 621,
+      "name": "Shakhtar Donetsk",
+      "ranking_points": 52000,
+      "ranking_position": 36,
+      "trophies_count": 37,
+      "venue_capacity": 34915
+    },
+    {
+      "team_id": 37,
+      "name": "Roma",
+      "ranking_points": 97000,
+      "ranking_position": 6,
+      "trophies_count": 17,
+      "venue_capacity": 72698
+    },
+    {
+      "team_id": 7926,
+      "name": "Győri ETO",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 5,
+      "venue_capacity": 16000
+    },
+    {
+      "team_id": 132649,
+      "name": "Ararat-Armenia",
+      "ranking_points": 7500,
+      "ranking_position": 188,
+      "trophies_count": 8,
+      "venue_capacity": 14403
+    },
+    {
+      "team_id": 7980,
+      "name": "Atlético de Madrid",
+      "ranking_points": 83000,
+      "ranking_position": 12,
+      "trophies_count": 18,
+      "venue_capacity": 70460
+    },
+    {
+      "team_id": 5444,
+      "name": "Tre Fiori",
+      "ranking_points": 3000,
+      "ranking_position": 357,
+      "trophies_count": 11,
+      "venue_capacity": 1000
+    },
+    {
+      "team_id": 3712,
+      "name": "Sutjeska",
+      "ranking_points": 5500,
+      "ranking_position": 261,
+      "trophies_count": 10,
+      "venue_capacity": 5214
+    },
+    {
+      "team_id": 148038,
+      "name": "Drita",
+      "ranking_points": 9000,
+      "ranking_position": 162,
+      "trophies_count": 5,
+      "venue_capacity": 15000
+    },
+    {
+      "team_id": 928,
+      "name": "Kauno Žalgiris",
+      "ranking_points": 5000,
+      "ranking_position": 276,
+      "trophies_count": 2,
+      "venue_capacity": 15315
+    },
+    {
+      "team_id": 3108,
+      "name": "Kairat",
+      "ranking_points": 5500,
+      "ranking_position": 264,
+      "trophies_count": 13,
+      "venue_capacity": 25057
+    },
+    {
+      "team_id": 8697,
+      "name": "Flora",
+      "ranking_points": 11500,
+      "ranking_position": 137,
+      "trophies_count": 22,
+      "venue_capacity": 200
+    }
+  ],
+  "season_27913": [
+    {
+      "team_id": 7242,
+      "name": "Tromsø",
+      "ranking_points": 2000,
+      "ranking_position": 203,
+      "trophies_count": 4,
+      "venue_capacity": 6687
+    },
+    {
+      "team_id": 51,
+      "name": "Crystal Palace",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 25456
+    },
+    {
+      "team_id": 9426,
+      "name": "Universitatea Cluj",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 7,
+      "venue_capacity": 30246
+    },
+    {
+      "team_id": 5905,
+      "name": "Žilina",
+      "ranking_points": 5000,
+      "ranking_position": 277,
+      "trophies_count": 15,
+      "venue_capacity": 11258
+    },
+    {
+      "team_id": 52,
+      "name": "AFC Bournemouth",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 11700
+    },
+    {
+      "team_id": 314,
+      "name": "Hearts",
+      "ranking_points": 11500,
+      "ranking_position": 135,
+      "trophies_count": 10,
+      "venue_capacity": 19852
+    },
+    {
+      "team_id": 554,
+      "name": "Beşiktaş",
+      "ranking_points": 15000,
+      "ranking_position": 111,
+      "trophies_count": 13,
+      "venue_capacity": 42590
+    },
+    {
+      "team_id": 516,
+      "name": "Hapoel Be'er Sheva",
+      "ranking_points": 16500,
+      "ranking_position": 95,
+      "trophies_count": 19,
+      "venue_capacity": 16126
+    },
+    {
+      "team_id": 5317,
+      "name": "Qarabağ",
+      "ranking_points": 31000,
+      "ranking_position": 66,
+      "trophies_count": 20,
+      "venue_capacity": 31200
+    },
+    {
+      "team_id": 3223,
+      "name": "Levski Sofia",
+      "ranking_points": 4500,
+      "ranking_position": 298,
+      "trophies_count": 12,
+      "venue_capacity": 17688
+    },
+    {
+      "team_id": 1114,
+      "name": "Celje",
+      "ranking_points": 9500,
+      "ranking_position": 156,
+      "trophies_count": 11,
+      "venue_capacity": 13059
+    },
+    {
+      "team_id": 8119,
+      "name": "Pafos FC",
+      "ranking_points": 7500,
+      "ranking_position": 197,
+      "trophies_count": 8,
+      "venue_capacity": 9394
+    },
+    {
+      "team_id": 3545,
+      "name": "Viktoria Plzeň",
+      "ranking_points": 35000,
+      "ranking_position": 57,
+      "trophies_count": 15,
+      "venue_capacity": 11700
+    },
+    {
+      "team_id": 3321,
+      "name": "Bayer 04 Leverkusen",
+      "ranking_points": 87000,
+      "ranking_position": 10,
+      "trophies_count": 9,
+      "venue_capacity": 30210
+    },
+    {
+      "team_id": 605,
+      "name": "Benfica",
+      "ranking_points": 82000,
+      "ranking_position": 13,
+      "trophies_count": 37,
+      "venue_capacity": 68100
+    },
+    {
+      "team_id": 598,
+      "name": "Rennes",
+      "ranking_points": 40000,
+      "ranking_position": 51,
+      "trophies_count": 4,
+      "venue_capacity": 29778
+    },
+    {
+      "team_id": 36,
+      "name": "Celta de Vigo",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 31800
+    },
+    {
+      "team_id": 10655,
+      "name": "Thun",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 7,
+      "venue_capacity": 10398
+    },
+    {
+      "team_id": 3552,
+      "name": "Hradec Králové",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 6,
+      "venue_capacity": 9300
+    },
+    {
+      "team_id": 5284,
+      "name": "KÍ",
+      "ranking_points": 11000,
+      "ranking_position": 140,
+      "trophies_count": 12,
+      "venue_capacity": 6000
+    },
+    {
+      "team_id": 362,
+      "name": "St. Gallen",
+      "ranking_points": 6000,
+      "ranking_position": 223,
+      "trophies_count": 6,
+      "venue_capacity": 19456
+    },
+    {
+      "team_id": 2688,
+      "name": "Víkingur Reykjavík",
+      "ranking_points": 10000,
+      "ranking_position": 148,
+      "trophies_count": 20,
+      "venue_capacity": 1500
+    },
+    {
+      "team_id": 6392,
+      "name": "FC Iberia 1999",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 9,
+      "venue_capacity": 27223
+    },
+    {
+      "team_id": 112,
+      "name": "Ferencvárosi",
+      "ranking_points": 35000,
+      "ranking_position": 59,
+      "trophies_count": 17,
+      "venue_capacity": 22000
+    },
+    {
+      "team_id": 11676,
+      "name": "Universitatea Craiova",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 7,
+      "venue_capacity": 30983
+    },
+    {
+      "team_id": 688,
+      "name": "Trabzonspor",
+      "ranking_points": 11000,
+      "ranking_position": 141,
+      "trophies_count": 10,
+      "venue_capacity": 40782
+    },
+    {
+      "team_id": 594,
+      "name": "Real Sociedad",
+      "ranking_points": 58000,
+      "ranking_position": 31,
+      "trophies_count": 2,
+      "venue_capacity": 40000
+    },
+    {
+      "team_id": 494,
+      "name": "NEC Nijmegen",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 12500
+    },
+    {
+      "team_id": 118,
+      "name": "OFI",
+      "ranking_points": 1500,
+      "ranking_position": 196,
+      "trophies_count": 3,
+      "venue_capacity": 25780
+    },
+    {
+      "team_id": 556,
+      "name": "Dynamo Kyiv",
+      "ranking_points": 21500,
+      "ranking_position": 80,
+      "trophies_count": 30,
+      "venue_capacity": 16873
+    },
+    {
+      "team_id": 10068,
+      "name": "Lincoln Red Imps",
+      "ranking_points": 10000,
+      "ranking_position": 150,
+      "trophies_count": 12,
+      "venue_capacity": null
+    },
+    {
+      "team_id": 207,
+      "name": "Shamrock Rovers",
+      "ranking_points": 16000,
+      "ranking_position": 101,
+      "trophies_count": 21,
+      "venue_capacity": 5500
+    },
+    {
+      "team_id": 2726,
+      "name": "TSG Hoffenheim",
+      "ranking_points": 17000,
+      "ranking_position": 94,
+      "trophies_count": 2,
+      "venue_capacity": 30150
+    },
+    {
+      "team_id": 1097,
+      "name": "Derry City",
+      "ranking_points": 5000,
+      "ranking_position": 272,
+      "trophies_count": 21,
+      "venue_capacity": 2000
+    },
+    {
+      "team_id": 368,
+      "name": "Omonia Nicosia",
+      "ranking_points": 17000,
+      "ranking_position": 93,
+      "trophies_count": 14,
+      "venue_capacity": 22859
+    },
+    {
+      "team_id": 62,
+      "name": "Rangers",
+      "ranking_points": 60000,
+      "ranking_position": 30,
+      "trophies_count": 34,
+      "venue_capacity": 51700
+    },
+    {
+      "team_id": 2673,
+      "name": "Crvena Zvezda",
+      "ranking_points": 42000,
+      "ranking_position": 47,
+      "trophies_count": 23,
+      "venue_capacity": 51755
+    },
+    {
+      "team_id": 674,
+      "name": "Dinamo Zagreb",
+      "ranking_points": 54000,
+      "ranking_position": 35,
+      "trophies_count": 36,
+      "venue_capacity": 24851
+    },
+    {
+      "team_id": 44,
+      "name": "Olympique Marseille",
+      "ranking_points": 48000,
+      "ranking_position": 42,
+      "trophies_count": 19,
+      "venue_capacity": 67395
+    },
+    {
+      "team_id": 4323,
+      "name": "KuPS",
+      "ranking_points": 10000,
+      "ranking_position": 153,
+      "trophies_count": 13,
+      "venue_capacity": 5300
+    },
+    {
+      "team_id": 906,
+      "name": "Hajduk Split",
+      "ranking_points": 10000,
+      "ranking_position": 151,
+      "trophies_count": 14,
+      "venue_capacity": 34198
+    },
+    {
+      "team_id": 11833,
+      "name": "Larne",
+      "ranking_points": 7000,
+      "ranking_position": 200,
+      "trophies_count": 9,
+      "venue_capacity": 6000
+    },
+    {
+      "team_id": 63383,
+      "name": "Egnatia Rrogozhinë",
+      "ranking_points": 2500,
+      "ranking_position": 366,
+      "trophies_count": 7,
+      "venue_capacity": 4000
+    },
+    {
+      "team_id": 627,
+      "name": "Sheriff",
+      "ranking_points": 20000,
+      "ranking_position": 85,
+      "trophies_count": 24,
+      "venue_capacity": 14000
+    },
+    {
+      "team_id": 113,
+      "name": "AC Milan",
+      "ranking_points": 75000,
+      "ranking_position": 20,
+      "trophies_count": 21,
+      "venue_capacity": 75817
+    },
+    {
+      "team_id": 355,
+      "name": "Sint-Truiden",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 14600
+    },
+    {
+      "team_id": 53,
+      "name": "Celtic",
+      "ranking_points": 37000,
+      "ranking_position": 54,
+      "trophies_count": 41,
+      "venue_capacity": 60411
+    },
+    {
+      "team_id": 7067,
+      "name": "Torreense",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 12000
+    },
+    {
+      "team_id": 649,
+      "name": "PAOK",
+      "ranking_points": 41500,
+      "ranking_position": 48,
+      "trophies_count": 15,
+      "venue_capacity": 28703
+    },
+    {
+      "team_id": 3291,
+      "name": "Aluminij",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 7,
+      "venue_capacity": 2600
+    },
+    {
+      "team_id": 2997,
+      "name": "Maccabi Tel Aviv",
+      "ranking_points": 37500,
+      "ranking_position": 53,
+      "trophies_count": 20,
+      "venue_capacity": 31733
+    },
+    {
+      "team_id": 79,
+      "name": "Olympique Lyonnais",
+      "ranking_points": 31000,
+      "ranking_position": 64,
+      "trophies_count": 20,
+      "venue_capacity": 59186
+    },
+    {
+      "team_id": 3781,
+      "name": "Górnik Zabrze",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 28236
+    },
+    {
+      "team_id": 593,
+      "name": "FC Twente",
+      "ranking_points": 11000,
+      "ranking_position": 120,
+      "trophies_count": 6,
+      "venue_capacity": 2000
+    },
+    {
+      "team_id": 3958,
+      "name": "Union Saint-Gilloise",
+      "ranking_points": 35000,
+      "ranking_position": 58,
+      "trophies_count": 8,
+      "venue_capacity": 8432
+    },
+    {
+      "team_id": 411,
+      "name": "Mjällby",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 7,
+      "venue_capacity": 6500
+    },
+    {
+      "team_id": 2905,
+      "name": "AGF",
+      "ranking_points": 4500,
+      "ranking_position": 227,
+      "trophies_count": 6,
+      "venue_capacity": 19433
+    },
+    {
+      "team_id": 392,
+      "name": "CSKA Sofia",
+      "ranking_points": 10500,
+      "ranking_position": 147,
+      "trophies_count": 17,
+      "venue_capacity": 43632
+    },
+    {
+      "team_id": 61,
+      "name": "AZ Alkmaar",
+      "ranking_points": 50000,
+      "ranking_position": 38,
+      "trophies_count": 10,
+      "venue_capacity": 19500
+    },
+    {
+      "team_id": 8503,
+      "name": "Vestri",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 800
+    },
+    {
+      "team_id": 2353,
+      "name": "Hammarby",
+      "ranking_points": 5500,
+      "ranking_position": 262,
+      "trophies_count": 7,
+      "venue_capacity": 32000
+    },
+    {
+      "team_id": 3357,
+      "name": "Sturm Graz",
+      "ranking_points": 21000,
+      "ranking_position": 81,
+      "trophies_count": 10,
+      "venue_capacity": 16764
+    },
+    {
+      "team_id": 602,
+      "name": "Olympiacos F.C.",
+      "ranking_points": 47000,
+      "ranking_position": 43,
+      "trophies_count": 28,
+      "venue_capacity": 33334
+    },
+    {
+      "team_id": 302,
+      "name": "Lech Poznań",
+      "ranking_points": 19000,
+      "ranking_position": 88,
+      "trophies_count": 14,
+      "venue_capacity": 42837
+    },
+    {
+      "team_id": 2727,
+      "name": "Sparta Praha",
+      "ranking_points": 29500,
+      "ranking_position": 68,
+      "trophies_count": 24,
+      "venue_capacity": 16000
+    },
+    {
+      "team_id": 49,
+      "name": "Salzburg",
+      "ranking_points": 48000,
+      "ranking_position": 41,
+      "trophies_count": 31,
+      "venue_capacity": 30188
+    },
+    {
+      "team_id": 2555,
+      "name": "Anderlecht",
+      "ranking_points": 24500,
+      "ranking_position": 72,
+      "trophies_count": 21,
+      "venue_capacity": 21500
+    },
+    {
+      "team_id": 2945,
+      "name": "Vojvodina",
+      "ranking_points": 7500,
+      "ranking_position": 189,
+      "trophies_count": 4,
+      "venue_capacity": 15000
+    },
+    {
+      "team_id": 890,
+      "name": "Jagiellonia Białystok",
+      "ranking_points": 8000,
+      "ranking_position": 179,
+      "trophies_count": 7,
+      "venue_capacity": 22372
+    },
+    {
+      "team_id": 3,
+      "name": "Sunderland",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 2500
+    },
+    {
+      "team_id": 132649,
+      "name": "Ararat-Armenia",
+      "ranking_points": 7500,
+      "ranking_position": 188,
+      "trophies_count": 8,
+      "venue_capacity": 14403
+    },
+    {
+      "team_id": 928,
+      "name": "Kauno Žalgiris",
+      "ranking_points": 5000,
+      "ranking_position": 276,
+      "trophies_count": 2,
+      "venue_capacity": 15315
+    },
+    {
+      "team_id": 3108,
+      "name": "Kairat",
+      "ranking_points": 5500,
+      "ranking_position": 264,
+      "trophies_count": 13,
+      "venue_capacity": 25057
+    },
+    {
+      "team_id": 2510,
+      "name": "Lillestrøm",
+      "ranking_points": 2000,
+      "ranking_position": 212,
+      "trophies_count": 6,
+      "venue_capacity": 12250
+    },
+    {
+      "team_id": 939,
+      "name": "FC Midtjylland",
+      "ranking_points": 30500,
+      "ranking_position": 67,
+      "trophies_count": 12,
+      "venue_capacity": 12152
+    },
+    {
+      "team_id": 625,
+      "name": "Juventus",
+      "ranking_points": 73000,
+      "ranking_position": 21,
+      "trophies_count": 31,
+      "venue_capacity": 45500
+    }
+  ],
+  "season_28083": [
+    {
+      "team_id": 78,
+      "name": "Brighton & Hove Albion",
+      "ranking_points": 16000,
+      "ranking_position": 83,
+      "trophies_count": 2,
+      "venue_capacity": 31876
+    },
+    {
+      "team_id": 11,
+      "name": "Fulham",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 2,
+      "venue_capacity": 25700
+    },
+    {
+      "team_id": 8,
+      "name": "Liverpool",
+      "ranking_points": 116000,
+      "ranking_position": 4,
+      "trophies_count": 32,
+      "venue_capacity": 61276
+    },
+    {
+      "team_id": 19,
+      "name": "Arsenal",
+      "ranking_points": 79000,
+      "ranking_position": 16,
+      "trophies_count": 34,
+      "venue_capacity": 60704
+    },
+    {
+      "team_id": 116,
+      "name": "Ipswich Town",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 29673
+    },
+    {
+      "team_id": 117,
+      "name": "Coventry City",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 32609
+    },
+    {
+      "team_id": 71,
+      "name": "Leeds United",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 5,
+      "venue_capacity": 37890
+    },
+    {
+      "team_id": 51,
+      "name": "Crystal Palace",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 25456
+    },
+    {
+      "team_id": 14,
+      "name": "Manchester United",
+      "ranking_points": 81000,
+      "ranking_position": 15,
+      "trophies_count": 38,
+      "venue_capacity": 74879
+    },
+    {
+      "team_id": 236,
+      "name": "Brentford",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 17250
+    },
+    {
+      "team_id": 3,
+      "name": "Sunderland",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 2500
+    },
+    {
+      "team_id": 52,
+      "name": "AFC Bournemouth",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 11700
+    },
+    {
+      "team_id": 22,
+      "name": "Hull City",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 25586
+    },
+    {
+      "team_id": 20,
+      "name": "Newcastle United",
+      "ranking_points": 8000,
+      "ranking_position": 84,
+      "trophies_count": 4,
+      "venue_capacity": 52409
+    },
+    {
+      "team_id": 63,
+      "name": "Nottingham Forest",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 0,
+      "venue_capacity": 30445
+    },
+    {
+      "team_id": 13,
+      "name": "Everton",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 52888
+    },
+    {
+      "team_id": 9,
+      "name": "Manchester City",
+      "ranking_points": 135000,
+      "ranking_position": 1,
+      "trophies_count": 40,
+      "venue_capacity": 52900
+    },
+    {
+      "team_id": 18,
+      "name": "Chelsea",
+      "ranking_points": 95500,
+      "ranking_position": 7,
+      "trophies_count": 47,
+      "venue_capacity": 34915
+    },
+    {
+      "team_id": 15,
+      "name": "Aston Villa",
+      "ranking_points": 32000,
+      "ranking_position": 63,
+      "trophies_count": 5,
+      "venue_capacity": 42640
+    },
+    {
+      "team_id": 6,
+      "name": "Tottenham Hotspur",
+      "ranking_points": 48000,
+      "ranking_position": 40,
+      "trophies_count": 11,
+      "venue_capacity": 62850
+    }
+  ],
+  "season_27903": [
+    {
+      "team_id": 24,
+      "name": "Derby County",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 33597
+    },
+    {
+      "team_id": 283,
+      "name": "Wrexham",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 9,
+      "venue_capacity": 10771
+    },
+    {
+      "team_id": 99,
+      "name": "Preston North End",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 0,
+      "venue_capacity": 23408
+    },
+    {
+      "team_id": 69,
+      "name": "Cardiff City",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 5,
+      "venue_capacity": 33280
+    },
+    {
+      "team_id": 25,
+      "name": "Watford",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 22200
+    },
+    {
+      "team_id": 305,
+      "name": "Lincoln City",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 10780
+    },
+    {
+      "team_id": 122,
+      "name": "Bristol City",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 27000
+    },
+    {
+      "team_id": 29,
+      "name": "Wolverhampton Wanderers",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 32050
+    },
+    {
+      "team_id": 4,
+      "name": "Charlton Athletic",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 27111
+    },
+    {
+      "team_id": 30,
+      "name": "Swansea City",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 20827
+    },
+    {
+      "team_id": 21,
+      "name": "Sheffield United",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 32702
+    },
+    {
+      "team_id": 47,
+      "name": "Queens Park Rangers",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 18500
+    },
+    {
+      "team_id": 33,
+      "name": "Norwich City",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 27244
+    },
+    {
+      "team_id": 10,
+      "name": "West Bromwich Albion",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 26445
+    },
+    {
+      "team_id": 7,
+      "name": "Middlesbrough",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 2,
+      "venue_capacity": 34988
+    },
+    {
+      "team_id": 1,
+      "name": "West Ham United",
+      "ranking_points": 69000,
+      "ranking_position": 23,
+      "trophies_count": 3,
+      "venue_capacity": 59623
+    },
+    {
+      "team_id": 65,
+      "name": "Southampton",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 32384
+    },
+    {
+      "team_id": 5,
+      "name": "Portsmouth",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 7,
+      "venue_capacity": 20688
+    },
+    {
+      "team_id": 64,
+      "name": "Millwall",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 0,
+      "venue_capacity": 20146
+    },
+    {
+      "team_id": 2,
+      "name": "Blackburn Rovers",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 31367
+    },
+    {
+      "team_id": 16,
+      "name": "Bolton Wanderers",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 2,
+      "venue_capacity": 28723
+    },
+    {
+      "team_id": 26,
+      "name": "Stoke City",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 2,
+      "venue_capacity": 30089
+    },
+    {
+      "team_id": 12,
+      "name": "Birmingham City",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 5,
+      "venue_capacity": 29409
+    },
+    {
+      "team_id": 27,
+      "name": "Burnley",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 22546
+    }
+  ],
+  "season_27965": [
+    {
+      "team_id": 3477,
+      "name": "Villarreal",
+      "ranking_points": 82000,
+      "ranking_position": 14,
+      "trophies_count": 4,
+      "venue_capacity": 23500
+    },
+    {
+      "team_id": 3468,
+      "name": "Real Madrid",
+      "ranking_points": 133000,
+      "ranking_position": 2,
+      "trophies_count": 53,
+      "venue_capacity": 84744
+    },
+    {
+      "team_id": 485,
+      "name": "Real Betis",
+      "ranking_points": 40000,
+      "ranking_position": 50,
+      "trophies_count": 5,
+      "venue_capacity": 70000
+    },
+    {
+      "team_id": 429,
+      "name": "Deportivo A Coruña",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 34600
+    },
+    {
+      "team_id": 36,
+      "name": "Celta de Vigo",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 31800
+    },
+    {
+      "team_id": 3457,
+      "name": "Levante",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 26354
+    },
+    {
+      "team_id": 1099,
+      "name": "Elche",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 2,
+      "venue_capacity": 31388
+    },
+    {
+      "team_id": 9818,
+      "name": "Racing Santander",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 6,
+      "venue_capacity": 22308
+    },
+    {
+      "team_id": 676,
+      "name": "Sevilla",
+      "ranking_points": 58000,
+      "ranking_position": 32,
+      "trophies_count": 24,
+      "venue_capacity": 42714
+    },
+    {
+      "team_id": 83,
+      "name": "FC Barcelona",
+      "ranking_points": 85000,
+      "ranking_position": 11,
+      "trophies_count": 64,
+      "venue_capacity": 6000
+    },
+    {
+      "team_id": 2975,
+      "name": "Deportivo Alavés",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 19840
+    },
+    {
+      "team_id": 594,
+      "name": "Real Sociedad",
+      "ranking_points": 58000,
+      "ranking_position": 31,
+      "trophies_count": 2,
+      "venue_capacity": 40000
+    },
+    {
+      "team_id": 214,
+      "name": "Valencia",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 6,
+      "venue_capacity": 49430
+    },
+    {
+      "team_id": 7980,
+      "name": "Atlético de Madrid",
+      "ranking_points": 83000,
+      "ranking_position": 12,
+      "trophies_count": 18,
+      "venue_capacity": 70460
+    },
+    {
+      "team_id": 106,
+      "name": "Getafe",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 2,
+      "venue_capacity": 17393
+    },
+    {
+      "team_id": 13258,
+      "name": "Athletic Club",
+      "ranking_points": 11000,
+      "ranking_position": 97,
+      "trophies_count": 12,
+      "venue_capacity": 53289
+    },
+    {
+      "team_id": 528,
+      "name": "Espanyol",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 6,
+      "venue_capacity": 40000
+    },
+    {
+      "team_id": 459,
+      "name": "Osasuna",
+      "ranking_points": 2500,
+      "ranking_position": 99,
+      "trophies_count": 2,
+      "venue_capacity": 23576
+    },
+    {
+      "team_id": 377,
+      "name": "Rayo Vallecano",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 5,
+      "venue_capacity": 14708
+    },
+    {
+      "team_id": 126,
+      "name": "Málaga",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 0,
+      "venue_capacity": 30044
+    }
+  ],
+  "season_27895": [
+    {
+      "team_id": 1628,
+      "name": "Monza",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 18568
+    },
+    {
+      "team_id": 708,
+      "name": "Atalanta",
+      "ranking_points": 77000,
+      "ranking_position": 18,
+      "trophies_count": 9,
+      "venue_capacity": 2180
+    },
+    {
+      "team_id": 346,
+      "name": "Udinese",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 0,
+      "venue_capacity": 25132
+    },
+    {
+      "team_id": 267,
+      "name": "Venezia",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 11150
+    },
+    {
+      "team_id": 113,
+      "name": "AC Milan",
+      "ranking_points": 75000,
+      "ranking_position": 20,
+      "trophies_count": 21,
+      "venue_capacity": 75817
+    },
+    {
+      "team_id": 102,
+      "name": "Genoa",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 33205
+    },
+    {
+      "team_id": 109,
+      "name": "Fiorentina",
+      "ranking_points": 51500,
+      "ranking_position": 37,
+      "trophies_count": 4,
+      "venue_capacity": 43147
+    },
+    {
+      "team_id": 43,
+      "name": "Lazio",
+      "ranking_points": 63000,
+      "ranking_position": 25,
+      "trophies_count": 12,
+      "venue_capacity": 72698
+    },
+    {
+      "team_id": 37,
+      "name": "Roma",
+      "ranking_points": 97000,
+      "ranking_position": 6,
+      "trophies_count": 17,
+      "venue_capacity": 72698
+    },
+    {
+      "team_id": 4070,
+      "name": "Frosinone",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 16227
+    },
+    {
+      "team_id": 613,
+      "name": "Torino",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 28177
+    },
+    {
+      "team_id": 268,
+      "name": "Como",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 12064
+    },
+    {
+      "team_id": 7790,
+      "name": "Lecce",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 6,
+      "venue_capacity": 40800
+    },
+    {
+      "team_id": 8513,
+      "name": "Bologna",
+      "ranking_points": 10000,
+      "ranking_position": 92,
+      "trophies_count": 4,
+      "venue_capacity": 36532
+    },
+    {
+      "team_id": 2714,
+      "name": "Sassuolo",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 21584
+    },
+    {
+      "team_id": 597,
+      "name": "Napoli",
+      "ranking_points": 61000,
+      "ranking_position": 29,
+      "trophies_count": 15,
+      "venue_capacity": 54726
+    },
+    {
+      "team_id": 398,
+      "name": "Parma",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 27906
+    },
+    {
+      "team_id": 2930,
+      "name": "Inter",
+      "ranking_points": 93000,
+      "ranking_position": 8,
+      "trophies_count": 36,
+      "venue_capacity": 75817
+    },
+    {
+      "team_id": 625,
+      "name": "Juventus",
+      "ranking_points": 73000,
+      "ranking_position": 21,
+      "trophies_count": 31,
+      "venue_capacity": 45500
+    },
+    {
+      "team_id": 585,
+      "name": "Cagliari",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 16416
+    }
+  ],
+  "season_28321": [
+    {
+      "team_id": 3321,
+      "name": "Bayer 04 Leverkusen",
+      "ranking_points": 87000,
+      "ranking_position": 10,
+      "trophies_count": 9,
+      "venue_capacity": 30210
+    },
+    {
+      "team_id": 3543,
+      "name": "SC Freiburg",
+      "ranking_points": 28000,
+      "ranking_position": 70,
+      "trophies_count": 4,
+      "venue_capacity": 34700
+    },
+    {
+      "team_id": 68,
+      "name": "Borussia Dortmund",
+      "ranking_points": 93000,
+      "ranking_position": 9,
+      "trophies_count": 29,
+      "venue_capacity": 81365
+    },
+    {
+      "team_id": 82,
+      "name": "Werder Bremen",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 7,
+      "venue_capacity": 42100
+    },
+    {
+      "team_id": 3320,
+      "name": "FC Köln",
+      "ranking_points": 6000,
+      "ranking_position": 106,
+      "trophies_count": 5,
+      "venue_capacity": 50000
+    },
+    {
+      "team_id": 67,
+      "name": "Schalke 04",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 6,
+      "venue_capacity": 62271
+    },
+    {
+      "team_id": 3588,
+      "name": "Elversberg",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 11,
+      "venue_capacity": 10000
+    },
+    {
+      "team_id": 277,
+      "name": "RB Leipzig",
+      "ranking_points": 78000,
+      "ranking_position": 17,
+      "trophies_count": 11,
+      "venue_capacity": 47069
+    },
+    {
+      "team_id": 90,
+      "name": "FC Augsburg",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 2,
+      "venue_capacity": 30660
+    },
+    {
+      "team_id": 683,
+      "name": "Borussia Mönchengladbach",
+      "ranking_points": 15000,
+      "ranking_position": 108,
+      "trophies_count": 2,
+      "venue_capacity": 54057
+    },
+    {
+      "team_id": 3319,
+      "name": "VfB Stuttgart",
+      "ranking_points": 13000,
+      "ranking_position": 104,
+      "trophies_count": 10,
+      "venue_capacity": 60449
+    },
+    {
+      "team_id": 2642,
+      "name": "Paderborn",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 2,
+      "venue_capacity": 15306
+    },
+    {
+      "team_id": 2726,
+      "name": "TSG Hoffenheim",
+      "ranking_points": 17000,
+      "ranking_position": 94,
+      "trophies_count": 2,
+      "venue_capacity": 30150
+    },
+    {
+      "team_id": 366,
+      "name": "Eintracht Frankfurt",
+      "ranking_points": 62000,
+      "ranking_position": 27,
+      "trophies_count": 8,
+      "venue_capacity": 58000
+    },
+    {
+      "team_id": 794,
+      "name": "FSV Mainz 05",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 34000
+    },
+    {
+      "team_id": 503,
+      "name": "FC Bayern München",
+      "ranking_points": 122000,
+      "ranking_position": 3,
+      "trophies_count": 52,
+      "venue_capacity": 75024
+    },
+    {
+      "team_id": 2708,
+      "name": "Hamburger SV",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 5,
+      "venue_capacity": 57000
+    },
+    {
+      "team_id": 1079,
+      "name": "FC Union Berlin",
+      "ranking_points": 23000,
+      "ranking_position": 77,
+      "trophies_count": 3,
+      "venue_capacity": 22012
+    }
+  ],
+  "season_28082": [
+    {
+      "team_id": 44,
+      "name": "Olympique Marseille",
+      "ranking_points": 48000,
+      "ranking_position": 42,
+      "trophies_count": 19,
+      "venue_capacity": 67395
+    },
+    {
+      "team_id": 690,
+      "name": "LOSC Lille",
+      "ranking_points": 57000,
+      "ranking_position": 34,
+      "trophies_count": 7,
+      "venue_capacity": 50186
+    },
+    {
+      "team_id": 598,
+      "name": "Rennes",
+      "ranking_points": 40000,
+      "ranking_position": 51,
+      "trophies_count": 4,
+      "venue_capacity": 29778
+    },
+    {
+      "team_id": 6789,
+      "name": "Monaco",
+      "ranking_points": 39000,
+      "ranking_position": 52,
+      "trophies_count": 15,
+      "venue_capacity": 18523
+    },
+    {
+      "team_id": 1055,
+      "name": "Le Havre",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 2,
+      "venue_capacity": 25181
+    },
+    {
+      "team_id": 776,
+      "name": "Angers SCO",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 2,
+      "venue_capacity": 17835
+    },
+    {
+      "team_id": 7047,
+      "name": "Troyes",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 2,
+      "venue_capacity": 20400
+    },
+    {
+      "team_id": 686,
+      "name": "Strasbourg",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 5,
+      "venue_capacity": 29200
+    },
+    {
+      "team_id": 591,
+      "name": "Paris Saint Germain",
+      "ranking_points": 98000,
+      "ranking_position": 5,
+      "trophies_count": 53,
+      "venue_capacity": 48583
+    },
+    {
+      "team_id": 271,
+      "name": "Lens",
+      "ranking_points": 12500,
+      "ranking_position": 114,
+      "trophies_count": 6,
+      "venue_capacity": 38223
+    },
+    {
+      "team_id": 289,
+      "name": "Toulouse",
+      "ranking_points": 10000,
+      "ranking_position": 115,
+      "trophies_count": 4,
+      "venue_capacity": 33150
+    },
+    {
+      "team_id": 266,
+      "name": "Brest",
+      "ranking_points": 15000,
+      "ranking_position": 110,
+      "trophies_count": 2,
+      "venue_capacity": 15097
+    },
+    {
+      "team_id": 9257,
+      "name": "Lorient",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 18110
+    },
+    {
+      "team_id": 7758,
+      "name": "Le Mans",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 2,
+      "venue_capacity": 25064
+    },
+    {
+      "team_id": 450,
+      "name": "Nice",
+      "ranking_points": 19000,
+      "ranking_position": 87,
+      "trophies_count": 2,
+      "venue_capacity": 36178
+    },
+    {
+      "team_id": 3682,
+      "name": "Auxerre",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 18541
+    },
+    {
+      "team_id": 4508,
+      "name": "Paris",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 0,
+      "venue_capacity": 15097
+    },
+    {
+      "team_id": 79,
+      "name": "Olympique Lyonnais",
+      "ranking_points": 31000,
+      "ranking_position": 64,
+      "trophies_count": 20,
+      "venue_capacity": 59186
+    }
+  ],
+  "season_27958": [
+    {
+      "team_id": 61,
+      "name": "AZ Alkmaar",
+      "ranking_points": 50000,
+      "ranking_position": 38,
+      "trophies_count": 10,
+      "venue_capacity": 19500
+    },
+    {
+      "team_id": 669,
+      "name": "Willem II",
+      "ranking_points": 2000,
+      "ranking_position": 123,
+      "trophies_count": 4,
+      "venue_capacity": 14700
+    },
+    {
+      "team_id": 629,
+      "name": "Ajax",
+      "ranking_points": 61000,
+      "ranking_position": 28,
+      "trophies_count": 34,
+      "venue_capacity": 55885
+    },
+    {
+      "team_id": 2345,
+      "name": "FC Groningen",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 22525
+    },
+    {
+      "team_id": 1652,
+      "name": "Excelsior",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 2,
+      "venue_capacity": 4500
+    },
+    {
+      "team_id": 919,
+      "name": "Sparta Rotterdam",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 11026
+    },
+    {
+      "team_id": 750,
+      "name": "FC Utrecht",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 2,
+      "venue_capacity": 23750
+    },
+    {
+      "team_id": 494,
+      "name": "NEC Nijmegen",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 12500
+    },
+    {
+      "team_id": 1128,
+      "name": "ADO Den Haag",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 0,
+      "venue_capacity": 15000
+    },
+    {
+      "team_id": 664,
+      "name": "Go Ahead Eagles",
+      "ranking_points": 1500,
+      "ranking_position": 121,
+      "trophies_count": 2,
+      "venue_capacity": 10400
+    },
+    {
+      "team_id": 1550,
+      "name": "Telstar",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 3200
+    },
+    {
+      "team_id": 1053,
+      "name": "SC Heerenveen",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 27224
+    },
+    {
+      "team_id": 1459,
+      "name": "Fortuna Sittard",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 12500
+    },
+    {
+      "team_id": 593,
+      "name": "FC Twente",
+      "ranking_points": 11000,
+      "ranking_position": 120,
+      "trophies_count": 6,
+      "venue_capacity": 2000
+    },
+    {
+      "team_id": 1016,
+      "name": "PEC Zwolle",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 6,
+      "venue_capacity": 14000
+    },
+    {
+      "team_id": 1435,
+      "name": "SC Cambuur",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 15000
+    },
+    {
+      "team_id": 682,
+      "name": "PSV",
+      "ranking_points": 62000,
+      "ranking_position": 26,
+      "trophies_count": 28,
+      "venue_capacity": 36500
+    },
+    {
+      "team_id": 73,
+      "name": "Feyenoord",
+      "ranking_points": 68000,
+      "ranking_position": 24,
+      "trophies_count": 19,
+      "venue_capacity": 3531
+    }
+  ],
+  "season_27947": [
+    {
+      "team_id": 58,
+      "name": "Sporting CP",
+      "ranking_points": 57500,
+      "ranking_position": 33,
+      "trophies_count": 32,
+      "venue_capacity": 52095
+    },
+    {
+      "team_id": 35867,
+      "name": "Alverca",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 7705
+    },
+    {
+      "team_id": 605,
+      "name": "Benfica",
+      "ranking_points": 82000,
+      "ranking_position": 13,
+      "trophies_count": 37,
+      "venue_capacity": 68100
+    },
+    {
+      "team_id": 6377,
+      "name": "Rio Ave",
+      "ranking_points": 2500,
+      "ranking_position": 133,
+      "trophies_count": 7,
+      "venue_capacity": 5300
+    },
+    {
+      "team_id": 1085,
+      "name": "Moreirense",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 6,
+      "venue_capacity": 6150
+    },
+    {
+      "team_id": 4092,
+      "name": "Arouca",
+      "ranking_points": 2000,
+      "ranking_position": 129,
+      "trophies_count": 4,
+      "venue_capacity": 5600
+    },
+    {
+      "team_id": 652,
+      "name": "Porto",
+      "ranking_points": 76000,
+      "ranking_position": 19,
+      "trophies_count": 46,
+      "venue_capacity": 50033
+    },
+    {
+      "team_id": 5931,
+      "name": "Marítimo",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 10932
+    },
+    {
+      "team_id": 12152,
+      "name": "Estrela Amadora",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 9000
+    },
+    {
+      "team_id": 1198,
+      "name": "Estoril",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 8000
+    },
+    {
+      "team_id": 884,
+      "name": "Sporting Braga",
+      "ranking_points": 44000,
+      "ranking_position": 44,
+      "trophies_count": 13,
+      "venue_capacity": 30286
+    },
+    {
+      "team_id": 11741,
+      "name": "Casa Pia",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 2500
+    },
+    {
+      "team_id": 8297,
+      "name": "Academico Viseu",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 2,
+      "venue_capacity": 6912
+    },
+    {
+      "team_id": 364,
+      "name": "Gil Vicente",
+      "ranking_points": 2500,
+      "ranking_position": 130,
+      "trophies_count": 0,
+      "venue_capacity": 12046
+    },
+    {
+      "team_id": 7035,
+      "name": "Nacional",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 5132
+    },
+    {
+      "team_id": 2628,
+      "name": "Santa Clara",
+      "ranking_points": 2500,
+      "ranking_position": 131,
+      "trophies_count": 2,
+      "venue_capacity": 13277
+    },
+    {
+      "team_id": 830,
+      "name": "Vitória Guimarães",
+      "ranking_points": 17750,
+      "ranking_position": 91,
+      "trophies_count": 5,
+      "venue_capacity": 30029
+    },
+    {
+      "team_id": 3161,
+      "name": "Famalicão",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 5307
+    }
+  ],
+  "season_28003": [
+    {
+      "team_id": 3369,
+      "name": "LASK",
+      "ranking_points": 28000,
+      "ranking_position": 69,
+      "trophies_count": 8,
+      "venue_capacity": 19080
+    },
+    {
+      "team_id": 4080,
+      "name": "WSG Tirol",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 8,
+      "venue_capacity": 16008
+    },
+    {
+      "team_id": 3678,
+      "name": "SK Rapid",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 12,
+      "venue_capacity": 28345
+    },
+    {
+      "team_id": 3357,
+      "name": "Sturm Graz",
+      "ranking_points": 21000,
+      "ranking_position": 81,
+      "trophies_count": 10,
+      "venue_capacity": 16764
+    },
+    {
+      "team_id": 3949,
+      "name": "Rheindorf Altach",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 5,
+      "venue_capacity": 8500
+    },
+    {
+      "team_id": 49,
+      "name": "Salzburg",
+      "ranking_points": 48000,
+      "ranking_position": 41,
+      "trophies_count": 31,
+      "venue_capacity": 30188
+    },
+    {
+      "team_id": 5769,
+      "name": "Hartberg",
+      "ranking_points": 1500,
+      "ranking_position": 216,
+      "trophies_count": 5,
+      "venue_capacity": 4635
+    },
+    {
+      "team_id": 5724,
+      "name": "Grazer AK",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 16764
+    },
+    {
+      "team_id": 3787,
+      "name": "Wolfsberger AC",
+      "ranking_points": 9500,
+      "ranking_position": 160,
+      "trophies_count": 1,
+      "venue_capacity": 7300
+    },
+    {
+      "team_id": 3569,
+      "name": "Ried",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 7,
+      "venue_capacity": 5000
+    },
+    {
+      "team_id": 3630,
+      "name": "Austria Wien",
+      "ranking_points": 7500,
+      "ranking_position": 191,
+      "trophies_count": 9,
+      "venue_capacity": 17500
+    },
+    {
+      "team_id": 3601,
+      "name": "Austria Lustenau",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 8800
+    }
+  ],
+  "season_27897": [
+    {
+      "team_id": 2447,
+      "name": "Viborg FF",
+      "ranking_points": 2500,
+      "ranking_position": 228,
+      "trophies_count": 5,
+      "venue_capacity": 9566
+    },
+    {
+      "team_id": 2650,
+      "name": "Lyngby Boldklub",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 5,
+      "venue_capacity": 10000
+    },
+    {
+      "team_id": 2394,
+      "name": "Nordsjælland",
+      "ranking_points": 7000,
+      "ranking_position": 208,
+      "trophies_count": 4,
+      "venue_capacity": 9200
+    },
+    {
+      "team_id": 1789,
+      "name": "Odense BK",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 5,
+      "venue_capacity": 15790
+    },
+    {
+      "team_id": 211,
+      "name": "Horsens",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 10400
+    },
+    {
+      "team_id": 2356,
+      "name": "Randers FC",
+      "ranking_points": 7000,
+      "ranking_position": 213,
+      "trophies_count": 3,
+      "venue_capacity": 12000
+    },
+    {
+      "team_id": 939,
+      "name": "FC Midtjylland",
+      "ranking_points": 30500,
+      "ranking_position": 67,
+      "trophies_count": 12,
+      "venue_capacity": 12152
+    },
+    {
+      "team_id": 86,
+      "name": "Silkeborg IF",
+      "ranking_points": 6000,
+      "ranking_position": 226,
+      "trophies_count": 9,
+      "venue_capacity": 10000
+    },
+    {
+      "team_id": 85,
+      "name": "FC København",
+      "ranking_points": 43500,
+      "ranking_position": 45,
+      "trophies_count": 26,
+      "venue_capacity": 38065
+    },
+    {
+      "team_id": 390,
+      "name": "Sønderjyske Fodbold",
+      "ranking_points": 2000,
+      "ranking_position": 229,
+      "trophies_count": 5,
+      "venue_capacity": 10000
+    },
+    {
+      "team_id": 293,
+      "name": "Brøndby IF",
+      "ranking_points": 7000,
+      "ranking_position": 202,
+      "trophies_count": 11,
+      "venue_capacity": 29000
+    },
+    {
+      "team_id": 2905,
+      "name": "AGF",
+      "ranking_points": 4500,
+      "ranking_position": 227,
+      "trophies_count": 6,
+      "venue_capacity": 19433
+    }
+  ],
+  "season_28203": [
+    {
+      "team_id": 2811,
+      "name": "Samsunspor",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 34403
+    },
+    {
+      "team_id": 4192,
+      "name": "Gaziantep F.K.",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 0,
+      "venue_capacity": 33502
+    },
+    {
+      "team_id": 1041,
+      "name": "Rizespor",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 15558
+    },
+    {
+      "team_id": 347,
+      "name": "Alanyaspor",
+      "ranking_points": 2000,
+      "ranking_position": 178,
+      "trophies_count": 3,
+      "venue_capacity": 10128
+    },
+    {
+      "team_id": 3570,
+      "name": "Amed SK",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 2,
+      "venue_capacity": 1540
+    },
+    {
+      "team_id": 3224,
+      "name": "Eyüpspor",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 2,
+      "venue_capacity": 2500
+    },
+    {
+      "team_id": 3897,
+      "name": "Göztepe",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 7,
+      "venue_capacity": 12500
+    },
+    {
+      "team_id": 88,
+      "name": "Fenerbahçe",
+      "ranking_points": 43000,
+      "ranking_position": 46,
+      "trophies_count": 23,
+      "venue_capacity": 50530
+    },
+    {
+      "team_id": 34,
+      "name": "Galatasaray",
+      "ranking_points": 35500,
+      "ranking_position": 56,
+      "trophies_count": 20,
+      "venue_capacity": 53978
+    },
+    {
+      "team_id": 13818,
+      "name": "Erzurumspor FK",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 4500
+    },
+    {
+      "team_id": 286,
+      "name": "Gençlerbirliği",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 20560
+    },
+    {
+      "team_id": 13860,
+      "name": "Kocaelispor",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 34829
+    },
+    {
+      "team_id": 688,
+      "name": "Trabzonspor",
+      "ranking_points": 11000,
+      "ranking_position": 141,
+      "trophies_count": 10,
+      "venue_capacity": 40782
+    },
+    {
+      "team_id": 554,
+      "name": "Beşiktaş",
+      "ranking_points": 15000,
+      "ranking_position": 111,
+      "trophies_count": 13,
+      "venue_capacity": 42590
+    },
+    {
+      "team_id": 13871,
+      "name": "Çorum FK",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 1,
+      "venue_capacity": 11263
+    },
+    {
+      "team_id": 3702,
+      "name": "İstanbul Başakşehir",
+      "ranking_points": 23000,
+      "ranking_position": 75,
+      "trophies_count": 11,
+      "venue_capacity": 17156
+    },
+    {
+      "team_id": 2632,
+      "name": "Konyaspor",
+      "ranking_points": 2000,
+      "ranking_position": 177,
+      "trophies_count": 2,
+      "venue_capacity": 42000
+    },
+    {
+      "team_id": 1071,
+      "name": "Kasımpaşa",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 0,
+      "venue_capacity": 14234
+    }
+  ],
+  "season_26806": [
+    {
+      "team_id": 2353,
+      "name": "Hammarby",
+      "ranking_points": 5500,
+      "ranking_position": 262,
+      "trophies_count": 7,
+      "venue_capacity": 32000
+    },
+    {
+      "team_id": 432,
+      "name": "Kalmar",
+      "ranking_points": 0,
+      "ranking_position": 281,
+      "trophies_count": 7,
+      "venue_capacity": 12500
+    },
+    {
+      "team_id": 2753,
+      "name": "Degerfors",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 7500
+    },
+    {
+      "team_id": 1870,
+      "name": "Örgryte",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 5,
+      "venue_capacity": 18416
+    },
+    {
+      "team_id": 2678,
+      "name": "Sirius",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 5,
+      "venue_capacity": 10000
+    },
+    {
+      "team_id": 3285,
+      "name": "Brommapojkarna",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 8,
+      "venue_capacity": 7343
+    },
+    {
+      "team_id": 1777,
+      "name": "GAIS",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 18416
+    },
+    {
+      "team_id": 2535,
+      "name": "Häcken",
+      "ranking_points": 7000,
+      "ranking_position": 198,
+      "trophies_count": 7,
+      "venue_capacity": 7000
+    },
+    {
+      "team_id": 720,
+      "name": "Halmstad",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 3,
+      "venue_capacity": 15500
+    },
+    {
+      "team_id": 443,
+      "name": "Djurgården",
+      "ranking_points": 26000,
+      "ranking_position": 71,
+      "trophies_count": 7,
+      "venue_capacity": 32000
+    },
+    {
+      "team_id": 354,
+      "name": "Malmö FF",
+      "ranking_points": 13500,
+      "ranking_position": 113,
+      "trophies_count": 15,
+      "venue_capacity": 22500
+    },
+    {
+      "team_id": 8671,
+      "name": "Västerås SK",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 4,
+      "venue_capacity": 7044
+    },
+    {
+      "team_id": 1226,
+      "name": "Elfsborg",
+      "ranking_points": 11000,
+      "ranking_position": 138,
+      "trophies_count": 6,
+      "venue_capacity": 17800
+    },
+    {
+      "team_id": 532,
+      "name": "IFK Göteborg",
+      "ranking_points": 1500,
+      "ranking_position": 283,
+      "trophies_count": 12,
+      "venue_capacity": 43200
+    },
+    {
+      "team_id": 2825,
+      "name": "AIK",
+      "ranking_points": 2500,
+      "ranking_position": 282,
+      "trophies_count": 10,
+      "venue_capacity": 54000
+    },
+    {
+      "team_id": 411,
+      "name": "Mjällby",
+      "ranking_points": 0,
+      "ranking_position": null,
+      "trophies_count": 7,
+      "venue_capacity": 6500
+    }
+  ]
+}

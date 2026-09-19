@@ -12,6 +12,7 @@ exported-binary/
 eval_report.json
 
 # Python caches & temporary test outputs
+data/cache.db
 __pycache__/
 *.pyc
 *.pyo
@@ -27,4 +28,20 @@ data/generated/
 
 # Godot MCP temporary cache
 addons/godot_mcp/cache/
+
+# Sensitive data pipeline scripts & API credentials
+data_pipeline/autonomous_football_datalake.py
+data_pipeline/*secret*.py
+data_pipeline/*token*.py
+.env
+.env.*
+*.env
+
+# Generated translations and raw data dumps
+*.translation
+*.tmp
+data_pipeline/data_lake_2026/*.jsonl
+data_pipeline/*.csv
+data_pipeline/**/*.db
+data_pipeline/*.db
 

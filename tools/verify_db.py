@@ -10,6 +10,7 @@ verify_db.py — Comprehensive verification test for PowerFootball 2D Layer 4 Cl
 
 import json
 import os
+import sqlite3
 import sys
 
 def verify_all():
@@ -274,23 +275,71 @@ def verify_all():
 
     print(f"[OK] Staff database verified: {len(staff_members)} staff members across clubs and free agents.")
 
-    # 5. World Sharded Manifest verification (if present)
-    manifest_path = os.path.join(data_dir, "world_manifest.json")
-    if os.path.exists(manifest_path):
-        with open(manifest_path, "r", encoding="utf-8") as f:
-            world_manifest = json.load(f)
-        assert "divisions" in world_manifest, "Missing 'divisions' in world_manifest.json"
-        assert len(world_manifest["divisions"]) == 20, f"Expected 20 divisions in world manifest, got {len(world_manifest['divisions'])}"
-        world_clubs = 0
-        for div in world_manifest["divisions"]:
-            assert "shard" in div, f"Division {div.get('name')} missing shard"
-            shard_path = os.path.join(data_dir, div["shard"])
-            assert os.path.exists(shard_path), f"Missing shard file: {shard_path}"
-            with open(shard_path, "r", encoding="utf-8") as sf:
-                shard_data = json.load(sf)
-            assert "teams" in shard_data, f"Shard {shard_path} missing teams"
-            world_clubs += len(shard_data["teams"])
-        print(f"[OK] World sharded database verified: {len(world_manifest['divisions'])} divisions, {world_clubs} clubs across shards.")
+    # 5. Master SQLite Database verification
+    db_path = os.path.join(data_dir, "powerfootball_master.db")
+    assert os.path.exists(db_path), f"Missing master database: {db_path}"
+    assert os.path.getsize(db_path) > 10_000_000, f"Master database too small ({os.path.getsize(db_path)} bytes)"
+
+    conn = sqlite3.connect(db_path)
+    cur = conn.cursor()
+
+    # Integrity check
+    cur.execute("PRAGMA integrity_check;")
+    integrity_result = cur.fetchone()
+    assert integrity_result and integrity_result[0] == "ok", f"SQLite integrity check failed: {integrity_result}"
+
+    # Required tables
+    cur.execute("SELECT name FROM sqlite_master WHERE type='table';")
+    tables = {row[0] for row in cur.fetchall()}
+    required_tables = {"leagues", "teams", "players", "contracts", "seasons", "tournament_participants"}
+    missing_tables = required_tables - tables
+    assert not missing_tables, f"Master database missing tables: {missing_tables}"
+
+    # Volume bounds
+    cur.execute("SELECT count(*) FROM leagues;")
+    league_count = cur.fetchone()[0]
+    assert league_count >= 200, f"Expected >= 200 leagues, got {league_count}"
+
+    cur.execute("SELECT count(*) FROM teams;")
+    team_count = cur.fetchone()[0]
+    assert team_count >= 5000, f"Expected >= 5000 teams, got {team_count}"
+
+    cur.execute("SELECT count(*) FROM players;")
+    player_count = cur.fetchone()[0]
+    assert player_count >= 80000, f"Expected >= 80000 players, got {player_count}"
+
+    # Gender separation
+    cur.execute("SELECT DISTINCT gender FROM players;")
+    player_genders = {row[0] for row in cur.fetchall()}
+    assert "men" in player_genders and "women" in player_genders, f"Missing player gender modes: {player_genders}"
+
+    cur.execute("SELECT DISTINCT gender FROM teams;")
+    team_genders = {row[0] for row in cur.fetchall()}
+    assert "men" in team_genders and "women" in team_genders, f"Missing team gender modes: {team_genders}"
+
+    # English Premier League authenticity check (ID 8)
+    cur.execute("SELECT team_id, name FROM teams WHERE league_id = 8 ORDER BY name;")
+    epl_teams = cur.fetchall()
+    assert len(epl_teams) == 20, f"Expected 20 Premier League teams, got {len(epl_teams)}"
+    epl_names = {row[1] for row in epl_teams}
+    expected_epl_clubs = {"Arsenal", "Chelsea", "Liverpool", "Manchester City", "Manchester United", "Tottenham Hotspur"}
+    missing_epl = expected_epl_clubs - epl_names
+    assert not missing_epl, f"Premier League missing authentic clubs: {missing_epl}"
+
+    # Zero fictional clubs
+    cur.execute("SELECT count(*) FROM teams WHERE name IN ('London FC', 'Derby Rovers', 'Manchester Red', 'London Blue');")
+    phony_count = cur.fetchone()[0]
+    assert phony_count == 0, f"Found {phony_count} fictional clubs in master database!"
+
+    # Position distribution check
+    cur.execute("SELECT DISTINCT position_role FROM players WHERE position_role IS NOT NULL;")
+    roles = {row[0] for row in cur.fetchall()}
+    expected_roles = {"GK", "CB", "LB", "RB", "DM", "CM", "AM", "ST", "LW", "RW"}
+    missing_roles = expected_roles - roles
+    assert not missing_roles, f"Master database missing positional roles: {missing_roles}"
+
+    conn.close()
+    print(f"[OK] Master SQLite database verified: {league_count} leagues, {team_count} teams, {player_count} players, 0 phony clubs.")
 
     print("=== All Verification Checks Passed (0 errors, 0 warnings) ===")
 

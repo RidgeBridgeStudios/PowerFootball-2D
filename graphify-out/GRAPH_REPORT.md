@@ -1,16 +1,16 @@
-# Graph Report - PowerFootball-2D-main  (2026-09-18)
+# Graph Report - PowerFootball-2D-main  (2026-09-19)
 
 ## Corpus Check
-- 264 files · ~1,304,334 words
+- 265 files · ~671,060 words
 - Verdict: corpus is large enough that graph structure adds value.
 
 ## Summary
-- 2566 nodes · 3404 edges · 193 communities (162 shown, 31 thin omitted)
-- Extraction: 96% EXTRACTED · 4% INFERRED · 0% AMBIGUOUS · INFERRED: 120 edges (avg confidence: 0.9)
+- 2939 nodes · 4164 edges · 207 communities (176 shown, 30 thin omitted)
+- Extraction: 97% EXTRACTED · 3% INFERRED · 0% AMBIGUOUS · INFERRED: 127 edges (avg confidence: 0.9)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `54ccb502`
+- Built from commit: `2471ce51`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -25,7 +25,7 @@
 - Agents Errata
 - Team Flag Textures
 - Update
-- Readme
+- Roadmap
 - mcp_server.py
 - AnalyticalSimulationHarness
 - lint_invariants.py
@@ -34,51 +34,51 @@
 - Json Schema
 - Core Invariants
 - football_mcp.py
-- math
+- balance_team_finances_and_facilities.py
 - SOCIAL_SIMULATION_ARCHITECTURE.md
-- StreamedBusHandler
+- harvest_staff_2026.py
 - **Econometric Refactoring of Football Player Valuation and Transfer Market Dynamics**
 - **Combinatorial Round-Robin Architecture: Zero-Allocation Generation, Break Minimization, and Constraint Fulfillment in Godot 4.7**
 - **Engineering Research Plan v2: Empirical Football Analytics Infrastructure for PowerFootball-2D**
 - **Algorithmic and Architectural Specification for PowerFootball-2D: Semi-Markov Simulation, Social Graph Dynamics, and Continuous Valuation**
 - **Automated Commentary Systems in Sports Simulation: Knowledge Graph Extraction, Deterministic Synthesis, and Trait-Driven Narrative Architecture in PowerFootball-2D**
-- os
+- sys
 - **Core Component Implementations in GDScript 2.0**
-- layer_context.py
+- eval_simulation.py
 - Player AI & Spatial Navigation Errata
 - 2. Public API, Signals, Events, Contracts & Dependencies
 - 2. Public API, Signals, Events, Contracts & Dependencies
 - 4. Non-obvious consequences an agent can trip over
 - Architecture Hub: PitchScene
 - Architecture Hub: SetPieceCoordinator
-- formation_ascii.py
+- Readme
 - Phase 0 Architectural Fixes (P1–P4) — Final Report
 - **Comprehensive Data Source Audit and Artifact Reconnaissance for PowerFootball-2D: Systematic Investigation of Datasets, Parsers, Player Attributes, Fan Culture, Club Infrastructure, Sample Joins, and Integration Architecture**
 - **Architecture and Implementation of a Zero-Allocation 90-Tick Utility AI Match Simulation Engine in GDScript 2.0**
 - Math Solvers
-- re
+- typing
 - Agents
 - validate_schemas.py
 - lint_scope.py
-- Graphify Lifecycle & Agent Navigation Protocol — PowerFootball-2D
+- Any
 - **Agent-Based Dressing Room Dynamics: Graph-Theoretic Morale Propagation and Mutiny Simulation in Godot 4**
-- generate_db.py
+- rehydrate_ratings_v2.py
 - Readme
-- test_quick_sim.py
-- Readme
-- GodotLSPClient
+- Dictionary
+- Architecture Hub: MatchWorldModel
+- os
 - Compounded corrections — verified against the source
-- Plugin
+- Readme
 - Query
 - **Mathematical Calibration of Player Development and Senescence in Association Football Simulation**
-- benchmark_math.py
+- fuzz_formations.py
 - lint_type_comparisons.py
 - Scene Tree, Node Hierarchy & Cross-Referencing Errata
 - Ponytail Decision Ladder (Reuse & Complexity Gating)
 - Llms
 - generate_symbols.py
 - The 10-Step Mandatory Protocol
-- IAudioPlayerAdapter
+- harvest_referees_2026.py
 - Claude
 - Exports
 - Github And Merge
@@ -90,9 +90,9 @@
 - Gdscript Antipatterns
 - football-expert
 - Complete Item Migration Manifest
-- Career Mode
-- lint_shadowing.py
-- Soccer Physics
+- math
+- database-merge-optimized.py
+- powerfootball_database_builder.py
 - Match State, Pacing & Urgency Errata
 - UI, HUD & Signal Bus Errata
 - Ai Architect
@@ -102,7 +102,7 @@
 - CLIProxyAPI Setup Instructions
 - caveman/SKILL.md
 - AudioHost
-- lint_xref.py
+- .harvest_season_managers
 - Core Directory Contents
 - DialogueManager
 - Graph Construction & Architecture Pipeline
@@ -149,7 +149,7 @@
 - .claude/rules/football-domain.md
 - Graphify Commands & CLI Reference
 - godot-mcp-toolkit/SKILL.md
-- fuzz_utility_scorer.py
+- Variant
 - Advanced Configuration
 - Formation & Tactical Spacing Audit Skill
 - Setup & Interpreter Management
@@ -161,35 +161,35 @@
 - Antigravity & Agent Integration
 - Context Hygiene
 - Performance Benchmark & Solvers Profiling Skill
-- fuzz_formations.py
+- MasterDatabaseBuilder
 - Node Properties & Migration
 - Readme
-- Roadmap
-- eval_simulation.py
+- database-merge.py
+- tscn_linter.py
 - spatial_grid_bench.py
-- test_pass_starvation.py
+- AntigravityContextGenerator
 - Extensions (supported)
 - Godot Version Compatibility
 - Node
 - PooledBusHandler
-- Dictionary
+- DialogueResponse
 - DialogueResponsesMenu
 - DialogueLine
-- DialogueResponse
+- DialogueManager.cs
 - DialogueLabel
 - DialogueManagerRuntime
 - DialogueActionable3D
 - DialogueActionable2D
-- Variant
+- benchmark_math.py
 - Attributions (godot-mcp-toolkit)
 - C# extensions
 - CustomEvictionExample
-- DialogueManager.cs
+- test_pass_starvation.py
 - Per-tool agent-side blocking
 - CustomPooledHandlerExample
 - Type wrappers for `node_set_property`
 - godot_mcp_toolkit/README.md
-- Array
+- enrich_datalake_wiki.py
 - DialogueMarker2D
 - DialogueMarker3D
 - `input_simulate` event reference
@@ -197,17 +197,30 @@
 - Multi-Instance / Multiplayer Setup
 - Godot MCP Toolkit
 - Constraints Directory Contents
-- sys
+- StreamedBusHandler
 - UI Directory Contents
-- entry_000004/manifest.json
+- WaterfallPyramidPopulator
 - Boot Splash Plus
-- entry_000001/manifest.json
-- entry_000002/manifest.json
+- LeagueHydrator
+- harvest_managers_2026.py
 - Cooperative cancellation
-- entry_000005/manifest.json
+- pathlib
 - Exporting your game (extension scripts in builds)
-- Extending the MCP Toolkit
+- Graphify Lifecycle & Agent Navigation Protocol — PowerFootball-2D
+- re
 - type-coercion.md
+- lsp_client.py
+- Plugin
+- Tool compatibility matrix
+- Project Context: PowerFootball-2D Database Integration
+- 2. Public API, Signals, Events, Contracts & Dependencies
+- IAudioPlayerAdapter
+- CompetitionRefactorer
+- lint_shadowing.py
+- Extending the MCP Toolkit
+- git_pre_commit.py
+- gdscript_slice_server.py
+- 3. State Model & Architectural Invariants
 
 ## God Nodes (most connected - your core abstractions)
 1. `Api Surface` - 156 edges
@@ -245,7 +258,7 @@
 - **Api Surface Concepts** — docs_api_surface_powerfootball2d___public_api_surface_map, docs_api_surface_table_of_contents, llms_layer_1___physics___kinematics, docs_api_surface_entities_ball_ballstategd, docs_api_surface_entities_ball_ballstatefactorygd [INFERRED 0.85]
 - **Core Invariants Concepts** — docs_core_invariants_coreinvariantsmd___powerfootball2d_archi, docs_core_invariants_1_engine_lock, docs_core_invariants_prohibited___strictly_forbidden_apis, docs_core_invariants_strict_typing_invariant, docs_core_invariants_scene_initialization___serialization [INFERRED 0.85]
 
-## Communities (193 total, 31 thin omitted)
+## Communities (207 total, 30 thin omitted)
 
 ### Community 0 - "Api Surface"
 Cohesion: 0.01
@@ -287,13 +300,13 @@ Nodes (36): Argentina Flag, Argentine Flag, Austria Flag, Batavian Flag, Belgium
 Cohesion: 0.06
 Nodes (36): Update, are dropped rather than masquerading as deletions; untouched rows preserved 1908, as the freshly merged nodes and would DELETE the reextracted content 1178 is moot, cached files instead of missing every one after a move 1417, Changed semantic files dispatched this run but NOT stamped had their chunk fail, clistampedmanifestfiles  clearsemantic  scancorpus, directed=ISDIRECTED: replace ISDIRECTED with True if directed was given else, Do NOT add changed here: with root= passed pruneset relativizes to the same base (+28 more)
 
-### Community 10 - "Readme"
-Cohesion: 0.06
-Nodes (39): Context Hygiene, Context Hygiene & Token Discipline, Errata History, Errata History Archive, archive_sessions(), compact_errata_file(), extract_session_blocks(), main() (+31 more)
+### Community 10 - "Roadmap"
+Cohesion: 0.29
+Nodes (7): Roadmap, PHASE 1 — Gameplay Completeness, PHASE 2 — Personality and Traits, PHASE 3 — Club World, PHASE 4 — Career Mode, PHASE 5 — Polish, ROADMAPmd
 
 ### Community 11 - "mcp_server.py"
-Cohesion: 0.12
-Nodes (31): io, list_symbols_in_file(), load_file_lines(), main(), slice_class_header(), slice_enum(), slice_function(), slice_signals() (+23 more)
+Cohesion: 0.16
+Nodes (25): io, list_symbols_in_file(), load_file_lines(), main(), slice_class_header(), slice_enum(), slice_function(), slice_signals() (+17 more)
 
 ### Community 12 - "AnalyticalSimulationHarness"
 Cohesion: 0.17
@@ -304,8 +317,8 @@ Cohesion: 0.23
 Nodes (17): check_game_manager_thin_shell(), check_hot_path_allocations(), check_publish_ownership(), check_scene_tree_crawl(), check_signal_bus_surface(), check_state_ownership(), _enum_members(), format_xml_output() (+9 more)
 
 ### Community 14 - "gdcheck.py"
-Cohesion: 0.12
-Nodes (23): Godot 47 Core, Godot 47 Core, "Deprecated" export ≠ unused export, entities/manager/ManagerDirectorgd — shiftto, gdcheck resolves autoload singleton names as types — never "fix" this by adding classname, Godot 47 GDScript 20 Invariants, ManagerLoader emits NO formation signal — ManagerDirector does, new is inherited not declared (+15 more)
+Cohesion: 0.05
+Nodes (48): Godot 47 Core, Soccer Physics, Career Mode, Career Mode Layer 4 Invariants, Compounded corrections — verified against the source, gdcheck cannot see through autoloads — use lintxref, Inbox options are deliberately NOT serialised, Match side is NOT the league team index (+40 more)
 
 ### Community 15 - "**Bayesian Uncertainty Quantification and Positional Rating Systems in Football Simulation Engine Architectures**"
 Cohesion: 0.07
@@ -320,20 +333,20 @@ Cohesion: 0.13
 Nodes (16): Core Invariants, 1 Engine Lock, 2 Simulation Stack, 3 Critical File Contracts Choke Points, 4 Physics & Spatial AI Invariants, 5 Static Verification & Autoload Handling, COREINVARIANTSmd — PowerFootball2D Architectural & Engine Invariants, CrossLayer Architectural Invariant (+8 more)
 
 ### Community 18 - "football_mcp.py"
-Cohesion: 0.21
-Nodes (16): Connection, fastmcp, sqlite3, tool, audit_action_transition(), audit_tactical_compactness(), _connect(), diagnose_tactical_deviation() (+8 more)
+Cohesion: 0.23
+Nodes (15): fastmcp, tool, audit_action_transition(), audit_tactical_compactness(), _connect(), diagnose_tactical_deviation(), _list_column(), Connection (+7 more)
 
-### Community 19 - "math"
-Cohesion: 0.13
-Nodes (16): hashlib, math, Random, struct, generate_simulated_match_frames(), main(), render_svg_frame(), generate_manager() (+8 more)
+### Community 19 - "balance_team_finances_and_facilities.py"
+Cohesion: 0.14
+Nodes (16): compute_facilities(), compute_transfer_budget(), compute_weekly_wage_budget(), main(), Any, Connection, Path, Matches shared/TeamData.gd::get_stature_from_reputation(). (+8 more)
 
 ### Community 20 - "SOCIAL_SIMULATION_ARCHITECTURE.md"
 Cohesion: 0.08
 Nodes (23): 0. Ground Truth — What Already Exists vs. What This Document Adds, 1.1 Existing Bitmask (unchanged), 1.2 Mechanical Lever Table, 1.3 `PressureImmune` — Closing the Live-Match Gap, 1.4 The `TraitEffectResolver` Pattern, 1.5 Trait Interaction & Anti-Snowball Guard, 1. The Psychological Trait & Archetype Matrix, 2.1 Existing Schema (unchanged) (+15 more)
 
-### Community 21 - "StreamedBusHandler"
-Cohesion: 0.29
-Nodes (7): StreamedBusHandler, AudioStream, AudioStreamPlayer, Node, Task, CancellationTokenSource, Tween
+### Community 21 - "harvest_staff_2026.py"
+Cohesion: 0.15
+Nodes (23): build_spoken_languages(), clean_wikitext_cell(), extract_nationality(), harvest_sportmonks_staff(), harvest_wikipedia_club_staff(), main(), normalize_role(), parse_wikitext_staff() (+15 more)
 
 ### Community 22 - "**Econometric Refactoring of Football Player Valuation and Transfer Market Dynamics**"
 Cohesion: 0.09
@@ -355,17 +368,17 @@ Nodes (20): **Algorithmic and Architectural Specification for PowerFootball-2D: 
 Cohesion: 0.10
 Nodes (20): **Apache License, Version 2.0**, **Architectural Synthesis and Systemic Conclusions**, **Automated Commentary Systems in Sports Simulation: Knowledge Graph Extraction, Deterministic Synthesis, and Trait-Driven Narrative Architecture in PowerFootball-2D**, **BSD 3-Clause License**, **Citerade verk**, **Comparative Corpus Analysis and Dataset Topology**, **Complete Implementation: entities/manager/PressOffice.gd**, **Dataset Ingestion Constraints and Access Topologies** (+12 more)
 
-### Community 27 - "os"
+### Community 27 - "sys"
 Cohesion: 0.12
-Nodes (19): os, shutil, socket, stat, subprocess, time, install_hook(), main() (+11 more)
+Nodes (18): html, shutil, subprocess, sys, time, prune_brain_store(), Path, find_godot_binary() (+10 more)
 
 ### Community 28 - "**Core Component Implementations in GDScript 2.0**"
 Cohesion: 0.10
 Nodes (19): **Allocation-Free Panel Navigation Stack (ui/manager\_mode/UIPanelStack.gd)**, **Citerade verk**, **Comparative Tactics Interface Analysis: 99Managers Futsal Edition vs. PowerFootball-2D**, **Core Component Implementations in GDScript 2.0**, **Direct-Mutation Simulation Inspector (ui/debug/PlayerInspector.gd)**, **High-Performance Virtual Table (ui/manager\_mode/VirtualTable.gd)**, **Information Architecture and Screen Decomposition**, **Lazy-List Recycling Control (ui/manager\_mode/LazyListBox.gd)** (+11 more)
 
-### Community 29 - "layer_context.py"
-Cohesion: 0.83
-Nodes (3): main(), print_layer_context(), read_rule_excerpt()
+### Community 29 - "eval_simulation.py"
+Cohesion: 0.57
+Nodes (6): find_godot_binary(), main(), print_summary_table(), Any, run_analytical_trials(), run_evaluation()
 
 ### Community 30 - "Player AI & Spatial Navigation Errata"
 Cohesion: 0.11
@@ -391,9 +404,9 @@ Nodes (17): 1. Purpose and Non-Responsibilities, 22-Player Declarative Layout In
 Cohesion: 0.11
 Nodes (17): 1. Purpose and Non-Responsibilities, 2. Public API, Signals, Events, Contracts & Dependencies, 3. State Model & Architectural Invariants, 4. Change-Impact Checklist, 5. Known Risks & Errata Search Terms, 6. Sources Examined, Anti-Double-Touch Law, Architecture Hub: SetPieceCoordinator (+9 more)
 
-### Community 36 - "formation_ascii.py"
-Cohesion: 0.90
-Nodes (4): calculate_phase_positions(), display_all_phases(), main(), render_ascii_pitch()
+### Community 36 - "Readme"
+Cohesion: 0.17
+Nodes (12): Readme, Adding a New Autoload, autoloads/ — Singletons & Global Services, DataLoadergd, GameEventsgd, GameManagergd, InputHelpergd, Key Responsibilities (+4 more)
 
 ### Community 37 - "Phase 0 Architectural Fixes (P1–P4) — Final Report"
 Cohesion: 0.12
@@ -411,9 +424,9 @@ Nodes (15): **10\. Implementation Synthesis**, **1\. Architectural Paradigm Shif
 Cohesion: 0.13
 Nodes (15): Math Solvers, 1 Kinematic PointtoSegment Projection & Distance, 1 Quadratic Distance Utility Decay, 2 Angular Cosine Alignment, 2 Kinematic Turning Penalty & Acceleration Curve, 3 Ballistic Pseudo3D Flight & Height Trajectory, 3 Receiver Openness, 4 Bisection RootFinding Ball Intercept Algorithm (+7 more)
 
-### Community 41 - "re"
-Cohesion: 0.11
-Nodes (13): argparse, re, audit_process_modes(), main(), check_file_allocations_and_distance(), find_gd_files(), main(), audit_file_signal_races() (+5 more)
+### Community 41 - "typing"
+Cohesion: 0.16
+Nodes (15): argparse, audit_process_modes(), main(), generate_simulated_match_frames(), main(), render_svg_frame(), check_file_allocations_and_distance(), find_gd_files() (+7 more)
 
 ### Community 42 - "Agents"
 Cohesion: 0.14
@@ -427,37 +440,41 @@ Nodes (7): format_xml_output(), main(), run_all_schema_validations(), SchemaViol
 Cohesion: 0.35
 Nodes (10): count_bracket_delta(), format_xml_output(), get_all_gd_files(), get_line_indent(), lint_file_scope(), lint_lambda_and_callable(), main(), run_scope_linter() (+2 more)
 
-### Community 45 - "Graphify Lifecycle & Agent Navigation Protocol — PowerFootball-2D"
-Cohesion: 0.15
-Nodes (12): 1.1. Initial Build, 1.2. Normal Update (Incremental Sync), 1.3. Update After Source Changes (Verification Battery), 1.4. Update After Git Operations (Hooks & Merge Driver), 1. Project-Local Graphify Lifecycle, 2.1. When Graphify MUST Be Queried, 2.2. Important Scope Clarification, 2. Agent Navigation Protocol (Claude Code & Antigravity) (+4 more)
+### Community 45 - "Any"
+Cohesion: 0.07
+Nodes (34): BzzoiroClient, cache_get(), cache_key(), cache_put(), CachedSource, _db(), _demo(), _env() (+26 more)
 
 ### Community 46 - "**Agent-Based Dressing Room Dynamics: Graph-Theoretic Morale Propagation and Mutiny Simulation in Godot 4**"
 Cohesion: 0.15
 Nodes (12): **Agent-Based Dressing Room Dynamics: Graph-Theoretic Morale Propagation and Mutiny Simulation in Godot 4**, **Algorithmic Design: Bitmask Bron–Kerbosch with Pivoting**, **Citerade verk**, **Compatibility Layer and Stub Ecosystem**, **Computational Architecture and Theoretical Framework**, **Empirical Validation and Regression Testing**, **Implementation: Social Dynamics Engine**, **Mathematical Modeling of Social Dynamics** (+4 more)
 
-### Community 47 - "generate_db.py"
-Cohesion: 0.29
-Nodes (8): build_player(), generate_league(), main(), get_club_staff(), get_free_agent_staff(), make_player_dob(), make_player_languages(), run_update()
+### Community 47 - "rehydrate_ratings_v2.py"
+Cohesion: 0.10
+Nodes (33): clamp_stat(), main(), normalize_name(), normalize_team(), parse_birth_year(), parse_height(), parse_weight(), Any (+25 more)
 
 ### Community 48 - "Readme"
 Cohesion: 0.15
 Nodes (13): Readme, CollisionLayersgd, Data Models, FormationAnchorMathgd, ManagerDatagd, PassUtilityScorergd, PlayerDatagd, PlayerRoleConfiggd (+5 more)
 
-### Community 49 - "test_quick_sim.py"
-Cohesion: 0.36
-Nodes (10): compute_analytical_probs(), dixon_coles_tau(), main(), poisson_pmf(), test_home_advantage(), test_player_rating_formula(), test_probability_distribution(), test_referee_strictness() (+2 more)
+### Community 49 - "Dictionary"
+Cohesion: 0.24
+Nodes (5): Dictionary, Type, MethodInfo, Script, Type
 
-### Community 50 - "Readme"
-Cohesion: 0.06
-Nodes (30): Readme, Adding a New Autoload, autoloads/ — Singletons & Global Services, DataLoadergd, GameEventsgd, GameManagergd, InputHelpergd, Key Responsibilities (+22 more)
+### Community 50 - "Architecture Hub: MatchWorldModel"
+Cohesion: 0.25
+Nodes (7): 1. Purpose and Non-Responsibilities, 4. Change-Impact Checklist, 5. Known Risks & Errata Search Terms, 6. Sources Examined, Architecture Hub: MatchWorldModel, Non-Responsibilities, Purpose
+
+### Community 51 - "os"
+Cohesion: 0.11
+Nodes (18): main(), resolve_position(), Lokaliserar databaserna oavsett varifrån terminalen startas., resolve_databases(), json, os, sqlite3, build_player() (+10 more)
 
 ### Community 52 - "Compounded corrections — verified against the source"
 Cohesion: 0.18
 Nodes (10): Career Mode (Layer 1) Invariants, Compounded corrections — verified against the source, gdcheck cannot see through autoloads — use lint_xref, Inbox options are deliberately NOT serialised, Match side is NOT the league team index, squad_index IS the identity, so removing a player renumbers everyone behind them, The career -> match bridge is the quick-sim result folded back by CareerManager, The season calendar is derived, never a fixed weekly rhythm (+2 more)
 
-### Community 53 - "Plugin"
-Cohesion: 0.18
-Nodes (4): AudioOptions, Plugin, AudioService, EditorPlugin
+### Community 53 - "Readme"
+Cohesion: 0.06
+Nodes (39): Context Hygiene, Context Hygiene & Token Discipline, Errata History, Errata History Archive, archive_sessions(), compact_errata_file(), extract_session_blocks(), main() (+31 more)
 
 ### Community 54 - "Query"
 Cohesion: 0.18
@@ -467,13 +484,13 @@ Nodes (11): Query, Find best matching node, Find bestmatching start nodes, For /
 Cohesion: 0.18
 Nodes (10): **Attribute Family Calibration and Archetype Architecture**, **Automated Parameter Estimation Pipeline: tools/fit\_age\_curves.py**, **Citerade verk**, **Domain Discrepancies and Methodological Boundaries**, **Empirical Biomechanical and Longitudinal Foundations**, **Engine Runtime Architecture: PlayerDevelopmentEngine.gd**, **Mathematical Calibration of Player Development and Senescence in Association Football Simulation**, **Mathematical Formulation and Functional Form Selection** (+2 more)
 
-### Community 56 - "benchmark_math.py"
-Cohesion: 0.18
-Nodes (17): Path, pathlib, prune_brain_store(), calculate_intercept_point_fast(), calculate_psxg_fast(), calculate_xg_fast(), clampf(), is_lane_blocked_fast() (+9 more)
+### Community 56 - "fuzz_formations.py"
+Cohesion: 0.06
+Nodes (41): MassPyramidPopulator, Path, resolve_paths(), LowerLeagueRatingPopulator, Path, Skapar balanserade attribut anpassade efter positionens profil., Hittar databasen och CSV-filen oavsett aktiv katalog i terminalen., Tvättar accenter, specialtecken och gemener för exakt matchning. (+33 more)
 
 ### Community 57 - "lint_type_comparisons.py"
-Cohesion: 0.24
-Nodes (10): html, format_xml_diagnostics(), main(), parse_gdcheck_output(), ComparisonViolation, format_xml_output(), get_all_gd_files(), lint_file_comparisons() (+2 more)
+Cohesion: 0.42
+Nodes (6): ComparisonViolation, format_xml_output(), get_all_gd_files(), lint_file_comparisons(), main(), run_comparison_linter()
 
 ### Community 58 - "Scene Tree, Node Hierarchy & Cross-Referencing Errata"
 Cohesion: 0.20
@@ -491,9 +508,9 @@ Nodes (8): find_gd_files(), get_autoload_map(), main(), parse_file_symbols(), pa
 Cohesion: 0.12
 Nodes (15): Cross-System Gameplay Feature Workflow, Invocation in Antigravity, Step 10: Final Verification Report, Step 1: Restate Requested Outcome and Non-Goals, Step 2: Classify Change-Impact Tier, Step 3: Graphify Impact Query Before Reading Broad Source Files, Step 4: Reading Only Relevant Module READMEs, Hub Maps, and Targeted Files, Step 5: Short Written Implementation Plan (+7 more)
 
-### Community 63 - "IAudioPlayerAdapter"
-Cohesion: 0.06
-Nodes (21): IAudioPlayerAdapter, AudioStream, StringName, Player1DAdapter, AudioStream, AudioStreamPlayer, StringName, Player2DAdapter (+13 more)
+### Community 63 - "harvest_referees_2026.py"
+Cohesion: 0.17
+Nodes (20): build_referee_database(), clean_referee_name(), enrich_via_wikipedia(), fetch_sportmonks_referees(), generate_languages(), normalize_nationality(), Any, Path (+12 more)
 
 ### Community 64 - "Claude"
 Cohesion: 0.12
@@ -539,17 +556,17 @@ Nodes (7): PYTHONIOENCODING, PYTHONUNBUFFERED, C:\Users\emanu\AppData\Roaming\uv
 Cohesion: 0.25
 Nodes (8): Agent Errata & Lessons Learned Index, Ambiguous Entries Report, Complete Item Migration Manifest, Discovered Rules (24 Items), Error Logs (7 Items), Narrative Subsections (4 Items), Session Handoff States, Topic Reference Pages
 
-### Community 75 - "Career Mode"
-Cohesion: 0.20
-Nodes (10): Career Mode, Career Mode Layer 4 Invariants, gdcheck cannot see through autoloads — use lintxref, Inbox options are deliberately NOT serialised, Match side is NOT the league team index, squadindex IS the identity so removing a player renumbers everyone behind them, The career > match bridge runs through PlayerFactory once per player per bind, The season calendar is derived never a fixed weekly rhythm (+2 more)
+### Community 75 - "math"
+Cohesion: 0.17
+Nodes (12): hashlib, math, struct, calculate_phase_positions(), display_all_phases(), main(), render_ascii_pitch(), DeterministicMatchSimulator (+4 more)
 
-### Community 76 - "lint_shadowing.py"
-Cohesion: 0.48
-Nodes (6): audit_file_shadowing(), find_gd_files(), get_autoload_names(), main(), parse_function_params(), Parses comma-separated parameter declarations into (param_name,…
+### Community 76 - "database-merge-optimized.py"
+Cohesion: 0.12
+Nodes (9): DatabasePipeline, DataNormalizer, main(), PlayerMatcher, DataFrame, Series, Timestamp, Utvärderar den bästa matchningen för en spelare med hjälp av namn, ålder och… (+1 more)
 
-### Community 77 - "Soccer Physics"
-Cohesion: 0.22
-Nodes (9): Soccer Physics, Compounded corrections — verified against the source, Soccer Physics, Ball friction is PROPORTIONAL not a constant deceleration, FEEL pass proportional friction / gaussian scatter, PowerFootball2d Physics Invariants, Pseudo3DBallpredicttrajectory returns RENDER points not ground points, Pseudo3DBallsimulatexyaxis (+1 more)
+### Community 77 - "powerfootball_database_builder.py"
+Cohesion: 0.15
+Nodes (7): DatabaseExporter, DataNormalizer, main(), PlayerMatcher, DataFrame, Series, Timestamp
 
 ### Community 78 - "Match State, Pacing & Urgency Errata"
 Cohesion: 0.29
@@ -587,17 +604,17 @@ Nodes (10): caveman, Example output, How to invoke, See also, What it does, Auto
 Cohesion: 0.15
 Nodes (12): AudioHost, Instance, Dictionary, StringName, AudioServiceExtensions, AudioStream, AudioStreamPlayer, AudioStreamPlayer2D (+4 more)
 
-### Community 87 - "lint_xref.py"
-Cohesion: 0.43
-Nodes (6): collect(), gd_files(), main(), (class_name, surface_set, source) for one .gd file., Remove string literals and trailing comments so paths are not scanned., strip_noise()
+### Community 87 - ".harvest_season_managers"
+Cohesion: 0.20
+Nodes (11): build_spoken_languages(), infer_personality_traits(), infer_tactics_from_formation(), Any, Infers tactical sliders (0.0 to 1.0) and counter formations from primary…, Computes trait bitmask based on curated records or personality heuristics., Assigns native language plus international languages., Executes GET request with exponential backoff and rate-limit handling. (+3 more)
 
 ### Community 88 - "Core Directory Contents"
 Cohesion: 0.50
 Nodes (3): Core Directory Contents, Directories, Files
 
 ### Community 89 - "DialogueManager"
-Cohesion: 0.11
-Nodes (16): CanvasLayer, Func, Node, Resource, StringName, DialogueManager, AssemblyTypes, GameStates (+8 more)
+Cohesion: 0.12
+Nodes (18): Array, CanvasLayer, Func, Node, Resource, StringName, Task, DialogueManager (+10 more)
 
 ### Community 90 - "Graph Construction & Architecture Pipeline"
 Cohesion: 0.17
@@ -620,8 +637,8 @@ Cohesion: 0.40
 Nodes (5): Transcribe, graphify reference: transcribe video and audio, print progress to stdout which would otherwise corrupt the JSON file 1392, Step 25  Transcribe video / audio files only if video files detected, Write the JSON from Python NOT a shell '>' redirect: transcribeall/Whisper
 
 ### Community 95 - "Data, Persistence & Career Calibration Errata"
-Cohesion: 0.40
-Nodes (5): Calibration is not optional, and the first guess was wrong twice, Career Calibration Findings, Data, Persistence & Career Calibration Errata, Table of Contents, The season calendar cannot be a fixed weekly rhythm
+Cohesion: 0.33
+Nodes (6): Calibration is not optional, and the first guess was wrong twice, Career Calibration Findings, Data, Persistence & Career Calibration Errata, Promotion/relegation bookkeeping never reaches next season, Table of Contents, The season calendar cannot be a fixed weekly rhythm
 
 ### Community 96 - "football-expert"
 Cohesion: 0.40
@@ -683,9 +700,9 @@ Nodes (7): For /graphify Add and --watch, For /graphify Query, For --update and 
 Cohesion: 0.09
 Nodes (22): 10. Parallel sessions, 1. Quick reference, 2. Tool selection, 3. Workflow patterns, 4. Tool availability, 5. Headless mode, 6. Key constraints, 7. Error recovery (+14 more)
 
-### Community 134 - "fuzz_utility_scorer.py"
-Cohesion: 0.51
-Nodes (8): clampf(), quadratic_decay(), run_fuzz_tests(), score_dribble(), score_pass(), score_pass_action(), score_shoot(), UtilityContext
+### Community 134 - "Variant"
+Cohesion: 0.30
+Nodes (3): Variant, Error, GodotObject
 
 ### Community 135 - "Advanced Configuration"
 Cohesion: 0.09
@@ -723,9 +740,9 @@ Nodes (9): Context Hygiene, Context Budget Tracking, CORRECT — pasted summary,
 Cohesion: 0.40
 Nodes (4): Performance Benchmark & Solvers Profiling Skill, Step-by-Step Workflow, When NOT to Use, When to Use
 
-### Community 146 - "fuzz_formations.py"
-Cohesion: 0.39
-Nodes (8): enum, clampf(), get_dynamic_anchor_position(), lerpf(), main(), Role, run_formation_fuzzer(), TeamPhase
+### Community 146 - "MasterDatabaseBuilder"
+Cohesion: 0.20
+Nodes (6): MasterDatabaseBuilder, Any, Path, Identifierar var JSONL-filerna ligger och var databasen ska sparas., resolve_directories(), SafeDataParser
 
 ### Community 147 - "Node Properties & Migration"
 Cohesion: 0.25
@@ -735,29 +752,29 @@ Nodes (7): CareerScreen Scene Tree & Specification (FM-Engine Architecture), Exp
 Cohesion: 0.25
 Nodes (8): Readme, Architecture at a Glance, Controls, First Setup in Godot, Measured behaviour of the weight model 75kg defaults, PowerFootball 2D, Running it, What's Next?
 
-### Community 149 - "Roadmap"
-Cohesion: 0.29
-Nodes (7): Roadmap, PHASE 1 — Gameplay Completeness, PHASE 2 — Personality and Traits, PHASE 3 — Club World, PHASE 4 — Career Mode, PHASE 5 — Polish, ROADMAPmd
+### Community 149 - "database-merge.py"
+Cohesion: 0.21
+Nodes (16): last_name_token(), main(), match_fm23_for_fc26(), normalize_name(), normalize_nationality(), parse_fc26_height(), parse_fc26_weight(), parse_fm23_dob() (+8 more)
 
-### Community 150 - "eval_simulation.py"
-Cohesion: 0.57
-Nodes (6): find_godot_binary(), main(), print_summary_table(), Any, run_analytical_trials(), run_evaluation()
+### Community 150 - "tscn_linter.py"
+Cohesion: 0.42
+Nodes (6): format_xml_output(), get_all_tscn_files(), lint_tscn_file(), main(), run_tscn_linter(), TSCNViolation
 
 ### Community 151 - "spatial_grid_bench.py"
 Cohesion: 0.26
 Nodes (6): benchmark_grid(), benchmark_linear_scan(), generate_match_positions(), main(), run_spatial_benchmark(), SpatialGrid
 
-### Community 152 - "test_pass_starvation.py"
-Cohesion: 0.80
-Nodes (4): calculate_pass_starvation_delta(), clampf(), lerp(), run_tests()
+### Community 152 - "AntigravityContextGenerator"
+Cohesion: 0.17
+Nodes (8): AntigravityContextGenerator, get_db_path(), Any, Path, Saves a structured JSON file for programmatic ingestion., Saves a readable markdown instruction document for Antigravity., Inspects all tables, columns, constraints, and record counts., Aggregates metrics for split game modes (men vs women) and competitions.
 
 ### Community 153 - "Extensions (supported)"
 Cohesion: 0.09
 Nodes (23): Concurrency: scene lease and mutation lock, Cooperative cancellation, Discovery rules, Distributable extensions, Error handling contract, Exclusive execution, Extensions (supported), Getting listed in the extension catalog (+15 more)
 
 ### Community 154 - "Godot Version Compatibility"
-Cohesion: 0.09
-Nodes (22): C# (.NET) editor requirement, CI/pipeline usage, Data format notes, Degraded behavior by version, Detection, Disabling the plugin safely, `editor_description` tooltip timer (Godot 4.3 engine issue), EditorFileSystem indexing (all versions) (+14 more)
+Cohesion: 0.15
+Nodes (13): CI/pipeline usage, Data format notes, Detection, Disabling the plugin safely, Export stripping (binary-token script gap), Forward compatibility, Godot Version Compatibility, Headless mode (`--headless`) (+5 more)
 
 ### Community 155 - "Node"
 Cohesion: 0.07
@@ -767,21 +784,21 @@ Nodes (17): CustomBusExample, AudioStream, DeterministicRngExample, AudioStream,
 Cohesion: 0.22
 Nodes (11): PooledBusHandler, AudioOptions, AudioStream, AudioStreamPlayer, AudioStreamPlayer2D, AudioStreamPlayer3D, Node, Stack (+3 more)
 
-### Community 157 - "Dictionary"
-Cohesion: 0.24
-Nodes (5): Dictionary, Type, MethodInfo, Script, Type
+### Community 157 - "DialogueResponse"
+Cohesion: 0.14
+Nodes (8): DialogueResponse, ConditionAsText, IsAllowed, NextId, StaticId, Tags, Text, RefCounted
 
 ### Community 158 - "DialogueResponsesMenu"
 Cohesion: 0.24
 Nodes (7): Array, Control, InputEvent, StringName, DialogueResponsesMenu, Responses, Container
 
 ### Community 159 - "DialogueLine"
-Cohesion: 0.11
-Nodes (14): DialogueLine, Character, ConcurrentLines, ExtraGameStates, Id, InlineMutations, NextId, Responses (+6 more)
+Cohesion: 0.13
+Nodes (13): DialogueLine, Character, ConcurrentLines, ExtraGameStates, Id, InlineMutations, NextId, Responses (+5 more)
 
-### Community 160 - "DialogueResponse"
+### Community 160 - "DialogueManager.cs"
 Cohesion: 0.20
-Nodes (7): DialogueResponse, ConditionAsText, IsAllowed, NextId, StaticId, Tags, Text
+Nodes (9): MutationBehaviour, DoNotWait, Skip, Wait, TranslationSource, CSV, Guess, None (+1 more)
 
 ### Community 161 - "DialogueLabel"
 Cohesion: 0.22
@@ -799,9 +816,9 @@ Nodes (9): Array, Func, Node, Resource, Variant, Vector3, DialogueActionable3D, 
 Cohesion: 0.17
 Nodes (8): Array, Func, Node, Resource, Variant, DialogueActionable2D, DialogueResource, Area2D
 
-### Community 165 - "Variant"
-Cohesion: 0.30
-Nodes (3): Variant, Error, GodotObject
+### Community 165 - "benchmark_math.py"
+Cohesion: 0.47
+Nodes (9): calculate_intercept_point_fast(), calculate_psxg_fast(), calculate_xg_fast(), clampf(), is_lane_blocked_fast(), main(), quadratic_decay(), run_benchmarks() (+1 more)
 
 ### Community 166 - "Attributions (godot-mcp-toolkit)"
 Cohesion: 0.17
@@ -815,9 +832,9 @@ Nodes (11): C# extensions, Cancellation (C#), Discovery workflow (C# needs a bui
 Cohesion: 0.20
 Nodes (5): CustomEvictionExample, NoReusePooledBusHandler, AudioStream, Stack, AudioService.Handlers
 
-### Community 169 - "DialogueManager.cs"
-Cohesion: 0.20
-Nodes (9): MutationBehaviour, DoNotWait, Skip, Wait, TranslationSource, CSV, Guess, None (+1 more)
+### Community 169 - "test_pass_starvation.py"
+Cohesion: 0.80
+Nodes (4): calculate_pass_starvation_delta(), clampf(), lerp(), run_tests()
 
 ### Community 170 - "Per-tool agent-side blocking"
 Cohesion: 0.20
@@ -834,6 +851,10 @@ Nodes (8): Anchor caveat, Compound property paths, Layer masks, Packed arrays, R
 ### Community 173 - "godot_mcp_toolkit/README.md"
 Cohesion: 0.36
 Nodes (3): Bundled agent skills, `godot-mcp-toolkit` — the toolkit workflow skill, `mcp-extension-creator` — the extension-authoring skill
+
+### Community 174 - "enrich_datalake_wiki.py"
+Cohesion: 0.12
+Nodes (20): append_jsonl(), generate_candidate_titles(), get_godot_user_db_path(), is_valid_football_club(), main(), Path, Handles HTTP requests to Wikipedia REST and Search APIs with session reuse and…, Validates that a Wikipedia summary represents a genuine association football… (+12 more)
 
 ### Community 175 - "DialogueMarker2D"
 Cohesion: 0.29
@@ -859,56 +880,104 @@ Nodes (8): Deterministic ports for parallel runs (pinning), GDScript LSP in two 
 Cohesion: 0.25
 Nodes (8): Documentation, Godot MCP Toolkit, License, Quick start, Read-only mode, Trademarks, Uninstalling, Where things are
 
-### Community 182 - "sys"
-Cohesion: 0.22
-Nodes (8): json, sys, clamp(), generate_manager(), generate_player(), generate_staff(), generate_world(), get_stature()
+### Community 182 - "StreamedBusHandler"
+Cohesion: 0.29
+Nodes (7): StreamedBusHandler, AudioStream, AudioStreamPlayer, Node, Task, CancellationTokenSource, Tween
 
-### Community 184 - "entry_000004/manifest.json"
-Cohesion: 0.33
-Nodes (5): args_summary, files, id, timestamp, tool
+### Community 184 - "WaterfallPyramidPopulator"
+Cohesion: 0.29
+Nodes (3): Path, resolve_paths(), WaterfallPyramidPopulator
 
 ### Community 185 - "Boot Splash Plus"
 Cohesion: 0.33
 Nodes (5): Boot Splash Plus, Features, How To Use, Settings, Versioning
 
-### Community 186 - "entry_000001/manifest.json"
-Cohesion: 0.33
-Nodes (5): args_summary, files, id, timestamp, tool
+### Community 186 - "LeagueHydrator"
+Cohesion: 0.25
+Nodes (5): LeagueHydrator, Path, Tvättar namn för tillförlitlig fuzzy-matchning., Kopplar ihop lag med rätt liga via säsongskontrakten om fältet är tomt., Läser in alla spelare med FM+FC-attribut från powerfootball.db.
 
-### Community 187 - "entry_000002/manifest.json"
-Cohesion: 0.33
-Nodes (5): args_summary, files, id, timestamp, tool
+### Community 187 - "harvest_managers_2026.py"
+Cohesion: 0.23
+Nodes (12): calculate_age(), calculate_experience(), load_seasons_from_raw(), main(), Path, Calculates age as of season 2026/2027., Calculates managerial experience (1-100) based on age and career start., Exports harvested managers to Godot-compatible JSON format. (+4 more)
 
 ### Community 188 - "Cooperative cancellation"
 Cohesion: 0.33
 Nodes (5): C#, Cooperative cancellation, Enabling it, Observing cancellation, Rules
 
-### Community 189 - "entry_000005/manifest.json"
-Cohesion: 0.33
-Nodes (5): args_summary, files, id, timestamp, tool
+### Community 189 - "pathlib"
+Cohesion: 0.29
+Nodes (3): GenderModeSeparator, Path, pathlib
 
 ### Community 190 - "Exporting your game (extension scripts in builds)"
 Cohesion: 0.40
 Nodes (4): C#, Exporting your game (extension scripts in builds), For a clean strip, The binary-token caveat (Godot 4.3+)
 
-### Community 191 - "Extending the MCP Toolkit"
+### Community 191 - "Graphify Lifecycle & Agent Navigation Protocol — PowerFootball-2D"
+Cohesion: 0.15
+Nodes (12): 1.1. Initial Build, 1.2. Normal Update (Incremental Sync), 1.3. Update After Source Changes (Verification Battery), 1.4. Update After Git Operations (Hooks & Merge Driver), 1. Project-Local Graphify Lifecycle, 2.1. When Graphify MUST Be Queried, 2.2. Important Scope Clarification, 2. Agent Navigation Protocol (Claude Code & Antigravity) (+4 more)
+
+### Community 194 - "lsp_client.py"
+Cohesion: 0.27
+Nodes (5): socket, GodotLSPClient, local_fallback_diagnostics(), main(), Any
+
+### Community 195 - "Plugin"
+Cohesion: 0.18
+Nodes (4): AudioOptions, Plugin, AudioService, EditorPlugin
+
+### Community 198 - "Tool compatibility matrix"
+Cohesion: 0.22
+Nodes (9): C# (.NET) editor requirement, Degraded behavior by version, `editor_description` tooltip timer (Godot 4.3 engine issue), EditorFileSystem indexing (all versions), External script editor (engine limitation), Phantom tab cleanup (scene/file/folder delete), Quit during a pending save — one-time console noise (all versions), `script_check` limitations (all versions) (+1 more)
+
+### Community 200 - "Project Context: PowerFootball-2D Database Integration"
+Cohesion: 0.22
+Nodes (8): 1. Fetch Squad Roster for Match Simulation, 2. Fetch Active Tournament Participants (Champions League / Cups), Active System Metrics, Architectural Requirements for Generated GDScript, Database Schema & Table Volume, Engine & Runtime Target, Project Context: PowerFootball-2D Database Integration, Standard SQL Query Recipes
+
+### Community 201 - "2. Public API, Signals, Events, Contracts & Dependencies"
+Cohesion: 0.29
+Nodes (7): 2. Public API, Signals, Events, Contracts & Dependencies, Constants & Enums, Core Dependencies, Key Public Methods, Process Priority & Boot Order, Public Data Properties, Signals & Event Bus
+
+### Community 203 - "IAudioPlayerAdapter"
+Cohesion: 0.06
+Nodes (21): IAudioPlayerAdapter, AudioStream, StringName, Player1DAdapter, AudioStream, AudioStreamPlayer, StringName, Player2DAdapter (+13 more)
+
+### Community 204 - "CompetitionRefactorer"
+Cohesion: 0.33
+Nodes (3): CompetitionRefactorer, Path, Klassificerar tävlingstyp baserat på namn och Sportmonks sub_type.
+
+### Community 206 - "lint_shadowing.py"
+Cohesion: 0.48
+Nodes (6): audit_file_shadowing(), find_gd_files(), get_autoload_names(), main(), parse_function_params(), Parses comma-separated parameter declarations into (param_name,…
+
+### Community 207 - "Extending the MCP Toolkit"
 Cohesion: 0.40
 Nodes (5): Exporting games with extensions, Extending the MCP Toolkit, Hooks (Internal API), Known limitations, Prompts & Resources (Internal API)
 
+### Community 208 - "git_pre_commit.py"
+Cohesion: 0.60
+Nodes (4): stat, install_hook(), main(), run_checks()
+
+### Community 209 - "gdscript_slice_server.py"
+Cohesion: 0.47
+Nodes (5): extract_signatures(), handle_request(), main(), tree_sitter, tree_sitter_gdscript
+
+### Community 211 - "3. State Model & Architectural Invariants"
+Cohesion: 0.50
+Nodes (4): 3. State Model & Architectural Invariants, Push-Registration Invariant, Shared Defensive Line Contract, Zero Hot-Path Scene Querying
+
 ## Knowledge Gaps
-- **1169 isolated node(s):** `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `tool_gatekeeper.sh script`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `py`, `PYTHONIOENCODING` (+1164 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1672 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
-- **31 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
+- **1156 isolated node(s):** `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `tool_gatekeeper.sh script`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `py`, `PYTHONIOENCODING` (+1151 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1776 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **30 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
-- **Why does `DialogueManager` connect `DialogueManager` to `Variant`, `DialogueManager.cs`, `Array`, `math`, `ExampleBalloon`, `Dictionary`, `DialogueLine`?**
-  _High betweenness centrality (0.160) - this node is a cross-community bridge._
-- **Why does `Agents` connect `Agents` to `Api Surface`, `Course Implementation Specification`, `.claude/rules/football-domain.md`, `Anti Patterns`, `Powerfootball Master Vision`, `fuzz_solvers.py`, `Agents Errata`, `Readme`, `mcp_server.py`, `lint_invariants.py`, `Core Invariants`, `fuzz_formations.py`, `math`, `Roadmap`, `eval_simulation.py`, `os`, `Math Solvers`, `Graphify Lifecycle & Agent Navigation Protocol — PowerFootball-2D`, `sys`, `benchmark_math.py`, `generate_symbols.py`, `Claude`?**
-  _High betweenness centrality (0.158) - this node is a cross-community bridge._
-- **Why does `DialogueManagerRuntime` connect `DialogueManagerRuntime` to `DialogueMarker3D`, `DialogueManager.cs`, `DialogueMarker2D`?**
-  _High betweenness centrality (0.113) - this node is a cross-community bridge._
+- **Why does `DialogueManager` connect `DialogueManager` to `DialogueManager.cs`, `Variant`, `Dictionary`, `fuzz_formations.py`, `ExampleBalloon`, `DialogueResponse`?**
+  _High betweenness centrality (0.177) - this node is a cross-community bridge._
+- **Why does `Agents` connect `Agents` to `Api Surface`, `Course Implementation Specification`, `.claude/rules/football-domain.md`, `Anti Patterns`, `Powerfootball Master Vision`, `fuzz_solvers.py`, `Agents Errata`, `Roadmap`, `mcp_server.py`, `lint_invariants.py`, `Core Invariants`, `sys`, `eval_simulation.py`, `benchmark_math.py`, `Math Solvers`, `Readme`, `fuzz_formations.py`, `generate_symbols.py`, `Graphify Lifecycle & Agent Navigation Protocol — PowerFootball-2D`, `re`, `Claude`, `math`?**
+  _High betweenness centrality (0.151) - this node is a cross-community bridge._
+- **Why does `DialogueManagerRuntime` connect `DialogueManagerRuntime` to `DialogueManager.cs`, `DialogueMarker3D`, `DialogueMarker2D`?**
+  _High betweenness centrality (0.123) - this node is a cross-community bridge._
 - **Are the 4 inferred relationships involving `Api Surface` (e.g. with `Agents` and `dump_api.py`) actually correct?**
   _`Api Surface` has 4 INFERRED edges - model-reasoned connections that need verification._
 - **Are the 4 inferred relationships involving `Course Implementation Specification` (e.g. with `Agents` and `Core Invariants`) actually correct?**
@@ -916,4 +985,4 @@ _Questions this graph is uniquely positioned to answer:_
 - **Are the 11 inferred relationships involving `Agents Errata` (e.g. with `Agents` and `Core Invariants`) actually correct?**
   _`Agents Errata` has 11 INFERRED edges - model-reasoned connections that need verification._
 - **What connects `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe`, `tool_gatekeeper.sh script`, `C:\Users\emanu\AppData\Roaming\uv\tools\graphifyy\Scripts\python.exe` to the rest of the system?**
-  _1169 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _1156 weakly-connected nodes found - possible documentation gaps or missing edges._

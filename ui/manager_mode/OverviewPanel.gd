@@ -36,6 +36,7 @@ func build(host: VBoxContainer, career: CareerSaveData) -> void:
 	mid.add_child(CareerTheme.card_root(_squad_health_card(career, team, p)))
 
 	host.add_child(CareerTheme.card_root(_media_card(career, p)))
+	host.add_child(CareerTheme.card_root(_history_card(team, p)))
 
 
 func _next_fixture_card(career: CareerSaveData, team: TeamData) -> VBoxContainer:
@@ -252,3 +253,45 @@ func _ordinal(n: int) -> String:
 			_:
 				suffix = "th"
 	return "%d%s" % [n, suffix]
+
+
+func _history_card(team: TeamData, p: CareerThemePalette) -> VBoxContainer:
+	var body: VBoxContainer = CareerTheme.card("Club Overview & History")
+	var scroll := ScrollContainer.new()
+	scroll.custom_minimum_size = Vector2(0.0, 140.0)
+	scroll.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	scroll.horizontal_scroll_mode = ScrollContainer.SCROLL_MODE_DISABLED
+	scroll.vertical_scroll_mode = ScrollContainer.SCROLL_MODE_AUTO
+
+	var label := RichTextLabel.new()
+	label.bbcode_enabled = true
+	label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	label.scroll_following = false
+	label.size_flags_horizontal = Control.SIZE_EXPAND_FILL
+	label.size_flags_vertical = Control.SIZE_EXPAND_FILL
+	label.fit_content = true
+	label.add_theme_font_size_override("normal_font_size", p.font_size_body)
+	label.add_theme_color_override("default_color", p.text_secondary)
+
+	if team.wikipedia_extract.strip_edges().is_empty():
+		label.text = "[color=#888888][i]No historical extract available for this club.[/i][/color]"
+	else:
+		label.text = team.wikipedia_extract
+
+	scroll.add_child(label)
+	body.add_child(scroll)
+	return body
+
+
+## Standalone helper if an inspector or test drives OverviewPanel directly.
+const TeamProfileViewScript: Resource = preload("res://ui/TeamProfileView.gd")
+var _profile_view: Node = null
+
+var history_label: RichTextLabel:
+	get:
+		return (_profile_view.get(&"history_label") as RichTextLabel) if _profile_view != null else null
+
+func populate_team(team: TeamData) -> void:
+	if _profile_view == null:
+		_profile_view = TeamProfileViewScript.new()
+	_profile_view.call(&"populate_team", team)

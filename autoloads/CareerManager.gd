@@ -347,6 +347,11 @@ func _build_competitions() -> void:
 	var div_offset: int = 0
 	for d_info: Dictionary in DataLoader.divisions:
 		var d_count: int = int(d_info.get("team_count", 0))
+		# Continental entry is earned in a top flight only; second divisions still advance
+		# div_offset because league indices are packed in manifest order.
+		if int(d_info.get("tier_index", 1)) != 1:
+			div_offset += d_count
+			continue
 		var conf: String = str(d_info.get("confederation", "UEFA"))
 		var top_slots: int = mini(2, d_count)
 		for s_i: int in range(top_slots):

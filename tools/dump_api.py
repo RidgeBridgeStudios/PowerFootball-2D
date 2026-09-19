@@ -72,6 +72,7 @@ LAYER_MAPPING = {
 
     # Layer 4: Club World & Persistent Entities
     "autoloads/DataLoader.gd": 4,
+    "autoloads/DatabaseManager.gd": 4,
     "autoloads/ManagerLoader.gd": 4,
     "autoloads/RefereeLoader.gd": 4,
     "shared/PlayerData.gd": 4,
@@ -370,7 +371,7 @@ def main() -> int:
     scripts = []
 
     for dirpath, dirnames, filenames in os.walk(ROOT):
-        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude", "legacy")]
+        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude", "legacy", "autoload")]
         for name in filenames:
             if name.endswith(".gd"):
                 full_path = os.path.join(dirpath, name)

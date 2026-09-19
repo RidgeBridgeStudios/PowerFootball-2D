@@ -4,6 +4,8 @@
 ##
 extends Node
 
+const TestDatabaseIntegration: Resource = preload("res://tests/test_database_integration.gd")
+
 var _passed: int = 0
 var _failed: int = 0
 var _rng: RandomNumberGenerator = RandomNumberGenerator.new()
@@ -30,6 +32,7 @@ func _ready() -> void:
 	_test_stadium_expansion_and_infrastructure()
 	_test_transfer_offers_and_inbox_signals()
 	_test_grounded_controversy_system()
+	_test_database_integration()
 
 	print("------------------------------------------------------------------")
 
@@ -39,6 +42,11 @@ func _ready() -> void:
 		get_tree().quit(1)
 	else:
 		get_tree().quit(0)
+
+
+func _test_database_integration() -> void:
+	var ok: bool = TestDatabaseIntegration.run_tests()
+	_assert_true(ok, "DatabaseManager integration regression tests")
 
 
 func _assert_true(cond: bool, msg: String) -> void:
@@ -262,8 +270,16 @@ func _test_p4_quick_match_isolation() -> void:
 
 func _test_world_database_and_continental() -> void:
 	var ok: bool = DataLoader.load_world_database()
-	_assert_true(ok and DataLoader.manifest_mode and DataLoader.divisions.size() == 20, "World DB: 20 divisions loaded from manifest")
-	_assert_true(DataLoader.league.teams.size() == 372, "World DB: 372 total clubs indexed in league stubs")
+	_assert_true(ok and DataLoader.manifest_mode and DataLoader.divisions.size() == 40, "World DB: 40 divisions loaded from manifest")
+	var tier1_count: int = 0
+	var tier2_count: int = 0
+	for d: Dictionary in DataLoader.divisions:
+		if int(d.get("tier_index", 1)) == 1:
+			tier1_count += 1
+		else:
+			tier2_count += 1
+	_assert_true(tier1_count == 20 and tier2_count == 20, "World DB: 20 top flights plus 20 second divisions form the pyramid")
+	_assert_true(DataLoader.league.teams.size() == 750, "World DB: 750 total clubs indexed across 40 authentic divisions")
 
 	var shard_ok: bool = DataLoader.load_division_shard(DataLoader.divisions[0])
 	_assert_true(shard_ok, "World DB: Division 0 shard loaded successfully")
@@ -300,6 +316,22 @@ func _test_world_database_and_continental() -> void:
 	_assert_true(has_americas, "World DB: Copa Continental generated")
 	_assert_true(has_world_club, "World DB: World Club Championship generated")
 	_assert_true(has_domestic_cup, "World DB: Division Domestic Cup generated")
+
+	# Continental entry is a top-flight privilege: no second-division club may be seeded.
+	if career_save != null:
+		var second_division: Array[int] = []
+		var offset: int = 0
+		for d_s: Dictionary in DataLoader.divisions:
+			var d_count_s: int = int(d_s.get("team_count", 0))
+			if int(d_s.get("tier_index", 1)) != 1:
+				for i_s: int in range(d_count_s):
+					second_division.append(offset + i_s)
+			offset += d_count_s
+		var leaked: bool = false
+		for cont_idx: int in career_save.continental_indices:
+			if second_division.has(cont_idx):
+				leaked = true
+		_assert_true(not leaked, "World DB: continental seeding excludes second-division clubs")
 
 	# Continental Multi-stage verification
 	if uefa_comp != null:

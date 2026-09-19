@@ -137,8 +137,10 @@ def strip_code(line: str) -> str:
 
 def gd_files() -> list[str]:
     out = []
+    # "autoload" (singular) is the godot-bridge MCP interaction server injected by the
+    # editor tooling at runtime; this project's own autoloads live in "autoloads".
     for dirpath, dirnames, filenames in os.walk(ROOT):
-        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude", "legacy")]
+        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude", "legacy", "autoload")]
         for name in filenames:
             if name.endswith(".gd"):
                 out.append(os.path.join(dirpath, name))

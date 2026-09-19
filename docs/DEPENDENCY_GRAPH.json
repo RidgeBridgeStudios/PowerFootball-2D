@@ -1,11 +1,11 @@
 {
-  "total_nodes": 89,
+  "total_nodes": 92,
   "layer_summary": {
-    "Layer 1 - Physics & Kinematics": 15,
+    "Layer 1 - Physics & Kinematics": 16,
     "Layer 2 - Match AI & Spatial Navigation": 33,
     "Layer 3 - Match Social & Dynamic Psychology": 2,
-    "Layer 4 - Club World & Persistent Entities": 9,
-    "Layer 5 - Narrative, Presentation & UI": 30
+    "Layer 4 - Club World & Persistent Entities": 10,
+    "Layer 5 - Narrative, Presentation & UI": 31
   },
   "nodes": {
     "_archive/chat_gen/scripts/career/CareerScreen.gd": {
@@ -306,7 +306,8 @@
         "shared/career/TransferOffer.gd",
         "shared/career/WorldEvent.gd",
         "shared/career/WorldEventGenerator.gd",
-        "shared/career/YouthAcademy.gd"
+        "shared/career/YouthAcademy.gd",
+        "ui/QuickSimModal.gd"
       ],
       "direct_dependents": [],
       "signals_declared": [],
@@ -330,6 +331,7 @@
       "layer_name": "Layer 4 - Club World & Persistent Entities",
       "extends": "Node",
       "direct_dependencies": [
+        "autoloads/DatabaseManager.gd",
         "autoloads/GameManager.gd",
         "shared/LeagueData.gd",
         "shared/NationDatabase.gd",
@@ -366,6 +368,32 @@
       ],
       "signals_declared": [],
       "signals_emitted": [],
+      "signals_connected": []
+    },
+    "autoloads/DatabaseManager.gd": {
+      "class_name": null,
+      "layer": 4,
+      "layer_name": "Layer 4 - Club World & Persistent Entities",
+      "extends": "Node",
+      "direct_dependencies": [
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd"
+      ],
+      "direct_dependents": [
+        "autoloads/DataLoader.gd",
+        "tests/run_all.gd",
+        "tests/test_database_integration.gd"
+      ],
+      "signals_declared": [
+        "game_mode_changed",
+        "database_opened",
+        "database_closed"
+      ],
+      "signals_emitted": [
+        "database_closed",
+        "database_opened",
+        "game_mode_changed"
+      ],
       "signals_connected": []
     },
     "autoloads/GameEvents.gd": {
@@ -448,6 +476,7 @@
         "shared/career/CareerSerializer.gd",
         "tests/run_all.gd",
         "ui/MainMenu.gd",
+        "ui/manager_mode/ManagerModeRoot.gd",
         "ui/manager_mode/OverviewPanel.gd"
       ],
       "signals_declared": [],
@@ -493,7 +522,8 @@
       "direct_dependents": [
         "autoloads/CareerManager.gd",
         "tests/run_all.gd",
-        "ui/MainMenu.gd"
+        "ui/MainMenu.gd",
+        "ui/manager_mode/ManagerModeRoot.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -550,7 +580,8 @@
         "shared/career/InboxEngine.gd",
         "shared/career/ManagerCareerProfile.gd",
         "shared/career/WorldEvent.gd",
-        "tests/run_all.gd"
+        "tests/run_all.gd",
+        "ui/QuickSimModal.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -662,6 +693,7 @@
         "tests/run_all.gd",
         "ui/MainMenu.gd",
         "ui/QuickSimModal.gd",
+        "ui/manager_mode/ManagerModeRoot.gd",
         "ui/manager_mode/OverviewPanel.gd",
         "ui/manager_mode/TacticsPanel.gd"
       ],
@@ -681,6 +713,7 @@
         "autoloads/RefereeLoader.gd",
         "autoloads/StaffLoader.gd",
         "shared/ManagerData.gd",
+        "shared/PlayerData.gd",
         "shared/RefereeData.gd",
         "shared/StaffData.gd",
         "shared/career/MoraleEngine.gd",
@@ -697,12 +730,14 @@
       "layer_name": "Layer 4 - Club World & Persistent Entities",
       "extends": "Resource",
       "direct_dependencies": [
+        "shared/NationDatabase.gd",
         "shared/PlayerRatingCalculator.gd",
         "shared/RefereeData.gd"
       ],
       "direct_dependents": [
         "autoloads/CareerManager.gd",
         "autoloads/DataLoader.gd",
+        "autoloads/DatabaseManager.gd",
         "autoloads/MatchStatsTracker.gd",
         "shared/CareerProgressionEngine.gd",
         "shared/ManagerData.gd",
@@ -726,6 +761,7 @@
         "shared/career/WorldEventGenerator.gd",
         "shared/career/YouthAcademy.gd",
         "tests/run_all.gd",
+        "tests/test_database_integration.gd",
         "ui/MatchStatsUI.gd",
         "ui/manager_mode/ContractNegotiationModal.gd",
         "ui/manager_mode/FinancesPanel.gd",
@@ -805,6 +841,7 @@
         "tests/run_all.gd",
         "ui/MainMenu.gd",
         "ui/QuickSimModal.gd",
+        "ui/manager_mode/ManagerModeRoot.gd",
         "ui/manager_mode/TacticsPanel.gd"
       ],
       "signals_declared": [],
@@ -829,7 +866,8 @@
         "shared/QuickSimEngine.gd",
         "tests/run_all.gd",
         "ui/MainMenu.gd",
-        "ui/QuickSimModal.gd"
+        "ui/QuickSimModal.gd",
+        "ui/manager_mode/ManagerModeRoot.gd"
       ],
       "signals_declared": [],
       "signals_emitted": [],
@@ -876,6 +914,7 @@
       "direct_dependents": [
         "autoloads/CareerManager.gd",
         "autoloads/DataLoader.gd",
+        "autoloads/DatabaseManager.gd",
         "autoloads/StaffLoader.gd",
         "shared/CareerProgressionEngine.gd",
         "shared/LeagueData.gd",
@@ -893,8 +932,10 @@
         "shared/career/WorldEventGenerator.gd",
         "shared/career/YouthAcademy.gd",
         "tests/run_all.gd",
+        "tests/test_database_integration.gd",
         "ui/MainMenu.gd",
         "ui/QuickSimModal.gd",
+        "ui/TeamProfileView.gd",
         "ui/manager_mode/CalendarPanel.gd",
         "ui/manager_mode/CareerPanel.gd",
         "ui/manager_mode/ContractNegotiationModal.gd",
@@ -1113,6 +1154,7 @@
         "ui/manager_mode/CareerTheme.gd"
       ],
       "direct_dependents": [
+        "ui/TeamProfileView.gd",
         "ui/manager_mode/BoardPanel.gd",
         "ui/manager_mode/CalendarPanel.gd",
         "ui/manager_mode/CareerTheme.gd",
@@ -1676,6 +1718,7 @@
       "extends": "Node",
       "direct_dependencies": [
         "autoloads/DataLoader.gd",
+        "autoloads/DatabaseManager.gd",
         "autoloads/ManagerLoader.gd",
         "autoloads/RefereeLoader.gd",
         "entities/manager/PressOffice.gd",
@@ -1702,9 +1745,28 @@
         "shared/career/RelationshipData.gd",
         "shared/career/TransferOffer.gd",
         "shared/career/WorldEvent.gd",
-        "shared/career/WorldEventGenerator.gd"
+        "shared/career/WorldEventGenerator.gd",
+        "tests/test_database_integration.gd"
       ],
       "direct_dependents": [],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
+    },
+    "tests/test_database_integration.gd": {
+      "class_name": "TestDatabaseIntegration",
+      "layer": 1,
+      "layer_name": "Layer 1 - Physics & Kinematics",
+      "extends": "Node",
+      "direct_dependencies": [
+        "autoloads/DatabaseManager.gd",
+        "shared/PlayerData.gd",
+        "shared/TeamData.gd",
+        "ui/TeamProfileView.gd"
+      ],
+      "direct_dependents": [
+        "tests/run_all.gd"
+      ],
       "signals_declared": [],
       "signals_emitted": [],
       "signals_connected": []
@@ -1818,13 +1880,17 @@
       "direct_dependencies": [
         "autoloads/GameManager.gd",
         "autoloads/MatchStatsTracker.gd",
+        "entities/manager/PressOffice.gd",
         "shared/ManagerData.gd",
         "shared/QuickSimEngine.gd",
         "shared/RefereeData.gd",
         "shared/TeamData.gd",
         "ui/MatchStatsUI.gd"
       ],
-      "direct_dependents": [],
+      "direct_dependents": [
+        "autoloads/CareerManager.gd",
+        "ui/manager_mode/ManagerModeRoot.gd"
+      ],
       "signals_declared": [
         "match_completed",
         "modal_closed"
@@ -1837,6 +1903,25 @@
         "pressed",
         "stats_dismissed"
       ]
+    },
+    "ui/TeamProfileView.gd": {
+      "class_name": "TeamProfileView",
+      "layer": 5,
+      "layer_name": "Layer 5 - Narrative, Presentation & UI",
+      "extends": "PanelContainer",
+      "direct_dependencies": [
+        "shared/TeamData.gd",
+        "shared/career/CareerThemePalette.gd",
+        "ui/manager_mode/CareerTheme.gd"
+      ],
+      "direct_dependents": [
+        "tests/test_database_integration.gd",
+        "ui/manager_mode/LeaguePanel.gd",
+        "ui/manager_mode/OverviewPanel.gd"
+      ],
+      "signals_declared": [],
+      "signals_emitted": [],
+      "signals_connected": []
     },
     "ui/manager_mode/AdvanceToDateDialog.gd": {
       "class_name": "AdvanceToDateDialog",
@@ -1951,6 +2036,7 @@
       ],
       "direct_dependents": [
         "shared/career/CareerThemePalette.gd",
+        "ui/TeamProfileView.gd",
         "ui/manager_mode/AdvanceToDateDialog.gd",
         "ui/manager_mode/BoardPanel.gd",
         "ui/manager_mode/CalendarPanel.gd",
@@ -2088,6 +2174,7 @@
         "shared/career/CompetitionData.gd",
         "shared/career/FixtureData.gd",
         "shared/career/LeagueTableRow.gd",
+        "ui/TeamProfileView.gd",
         "ui/manager_mode/CareerPanel.gd",
         "ui/manager_mode/CareerTheme.gd"
       ],
@@ -2131,12 +2218,18 @@
       "direct_dependencies": [
         "autoloads/DataLoader.gd",
         "autoloads/GameEvents.gd",
+        "autoloads/ManagerLoader.gd",
+        "autoloads/RefereeLoader.gd",
+        "shared/ManagerData.gd",
+        "shared/QuickSimEngine.gd",
+        "shared/RefereeData.gd",
         "shared/TeamData.gd",
         "shared/career/CareerDate.gd",
         "shared/career/CareerSaveData.gd",
         "shared/career/CareerThemePalette.gd",
         "shared/career/ClubFinances.gd",
         "shared/career/FixtureData.gd",
+        "ui/QuickSimModal.gd",
         "ui/manager_mode/AdvanceToDateDialog.gd",
         "ui/manager_mode/BoardPanel.gd",
         "ui/manager_mode/CalendarPanel.gd",
@@ -2166,6 +2259,8 @@
         "career_manager_sacked",
         "career_speed_changed",
         "date_confirmed",
+        "match_completed",
+        "modal_closed",
         "pressed"
       ]
     },
@@ -2190,6 +2285,7 @@
         "shared/career/PlayerCareerState.gd",
         "shared/career/ScoutingNetwork.gd",
         "shared/career/WorldEvent.gd",
+        "ui/TeamProfileView.gd",
         "ui/manager_mode/CareerPanel.gd",
         "ui/manager_mode/CareerTheme.gd"
       ],

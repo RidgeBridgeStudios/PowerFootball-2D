@@ -15,7 +15,6 @@ extends Node
 
 const CUSTOM_REFEREES_PATH: String = "user://custom_referees.json"
 const DEFAULT_REFEREES_PATH: String = "res://data/referees.json"
-const WORLD_REFEREES_PATH: String = "res://data/world_referees.json"
 
 var referee_pool: Array[RefereeData] = []
 
@@ -135,9 +134,6 @@ func save_referees() -> void:
 func _load_referees() -> void:
 	if FileAccess.file_exists(CUSTOM_REFEREES_PATH):
 		if _parse_json_referees(CUSTOM_REFEREES_PATH):
-			return
-	if FileAccess.file_exists(WORLD_REFEREES_PATH):
-		if _parse_json_referees(WORLD_REFEREES_PATH):
 			return
 	if FileAccess.file_exists(DEFAULT_REFEREES_PATH):
 		if _parse_json_referees(DEFAULT_REFEREES_PATH):

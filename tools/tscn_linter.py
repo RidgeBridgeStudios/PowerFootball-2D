@@ -46,7 +46,7 @@ class TSCNViolation:
 def get_all_tscn_files(base_dir: str) -> list[str]:
     files = []
     for dirpath, dirnames, filenames in os.walk(base_dir):
-        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude", "__pycache__", ".godot", "legacy")]
+        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude", "__pycache__", ".godot", "legacy", "autoload")]
         for f in filenames:
             if f.endswith(".tscn"):
                 files.append(os.path.join(dirpath, f))

@@ -67,6 +67,7 @@ LAYER_MAPPING = {
     "autoloads/MatchStatsTracker.gd": 3,
 
     "autoloads/DataLoader.gd": 4,
+    "autoloads/DatabaseManager.gd": 4,
     "autoloads/ManagerLoader.gd": 4,
     "autoloads/RefereeLoader.gd": 4,
     "shared/PlayerData.gd": 4,
@@ -148,7 +149,7 @@ def scan_repository() -> tuple[dict[str, ScriptNode], dict[str, str]]:
 
     # 1. First pass: find all scripts and class definitions
     for dirpath, dirnames, filenames in os.walk(ROOT):
-        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude", "__pycache__", "docs", "legacy")]
+        dirnames[:] = [d for d in dirnames if d not in (".git", "addons", ".claude", "__pycache__", "docs", "legacy", "autoload")]
         for f in filenames:
             if f.endswith(".gd"):
                 full_path = os.path.join(dirpath, f)
@@ -197,6 +198,7 @@ def scan_repository() -> tuple[dict[str, ScriptNode], dict[str, str]]:
         "GameEvents": "autoloads/GameEvents.gd",
         "GameManager": "autoloads/GameManager.gd",
         "MatchStatsTracker": "autoloads/MatchStatsTracker.gd",
+        "DatabaseManager": "autoloads/DatabaseManager.gd",
         "DataLoader": "autoloads/DataLoader.gd",
         "RefereeLoader": "autoloads/RefereeLoader.gd",
         "ManagerLoader": "autoloads/ManagerLoader.gd",

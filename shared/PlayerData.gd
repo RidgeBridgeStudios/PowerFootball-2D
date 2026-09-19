@@ -15,7 +15,10 @@ extends Resource
 
 ## --- Identity ----------------------------------------------------------------
 
+@export var player_id: int = 0
 @export var player_name: String = ""
+@export var first_name: String = ""
+@export var last_name: String = ""
 @export var shirt_number: int = 0
 ## "GK", "CB", "LB", "RB", "DM", "CM", "AM", "LW", "RW", "ST"
 @export var position_role: String = ""
@@ -24,6 +27,10 @@ extends Resource
 @export var secondary_nationality: String = ""
 ## ISO "YYYY-MM-DD"
 @export var date_of_birth: String = "2000-01-01"
+@export var gender: String = "men"
+@export var height_cm: int = 180
+@export var weight_kg: float = 75.0
+@export var image_url: String = ""
 ## Array of Dictionaries: [{"language": "Nordlandic", "proficiency": 1.0, "level": "Native"}, ...]
 @export var spoken_languages: Array[Dictionary] = []
 
@@ -159,6 +166,100 @@ func accumulate_match_stats(events: PlayerRatingCalculator.PlayerMatchEvents) ->
 	if events.kept_clean_sheet:
 		career_clean_sheets += 1
 
+
+
+static func from_db_row(row: Dictionary) -> PlayerData:
+	var d := PlayerData.new()
+	var pid: Variant = row.get("player_id")
+	if pid != null:
+		d.player_id = int(pid)
+	var pname: Variant = row.get("player_name")
+	if pname != null:
+		d.player_name = str(pname)
+	var fname: Variant = row.get("first_name")
+	if fname != null:
+		d.first_name = str(fname)
+	var lname: Variant = row.get("last_name")
+	if lname != null:
+		d.last_name = str(lname)
+
+	var pos: Variant = row.get("position_role")
+	if pos == null:
+		pos = row.get("position_name")
+	if pos != null:
+		d.position_role = str(pos)
+	else:
+		d.position_role = "CM"
+
+	var nat: Variant = row.get("nationality")
+	if nat != null:
+		d.nationality = str(nat)
+	var dob: Variant = row.get("date_of_birth")
+	if dob != null:
+		d.date_of_birth = str(dob)
+	var gen: Variant = row.get("gender")
+	if gen != null:
+		d.gender = str(gen)
+	var h: Variant = row.get("height_cm")
+	if h != null:
+		d.height_cm = int(h)
+	var w: Variant = row.get("weight_kg")
+	if w != null:
+		d.weight_kg = float(w)
+	var img: Variant = row.get("image_url")
+	if img != null:
+		d.image_url = str(img)
+
+	var num: Variant = row.get("jersey_number")
+	if num == null:
+		num = row.get("shirt_number")
+	if num != null:
+		d.shirt_number = int(num)
+
+	if row.has("mass") and row["mass"] != null:
+		d.mass = float(row["mass"])
+	if row.has("top_speed") and row["top_speed"] != null:
+		d.top_speed = float(row["top_speed"])
+	if row.has("stamina_max") and row["stamina_max"] != null:
+		d.stamina_max = float(row["stamina_max"])
+	if row.has("vision") and row["vision"] != null:
+		d.vision = float(row["vision"])
+	if row.has("composure") and row["composure"] != null:
+		d.composure = float(row["composure"])
+	if row.has("aggression") and row["aggression"] != null:
+		d.aggression = float(row["aggression"])
+	if row.has("close_control") and row["close_control"] != null:
+		d.close_control = float(row["close_control"])
+	if row.has("reflexes") and row["reflexes"] != null:
+		d.reflexes = float(row["reflexes"])
+	if row.has("determination") and row["determination"] != null:
+		d.determination = float(row["determination"])
+	if row.has("work_rate") and row["work_rate"] != null:
+		d.work_rate = float(row["work_rate"])
+
+	if d.mass <= 0.0:
+		d.mass = 75.0
+	if d.top_speed <= 0.0:
+		d.top_speed = 210.0
+	if d.stamina_max <= 0.0:
+		d.stamina_max = 100.0
+	if d.date_of_birth == "":
+		d.date_of_birth = "2000-01-01"
+	if d.nationality == "":
+		d.nationality = "English"
+	if d.spoken_languages.is_empty():
+		var prim_lang: String = NationDatabase.get_primary_language_for_nation(d.nationality)
+		d.spoken_languages = [
+			{"language": prim_lang, "proficiency": 1.0, "level": "Native"},
+			{"language": "English", "proficiency": 0.85, "level": "Fluent"}
+		]
+	if d.wage_weekly <= 0:
+		d.wage_weekly = 15000
+	if d.contract_years <= 0:
+		d.contract_years = 3
+
+	d.apply_role_defaults(d.position_role)
+	return d
 
 
 static func make_default(player_name: String, shirt_number: int, position_role: String) -> PlayerData:

@@ -10,8 +10,10 @@
 class_name LeaguePanel
 extends CareerPanel
 
+const TeamProfileViewScript: Resource = preload("res://ui/TeamProfileView.gd")
 
 var _selected_comp_idx: int = 0
+var _selected_team_index: int = -1
 
 
 func title() -> String:
@@ -31,6 +33,7 @@ func build(host: VBoxContainer, career: CareerSaveData) -> void:
 		var btn: Button = CareerTheme.button(c_data.competition_name, idx == _selected_comp_idx)
 		btn.pressed.connect(func() -> void:
 			_selected_comp_idx = idx
+			_selected_team_index = -1
 			refresh()
 		)
 		tabs.add_child(btn)
@@ -83,7 +86,24 @@ func _league_table(comp: CompetitionData, career: CareerSaveData, p: CareerTheme
 		var name_tint: Color = p.accent if is_user else p.text_primary
 
 		line.add_child(CareerTheme.cell(str(position), 28, position_tint))
-		line.add_child(CareerTheme.cell(r.team_name, 168, name_tint))
+		var team_btn: Button = CareerTheme.button(r.team_name)
+		team_btn.custom_minimum_size = Vector2(168.0, 0.0)
+		team_btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		team_btn.clip_text = true
+		team_btn.add_theme_font_size_override("font_size", p.font_size_body)
+		team_btn.add_theme_color_override("font_color", name_tint)
+		var flat: StyleBoxFlat = CareerTheme.style_box(Color(0, 0, 0, 0), 0)
+		team_btn.add_theme_stylebox_override("normal", flat)
+		var t_idx: int = r.team_index
+		var host_panel: LeaguePanel = self
+		team_btn.pressed.connect(func() -> void:
+			if host_panel.get(&"_selected_team_index") == t_idx:
+				host_panel.set(&"_selected_team_index", -1)
+			else:
+				host_panel.set(&"_selected_team_index", t_idx)
+			host_panel.refresh()
+		)
+		line.add_child(team_btn)
 		line.add_child(CareerTheme.cell(str(r.played), 28, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT))
 		line.add_child(CareerTheme.cell(str(r.won), 28, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT))
 		line.add_child(CareerTheme.cell(str(r.drawn), 28, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT))
@@ -102,6 +122,15 @@ func _league_table(comp: CompetitionData, career: CareerSaveData, p: CareerTheme
 		form_holder.add_child(CareerTheme.form_strip(r.form_string(5)))
 		line.add_child(form_holder)
 		body.add_child(CareerTheme.data_row_root(line))
+
+		if _selected_team_index == r.team_index:
+			var inspected_team: TeamData = DataLoader.get_team(r.team_index)
+			if inspected_team != null:
+				var profile_view: Node = TeamProfileViewScript.new()
+				profile_view.call(&"populate_team", inspected_team)
+				body.add_child(CareerTheme.spacer(4))
+				body.add_child(profile_view as Control)
+				body.add_child(CareerTheme.spacer(4))
 
 	body.add_child(CareerTheme.spacer(4))
 	var key: HBoxContainer = CareerTheme.row(14)

@@ -69,8 +69,10 @@ import sys
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-# Directories that are never live game code.
-SKIP_DIRS = (".git", "addons", ".claude", "__pycache__", "legacy")
+# Directories that are never live game code. "autoload" (singular) is the godot-bridge
+# MCP interaction server injected by the editor tooling; this project's autoloads are in
+# "autoloads".
+SKIP_DIRS = (".git", "addons", ".claude", "__pycache__", "legacy", "autoload")
 
 # Regex utilities for GDScript code analysis
 STRING_RE = re.compile(r'"(?:[^"\\]|\\.)*"|\'(?:[^\'\\]|\\.)*\'')
