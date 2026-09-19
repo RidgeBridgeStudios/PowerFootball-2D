@@ -11860,32 +11860,120 @@
       }
     },
     "methods": {
+      "get_or_create": {
+        "line": 62,
+        "args": [
+          "parent: Node = null"
+        ],
+        "return": "Control",
+        "is_static": true
+      },
+      "inspect_team": {
+        "line": 80,
+        "args": [
+          "team_val: Variant"
+        ],
+        "return": "void",
+        "is_static": true
+      },
+      "inspect_player": {
+        "line": 86,
+        "args": [
+          "player_val: Variant"
+        ],
+        "return": "void",
+        "is_static": true
+      },
+      "inspect_referee": {
+        "line": 92,
+        "args": [
+          "ref_val: Variant"
+        ],
+        "return": "void",
+        "is_static": true
+      },
+      "inspect_staff": {
+        "line": 98,
+        "args": [
+          "staff_val: Variant"
+        ],
+        "return": "void",
+        "is_static": true
+      },
+      "inspect_competition": {
+        "line": 104,
+        "args": [
+          "comp_val: Variant"
+        ],
+        "return": "void",
+        "is_static": true
+      },
       "_ready": {
-        "line": 60,
+        "line": 110,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "open": {
-        "line": 68,
+        "line": 119,
         "args": [],
         "return": "void",
         "is_static": false
       },
+      "open_team": {
+        "line": 127,
+        "args": [
+          "team_val: Variant"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "open_player": {
+        "line": 143,
+        "args": [
+          "player_val: Variant"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "open_referee": {
+        "line": 167,
+        "args": [
+          "ref_val: Variant"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "open_staff": {
+        "line": 220,
+        "args": [
+          "staff_val: Variant"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "open_competition": {
+        "line": 261,
+        "args": [
+          "comp_val: Variant"
+        ],
+        "return": "void",
+        "is_static": false
+      },
       "close": {
-        "line": 76,
+        "line": 269,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_build_ui": {
-        "line": 81,
+        "line": 274,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_create_tab_button": {
-        "line": 278,
+        "line": 471,
         "args": [
           "text: String",
           "tab: ActiveTab"
@@ -11894,7 +11982,7 @@
         "is_static": false
       },
       "_select_tab": {
-        "line": 290,
+        "line": 483,
         "args": [
           "tab: ActiveTab"
         ],
@@ -11902,55 +11990,55 @@
         "is_static": false
       },
       "_update_tab_button_styles": {
-        "line": 315,
+        "line": 508,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_gender_changed": {
-        "line": 322,
+        "line": 515,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_refresh_active_tab": {
-        "line": 327,
+        "line": 520,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_search_changed": {
-        "line": 331,
+        "line": 524,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_filter_changed": {
-        "line": 343,
+        "line": 536,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_load_competitions": {
-        "line": 357,
+        "line": 550,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_setup_competition_filters": {
-        "line": 373,
+        "line": 566,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_populate_competitions_list": {
-        "line": 382,
+        "line": 575,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_render_competition_detail": {
-        "line": 440,
+        "line": 633,
         "args": [
           "comp: Dictionary"
         ],
@@ -11958,7 +12046,7 @@
         "is_static": false
       },
       "_jump_to_team": {
-        "line": 516,
+        "line": 709,
         "args": [
           "team: TeamData"
         ],
@@ -11966,34 +12054,18 @@
         "is_static": false
       },
       "_setup_club_filters": {
-        "line": 525,
+        "line": 718,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_populate_clubs_list": {
-        "line": 540,
+        "line": 733,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_render_club_detail": {
-        "line": 594,
-        "args": [
-          "team: TeamData"
-        ],
-        "return": "void",
-        "is_static": false
-      },
-      "_render_club_overview_tab": {
-        "line": 697,
-        "args": [
-          "team: TeamData"
-        ],
-        "return": "void",
-        "is_static": false
-      },
-      "_render_club_roster_tab": {
         "line": 787,
         "args": [
           "team: TeamData"
@@ -12001,8 +12073,24 @@
         "return": "void",
         "is_static": false
       },
+      "_render_club_overview_tab": {
+        "line": 890,
+        "args": [
+          "team: TeamData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
+      "_render_club_roster_tab": {
+        "line": 980,
+        "args": [
+          "team: TeamData"
+        ],
+        "return": "void",
+        "is_static": false
+      },
       "_render_club_staff_tab": {
-        "line": 849,
+        "line": 1042,
         "args": [
           "team: TeamData"
         ],
@@ -12010,19 +12098,19 @@
         "is_static": false
       },
       "_setup_referee_filters": {
-        "line": 953,
+        "line": 1146,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_populate_referees_list": {
-        "line": 965,
+        "line": 1158,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_render_referee_detail": {
-        "line": 1028,
+        "line": 1221,
         "args": [
           "ref: Dictionary"
         ],
@@ -12030,19 +12118,19 @@
         "is_static": false
       },
       "_setup_player_filters": {
-        "line": 1120,
+        "line": 1313,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_populate_players_list": {
-        "line": 1130,
+        "line": 1323,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_render_player_detail": {
-        "line": 1183,
+        "line": 1376,
         "args": [
           "p: PlayerData"
         ],
@@ -12050,7 +12138,7 @@
         "is_static": false
       },
       "_render_player_popup": {
-        "line": 1265,
+        "line": 1480,
         "args": [
           "p: PlayerData"
         ],
@@ -12058,13 +12146,13 @@
         "is_static": false
       },
       "_make_card": {
-        "line": 1272,
+        "line": 1487,
         "args": [],
         "return": "PanelContainer",
         "is_static": false
       },
       "_make_subheading": {
-        "line": 1288,
+        "line": 1503,
         "args": [
           "text: String"
         ],
@@ -12072,7 +12160,7 @@
         "is_static": false
       },
       "_make_kv_label": {
-        "line": 1296,
+        "line": 1511,
         "args": [
           "key: String",
           "value: String",
@@ -12082,7 +12170,7 @@
         "is_static": false
       },
       "_make_cell": {
-        "line": 1314,
+        "line": 1529,
         "args": [
           "text: String",
           "width: int",
@@ -12093,7 +12181,7 @@
         "is_static": false
       },
       "_make_tag": {
-        "line": 1329,
+        "line": 1544,
         "args": [
           "text: String",
           "tag_color: Color"
@@ -12102,7 +12190,7 @@
         "is_static": false
       },
       "_make_stat_badge": {
-        "line": 1345,
+        "line": 1560,
         "args": [
           "title: String",
           "val: String"
@@ -12111,7 +12199,7 @@
         "is_static": false
       },
       "_make_attr_row": {
-        "line": 1376,
+        "line": 1591,
         "args": [
           "title: String",
           "ratio: float",
@@ -12122,7 +12210,7 @@
         "is_static": false
       },
       "_make_empty_notice": {
-        "line": 1406,
+        "line": 1621,
         "args": [
           "text: String"
         ],
@@ -12130,7 +12218,7 @@
         "is_static": false
       },
       "_pos_color": {
-        "line": 1414,
+        "line": 1629,
         "args": [
           "pos: String"
         ],
@@ -12138,7 +12226,7 @@
         "is_static": false
       },
       "_style_button": {
-        "line": 1428,
+        "line": 1643,
         "args": [
           "btn: Button",
           "is_active: bool"
@@ -12147,7 +12235,7 @@
         "is_static": false
       },
       "_style_list_item": {
-        "line": 1446,
+        "line": 1661,
         "args": [
           "btn: Button"
         ],
@@ -12155,7 +12243,7 @@
         "is_static": false
       },
       "_format_number": {
-        "line": 1464,
+        "line": 1679,
         "args": [
           "n: int"
         ],
@@ -12163,7 +12251,7 @@
         "is_static": false
       },
       "_clear_node_children": {
-        "line": 1476,
+        "line": 1691,
         "args": [
           "parent: Node"
         ],
@@ -12641,13 +12729,13 @@
       },
       "_banner_home_name": {
         "line": 73,
-        "type": "Label",
+        "type": "Button",
         "is_export": false,
         "is_onready": false
       },
       "_banner_away_name": {
         "line": 74,
-        "type": "Label",
+        "type": "Button",
         "is_export": false,
         "is_onready": false
       },
@@ -12750,43 +12838,43 @@
         "is_static": false
       },
       "_build_tab_bar": {
-        "line": 227,
+        "line": 229,
         "args": [],
         "return": "HBoxContainer",
         "is_static": false
       },
       "_build_summary_tab": {
-        "line": 252,
+        "line": 254,
         "args": [],
         "return": "PanelContainer",
         "is_static": false
       },
       "_build_traditional_stats_tab": {
-        "line": 318,
+        "line": 320,
         "args": [],
         "return": "PanelContainer",
         "is_static": false
       },
       "_build_advanced_stats_tab": {
-        "line": 335,
+        "line": 337,
         "args": [],
         "return": "PanelContainer",
         "is_static": false
       },
       "_build_ratings_tab": {
-        "line": 352,
+        "line": 354,
         "args": [],
         "return": "PanelContainer",
         "is_static": false
       },
       "_build_bottom_bar": {
-        "line": 379,
+        "line": 381,
         "args": [],
         "return": "HBoxContainer",
         "is_static": false
       },
       "_switch_tab": {
-        "line": 406,
+        "line": 408,
         "args": [
           "tab_idx: TabIndex"
         ],
@@ -12794,19 +12882,19 @@
         "is_static": false
       },
       "_on_prev_pressed": {
-        "line": 417,
+        "line": 419,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_next_pressed": {
-        "line": 422,
+        "line": 424,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "populate": {
-        "line": 428,
+        "line": 430,
         "args": [
           "team_a_name: String",
           "team_b_name: String"
@@ -12815,25 +12903,25 @@
         "is_static": false
       },
       "_populate_summary_tab": {
-        "line": 455,
+        "line": 457,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_populate_traditional_stats": {
-        "line": 543,
+        "line": 544,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_populate_advanced_stats": {
-        "line": 561,
+        "line": 562,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_create_stat_bar_row": {
-        "line": 582,
+        "line": 583,
         "args": [
           "label_text: String",
           "val_h: float",
@@ -12844,7 +12932,7 @@
         "is_static": false
       },
       "_create_advanced_metric_card": {
-        "line": 645,
+        "line": 646,
         "args": [
           "title: String",
           "desc: String",
@@ -12856,13 +12944,13 @@
         "is_static": false
       },
       "_populate_ratings_matrix": {
-        "line": 703,
+        "line": 704,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_fill_ratings_column": {
-        "line": 708,
+        "line": 709,
         "args": [
           "vbox: VBoxContainer",
           "team_idx: int",
@@ -12872,7 +12960,7 @@
         "is_static": false
       },
       "_make_col_header": {
-        "line": 756,
+        "line": 757,
         "args": [
           "text: String",
           "min_w: int",
@@ -12882,7 +12970,7 @@
         "is_static": false
       },
       "_build_player_row": {
-        "line": 766,
+        "line": 767,
         "args": [
           "p: PlayerData",
           "rating: float",
@@ -13533,7 +13621,7 @@
         "is_static": false
       },
       "_on_press_choice": {
-        "line": 243,
+        "line": 260,
         "args": [
           "choice: int"
         ],
@@ -13541,7 +13629,7 @@
         "is_static": false
       },
       "_set_mentality": {
-        "line": 256,
+        "line": 273,
         "args": [
           "m: int"
         ],
@@ -13549,19 +13637,19 @@
         "is_static": false
       },
       "_on_simulate_pressed": {
-        "line": 263,
+        "line": 280,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_step_minute": {
-        "line": 310,
+        "line": 327,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_append_commentary_event": {
-        "line": 335,
+        "line": 352,
         "args": [
           "ev: QuickSimEngine.MatchEventRecord"
         ],
@@ -13569,19 +13657,19 @@
         "is_static": false
       },
       "_scroll_to_bottom": {
-        "line": 393,
+        "line": 410,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_pause_toggle": {
-        "line": 400,
+        "line": 417,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_set_speed": {
-        "line": 405,
+        "line": 422,
         "args": [
           "s: float"
         ],
@@ -13589,43 +13677,43 @@
         "is_static": false
       },
       "_on_resume_2nd_half": {
-        "line": 412,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_on_skip_pressed": {
-        "line": 418,
-        "args": [],
-        "return": "void",
-        "is_static": false
-      },
-      "_finish_match": {
         "line": 429,
         "args": [],
         "return": "void",
         "is_static": false
       },
+      "_on_skip_pressed": {
+        "line": 435,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
+      "_finish_match": {
+        "line": 446,
+        "args": [],
+        "return": "void",
+        "is_static": false
+      },
       "_populate_post_sim_ui": {
-        "line": 439,
+        "line": 456,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_view_stats_pressed": {
-        "line": 470,
+        "line": 497,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_done_pressed": {
-        "line": 481,
+        "line": 508,
         "args": [],
         "return": "void",
         "is_static": false
       },
       "_on_cancel_pressed": {
-        "line": 486,
+        "line": 513,
         "args": [],
         "return": "void",
         "is_static": false
@@ -14020,6 +14108,11 @@
         "line": 23,
         "type": "String",
         "is_const": true
+      },
+      "DatabaseViewerScript": {
+        "line": 403,
+        "type": "Resource",
+        "is_const": true
       }
     },
     "methods": {
@@ -14231,6 +14324,46 @@
           "node: Node"
         ],
         "return": "void",
+        "is_static": true
+      },
+      "team_link": {
+        "line": 439,
+        "args": [
+          "team_val: Variant",
+          "width: int = 0",
+          "color: Color = Color(0, 0, 0, 0)"
+        ],
+        "return": "Button",
+        "is_static": true
+      },
+      "player_link": {
+        "line": 455,
+        "args": [
+          "player_val: Variant",
+          "width: int = 0",
+          "color: Color = Color(0, 0, 0, 0)"
+        ],
+        "return": "Button",
+        "is_static": true
+      },
+      "referee_link": {
+        "line": 468,
+        "args": [
+          "ref_val: Variant",
+          "width: int = 0",
+          "color: Color = Color(0, 0, 0, 0)"
+        ],
+        "return": "Button",
+        "is_static": true
+      },
+      "staff_link": {
+        "line": 483,
+        "args": [
+          "staff_val: Variant",
+          "width: int = 0",
+          "color: Color = Color(0, 0, 0, 0)"
+        ],
+        "return": "Button",
         "is_static": true
       }
     }
@@ -14622,7 +14755,7 @@
         "is_static": false
       },
       "_cup_progress": {
-        "line": 146,
+        "line": 130,
         "args": [
           "comp: CompetitionData",
           "career: CareerSaveData",
@@ -15131,18 +15264,18 @@
     "enums": {},
     "properties": {
       "TeamProfileViewScript": {
-        "line": 287,
+        "line": 308,
         "type": "Resource",
         "is_const": true
       },
       "_profile_view": {
-        "line": 288,
+        "line": 309,
         "type": "Node",
         "is_export": false,
         "is_onready": false
       },
       "history_label": {
-        "line": 290,
+        "line": 311,
         "type": "RichTextLabel",
         "is_export": false,
         "is_onready": false
@@ -15174,7 +15307,7 @@
         "is_static": false
       },
       "_form_card": {
-        "line": 91,
+        "line": 101,
         "args": [
           "career: CareerSaveData",
           "p: CareerThemePalette"
@@ -15183,7 +15316,7 @@
         "is_static": false
       },
       "_league_card": {
-        "line": 126,
+        "line": 137,
         "args": [
           "career: CareerSaveData",
           "p: CareerThemePalette"
@@ -15192,7 +15325,7 @@
         "is_static": false
       },
       "_squad_health_card": {
-        "line": 164,
+        "line": 175,
         "args": [
           "career: CareerSaveData",
           "team: TeamData",
@@ -15202,7 +15335,7 @@
         "is_static": false
       },
       "_media_card": {
-        "line": 213,
+        "line": 234,
         "args": [
           "career: CareerSaveData",
           "p: CareerThemePalette"
@@ -15211,7 +15344,7 @@
         "is_static": false
       },
       "_signed": {
-        "line": 239,
+        "line": 260,
         "args": [
           "v: int"
         ],
@@ -15219,7 +15352,7 @@
         "is_static": false
       },
       "_ordinal": {
-        "line": 243,
+        "line": 264,
         "args": [
           "n: int"
         ],
@@ -15227,7 +15360,7 @@
         "is_static": false
       },
       "_history_card": {
-        "line": 258,
+        "line": 279,
         "args": [
           "team: TeamData",
           "p: CareerThemePalette"
@@ -15236,7 +15369,7 @@
         "is_static": false
       },
       "populate_team": {
-        "line": 294,
+        "line": 315,
         "args": [
           "team: TeamData"
         ],
@@ -15776,7 +15909,7 @@
         "is_onready": false
       },
       "_cached_free_agents": {
-        "line": 436,
+        "line": 442,
         "type": "Array[PlayerData]",
         "is_export": false,
         "is_onready": false
@@ -15799,7 +15932,7 @@
         "is_static": false
       },
       "_build_shortlist": {
-        "line": 270,
+        "line": 276,
         "args": [
           "host: VBoxContainer",
           "career: CareerSaveData",
@@ -15809,7 +15942,7 @@
         "is_static": false
       },
       "_build_negotiations": {
-        "line": 311,
+        "line": 317,
         "args": [
           "host: VBoxContainer",
           "career: CareerSaveData",
@@ -15819,7 +15952,7 @@
         "is_static": false
       },
       "_get_free_agents_pool": {
-        "line": 438,
+        "line": 444,
         "args": [],
         "return": "Array[PlayerData]",
         "is_static": false

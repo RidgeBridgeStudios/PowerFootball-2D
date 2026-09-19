@@ -49,7 +49,7 @@ func _network_card(career: CareerSaveData, team: TeamData, p: CareerThemePalette
 		var scout: StaffData = scouts[i]
 		var load: int = ScoutingNetwork.caseload(career, scout.staff_name)
 		var line: HBoxContainer = CareerTheme.data_row(i)
-		line.add_child(CareerTheme.cell(scout.staff_name, 160, p.text_primary))
+		line.add_child(CareerTheme.staff_link(scout, 160))
 		line.add_child(CareerTheme.cell(scout.role, 120, p.text_secondary))
 		line.add_child(CareerTheme.cell("Judging", 60, p.text_muted, HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small))
 		line.add_child(CareerTheme.bar(scout.judging_ability, 90))
@@ -109,8 +109,8 @@ func _reports_card(career: CareerSaveData, p: CareerThemePalette) -> VBoxContain
 	for i: int in range(sorted.size()):
 		var report: ScoutReport = sorted[i]
 		var line: HBoxContainer = CareerTheme.data_row(i)
-		line.add_child(CareerTheme.cell(report.target_name, 150, p.text_primary))
-		line.add_child(CareerTheme.cell(report.target_club, 130, p.text_secondary))
+		line.add_child(CareerTheme.player_link(report.target_name, 150))
+		line.add_child(CareerTheme.team_link(report.target_club, 130))
 		line.add_child(CareerTheme.cell(report.target_position, 44, p.text_secondary))
 		line.add_child(CareerTheme.cell(report.display_value(), 66, p.text_primary))
 		line.add_child(CareerTheme.cell(report.display_potential(), 66, p.text_secondary))
@@ -120,12 +120,13 @@ func _reports_card(career: CareerSaveData, p: CareerThemePalette) -> VBoxContain
 			p.positive if report.is_bid_ready() else p.text_muted,
 			HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small
 		))
-		line.add_child(CareerTheme.cell(
-			report.assigned_scout_name if report.assigned_scout_name != "" else "Unassigned",
-			130,
-			p.text_secondary if report.assigned_scout_name != "" else p.warning,
-			HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small
-		))
+		if report.assigned_scout_name != "":
+			line.add_child(CareerTheme.staff_link(report.assigned_scout_name, 130))
+		else:
+			line.add_child(CareerTheme.cell(
+				"Unassigned", 130, p.warning,
+				HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small
+			))
 		body.add_child(CareerTheme.data_row_root(line))
 
 		if report.verdict != "":

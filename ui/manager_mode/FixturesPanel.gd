@@ -84,8 +84,8 @@ func build(host: VBoxContainer, career: CareerSaveData) -> void:
 		line.add_child(CareerTheme.cell(
 			"H" if f.is_home_for(career.user_team_index) else "A", 34, p.text_secondary
 		))
-		line.add_child(CareerTheme.cell(
-			opponent.team_name if opponent != null else "?", 168,
+		line.add_child(CareerTheme.team_link(
+			opponent if opponent != null else "?", 168,
 			p.accent if is_next else tint
 		))
 

@@ -78,9 +78,9 @@
     "semantic_hash": ""
   },
   "docs/SYMBOLS.json": {
-    "mtime": 1789849706.243323,
-    "seen": 1789849717.1567895,
-    "ast_hash": "076c49ed98f3bc9723f14c7441546d07",
+    "mtime": 1789850623.0743277,
+    "seen": 1789850633.454815,
+    "ast_hash": "5c6eec7347ee468ee8bc5207d1f00f70",
     "semantic_hash": ""
   },
   "tools/audit_process_modes.py": {
@@ -624,9 +624,9 @@
     "semantic_hash": ""
   },
   "docs/API_SURFACE.md": {
-    "mtime": 1789849706.0942018,
-    "seen": 1789849717.1569717,
-    "ast_hash": "f24fde0a1ef9eded33d30194838a6427",
+    "mtime": 1789850622.896443,
+    "seen": 1789850633.454987,
+    "ast_hash": "a853d2901b1a70efcd3393b5f0df673b",
     "semantic_hash": ""
   },
   "docs/CORE_INVARIANTS.md": {

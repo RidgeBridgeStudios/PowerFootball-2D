@@ -86,23 +86,7 @@ func _league_table(comp: CompetitionData, career: CareerSaveData, p: CareerTheme
 		var name_tint: Color = p.accent if is_user else p.text_primary
 
 		line.add_child(CareerTheme.cell(str(position), 28, position_tint))
-		var team_btn: Button = CareerTheme.button(r.team_name)
-		team_btn.custom_minimum_size = Vector2(168.0, 0.0)
-		team_btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
-		team_btn.clip_text = true
-		team_btn.add_theme_font_size_override("font_size", p.font_size_body)
-		team_btn.add_theme_color_override("font_color", name_tint)
-		var flat: StyleBoxFlat = CareerTheme.style_box(Color(0, 0, 0, 0), 0)
-		team_btn.add_theme_stylebox_override("normal", flat)
-		var t_idx: int = r.team_index
-		var host_panel: LeaguePanel = self
-		team_btn.pressed.connect(func() -> void:
-			if host_panel.get(&"_selected_team_index") == t_idx:
-				host_panel.set(&"_selected_team_index", -1)
-			else:
-				host_panel.set(&"_selected_team_index", t_idx)
-			host_panel.refresh()
-		)
+		var team_btn: Button = CareerTheme.team_link(r.team_index, 168, name_tint)
 		line.add_child(team_btn)
 		line.add_child(CareerTheme.cell(str(r.played), 28, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT))
 		line.add_child(CareerTheme.cell(str(r.won), 28, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT))
@@ -180,7 +164,7 @@ func _cup_progress(comp: CompetitionData, career: CareerSaveData, p: CareerTheme
 				var name_tint: Color = p.accent if is_u else p.text_primary
 
 				g_line.add_child(CareerTheme.cell(str(pos), 28, pos_tint))
-				g_line.add_child(CareerTheme.cell(r.team_name, 168, name_tint))
+				g_line.add_child(CareerTheme.team_link(r.team_index, 168, name_tint))
 				g_line.add_child(CareerTheme.cell(str(r.played), 28, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT))
 				g_line.add_child(CareerTheme.cell(str(r.won), 28, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT))
 				g_line.add_child(CareerTheme.cell(str(r.drawn), 28, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT))
@@ -218,13 +202,13 @@ func _cup_progress(comp: CompetitionData, career: CareerSaveData, p: CareerTheme
 		var away: TeamData = DataLoader.get_team(f.away_team_index)
 		var involves_user: bool = f.involves(career.user_team_index)
 		var line: HBoxContainer = CareerTheme.data_row(0, involves_user)
-		line.add_child(CareerTheme.cell(
-			home.team_name if home != null else "?", 160,
+		line.add_child(CareerTheme.team_link(
+			home if home != null else "?", 160,
 			p.accent if involves_user else p.text_primary
 		))
 		line.add_child(CareerTheme.cell(f.score_line(), 50, p.text_primary, HORIZONTAL_ALIGNMENT_CENTER))
-		line.add_child(CareerTheme.cell(
-			away.team_name if away != null else "?", 160,
+		line.add_child(CareerTheme.team_link(
+			away if away != null else "?", 160,
 			p.accent if involves_user else p.text_primary
 		))
 		body.add_child(CareerTheme.data_row_root(line))

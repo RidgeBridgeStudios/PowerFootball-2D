@@ -142,7 +142,7 @@ func _wages_card(career: CareerSaveData, team: TeamData, p: CareerThemePalette) 
 		var squad_index: int = order[i]
 		var data: PlayerData = team.squad[squad_index]
 		var line: HBoxContainer = CareerTheme.data_row(i)
-		line.add_child(CareerTheme.cell(data.player_name, 150, p.text_primary))
+		line.add_child(CareerTheme.player_link(data, 150))
 		line.add_child(CareerTheme.cell(data.position_role, 40, p.text_muted))
 		line.add_child(CareerTheme.cell(
 			"%s/wk" % CareerTheme.money(data.wage_weekly), 84, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT
@@ -156,7 +156,7 @@ func _wages_card(career: CareerSaveData, team: TeamData, p: CareerThemePalette) 
 		body.add_child(CareerTheme.muted("STAFF"))
 		for s: StaffData in team.staff:
 			var line2: HBoxContainer = CareerTheme.row()
-			line2.add_child(CareerTheme.cell(s.staff_name, 150, p.text_secondary))
+			line2.add_child(CareerTheme.staff_link(s, 150, p.text_secondary))
 			line2.add_child(CareerTheme.cell(s.role, 40, p.text_muted, HORIZONTAL_ALIGNMENT_LEFT, p.font_size_small))
 			line2.add_child(CareerTheme.cell(
 				"%s/wk" % CareerTheme.money(s.salary_weekly), 84, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT

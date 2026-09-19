@@ -143,7 +143,7 @@ func _individual_card(career: CareerSaveData, team: TeamData, p: CareerThemePale
 		var line: HBoxContainer = CareerTheme.data_row(squad_index)
 		var age: int = data.get_age(career.today.year, career.today.month, career.today.day)
 
-		line.add_child(CareerTheme.cell(data.player_name, 160, p.text_primary))
+		line.add_child(CareerTheme.player_link(data, 160))
 		line.add_child(CareerTheme.cell(data.position_role, 40, p.text_secondary))
 		line.add_child(CareerTheme.cell(str(age), 34, p.text_secondary))
 		if state.is_injured():

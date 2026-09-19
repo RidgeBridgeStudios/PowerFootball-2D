@@ -113,6 +113,24 @@ func _build_item(item: InboxItem, index: int, career: CareerSaveData, p: CareerT
 	column.add_child(CareerTheme.divider())
 	column.add_child(CareerTheme.paragraph(item.body))
 
+	if not item.subject_player_name.is_empty() or item.subject_player_key >= 0:
+		var p_link_row: HBoxContainer = CareerTheme.row(6)
+		p_link_row.add_child(CareerTheme.muted("Concerned Player:"))
+		var pname: String = item.subject_player_name
+		if pname.is_empty() and item.subject_player_key >= 0:
+			var pstate: PlayerCareerState = career.state_for(item.subject_player_key)
+			if pstate != null:
+				pname = pstate.display_name
+		p_link_row.add_child(CareerTheme.player_link(pname))
+		column.add_child(p_link_row)
+
+	var rel_club: String = str(item.payload.get("from_club", item.payload.get("buying_club", item.payload.get("opponent_name", ""))))
+	if not rel_club.is_empty():
+		var c_link_row: HBoxContainer = CareerTheme.row(6)
+		c_link_row.add_child(CareerTheme.muted("Concerned Club:"))
+		c_link_row.add_child(CareerTheme.team_link(rel_club))
+		column.add_child(c_link_row)
+
 	if item.requires_decision():
 		column.add_child(CareerTheme.spacer(4))
 		column.add_child(CareerTheme.muted("Your response"))

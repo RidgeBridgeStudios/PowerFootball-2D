@@ -169,7 +169,7 @@ func host_row(
 	)
 	line.add_child(name_button)
 
-	line.add_child(CareerTheme.cell(other.team_name, 140, p.text_secondary))
+	line.add_child(CareerTheme.team_link(other, 140, p.text_secondary))
 	line.add_child(CareerTheme.cell(data.position_role, 44, p.text_secondary))
 	line.add_child(CareerTheme.cell(str(age), 36, p.text_secondary))
 
@@ -227,6 +227,12 @@ func _target_actions(
 	body.add_child(actions)
 
 	var shortlisted: bool = career.shortlist_contains(key)
+	var profile_btn: Button = CareerTheme.button("View Full Profile")
+	profile_btn.pressed.connect(func() -> void:
+		CareerTheme.DatabaseViewerScript.call(&"inspect_player", data)
+	)
+	actions.add_child(profile_btn)
+
 	var shortlist_button: Button = CareerTheme.button(
 		"Remove from shortlist" if shortlisted else "Add to shortlist"
 	)
@@ -285,8 +291,8 @@ func _build_shortlist(host: VBoxContainer, career: CareerSaveData, p: CareerThem
 		var state: PlayerCareerState = career.state_for(key)
 		var report: ScoutReport = career.report_for(key)
 		var line: HBoxContainer = CareerTheme.data_row(i)
-		line.add_child(CareerTheme.cell(data.player_name, 160, p.text_primary))
-		line.add_child(CareerTheme.cell(other.team_name, 140, p.text_secondary))
+		line.add_child(CareerTheme.player_link(data, 160))
+		line.add_child(CareerTheme.team_link(other, 140))
 		line.add_child(CareerTheme.cell(data.position_role, 44, p.text_secondary))
 		line.add_child(CareerTheme.cell(
 			report.display_value() if report != null else "?", 70, p.text_secondary
@@ -321,8 +327,8 @@ func _build_negotiations(host: VBoxContainer, career: CareerSaveData, p: CareerT
 		line.add_theme_constant_override("separation", 3)
 
 		var top: HBoxContainer = CareerTheme.row()
-		top.add_child(CareerTheme.cell(offer.player_name, 160, p.text_primary))
-		top.add_child(CareerTheme.cell(offer.selling_club, 140, p.text_secondary))
+		top.add_child(CareerTheme.player_link(offer.player_name, 160))
+		top.add_child(CareerTheme.team_link(offer.selling_club, 140))
 		var state_tint: Color = p.text_secondary
 		if offer.state == TransferOffer.State.COMPLETED:
 			state_tint = p.positive
@@ -412,7 +418,7 @@ func _build_free_agents(
 		var ovr: int = fa.calculate_overall_rating()
 		var wage_est: int = TransferMarket.wage_demand(fa, null, team, career.today)
 
-		line.add_child(CareerTheme.cell(fa.player_name, 160, p.text_primary))
+		line.add_child(CareerTheme.player_link(fa, 160))
 		line.add_child(CareerTheme.cell(fa.position_role, 50, p.text_secondary))
 		line.add_child(CareerTheme.cell(str(age), 40, p.text_secondary))
 		line.add_child(CareerTheme.cell(str(ovr), 44, p.accent))

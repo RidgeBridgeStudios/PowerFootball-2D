@@ -120,7 +120,7 @@ func _staff_card(team: TeamData, p: CareerThemePalette) -> VBoxContainer:
 	for i: int in range(team.staff.size()):
 		var s: StaffData = team.staff[i]
 		var line: HBoxContainer = CareerTheme.data_row(i)
-		line.add_child(CareerTheme.cell(s.staff_name, 160, p.text_primary))
+		line.add_child(CareerTheme.staff_link(s, 160))
 		line.add_child(CareerTheme.cell(s.role, 140, p.text_secondary))
 		line.add_child(CareerTheme.cell(str(s.get_age()), 40, p.text_secondary))
 		line.add_child(CareerTheme.bar(s.coaching, 66))
@@ -166,7 +166,7 @@ func _recruitment_card(team: TeamData, p: CareerThemePalette) -> VBoxContainer:
 	for i: int in range(available.size()):
 		var s: StaffData = available[i]
 		var line: HBoxContainer = CareerTheme.data_row(i)
-		line.add_child(CareerTheme.cell(s.staff_name, 160, p.text_primary))
+		line.add_child(CareerTheme.staff_link(s, 160))
 		line.add_child(CareerTheme.cell(s.role, 130, p.text_secondary))
 		line.add_child(CareerTheme.cell(str(s.get_age()), 40, p.text_secondary))
 		line.add_child(CareerTheme.bar(s.coaching, 66))

@@ -158,12 +158,12 @@ func _day_cell(date: CareerDate, career: CareerSaveData, p: CareerThemePalette) 
 	if user_fixture != null:
 		var opponent: TeamData = DataLoader.get_team(user_fixture.opponent_of(career.user_team_index))
 		var prefix: String = "v " if user_fixture.is_home_for(career.user_team_index) else "@ "
-		var name_label: Label = CareerTheme.label(
-			prefix + (opponent.team_name if opponent != null else "?"),
-			p.text_primary, p.font_size_small
+		var opp_btn: Button = CareerTheme.team_link(
+			opponent if opponent != null else "?", 0, p.text_primary
 		)
-		name_label.clip_text = true
-		column.add_child(name_label)
+		opp_btn.text = prefix + (opponent.team_name if opponent != null else "?")
+		opp_btn.add_theme_font_size_override("font_size", p.font_size_small)
+		column.add_child(opp_btn)
 		if user_fixture.played:
 			var result: String = user_fixture.result_char_for(career.user_team_index)
 			column.add_child(CareerTheme.label(

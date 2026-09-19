@@ -49,13 +49,14 @@ func _next_fixture_card(career: CareerSaveData, team: TeamData) -> VBoxContainer
 
 	var opponent: TeamData = DataLoader.get_team(fixture.opponent_of(career.user_team_index))
 	var is_home: bool = fixture.is_home_for(career.user_team_index)
-	body.add_child(CareerTheme.label(
-		"%s  %s  %s" % [
-			team.team_name if is_home else (opponent.team_name if opponent != null else "?"),
-			"vs",
-			(opponent.team_name if opponent != null else "?") if is_home else team.team_name
-		], p.text_primary, p.font_size_heading
-	))
+	var home_club: Variant = team if is_home else opponent
+	var away_club: Variant = opponent if is_home else team
+	var fix_hdr: HBoxContainer = CareerTheme.row(8)
+	body.add_child(fix_hdr)
+	fix_hdr.add_child(CareerTheme.team_link(home_club, 0, p.text_primary))
+	fix_hdr.add_child(CareerTheme.label("vs", p.text_muted))
+	fix_hdr.add_child(CareerTheme.team_link(away_club, 0, p.text_primary))
+
 	body.add_child(CareerTheme.secondary("%s · %s · %s" % [
 		fixture.competition_name(), fixture.round_display(),
 		"Home" if is_home else "Away"
@@ -80,11 +81,20 @@ func _next_fixture_card(career: CareerSaveData, team: TeamData) -> VBoxContainer
 		var dossier: Dictionary = ScoutingNetwork.opposition_report(
 			opponent, opp_mgr, opp_row, analyst
 		)
+		if opp_mgr != null:
+			var mgr_line: HBoxContainer = CareerTheme.row(6)
+			mgr_line.add_child(CareerTheme.secondary("Manager:"))
+			mgr_line.add_child(CareerTheme.staff_link(opp_mgr))
+			body.add_child(mgr_line)
 		body.add_child(CareerTheme.secondary("Shape: %s" % String(dossier.get("formation", "?"))))
 		body.add_child(CareerTheme.paragraph(String(dossier.get("style", ""))))
 		var keys: Array = dossier.get("key_players", [])
 		if not keys.is_empty():
-			body.add_child(CareerTheme.muted("Danger: " + ", ".join(PackedStringArray(keys))))
+			var danger_line: HBoxContainer = CareerTheme.row(6)
+			danger_line.add_child(CareerTheme.muted("Danger:"))
+			for k_name: Variant in keys:
+				danger_line.add_child(CareerTheme.player_link(str(k_name)))
+			body.add_child(danger_line)
 	return body
 
 
@@ -110,10 +120,11 @@ func _form_card(career: CareerSaveData, p: CareerThemePalette) -> VBoxContainer:
 		var result: String = f.result_char_for(career.user_team_index)
 		var line: HBoxContainer = CareerTheme.data_row(recent.size() - 1 - i)
 		line.add_child(CareerTheme.cell(result, 18, CareerTheme.result_color(result)))
-		line.add_child(CareerTheme.cell(
-			"%s %s" % ["v" if f.is_home_for(career.user_team_index) else "@",
-				opponent.team_name if opponent != null else "?"], 150
-		))
+		var opp_box := HBoxContainer.new()
+		opp_box.custom_minimum_size = Vector2(150.0, 0.0)
+		opp_box.add_child(CareerTheme.cell("v" if f.is_home_for(career.user_team_index) else "@", 16, p.text_muted))
+		opp_box.add_child(CareerTheme.team_link(opponent if opponent != null else "?", 130))
+		line.add_child(opp_box)
 		line.add_child(CareerTheme.cell(
 			"%d-%d" % [f.goals_for(career.user_team_index), f.goals_against(career.user_team_index)],
 			46, p.text_primary, HORIZONTAL_ALIGNMENT_RIGHT
@@ -153,7 +164,7 @@ func _league_card(career: CareerSaveData, p: CareerThemePalette) -> VBoxContaine
 		var line: HBoxContainer = CareerTheme.data_row(i, is_user)
 		var tint: Color = p.accent if is_user else p.text_primary
 		line.add_child(CareerTheme.cell(str(i + 1), 24, tint))
-		line.add_child(CareerTheme.cell(r.team_name, 140, tint))
+		line.add_child(CareerTheme.team_link(r.team_index, 140, tint))
 		line.add_child(CareerTheme.cell(str(r.played), 26, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT))
 		line.add_child(CareerTheme.cell(_signed(r.goal_difference()), 34, p.text_secondary, HORIZONTAL_ALIGNMENT_RIGHT))
 		line.add_child(CareerTheme.cell(str(r.points), 30, tint, HORIZONTAL_ALIGNMENT_RIGHT))
@@ -184,29 +195,39 @@ func _squad_health_card(career: CareerSaveData, team: TeamData, p: CareerThemePa
 	body.add_child(CareerTheme.divider())
 
 	# Unavailable players — the thing a manager actually checks first.
-	var unavailable: Array[String] = []
-	var unhappy: Array[String] = []
+	var unavailable_players: Array[Array] = []
+	var unhappy_players: Array[Array] = []
 	for squad_index: int in range(team.squad.size()):
 		var state: PlayerCareerState = career.state_for_squad(career.user_team_index, squad_index)
 		if state == null:
 			continue
 		var data: PlayerData = team.squad[squad_index]
 		if not state.is_available():
-			unavailable.append("%s — %s" % [data.player_name, state.availability_label()])
+			unavailable_players.append([data, state.availability_label()])
 		elif data.morale < 0.35:
-			unhappy.append("%s — %s" % [data.player_name, MoraleEngine.morale_label(data.morale)])
+			unhappy_players.append([data, MoraleEngine.morale_label(data.morale)])
 
-	body.add_child(CareerTheme.muted("Unavailable (%d)" % unavailable.size()))
-	if unavailable.is_empty():
+	body.add_child(CareerTheme.muted("Unavailable (%d)" % unavailable_players.size()))
+	if unavailable_players.is_empty():
 		body.add_child(CareerTheme.secondary("Full squad available."))
 	else:
-		for line: String in unavailable:
-			body.add_child(CareerTheme.label(line, p.danger, p.font_size_small))
+		for item: Array in unavailable_players:
+			var pl_data: PlayerData = item[0] as PlayerData
+			var status_str: String = String(item[1])
+			var row_box: HBoxContainer = CareerTheme.row(4)
+			row_box.add_child(CareerTheme.player_link(pl_data, 0, p.danger))
+			row_box.add_child(CareerTheme.label("— " + status_str, p.danger, p.font_size_small))
+			body.add_child(row_box)
 
-	if not unhappy.is_empty():
-		body.add_child(CareerTheme.muted("Unhappy (%d)" % unhappy.size()))
-		for line2: String in unhappy:
-			body.add_child(CareerTheme.label(line2, p.warning, p.font_size_small))
+	if not unhappy_players.is_empty():
+		body.add_child(CareerTheme.muted("Unhappy (%d)" % unhappy_players.size()))
+		for item2: Array in unhappy_players:
+			var pl_data2: PlayerData = item2[0] as PlayerData
+			var status_str2: String = String(item2[1])
+			var row_box2: HBoxContainer = CareerTheme.row(4)
+			row_box2.add_child(CareerTheme.player_link(pl_data2, 0, p.warning))
+			row_box2.add_child(CareerTheme.label("— " + status_str2, p.warning, p.font_size_small))
+			body.add_child(row_box2)
 	return body
 
 

@@ -70,8 +70,8 @@ var _cached_ratings: Dictionary[int, float] = {}
 
 # Top banner nodes
 var _banner_score_label: Label = null
-var _banner_home_name: Label = null
-var _banner_away_name: Label = null
+var _banner_home_name: Button = null
+var _banner_away_name: Button = null
 var _banner_headline: Label = null
 
 # Tab buttons
@@ -182,11 +182,12 @@ func _build_match_banner() -> PanelContainer:
 	hbox.add_theme_constant_override("separation", 24)
 	panel.add_child(hbox)
 
-	_banner_home_name = Label.new()
-	_banner_home_name.custom_minimum_size = Vector2(240.0, 0.0)
-	_banner_home_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT
+	_banner_home_name = CareerTheme.team_link(_team_a_name, 240, ACCENT_COLOR)
+	_banner_home_name.alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	_banner_home_name.add_theme_font_size_override("font_size", 22)
-	_banner_home_name.add_theme_color_override("font_color", ACCENT_COLOR)
+	_banner_home_name.pressed.connect(func() -> void:
+		CareerTheme.DatabaseViewerScript.call(&"inspect_team", _team_a_name)
+	)
 	hbox.add_child(_banner_home_name)
 
 	var score_box := VBoxContainer.new()
@@ -214,11 +215,12 @@ func _build_match_banner() -> PanelContainer:
 
 	hbox.add_child(score_box)
 
-	_banner_away_name = Label.new()
-	_banner_away_name.custom_minimum_size = Vector2(240.0, 0.0)
-	_banner_away_name.horizontal_alignment = HORIZONTAL_ALIGNMENT_LEFT
+	_banner_away_name = CareerTheme.team_link(_team_b_name, 240, Color(0.9, 0.9, 0.9))
+	_banner_away_name.alignment = HORIZONTAL_ALIGNMENT_LEFT
 	_banner_away_name.add_theme_font_size_override("font_size", 22)
-	_banner_away_name.add_theme_color_override("font_color", Color(0.9, 0.9, 0.9))
+	_banner_away_name.pressed.connect(func() -> void:
+		CareerTheme.DatabaseViewerScript.call(&"inspect_team", _team_b_name)
+	)
 	hbox.add_child(_banner_away_name)
 
 	return panel
@@ -485,15 +487,14 @@ func _populate_summary_tab() -> void:
 	_motm_card_box.add_child(title_lbl)
 
 	if motm_p != null:
-		var name_lbl := Label.new()
-		name_lbl.text = "%s (#%d, %s)" % [motm_p.player_name, motm_p.shirt_number, motm_p.position_role]
-		name_lbl.add_theme_font_size_override("font_size", 20)
-		_motm_card_box.add_child(name_lbl)
+		var name_btn: Button = CareerTheme.player_link(motm_p)
+		name_btn.text = "%s (#%d, %s)" % [motm_p.player_name, motm_p.shirt_number, motm_p.position_role]
+		name_btn.add_theme_font_size_override("font_size", 20)
+		_motm_card_box.add_child(name_btn)
 
-		var team_lbl := Label.new()
-		team_lbl.text = motm_team_name
-		team_lbl.add_theme_color_override("font_color", Color(0.7, 0.85, 0.7))
-		_motm_card_box.add_child(team_lbl)
+		var team_btn: Button = CareerTheme.team_link(motm_team_name)
+		team_btn.add_theme_color_override("font_color", Color(0.7, 0.85, 0.7))
+		_motm_card_box.add_child(team_btn)
 
 		var rtg_lbl := Label.new()
 		rtg_lbl.text = "Match Rating: %.1f / 10.0" % best_rating
@@ -774,14 +775,13 @@ func _build_player_row(p: PlayerData, rating: float, ev: PlayerRatingCalculator.
 	num_lbl.add_theme_font_size_override("font_size", 13)
 	row.add_child(num_lbl)
 
-	var name_lbl := Label.new()
 	var g_str: String = " ⚽%d" % ev.goals if ev.goals > 0 else ""
 	var a_str: String = " 🎯%d" % ev.assists if ev.assists > 0 else ""
 	var card_str: String = " 🟨" if ev.yellow_cards > 0 else (" 🟥" if ev.red_cards > 0 else "")
-	name_lbl.text = "%s%s%s%s" % [_surname(p.player_name), g_str, a_str, card_str]
-	name_lbl.custom_minimum_size = Vector2(80.0, 0.0)
-	name_lbl.add_theme_font_size_override("font_size", 13)
-	row.add_child(name_lbl)
+	var name_btn: Button = CareerTheme.player_link(p, 80)
+	name_btn.text = "%s%s%s%s" % [_surname(p.player_name), g_str, a_str, card_str]
+	name_btn.add_theme_font_size_override("font_size", 13)
+	row.add_child(name_btn)
 
 	var pos_lbl := Label.new()
 	pos_lbl.text = p.position_role

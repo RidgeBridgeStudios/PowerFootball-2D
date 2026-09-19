@@ -185,6 +185,23 @@ func _populate_pre_sim_ui() -> void:
 
 	_match_title_label.text = "%s  vs  %s" % [_home_team.team_name, _away_team.team_name]
 
+	var header_box: VBoxContainer = _match_title_label.get_parent() as VBoxContainer
+	if header_box != null:
+		var old_links: Node = header_box.get_node_or_null("EntityLinksRow")
+		if old_links != null:
+			old_links.queue_free()
+		var links_row := HBoxContainer.new()
+		links_row.name = "EntityLinksRow"
+		links_row.alignment = BoxContainer.ALIGNMENT_CENTER
+		links_row.add_theme_constant_override("separation", 16)
+		links_row.add_child(CareerTheme.team_link(_home_team))
+		links_row.add_child(CareerTheme.label("vs", Color(0.7, 0.7, 0.7)))
+		links_row.add_child(CareerTheme.team_link(_away_team))
+		if _referee != null:
+			links_row.add_child(CareerTheme.label("·  Official:", Color(0.6, 0.6, 0.6)))
+			links_row.add_child(CareerTheme.referee_link(_referee))
+		header_box.add_child(links_row)
+
 	# Press conference prompt
 	var opp_name: String = _away_team.team_name
 	if CareerManager.career != null and _away_team.team_name == CareerManager.user_team().team_name:
@@ -461,9 +478,19 @@ func _populate_post_sim_ui() -> void:
 	else:
 		for ev: QuickSimEngine.MatchEventRecord in _sim_result.events:
 			if ev.event_type in ["goal", "yellow_card", "red_card"]:
-				var item := Label.new()
+				var item := HBoxContainer.new()
+				item.add_theme_constant_override("separation", 6)
 				var icon: String = "⚽" if ev.event_type == "goal" else ("🟨" if ev.event_type == "yellow_card" else "🟥")
-				item.text = "%s %d'  %s" % [icon, ev.minute, ev.description]
+				var min_lbl := Label.new()
+				min_lbl.text = "%s %d'" % [icon, ev.minute]
+				item.add_child(min_lbl)
+				var desc_lbl := Label.new()
+				if not ev.player_name.is_empty():
+					item.add_child(CareerTheme.player_link(ev.player_name))
+					desc_lbl.text = "· " + ev.description
+				else:
+					desc_lbl.text = ev.description
+				item.add_child(desc_lbl)
 				_events_list.add_child(item)
 
 

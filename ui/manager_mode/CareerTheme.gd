@@ -396,3 +396,101 @@ static func scroll_root(list_body: VBoxContainer) -> Control:
 static func clear(node: Node) -> void:
 	for child: Node in node.get_children():
 		child.queue_free()
+
+
+## --- Entity Links (FM-Style Universal Forwarding) ----------------------------
+
+const DatabaseViewerScript: Resource = preload("res://ui/DatabaseViewer.gd")
+
+
+## Interactive link button styled as a clean clickable label with hover/press glow.
+static func link_button(
+	text: String,
+	width: int = 0,
+	color: Color = Color(0, 0, 0, 0),
+	align: int = HORIZONTAL_ALIGNMENT_LEFT
+) -> Button:
+	var p: CareerThemePalette = palette()
+	var b := Button.new()
+	b.text = text
+	b.alignment = align
+	b.clip_text = true
+	b.flat = true
+	var font_color: Color = color if color.a > 0.0 else p.accent
+	b.add_theme_color_override("font_color", font_color)
+	b.add_theme_color_override("font_hover_color", p.positive)
+	b.add_theme_color_override("font_pressed_color", p.accent_dim)
+	b.add_theme_color_override("font_focus_color", p.positive)
+	b.add_theme_font_size_override("font_size", p.font_size_body)
+	var flat_box: StyleBoxFlat = style_box(Color(0, 0, 0, 0), 0)
+	flat_box.content_margin_left = 0.0
+	flat_box.content_margin_right = 0.0
+	flat_box.content_margin_top = 0.0
+	flat_box.content_margin_bottom = 0.0
+	b.add_theme_stylebox_override("normal", flat_box)
+	b.add_theme_stylebox_override("hover", flat_box)
+	b.add_theme_stylebox_override("pressed", flat_box)
+	b.add_theme_stylebox_override("focus", flat_box)
+	if width > 0:
+		b.custom_minimum_size = Vector2(float(width), 0.0)
+	return b
+
+
+static func team_link(team_val: Variant, width: int = 0, color: Color = Color(0, 0, 0, 0)) -> Button:
+	var label_text: String = ""
+	if team_val is TeamData:
+		label_text = (team_val as TeamData).team_name
+	elif team_val is String or team_val is StringName:
+		label_text = str(team_val)
+	elif team_val is int:
+		var t: TeamData = DataLoader.get_team(int(team_val))
+		label_text = t.team_name if t != null else "Club"
+	var btn: Button = link_button(label_text, width, color)
+	btn.pressed.connect(func() -> void:
+		DatabaseViewerScript.call(&"inspect_team", team_val)
+	)
+	return btn
+
+
+static func player_link(player_val: Variant, width: int = 0, color: Color = Color(0, 0, 0, 0)) -> Button:
+	var label_text: String = ""
+	if player_val is PlayerData:
+		label_text = (player_val as PlayerData).player_name
+	elif player_val is String or player_val is StringName:
+		label_text = str(player_val)
+	var btn: Button = link_button(label_text, width, color)
+	btn.pressed.connect(func() -> void:
+		DatabaseViewerScript.call(&"inspect_player", player_val)
+	)
+	return btn
+
+
+static func referee_link(ref_val: Variant, width: int = 0, color: Color = Color(0, 0, 0, 0)) -> Button:
+	var label_text: String = ""
+	if ref_val is RefereeData:
+		label_text = (ref_val as RefereeData).referee_name
+	elif ref_val is Dictionary:
+		label_text = str((ref_val as Dictionary).get("name", "Match Official"))
+	elif ref_val is String or ref_val is StringName:
+		label_text = str(ref_val)
+	var btn: Button = link_button(label_text, width, color)
+	btn.pressed.connect(func() -> void:
+		DatabaseViewerScript.call(&"inspect_referee", ref_val)
+	)
+	return btn
+
+
+static func staff_link(staff_val: Variant, width: int = 0, color: Color = Color(0, 0, 0, 0)) -> Button:
+	var label_text: String = ""
+	if staff_val is StaffData:
+		label_text = (staff_val as StaffData).staff_name
+	elif staff_val is ManagerData:
+		label_text = (staff_val as ManagerData).manager_name
+	elif staff_val is String or staff_val is StringName:
+		label_text = str(staff_val)
+	var btn: Button = link_button(label_text, width, color)
+	btn.pressed.connect(func() -> void:
+		DatabaseViewerScript.call(&"inspect_staff", staff_val)
+	)
+	return btn
+

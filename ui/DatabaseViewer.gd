@@ -56,8 +56,59 @@ var _filtered_players: Array[PlayerData] = []
 
 var _built: bool = false
 
+static var _active_instance: Control = null
+
+
+static func get_or_create(parent: Node = null) -> Control:
+	if _active_instance != null and is_instance_valid(_active_instance):
+		return _active_instance
+	var tree: SceneTree = Engine.get_main_loop() as SceneTree
+	if tree == null or tree.root == null:
+		return null
+	var scene: PackedScene = preload("res://ui/DatabaseViewer.tscn")
+	var viewer: Control = scene.instantiate() as Control
+	viewer.top_level = true
+	viewer.z_index = 200
+	if parent != null and is_instance_valid(parent):
+		parent.add_child(viewer)
+	else:
+		tree.root.add_child(viewer)
+	_active_instance = viewer
+	return viewer
+
+
+static func inspect_team(team_val: Variant) -> void:
+	var v: Control = get_or_create()
+	if v != null and v.has_method(&"open_team"):
+		v.call(&"open_team", team_val)
+
+
+static func inspect_player(player_val: Variant) -> void:
+	var v: Control = get_or_create()
+	if v != null and v.has_method(&"open_player"):
+		v.call(&"open_player", player_val)
+
+
+static func inspect_referee(ref_val: Variant) -> void:
+	var v: Control = get_or_create()
+	if v != null and v.has_method(&"open_referee"):
+		v.call(&"open_referee", ref_val)
+
+
+static func inspect_staff(staff_val: Variant) -> void:
+	var v: Control = get_or_create()
+	if v != null and v.has_method(&"open_staff"):
+		v.call(&"open_staff", staff_val)
+
+
+static func inspect_competition(comp_val: Variant) -> void:
+	var v: Control = get_or_create()
+	if v != null and v.has_method(&"open_competition"):
+		v.call(&"open_competition", comp_val)
+
 
 func _ready() -> void:
+	_active_instance = self
 	set_anchors_preset(Control.PRESET_FULL_RECT)
 	_build_ui()
 	_load_competitions()
@@ -70,6 +121,148 @@ func open() -> void:
 	if not _built:
 		_build_ui()
 	_refresh_active_tab()
+
+
+## Opens the viewer focused directly on a club.
+func open_team(team_val: Variant) -> void:
+	var target_team: TeamData = null
+	if team_val is TeamData:
+		target_team = team_val as TeamData
+	elif team_val is int:
+		target_team = DataLoader.get_team(int(team_val))
+	elif team_val is String or team_val is StringName:
+		target_team = DataLoader.get_team_by_name(str(team_val))
+	if target_team == null:
+		open()
+		return
+	open()
+	_jump_to_team(target_team)
+
+
+## Opens the viewer focused directly on a player.
+func open_player(player_val: Variant) -> void:
+	var target_player: PlayerData = null
+	if player_val is PlayerData:
+		target_player = player_val as PlayerData
+	elif player_val is String or player_val is StringName:
+		var pname: String = str(player_val).to_lower().strip_edges()
+		if DataLoader.league != null:
+			for t: TeamData in DataLoader.league.teams:
+				for p: PlayerData in t.squad:
+					if p.player_name.to_lower() == pname:
+						target_player = p
+						break
+				if target_player != null:
+					break
+	if target_player == null:
+		open()
+		_select_tab(ActiveTab.PLAYERS)
+		return
+	open()
+	_select_tab(ActiveTab.PLAYERS)
+	_render_player_detail(target_player)
+
+
+## Opens the viewer focused directly on a referee.
+func open_referee(ref_val: Variant) -> void:
+	var ref_dict: Dictionary = {}
+	if ref_val is Dictionary:
+		ref_dict = ref_val as Dictionary
+	elif ref_val is RefereeData:
+		var r: RefereeData = ref_val as RefereeData
+		ref_dict = {
+			"name": r.referee_name,
+			"nationality": r.nationality,
+			"experience": r.experience,
+			"strictness": r.strictness,
+			"consistency": r.consistency,
+			"composure": r.composure,
+			"unprofessionalism": r.unprofessionalism,
+			"incoherence": r.incoherence,
+			"reputation": r.reputation,
+			"respect_rating": r.respect_rating,
+			"matches_officiated": r.matches_officiated,
+			"fouls_awarded": r.fouls_awarded,
+			"penalties_awarded": r.penalties_awarded,
+			"red_cards_issued": r.red_cards_issued,
+		}
+	elif ref_val is String or ref_val is StringName:
+		var rname: String = str(ref_val).to_lower().strip_edges()
+		for ref: RefereeData in RefereeLoader.referee_pool:
+			if ref.referee_name.to_lower() == rname:
+				ref_dict = {
+					"name": ref.referee_name,
+					"nationality": ref.nationality,
+					"experience": ref.experience,
+					"strictness": ref.strictness,
+					"consistency": ref.consistency,
+					"composure": ref.composure,
+					"unprofessionalism": ref.unprofessionalism,
+					"incoherence": ref.incoherence,
+					"reputation": ref.reputation,
+					"respect_rating": ref.respect_rating,
+					"matches_officiated": ref.matches_officiated,
+					"fouls_awarded": ref.fouls_awarded,
+					"penalties_awarded": ref.penalties_awarded,
+					"red_cards_issued": ref.red_cards_issued,
+				}
+				break
+	if ref_dict.is_empty():
+		open()
+		_select_tab(ActiveTab.REFEREES)
+		return
+	open()
+	_select_tab(ActiveTab.REFEREES)
+	_render_referee_detail(ref_dict)
+
+
+## Opens the viewer focused on a staff member or manager.
+func open_staff(staff_val: Variant) -> void:
+	var team_found: TeamData = null
+	if staff_val is ManagerData:
+		var mgr: ManagerData = staff_val as ManagerData
+		if DataLoader.league != null:
+			for t: TeamData in DataLoader.league.teams:
+				var m: ManagerData = ManagerLoader.get_manager_for_team(t.team_name)
+				if m != null and m.manager_name == mgr.manager_name:
+					team_found = t
+					break
+	elif staff_val is StaffData:
+		var s: StaffData = staff_val as StaffData
+		if DataLoader.league != null:
+			for t: TeamData in DataLoader.league.teams:
+				if t.staff.has(s):
+					team_found = t
+					break
+	elif staff_val is String or staff_val is StringName:
+		var sname: String = str(staff_val).to_lower().strip_edges()
+		if DataLoader.league != null:
+			for t: TeamData in DataLoader.league.teams:
+				var tm: ManagerData = ManagerLoader.get_manager_for_team(t.team_name)
+				if tm != null and tm.manager_name.to_lower() == sname:
+					team_found = t
+					break
+				for st: StaffData in t.staff:
+					if st.staff_name.to_lower() == sname:
+						team_found = t
+						break
+				if team_found != null:
+					break
+	if team_found != null:
+		open_team(team_found)
+		_active_club_subtab = ClubSubTab.STAFF
+		_render_club_detail(team_found)
+		return
+	open()
+	_select_tab(ActiveTab.CLUBS)
+
+
+## Opens the viewer focused on a competition.
+func open_competition(comp_val: Variant) -> void:
+	open()
+	_select_tab(ActiveTab.COMPETITIONS)
+	if comp_val is Dictionary:
+		_render_competition_detail(comp_val as Dictionary)
 
 
 ## Closes the viewer and emits viewer_closed.
@@ -163,7 +356,7 @@ func _build_ui() -> void:
 
 	# Back button
 	var back_btn := Button.new()
-	back_btn.text = "← Main Menu"
+	back_btn.text = "← Back"
 	back_btn.custom_minimum_size = Vector2(110.0, 32.0)
 	back_btn.pressed.connect(func() -> void:
 		host.close()
@@ -1216,6 +1409,28 @@ func _render_player_detail(p: PlayerData) -> void:
 	sub_lbl.add_theme_font_size_override("font_size", 12)
 	sub_lbl.add_theme_color_override("font_color", Color(0.7, 0.75, 0.7))
 	name_box.add_child(sub_lbl)
+
+	# Clickable club link if player belongs to a club
+	var player_team: TeamData = null
+	if DataLoader.league != null:
+		for t: TeamData in DataLoader.league.teams:
+			if t.squad.has(p):
+				player_team = t
+				break
+	if player_team != null:
+		var club_btn := Button.new()
+		club_btn.text = "🛡️ %s" % player_team.team_name
+		club_btn.flat = true
+		club_btn.alignment = HORIZONTAL_ALIGNMENT_LEFT
+		club_btn.add_theme_font_size_override("font_size", 12)
+		club_btn.add_theme_color_override("font_color", ACCENT_COLOR)
+		var host: Control = self
+		var pt: TeamData = player_team
+		club_btn.pressed.connect(func() -> void:
+			host._jump_to_team(pt)
+		)
+		name_box.add_child(club_btn)
+
 	_detail_container.add_child(card)
 
 	# 2. Physical & Bio Metrics
